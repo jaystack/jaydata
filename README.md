@@ -1,4 +1,5 @@
-Enterprise HTML5 data management with JavaScript in web applications and cross-platform hybrid mobile applications
+JayData is a standards-based (mostly HTML5), cross-platform JavaScript library and a set of practices to access 
+and manipulate data from various online and offline sources
 =======
 
 JayData not only provides JavaScript Language Query (JSLQ) syntax to access local (in-browser and mobile) 
