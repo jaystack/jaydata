@@ -268,11 +268,11 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
                 if (info.length > 0) {
                     return context.sets[info[0].AliasNumber];
                 }
-                var memberDefinitions = this.backupContextExpression.instance.getType().memberDefinitions.filter(function (item) { return item.name == expression.storageModel.EntitySetReference.name; });
-                if (memberDefinitions.length != 1) {
+                var memberDefinitions = this.backupContextExpression.instance.getType().memberDefinitions.getMember(expression.storageModel.EntitySetReference.name);
+                if (!memberDefinitions) {
                     Guard.raise("Context schema error");
                 }
-                var mi = Container.createMemberInfoExpression(memberDefinitions[0]);
+                var mi = Container.createMemberInfoExpression(memberDefinitions);
                 var result = Container.createEntitySetExpression(this.backupContextExpression, mi);
                 result.instance = this.backupContextExpression.instance[expression.storageModel.EntitySetReference.name];
                 var aliasNum = context.sets.push(result);

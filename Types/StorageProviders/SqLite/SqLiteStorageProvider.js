@@ -11,7 +11,6 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged
         }, cfg);
 
-
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -653,7 +652,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         };
     }
 }, {
-    isAvailable: {
+    isSupported: {
         get: function () { return "openDatabase" in window; },
         set: function () { }
     }
@@ -665,6 +664,8 @@ $data.storageProviders.sqLite.DbCreationType = {
     DropAllExistingTables: 30
 };
 
-$data.StorageProviderBase.registerProvider("webSql", $data.storageProviders.sqLite.SqLiteStorageProvider);
-$data.StorageProviderBase.registerProvider("sqLite", $data.storageProviders.sqLite.SqLiteStorageProvider);
-$data.webSqlProvider = $data.storageProviders.sqLite.SqLiteStorageProvider;
+if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported){
+	$data.StorageProviderBase.registerProvider("webSql", $data.storageProviders.sqLite.SqLiteStorageProvider);
+	$data.StorageProviderBase.registerProvider("sqLite", $data.storageProviders.sqLite.SqLiteStorageProvider);
+	$data.webSqlProvider = $data.storageProviders.sqLite.SqLiteStorageProvider;
+}

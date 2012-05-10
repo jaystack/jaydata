@@ -458,10 +458,18 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         var sqlText = Container.createIndexedDBCompiler().compile(query);
         return sqlText;
     }
-}, null);
+}, {
+	isSupported: {
+        get: function () { return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB; },
+        set: function () { }
+    }
+});
+
 $data.storageProviders.indexedDb.DbCreationType = {
     Default: 1,
     DropStoreIfOlderVersion: 2,
     DropStoreIfExists: 3
 };
-$data.StorageProviderBase.registerProvider('indexedDb', $data.storageProviders.indexedDb.IndexedDBStorageProvider);
+
+if ($data.storageProviders.indexedDb.IndexedDBStorageProvider.isSupported)
+	$data.StorageProviderBase.registerProvider('indexedDb', $data.storageProviders.indexedDb.IndexedDBStorageProvider);

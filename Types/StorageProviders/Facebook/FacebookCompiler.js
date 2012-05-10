@@ -42,6 +42,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
 
     autoGenerateProjection: function (query) {
         var newQueryable = new $data.Queryable(query.entitySet);
+        newQueryable._checkRootExpression();
         var codeExpression = Container.createCodeExpression(this.generateProjectionFunc(query));
         var exp = Container.createProjectionExpression(newQueryable.expression, codeExpression);
         var q = Container.createQueryable(newQueryable, exp);
@@ -60,7 +61,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
     generateProjectionFunc: function (query) {
         var isAuthenticated = this.provider.AuthenticationProvider.Authenticated;
         var publicMemberDefinitions = query.entitySet.createNew.memberDefinitions.getPublicMappedProperties();
-        if (!isAuthenticated && query.entitySet.createNew.memberDefinitions.some(function (memDef) { return memDef.isPublic == true; })) {
+        if (!isAuthenticated && publicMemberDefinitions.some(function (memDef) { return memDef.isPublic == true; })) {
             publicMemberDefinitions = publicMemberDefinitions.filter(function (memDef) { return memDef.isPublic == true; });
         }
 

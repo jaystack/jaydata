@@ -12,7 +12,6 @@ $data.entitySetState = { created: 0, defined: 1, active: 2 };
 
 $data.Class.defineEx('$data.EntitySet',
     [
-        { type: $data.QueryProvider },
         { type: $data.Queryable, params: [function () { return this; }] }
     ], null,
 {

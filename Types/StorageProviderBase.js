@@ -70,7 +70,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 from[i] = true;
                 edgesFrom[ixDependendOn] = from;
             }
-            // Persisting found edges in edgesTo array            
+            // Persisting found edges in edgesTo array
             if (to !== null)
                 edgesTo[i] = to;
         }
@@ -209,9 +209,17 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         $data.RegistredStorageProviders[name] = provider;
     },
     getProvider: function (name) {
-        var provider = $data.RegistredStorageProviders[name];
+		var provider = $data.RegistredStorageProviders[name];
+		if (!provider)
+            console.warn("Provider not found: '" + name + "'");
+		return provider;
+        /*var provider = $data.RegistredStorageProviders[name];
         if (!provider)
             Guard.raise(new Exception("Provider not found: '" + name + "'", "Not Found"));
-        return provider;
+        return provider;*/
+    },
+    isSupported: {
+        get: function () { return true; },
+        set: function () { }
     }
 });

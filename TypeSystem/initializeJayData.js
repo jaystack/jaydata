@@ -1,3 +1,17 @@
+// JayData RC1 Refresh 1
+// Dual licensed under MIT and GPL v2 
+// Copyright JayStack Technologies (http://jaydata.org/licensing)
+//
+// JayData is a standards-based, cross-platform Javascript library and a set of
+// practices to access and manipulate data from various online and offline sources.
+//
+// Credits:
+//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
+//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
+//     Zoltán Gyebrovszki
+//
+// More info: http://jaydata.org
+
 if (typeof console === 'undefined') {
     var console = {
         log : function () { },
@@ -30,6 +44,7 @@ if (typeof console === 'undefined') {
     /// Collection of JayData services
     ///</summary>
     $data.__namespace = true;
+    $data.version = "JayData RC1 Refresh 1";
     $data.root = {};
 
 })($data);

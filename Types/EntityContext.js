@@ -1,6 +1,8 @@
 $data.Class.define('$data.StorageModel', null, null, {
     constructor: function () {
         ///<field name="LogicalType" type="$data.Entity">User defined type</field>
+        this.ComplexTypes = [];
+        this.Associations = [];
     },
     LogicalType: {},
     LogicalTypeName: {},
@@ -53,7 +55,14 @@ $data.Class.define('$data.EntityContext', null, null,
             var resolvedType = Container.resolveType(typeName);
             return ctx._storageModel.filter(function (s) { return s.LogicalType === resolvedType; })[0];
         };
-        var providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name);
+		if (typeof storageProviderCfg.name === 'string'){
+			var tmp = storageProviderCfg.name;
+			storageProviderCfg.name = [tmp];
+		}
+		var i = 0,
+			providerType;
+		while(!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
+        if (providerType) {
         this.storageProvider = new providerType(storageProviderCfg, this);
         this.storageProvider.setContext(this);
         this.stateManager = new $data.EntityStateManager(this);
@@ -64,12 +73,16 @@ $data.Class.define('$data.EntityContext', null, null,
         this._initializeStorageModel();
             this.getType()._storageModelCache[storageProviderCfg.name] = this._storageModel;
         }
+		}else{
+			Guard.raise(new Exception("Provider fallback failed!", "Not Found"));
+        }
         this._initializeEntitySets(this.constructor);
-
 
         this._isOK = false;
         var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider });
+        if (this.storageProvider) {
         this.storageProvider.initializeStore(callBack);
+        }
     },
     getDataType: function (dataType) {
         if (typeof dataType == "string") {
@@ -94,7 +107,7 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _initializeStorageModel: function () {
 
-        this.constructor.memberDefinitions.forEach(function (item) {
+        this.getType().memberDefinitions.asArray().forEach(function (item) {
             if ('dataType' in item) {
                 var itemResolvedDataType = Container.resolveType(item.dataType);
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
@@ -108,6 +121,9 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
             }
         }, this);
+
+        if (typeof intellisense !== 'undefined')
+            return;
 
         this._storageModel.forEach(function (storageModel) {
             ///<param name="storageModel" type="$data.StorageModel">Storage model item</param>
@@ -143,11 +159,11 @@ $data.Class.define('$data.EntityContext', null, null,
                             //Guard.raise("NOT SUPPORTED YET");
                         } else {
                             //member definition is navigation property one..one or one..many case
-                            var fields = memDefResolvedDataType.memberDefinitions.filter(function (m) { return m.name === memDef.inverseProperty; }, this);
-                            if (fields.length == 1) {
-                                if (fields[0].elementType) {
+                            var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
+                            if (fields) {
+                                if (fields.elementType) {
                                     //member definition is one..many connection
-                                    var referealResolvedType = Container.resolveType(fields[0].elementType);
+                                    var referealResolvedType = Container.resolveType(fields.elementType);
                                     if (referealResolvedType === storageModel.LogicalType) {
                                         this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
                                     } else {
@@ -223,7 +239,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 refStorageModel = this._storageModel.getStorageModel(memDefResolvedDataType);
             }
 
-            var p = refStorageModel.LogicalType.memberDefinitions.filter(function (mdef) { return mdef.name == memDef.inverseProperty; }).pop();
+            var p = refStorageModel.LogicalType.memberDefinitions.getMember(memDef.inverseProperty);
             if (p) {
                 if (p.inverseProperty) {
                     if (p.inverseProperty != memDef.name) {
@@ -299,7 +315,7 @@ $data.Class.define('$data.EntityContext', null, null,
             }
         }
 
-        var refereedMemberDefinition = refereedStorageModel.LogicalType.memberDefinitions.filter(function (m) { return m.name == memDef.inverseProperty; })[0];
+        var refereedMemberDefinition = refereedStorageModel.LogicalType.memberDefinitions.getMember(memDef.inverseProperty);
         if (!refereedMemberDefinition.required && !memDef.required) { if (typeof intellisense === 'undefined') { if (typeof intellisense === 'undefined') { Guard.raise(new Exception('In one to one connection, one side must required!', 'One to One connection', memDef)); } } }
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
@@ -414,18 +430,6 @@ $data.Class.define('$data.EntityContext', null, null,
         var clbWrapper = pHandler.createCallback(callback);
         var pHandlerResult = pHandler.getPromise();
 
-        //validate entities
-        var errors = [];
-        trackedEntities.forEach(function (entity) {
-            if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
-                && !entity.data.isValid()) {
-                    errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
-                }
-        });
-        if (errors.length > 0) {
-            clbWrapper.error(errors);
-            return pHandlerResult;
-        }
         var skipItems = [];
         while (trackedEntities.length > 0) {
             var additionalEntities = [];
@@ -438,7 +442,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     if (entityCachedItem.data.entityState == $data.EntityState.Modified) {
                         if (entityCachedItem.data.changedProperties) {
                             var changeStoredProperty = entityCachedItem.data.changedProperties.some(function (p) {
-                                var pMemDef = sModel.PhysicalType.memberDefinitions.filter(function (m) { return m.name == p.name; }).pop();
+                                var pMemDef = sModel.PhysicalType.memberDefinitions.getMember(p.name);
                                 if (pMemDef.kind == $data.MemberTypes.navProperty) {
                                     var a = sModel.Associations[pMemDef.association];
                                     var multiplicity = a.FromMultiplicity + a.ToMultiplicity;
@@ -454,7 +458,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     }
                 }
 
-                var navigationProperties = sModel.PhysicalType.memberDefinitions.filter(function (p) { return p.kind == $data.MemberTypes.navProperty; });
+                var navigationProperties = sModel.PhysicalType.memberDefinitions.asArray().filter(function (p) { return p.kind == $data.MemberTypes.navProperty; });
                 navigationProperties.forEach(function (navProp) {
                     var association = sModel.Associations[navProp.name]; //eg.:"Profile"
                     var name = navProp.name; //eg.: "Profile"
@@ -543,6 +547,24 @@ $data.Class.define('$data.EntityContext', null, null,
         var ctx = this;
         if (changedEntities.length == 0) { clbWrapper.success(); return pHandlerResult; }
 
+		//validate entities
+        var errors = [];
+        changedEntities.forEach(function (entity) {
+            if (entity.data.entityState === $data.EntityState.Added) {
+				entity.data.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+					if (memDef.required && !memDef.computed && !entity.data[memDef.name]) entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+				}, this);
+			}
+            if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
+                && !entity.data.isValid()) {
+                    errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
+                }
+        });
+        if (errors.length > 0) {
+            clbWrapper.error(errors);
+            return pHandlerResult;
+        }
+
         this.storageProvider.saveChanges({
             success: function () {
                 ctx._postProcessSavedItems(clbWrapper, changedEntities);
@@ -575,7 +597,7 @@ $data.Class.define('$data.EntityContext', null, null,
     loadItemProperty: function (entity, property, callback) {
         Guard.requireType('entity', entity, $data.Entity);
 
-        var memberDefinition = typeof property === 'string' ? $data.typeSystem.lookupMemberDefinition(entity.getType().memberDefinitions, property) : property;
+        var memberDefinition = typeof property === 'string' ? entity.getType().memberDefinitions.getMember(property) : property;
 
         if (entity[memberDefinition.name] != undefined) {
             callback(entity[memberDefinition.name]);
@@ -644,23 +666,42 @@ $data.Class.define('$data.EntityContext', null, null,
     resolveBinaryOperator: function (operator, expression, frameType) {
         return this.storageProvider.resolveBinaryOperator(operator, expression, frameType);
     },
-
     resolveUnaryOperator: function (operator, expression, frameType) {
         return this.storageProvider.resolveUnaryOperator(operator, expression, frameType);
     },
-
     resolveFieldOperation: function (operation, expression, frameType) {
         return this.storageProvider.resolveFieldOperation(operation, expression, frameType);
     },    
-    attach: function(entity) {
+    _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
+        var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, functionName);
+        virtualEs.tableName = functionName;
+
+        var paramConstExpression = null;
+        if (parameters) {
+            paramConstExpression = [];
+            for (var i = 0; i < parameters.length; i++) {
+                paramConstExpression.push(Container.createConstantExpression(arg[i], null, parameters[i]));
+            }
+        }
+        var ec = Container.createEntityContextExpression(this);
+        var memberdef = this.getType().getMemberDefinition(returnEntitySet);
+        var es = Container.createEntitySetExpression(ec,
+                Container.createMemberInfoExpression(memberdef),
+                paramConstExpression,
+                virtualEs);
+
+        var q = Container.createQueryable(this[returnEntitySet], es);
+        return q;
+    },
+    attach: function (entity) {
         var entitySet = this.getEntitySetFromElementType(entity.getType());        
         return entitySet.attach(entity);
     },
-    attachOrGet: function(entity) {
+    attachOrGet: function (entity) {
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attachOrGet(entity);
     },    
-    add: function(entity) {
+    add: function (entity) {
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.add(entity);
     },
@@ -674,11 +715,11 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _storageModelCache: {
         get: function () {
-            if(!this.__storageModelCache)
+            if (!this.__storageModelCache)
                 this.__storageModelCache = {};
             return this.__storageModelCache;
         },
-        set: function() {
+        set: function () {
             //todo exception
         }
     }

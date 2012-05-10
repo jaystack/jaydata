@@ -23,11 +23,12 @@
         equal(dataClass.name, "dataClass", "dataClass name");
         equal(dataClass, dataClass.prototype.constructor, "dataClass equal with ctor");
         equal(dataClass.inheritsFrom.name, "Base", "dataClass inherits from Base");
-        equal(dataClass.memberDefinitions instanceof Array, true, "dataClass memberDefinitions exists");
-        equal(dataClass.memberDefinitions.length, 4, "dataClass memberDefinitions count");
+        equal(dataClass.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "dataClass memberDefinitions exists");
+        var defs = dataClass.memberDefinitions.asArray();
+        equal(defs.length, 4, "dataClass memberDefinitions count");
 
-        equal(dataClass.memberDefinitions[0].kind, "method", "dataClass memberDefinitions[0] type");
-        equal(dataClass.memberDefinitions[3].kind, "property", "dataClass memberDefinitions[3] type");
+        equal(defs[0].kind, "method", "dataClass memberDefinitions[0] type");
+        equal(defs[3].kind, "property", "dataClass memberDefinitions[3] type");
     });
 
     test("Type definition - type alias", 17, function () {
@@ -76,7 +77,7 @@
         var testClass = new dataClass('testParam');
 
         equal(testClass instanceof dataClass, true, "testClass is dataClass");
-        equal(testClass.constructor.memberDefinitions instanceof Array, true, "testClass has members");
+        equal(testClass.constructor.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "testClass is $data.MemberDefinitionCollection");
         equal(testClass.testFunc(), "testfunc", "testClass invoke func");
         equal(testClass.testFunc2(), "testfunc2", "testClass invoke func2");
         equal(testClass.param, "testParam", "testClass invoke property");
@@ -110,12 +111,14 @@
         equal(classBase.name, "classBase", "classBase name");
         equal(classBase, classBase.prototype.constructor, "classBase equal with ctor");
         equal(classBase.inheritsFrom.name, "dataClass", "classBase inherits from dataClass");
-        equal(classBase.memberDefinitions instanceof Array, true, "dataClass memberDefinitions exists");
-        equal(classBase.memberDefinitions.length, 6, "classBase memberDefinitions count");
+        equal(classBase.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "dataClass memberDefinitions exists");
 
-        equal(classBase.memberDefinitions[0].kind, "method", "classBase memberDefinitions[0] - constructor type");
-        equal(classBase.memberDefinitions[4].kind, "property", "classBase memberDefinitions[4] type");
-        equal(classBase.memberDefinitions[5].kind, "method", "classBase memberDefinitions[5] type");
+        var defs = classBase.memberDefinitions.asArray();
+        equal(defs.length, 6, "classBase memberDefinitions count");
+
+        equal(defs[0].kind, "method", "classBase memberDefinitions[0] - constructor type");
+        equal(defs[4].kind, "method", "classBase memberDefinitions[4] type");
+        equal(defs[5].kind, "property", "classBase memberDefinitions[5] type");
     });
 
     test("Type instance - Inheritance", 10, function () {
@@ -123,7 +126,7 @@
 
         equal(class2 instanceof classBase, true, "class2 is classBase");
         equal(class2 instanceof dataClass, true, "class2 is dataClass");
-        equal(class2.constructor.memberDefinitions instanceof Array, true, "class2 has members");
+        equal(class2.constructor.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "class2 is $data.MemberDefinitionCollection");
         equal(class2.constructor.memberDefinitions.getPublicMappedProperties().length, 2, "getPublicMappedProperties length");
 
         equal(class2.testFunc(), "testfunc", "class2 invoke base func");
@@ -218,12 +221,12 @@
         equal(classEx.name, "classEx", "classEx name");
         equal(classEx, classEx.prototype.constructor, "classEx equal with ctor");
         equal(classEx.inheritsFrom.name, "dataClass", "classEx inherits from dataClass");
-        equal(classEx.memberDefinitions instanceof Array, true, "classEx memberDefinitions exists");
-        equal(classEx.memberDefinitions.length, 6, "classEx memberDefinitions count");
+        equal(classEx.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "classEx memberDefinitions exists");
+        equal(classEx.memberDefinitions.asArray().length, 6, "classEx memberDefinitions count");
 
-        equal(classBase.memberDefinitions[0].kind, "method", "classEx memberDefinitions[0] type");
-        equal(classBase.memberDefinitions[4].kind, "property", "classEx memberDefinitions[4] type");
-        equal(classBase.memberDefinitions[5].kind, "method", "classEx memberDefinitions[5] type");
+        equal(classBase.memberDefinitions.asArray()[0].kind, "method", "classEx memberDefinitions[0] type");
+        equal(classBase.memberDefinitions.asArray()[4].kind, "method", "classEx memberDefinitions[4] type");
+        equal(classBase.memberDefinitions.asArray()[5].kind, "property", "classEx memberDefinitions[5] type");
     });
 
     test("Type instance extended - Inheritance", 9, function () {
@@ -231,7 +234,7 @@
 
         equal(class2 instanceof classBase, true, "class2 is classBase");
         equal(class2 instanceof dataClass, true, "class2 is dataClass");
-        equal(class2.constructor.memberDefinitions instanceof Array, true, "class2 has members");
+        equal(class2.constructor.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "class2 has members");
         equal(class2.testFunc(), "testfunc", "class2 invoke func");
         equal(class2.testFunc2(), "testfunc2", "class2 invoke func2");
         equal(class2.param, "class2Param", "class2 invoke property");
@@ -282,8 +285,8 @@
 
     var mixClass2 = $data.Class.defineEx('mixClass2', [
         { type: dataClass, params: [new ConstructorParameter(0), 'hello2', 1337] },
-        { type: simpleClass },
-        { type: simpleClass2, params: [new ConstructorParameter(1), 8080] }
+        { type: simpleClass, propagateTo: 'simpleClass' },
+        { type: simpleClass2, params: [new ConstructorParameter(1), 8080], propagateTo: 'simpleClass2' }
     ], null, {
         constructor: function () {
             this.ctorArguments = arguments;
@@ -337,8 +340,8 @@
 
     var mixClass3 = $data.Class.defineEx('mixClass3', [
         { type: dataClass, params: [new ConstructorParameter(0), 'almafa', 1337] },
-        { type: simpleClass },
-        { type: simpleClass3, params: [function () { return this; }, function () { return this.simpleClass; }, new ConstructorParameter(1), 8080] }
+        { type: simpleClass, propagateTo: 'simpleClass' },
+        { type: simpleClass3, params: [function () { return this; }, function () { return this.simpleClass; }, new ConstructorParameter(1), 8080], propagateTo: 'simpleClass3' }
     ], null, {
         constructor: function () {
             this.ctorArguments = arguments;
@@ -389,8 +392,8 @@
         equal(mixinClass.name, "mixinClass", "mixinClass name");
         equal(mixinClass, mixinClass.prototype.constructor, "mixinClass equal with ctor");
         equal(mixinClass.inheritsFrom.name, "Base", "mixinClass inherits from Base");
-        equal(mixinClass.memberDefinitions instanceof Array, true, "mixinClass memberDefinitions exists");
-        equal(mixinClass.memberDefinitions.length, 7, "mixinClass memberDefinitions count");
+        equal(mixinClass.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "mixinClass memberDefinitions exists");
+        equal(mixinClass.memberDefinitions.asArray().length, 7, "mixinClass memberDefinitions count");
 
         equal(mixinClass.mixins.length, 1, "mixinClass mixins count");
         equal(mixinClass.mixins[0].type, propClass, "mixinClass mixin - simpleClass");
@@ -400,8 +403,8 @@
     test("Type instance - mixin", 5, function () {
         var class4 = new mixinClass();
 
-        equal(class4.constructor.memberDefinitions instanceof Array, true, "class4 has members");
-        equal(class4.constructor.memberDefinitions.length, 7, "class4 member count");
+        equal(class4.constructor.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "class4 has members");
+        equal(class4.constructor.memberDefinitions.asArray().length, 7, "class4 member count");
 
         equal(class4.prop1, 1, "class4 mixin's prop value");
         equal(class4.prop2, 12, "class4 prop value, mixin not override");
@@ -422,8 +425,8 @@
 
     var mixinClass2 = $data.Class.defineEx('mixinClass', [
         { type: null },
-        { type: propClass },
-        { type: propClass2 }
+        { type: propClass, kind: 'mixin' },
+        { type: propClass2, kind: 'mixin' }
     ], null, {
         constructor: function () {
             this.prop2 = 12;
@@ -438,7 +441,7 @@
         var class4 = new mixinClass2();
 
         equal(mixinClass2.mixins.length, 2, "mixinClass2 mixins count");
-        equal(class4.constructor.memberDefinitions.length, 11, "class4 member count");
+        equal(class4.constructor.memberDefinitions.asArray().length, 11, "class4 member count");
 
         equal(class4.prop5, undefined, "class4 prop value not set");
 
@@ -449,7 +452,7 @@
 
     var mixinClass3 = $data.Class.defineEx('mixinClass', [
         { type: null },
-        { type: propClass },
+        { type: propClass, propagateTo: 'propClass' },
         { type: propClass2 }
     ], null, {
         constructor: function () {

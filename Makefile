@@ -2,13 +2,13 @@ SRC_DIR = ./Types
 TEMP_DIR = ./TMP
 COMPILER = ./Tools/compiler.jar
 
-TYPE_SYSTEM = ./TypeSystem/JayLint.js\
-	./TypeSystem/initializeJayData.js\
+TYPE_SYSTEM = ./TypeSystem/initializeJayData.js\
 	./TypeSystem/utils.js\
 	./TypeSystem/PreHtml5Compatible.js\
+	./TypeSystem/JayLint.js\
 	./TypeSystem/TypeSystem.js\
 
-EXPRESSIONS = ${SRC_DIR}/Expressions/ASTParser.js\
+EXPRESSIONS = $(SRC_DIR)/Expressions/ASTParser.js\
 	$(SRC_DIR)/Expressions/ExpressionNode2.js\
 	$(SRC_DIR)/Expressions/ArrayLiteralExpression.js\
 	$(SRC_DIR)/Expressions/CallExpression.js\

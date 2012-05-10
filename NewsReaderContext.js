@@ -67,13 +67,14 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     Tags: { type: $data.EntitySet, elementType: $news.Types.Tag },
     Users: { type: $data.EntitySet, elementType: $news.Types.User },
     UserProfiles: { type: $data.EntitySet, elementType: $news.Types.UserProfile },
-    TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItem }
+    TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItem },
+    PrefilteredArticles: function () { return this._generateServiceOperationQueryable('PrefilteredArticles', 'Articles', arguments, ['minId', 'startsWith']); }
 }, null);
+
+
+
 $news.Types.NewsContext.generateTestData = function (context, callBack) {
-    //if (context.storageProvider instanceof $data.storageProviders.oData.oDataProvider) {
-    //    callBack(-1);
-    //    return;
-    //}
+
     var usr1 = new $news.Types.User({ LoginName: "Usr1", Email: "usr1@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name", Bio: "Bio1", Birthday: new Date(Date.parse("1975/01/01")), Location: new $news.Types.Location({ Zip: 2840, City: 'City1', Address: 'Address6', Country: 'Country1' }) }) });
     var usr2 = new $news.Types.User({ LoginName: "Usr2", Email: "usr2@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name", Bio: "Bio2", Birthday: new Date(Date.parse("1976/02/01")), Location: new $news.Types.Location({ Zip: 1117, City: 'City2', Address: 'Address7', Country: 'Country2' }) }) });
     var usr3 = new $news.Types.User({ LoginName: "Usr3", Email: "usr3@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name1", Bio: "Bio3", Birthday: new Date(Date.parse("1977/03/01")), Location: new $news.Types.Location({ Zip: 1115, City: 'City3', Address: 'Address8', Country: 'Country3' }) }) });

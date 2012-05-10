@@ -24,7 +24,11 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             if (name != "urlText" && name != "actionPack" && name != "data" && queryFragments[name] != "") {
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
-                queryText += name + '=' + queryFragments[name];
+                if(name != "$urlParams"){
+                    queryText += name + '=' + queryFragments[name];
+                }else{
+                    queryText += queryFragments[name];
+                }
             }
         }
         query.actionPack = queryFragments.actionPack;
@@ -98,13 +102,24 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     VisitEntitySetExpression: function (expression, context) {
         context.urlText += "/" + expression.instance.tableName;
         this.logicalType = expression.instance.elementType;
+        if (expression.params) {
+            for (var i = 0; i < expression.params.length; i++) {
+                this.Visit(expression.params[i], context);
+            }
+        }
     },
-    VisitCountExpression:function(expression, context){
+    VisitConstantExpression: function (expression, context) {
+        if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
+
+        var valueType = Container.getTypeName(expression.value);
+        context['$urlParams'] += expression.name + '=' + this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+    },
+    VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
         context.urlText += '/$count';
         context.actionPack = [];
         context.actionPack.push({ op: "buildType", context: this.context, logicalType: null, tempObjectName: 'result', propertyMapping: [{ from: 'cnt', dataType: 'number' }] });
         context.actionPack.push({ op: "copyToResult", tempObjectName: 'result' });
 
-        }
+    }
 }, {});

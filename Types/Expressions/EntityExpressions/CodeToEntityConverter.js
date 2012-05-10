@@ -111,8 +111,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 }
                 //var storageMemberDefinition =
                 var storageField = memberDefinition.storageModel
-                                                   .PhysicalType.memberDefinitions
-                                                   .filter(function (md) { return md.name == memberDefinition.name; })[0];
+                                                   .PhysicalType.memberDefinitions.getMember(memberDefinition.name);
                 var res;
                 var memberDefinitionExp;
                 switch (storageField.kind) {

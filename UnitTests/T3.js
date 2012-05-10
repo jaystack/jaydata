@@ -760,8 +760,23 @@ function T3(providerConfig, msg) {
             q = db.Articles.orderBy(function (a) { return a.Body.concat(a.Lead); }).toTraceString();
             equal(q.queryText, "/Articles?$orderby=concat(Body,Lead)", 'complex order by failed');
         });
+    });
 
-
-
+    test('OData_Function_Call', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticles(4, 'Art').filter(function(a){return a.Id<7}).toArray(function(result){
+                    start(1);
+                    ok(result);
+                    ok(result[0] instanceof $news.Types.Article, 'Return type faild');
+                    ok(result[1].Title.length>0, 'Title faild');
+                })
+            });
+        });
     });
 }

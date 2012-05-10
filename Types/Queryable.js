@@ -7,13 +7,13 @@ $data.Class.define('$data.Queryable', null, null,
         ///<param name="source" type="$data.EntitySet" />
         ///<field name="entitySet" type="$data.EntitySet" />
         ///source can be: array or an object that is IQueryProvider
-        if (source.entitySet) {
-            Object.defineProperty(this, "entitySet", { value: source.entitySet, enumerable: true, writable: true });
-        } else {
-            Object.defineProperty(this, "entitySet", { value: source, enumerable: true, writable: true });
-        }
-        this.expression = [];
-        if (!rootExpression) {
+        var es = source.entitySet instanceof $data.EntitySet ? source.entitySet : source;
+        Object.defineProperty(this, "entitySet", { value: es, enumerable: true, writable: true });
+
+        this.expression = rootExpression;
+    },
+    _checkRootExpression: function () {
+        if (!this.expression) {
             var ec = Container.createEntityContextExpression(this.entitySet.entityContext);
             var name = this.entitySet.collectionName;
             var memberdef = this.entitySet.entityContext.getType().getMemberDefinition(name);
@@ -22,11 +22,6 @@ $data.Class.define('$data.Queryable', null, null,
                 this.entitySet);
             this.expression = es;
         }
-        else {
-            this.expression = rootExpression;
-        }
-
-        //if (!
     },
 
     entitySet: {},
@@ -38,6 +33,7 @@ $data.Class.define('$data.Queryable', null, null,
         /// <param name="thisArg" type="Object" optional="true" />
         /// </signature>
         /// </param>
+        this._checkRootExpression();
         var expression = Container.createCodeExpression(predicate, thisArg);
         var expressionSource = this.expression;
         if (this.expression instanceof $data.Expressions.FilterExpression) {
@@ -56,6 +52,7 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     map: function (projection, thisArg) {
+        this._checkRootExpression();
         var codeExpression = Container.createCodeExpression(projection, thisArg);
         var exp = Container.createProjectionExpression(this.expression, codeExpression);
         var q = Container.createQueryable(this, exp);
@@ -67,6 +64,7 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     length: function (onResult) {
+        this._checkRootExpression();
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult);
 
@@ -85,6 +83,7 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     forEach: function (iterator) {
+        this._checkRootExpression();
         var pHandler = new $data.PromiseHandler();
         function iteratorFunc(items) { items.forEach(iterator); }
         var cbWrapper = pHandler.createCallback(iteratorFunc);
@@ -103,6 +102,7 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     toArray: function (onResult_items) {
+        this._checkRootExpression();
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult_items);
 
@@ -145,23 +145,27 @@ $data.Class.define('$data.Queryable', null, null,
 
 
     take: function (amount) {
+        this._checkRootExpression();
         var constExp = Container.createConstantExpression(amount, "number");
         var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Take);
         return Container.createQueryable(this, takeExp);
     },
     skip: function (amount) {
+        this._checkRootExpression();
         var constExp = Container.createConstantExpression(amount, "number");
         var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Skip);
         return Container.createQueryable(this, takeExp);
     },
 
     orderBy: function (selector, thisArg) {
+        this._checkRootExpression();
         var codeExpression = Container.createCodeExpression(selector, thisArg);
         var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderBy);
         var q = Container.createQueryable(this, exp);
         return q;
     },
     orderByDescending: function (selector, thisArg) {
+        this._checkRootExpression();
         var codeExpression = Container.createCodeExpression(selector, thisArg);
         var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderByDescending);
         var q = Container.createQueryable(this, exp);
@@ -194,6 +198,7 @@ $data.Class.define('$data.Queryable', null, null,
 
 
     include: function (selector) {
+        this._checkRootExpression();
         var constExp = Container.createConstantExpression(selector, "string");
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
@@ -216,6 +221,7 @@ $data.Class.define('$data.Queryable', null, null,
 
 
     toTraceString: function () {
+        this._checkRootExpression();
         var expression = this.expression;
         var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
         expression = preparator.Visit(expression);

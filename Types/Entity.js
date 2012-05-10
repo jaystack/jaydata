@@ -143,7 +143,7 @@ $data.Entity = Entity = Class.define("$data.Entity", null, null, {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
             var member = 'propertyChanging';
-            var memDef = $data.typeSystem.lookupMemberDefinition(this.getType().memberDefinitions, member);
+            var memDef = this.getType().memberDefinitions.getMember(member);
 
             if (memDef) {
                 delete this[member];
@@ -160,7 +160,7 @@ $data.Entity = Entity = Class.define("$data.Entity", null, null, {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
             var member = 'propertyChanged';
-            var memDef = $data.typeSystem.lookupMemberDefinition(this.getType().memberDefinitions, member);
+            var memDef = this.getType().memberDefinitions.getMember(member);
 
             if (memDef) {
                 delete this[member];
@@ -177,7 +177,7 @@ $data.Entity = Entity = Class.define("$data.Entity", null, null, {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
             var member = 'propertyValidationError';
-            var memDef = $data.typeSystem.lookupMemberDefinition(this.getType().memberDefinitions, member);
+            var memDef = this.getType().memberDefinitions.getMember(member);
 
             if (memDef) {
                 delete this[member];

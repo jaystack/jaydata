@@ -47,9 +47,11 @@
                     this.value = memberDefinitionData;
                     this.dataType = typeof memberDefinitionData;
                 } else {
-                    Object.keys(memberDefinitionData).forEach(function (item) {
-                        this[item] = memberDefinitionData[item];
-                    }, this);
+                    for (var item in memberDefinitionData) {
+                        if (memberDefinitionData.hasOwnProperty(item)) {
+                            this[item] = memberDefinitionData[item];
+                        }
+                    }
                 }
             }
             if (this.type !== undefined) {
@@ -105,10 +107,67 @@
     //TODO global/window
     $data.MemberDefinition = window["MemberDefinition"] = MemberDefinition;
     
+    var memberDefinitionPrefix = '$';
+    function MemberDefinitionCollection() { };
+    MemberDefinitionCollection.prototype = {
+		clearCache: function(){
+			this.arrayCache = undefined;
+			this.pubMapPropsCache = undefined;
+			this.keyPropsCache = undefined;
+			this.propByTypeCache = undefined;
+		},
+        asArray: function () {
+            if (!this.arrayCache) {
+                this.arrayCache = [];
+                for (var i in this) {
+                    if (i.indexOf(memberDefinitionPrefix) === 0)
+                        this.arrayCache.push(this[i]);
+                }
+            }
+            return this.arrayCache;
+        },
+        getPublicMappedProperties: function () {
+			if (!this.pubMapPropsCache){
+				this.pubMapPropsCache = [];
+				for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].kind == 'property' && !this[i].notMapped && this[i].enumerable)
+						this.pubMapPropsCache.push(this[i]);
+				}
+			}
+			return this.pubMapPropsCache;// || (this.pubMapPropsCache = this.asArray().filter(function (m) { return m.kind == 'property' && !m.notMapped && m.enumerable; }));
+		},
+        getKeyProperties: function () {
+			if (!this.keyPropsCache){
+				this.keyPropsCache = [];
+				for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].kind == 'property' && this[i].key)
+						this.keyPropsCache.push(this[i]);
+				}
+			}
+			return this.keyPropsCache;
+			//return this.keyPropsCache || (this.keyPropsCache = this.asArray().filter(function (m) { return m.kind == 'property' && m.key; }));
+		},
+        getPropertyByType: function (type) {
+			if (!this.propByTypeCache){
+				this.propByTypeCache = [];
+				for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].dataType == type)
+						this.propByTypeCache.push(this[i]);
+				}
+			}
+			return this.propByTypeCache;
+			//return this.propByTypeCache || (this.propByTypeCache = this.asArray().filter(function (m) { return m.dataType == type; }));
+		},
+        getMember: function (name) { return this[memberDefinitionPrefix + name]; },
+        setMember: function (value) { this[memberDefinitionPrefix + value.name] = value; }
+    };
+    MemberDefinitionCollection.prototype.constructor = MemberDefinitionCollection;
+    $data.MemberDefinitionCollection = window["MemberDefinitionCollection"] = MemberDefinitionCollection;
+
+    
     eval('function Base() { };');
 
     $data.Base = Base;
-
 
     $data.Base.fullName = '$data.Base';
     if (!$data.Base.name) {
@@ -144,18 +203,6 @@
 
     function ClassEngineBase() {
         this.classNames = {};
-
-        var aliases = [
-                { aliases: ["int", "integer", "int16"], type: Number },
-                { aliases: ["text", "string"], type: String },
-                { aliases: ["date", "time"], type: Date },
-                { aliases: ["bool", "yesno", "igazhamis", "avansn"], type: Boolean }
-        ];
-        aliases.forEach(function (aliasList) {
-            aliasList.aliases.forEach(function (alias) {
-                this.classNames[alias] = aliasList.type;
-            }, this);
-        }, this);
     }
 
     function MemberTypes() {
@@ -171,7 +218,6 @@
     MemberTypes.navProperty = "navProperty";
     MemberTypes.complexProperty = "complexProperty";
     MemberTypes.field = "field";
-    //MemberTypes.propagation = "propagation";
 
     $data.MemberTypes = MemberTypes;
 
@@ -230,14 +276,23 @@
         this.getOrderedSteppes = function () {
             if (this._createOrder.calculated == false) {
                 var _this = this;
-                function _concatStep(key) {
-                    _this._createOrder.push(_this.steppes[key]);
-                }
+                //function _concatStep(key) {
+                //    _this._createOrder.push(_this.steppes[key]);
+                //}
 
                 this._createOrder = [];
-                this.mixinKeys.forEach(_concatStep);
-                this.constructorKeys.forEach(_concatStep);
-                this.propagationKeys.forEach(_concatStep);
+                for (var i = 0, l = mixinKeys.length; i < l; i++) {
+                    _this._createOrder.push(_this.steppes[mixinKeys[i]]);
+                }
+                for (var i = 0, l = constructorKeys.length; i < l; i++) {
+                    _this._createOrder.push(_this.steppes[constructorKeys[i]]);
+                }
+                for (var i = 0, l = propagationKeys.length; i < l; i++) {
+                    _this._createOrder.push(_this.steppes[propagationKeys[i]]);
+                }
+                //this.mixinKeys.forEach(_concatStep);
+                //this.constructorKeys.forEach(_concatStep);
+                //this.propagationKeys.forEach(_concatStep);
 
                 this._createOrder.calculated = true;
             }
@@ -262,7 +317,7 @@
         return this.defineEx(className, [{ type: baseClass }], interfaces, instanceDefinition, classDefinition);
     },
     defineEx: function (className, baseClasses, interfaces, instanceDefinition, classDefinition) {
-        ///
+        ///<param name="baseClasses" type="Array" elementType="Function" />
 
         //il("!defineClass was invoked:" + className);
 
@@ -289,36 +344,20 @@
         });
 
         var classFunction = null;
-        //var docComment = test.toString().replace("function test() {", "").replace("}","");
-        var docComment = '';
-
-        /*var ctorFunctionDefinition = "classFunction = function " + shortClassName + " (a,b,c) { " + docComment + "\n }";
-        if (simpleCtorFunc == false)
-            ctorFunctionDefinition = "classFunction = function " + shortClassName + " () { " + docComment + "\n initObjectInstance2(this, arguments, initObject); \n}";
-        
-        if (typeof intellisense === 'undefined') {
-            eval(ctorFunctionDefinition);
-        } else {
-            eval(ctorFunctionDefinition);
-            //var ctor = instanceDefinition.constructor|| eval(ctorFunctionDefinition);
-            //classFunction = ctor;
-        }*/
         classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
         classFunction.fullName = className;
+
         this.buildType(classFunction, baseClasses, instanceDefinition, classDefinition);
-        //if (!("name" in classFunction)) {
+
         classFunction.name = shortClassName;
-        //};
+        Container.registerType(className, classFunction);
+
         if (typeof intellisense !== 'undefined') {
             if (instanceDefinition && instanceDefinition.constructor) {
                 intellisense.annotate(classFunction, instanceDefinition.constructor);
             }
         }
-        /*discover new type*/
-        //this.discoverType(classFunction, baseClasses[0].params, initObject, false);
 
-
-        Container.registerType(className, classFunction);
         root[shortClassName] = this.classNames[className] = classFunction;
 
         //classFunction.prototype.constructor = instanceDefinition.constructor;
@@ -335,26 +374,27 @@
         var body = '';
         var propagation = '';
 
-        bases.forEach(function (base, index) {
+        for (var i = 0, l = bases.length; i < l; i++) {
+            var base = bases[i];
+            var index = i;
             if (index == 0) { //ctor func
                 if (base && base.type) {
                     body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
                     body += '    ' + base.type.fullName + '.apply(this, baseArguments); \n';
                 }
             } else {
-                if (base && base.type && base.type.name in instanceDefinition) {
+                if (base && base.type && base.propagateTo) {
                     //propagation
                     propagation += '    ' + (!propagation ? 'var ' : '' + '') + 'propagationArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
-                    propagation += '    this["' + base.type.name + '"] =  Object.create(' + base.type.fullName + '.prototype); \n' +
-                                   '    ' + base.type.fullName + '.apply(this["' + base.type.name + '"], propagationArguments); \n';
+                    propagation += '    this["' + base.propagateTo + '"] =  Object.create(' + base.type.fullName + '.prototype); \n' +
+                                   '    ' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], propagationArguments); \n';
                 }
-                else if (base && base.type && !(base.type.name in instanceDefinition)) {
+                else if (base && base.type && base.type.memberDefinitions && base.type.memberDefinitions.$constructor && !base.propagateTo) {
                     //mixin
-                    mixin += '    ' + base.type.fullName + '.apply(this); \n';
+                    mixin += '    ' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
                 }
             }
-        });
-
+        }
         if (instanceDefinition && instanceDefinition.constructor != Object) 
             body += "    instanceDefinition.constructor.apply(this, arguments); \n";
 
@@ -367,12 +407,18 @@
 
         if (baseClass) {
             classFunction.prototype = Object.create(baseClass.prototype);
-            classFunction.memberDefinitions = this.buildMemberDefinitionsArray(baseClass.memberDefinitions);
-            if(baseClass.staticDefinitions){
-                baseClass.staticDefinitions.forEach(function (staticDef) {
-                    this.buildMember(classFunction, staticDef, undefined, 'staticDefinitions');
-                }, this);
-            }
+            classFunction.memberDefinitions = Object.create(baseClass.memberDefinitions || new MemberDefinitionCollection());
+			classFunction.memberDefinitions.clearCache();
+
+			var staticDefs = baseClass.staticDefinitions;
+			if (staticDefs){
+				staticDefs = staticDefs.asArray();
+				if (staticDefs) {
+            		for(var i = 0; i < staticDefs.length; i++) {
+						this.buildMember(classFunction, staticDefs[i], undefined, 'staticDefinitions');
+            		}
+				}
+			}
             classFunction.baseTypes = (baseClass.baseTypes || []).concat(baseClasses.map(function (base) { return base.type; }));
             if (!classFunction.isAssignableTo) {
                 Object.defineProperty(classFunction, "isAssignableTo", {
@@ -422,40 +468,15 @@
 
         Object.defineProperty(classFunction, "getMemberDefinition", {
             value: function (name) {
-                return classFunction.memberDefinitions.filter(function (md) {
-                    return md.name == name;
-                })[0];
+                return classFunction.memberDefinitions.getMember(name);
             }
         });
 
     },
-    buildMemberDefinitionsArray: function (inheritedMemberDefinitions) {
-        var memDefs = inheritedMemberDefinitions ? [].concat(inheritedMemberDefinitions) : [];
-
-        var memDefExtensions = [
-            { name: 'getPublicMappedProperties', method: function () { return this.filter(function (m) { return m.kind == 'property' && !m.notMapped && m.enumerable; }); } },
-            { name: 'getKeyProperties', method: function () { return this.filter(function (m) { return m.kind == 'property' && m.key; }); } },
-            { name: 'getPropertyByType', method: function (type) { return this.filter(function (m) { return m.dataType == type; }); } }
-        ];
-
-        memDefExtensions.forEach(function (extension) {
-            Object.defineProperty(memDefs, extension.name, {
-                enumerable: false,
-                configurable: false,
-                writable: false,
-                value: extension.method
-            });
-        });
-
-        return memDefs;
-    },
 
     addMethod: function (holder, name, method, propagation) {
-        if (!propagation)
+        if (!propagation || (typeof intellisense !== 'undefined')) {
             holder[name] = method;
-        else
-            if (typeof intellisense !== 'undefined') {
-                holder[name] = method;
             } else {
                 holder[name] = function () {
                     return method.apply(this[propagation], arguments);
@@ -524,22 +545,10 @@
     buildMember: function (classFunction, memberDefinition, propagation, memberCollectionName) {
         ///<param name="memberDefinition" type="MemberDefinition" />
         memberCollectionName = memberCollectionName || 'memberDefinitions';
-        classFunction[memberCollectionName] = classFunction[memberCollectionName] || [];
+        classFunction[memberCollectionName] = classFunction[memberCollectionName] || new MemberDefinitionCollection();
 
-        //override property //TODO refactor
-        var exists = classFunction[memberCollectionName].some(function (m, idx) {
-            if (m.name == memberDefinition.name)
-            {
-                classFunction[memberCollectionName][idx] = memberDefinition;
-                return true;
-            }
-            return false;
-        });
+        classFunction[memberCollectionName].setMember(memberDefinition);
 
-        if (!exists)
-            classFunction[memberCollectionName].push(memberDefinition);
-        //classFunction.memberDefinitions[memberDefinition.name] = memberDefinition;
-            
         switch (memberDefinition.kind) {
             case MemberTypes.method:
                 this.buildMethod(classFunction, memberDefinition, propagation);
@@ -556,28 +565,31 @@
     buildStaticMembers: function (classFunction, memberListDefinition) {
         ///<param name="classFunction" type="Object">The class constructor that will be extended</param>
         ///<param name="memberListDefinition" type="Object"></param>
-        var keys = Object.keys(memberListDefinition);
         var t = this;
-        keys.forEach(function (item, index) {
-            var memberDefinition = new MemberDefinition(memberListDefinition[item], classFunction);
-            memberDefinition.name = item;
-            memberDefinition.classMember = true;
-            t.buildMember(classFunction, memberDefinition, undefined, 'staticDefinitions');
-        }, this);
+        for (var item in memberListDefinition)
+        {
+            if (memberListDefinition.hasOwnProperty(item)) {
+                var memberDefinition = new MemberDefinition(memberListDefinition[item], classFunction);
+                memberDefinition.name = item;
+                memberDefinition.classMember = true;
+                t.buildMember(classFunction, memberDefinition, undefined, 'staticDefinitions');
+            }
+        }
     },
 
     buildInstanceMembers: function (classFunction, memberListDefinition) {
         ///<param name="classFunction" type="Function">The class constructor whose prototype will be extended</param>
         ///<param name="memberListDefinition" type="Object"></param>
-        var keys = Object.keys(memberListDefinition);
         ///pinning t outside of the closure seems actually faster then passing in the this  and referencing
         var t = this;
-        keys.forEach(function (item, index) {
-            var memberDefinition = new MemberDefinition(memberListDefinition[item], classFunction);
+        for (var item in memberListDefinition) {
+            if (memberListDefinition.hasOwnProperty(item)) {
+                var memberDefinition = new MemberDefinition(memberListDefinition[item], classFunction);
 
-            memberDefinition.name = item;
-            t.buildMember(classFunction, memberDefinition);
-        }, this);
+                memberDefinition.name = item;
+                t.buildMember(classFunction, memberDefinition);
+            }
+        }
     },
 
     copyMembers: function(sourceType, targetType) {
@@ -601,57 +613,53 @@
     buildInstanceMixins: function (classFunction, mixinList) {
         ///<param name="classFunction" type="Function">The class constructor whose prototype will be extended</param>
         ///<param name="mixinList" type="Array"></param>
-        var keys = Object.keys(mixinList);
-        var classFunctionMemberNames = classFunction.memberDefinitions ? classFunction.memberDefinitions.map(function (m) { return m.name; }) : [];
-        //classFunction.mixins2 = mixinList;
+
         classFunction.mixins = classFunction.mixins || [];
         classFunction.propagations = classFunction.propagations || [];
-        ///pinning t outside of the closure seems actually faster then passing in the this  and referencing
-        var t = this;
-        keys.forEach(function (item, index) {
-            //if (classFunctionMemberNames.indexOf(mixinList[item].type.name) > 0) {
-            if (classFunctionMemberNames.some(function (m) { return m == mixinList[item].type.name; })) {
-                t.buildInstancePropagation(classFunction, mixinList[item], classFunctionMemberNames);
-                classFunction.propagations.push(mixinList[item]);
-                classFunction.propagations[mixinList[item].type.name] = true;
+
+        for(var i = 0; i < mixinList.length; i++) {
+            var item = mixinList[i];
+            //if (classFunction.memberDefinitions.getMember(item.type.name)) {
+            if (item.propagateTo) {
+                this.buildInstancePropagation(classFunction, item);
+                classFunction.propagations.push(item);
+                classFunction.propagations[item.type.name] = true;
             } else {
-                t.buildInstanceMixin(classFunction, mixinList[item], classFunctionMemberNames);
-                classFunction.mixins.push(mixinList[item]);
-                classFunction.mixins[mixinList[item].type.name] = true;
+                this.buildInstanceMixin(classFunction, item);
+                classFunction.mixins.push(item);
+                classFunction.mixins[item.type.name] = true;
             }
-        }, this);
+        };
     },
-    buildInstanceMixin: function (classFunction, typeObj, classFunctionMemberNames) {
+    buildInstanceMixin: function (classFunction, typeObj) {
         ///<param name="classFunction" type="Function">The class constructor whose prototype will be extended</param>
         ///<param name="typeObj" type="Object"></param>
-        var t = this;
-        var memberKeys = Object.keys(typeObj.type.memberDefinitions);
-        memberKeys.forEach(function (mItem, mIndex) {
-            var itemName = typeObj.type.memberDefinitions[mItem].name;
-            if (itemName !== 'constructor' && !classFunctionMemberNames.some(function (m) { return m == itemName; })) {
-                t.buildMember(classFunction, typeObj.type.memberDefinitions[mItem]);
+
+        var memberDefs = typeObj.type.memberDefinitions.asArray();
+        for (var i = 0, l = memberDefs.length; i < l; i++) {
+            var itemName = memberDefs[i].name;
+            if (itemName !== 'constructor' && !classFunction.memberDefinitions.getMember(itemName)) {
+                this.buildMember(classFunction, memberDefs[i]);
             }
-        });
+            }
     },
-    buildInstancePropagation: function (classFunction, typeObj, classFunctionMemberNames) {
+    buildInstancePropagation: function (classFunction, typeObj) {
         ///<param name="classFunction" type="Function">The class constructor whose prototype will be extended</param>
         ///<param name="typeObj" type="Object"></param>
-        ///<param name="classFunctionMemberNames" type="Array"></param>
-        var t = this;
 
-        var memberKeys = Object.keys(typeObj.type.memberDefinitions);
-        memberKeys.forEach(function (mItem, mIndex) {
-            var itemName = typeObj.type.memberDefinitions[mItem].name;
-            if (itemName !== 'constructor' && !classFunctionMemberNames.some(function (m) { return m == itemName; })) {
-                t.buildMember(classFunction, typeObj.type.memberDefinitions[mItem], typeObj.type.name);
+        var memberDefs = typeObj.type.memberDefinitions.asArray();
+        for (var i = 0, l = memberDefs.length; i < l; i++) {
+            var itemName = memberDefs[i].name;
+            if (itemName !== 'constructor' && !classFunction.memberDefinitions.getMember(itemName)) {
+                this.buildMember(classFunction, memberDefs[i], typeObj.propagateTo);
             }
-        });
-
+            }
     }
 
 };
 
     $data.Class = Class = new ClassEngineBase();
+
 
 (function (global) {
 
@@ -710,13 +718,7 @@
             var t = typeOrName;
             t = this.getType(t);
             var posT = classTypes.indexOf(t);
-            if (typeof mappedTo[posT] === 'undefined') {
-                return t;
-            } else {
-                ///Multi level map
-                return classTypes[mappedTo[posT]];
-            };
-            //return t; // unreachable code
+			return typeof mappedTo[posT] === 'undefined' ? t : classTypes[mappedTo[posT]];
         };
 
         this.getTypes = function () {
@@ -773,6 +775,18 @@
                 Guard.raise("unknown type to request name for: " + typeOrName);
             return consolidatedClassNames[tPos];
         };
+
+		this.getDefault = function (typeOrName) {
+			var t = this.resolveType(typeOrName);
+			switch (t){
+				case $data.Number: return 0.0;
+				case $data.Integer: return 0;
+				case $data.String: return '';
+				case $data.Boolean: return false;
+				default: return null;
+			}
+		};
+
         //name array ['', '', '']
         this.registerType = function(nameOrNamesArray, type) {
             ///<signature>
@@ -796,13 +810,20 @@
                 }
             }*/
 
+            if (!nameOrNamesArray) {
+                return;
+            }
+
             //todo add ('number', 'number')
             if (typeof type === "string") {
                 type = self.resolveType(type);
             }
 
-            if (!(nameOrNamesArray instanceof Array))
-                nameOrNamesArray = [nameOrNamesArray];
+            if (typeof nameOrNamesArray === 'string') {
+                var tmp = [];
+                tmp.push(nameOrNamesArray);
+                nameOrNamesArray = tmp;
+            }
 
             for (var i = 0; i < nameOrNamesArray.length; i++) {
                 var parts = nameOrNamesArray[i].split('.');
@@ -821,15 +842,14 @@
                 intellisense.annotate(creatorFnc, type);
             }
 
-            nameOrNamesArray.forEach(function(item) {
-                //console.log("create" + item.name);
-
-                if (! (("create" + item.shortName) in self)) {
+            for (var i = 0, l = nameOrNamesArray.length; i < l; i++) {
+                var item = nameOrNamesArray[i];
+                if (!(("create" + item.shortName) in self)) {
                     self["create" + item.shortName] = creatorFnc;
                 } else {
-                    if (console) { console.log("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
+                    if (console) { console.warn("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
                 };
-                
+
                 var typePos = classTypes.indexOf(type);
                 if (typePos == -1) {
                     //new type
@@ -837,23 +857,23 @@
                     var fn = item.fullName;
                     consolidatedClassNames[typePos] = item.fullName;
                 };
-                
+
                 if (item.fullName in classNames) {
-                    console.log("warning:!!! This typename has already been registered:" + item.fullName);
+                    console.warn("warning:!!! This typename has already been registered:" + item.fullName);
                 };
                 classNames[item.fullName] = typePos;
-            });
+            }
         };
     }
 
-    $data.Number = typeof Number !== 'undefined' ? Number : function Number() { };
-    $data.Integer = typeof Integer !== 'undefined' ? Integer : function Integer() {  };
-    $data.Date = typeof Date !== 'undefined' ? Date : function Date() { };
-    $data.String = typeof String !== 'undefined' ? String : function String() { };
-    $data.Boolean = typeof Boolean !== 'undefined' ? Boolean : function Boolean() { };
-    $data.Blob = /*typeof Blob !== 'undefined' ? Blob :*/ function Blob() { };
-    $data.Array = typeof Array !== 'undefined' ? Array : function Array() { };
-    $data.Object = typeof Object !== 'undefined' ? Object : function Object() { };
+    $data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
+    $data.Integer = typeof Integer !== 'undefined' ? Integer : function JayInteger() {  };
+    $data.Date = typeof Date !== 'undefined' ? Date : function JayDate() { };
+    $data.String = typeof String !== 'undefined' ? String : function JayString() { };
+    $data.Boolean = typeof Boolean !== 'undefined' ? Boolean : function JayBoolean() { };
+    $data.Blob = /*typeof Blob !== 'undefined' ? Blob :*/ function JayBlob() { };
+    $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
+    $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
     $data.Function = Function;
 
     var c;
@@ -943,11 +963,12 @@ $data.typeSystem = {
                 console.log('DEFAULT SUCCES CALLBACK');
             },
             error: function () {
-                console.log('DEFAULT ERROR CALLBACK:');
-                if (console.dir)
+                //console.log('DEFAULT ERROR CALLBACK:');
+                /*if (console.dir)
                     console.dir(arguments);
                 else
-                    console.log(arguments);
+                    console.log(arguments);*/
+                Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
             },
             notify: function () {
                 console.log('DEFAULT NOTIFY CALLBACK');
@@ -970,15 +991,15 @@ $data.typeSystem = {
         ///<param name="thisObj" type="Object" />
         if (indexes) {
             var paramArray = [];
-            var keys = Object.keys(indexes);
-            keys.forEach(function (item) {
+            for (var i = 0, l = indexes.length; i < l; i++) {
+                var item = i;
                 if (indexes[item] instanceof ConstructorParameter)
                     paramArray.push(source[indexes[item].paramIndex]);
                 else if (typeof indexes[item] === "function")
                     paramArray.push(indexes[item].apply(thisObj));
                 else
                     paramArray.push(indexes[item]);
-            });
+            }
             return paramArray;
         }
         return source;
@@ -987,7 +1008,7 @@ $data.typeSystem = {
     {
         if (obj && obj.getType && obj.getType().memberDefinitions)
         {
-            this.writeProperties(obj, obj.getType().memberDefinitions.filter(
+            this.writeProperties(obj, obj.getType().memberDefinitions.asArray().filter(
                 function (md) { return (md.kind == "property" || md.kind == "navProperty" || md.kind == "complexProperty") && !md.prototypeProperty; }
                 ));
         }
@@ -995,31 +1016,21 @@ $data.typeSystem = {
     writeProperties: function (obj, members)
     {
         var defines = {};
-        members.forEach(function (memDef) {
+        for (var i = 0, l = members.length; i < l; i++) {
+            var memDef = members[i];
             defines[memDef.name] = memDef.createPropertyDescriptor(null, memDef.value);
-        });
+        }
 
         Object.defineProperties(obj, defines);
 
     },
     writeProperty: function (obj, member, value)
     {
-        var memDef = typeof member === 'string' ?
-                $data.typeSystem.lookupMemberDefinition(obj.constructor.memberDefinitions, member) : member;
+        var memDef = typeof member === 'string' ? obj.getType().memberDefinitions.getMember(member) : member;
         if (memDef) {
             var propDef = memDef.createPropertyDescriptor(null, value);
             //////OPTIMIZATION
             Object.defineProperty(obj, memDef.name, propDef);
         }
-    },
-    lookupMemberDefinition: function lookupMemberDefinition(list, name) {
-        ///<param name="list" type="Array" elementType="$data.MemberDefinition" />
-        ///TODO optimal member definition table with sorted memberNames list 
-        console.log("Lookup:" + name);
-        var member = list.filter(function (md) {
-            ///<param name="md" type="$data.MemberDefinition" />
-            return md.name === name && md.kind === $data.MemberTypes.property;
-        });
-        return member[0];
     }
 };

@@ -198,7 +198,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
-            }else{
+            } else {
                 callBack.error(response);
             }
 
@@ -210,7 +210,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     save_getInitData: function (item, convertedItems) {
         item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
         var serializableObject = {}
-        item.physicalData.getType().memberDefinitions.forEach(function (memdef) {
+        item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
                 serializableObject[memdef.name] = item.physicalData[memdef.name];
             }
@@ -388,8 +388,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     getEntityKeysValue: function (entity) {
         var result = [];
         var keyValue = undefined;
-        for (var i = 0; i < entity.entitySet.createNew.memberDefinitions.length; i++) {
-            var field = entity.entitySet.createNew.memberDefinitions[i];
+        var memDefs = entity.entitySet.createNew.memberDefinitions.asArray();
+        for (var i = 0, l = memDefs.length; i < l; i++) {
+            var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
                 if (field.dataType == "string")

@@ -54,11 +54,76 @@
         };
     }
 
-    if (!Array.prototype.forEach) {
-        Array.prototype.forEach = function (handler) {
-            for (var i = 0; i < this.length; i++) {
-                handler(this[i], i);
+    if (!Object.defineProperties) {
+        Object.defineProperties = function (obj, defines) {
+            for (var i in defines) {
+                if(defines.hasOwnProperty(i))
+                    obj[i] = defines[i].value || {};
             }
         };
     }
+
+    if (!Array.prototype.forEach) {
+        Array.prototype.forEach = function (handler, thisArg) {
+            for (var i = 0, l = this.length; i < l; i++) {
+                if (thisArg) { handler.call(thisArg, this[i], i, this); }
+                else { handler(this[i], i, this); };
+            };
+        };
+    };
+
+    if (!Array.prototype.filter) {
+        Array.prototype.filter = function (handler, thisArg) {
+            var result = [];
+            for (var i = 0, l = this.length; i < l; i++) {
+                var r = thisArg ?
+                    handler.call(thisArg, this[i], i, this) :
+                    handler(this[i], i, this);
+                if (r === true) {
+                    result.push(this[i]);
+                }
+            }
+            return result;
+        };
+    }
+
+    if (!Array.prototype.map) {
+        Array.prototype.map = function (handler, thisArg) {
+            var result = [];
+            for (var i = 0, l = this.length; i < l; i++) {
+                var r = thisArg ?
+                    handler.call(thisArg, this[i], i, this) :
+                    handler(this[i], i, this);
+                result.push(r);
+            }
+            return result;
+        };
+    }
+
+    if (!Array.prototype.some) {
+        Array.prototype.some = function (handler, thisArg) {
+            for (var i = 0, l = this.length; i < l; i++) {
+                var r = thisArg ?
+                    handler.call(thisArg, this[i], i, this) :
+                    handler(this[i], i, this);
+                if (r) { return true; }
+
+            }
+            return false;
+        };
+    }
+
+    if (!Array.prototype.indexOf) {
+        Array.prototype.indexOf = function (item, from) {
+            for (var i = 0, l = this.length; i < l; i++) {
+                if (this[i] === item) {
+                    return i;
+                };
+            };
+            return -1;
+        };
+    }
+
+
+
 })();

@@ -2,8 +2,12 @@ function Exception(message, name, data) {
     this.name = name ? name : "Exception";
     this.message = message;
     this.data = data;
-    this.toString = function() { return JSON.stringify(this); };
+    //this.toString = function() { return JSON.stringify(this); };
 }
+
+Exception.prototype = new Error();
+Exception.prototype.constructor = Exception;
+
 Exception.prototype._getStackTrace = function () {
     var callstack = [];
     var isCallstackPopulated = false;
