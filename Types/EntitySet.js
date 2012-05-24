@@ -19,12 +19,19 @@ $data.Class.defineEx('$data.EntitySet',
         ///<summary>Represents a typed entity set that is used to perform create, read, update, and delete operations</summary>
         ///<param name="entitySchema" type="$data.Entity" mayBeNull="false">The type that defines the set. The type must be derived from 'Entity' base type.</param>
         ///<param name="entityContext" type="$data.EntityContext" mayBeNull="false">An instance of 'EntityContext' which call the constructor.</param>
+        ///<example>
+        ///$data.AutoIdEntity.extend('Book', { Title: { type: String } });
+        ///$data.EntityContext.extend('MyContext', {
+        ///  Books: { type: $data.EntitySet, entityType: Book }
+        ///});
+        ///</example>
         this.createNew = this[elementType.name] = elementType;
         this.stateManager = new $data.EntityStateManager(this);
         Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
         Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
         Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
-        return;
+
+        this._checkRootExpression();
     },
     executeQuery: function (expression, on_ready) {
         //var compiledQuery = this.entityContext
@@ -109,6 +116,19 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         data.context = this.entityContext;
         this._trackEntity(data);
+    },
+    detach: function(entity) {
+        if (!(entity instanceof this.createNew)) {
+            return;
+        }
+
+        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(entity); }).pop();
+        if (existsItem) {
+            var idx = this.entityContext.stateManager.trackedEntities.indexOf(existsItem);
+            entity.entityState = $data.EntityState.Detached;
+            this.entityContext.stateManager.trackedEntities.splice(idx, 1);
+            return;
+        }
     },
     attachOrGet: function (entity) {
         var data = entity;

@@ -204,10 +204,10 @@ function T3(providerConfig, msg) {
             });
         });
     });
-    test('_Update_Articles', function () {
+    test('Update_Articles_Title', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(5);
-        stop(4);
+        stop(5);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
@@ -221,6 +221,7 @@ function T3(providerConfig, msg) {
                     db.Articles.attach(a);
                     a.Title = 'updatedArticleTitle';
                     db.saveChanges(function () {
+                        start(1);
                         db.Articles.filter(function (item) { return item.Id == this.id; }, { id: 3 }).toArray(function (result) {
                             start(1);
                             ok(result, 'query failed');
@@ -286,6 +287,25 @@ function T3(providerConfig, msg) {
             });
         });
     });
+    test('Include_Category_in_Article', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+
+                db.Articles.include('Category').toArray(function (result) {
+                    start(1);
+                    ok(result, 'query failed');
+                    var a = result[0];
+                    equal(a.Category instanceof $news.Types.Category, true, 'Category is not an Category');
+                    equal(typeof a.Category.Title == 'string', true, 'Article.Title is not a string');
+                });
+            });
+        });
+    });
     //test('Delete_with_Include', function () {
     //    //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
     //    expect(1);
@@ -335,7 +355,7 @@ function T3(providerConfig, msg) {
     test('Update_Articles_and_add_new_TagConnection', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(7);
-        stop(5);
+        stop(7);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
@@ -348,22 +368,39 @@ function T3(providerConfig, msg) {
                     var a = result[0];
                     db.Articles.attach(a);
                     a.Title = 'updatedArticleTitle';
-                    db.saveChanges(function () {
-                        db.Articles.filter(function (item) { return item.Id == this.id; }, { id: 1 }).toArray(function (result) {
+                    db.saveChanges({
+                        success: function () {
                             start(1);
-                            ok(result, 'query failed');
-                            equal(result.length, 1, 'not only 1 row in result set');
-                            var a = result[0];
-                            equal(a.Title, 'updatedArticleTitle', 'update failed');
-                            db.TagConnections.add(new $news.Types.TagConnection({ Article: a, Tag: new $news.Types.Tag({ Title: 'newtag' }) }));
-                            db.saveChanges(function () {
-                                db.TagConnections.filter(function (item) { return item.Article.Id == 1 && item.Tag.Title == 'newtag'; }).toArray(function (result) {
-                                    start(1);
-                                    ok(result, 'query failed');
-                                    equal(result.length, 1, 'not only 1 row in result set');
+                            db.Articles.filter(function (item) { return item.Id == this.id; }, { id: 1 }).toArray(function (result) {
+                                start(1);
+                                ok(result, 'query failed');
+                                equal(result.length, 1, 'not only 1 row in result set');
+                                var a = result[0];
+                                equal(a.Title, 'updatedArticleTitle', 'update failed');
+                                db.Articles.attach(a);
+                                db.TagConnections.add(new $news.Types.TagConnection({ Article: a, Tag: new $news.Types.Tag({ Title: 'newtag' }) }));
+                                db.saveChanges({
+                                    success: function () {
+                                        start(1);
+                                        db.TagConnections.filter(function (item) { return item.Article.Id == 1 && item.Tag.Title == 'newtag'; }).toArray(function (result) {
+                                            start(1);
+                                            ok(result, 'query failed');
+                                            equal(result.length, 1, 'not only 1 row in result set');
+                                        });
+                                    },
+                                    error: function (error) {
+                                        start(2);
+                                        console.dir(error);
+                                        ok(false, error);
+                                    }
                                 });
                             });
-                        });
+                        },
+                        error: function (error) {
+                            start(4);
+                            console.dir(error);
+                            ok(false, error);
+                        }
                     });
                 });
             });
@@ -378,11 +415,64 @@ function T3(providerConfig, msg) {
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
 
-                db.Articles.length(function (result) {
-                    start(1);
-                    ok(result, 'query failed');
-                    equal(result, 26, 'not only 1 row in result set');
-                    console.dir(result);
+                db.Articles.length({
+                    success: function (result) {
+                        start(1);
+                        ok(result, 'query failed');
+                        equal(result, 26, 'not only 1 row in result set');
+                        console.dir(result);
+                    },
+                    error: function (error) {
+                        start(1);
+                        console.dir(error);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('full_table_single', function () {
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(2);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+
+                db.Articles.single(function (a) { return a.Id == 1;}, null,{
+                    success: function (result) {
+                        start(1);
+                        ok(result, 'query failed');
+                        ok(result instanceof $news.Types.Article, 'Result faild');
+                    },
+                    error: function (error) {
+                        start(1);
+                        console.dir(error);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('full_table_single_faild', function () {
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(1);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+
+                db.Articles.single(function (a) { return a.Id > 1; }, null, {
+                    success: function (result) {
+                        start(1);
+                        ok(false, 'Single return more than 1 item');
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(true, 'OK');
+                    }
                 });
             });
         });

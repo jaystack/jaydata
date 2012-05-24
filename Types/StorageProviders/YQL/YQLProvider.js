@@ -73,12 +73,12 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
                 '$data.Date': function (value) { return new Date(typeof value === "string" ? parseInt(value) : value); },
                 '$data.Boolean': function (value) { return !!value },
                 '$data.Blob': function (value) { return value; },
-                '$data.Array': function (value) { return value; }
+                '$data.Array': function (value) { if (value === undefined) { return new $data.Array(); } return value; }
             },
             toDb: {
                 '$data.Number': function (value) { return value; },
                 '$data.Integer': function (value) { return value; },
-                '$data.String': function (value) { return  "'" +  value + "'"; },
+                '$data.String': function (value) { return "'" + value + "'"; },
                 '$data.Date': function (value) { return value ? value.valueOf() : null; },
                 '$data.Boolean': function (value) { return value },
                 '$data.Blob': function (value) { return value; },
@@ -118,14 +118,17 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
                     return;
                 }
 
+                query.rawDataList = resultData;
                 if (entitSetDefinition.anonymousResult) {
                     query.rawDataList = resultData;
                     query.actionPack.push({ op: "copyToResult" });
                     callBack.success(query);
                     return;
+                } else {
+                    var compiler = Container.createModelBinderConfigCompiler(query, []);
+                    compiler.Visit(query.expression);
                 }
 
-                query.rawDataList = resultData;
                 query.actionPack.push({ op: "buildType", context: ctx, logicalType: schema, tempObjectName: schema.name, includes: includes, propertyMapping: sql.selectMapping });
                 query.actionPack.push({ op: "copyToResult", tempObjectName: schema.name });
                 callBack.success(query);

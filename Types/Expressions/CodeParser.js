@@ -65,7 +65,7 @@ $C('$data.Expressions.CodeParser', null, null, {
     },
 
     Build2: function (node) {
-        ///<param name="node" type="Lint
+        ///<param name="node" type="Lint" />
         ///<returns type="$data.Expressions.ExpressionNode" />
         var n;
         switch (node.arity) {

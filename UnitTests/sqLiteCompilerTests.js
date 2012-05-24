@@ -1,6 +1,7 @@
 ﻿$(document).ready(function () {
+	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
 
-    $data.NewsReaderContext = new $news.Types.NewsContext({ databaseName: "sqLiteCompilerTestDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged });
+    $data.NewsReaderContext = new $news.Types.NewsContext({ databaseName: "sqLiteCompilerTestDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
     $data.NewsReaderContext.onReady(function () {
         module("sqLiteCompilerTests");
 
@@ -8,23 +9,27 @@
             var x = r.sqlText + " | " + JSON.stringify(r.params);
             return x;
         };
-
+        _modelBinderToString = function (m) {
+            return JSON.parse(JSON.stringify(m));
+        }
         //==================================================================================================== Accessing array items
 
-        test("ArrayAccess: Vector", 5, function () {
+        test("ArrayAccess: Vector", 2, function () {
             var x = { xvalue: ["Joe", "Jack", "Jim"] };
             var q = $data.NewsReaderContext.Users.where(function (m) { return m.LoginName != this.p1.xvalue[0] + this.p1.xvalue[1] + this.p1.xvalue[2] }, { p1: x });
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE (T0.LoginName != ?) | [\"JoeJackJim\"]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array, $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
         test("ArrayAccess: Jagged", 1, function () {
             var x = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
@@ -78,36 +83,40 @@
         });
         //==================================================================================================== Naming
 
-        test("Naming: Lamda name and paramobject name are same in the fn arglist", 5, function () {
+        test("Naming: Lamda name and paramobject name are same in the fn arglist", 2, function () {
             var q = $data.NewsReaderContext.Users.where(function (m) { return m.LoginName == this.prm; }, { prm: "Joe" });
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE (T0.LoginName = ?) | [\"Joe\"]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array, $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
 
         //==================================================================================================== Side effect
 
-        test("Naming: Lambda without return", 5, function () {
+        test("Naming: Lambda without return", 2, function () {
             var q = $data.NewsReaderContext.Users.where(function (m) { m.LoginName == this.prm; }, { prm: "Joe" });
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE (T0.LoginName = ?) | [\"Joe\"]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array, $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
 
         //==================================================================================================== WhereExp
@@ -190,7 +199,7 @@
             equal(_resultToString(r), 'SELECT * FROM Tags T0 WHERE (rtrim(T0.Title) = ?) | ["test"]');
             q = $data.NewsReaderContext.Tags.where(function (m) { return m.Title.rtrim(this.chars) == this.str }, { str: 'test', chars: '.!? ' });
             r = q.toTraceString();
-            equal(_resultToString(r), 'SELECT * FROM Tags T0 WHERE (rtrim(T0.Title , ?) = ?) | [".!? ","test"]');            
+            equal(_resultToString(r), 'SELECT * FROM Tags T0 WHERE (rtrim(T0.Title , ?) = ?) | [".!? ","test"]');
         });
         test("MethodCall: Contains_ParamProp", 1, function () {
             var x = { value: "test" };
@@ -198,20 +207,22 @@
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE like(? , T0.LoginName) | [\"%test%\"]");
         });
-        test("MethodCall: Contains_ParamMethod", 5, function () {
+        test("MethodCall: Contains_ParamMethod", 2, function () {
             var x = { dup: function (s, c) { var x = ''; for (var i = 0; i < c; i++) x = x + s; return x; } };
             var q = $data.NewsReaderContext.Users.where(function (m) { return m.LoginName.contains(this.prm.dup("ab_", 3)) }, { prm: x });
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE like(? , T0.LoginName) | [\"%ab_ab_ab_%\"]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array, $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
         test("MethodCall: StartsWith_ParamProp", 1, function () {
             var x = { value: "test" };
@@ -231,20 +242,22 @@
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE like(? , T0.LoginName) | [\"%test\"]");
         });
-        test("MethodCall: EndsWith_ParamMethod", 5, function () {
+        test("MethodCall: EndsWith_ParamMethod", 2, function () {
             var x = { dup: function (s, c) { var x = ''; for (var i = 0; i < c; i++) x = x + s; return x; } };
             var q = $data.NewsReaderContext.Users.where(function (m) { return m.LoginName.endsWith(this.prm.dup("ab_", 3)) }, { prm: x });
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE like(? , T0.LoginName) | [\"%ab_ab_ab_\"]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array, $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
 
         //==================================================================================================== Expressions
@@ -277,19 +290,26 @@
 
         //==================================================================================================== Boolean expressions
 
-        test("Expressions (bool): EntityProp Eq True", 5, function () {
+        test("Expressions (bool): EntityProp Eq True", 2, function () {
             var q = $data.NewsReaderContext.TestTable.where(function (m) { return m.b0 == true }, {});
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM TestTable T0 WHERE (T0.b0 = ?) | [1]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.TestItem, tempObjectName: "TestItem", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "TestItem" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", i0: "i0", b0: "b0", s0: "s0", blob: "blob", n0: "n0", d0: "d0" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $type: $news.Types.TestTable,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    i0: "i0",
+                    b0: "b0",
+                    s0: "s0",
+                    blob: "blob",
+                    n0: "n0",
+                    d0: "d0"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
         test("Expressions (bool): EntityProp Eq False", 1, function () {
             var q = $data.NewsReaderContext.TestTable.where(function (m) { return m.b0 == false }, {});
@@ -484,20 +504,23 @@
 
         //==================================================================================================== Take
 
-        test("Take: literal", 5, function () {
+        test("Take: literal", 2, function () {
             var x = { value: "Joe" };
             var q = $data.NewsReaderContext.Users.where(function (m) { return m.LoginName != this.prm.value; }, { prm: x }).take(4);
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 WHERE (T0.LoginName != ?) LIMIT ? | [\"Joe\",4]");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
         test("Take: parameter", 1, function () {
             var x = { value: "Joe", top: 3 };
@@ -778,11 +801,21 @@
                         + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
                         + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
         });
-        test("Projection: complett entity", 1, function () {
-            equal(_resultToString(
-                $data.NewsReaderContext.Articles.select(function (m) { return m.Category; }).toTraceString()),
-                "SELECT T0.rowid AS rowid$$, T1.Id AS Id, T1.Title AS Title FROM Articles T0 "
-                        + "\n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) | []");
+        test("Projection: full entity", 2, function () {
+            var q = $data.NewsReaderContext.Articles.select(function (m) { return m.Category; });
+            var r = q.toTraceString();
+            equal(_resultToString(r), "SELECT T1.Id AS Id, T1.Title AS Title FROM Articles T0 \n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) | []");
+
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $type: $news.Types.Category,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    Title: "Title"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
         //test("Include: full table with include", 1, function () {
         //    equal(_resultToString(
@@ -797,39 +830,40 @@
         //                + "\n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) | []");
         //});
         module("sqLiteModelBinder");
-        test("get full table without select", 5, function () {
+        test("get full table without select", 2, function () {
             var q = $data.NewsReaderContext.Users;
             var r = q.toTraceString();
             equal(_resultToString(r), "SELECT * FROM Users T0 | []");
 
-            var expectedObject = { op: "buildType", context: null, logicalType: $news.Types.User, tempObjectName: "User", propertyMapping: null };
-            r.actions[0].context = null;
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "User" }, "copy type faild");
-
-            expectedObject = { keys: ['Id'], mapping: { Id: "Id", LoginName: "LoginName", Email: "Email" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $type: $news.Types.User,
+                    $keys: ['Id'],
+                    Id: "Id",
+                    LoginName: "LoginName",
+                    Email: "Email",
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_scalar_field", 6, function () {
+        test("map_scalar_field", 2, function () {
             var q = $data.NewsReaderContext.Users.map(function (item) { return item.Id });
             var r = q.toTraceString();
             start(1);
             equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T0.Id AS d FROM Users T0 | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 'd', type: undefined, includes: null, dataType: 'int' }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = { keys: ['rowid$$'], propertyType: "object", mapping: { d: "d" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: 'int',
+                    $source: 'd'
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_deep_scalar_field", 6, function () {
+        test("map_deep_scalar_field", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return item.Author.Profile.Bio });
             var r = q.toTraceString();
             start(1);
@@ -837,37 +871,34 @@
 	                                        + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
 	                                        + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 'd', type: undefined, includes: null, dataType: 'string' }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = { keys: ['rowid$$'], propertyType: "object", mapping: { d: "d" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: 'string',
+                    $source: 'd'
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_obejct_scalar_field", 6, function () {
+        test("map_obejct_scalar_field", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return { t: item.Title, l: item.Lead }; });
             var r = q.toTraceString();
             start(1);
             equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T0.Title AS t, T0.Lead AS l FROM Articles T0 | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 't', to: 't', type: undefined, includes: null, dataType: 'string' }, { from: 'l', to: 'l', type: undefined, includes: null, dataType: 'string' }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = { keys: ['rowid$$'], propertyType: "object", mapping: { t: "t", l: "l" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: $data.Object,
+                    t: { $type: 'string', $source: 't' },
+                    l: { $type: 'string', $source: 'l' },
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_obejct_deep_scalar_field", 6, function () {
+        test("map_obejct_deep_scalar_field", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return { t: item.Author.Profile.FullName, l: item.Author.LoginName }; });
             var r = q.toTraceString();
             start(1);
@@ -875,82 +906,105 @@
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 't', to: 't', type: undefined, includes: null, dataType: 'string' }, { from: 'l', to: 'l', type: undefined, includes: null, dataType: 'string' }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = { keys: ['rowid$$'], propertyType: "object", mapping: { t: "t", l: "l" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: $data.Object,
+                    t: { $type: 'string', $source: 't' },
+                    l: { $type: 'string', $source: 'l' },
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_deep_obejct_deep_scalar_field", 6, function () {
+        test("map_deep_obejct_deep_scalar_field", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return { t: item.Author.Profile.FullName, a: { b: { c: { d: item.Author.LoginName } } } }; });
             var r = q.toTraceString();
             start(1);
-            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.FullName AS t, T0.rowid AS a__rowid$$, T0.rowid AS b__rowid$$, T0.rowid AS c__rowid$$, T1.LoginName AS c__d FROM Articles T0 "
+            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.FullName AS t, T0.rowid AS a__rowid$$, T0.rowid AS a__b__rowid$$, T0.rowid AS a__b__c__rowid$$, T1.LoginName AS a__b__c__d FROM Articles T0 "
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 't', to: 't', type: undefined, includes: null, dataType: 'string' }, { from: 'a.b.c.d', to: 'a.b.c.d', type: undefined, includes: null, dataType: 'string' }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = [{ keys: ['rowid$$'], propertyType: "object", mapping: { t: "t" } }, { keys: ['a__rowid$$'], propertyType: "object", propertyName: "a", mapping: {} }, { keys: ['b__rowid$$'], propertyType: "object", propertyName: "a.b", mapping: {} }, { keys: ['c__rowid$$'], propertyType: "object", propertyName: "a.b.c", mapping: { d: "c__d" } }];
-            equal(r.converter.length, 4, "converter row number faild");
-            deepEqual(r.converter, expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: $data.Object,
+                    t: { $type: 'string', $source: 't' },
+                    a: {
+                        $keys: ['a__rowid$$'],
+                        b: {
+                            $keys: ['a__b__rowid$$'],
+                            c: {
+                                $keys: ['a__b__c__rowid$$'],
+                                d: { $type: 'string', $source: 'a__b__c__d' },
+                            }
+                        }
+                    }
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_deep_obejct_expression_field", 6, function () {
+        test("map_deep_obejct_expression_field", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return { t: item.Author.Profile.FullName, a: { b: { c: { r: item.Author.LoginName + item.Reviewer.Profile.Bio } } } }; });
             var r = q.toTraceString();
             start(1);
-            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.FullName AS t, T0.rowid AS a__rowid$$, T0.rowid AS b__rowid$$, T0.rowid AS c__rowid$$, (T1.LoginName + T4.Bio) AS c__r FROM Articles T0 "
+            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.FullName AS t, T0.rowid AS a__rowid$$, T0.rowid AS a__b__rowid$$, T0.rowid AS a__b__c__rowid$$, (T1.LoginName + T4.Bio) AS a__b__c__r FROM Articles T0 "
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) "
 	                                            + "\n\tLEFT OUTER JOIN Users T3 ON (T0.Reviewer__Id = T3.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T4 ON (T3.Id = T4.User__Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 't', to: 't', type: undefined, includes: null, dataType: 'string' }, { from: 'a.b.c.r', to: 'a.b.c.r', type: undefined, includes: null, dataType: null }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = [{ keys: ['rowid$$'], propertyType: "object", mapping: { t: "t" } }, { keys: ['a__rowid$$'], propertyType: "object", propertyName: "a", mapping: {} }, { keys: ['b__rowid$$'], propertyType: "object", propertyName: "a.b", mapping: {} }, { keys: ['c__rowid$$'], propertyType: "object", propertyName: "a.b.c", mapping: { r: "c__r" } }];
-            equal(r.converter.length, 4, "converter row number faild");
-            deepEqual(r.converter, expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: $data.Object,
+                    t: { $type: 'string', $source: 't' },
+                    a: {
+                        $keys: ['a__rowid$$'],
+                        b: {
+                            $keys: ['a__b__rowid$$'],
+                            c: {
+                                $keys: ['a__b__c__rowid$$'],
+                                r: { $source: 'a__b__c__r' }
+                            }
+                        }
+                    }
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_entity", 6, function () {
+        test("map_entity", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return item.Reviewer.Profile; });
             var r = q.toTraceString();
             start(1);
-            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.Id AS Id, T2.FullName AS FullName, T2.Bio AS Bio, T2.Avatar AS Avatar, T2.Birthday AS Birthday, T2.User__Id AS User__Id, T2.Location__Address AS Location__Address, T2.Location__City AS Location__City, T2.Location__Zip AS Location__Zip, T2.Location__Country AS Location__Country FROM Articles T0 "
+            equal(_resultToString(r), "SELECT T2.Id AS Id, T2.FullName AS FullName, T2.Bio AS Bio, T2.Avatar AS Avatar, T2.Birthday AS Birthday, T2.User__Id AS User__Id, T2.Location__Address AS Location__Address, T2.Location__City AS Location__City, T2.Location__Zip AS Location__Zip, T2.Location__Country AS Location__Country FROM Articles T0 "
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Reviewer__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: 'd', type: $news.Types.UserProfile, dataType: null, includes: [{ name: 'Location', type: $news.Types.Location }] }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = [{ keys: ['rowid$$'], propertyType: "object", mapping: { Id: "Id", FullName: "FullName", Bio: "Bio", Avatar: "Avatar", Birthday: "Birthday", User__Id: "User__Id" } },
-                              { keys: ['rowid$$'], propertyName: "Location", propertyType: 'object', mapping: { Address: "Location__Address", City: "Location__City", Zip: "Location__Zip", Country: "Location__Country" } }];
-            equal(r.converter.length, 2, "converter row number faild");
-            deepEqual(r.converter, expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['Id'],
+                    $type: $news.Types.UserProfile,
+                    Id: 'Id',
+                    FullName: 'FullName',
+                    Avatar: 'Avatar',
+                    Bio: 'Bio',
+                    Birthday: 'Birthday',
+                    Location: {
+                        $type: $news.Types.Location,
+                        Address: 'Location__Address',
+                        City: 'Location__City',
+                        Zip: 'Location__Zip',
+                        Country:'Location__Country'
+                    }
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("map_scalar_field_from_type_with_complexType", 6, function () {
+        test("map_scalar_field_from_type_with_complexType", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (item) { return item.Reviewer.Profile.FullName; });
             var r = q.toTraceString();
             start(1);
@@ -958,37 +1012,39 @@
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Reviewer__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: "d", dataType: "string", includes: null, type: undefined }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = { keys: ['rowid$$'], propertyType: "object", mapping: { d: "d" } };
-            equal(r.converter.length, 1, "converter row number faild");
-            deepEqual(r.converter[0], expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: 'string',
+                    $source: "d"
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
 
-        test("map_scalar_and_entity", 6, function () {
+        test("map_scalar_and_entity", 2, function () {
             var q = $data.NewsReaderContext.Articles.map(function (a) { return { Title: a.Title, Auth: a.Author }; });
             var r = q.toTraceString();
             start(1);
             equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T0.Title AS Title, T1.Id AS Auth__Id, T1.LoginName AS Auth__LoginName, T1.Email AS Auth__Email FROM Articles T0 "
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) | []");
 
-            console.dir(r);
-            //Model binder
-            ok(r.actions[0].context === $data.NewsReaderContext, 'Model binder context error');
-            r.actions[0].context = null;
-            var expectedObject = { op: "buildType", context: null, logicalType: null, tempObjectName: "d", propertyMapping: [{ from: "Title", to: "Title", dataType: "string", includes: null, type: undefined }, { from: "Auth", to: "Auth", dataType: null, includes: null, type: $news.Types.User }] };
-            deepEqual(r.actions[0], expectedObject, "buildType faild");
-            deepEqual(r.actions[1], { op: "copyToResult", tempObjectName: "d" }, "copy type faild");
-
-            expectedObject = [{ keys: ['rowid$$'], propertyType: "object", mapping: { Title: "Title" } }, { keys: ['rowid$$'], propertyType: "object", propertyName: "Auth", mapping: { Id: 'Auth__Id', LoginName: 'Auth__LoginName', Email: 'Auth__Email' } }];
-            equal(r.converter.length, 2, "converter row number faild");
-            deepEqual(r.converter, expectedObject, "expected converted row faild!");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    Title: { $type: 'string', $source: 'Title' },
+                    Auth: {
+                        $type: $news.Types.User,
+                        Id: 'Auth__Id',
+                        $keys: ['Auth__Id'],
+                        LoginName: 'Auth__LoginName',
+                        Email: 'Auth__Email'
+                    }
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
         //test("map_complex_type_field", 6, function () {
         //    var q = $data.NewsReaderContext.Articles.map(function (m) {return {a: m.Author.Profile.FullName, b: m.Author.LoginName, c: m.Author.Profile };});

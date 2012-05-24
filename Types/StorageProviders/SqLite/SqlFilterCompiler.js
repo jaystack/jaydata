@@ -37,7 +37,8 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                     });
                     sqlBuilder.addText(SqlStatementBlocks.endGroup);
                 } else if (set instanceof $data.Queryable) {
-                    Guard.raise("Not yet... but coming!");                                        
+					sqlBuilder.addText("(SELECT d FROM (" + set.toTraceString().sqlText + "))");
+                    //Guard.raise("Not yet... but coming!");
                 } else {
                     Guard.raise(new Exception("Only constant arrays and Queryables can be on the right side of 'in' operator", "UnsupportedType"));
                 };
@@ -70,16 +71,18 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
         sqlBuilder.addText(opName);
         sqlBuilder.addText(SqlStatementBlocks.beginGroup);
         if (opName === "like") {
-            var builder = Container.createSqlBuilder([],sqlBuilder.entityContext);
+            var builder = Container.createSqlBuilder([], sqlBuilder.entityContext);
+            builder.selectTextPart("fragment");
             this.Visit(expression.parameters[0], builder);
-            builder.params.forEach(function (p) {
+            var fragment = builder.getTextPart("fragment");
+            fragment.params.forEach(function (p) {
                 var v = p;
                 var paramDef = opDefinition.parameters[0];
                 var v = paramDef.prefix ? paramDef.prefix + v : v;
                 v = paramDef.suffix ? v + paramDef.suffix : v;
                 sqlBuilder.addParameter(v);
             });
-            sqlBuilder.addText(builder.sql);
+            sqlBuilder.addText(fragment.text);
             sqlBuilder.addText(" , ");
             this.Visit(expression.source, sqlBuilder);
         } else {

@@ -1,5 +1,5 @@
 
-Class.define('$data.Notifications.ChangeDistributorBase', null, null, {
+$data.Class.define('$data.Notifications.ChangeDistributorBase', null, null, {
     distributeData: function (collectorData) {
         Guard.raise("Pure class");
     }

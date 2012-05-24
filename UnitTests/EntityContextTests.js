@@ -95,35 +95,42 @@
         });
     });
     module("Context initialize");
-    test('Crate context', 1, function () {
-        stop(1);
-        $C('$t.EntityContextTest.TestItem', $data.Entity, null, {
-            Id: { dataType: $data.Integer, key: true, computed: true },
-            Str1: { dataType: $data.String },
-            Num1: { dataType: $data.Number },
-            Blob1: { dataType: $data.Blob },
-            Bool1: { dataType: $data.Boolean },
-            Date1: { dataType: $data.Date }
-        });
-        $C('$t.EntityContextTest.TestItemFromString', $data.Entity, null, {
-            Id: { dataType: '$data.Integer', key: true, computed: true },
-            Str1: { dataType: '$data.String' },
-            Num1: { dataType: '$data.Number' },
-            Blob1: { dataType: '$data.Blob' },
-            Bool1: { dataType: '$data.Boolean' },
-            Date1: { dataType: '$data.Date' }
-        });
-        $C('$t.EntityContextTest.DataTypeContext', $data.EntityContext, null, {
-            TestTable1: { dataType: '$data.EntitySet', elementType: '$t.EntityContextTest.TestItemFromString' },
-            TestTable2: { dataType: $data.EntitySet, elementType: $t.EntityContextTest.TestItem }
-        });
-        var cnt = new $t.EntityContextTest.DataTypeContext({ name: 'sqLite' });
-        cnt.onReady(function (db) {
-            start(1);
-            ok(db, "Db create faild");
-            console.dir(db);
-        });
-    });
+	if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported){
+		test('Crate context', 1, function () {
+			stop(1);
+			$C('$t.EntityContextTest.TestItem', $data.Entity, null, {
+				Id: { dataType: $data.Integer, key: true, computed: true },
+				Str1: { dataType: $data.String },
+				Num1: { dataType: $data.Number },
+				Blob1: { dataType: $data.Blob },
+				Bool1: { dataType: $data.Boolean },
+				Date1: { dataType: $data.Date }
+			});
+			$C('$t.EntityContextTest.TestItemFromString', $data.Entity, null, {
+				Id: { dataType: '$data.Integer', key: true, computed: true },
+				Str1: { dataType: '$data.String' },
+				Num1: { dataType: '$data.Number' },
+				Blob1: { dataType: '$data.Blob' },
+				Bool1: { dataType: '$data.Boolean' },
+				Date1: { dataType: '$data.Date' }
+			});
+			$C('$t.EntityContextTest.DataTypeContext', $data.EntityContext, null, {
+				TestTable1: { dataType: '$data.EntitySet', elementType: '$t.EntityContextTest.TestItemFromString' },
+				TestTable2: { dataType: $data.EntitySet, elementType: $t.EntityContextTest.TestItem }
+			});
+			try{
+				var cnt = new $t.EntityContextTest.DataTypeContext({ name: 'sqLite' });
+				cnt.onReady(function (db) {
+					start(1);
+					ok(db, "Db create faild");
+					console.dir(db);
+				});
+			}catch(e){
+				start(1);
+        		ok(false, "Db create faild");
+			}
+		});
+	}
     //test('Crate context 2', 1, function () {
     //    stop(1);
     //    function registerEdmTypes() {

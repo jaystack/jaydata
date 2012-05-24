@@ -104,6 +104,16 @@
         };
     };
 
+    MemberDefinition.prototype.toJSON = function () {
+        var alma = {};
+        for (var name in this) {
+            if (name !== 'defineBy' && name !== 'storageModel') {
+                alma[name] = this[name];
+            }
+        }
+        return alma;
+    }
+
     //TODO global/window
     $data.MemberDefinition = window["MemberDefinition"] = MemberDefinition;
     
@@ -346,6 +356,7 @@
         var classFunction = null;
         classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
         classFunction.fullName = className;
+        classFunction.namespace = classNameParts.join('.'); //classname splitted
 
         this.buildType(classFunction, baseClasses, instanceDefinition, classDefinition);
 
@@ -788,7 +799,7 @@
 		};
 
         //name array ['', '', '']
-        this.registerType = function(nameOrNamesArray, type) {
+        this.registerType = function(nameOrNamesArray, type, factoryFunc) {
             ///<signature>
             ///<summary>Registers a type and optionally a lifetimeManager with a name
             ///that can be used to later resolve the type or create new instances</summary>
@@ -845,7 +856,11 @@
             for (var i = 0, l = nameOrNamesArray.length; i < l; i++) {
                 var item = nameOrNamesArray[i];
                 if (!(("create" + item.shortName) in self)) {
-                    self["create" + item.shortName] = creatorFnc;
+                    if (typeof factoryFunc === 'function') {
+                        self["create" + item.shortName] = factoryFunc;
+                    } else {
+                        self["create" + item.shortName] = creatorFnc;
+                    }
                 } else {
                     if (console) { console.warn("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
                 };
@@ -863,6 +878,10 @@
                 };
                 classNames[item.fullName] = typePos;
             }
+
+			if (!type.name){
+				type.name = nameOrNamesArray[0].shortName;
+			}
         };
     }
 
@@ -881,7 +900,9 @@
     c.registerType(["$data.Number", "number", "float", "real", "decimal"], $data.Number);
     c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64"], $data.Integer);
     c.registerType(["$data.String", "string", "text", "character"], $data.String);
-    c.registerType(["$data.Array", "array", "Array", "[]"], $data.Array);
+    c.registerType(["$data.Array", "array", "Array", "[]"], $data.Array, function () {
+        return $data.Array.apply(undefined, arguments);
+    });
     c.registerType(["$data.Date", "datetime", "date"], $data.Date);
     c.registerType(["$data.Boolean", "bool", "boolean"], $data.Boolean);
     c.registerType(["$data.Blob", "blob"], $data.Blob);
@@ -896,7 +917,7 @@ global["$C"] = function () { Class.define.apply(Class, arguments); };
 
 $data.Class.ConstructorParameter = ConstructorParameter = $data.Class.define('ConstructorParameter', null, null, {
     constructor: function (paramIndex) {
-        ///<param name="paramIndex" type="integer">
+        ///<param name="paramIndex" type="integer" />
         this.paramIndex = paramIndex;
     },
     paramIndex: {}
@@ -937,6 +958,17 @@ $data.Observable = Observable = Class.define("Observable", null, null, {
 
 })($data, window);
 
+$data.defaultErrorCallback = function () {
+    //console.log('DEFAULT ERROR CALLBACK:');
+    /*if (console.dir)
+        console.dir(arguments);
+    else
+        console.log(arguments);*/
+    Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
+};
+$data.defaultSuccessCallback = function () { console.log('DEFAULT SUCCES CALLBACK'); };
+$data.defaultNotifyCallback = function () { console.log('DEFAULT NOTIFY CALLBACK'); };
+
 $data.typeSystem = {
     __namespace: true,
     /*inherit: function (ctor, baseType) {
@@ -959,20 +991,9 @@ $data.typeSystem = {
     },
     createCallbackSetting: function (callBack, defaultSetting) {
         var setting = {
-            success: function () {
-                console.log('DEFAULT SUCCES CALLBACK');
-            },
-            error: function () {
-                //console.log('DEFAULT ERROR CALLBACK:');
-                /*if (console.dir)
-                    console.dir(arguments);
-                else
-                    console.log(arguments);*/
-                Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
-            },
-            notify: function () {
-                console.log('DEFAULT NOTIFY CALLBACK');
-            }
+            success: $data.defaultSuccessCallback,
+            error: $data.defaultErrorCallback,
+            notify: $data.defaultNotifyCallback
         };
         if (defaultSetting != undefined && defaultSetting != null) {
             setting = defaultSetting;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JayData unit tests.</title>
+    <title>JayData unit tests</title>
 
     <!--<script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>-->
     <link rel="stylesheet" href="scripts/qunit.css" type="text/css" media="screen" />
@@ -9,7 +9,7 @@
     <script type="text/javascript" src="scripts/qunit.js"></script>
     <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
-    
+    <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
     
     <!--************************************************************************************-->
     <script type="text/javascript" src="/TypeSystem/initializeJayData.js"></script>
@@ -83,7 +83,7 @@
     <script type="text/javascript" src="/Types/Entity.js"></script>
     <script type="text/javascript" src="/Types/EntityContext.js"></script>
     <script type="text/javascript" src="/Types/QueryProvider.js"></script>
-    <script type="text/javascript" src="/Types/RowConverter.js"></script>
+    <script type="text/javascript" src="/Types/ModelBinder.js"></script>
     <script type="text/javascript" src="/Types/Query.js"></script>
     <script type="text/javascript" src="/Types/Queryable.js"></script>
     <script type="text/javascript" src="/Types/EntitySet.js"></script>
@@ -92,6 +92,8 @@
     <script type="text/javascript" src="/Types/EntityStateManager.js"></script>
     <script type="text/javascript" src="/Types/Exception.js"></script>
     <script type="text/javascript" src="/Types/StorageProviderBase.js"></script>
+
+    <script type="text/javascript" src="/Types/ObjectWrapper.js"></script>
 
     <!--******************************* DbClient ****************************************-->
     <script type="text/javascript" src="/Types/DbClient/DbCommand.js"></script>
@@ -103,6 +105,7 @@
     <script type="text/javascript" src="/Types/DbClient/SqLiteNJClient/SqLiteNjCommand.js"></script>
     <script type="text/javascript" src="/Types/DbClient/SqLiteNJClient/SqLiteNjConnection.js"></script>
 
+    <script type="text/javascript" src="/Types/StorageProviders/modelBinderConfigCompiler.js"></script>
     <!--******************************* StorageProvider - sqLite ****************************************-->
     <script type="text/javascript" src="/Types/StorageProviders/SqLite/SqLiteStorageProvider.js"></script>
     <script type="text/javascript" src="/Types/StorageProviders/SqLite/SqLiteCompiler.js"></script>
@@ -111,10 +114,7 @@
     <script type="text/javascript" src="/Types/StorageProviders/SqLite/SqlProjectionCompiler.js"></script>
     <script type="text/javascript" src="/Types/StorageProviders/SqLite/ExpressionMonitor.js"></script>
     <script type="text/javascript" src="/Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
-    <script type="text/javascript" src="/Types/StorageProviders/SqLite/ModelBinder/sqLiteEFModelBinderCompiler.js"></script>
-    <script type="text/javascript" src="/Types/StorageProviders/SqLite/ModelBinder/sqLiteModelBinderCompiler.js"></script>
-    <script type="text/javascript" src="/Types/StorageProviders/SqLite/ModelBinder/sqLiteOLModelBinderCompiler.js"></script>
-
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
     <script type="text/javascript" src="/Types/StorageProviders/oData/oDataProvider.js"></script>
     <script type="text/javascript" src="/Types/StorageProviders/oData/oDataCompiler.js"></script>
@@ -122,10 +122,6 @@
     <script type="text/javascript" src="/Types/StorageProviders/oData/oDataOrderCompiler.js"></script>
     <script type="text/javascript" src="/Types/StorageProviders/oData/oDataPagingCompiler.js"></script>
     <script type="text/javascript" src="/Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
-    <script type="text/javascript" src="/Types/StorageProviders/oData/ModelBinder/oDataModelBinderCompiler.js"></script>
-    <script type="text/javascript" src="/Types/StorageProviders/oData/ModelBinder/oDataEFModelBinderCompiler.js"></script>
-    <script type="text/javascript" src="/Types/StorageProviders/oData/ModelBinder/oDataOLModelBinderCompiler.js"></script>
-    
     <!--******************************* StorageProvider - IndexDb ****************************************-->
     <script type="text/javascript" src="/Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
     
@@ -153,6 +149,7 @@
     <script type="text/javascript" src="/Modules/formBinder.js"></script>
     <script type="text/javascript" src="/Modules/template.js"></script>
     <script type="text/javascript" src="/Modules/validate.js"></script>
+    <script type="text/javascript" src="/Modules/knockout.js"></script>
     <!--************************************************************************************-->
     
 
@@ -163,22 +160,22 @@
     <script src="UnitTests/EntityContextTests.js" type="text/javascript"></script>
     <script src="UnitTests/dataDistributeTest.js" type="text/javascript"></script>
     <script src="UnitTests/ValidationTests.js" type="text/javascript"></script>
-
-    <script src="UnitTests/FaceBookProviderTests.js" type="text/javascript"></script>
-    <script src="UnitTests/YQLProviderTests.js" type="text/javascript"></script>
+    <script src="UnitTests/knockoutTests.js" type="text/javascript"></script>
 
     <script src="UnitTests/sqLiteProviderTests.js" type="text/javascript"></script>
     <script src="UnitTests/sqLiteCompilerTests.js" type="text/javascript"></script>
+    <script src="UnitTests/oDataProviderTests.js" type="text/javascript"></script>
     <script src="UnitTests/sqLiteCRUDTests.js" type="text/javascript"></script>
 
-    <script src="UnitTests/oDataProviderTests.js" type="text/javascript"></script>
-    
-    <script src="UnitTests/T1.js" type="text/javascript"></script>
     <script src="UnitTests/T2.js" type="text/javascript"></script>
+    <script src="UnitTests/T1.js" type="text/javascript"></script>
     <script src="UnitTests/T3.js" type="text/javascript"></script>
     <script src="UnitTests/loadPropertyTests.js" type="text/javascript"></script>
     <script src="UnitTests/ValidatonPluginTest.js" type="text/javascript"></script>
     <script src="UnitTests/promiseTests.js" type="text/javascript"></script>
+
+    <script src="UnitTests/FaceBookProviderTests.js" type="text/javascript"></script>
+    <script src="UnitTests/YQLProviderTests.js" type="text/javascript"></script>
 
     <!--<script src="UnitTests/AuthEntityContextTests.js" type="text/javascript"></script>--> <!--//TODO: fixed authentication context bugs-->
     <script src="UnitTests/indexedDbProviderTest.js" type="text/javascript"></script>

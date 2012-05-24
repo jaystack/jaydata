@@ -62,6 +62,8 @@ ExpressionType.Filter = "Filter";
 ExpressionType.First = "First";
 ExpressionType.Count = "Count";
 ExpressionType.Single = "Single";
+ExpressionType.ToArray = "ToArray";
+ExpressionType.ForEach = "ForEach";
 ExpressionType.Projection = "Projection";
 ExpressionType.EntityMember = "EntityMember";
 ExpressionType.EntityFieldOperation = "EntityFieldOperation";
@@ -269,19 +271,19 @@ $C('$data.Expressions.UnaryExpression', $data.Expressions.ExpressionNode, null, 
 
 
 
-//$data.expressions.expressionNodeTypes.NewExpressionNode = $C('NewExpressionNode', $data.expressions.expressionNodeTypes.ExpressionNode, null, {
+//$data.Expressions.ExpressionNodeTypes.NewExpressionNode = $C('NewExpressionNode', $data.Expressions.ExpressionNodeTypes.ExpressionNode, null, {
 //    values: { value: undefined },
 //    constructor: function (type, executable, values) {
 //        this.values = values;
 //    }
 //}, {
 //    create: function (executable, values) {
-//        return new $data.expressions.expressionNodeTypes.NewExpressionNode(NEW, executable, values);
+//        return new $data.Expressions.ExpressionNodeTypes.NewExpressionNode(NEW, executable, values);
 //    }
 //});
 
 
-//$data.expressions.expressionNodeTypes.IncDecExpressionNode = $C('IncDecExpressionNode', $data.expressions.expressionNodeTypes.ExpressionNode, null, {
+//$data.Expressions.ExpressionNodeTypes.IncDecExpressionNode = $C('IncDecExpressionNode', $data.Expressions.ExpressionNodeTypes.ExpressionNode, null, {
 //    operator: { value: undefined },
 //    operand: { value: undefined },
 //    suffix: { value: undefined },
@@ -292,12 +294,12 @@ $C('$data.Expressions.UnaryExpression', $data.Expressions.ExpressionNode, null, 
 //    }
 //}, {
 //    create: function (executable, operator, operand, suffix) {
-//        return new $data.expressions.expressionNodeTypes.IncDecExpressionNode(INCDEC, executable, operator, operand, suffix);
+//        return new $data.Expressions.ExpressionNodeTypes.IncDecExpressionNode(INCDEC, executable, operator, operand, suffix);
 //    }
 //});
 
 
-//$data.expressions.expressionNodeTypes.DecisionExpressionNode = $C('DecisionExpressionNode', $data.expressions.expressionNodeTypes.ExpressionNode, null, {
+//$data.Expressions.ExpressionNodeTypes.DecisionExpressionNode = $C('DecisionExpressionNode', $data.Expressions.ExpressionNodeTypes.ExpressionNode, null, {
 //    expression: { value: undefined },
 //    left: { value: undefined },
 //    right: { value: undefined },
@@ -308,7 +310,7 @@ $C('$data.Expressions.UnaryExpression', $data.Expressions.ExpressionNode, null, 
 //    }
 //}, {
 //    create: function (executable, expression, left, right) {
-//        return new $data.expressions.expressionNodeTypes.DecisionExpressionNode(DECISION, executable, expression, left, right);
+//        return new $data.Expressions.ExpressionNodeTypes.DecisionExpressionNode(DECISION, executable, expression, left, right);
 //    }
 //});
 

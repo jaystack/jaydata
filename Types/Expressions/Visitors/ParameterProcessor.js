@@ -21,7 +21,7 @@ $C("$data.Expressions.ParameterProcessor", $data.Expressions.ExpressionVisitor, 
         Guard.raise("Pure method");
     },
     resolve: function (paramExpression) {
-        ///<returns type="
+        ///<returns type="XXX" />
         Guard.raise("Pure method");
     }
 });

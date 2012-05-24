@@ -372,7 +372,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : undefined; },
                 '$data.String': function (text) { return text; },
-                '$data.Boolean': function (bool) { return bool === 1 ? true : false; },
+                '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; }
             },
             toDb: {

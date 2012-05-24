@@ -1,5 +1,17 @@
 (function ObjectMethodsForPreHTML5Browsers() {
 
+	if (!Object.getOwnPropertyNames){
+		Object.getOwnPropertyNames = function(o){
+			var names = [];
+
+			for (var i in o){
+				if (o.hasOwnProperty(i)) names.push(i);
+			}
+
+			return names;
+		};
+	}
+
     if (!Object.create) {
         Object.create = function (o) {
             if (arguments.length > 1) {

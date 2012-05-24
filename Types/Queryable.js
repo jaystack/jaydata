@@ -1,15 +1,26 @@
-///Queryable
-///Object that provides standard query methods like where, select, top, etc
+/*
+    code comment:
+
+    - constructor:  * nem tartalmazhat <signature> -t
+                    * a <description> tag az egesz osztaly leirasa
+    - egyeb: ha van <signature>, akkor azon kivul nem lehet <example>
+*/
 
 $data.Class.define('$data.Queryable', null, null,
 {
     constructor: function (source, rootExpression) {
+        /// <description>
+        /// class description
+        /// </description>
+        /// <summary>
+        /// Provides a base class for classes supporting JavaScript Language Query
+        /// </summary>
+        /// <param name="source" type="xxx"></param>
+        /// <param name="rootExpression" type="expression"></param>
         ///<param name="source" type="$data.EntitySet" />
         ///<field name="entitySet" type="$data.EntitySet" />
-        ///source can be: array or an object that is IQueryProvider
         var es = source.entitySet instanceof $data.EntitySet ? source.entitySet : source;
         Object.defineProperty(this, "entitySet", { value: es, enumerable: true, writable: true });
-
         this.expression = rootExpression;
     },
     _checkRootExpression: function () {
@@ -27,13 +38,50 @@ $data.Class.define('$data.Queryable', null, null,
     entitySet: {},
 
     filter: function (predicate, thisArg) {
-        /// <param name="predicate" type="Function">
-        /// <signature>
-        /// <param name="entity" type="$data.Entity" />
-        /// <param name="thisArg" type="Object" optional="true" />
-        /// </signature>
-        /// </param>
-        this._checkRootExpression();
+        ///<summary>Filters a set of entities using a boolean expression.</summary>
+        ///<param name="predicate" type="Function">A boolean query expression</param>
+        ///<param name="thisArg" type="Object">The query parameters</param>
+        ///<returns type="$data.Queryable" />
+        ///<signature>
+        ///<summary>Filters a set of entities using a boolean expression formulated as string.</summary>
+        ///<param name="predicate" type="string">
+        ///The expression body of the predicate function in string. &#10;
+        ///To reference the lambda parameter use the 'it' context variable. &#10;
+        ///Example: filter("it.Title == 'Hello'")
+        ///</param>
+        ///<param name="thisArg" type="Object" />
+        ///<returns type="$data.Queryable" />
+        ///</signature>
+        ///<signature>
+        ///<summary>Filters a set of entities using a bool expression formulated as a JavaScript function.</summary>
+        ///<param name="predicate" type="Function">
+        ///<signature>
+        ///<summary>ezzel vajh mi lesz?</summary>
+        ///<param name="entity" type="$data.Entity" />
+        ///<returns type="boolean" />
+        ///</signature>
+        ///</param>
+        ///<param name="thisArg" type="Object" optional="true">
+        ///Contains the predicate parameters
+        ///</param>
+        ///<returns type="$data.Queryable" />
+        ///<example>
+        ///Filtering a set of entities with a predicate function&#10;
+        ///var males = Persons.filter( function( person ) { return person.Gender == 'Male' } );
+        ///</example>
+        ///<example>
+        ///Filtering a set of entities with a predicate function and parameters&#10;
+        ///var draftables = Persons.filter( function( person ) {
+        ///     return person.Gender == this.gender &amp;&amp; person.Age &gt; this.age
+        /// }, { gender: 'Male',  age: 21 });
+        ///</example>
+        ///<example>
+        ///Filtering a set of entities with a predicate as a string and parameters&#10;
+        ///var draftables = Persons.filter("it.Gender == this.gender &amp;&amp;  it.Age &gt; this.age",
+        /// { gender: 'Male',  age: 21 });
+        ///</example>
+        ///</signature>
+
         var expression = Container.createCodeExpression(predicate, thisArg);
         var expressionSource = this.expression;
         if (this.expression instanceof $data.Expressions.FilterExpression) {
@@ -52,19 +100,16 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     map: function (projection, thisArg) {
-        this._checkRootExpression();
         var codeExpression = Container.createCodeExpression(projection, thisArg);
         var exp = Container.createProjectionExpression(this.expression, codeExpression);
         var q = Container.createQueryable(this, exp);
         return q;
     },
-
     select: function (projection, thisArg) {
         return this.map(projection, thisArg);
     },
 
     length: function (onResult) {
-        this._checkRootExpression();
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult);
 
@@ -83,14 +128,14 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     forEach: function (iterator) {
-        this._checkRootExpression();
         var pHandler = new $data.PromiseHandler();
         function iteratorFunc(items) { items.forEach(iterator); }
         var cbWrapper = pHandler.createCallback(iteratorFunc);
 
+        var forEachExpression = Container.createForEachExpression(this.expression);
         var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
         try {
-            var expression = preparator.Visit(this.expression);
+            var expression = preparator.Visit(forEachExpression);
             this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
 
             this.entitySet.executeQuery(Container.createQueryable(this, expression), cbWrapper);
@@ -102,13 +147,24 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     toArray: function (onResult_items) {
-        this._checkRootExpression();
+        if (onResult_items instanceof $data.Array)
+        {
+            return this.forEach(function (item, idx) {
+                if (idx === 0)
+                    onResult_items.length = 0;
+
+                onResult_items.push(item);
+            });
+        }
+
+
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult_items);
 
+        var toArrayExpression = Container.createToArrayExpression(this.expression);
         var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
         try {
-            var expression = preparator.Visit(this.expression);
+            var expression = preparator.Visit(toArrayExpression);
             this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
 
             this.entitySet.executeQuery(Container.createQueryable(this, expression), cbWrapper);
@@ -145,27 +201,23 @@ $data.Class.define('$data.Queryable', null, null,
 
 
     take: function (amount) {
-        this._checkRootExpression();
         var constExp = Container.createConstantExpression(amount, "number");
         var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Take);
         return Container.createQueryable(this, takeExp);
     },
     skip: function (amount) {
-        this._checkRootExpression();
         var constExp = Container.createConstantExpression(amount, "number");
         var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Skip);
         return Container.createQueryable(this, takeExp);
     },
 
     orderBy: function (selector, thisArg) {
-        this._checkRootExpression();
         var codeExpression = Container.createCodeExpression(selector, thisArg);
         var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderBy);
         var q = Container.createQueryable(this, exp);
         return q;
     },
     orderByDescending: function (selector, thisArg) {
-        this._checkRootExpression();
         var codeExpression = Container.createCodeExpression(selector, thisArg);
         var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderByDescending);
         var q = Container.createQueryable(this, exp);
@@ -198,128 +250,26 @@ $data.Class.define('$data.Queryable', null, null,
 
 
     include: function (selector) {
-        this._checkRootExpression();
         var constExp = Container.createConstantExpression(selector, "string");
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
     },
 
-    _makeChain: function (fx, args) {
-        var q = new $data.Queryable_old(this.entitySet);
-        q.operation = { fx: fx, args: args };
-        q.prev = this;
-        /*q.entitySet = this.entitySet ? this.entitySet : this;*/
-        return q;
-    },
-    _makeChain2: function (operation) { // {name, arity, fn, prm}
-        var q = new $data.Queryable_old(this.entitySet);
-        q.operation = operation;
-        q.prev = this;
-        /*q.entitySet = this.entitySet ? this.entitySet : this;*/
-        return q;
-    },
-
-
-    toTraceString: function () {
-        this._checkRootExpression();
+    toTraceString: function (name) {
         var expression = this.expression;
+
+        if (name) {
+            expression = Container['create' + name + 'Expression'](expression);
+        } else {
+            expression = Container.createToArrayExpression(expression);
+        }
+
         var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
         expression = preparator.Visit(expression);
-        this.expression = expression;
-        return this.entitySet.getTraceString(this);
-    },
 
-    createExpression: function () {
-        this.expressions = [];
-        var step = this;
-        var frame;
-        while (frame = step.operation) {
-            switch (frame.name) {
-                case "orderBy":
-                case "orderByDescending":
-                case "where":
-                case "select":
-                    var exp = this._getTree(frame);
-                    exp.name = frame.name;
-                    this.expression.push(exp);
-                    break;
-                case "take":
-                case "skip":
-                case "include":
-                    this.expression.push({
-                        name: frame.name,
-                        expression: $data.expressions.expressionNodeTypes.LiteralExpressionNode.create(false, "number", frame.amount),
-                        lambdaParams: [],
-                        paramContext: {}
-                    });
-                    break;
-                default:
-                    Guard.raise("Not implemented: frame.name = '" + frame.name + "'");
-            }
-            step = step.prev;
-        }
-        return this.expressions;
-    },
-    //================================================================ <gyeby>
-    _getTree: function (operation) {
-        window["idvalue"] = 15;
-
-        // suspicious code
-        /*if (operation.name == "where") {
-            //TODO: fix this
-        }*/
-
-        //var result = {
-
-
-        //codeParser.createExpression
-        //return;
-
-        var x = JSLINT(operation.fn.toString());
-        var tree = JSLINT.tree;
-        var err = JSLINT.errors;
-
-        // #1: getting first function
-        var n = tree.first[0]; // function
-        if (!n)
-            Guard.raise("Lambda function not found");
-
-        // #2: building the context (lambdaParams & paramContext)
-        var params = n.first.slice();
-        if (params.length < operation.arity)
-            Guard.raise(new Exception("Not enough lambda parameters. Expected: " + arity, "InvalidOperaion", {}));
-        if (params.length > operation.arity + 1)
-            Guard.raise(new Exception("Too many lambda parameters. Expected: " + arity, "InvalidOperaion", {}));
-
-        var lambdaParams = new Array();
-        for (var i = 0; i < operation.arity; i++)
-            lambdaParams[i] = params[i].value;
-
-        var context = { paramContext: (operation.prm ? operation.prm : {}), lambdaParams: lambdaParams, operation: operation.name };
-        if (params.length > operation.arity)
-            context.paramsName = params[operation.arity].value;
-
-        // #3: skipping to expression after 'return'
-        var lambdaBlock = n.block;
-        if (!lambdaBlock)
-            Guard.raise("Lambda function hasn't 'block'.");
-        //console.assert(lambdaBlock.length == 1, "lambdaBlock is longer than 1");
-        n = lambdaBlock[0];
-        if (n.value == "return" && n.arity == "statement")
-            n = n.first; //Guard.raise("Lambda function body is invalid. Expected: return [expression];");
-        //-- check: JSON.stringify(tree, ["type", 'value', 'arity', 'name', 'first', 'second', 'third', 'block', 'else'], 4);
-
-        // #4: building expression tree
-        var t = new $data.expressions.ExpressionBuilder(context).Build(n);
-        //-- check: JSON.stringify(t, ["type", "executable", "member", "object", "method", "args", "value", "valueType", "name", "operator", "left", "right", "operand", "suffix", "expression", "array", "index", "subType"], 4)
-
-        // #5: setting executables
-        var t1 = new $data.expressions.SetExecutableVisitor().Visit(t, context);
-
-        // #6: executing executables
-        var t2 = new $data.expressions.ExecutorVisitor().Visit(t1, context);
-
-        context.expression = t2;
-        return context;
+        //this.expression = expression;
+        var q = Container.createQueryable(this, expression)
+        return q.entitySet.getTraceString(q);
     }
+
 }, null);

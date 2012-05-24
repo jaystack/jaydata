@@ -1,4 +1,4 @@
- $data.Class.define('$data.expressions.ExpressionBuilder', null, null,
+ $data.Class.define('$data.Expressions.ExpressionBuilder', null, null,
 {
     constructor: function (context) {
         this.context = context;
@@ -75,17 +75,17 @@
         return n;
     },
     BuildNewExpression: function (node, expNode) {
-        var newExpression = $data.expressions.expressionNodeTypes.NewExpressionNode.create(true, []);
+        var newExpression = $data.Expressions.ExpressionNodeTypes.NewExpressionNode.create(true, []);
         var n = node.first;
         for (var i = 0; i < n.length; i++)
             newExpression.values.push(this.Build(n[i], newExpression));
         return newExpression;
     },
     BuildLiteral: function (node, expNode) {
-        return $data.expressions.expressionNodeTypes.LiteralExpressionNode.create(true, node.arity, node.value);
+        return $data.Expressions.ExpressionNodeTypes.LiteralExpressionNode.create(true, node.arity, node.value);
     },
     BuildBoolLiteral: function (node, expNode) {
-        return $data.expressions.expressionNodeTypes.LiteralExpressionNode.create(true, node.type, node.value == "true" ? true : false);
+        return $data.Expressions.ExpressionNodeTypes.LiteralExpressionNode.create(true, node.type, node.value == "true" ? true : false);
     },
     BuildVariable: function (node, expNode) {
         if (!node.first) {
@@ -115,12 +115,12 @@
                         "InvalidOperation", { operationName: this.context.operation, missingParameterName: node.value })
 						);
             }
-            return $data.expressions.expressionNodeTypes.VariableExpressionNode.create(true, node.value, subType);
+            return $data.Expressions.ExpressionNodeTypes.VariableExpressionNode.create(true, node.value, subType);
         }
 
-        var left = $data.expressions.expressionNodeTypes.LiteralExpressionNode.create(true, "name", node.value);
+        var left = $data.Expressions.ExpressionNodeTypes.LiteralExpressionNode.create(true, "name", node.value);
 
-        var jsonAssign = $data.expressions.expressionNodeTypes.JsonAssignExpressionNode.create(true);
+        var jsonAssign = $data.Expressions.ExpressionNodeTypes.JsonAssignExpressionNode.create(true);
         var right = this.Build(node.first, jsonAssign);
         //left.parent = jsonAssign;
         jsonAssign.left = left;
@@ -134,11 +134,11 @@
     BuildMember: function (node, expNode) {
         if (node.value != "." || node.arity != "infix") {
             if (node.type == "string") { //TODO: more types?
-                return $data.expressions.expressionNodeTypes.LiteralExpressionNode.create(true, node.arity, node.value);
+                return $data.Expressions.ExpressionNodeTypes.LiteralExpressionNode.create(true, node.arity, node.value);
             }
-            return $data.expressions.expressionNodeTypes.MemberAccessExpressionNode.create(true, null, node.value);
+            return $data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode.create(true, null, node.value);
         }
-        var result = $data.expressions.expressionNodeTypes.MemberAccessExpressionNode.create(true);
+        var result = $data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode.create(true);
         var expression = this.Build(node.first, result);
         var member = this.Build(node.second, result);
         result.expression = expression;
@@ -146,38 +146,38 @@
         return result;
     },
     BuildUnary: function (node, expNode) {
-        var result = $data.expressions.expressionNodeTypes.UnaryExpressionNode.create(true, node.value);
+        var result = $data.Expressions.ExpressionNodeTypes.UnaryExpressionNode.create(true, node.value);
         result.operand = this.Build(node.first, result);
         return result;
     },
     BuildIncDec: function (node, expNode) {
-        var result = $data.expressions.expressionNodeTypes.IncDecExpressionNode.create(true, node.value, null, node.arity == "suffix");
+        var result = $data.Expressions.ExpressionNodeTypes.IncDecExpressionNode.create(true, node.value, null, node.arity == "suffix");
         result.operand = this.Build(node.first, result);
         return result;
     },
     BuildBinary: function (node, expNode) {
         if (!node.first) Guard.raise("Cannot build binary: node.first is null");
         if (!node.second) Guard.raise("Cannot build binary: node.second is null");
-        var result = $data.expressions.expressionNodeTypes.BinaryExpressionNode.create(true, node.value);
+        var result = $data.Expressions.ExpressionNodeTypes.BinaryExpressionNode.create(true, node.value);
         result.left = this.Build(node.first, result);
         result.right = this.Build(node.second, result);
         return result;
     },
     BuildEquality: function (node, expNode) {
-        var result = $data.expressions.expressionNodeTypes.EqualityExpressionNode.create(true, node.value);
+        var result = $data.Expressions.ExpressionNodeTypes.EqualityExpressionNode.create(true, node.value);
         result.left = this.Build(node.first, result);
         result.right = this.Build(node.second, result);
         return result;
     },
     BuildDecision: function (node, expNode) {
-        var result = $data.expressions.expressionNodeTypes.DecisionExpressionNode.create(true);
+        var result = $data.Expressions.ExpressionNodeTypes.DecisionExpressionNode.create(true);
         result.expression = this.Build(node.first, result);
         result.left = this.Build(node.second, result);
         result.right = this.Build(node.third, result);
         return result;
     },
     BuildMethodCall: function (node, expNode) {
-        var result = $data.expressions.expressionNodeTypes.MethodcallExpressionNode.create(true);
+        var result = $data.Expressions.ExpressionNodeTypes.MethodcallExpressionNode.create(true);
         if (node.first.type == "function") {
             //-- object's function
             result.object = this.Build(node.first.first, result);
@@ -201,7 +201,7 @@
     },
     BuildArrayAccess: function (node, expNode) {
         // { type:ARRAYACCESS, executable:true, array:, index: }
-        var result = $data.expressions.expressionNodeTypes.ArrayAccessExpressionNode.create(true);
+        var result = $data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode.create(true);
         result.array = this.Build(node.first, result);
         result.index = this.Build(node.second, result);
         return result;

@@ -433,14 +433,21 @@
                     start(1);
                     var cat = a[0];
                     ok(cat instanceof $news.Types.Category, "Return value do not a category instance");
-                    //db.Categories.attach(cat);
+                    db.Categories.attach(cat);
                     for (var i = 0; i < 100; i++) {
                         var art = new $news.Types.Article({ Title: 'Arti' + i, Category: cat });
                         db.Articles.add(art);
                     }
-                    db.saveChanges(function (count) {
-                        start(1);
-                        equal(count, 100, "Saved item count faild");
+                    db.saveChanges({
+                        success: function (count) {
+                            start(1);
+                            equal(count, 100, "Saved item count faild");
+                        },
+                        error: function (error) {
+                            start(1);
+                            console.dir(error);
+                            ok(false, error);
+                        }
                     });
                 });
             });
@@ -521,6 +528,27 @@
             });
         });
     });
+    test("write_boolean_property", 3, function () {
+        stop(4);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            ok(db, 'Databse generation faild');
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var item = new $news.Types.TestItem();
+                item.b0 = true;
+                db.TestTable.add(item);
+                db.saveChanges(function () {
+                    start(1);
+                    db.TestTable.toArray(function (result) {
+                        start(1);
+                        ok(result, 'query error');
+                        ok(result[0].b0, 'boolean result error');
+                    });
+                });
+            });
+        });
+    });
     //test("XXX_Projection_scalar_with_function_call", 3, function () {
     //    stop(3);
     //    (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -593,7 +621,7 @@
                 start(1);
                 $news.Types.NewsContext.generateTestData(db, function () {
                     start(1);
-                    var q = db.Articles.map(function (a) { a.Author.Profile.Location }).include("Author.Profile");
+                    var q = db.Articles.include("Author.Profile").map(function (a) { return a.Author.Profile.Location });
                     q.toArray(function (article) {
                         start(1);
                         equal(article[0] instanceof $news.Types.Location, true, "result type faild");
@@ -794,6 +822,7 @@
 				.toArray(function (result) {
 				    start(1);
 				    var category = result[0];
+				    db.Categories.attach(category);
 				    var articleEntity = new $news.Types.Article({
 				        Title: 'temp',
 				        Lead: 'temp',
@@ -802,10 +831,11 @@
 				    });
 
 				    db.Articles.add(articleEntity);
-				    db.saveChanges(function () {
-				        start(1);
-				        var tags = 'temp'.split(',');
-				        db.Tags
+				    db.saveChanges({
+				        success: function () {
+				            start(1);
+				            var tags = 'temp'.split(',');
+				            db.Tags
 						.filter(function (item) { return item.Title in this.tags; }, { tags: tags })
 						.toArray(function (result) {
 						    start(1);
@@ -824,12 +854,25 @@
 						        }
 						    }
 						    db.Articles.attach(articleEntity);
-						    db.saveChanges(function () {
-						        start(1);
-						        equal(articleEntity.Id, 27, 'Article Id faild');
-						        console.log('Article ID: ' + articleEntity.Id);
+						    db.saveChanges({
+						        success: function () {
+						            start(1);
+						            equal(articleEntity.Id, 27, 'Article Id faild');
+						            console.log('Article ID: ' + articleEntity.Id);
+						        },
+						        error: function (error) {
+						            star(1);
+						            console.dir(error);
+						            ok(false, error);
+						        }
 						    });
 						});
+				        },
+				        error: function (error) {
+				            start(3);
+				            console.dir(error);
+				            ok(false, error);
+				        }
 				    });
 				});
             });
@@ -837,16 +880,16 @@
     });
     test('DANI_CategoryModify', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        expect(4);
+        expect(1);
         stop(5);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
-            start(1);
+                start(1);
                 db.Articles.first(function (a) { return a.Id == 4 }, null, function (article) {
                     start(1);
                     db.Articles.attach(article);
-                    article.Title = "élhklkjhlkjhkhl";
+                    article.Title = "Some test data";
                     var cat = new $news.Types.Category({ Id: 5 });
                     db.Categories.attach(cat);
                     article.Category = cat;
@@ -857,7 +900,7 @@
                             ok(article2.Category instanceof $news.Types.Category, 'faild');
                         });
                     });
-                }); 
+                });
             });
         });
     });
@@ -927,7 +970,7 @@
     //    });
     //});
 
-    test('sqlite_performace_issue', 0, function () {
+    /*test('sqlite_performace_issue', 0, function () {
         stop(1);
 
         function rng(max) {
@@ -1020,5 +1063,5 @@
         $news.context.onReady(addTestData);
 
         console.log('\nstarting...');
-    });
+    });*/
 }

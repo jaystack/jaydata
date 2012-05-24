@@ -1,5 +1,7 @@
 ﻿
 $(document).ready(function () {
+	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+
     loadPropertyTests({ name: "sqLite", dataBaseName: 'loadPropertyTests', oDataServiceHost: "newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
 });
 
@@ -19,7 +21,7 @@ function loadPropertyTests(providerConfig) {
                         equal(articles[0].Title, undefined, 'Article title is not undefined');
 
                         stop(1);
-                        db.loadItemProperty(articles[0], 'Title', function (title) {
+                       db.loadItemProperty(articles[0], 'Title', function (title) {
                             start(1);
                             equal(title, "Article1", 'Article title has invalid value');
                         });

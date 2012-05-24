@@ -86,7 +86,7 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
         },
 
         VisitArrayLiteral: function(eNode, context) {
-            ///<param name="eNode" type="$data.Expressions.ArrayLiteralExpression />
+            ///<param name="eNode" type="$data.Expressions.ArrayLiteralExpression" />
             var self = this;
             var items = eNode.items.map(function (item) {
                 return self.Visit(item, context);
@@ -155,7 +155,7 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
             ///<summary></summary>
             ///<param name="eNode" type="$data.Expressions.SimpleBinaryExpression"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
 
             var left = this.Visit(eNode.left, context);
             var right = this.Visit(eNode.right, context);
@@ -183,40 +183,40 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
 
         VisitDecision: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.DecisionExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.DecisionExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.DecisionExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.DecisionExpressionNode"/>
 
             var expression = this.Visit(eNode.expression, context);
             var left = this.Visit(eNode.left, context);
             var right = this.Visit(eNode.right, context);
             if (expression === eNode.expression && left === eNode.left && right === eNode.right)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.DecisionExpressionNode.create(eNode.executable, expression, left, right);
+            return $data.Expressions.ExpressionNodeTypes.DecisionExpressionNode.create(eNode.executable, expression, left, right);
         },
 
         VisitNew: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.NewExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.NewExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.NewExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.NewExpressionNode"/>
 
             var values = this.VisitArray(eNode.values, context);
             if (values === eNode.values)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.NewExpressionNode.create(true, values);
+            return $data.Expressions.ExpressionNodeTypes.NewExpressionNode.create(true, values);
         },
         VisitArrayAccess: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.ArrayAccessExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.ArrayAccessExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode"/>
 
             var array = this.Visit(eNode.array, context);
             var index = this.Visit(eNode.index, context);
             if (array === eNode.array && index === eNode.index)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.ArrayAccessExpressionNode.create(true, array, index);
+            return $data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode.create(true, array, index);
         },
         VisitArray: function (eNodes, context) {
             var args = [];

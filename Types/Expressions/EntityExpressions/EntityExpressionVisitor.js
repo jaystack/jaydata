@@ -24,7 +24,20 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         //console.log("unhandled expression type:" + expression.getType().name);
         return expression;
     },
-
+    VisitToArrayExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        if (source !== expression.source) {
+            return Container.createToArrayExpression(source);
+        }
+        return expression;
+    },
+    VisitForEachExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        if (source !== expression.source) {
+            return Container.createForEachExpression(source);
+        }
+        return expression;
+    },
     VisitMemberInfoExpression: function (expression, context) {
         return expression;
     },

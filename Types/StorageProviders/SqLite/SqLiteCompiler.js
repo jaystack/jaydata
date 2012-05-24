@@ -15,22 +15,59 @@ var SqlStatementBlocks = {
     rowIdName: 'rowid$$',
     count: 'select count(*) cnt from ('
 };
-
-$C('$data.sqLite.SqlBuilder', null, null, {
-    constructor: function (sets, context) {
-        this.sql = '';
-        this.params = [];
-        this.sets = sets;
-        this.actions = [];
-        this.converter = [];
-        this.entityContext = context;
-
+$C('$data.queryBuilder', null, null, {
+    constructor: function () {
+        this._fragments = {};
+        this.selectedFragment = null;
+        this._binderConfig = {};
+        this.modelBinderConfig = this._binderConfig;
+        this._binderConfigPropertyStack = [];
     },
-    addText: function (sqlParticle) {
-        this.sql += sqlParticle;
+    selectTextPart: function (name) {
+        if (!this._fragments[name]) {
+            this._fragments[name] = { text: '', params: [] };
+        }
+        this.selectedFragment = this._fragments[name];
+    },
+    getTextPart: function (name) {
+        return this._fragments[name];
+    },
+    addText: function (textParticle) {
+        this.selectedFragment.text += textParticle;
     },
     addParameter: function (param) {
-        this.params.push(param);
+        this.selectedFragment.params.push(param);
+    },
+    selectModelBinderProperty: function (name) {
+        this._binderConfigPropertyStack.push(this.modelBinderConfig);
+        if (!(name in this.modelBinderConfig)) {
+            this.modelBinderConfig[name] = {};
+        }
+        this.modelBinderConfig = this.modelBinderConfig[name];
+    },
+    popModelBinderProperty: function () {
+        if (this._binderConfigPropertyStack.length === 0) {
+            this.modelBinderConfig = this._binderConfig();
+        } else {
+            this.modelBinderConfig = this._binderConfigPropertyStack.pop();
+        }
+    },
+    resetModelBinderProperty: function (name) {
+        this._binderConfigPropertyStack = [];
+        this.modelBinderConfig = this._binderConfig;
+    },
+    addKeyField: function (name) {
+        if(!this.modelBinderConfig['$keys']){
+            this.modelBinderConfig['$keys'] = new Array();
+        }
+        this.modelBinderConfig['$keys'].push(name);
+    }
+});
+$C('$data.sqLite.SqlBuilder', $data.queryBuilder, null, {
+    constructor: function (sets, context) {
+        this.sets = sets;
+        this.entityContext = context;
+
     },
     getExpressionAlias: function (setExpression) {
         var idx = this.sets.indexOf(setExpression);
@@ -56,131 +93,103 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         var sqlBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
         this.Visit(this.queryExpression, sqlBuilder);
 
-        if (this.newFilters['projection'] === undefined) {
-            this.VisitDefaultProjection();
+        if (sqlBuilder.getTextPart('projection') === undefined) {
+            this.VisitDefaultProjection(sqlBuilder);
         }
-
+        sqlBuilder.selectTextPart("result");
         this.sortedFilterPart.forEach(function (part) {
-            if (this.newFilters[part]) {
-                sqlBuilder.addText(this.newFilters[part].sql);
-                sqlBuilder.params = sqlBuilder.params.concat(this.newFilters[part].params);
-                sqlBuilder.actions = sqlBuilder.actions.concat(this.newFilters[part].actions);
-                sqlBuilder.converter = sqlBuilder.converter.concat(this.newFilters[part].converter);
+            var part = sqlBuilder.getTextPart(part);
+            if (part) {
+                sqlBuilder.addText(part.text);
+                sqlBuilder.selectedFragment.params = sqlBuilder.selectedFragment.params.concat(part.params);
             }
         }, this);
-        if (this.newFilters['count'] !== undefined) {
-            sqlBuilder.sql = this.newFilters['count'].sql + sqlBuilder.sql;
+        var countPart = sqlBuilder.getTextPart('count');
+        if (countPart !== undefined) {
+            sqlBuilder.selectedFragment.text = countPart.text + sqlBuilder.selectedFragment.text;
             sqlBuilder.addText(SqlStatementBlocks.endGroup);
-            sqlBuilder.params = sqlBuilder.params.concat(this.newFilters['count'].params);
-            sqlBuilder.actions = this.newFilters['count'].actions;
-            sqlBuilder.converter = this.newFilters['count'].converter;
+            sqlBuilder.selectedFragment.params = sqlBuilder.selectedFragment.params.concat(countPart.params);
         }
-
+        sqlBuilder.resetModelBinderProperty();
         this.filters.push(sqlBuilder);
     },
 
-    VisitCountExpression: function (expression, sqlBuilder) {
-        var countBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-
-        this.Visit(expression.source, countBuilder);
-        countBuilder.sql = SqlStatementBlocks.count;
-        countBuilder.converter = [{ keys: ['cnt'], propertyType: 'object', mapping: { cnt: "cnt" } }];
-        countBuilder.actions = [];
-        countBuilder.actions.push({ op: "buildType", context: countBuilder.entityContext, logicalType: null, tempObjectName: 'result', propertyMapping: [{ from: 'cnt', dataType: 'number' }] });
-        countBuilder.actions.push({ op: "copyToResult", tempObjectName: 'result' });
-        
-        this.newFilters['count'] = countBuilder;
+    VisitToArrayExpression: function (expression, sqlBuilder) {
+        this.Visit(expression.source, sqlBuilder);
     },
-    VisitFilterExpression: function (expression) {
-        var filterBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-
-        this.Visit(expression.source, filterBuilder);
-
-        filterBuilder.addText(SqlStatementBlocks.where);
+    VisitCountExpression: function (expression, sqlBuilder) {
+        this.Visit(expression.source, sqlBuilder);
+        sqlBuilder.selectTextPart('count');
+        sqlBuilder.addText(SqlStatementBlocks.count);
+    },
+    VisitFilterExpression: function (expression, sqlBuilder) {
+        this.Visit(expression.source, sqlBuilder);
+        sqlBuilder.selectTextPart('filter');
+        sqlBuilder.addText(SqlStatementBlocks.where);
         var filterCompiler = Container.createSqlFilterCompiler();
-        filterCompiler.Visit(expression.selector, filterBuilder);
-
-        this.newFilters['filter'] = filterBuilder;
-
+        filterCompiler.Visit(expression.selector, sqlBuilder);
         return expression;
     },
-    VisitOrderExpression: function (expression) {
-        if (this.newFilters['order'] === undefined) {
-            this.newFilters['order'] = Container.createSqlBuilder(this.sets, this.entityContext);
-        }
 
-        this.Visit(expression.source, this.newFilters['order']);
-
+    VisitOrderExpression: function (expression, sqlBuilder) {
+        this.Visit(expression.source, sqlBuilder);
+        sqlBuilder.selectTextPart('order');
         if (this.addOrders) {
-            this.newFilters['order'].addText(SqlStatementBlocks.valueSeparator);
+            sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
         } else {
             this.addOrders = true;
-            this.newFilters['order'].addText(SqlStatementBlocks.order);
+            sqlBuilder.addText(SqlStatementBlocks.order);
         }
         var orderCompiler = Container.createSqlOrderCompiler();
-        orderCompiler.Visit(expression, this.newFilters['order']);
+        orderCompiler.Visit(expression, sqlBuilder);
 
         return expression;
     },
-    VisitPagingExpression: function (expression) {
-        var pagingBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-
-        this.Visit(expression.source, pagingBuilder);
+    VisitPagingExpression: function (expression, sqlBuilder) {
+        this.Visit(expression.source, sqlBuilder);
 
         switch (expression.nodeType) {
-            case ExpressionType.Skip: pagingBuilder.addText(SqlStatementBlocks.skip); break;
-            case ExpressionType.Take: pagingBuilder.addText(SqlStatementBlocks.take); break;
+            case ExpressionType.Skip:
+                sqlBuilder.selectTextPart('skip');
+                sqlBuilder.addText(SqlStatementBlocks.skip); break;
+            case ExpressionType.Take:
+                sqlBuilder.selectTextPart('take');
+                sqlBuilder.addText(SqlStatementBlocks.take); break;
             default: Guard.raise("Not supported nodeType"); break;
         }
         var pagingCompiler = Container.createSqlPagingCompiler();
-        pagingCompiler.Visit(expression, pagingBuilder);
-
-        switch (expression.nodeType) {
-            case ExpressionType.Skip: this.newFilters['skip'] = pagingBuilder; break;
-            case ExpressionType.Take: this.newFilters['take'] = pagingBuilder; break;
-            default: Guard.raise("Not supported nodeType"); break;
-        }
+        pagingCompiler.Visit(expression, sqlBuilder);
         return expression;
     },
-    VisitProjectionExpression: function (expression) {
-        var projectionBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-
+    VisitProjectionExpression: function (expression, sqlBuilder) {
+        this.Visit(expression.source, sqlBuilder);
+        sqlBuilder.selectTextPart('projection');
         this.hasProjection = true;
-        projectionBuilder.addText(SqlStatementBlocks.select);
-
+        sqlBuilder.addText(SqlStatementBlocks.select);
         var projectonCompiler = Container.createSqlProjectionCompiler();
-        projectonCompiler.Visit(expression, projectionBuilder);
-
-        this.Visit(expression.source, projectionBuilder);
-
-        this.newFilters['projection'] = projectionBuilder;
-        //Model binder
-        var mb = Container.createsqLiteModelBinderCompiler();
-        mb.Visit(expression, projectionBuilder);
+        projectonCompiler.Visit(expression, sqlBuilder);
     },
     VisitIncludeExpression: function (expression) {
         var includeBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
         this.Visit(expression.source, includeBuilder);
 
-        //var projectonCompiler = Container.createSqlProjectionCompiler();
-        //projectonCompiler.Visit(expression, includeBuilder);
         this.newFilters['include'] = projectionBuilder;
     },
-    VisitEntitySetExpression: function (expression) {
-        var fromBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-        fromBuilder.addText(SqlStatementBlocks.from);
-        fromBuilder.sets.forEach(function (es, setIndex) {
+    VisitEntitySetExpression: function (expression, sqlBuilder) {
+        sqlBuilder.selectTextPart('from');
+        sqlBuilder.addText(SqlStatementBlocks.from);
+        sqlBuilder.sets.forEach(function (es, setIndex) {
 
             if (setIndex > 0) {
-                fromBuilder.addText(" \n\tLEFT OUTER JOIN ");
+                sqlBuilder.addText(" \n\tLEFT OUTER JOIN ");
             }
 
-            var alias = fromBuilder.getExpressionAlias(es);
-            fromBuilder.addText(es.instance.tableName + ' ');
-            fromBuilder.addText(alias);
+            var alias = sqlBuilder.getExpressionAlias(es);
+            sqlBuilder.addText(es.instance.tableName + ' ');
+            sqlBuilder.addText(alias);
 
             if (setIndex > 0) {
-                fromBuilder.addText(" ON (");
+                sqlBuilder.addText(" ON (");
                 var toSet = this.infos[setIndex];
                 var toPrefix = "T" + toSet.AliasNumber;
                 var fromSetName = toSet.NavigationPath.substring(0, toSet.NavigationPath.lastIndexOf('.'));
@@ -190,45 +199,29 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
                     fromPrefix = "T" + temp[0].AliasNumber;
                 }
                 toSet.Association.associationInfo.ReferentialConstraint.forEach(function (constrain, index) {
-                    fromBuilder.addText(fromPrefix + "." + constrain[toSet.Association.associationInfo.From]);
-                    fromBuilder.addText(" = ");
-                    fromBuilder.addText(toPrefix + "." + constrain[toSet.Association.associationInfo.To]);
+                    sqlBuilder.addText(fromPrefix + "." + constrain[toSet.Association.associationInfo.From]);
+                    sqlBuilder.addText(" = ");
+                    sqlBuilder.addText(toPrefix + "." + constrain[toSet.Association.associationInfo.To]);
                 }, this);
-                fromBuilder.addText(")");
+                sqlBuilder.addText(")");
             }
         }, this);
-        this.newFilters['from'] = fromBuilder;
     },
-    VisitDefaultProjection: function () {
-        var projectionBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-        if (projectionBuilder.sets.length > 1) {
-            projectionBuilder.addText(SqlStatementBlocks.select);
-            projectionBuilder.sets[0].storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memberDef, index) {
+    VisitDefaultProjection: function (sqlBuilder) {
+        sqlBuilder.selectTextPart('projection');
+        if (sqlBuilder.sets.length > 1) {
+            sqlBuilder.addText(SqlStatementBlocks.select);
+            sqlBuilder.sets[0].storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memberDef, index) {
                 if (index > 0) {
-                    projectionBuilder.addText(SqlStatementBlocks.valueSeparator);
+                    sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
                 }
-                projectionBuilder.addText("T0.");
-                projectionBuilder.addText(memberDef.name);
+                sqlBuilder.addText("T0.");
+                sqlBuilder.addText(memberDef.name);
             }, this);
         }
         else {
-            projectionBuilder.sql = "SELECT *";
+            sqlBuilder.addText("SELECT *");
         }
-
-        //Create converter config object
-        var converterItem = { keys: [], mapping: {} };
-        projectionBuilder.sets[0].storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memberDef, index) {
-            if (memberDef.key) {
-                converterItem.keys.push(memberDef.name);
-            }
-            converterItem.mapping[memberDef.name] = memberDef.name;
-        });
-        projectionBuilder.converter.push(converterItem);
-        //create actionpack
-        projectionBuilder.actions.push({ op: "buildType", context: projectionBuilder.entityContext, logicalType: projectionBuilder.sets[0].elementType, tempObjectName: projectionBuilder.sets[0].elementType.name, propertyMapping: null });
-        projectionBuilder.actions.push({ op: "copyToResult", tempObjectName: projectionBuilder.sets[0].elementType.name });
-
-        this.newFilters['projection'] = projectionBuilder;
     }
 });
 
@@ -287,11 +280,17 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
 
         var compiler = Container.createSqlCompiler(optimizedExpression, context);
         compiler.compile();
+
+        var sqlBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
+        
+        query.modelBinderConfig = {};
+        var modelBinder = Container.createsqLite_ModelBinderCompiler(query, []);
+        modelBinder.Visit(optimizedExpression);
+
         var result = {
-            sqlText: compiler.filters[0].sql,
-            params: compiler.filters[0].params,
-            actions: compiler.filters[0].actions,
-            converter: compiler.filters[0].converter
+            sqlText: compiler.filters[0].selectedFragment.text,
+            params: compiler.filters[0].selectedFragment.params,
+            modelBinderConfig: query.modelBinderConfig
         };
 
         return result;

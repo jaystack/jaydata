@@ -12,11 +12,14 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         this.context = query.context;
         this.mainEntitySet = query.entitySet;
 
-        query.actionPack = query.actionPack || [];
-        var queryFragments = { urlText: "", actionPack: [] };
-        //queryFragments.actionPack = queryFragments.actionPack || [];
-
+        var queryFragments = { urlText: "" };
+        
         this.Visit(query.expression, queryFragments);
+
+        query.modelBinderConfig = {};
+        var modelBinder = Container.createModelBinderConfigCompiler(query, this.includes);
+        modelBinder.Visit(query.expression);
+
 
         var queryText = queryFragments.urlText;
         var addAmp = false;
@@ -31,15 +34,8 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
                 }
             }
         }
-        query.actionPack = queryFragments.actionPack;
         query.queryText = queryText;
-
-        if (query.actionPack.length < 1) {
-            query.actionPack.push({ op: "buildType", context: this.context, logicalType: this.logicalType, tempObjectName: this.logicalType.name, propertyMapping: null, includes: this.includes });
-            query.actionPack.push({ op: "copyToResult", tempObjectName: this.logicalType.name });
-        }
-
-
+        
         return {
             queryText: queryText,
             params: []
@@ -87,9 +83,6 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         var projectionCompiler = Container.createoDataProjectionCompiler(this.context);
         projectionCompiler.compile(expression, context);
-
-        var modelBinder = Container.createoDataModelBinderCompiler();
-        modelBinder.Visit(expression, context);
     },
     VisitFilterExpression: function (expression, context) {
         ///<param name="expression" type="$data.Expressions.FilterExpression" />
@@ -116,10 +109,6 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        context.urlText += '/$count';
-        context.actionPack = [];
-        context.actionPack.push({ op: "buildType", context: this.context, logicalType: null, tempObjectName: 'result', propertyMapping: [{ from: 'cnt', dataType: 'number' }] });
-        context.actionPack.push({ op: "copyToResult", tempObjectName: 'result' });
-
+        context.urlText += '/$count';       
     }
 }, {});

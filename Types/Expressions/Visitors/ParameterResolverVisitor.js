@@ -112,9 +112,9 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
 
     VisitBinary: function (eNode, context) {
         ///<summary></summary>
-        ///<param name="eNode" type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+        ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
         ///<param name="context" type="Object"/>
-        ///<return type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+        ///<return type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
 
         var left = this.Visit(eNode.left, context);
         var right = this.Visit(eNode.right, context);
@@ -130,9 +130,9 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
 
     VisitUnary: function (eNode, context) {
         ///<summary></summary>
-        ///<param name="eNode" type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+        ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
         ///<param name="context" type="Object"/>
-        ///<return type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+        ///<return type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
 
         var operand = this.Visit(eNode.operand, context);
         //var imp = unaryOperators.getOperator(

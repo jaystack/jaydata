@@ -1,4 +1,6 @@
 ﻿$(document).ready(function () {
+	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+
     var sqlite;
 
     $data.Class.define("$blog.Types.Blog", $data.Entity, null, {
@@ -186,7 +188,7 @@
     });
 
     asyncTest("Update Blog navigation property", 1, function () {
-        expect(2);
+        expect(3);
 
         var post = new $blog.Types.BlogPost({ Title: "title", Body: 'body', CreatedAt: null });
         var commentBlog = new $blog.Types.Blog({

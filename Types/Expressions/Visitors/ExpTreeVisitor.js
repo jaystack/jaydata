@@ -1,4 +1,4 @@
-$data.Class.define('$data.expressions.ExpTreeVisitor',
+$data.Class.define('$data.Expressions.ExpTreeVisitor',
     null, null,
     {
         constructor: function () {
@@ -6,9 +6,9 @@ $data.Class.define('$data.expressions.ExpTreeVisitor',
         },
         Visit: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.ExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.ExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.ExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.ExpressionNode"/>
             this._deep = this._deep + 1;
             var result = null;
             switch (eNode.type) {
@@ -32,119 +32,119 @@ $data.Class.define('$data.expressions.ExpTreeVisitor',
         },
         VisitLiteral: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.LiteralExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.LiteralExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.LiteralExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.LiteralExpressionNode"/>
             
             return eNode;
         },
         VisitVariable: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.VariableExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.VariableExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.VariableExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.VariableExpressionNode"/>
 
             return eNode;
         },
         VisitMember: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.MemberAccessExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.MemberAccessExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode"/>
 
             var expression = this.Visit(eNode.expression, context);
             var member = this.Visit(eNode.member, context);
             if (expression === eNode.expression && member === eNode.member)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.MemberAccessExpressionNode.create(eNode.executable, expression, member);
+            return $data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode.create(eNode.executable, expression, member);
         },
         VisitBinary: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.BinaryExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
 
             var left = this.Visit(eNode.left, context);
             var right = this.Visit(eNode.right, context);
             if (left === eNode.left && right === eNode.right)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.BinaryExpressionNode.create(eNode.executable, eNode.operator, left, right);
+            return $data.Expressions.ExpressionNodeTypes.BinaryExpressionNode.create(eNode.executable, eNode.operator, left, right);
         },
         VisitUnary: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.UnaryExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.UnaryExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.UnaryExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.UnaryExpressionNode"/>
 
             var operand = this.Visit(eNode.operand, context);
             if (operand === eNode.operand)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.UnaryExpressionNode.create(eNode.executable, eNode.operator, operand);
+            return $data.Expressions.ExpressionNodeTypes.UnaryExpressionNode.create(eNode.executable, eNode.operator, operand);
         },
         VisitIncDec: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.IncDecExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.IncDecExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.IncDecExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.IncDecExpressionNode"/>
 
             var operand = this.Visit(eNode.operand, context);
             if (operand === eNode.operand)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.IncDecExpressionNode.create(eNode.executable, eNode.operator, operand, eNode.suffix);
+            return $data.Expressions.ExpressionNodeTypes.IncDecExpressionNode.create(eNode.executable, eNode.operator, operand, eNode.suffix);
         },
         VisitEquality: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.EqualityExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.EqualityExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.EqualityExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.EqualityExpressionNode"/>
 
             var left = this.Visit(eNode.left, context);
             var right = this.Visit(eNode.right, context);
             if (left === eNode.left && right === eNode.right)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.EqualityExpressionNode.create(eNode.executable, eNode.operator, left, right);
+            return $data.Expressions.ExpressionNodeTypes.EqualityExpressionNode.create(eNode.executable, eNode.operator, left, right);
         },
         VisitDecision: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.DecisionExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.DecisionExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.DecisionExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.DecisionExpressionNode"/>
 
             var expression = this.Visit(eNode.expression, context);
             var left = this.Visit(eNode.left, context);
             var right = this.Visit(eNode.right, context);
             if (expression === eNode.expression && left === eNode.left && right === eNode.right)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.DecisionExpressionNode.create(eNode.executable, expression, left, right);
+            return $data.Expressions.ExpressionNodeTypes.DecisionExpressionNode.create(eNode.executable, expression, left, right);
         },
         VisitMethodCall: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.MethodcallExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.MethodcallExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.MethodcallExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.MethodcallExpressionNode"/>
 
             var object = eNode.object ? this.Visit(eNode.object, context) : null;
             var args = this.VisitArray(eNode.args, context);
             if (object === eNode.object && args === eNode.args)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.MethodcallExpressionNode.create(eNode.executable, object, eNode.method, args);
+            return $data.Expressions.ExpressionNodeTypes.MethodcallExpressionNode.create(eNode.executable, object, eNode.method, args);
         },
         VisitNew: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.NewExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.NewExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.NewExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.NewExpressionNode"/>
 
             var values = this.VisitArray(eNode.values, context);
             if (values === eNode.values)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.NewExpressionNode.create(true, values);
+            return $data.Expressions.ExpressionNodeTypes.NewExpressionNode.create(true, values);
         },
         VisitJsonAssign: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.JsonAssignExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.JsonAssignExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.JsonAssignExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.JsonAssignExpressionNode"/>
 
             var left = this.Visit(eNode.left, context);
             var right = this.Visit(eNode.right, context);
@@ -152,19 +152,19 @@ $data.Class.define('$data.expressions.ExpTreeVisitor',
                 return eNode;
             left.JSONASSIGN = true;
             right.JSONASSIGN = true;
-            return $data.expressions.expressionNodeTypes.JsonAssignExpressionNode.create(true, left, right);
+            return $data.Expressions.ExpressionNodeTypes.JsonAssignExpressionNode.create(true, left, right);
         },
         VisitArrayAccess: function (eNode, context) {
             ///<summary></summary>
-            ///<param name="eNode" type="$data.expressions.expressionNodeTypes.ArrayAccessExpressionNode"/>
+            ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode"/>
             ///<param name="context" type="Object"/>
-            //<return type="$data.expressions.expressionNodeTypes.ArrayAccessExpressionNode"/>
+            //<return type="$data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode"/>
 
             var array = this.Visit(eNode.array, context);
             var index = this.Visit(eNode.index, context);
             if (array === eNode.array && index === eNode.index)
                 return eNode;
-            return $data.expressions.expressionNodeTypes.ArrayAccessExpressionNode.create(true, array, index);
+            return $data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode.create(true, array, index);
         },
         VisitArray: function (eNodes, context) {
             var args = [];

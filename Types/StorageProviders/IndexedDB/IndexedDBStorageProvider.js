@@ -78,7 +78,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 '$data.String': function (string) { return string; },
                 '$data.Boolean': function (b) { return b; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Array': function (arr) { return arr; },
+                '$data.Array': function (arr) { if (arr === undefined) { return new $data.Array(); }return arr; },
                 '$data.Object': function (obj) { return obj; }
             },
             toDb: {
@@ -208,18 +208,21 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 callBack.success(query);
             }
         }).objectStore(query.entitySet.tableName);
+        var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
+        modelBinderCompiler.Visit(query.expression);
         switch (query.expression.nodeType) {
             case $data.Expressions.ExpressionType.Count:
-                query.actionPack.push({ op: 'buildType', context: self.context, tempObjectName: 'lulz', propertyMapping: [{ from: 'count', dataType: $data.Integer }] });
-                query.actionPack.push({ op: 'copyToResult', tempObjectName: 'lulz' });
+                
+                //query.actionPack.push({ op: 'buildType', context: self.context, tempObjectName: 'lulz', propertyMapping: [{ from: 'count', dataType: $data.Integer }] });
+                //query.actionPack.push({ op: 'copyToResult', tempObjectName: 'lulz' });
                 store.count().onsuccess = function (event) {
                     var count = event.target.result;
-                    query.rawDataList.push(count);
+                    query.rawDataList.push({ cnt: count });
                 }
                 break;
             default:
-                query.actionPack.push({ op: 'buildType', context: self.context, logicalType: query.entitySet.createNew, tempObjectName: 'lulz' });
-                query.actionPack.push({ op: 'copyToResult', tempObjectName: 'lulz' });
+                //query.actionPack.push({ op: 'buildType', context: self.context, logicalType: query.entitySet.createNew, tempObjectName: 'lulz' });
+                //query.actionPack.push({ op: 'copyToResult', tempObjectName: 'lulz' });
                 store.openCursor().onsuccess = function (event) {
                     // We currently support only toArray() so let's just dump all data
                     var cursor = event.target.result;

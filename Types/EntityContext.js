@@ -656,7 +656,7 @@ $data.Class.define('$data.EntityContext', null, null,
     },
 
     getTraceString: function (queryable) {
-        var query = new $data.Query(queryable.expression, queryable.entitySet);
+        var query = new $data.Query(queryable.expression, queryable.entitySet, this);
         return this.storageProvider.getTraceString(query);
     },
     log: function (logInfo) {
@@ -673,7 +673,7 @@ $data.Class.define('$data.EntityContext', null, null,
         return this.storageProvider.resolveFieldOperation(operation, expression, frameType);
     },    
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
-        var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, functionName);
+        var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
         virtualEs.tableName = functionName;
 
         var paramConstExpression = null;

@@ -1,4 +1,6 @@
 ﻿$(document).ready(function () {
+	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+
     module("dataDistributeTest");
 
     test("simpleFieldDataTypeTest", 8, function () {

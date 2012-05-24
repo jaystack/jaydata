@@ -82,7 +82,7 @@
         var context = new indexedDbProviderTest_Context({
             name: 'indexedDb',
             databaseName: 'indexedDbProvider_openDbInsertSingleKeyCRUD',
-            dbCreation: $data.storageProviders.indexedDb.DbCreationType.DropStoreIfExists
+            dbCreation: $data.storageProviders.indexedDb.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {

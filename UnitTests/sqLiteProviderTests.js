@@ -1,4 +1,5 @@
 ﻿$(document).ready(function () {
+	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
 
     module("sqLiteProviderTest");
     test("simpleFieldDataTypeTest", function () {
@@ -24,7 +25,7 @@
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
         var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
 
-        equal(sql, 'CREATE TABLE IF NOT EXISTS SimpleDataTypes (i0 INTEGER, i1 INTEGER, b0 INTEGER, b1 INTEGER, t0 TEXT, t1 TEXT, bl BLOB, n0 REAL, d1 REAL, d2 REAL);', 'create table function faild');
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [SimpleDataTypes] ([i0] INTEGER, [i1] INTEGER, [b0] INTEGER, [b1] INTEGER, [t0] TEXT, [t1] TEXT, [bl] BLOB, [n0] REAL, [d1] REAL, [d2] REAL);', 'create table function faild');
     });
     test("requiredFieldTest", function () {
         var context = $data.Class.define("ProviderTestContext", $data.EntityContext, null, {
@@ -68,13 +69,13 @@
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
 
         var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
-        equal(sql, 'CREATE TABLE IF NOT EXISTS SimpleDataTypes (i0 INTEGER NOT NULL, i1 INTEGER, b0 INTEGER NOT NULL, b1 INTEGER, t0 TEXT NOT NULL, t1 TEXT, bl0 BLOB NOT NULL, bl1 BLOB, n0 REAL NOT NULL, n1 REAL, d1 REAL NOT NULL, d2 REAL);', 'create table function faild');
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [SimpleDataTypes] ([i0] INTEGER NOT NULL, [i1] INTEGER, [b0] INTEGER NOT NULL, [b1] INTEGER, [t0] TEXT NOT NULL, [t1] TEXT, [bl0] BLOB NOT NULL, [bl1] BLOB, [n0] REAL NOT NULL, [n1] REAL, [d1] REAL NOT NULL, [d2] REAL);', 'create table function faild');
         var sql = prov.createSqlFromStorageModel(c._storageModel[1]);
-        equal(sql, 'CREATE TABLE IF NOT EXISTS RequireWithKeys (i0 INTEGER NOT NULL, i1 INTEGER NOT NULL,PRIMARY KEY (i0));', 'required with key');
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [RequireWithKeys] ([i0] INTEGER NOT NULL, [i1] INTEGER NOT NULL,PRIMARY KEY ([i0]));', 'required with key');
         var sql = prov.createSqlFromStorageModel(c._storageModel[2]);
-        equal(sql, 'CREATE TABLE IF NOT EXISTS RequireWithMultipleKeys (i0 INTEGER NOT NULL, i1 INTEGER NOT NULL,PRIMARY KEY (i0, i1));', 'required with multiple key');
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [RequireWithMultipleKeys] ([i0] INTEGER NOT NULL, [i1] INTEGER NOT NULL,PRIMARY KEY ([i0], [i1]));', 'required with multiple key');
         var sql = prov.createSqlFromStorageModel(c._storageModel[3]);
-        equal(sql, 'CREATE TABLE IF NOT EXISTS RequireWithComputeds (i0 INTEGER PRIMARY KEY AUTOINCREMENT, i1 INTEGER NOT NULL);', 'required with computed field');
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [RequireWithComputeds] ([i0] INTEGER PRIMARY KEY AUTOINCREMENT, [i1] INTEGER NOT NULL);', 'required with computed field');
     });
 
     module("sqLiteProviderTest_createDb");
@@ -318,6 +319,63 @@
                 ok(true, 'Initialize faild');
                 var person4 = new db.Persons.createNew({ Id: 3, Name: 'person3', DefaultBlog: blog1 });
                 //console.dir(person4);
+            });
+        });
+    });
+
+	module("sqLiteProviderTest_in_subselect");
+    test("filter_in_subselect", function () {
+        var context = $data.EntityContext.extend("ProviderTestContext", {
+            Categories: {
+                type: $data.EntitySet, elementType: $data.Entity.extend("Category", {
+                    Id: { type: 'int', key: true, computed: true },
+                    Title: { type: 'string' },
+                    Articles: { type: $data.EntitySet, elementType: "Article", inverseProperty: 'Category' }
+                })
+            },
+            Articles: {
+                type: $data.EntitySet, elementType: $data.Entity.extend("Article", {
+                    Id: { type: 'int', key: true, computed: true },
+                    Title: { type: 'string' },
+                    Category: { type: 'Category', required: true }
+                })
+            }
+        });
+
+        stop(2);
+        expect(1);
+        var c = new context({ databaseName: "sqLiteProviderTest_subselect", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables }).onReady(function (db) {
+			var catA = new Category({ Title: 'CatA' });
+			var catB = new Category({ Title: 'CatB' });
+            db.Categories.add(catA);
+			db.Categories.add(catB);
+
+			var artA = new Article({ Title: 'ArtA', Category: catA });
+			var artB = new Article({ Title: 'ArtB', Category: catA });
+			var artC = new Article({ Title: 'ArtC', Category: catB });
+
+			db.Articles.add(artA);
+			db.Articles.add(artB);
+			db.Articles.add(artC);
+
+            db.saveChanges(function () {
+                start(1);
+				try{
+					db.Categories
+					.filter(function(item){
+						return item.Id in this.category;
+					}, {
+						category: db.Articles
+									.map(function(item){ return item.Category.Id; })
+					})
+					.toArray(function(){
+						start(1);
+						ok(true, 'Query failed');
+					});
+				}catch(e){
+					start(1);
+					ok(false, 'Query failed');
+				}
             });
         });
     });

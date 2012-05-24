@@ -1,4 +1,4 @@
-$data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.ExpTreeVisitor, null,
+$data.Class.define('$data.Expressions.SetExecutableVisitor', $data.Expressions.ExpTreeVisitor, null,
 {
     Visit: function (eNode, context) {
         switch (eNode.type) {
@@ -24,26 +24,26 @@ $data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.E
         var right = this.Visit(eNode.right, context);
         if (left === eNode.left && right === eNode.right && (left.executable && right.executable == eNode.executable))
             return eNode;
-        return $data.expressions.expressionNodeTypes.BinaryExpressionNode.create(left.executable && right.executable, eNode.operator, left, right);
+        return $data.Expressions.ExpressionNodeTypes.BinaryExpressionNode.create(left.executable && right.executable, eNode.operator, left, right);
     },
     VisitUnary: function (eNode, context) {
         var operand = this.Visit(eNode.operand, context);
         if (operand === eNode.operand)
             return eNode;
-        return $data.expressions.expressionNodeTypes.UnaryExpressionNode.create(operand.executable, eNode.operator, operand);
+        return $data.Expressions.ExpressionNodeTypes.UnaryExpressionNode.create(operand.executable, eNode.operator, operand);
     },
     VisitIncDec: function (eNode, context) {
         var operand = this.Visit(eNode.operand, context);
         if (operand === eNode.operand)
             return eNode;
-        return $data.expressions.expressionNodeTypes.IncDecExpressionNode.create(operand.executable, eNode.operator, operand, eNode.suffix);
+        return $data.Expressions.ExpressionNodeTypes.IncDecExpressionNode.create(operand.executable, eNode.operator, operand, eNode.suffix);
     },
     VisitEquality: function (eNode, context) {
         var left = this.Visit(eNode.left, context);
         var right = this.Visit(eNode.right, context);
         if (left === eNode.left && right === eNode.right && (left.executable && right.executable == eNode.executable))
             return eNode;
-        return $data.expressions.expressionNodeTypes.EqualityExpressionNode.create(left.executable && right.executable, eNode.operator, left, right);
+        return $data.Expressions.ExpressionNodeTypes.EqualityExpressionNode.create(left.executable && right.executable, eNode.operator, left, right);
     },
     VisitDecision: function (eNode, context) {
         var expression = this.Visit(eNode.expression, context);
@@ -51,21 +51,21 @@ $data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.E
         var right = this.Visit(eNode.right, context);
         if (expression === eNode.expression && left === eNode.left && right === eNode.right && (left.executable && right.executable && expression.executable == eNode.executable))
             return eNode;
-        return $data.expressions.expressionNodeTypes.DecisionExpressionNode.create(left.executable && right.executable && expression.executable, expression, left, right);
+        return $data.Expressions.ExpressionNodeTypes.DecisionExpressionNode.create(left.executable && right.executable && expression.executable, expression, left, right);
     },
     VisitMethodCall: function (eNode, context) {
         var object = eNode.object ? this.Visit(eNode.object, context) : null;
         var args = this.VisitArray(eNode.args, context);
         if (object === eNode.object && args === eNode.args && ((object == null ? true : object.executable) == eNode.executable))
             return eNode;
-        return $data.expressions.expressionNodeTypes.MethodcallExpressionNode.create(object == null ? true : object.executable, object, eNode.method, args);
+        return $data.Expressions.ExpressionNodeTypes.MethodcallExpressionNode.create(object == null ? true : object.executable, object, eNode.method, args);
     },
     VisitNew: function (eNode, context) {
         // { type:NEW, executable:true, values: [] };
         var values = this.VisitArray(eNode.values, context);
         if (values === eNode.values)
             return eNode;
-        return $data.expressions.expressionNodeTypes.NewExpressionNode.create(true, values);
+        return $data.Expressions.ExpressionNodeTypes.NewExpressionNode.create(true, values);
     },
     VisitJsonAssign: function (eNode, context) {
         // { type:JSONASSIGN, executable:true, left: variable, right: right }
@@ -75,7 +75,7 @@ $data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.E
             return eNode;
         left.JSONASSIGN = true;
         right.JSONASSIGN = true;
-        return $data.expressions.expressionNodeTypes.JsonAssignExpressionNode.create(true, left, right);
+        return $data.Expressions.ExpressionNodeTypes.JsonAssignExpressionNode.create(true, left, right);
     },
     VisitArrayAccess: function (eNode, context) {
         // { type:ARRAYACCESS, executable:true, array:, index: }
@@ -83,7 +83,7 @@ $data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.E
         var index = this.Visit(eNode.index, context);
         if (array === eNode.array && index === eNode.index)
             return eNode;
-        return $data.expressions.expressionNodeTypes.ArrayAccessExpressionNode.create(true, array, index);
+        return $data.Expressions.ExpressionNodeTypes.ArrayAccessExpressionNode.create(true, array, index);
     },
     VisitArray: function (eNodes, context) {
         var args = [];
@@ -102,7 +102,7 @@ $data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.E
         if (typeof context.paramContext[eNode.name] == undefined) // isn't param  //TODO: check ParamContext
             Guard.raise("Variable is not defined in the paramContext: " + eNode.name);
         //this._setExecutable(eNode, true);
-        return $data.expressions.expressionNodeTypes.VariableExpressionNode.create(true, "Math", "GLOBALOBJECT");
+        return $data.Expressions.ExpressionNodeTypes.VariableExpressionNode.create(true, "Math", "GLOBALOBJECT");
     },
     VisitMember: function (eNode, context) {
         var chain = this.GetMemberChain(eNode);
@@ -112,6 +112,6 @@ $data.Class.define('$data.expressions.SetExecutableVisitor', $data.expressions.E
         if (!isLocalParam && !isLambdaParam)
             Guard.raise("Variable is not defined in the paramContext or the lambda parameters: " + firstMember);
 
-        return $data.expressions.expressionNodeTypes.MemberAccessExpressionNode.create(isLocalParam, eNode.expression, eNode.member);
+        return $data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode.create(isLocalParam, eNode.expression, eNode.member);
     }
 }, null);

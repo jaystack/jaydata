@@ -13,7 +13,7 @@
 // More info: http://jaydata.org
 
 if (typeof console === 'undefined') {
-    var console = {
+    console = {
         warn: function () { },
         error: function () { },
         log: function () { },
@@ -22,6 +22,9 @@ if (typeof console === 'undefined') {
         timeEnd: function () { }
     };
 }
+
+if (!console.warn) console.warn = function () { };
+if (!console.error) console.error = function () { };
 
 (function (global) {
     /// <summary>NodeJS detecting, handling, and module export.</summary>
@@ -50,3 +53,9 @@ if (typeof console === 'undefined') {
     $data.root = {};
 
 })($data);
+
+
+/**
+    @name $data.Base
+    @class base class
+*/

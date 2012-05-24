@@ -1,12 +1,17 @@
 function Exception(message, name, data) {
-    this.name = name ? name : "Exception";
+    Error.call(this);
+	if (Error.captureStackTrace)
+	    Error.captureStackTrace(this, this.constructor);
+    
+    this.name = name || "Exception";
     this.message = message;
     this.data = data;
+
     //this.toString = function() { return JSON.stringify(this); };
+
 }
 
-Exception.prototype = new Error();
-Exception.prototype.constructor = Exception;
+Exception.prototype.__proto__ = Error.prototype;
 
 Exception.prototype._getStackTrace = function () {
     var callstack = [];

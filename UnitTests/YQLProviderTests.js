@@ -343,8 +343,8 @@
                 equal(result[0].name, 'Washington', 'result item value');
                 equal(result[0].country.code, 'US', 'result item complex value');
                 equal(result[0].admin1.type, 'District', 'result item complex value');
-                equal(result[0].centroid.latitude, 38.899101, 'result item complex value');
-                equal(result[0].boundingBox.northEast.latitude, 39.003750, 'result item complex value');
+                equal(result[0].centroid.latitude, '38.899101', 'result item complex value');
+                equal(result[0].boundingBox.northEast.latitude, '39.003750', 'result item complex value');
             });
         });
 
@@ -504,9 +504,10 @@
             });
         });
 
-        test("YQL query_data_complexType_live", 25, function () {
+       test("YQL query_data_complexType_live", 25, function () {
             stop(1)
-            context.Places.where(function (p) { return p.text == this.text && p.boundingBox.southWest.latitude == this.latitude; }, { text: "us", latitude: '50.864220' }).toArray(function (result) {
+            context.Places.where(function (p) { return p.text == this.text && p.boundingBox.southWest.latitude == this.latitude; }, { text: "us", latitude: '50.864220' })
+            .toArray(function (result) {
                 start();
                 equal(result instanceof Array, true, "result is array");
                 ok(result.length > 0, "result length");

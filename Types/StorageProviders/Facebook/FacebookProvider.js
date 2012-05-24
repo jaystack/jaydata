@@ -82,7 +82,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
                 '$data.Date': function (value) { return new Date(typeof value === "string" ? parseInt(value) : value); },
                 '$data.Boolean': function (value) { return !!value },
                 '$data.Blob': function (value) { return value; },
-                '$data.Array': function (value) { return value; }
+                '$data.Array': function (value) { if (value === undefined) { return new $data.Array(); } return value; }
             },
             toDb: {
                 '$data.Number': function (value) { return value; },
@@ -121,8 +121,8 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
             dataType: "JSON",
             success: function (data, textStatus, jqXHR) {
                 query.rawDataList = data.data;
-                query.actionPack.push({ op: "buildType", context: ctx, logicalType: schema, tempObjectName: schema.name, includes: includes, propertyMapping: sql.selectMapping });
-                query.actionPack.push({ op: "copyToResult", tempObjectName: schema.name });
+                var compiler = Container.createModelBinderConfigCompiler(query, []);
+                compiler.Visit(query.expression);
                 callBack.success(query);
             },
             error: function (jqXHR, textStatus, errorThrow) {

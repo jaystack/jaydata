@@ -71,7 +71,7 @@ var eventData = $data.Class.define("EventData", null, null, {
     eventName: {}
 });
 
-var PropertyChangeEventData = $data.Class.define("PropertyChangeEventData", eventData, null, {
+var PropertyChangeEventData = $data.Class.define("PropertyChangeEventData", EventData, null, {
     constructor: function (propertyName, oldValue, newValue) {
         this.propertyName = propertyName;
         this.oldValue = oldValue;
@@ -82,7 +82,7 @@ var PropertyChangeEventData = $data.Class.define("PropertyChangeEventData", even
     newValue: {}
 });
 
-var PropertyValidationEventData = $data.Class.define("PropertyValidationEventData", eventData, null, {
+var PropertyValidationEventData = $data.Class.define("PropertyValidationEventData", EventData, null, {
     constructor: function (propertyName, oldValue, newValue, errors) {
         this.propertyName = propertyName;
         this.oldValue = oldValue;
@@ -97,7 +97,7 @@ var PropertyValidationEventData = $data.Class.define("PropertyValidationEventDat
     cancel: {}
 });
 
-$data.Entity = Entity = Class.define("$data.Entity", null, null, {
+$data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
     constructor: function (initData) {
         //this.initData = {};
@@ -195,7 +195,7 @@ $data.Entity = Entity = Class.define("$data.Entity", null, null, {
         ///<param name="memberDefinition" type="MemberDefinition" />
         //if (origValue == value) return;
         var eventData = null;
-        if (memberDefinition.monitorChanges != false && (this._propertyChanging || "instancePropertyChanged" in this.constructor)) {
+        if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
             var origValue = this[memberDefinition.name];
             eventData = new PropertyChangeEventData(memberDefinition.name, origValue, value);
             if (this._propertyChanging)
