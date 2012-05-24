@@ -1,13 +1,19 @@
-var EventSubscriber = $data.Class.define("subscriber", null, null, {
+var EventSubscriber = $data.Class.define("EventSubscriber", null, null, {
     constructor: function (handler, state, thisArg) {
-        ///<param name="handler" type="Function">
-        ///<signature>
-        ///<param name="eventData" type="Object" />
-        ///<param name="state" type="Object" />
-        ///</signature>
-        ///</param>
-        ///<param name="state" type="Object" optional="true" />
-        ///<param name="thisArg" type="Object" optional="true" />
+        /// <param name="handler" type="Function">
+        ///     <summary>event handler</summary>
+        ///     <signature>
+        ///         <param name="sender" type="$data.Entity" />
+        ///         <param name="eventData" type="EventData" />
+        ///         <param name="state" type="Object" />
+        ///     </signature>
+        /// </param>
+        /// <param name="state" type="Object" optional="true">custom state object</param>
+        /// <param name="thisArg" type="Object" optional="true">[i]this[/i] context for handler</param>
+        ///
+        /// <field name="handler" type="function($data.Entity sender, EventData eventData, Object state)">event handler</field>
+        /// <field name="state" type="Object">custom state object</field>
+        /// <field name="thisArg">[i]this[/i] context for handler</field>
         this.handler = handler;
         this.state = state;
         this.thisArg = thisArg;
@@ -17,7 +23,7 @@ var EventSubscriber = $data.Class.define("subscriber", null, null, {
     thisArg: {}
 });
 
-$data.Event = Event = Class.define("Event", null, null, {
+$data.Event = Event = $data.Class.define("$data.Event", null, null, {
     constructor: function (name, sender) {
         ///<param name="name" type="string">The name of the event</param>
         ///<param name="sender" type="Object">The originator/sender of the event. [this] in handlers will be set to this</param>
@@ -98,8 +104,31 @@ var PropertyValidationEventData = $data.Class.define("PropertyValidationEventDat
 });
 
 $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
-
     constructor: function (initData) {
+        /// <description>
+        ///     This class provide a light weight, object-relational interface between 
+        ///     your javascript code and database.
+        /// </description>
+        ///
+        /// <signature>
+        ///     <param name="initData" type="Object">initialization data</param>
+        ///     <example>
+        ///         var category = new $news.Types.Category({ Title: 'Tech' });
+        ///         $news.context.Categories.add(category);
+        ///     </example>
+        /// </signature>
+        ///
+        /// <field name="initData" type="Object">initialization data</field>
+        /// <field name="context" type="$data.EntityContext"></field>
+        /// <field name="propertyChanging" type="$data.Event"></field>
+        /// <field name="propertyChanged" type="$data.Event"></field>
+        /// <field name="propertyValidationError" type="$data.Event"></field>
+        /// <field name="isValidated" type="Boolean">Determines the current $data.Entity is validated.</field>
+        /// <field name="ValidationErrors" type="Array">array of $data.Validation.ValidationError</field>
+        /// <field name="ValidationErrors" type="Array">array of MemberDefinition</field>
+        /// <field name="entityState" type="Integer"></field>
+        /// <field name="changedProperties" type="Array">array of MemberDefinition</field>
+
         //this.initData = {};
         if (this.getType().__copyPropertiesToInstance) {
             $data.typeSystem.writePropertyValues(this);
@@ -115,8 +144,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             }
         }
     },
-    toString: function() { return this.getType().fullName + "(" + ( this.Id || this.Name || '' ) + ")" },
+    toString: function () {
+        /// <summary>Returns a string that represents the current $data.Entity</summary>
+        /// <returns type="String"/>
+
+        return this.getType().fullName + "(" + (this.Id || this.Name || '') + ")"
+    },
     toJSON: function () {
+        /// <summary>Creates pure JSON object from $data.Entity.</summary>
+        /// <returns type="Object">JSON representation</returns>
+
         var result = {};
         var self = this;
         this.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
@@ -125,6 +162,9 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         return result;
     },
     equals: function (entity) {
+        /// <summary>Determines whether the specified $data.Entity is equal to the current $data.Entity.</summary>
+        /// <returns type="Boolean">[b]true[/b] if the specified $data.Entity is equal to the current $data.Entity; otherwise, [b]false[/b].</returns>
+
         if (entity.getType() !== this.getType()) {
             return false;
         }
@@ -191,8 +231,11 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         set: function () { }
     },
 
+    // protected
     storeProperty: function (memberDefinition, value) {
-        ///<param name="memberDefinition" type="MemberDefinition" />
+        /// <param name="memberDefinition" type="MemberDefinition" />
+        /// <param name="value" />
+
         //if (origValue == value) return;
         var eventData = null;
         if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
@@ -253,7 +296,10 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
     },
 
+    // protected
     retrieveProperty: function (memberDefinition) {
+        /// <param name="memberDefinition" type="MemberDefinition" />
+
         if (memberDefinition.storeOnObject == true) {
             //TODO refactor to Base.getBackingFieldName
             var backingFieldName = "_" + memberDefinition.name;
@@ -263,7 +309,17 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
     },
 
+    // protected
     getProperty: function (memberDefinition, callback) {
+        /// <summary>Retrieve value of member</summary>
+        /// <param name="memberDefinition" type="MemberDefinition" />
+        /// <param name="callback" type="Function">
+        ///     <signature>
+        ///         <param name="value" />
+        ///     </signature>
+        /// </param>
+        /// <returns>value associated for [i]memberDefinition[/i]</returns>
+
         if (this[memberDefinition.name] != undefined) {
             callback(this[memberDefinition.name]);
             return;
@@ -274,12 +330,19 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
         return this.context.loadItemProperty(this, memberDefinition, callback);
     },
+    // protected
     setProperty: function (memberDefinition, value, callback) {
+        /// <param name="memberDefinition" type="MemberDefinition" />
+        /// <param name="value" />
+        /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
         callback();
     },
 
     isValid: function () {
+        /// <summary>Determines the current $data.Entity is validated and valid.</summary>
+        /// <returns type="Boolean" />
+
         if (!this.isValidated) {
             this.ValidationErrors = $data.Validation.Entity.ValidateEntity(this);
             this.isValidated = true;
@@ -296,7 +359,11 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         enumerable: false
     },
 
-    resetChanges: function () { delete this._changedProperties; },
+    resetChanges: function () {
+        /// <summary>reset changes</summary>
+
+        delete this._changedProperties;
+    },
 
     changedProperties: {
         dataType: Array,

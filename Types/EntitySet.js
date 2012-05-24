@@ -16,15 +16,12 @@ $data.Class.defineEx('$data.EntitySet',
     ], null,
 {
     constructor: function (elementType, context, collectionName) {
-        ///<summary>Represents a typed entity set that is used to perform create, read, update, and delete operations</summary>
-        ///<param name="entitySchema" type="$data.Entity" mayBeNull="false">The type that defines the set. The type must be derived from 'Entity' base type.</param>
-        ///<param name="entityContext" type="$data.EntityContext" mayBeNull="false">An instance of 'EntityContext' which call the constructor.</param>
-        ///<example>
-        ///$data.AutoIdEntity.extend('Book', { Title: { type: String } });
-        ///$data.EntityContext.extend('MyContext', {
-        ///  Books: { type: $data.EntitySet, entityType: Book }
-        ///});
-        ///</example>
+        /// <signature>
+        ///     <summary>Represents a typed entity set that is used to perform create, read, update, and delete operations</summary>
+        ///     <param name="elementType" type="Function" subClassOf="$data.Entity">Type of entity set elements, elementType must be subclass of $data.Entity</param>
+        ///     <param name="context" type="$data.EntityContext">Context of the EntitySet</param>
+        ///     <param name="collectionName" type="String">Name of the EntitySet</param>
+        /// </signature>
         this.createNew = this[elementType.name] = elementType;
         this.stateManager = new $data.EntityStateManager(this);
         Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
@@ -55,14 +52,31 @@ $data.Class.defineEx('$data.EntitySet',
         trackedEntities.push({ entitySet: this, data: entity });
     },
     add: function (entity) {
-        ///<signature>
-        ///<summary>Creates a typed entity and adds to the context.</summary>
-        ///<param name="entity" type="Object">The init parameters whish is based on Entity</param>
-        ///</signature>
-        ///<signature>
-        ///<summary>Adds the given entity to the context.</summary>
-        ///<param name="entity" type="$data.Entity">The entity to add</param>
-        ///</signature>
+        /// <signature>
+        ///     <summary>Creates a typed entity and adds to the context.</summary>
+        ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
+        ///     <example>
+        ///         
+        ///         Persons.add({ Name: 'John', Email: 'john@example.com', Age: 30, Gender: 'Male' });
+        ///         
+        ///     </example>
+        /// </signature>
+        /// <signature>
+        ///     <summary>Adds the given entity to the context.</summary>
+        ///     <param name="entity" type="$data.Entity">The entity to add</param>
+        ///     <example>
+        ///
+        ///         Persons.add(new $news.Types.Person({ Name: 'John', Email: 'john@example.com', Age: 30, Gender: 'Male' }));
+        ///
+        ///     </example>
+        ///     <example>
+        ///
+        ///         var person = new $news.Types.Person({ Name: 'John', Email: 'john@example.com', Age: 30, Gender: 'Male' });
+        ///         Persons.add(person);
+        ///
+        ///     </example>
+        /// </signature>
+
         var data = entity;
         if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
@@ -73,14 +87,30 @@ $data.Class.defineEx('$data.EntitySet',
         this._trackEntity(data);
     },
     remove: function (entity) {
-        ///<signature>
-        ///<summary>Creates a typed entity and marks it as Deleted.</summary>
-        ///<param name="entity" type="Object">The init parameters whish is based on Entity</param>
-        ///</signature>
-        ///<signature>
-        ///<summary>Marks the given entity as Deleted.</summary>
-        ///<param name="entity" type="$data.Entity">The entity to remove</param>
-        ///</signature>
+        /// <signature>
+        ///     <summary>Creates a typed entity and marks it as Deleted.</summary>
+        ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
+        ///     <example>
+        ///         Person will be marked as Deleted where an id is 5. Id is a key of entity.
+        ///         Persons.remove({ Id: 5 });
+        ///
+        ///     </example>
+        /// </signature>
+        /// <signature>
+        ///     <summary>Marks the given entity as Deleted.</summary>
+        ///     <param name="entity" type="$data.Entity">The entity to remove</param>
+        ///     <example>
+        ///         
+        ///         Persons.remove(person);
+        ///
+        ///     </example>
+        ///     <example>
+        ///         Person will be marked as Deleted where an Id is 5. Id is a key of entity.
+        ///         Persons.add(new $news.Types.Person({ Id: 5 }));
+        ///
+        ///     </example>
+        /// </signature>
+
         var data = entity;
         if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
@@ -90,14 +120,34 @@ $data.Class.defineEx('$data.EntitySet',
         this._trackEntity(data);
     },
     attach: function (entity) {
-        ///<signature>
-        ///<summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
-        ///<param name="entity" type="Object">The init parameters whish is based on Entity</param>
-        ///</signature>
-        ///<signature>
-        ///<summary>Adds to the context and sets state Unchanged.</summary>
-        ///<param name="entity" type="$data.Entity">The entity to attach</param>
-        ///</signature>
+        /// <signature>
+        ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
+        ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
+        ///     <example>
+        ///         
+        ///         Persons.attach({ Id: 5, Email: 'newEmail@example.com' });
+        ///
+        ///     </example>
+        /// </signature>
+        /// <signature>
+        ///     <summary>Adds to the context and sets state Unchanged.</summary>
+        ///     <param name="entity" type="$data.Entity">The entity to attach</param>
+        ///     <example>
+        ///
+        ///         Persons.attach(person);
+        ///
+        ///     </example>
+        ///     <example>
+        ///         Set an entity's related entities without loading 
+        ///
+        ///         var categoryPromo = new $news.Types.Category({ Id: 5 });
+        ///         Category.attach(categoryPromo);
+        ///         var article = new $news.Types.Article({ Title: 'New Article title', Body: 'Article body', Category: [ categoryPromo ] });
+        ///         Article.attach(article);
+        ///
+        ///     </example>
+        /// </signature>
+
         var data = entity;
         if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
@@ -117,9 +167,34 @@ $data.Class.defineEx('$data.EntitySet',
         data.context = this.entityContext;
         this._trackEntity(data);
     },
-    detach: function(entity) {
+    detach: function (entity) {
+        /// <signature>
+        ///     <summary>Creates a typed entity and detach from the Context with Detached state.</summary>
+        ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
+        ///     <example>
+        ///         Person will be Detached where an id is 5. Id is a key of entity.
+        ///         Persons.detach({ Id: 5 });
+        ///
+        ///     </example>
+        /// </signature>
+        /// <signature>
+        ///     <summary>Detach from the context and sets state Detached.</summary>
+        ///     <param name="entity" type="$data.Entity">The entity to detach</param>
+        ///     <example>
+        ///
+        ///         Persons.detach(person);
+        ///
+        ///     </example>
+        ///     <example>
+        ///         Person will be Detached where an Id is 5. Id is a key of entity.
+        ///         Persons.add(new $news.Types.Person({ Id: 5 }));
+        ///
+        ///     </example>
+        /// </signature>
+
+        var data = entity;
         if (!(entity instanceof this.createNew)) {
-            return;
+            data = new this.createNew(entity);
         }
 
         var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(entity); }).pop();
@@ -131,6 +206,33 @@ $data.Class.defineEx('$data.EntitySet',
         }
     },
     attachOrGet: function (entity) {
+        /// <signature>
+        ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
+        ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
+        ///     <returns type="$data.Entity" />
+        ///     <example>
+        ///         Id is a key of entity.
+        ///         var person = Persons.attachOrGet({ Id: 5  });
+        ///
+        ///     </example>
+        /// </signature>
+        /// <signature>
+        ///     <summary>If not in context then adds to it and sets state Unchanged.</summary>
+        ///     <param name="entity" type="$data.Entity">The entity to detach</param>
+        ///     <returns type="$data.Entity" />
+        ///     <example>
+        ///
+        ///         var attachedPerson = Persons.attachOrGet(person);
+        ///
+        ///     </example>
+        ///     <example>
+        ///         Id is a key of entity.
+        ///         var p = new $news.Types.Person({ Id: 5 });
+        ///         var attachedPerson = Persons.attachOrGet(p);
+        ///
+        ///     </example>
+        /// </signature>
+
         var data = entity;
         if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
@@ -147,28 +249,66 @@ $data.Class.defineEx('$data.EntitySet',
         this._trackEntity(data);
         return data;
     },
-    find: function (keys) {
-        //todo global scope
-        if (!this.entityKeys) {
-            this.entityKeys = this.createNew.memberDefinition.filter(function (prop) { return prop.key; }, this);
-        }
-        this.entityContext.stateManager.trackedEntities.forEach(function (item) {
-            if (item.entitySet == this) {
-                var isOk = true;
-                this.entityKeys.forEach(function (item, index) { isOK = isOk && (item.data[item.name] == keys[index]); }, this);
-                if (isOk) {
-                    return item.data;
-                }
-            }
-        }, this);
-        //TODO: db call
-        return null;
-    },
+    //find: function (keys) {
+    //    //todo global scope
+    //    if (!this.entityKeys) {
+    //        this.entityKeys = this.createNew.memberDefinition.filter(function (prop) { return prop.key; }, this);
+    //    }
+    //    this.entityContext.stateManager.trackedEntities.forEach(function (item) {
+    //        if (item.entitySet == this) {
+    //            var isOk = true;
+    //            this.entityKeys.forEach(function (item, index) { isOK = isOk && (item.data[item.name] == keys[index]); }, this);
+    //            if (isOk) {
+    //                return item.data;
+    //            }
+    //        }
+    //    }, this);
+    //    //TODO: db call
+    //    return null;
+    //},
     loadItemProperty: function (entity, memberDefinition, callback) {
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="String">Property name</param>
+        ///     <param name="callback" type="Function">
+        ///         <summary>Callback function</summary>
+        ///         <param name="propertyValue" />
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="String">Property name</param>
+        ///     <param name="callbacks" type="Object">
+        ///         Success and error callbacks definition.
+        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="$data.MemberDefinition">Property definition</param>
+        ///     <param name="callback" type="Function">
+        ///         <summary>Callback function</summary>
+        ///         <param name="propertyValue" />
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="$data.MemberDefinition">Property definition</param>
+        ///     <param name="callbacks" type="Object">
+        ///         Success and error callbacks definition.
+        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
     },
     Queryable: {}
 }, null);
-
-//TODO: remove "types" namespace
-$data.EntitySet = $data.EntitySet;

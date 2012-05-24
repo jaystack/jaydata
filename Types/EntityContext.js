@@ -41,8 +41,8 @@ $data.Class.define('$data.ComplexType', $data.Assiociation, null, {}, null);
 $data.Class.define('$data.EntityContext', null, null,
 {
     constructor: function (storageProviderCfg) {
-        ///<summary>Provides facilities for querying and working with entity data as objects.</summary>
-        ///<param name="storageProviderCfg">???</param>
+        /// <description>Provides facilities for querying and working with entity data as objects.</description>
+        ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
         //Initialize properties
         this.lazyLoad = false;
@@ -55,36 +55,37 @@ $data.Class.define('$data.EntityContext', null, null,
             var resolvedType = Container.resolveType(typeName);
             return ctx._storageModel.filter(function (s) { return s.LogicalType === resolvedType; })[0];
         };
-		if (typeof storageProviderCfg.name === 'string'){
-			var tmp = storageProviderCfg.name;
-			storageProviderCfg.name = [tmp];
-		}
-		var i = 0,
-			providerType;
-		while(!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
-        if (providerType) {
-        this.storageProvider = new providerType(storageProviderCfg, this);
-        this.storageProvider.setContext(this);
-        this.stateManager = new $data.EntityStateManager(this);
-
-        if (storageProviderCfg.name in this.getType()._storageModelCache) {
-            this._storageModel = this.getType()._storageModelCache[storageProviderCfg.name];
-        } else {
-        this._initializeStorageModel();
-            this.getType()._storageModelCache[storageProviderCfg.name] = this._storageModel;
+        if (typeof storageProviderCfg.name === 'string') {
+            var tmp = storageProviderCfg.name;
+            storageProviderCfg.name = [tmp];
         }
-		}else{
-			Guard.raise(new Exception("Provider fallback failed!", "Not Found"));
+        var i = 0,
+			providerType;
+        while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
+        if (providerType) {
+            this.storageProvider = new providerType(storageProviderCfg, this);
+            this.storageProvider.setContext(this);
+            this.stateManager = new $data.EntityStateManager(this);
+
+            if (storageProviderCfg.name in this.getType()._storageModelCache) {
+                this._storageModel = this.getType()._storageModelCache[storageProviderCfg.name];
+            } else {
+                this._initializeStorageModel();
+                this.getType()._storageModelCache[storageProviderCfg.name] = this._storageModel;
+            }
+        } else {
+            Guard.raise(new Exception("Provider fallback failed!", "Not Found"));
         }
         this._initializeEntitySets(this.constructor);
 
         this._isOK = false;
         var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider });
         if (this.storageProvider) {
-        this.storageProvider.initializeStore(callBack);
+            this.storageProvider.initializeStore(callBack);
         }
     },
     getDataType: function (dataType) {
+        // Obsolate
         if (typeof dataType == "string") {
             var memDef_dataType = this[dataType];
             if (memDef_dataType === undefined || memDef_dataType === null) { memDef_dataType = eval(dataType); }
@@ -135,7 +136,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 ///<param name="memDef" type="MemberDefinition">Member definition instance</param>
 
                 var memDefResolvedDataType = Container.resolveType(memDef.dataType);
-               
+
                 if ((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1) && Object.isNullOrUndefined(memDef.inverseProperty)) {
                     //copy member definition
                     var t = JSON.parse(JSON.stringify(memDef));
@@ -146,7 +147,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
 
                 this._buildDbType_navigationPropertyComplite(memDef, memDefResolvedDataType, storageModel);
-                
+
 
 
                 //var memDef_dataType = this.getDataType(memDef.dataType);
@@ -374,6 +375,26 @@ $data.Class.define('$data.EntityContext', null, null,
 
     },
     onReady: function (fn) {
+        /// <signature>
+        ///     <summary>
+        ///         Sets the callback function to be called when the initialization of the EntityContext has successfully finished.
+        ///     </summary>
+        ///     <param name="successCallback" type="Function">
+        ///         <summary>Success callback</summary>
+        ///         <param name="entityContext" type="$data.EntityContext">Current entityContext object</param>
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>
+        ///         Sets the callback functions to be called when the initialization of the EntityContext has finished.
+        ///     </summary>
+        ///     <param name="callbacks" type="Object">
+        ///         Success and error callbacks definition.
+        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
         var pHandler = new $data.PromiseHandler();
         var callBack = pHandler.createCallback(fn);
         this.onReadyFunction = callBack.success;
@@ -383,6 +404,16 @@ $data.Class.define('$data.EntityContext', null, null,
         return pHandler.getPromise();
     },
     getEntitySetFromElementType: function (elementType) {
+        /// <signature>
+        ///     <summary>Gets the matching EntitySet for an element type.</summary>
+        ///     <param name="elementType" type="Function" />
+        ///     <returns type="$data.EntitySet" />
+        /// </signature>
+        /// <signature>
+    	///     <summary>Gets the matching EntitySet for an element type.</summary>
+    	///     <param name="elementType" type="String" />
+        ///     <returns type="$data.EntitySet" />
+        /// </signature>
         var result = this._entitySetReferences[elementType];
         if (!result) {
             try {
@@ -403,7 +434,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     if (query.result.length !== 1) {
                         callBack.error(new Exception('result count failed'));
                         return;
-                        }
+                    }
 
                     callBack.success(query.result[0]);
                 } else if (query.expression.nodeType === $data.Expressions.ExpressionType.First) {
@@ -421,9 +452,26 @@ $data.Class.define('$data.EntityContext', null, null,
         this.storageProvider.executeQuery(query, clbWrapper);
     },
     saveChanges: function (callback) {
-        ///<summary>
-        /// Adatforráson végrehajtott módosítások mentése, véglegesítése
-        ///</summary>
+        /// <signature>
+        ///     <summary>
+        ///         Saves the changes made to the context.
+        ///     </summary>
+        ///     <param name="successCallback" type="Function">
+        ///         <summary>Success callback</summary>
+        ///         <param name="entityContext" type="$data.EntityContext">Current entityContext object</param>
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>
+        ///         Saves the changes made to the context.
+        ///     </summary>
+        ///     <param name="callbacks" type="Object">
+        ///         Success and error callbacks definition.
+        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
         var changedEntities = [];
         var trackedEntities = this.stateManager.trackedEntities;
         var pHandler = new $data.PromiseHandler();
@@ -516,7 +564,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     }, this);
                 }, this);
             }, this);
-            
+
             trackedEntities.forEach(function (entity) {
                 if (entity.skipSave !== true) { changedEntities.push(entity); }
             });
@@ -547,14 +595,14 @@ $data.Class.define('$data.EntityContext', null, null,
         var ctx = this;
         if (changedEntities.length == 0) { clbWrapper.success(); return pHandlerResult; }
 
-		//validate entities
+        //validate entities
         var errors = [];
         changedEntities.forEach(function (entity) {
             if (entity.data.entityState === $data.EntityState.Added) {
-				entity.data.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-					if (memDef.required && !memDef.computed && !entity.data[memDef.name]) entity.data[memDef.name] = Container.getDefault(memDef.dataType);
-				}, this);
-			}
+                entity.data.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+                    if (memDef.required && !memDef.computed && !entity.data[memDef.name]) entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+                }, this);
+            }
             if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
                 && !entity.data.isValid()) {
                     errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
@@ -588,6 +636,13 @@ $data.Class.define('$data.EntityContext', null, null,
         callBack.success(changedEntities.length);
     },
     forEachEntitySet: function (fn, ctx) {
+    	/// <summary>
+    	///     Iterates over the entity sets' of current EntityContext.
+    	/// </summary>
+        /// <param name="fn" type="Function">
+        ///     <param name="entitySet" type="$data.EntitySet" />
+        /// </param>
+    	/// <param name="ctx">'this' argument for the 'fn' function.</param>
         for (var entitySetName in this._entitySetReferences) {
             var actualEntitySet = this._entitySetReferences[entitySetName];
             fn.call(ctx, actualEntitySet);
@@ -595,13 +650,55 @@ $data.Class.define('$data.EntityContext', null, null,
     },
 
     loadItemProperty: function (entity, property, callback) {
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+    	///     <param name="entity" type="$data.Entity">Entity object</param>
+    	///     <param name="property" type="String">Property name</param>
+        ///     <param name="callback" type="Function">
+        ///         <summary>C  allback function</summary>
+        ///         <param name="propertyValue" />
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="String">Property name</param>
+        ///     <param name="callbacks" type="Object">
+        ///         Success and error callbacks definition.
+        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="MemberDefinition">Property definition</param>
+        ///     <param name="callback" type="Function">
+        ///         <summary>Callback function</summary>
+        ///         <param name="propertyValue" />
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
+        /// <signature>
+        ///     <summary>Loads a property of the entity through the storage provider.</summary>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="MemberDefinition">Property definition</param>
+        ///     <param name="callbacks" type="Object">
+        ///         Success and error callbacks definition.
+        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
+        ///     </param>
+        ///     <returns type="$.Deferred" />
+        /// </signature>
         Guard.requireType('entity', entity, $data.Entity);
 
         var memberDefinition = typeof property === 'string' ? entity.getType().memberDefinitions.getMember(property) : property;
 
         if (entity[memberDefinition.name] != undefined) {
-            callback(entity[memberDefinition.name]);
-            return;
+            var pHandler = new $data.PromiseHandler();
+            callBack = pHandler.createCallback(callback);                        
+            callback.success(entity[memberDefinition.name]);
+            return pHandler.getPromise();
         }
 
         var isSingleSide = true;
@@ -656,6 +753,11 @@ $data.Class.define('$data.EntityContext', null, null,
     },
 
     getTraceString: function (queryable) {
+    	/// <summary>
+    	/// Returns a trace string. Used for debugging purposes!
+    	/// </summary>
+    	/// <param name="queryable" type="$data.Queryable" />
+    	/// <returns>Trace string</returns>
         var query = new $data.Query(queryable.expression, queryable.entitySet, this);
         return this.storageProvider.getTraceString(query);
     },
@@ -671,7 +773,7 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     resolveFieldOperation: function (operation, expression, frameType) {
         return this.storageProvider.resolveFieldOperation(operation, expression, frameType);
-    },    
+    },
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
         var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
         virtualEs.tableName = functionName;
@@ -694,18 +796,38 @@ $data.Class.define('$data.EntityContext', null, null,
         return q;
     },
     attach: function (entity) {
-        var entitySet = this.getEntitySetFromElementType(entity.getType());        
+    	/// <summary>
+    	///     Attaches an entity to its matching entity set.
+    	/// </summary>
+    	/// <param name="entity" type="$data.Entity" />
+    	/// <returns type="$data.Entity">Returns the attached entity.</returns>
+        var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attach(entity);
     },
     attachOrGet: function (entity) {
+        /// <summary>
+        ///     Attaches an entity to its matching entity set, or returns if it's already attached.
+        /// </summary>
+        /// <param name="entity" type="$data.Entity" />
+        /// <returns type="$data.Entity">Returns the entity.</returns>
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attachOrGet(entity);
-    },    
+    },
     add: function (entity) {
+        /// <summary>
+        ///     Adds a new entity to its matching entity set.
+        /// </summary>
+        /// <param name="entity" type="$data.Entity" />
+        /// <returns type="$data.Entity">Returns the added entity.</returns>
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.add(entity);
     },
     remove: function (entity) {
+        /// <summary>
+        ///     Removes an entity from its matching entity set.
+        /// </summary>
+        /// <param name="entity" type="$data.Entity" />
+        /// <returns type="$data.Entity">Returns the removed entity.</returns>
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.remove(entity);
     }
@@ -724,5 +846,3 @@ $data.Class.define('$data.EntityContext', null, null,
         }
     }
 });
-//TODO: remove "types" namespace
-$data.EntityContext = $data.EntityContext;
