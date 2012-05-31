@@ -238,11 +238,11 @@ $data.Class.define('$data.Queryable', null, null,
 
         if (onResult_items instanceof $data.Array)
         {
-            return this.forEach(function (item, idx) {
-                if (idx === 0)
-                    onResult_items.length = 0;
-
-                onResult_items.push(item);
+            return this.toArray(function (results) {
+                onResult_items.length = 0;
+                results.forEach(function (item, idx) {
+                    onResult_items.push(item);
+                });
             });
         }
 

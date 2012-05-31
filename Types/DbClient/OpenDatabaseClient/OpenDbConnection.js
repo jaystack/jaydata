@@ -7,13 +7,13 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
         return this.database !== null && this.database !== undefined && this.transaction !== null && this.transaction !== undefined;
     },
     open: function (callBack) {
-        if (this.transaction) {
-            callBack.success(this.transaction);
+		if (this.database){
+			this.database.transaction(function (tran) { callBack.success(tran); });
         } else {
             var p = this.connectionParams;
             var con = this;
-            this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
-            this.database.transaction(function (tran) { con.transaction = tran; callBack.success(tran); });
+			this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
+			this.database.transaction(function (tran) { callBack.success(tran); });
         }
     },
     close: function () {

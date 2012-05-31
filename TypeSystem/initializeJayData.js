@@ -1,4 +1,4 @@
-// JayData RC1 Refresh 1
+// JayData 1.0.4
 // Dual licensed under MIT and GPL v2
 // Copyright JayStack Technologies (http://jaydata.org/licensing)
 //
@@ -39,6 +39,7 @@ if (!console.error) console.error = function () { };
 
     if (typeof module !== "undefined" && module.exports) {
         sqLiteModule = require('sqlite3');
+		if (sqLiteModule) window['openDatabase'] = true;
         module.exports = $data;
     }
 
@@ -49,13 +50,8 @@ if (!console.error) console.error = function () { };
     /// Collection of JayData services
     ///</summary>
     $data.__namespace = true;
-    $data.version = "JayData RC1 Refresh 1";
+    $data.version = "JayData 1.0.4";
+    $data.versionNumber = "1.0.4";
     $data.root = {};
 
 })($data);
-
-
-/**
-    @name $data.Base
-    @class base class
-*/

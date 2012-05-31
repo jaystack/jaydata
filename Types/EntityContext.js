@@ -800,7 +800,11 @@ $data.Class.define('$data.EntityContext', null, null,
     	///     Attaches an entity to its matching entity set.
     	/// </summary>
     	/// <param name="entity" type="$data.Entity" />
-    	/// <returns type="$data.Entity">Returns the attached entity.</returns>
+        /// <returns type="$data.Entity">Returns the attached entity.</returns>
+
+        if (entity instanceof $data.EntityWrapper) {
+            entity = entity.getEntity();
+        } 
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attach(entity);
     },
@@ -810,6 +814,10 @@ $data.Class.define('$data.EntityContext', null, null,
         /// </summary>
         /// <param name="entity" type="$data.Entity" />
         /// <returns type="$data.Entity">Returns the entity.</returns>
+
+        if (entity instanceof $data.EntityWrapper) {
+            entity = entity.getEntity();
+        }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attachOrGet(entity);
     },
@@ -819,6 +827,10 @@ $data.Class.define('$data.EntityContext', null, null,
         /// </summary>
         /// <param name="entity" type="$data.Entity" />
         /// <returns type="$data.Entity">Returns the added entity.</returns>
+
+        if (entity instanceof $data.EntityWrapper) {
+            entity = entity.getEntity();
+        }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.add(entity);
     },
@@ -828,6 +840,10 @@ $data.Class.define('$data.EntityContext', null, null,
         /// </summary>
         /// <param name="entity" type="$data.Entity" />
         /// <returns type="$data.Entity">Returns the removed entity.</returns>
+
+        if (entity instanceof $data.EntityWrapper) {
+            entity = entity.getEntity();
+        }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.remove(entity);
     }

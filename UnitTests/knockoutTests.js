@@ -3,7 +3,7 @@
 /// <reference path="../Modules/knockout.js" />
 
 $(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+    if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
     knockoutTests({ name: "sqLite", dataBaseName: 'knockoutTests', oDataServiceHost: "newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
 });
 
@@ -22,7 +22,7 @@ function knockoutTests(providerConfig) {
         ok(article === koArticle.innerInstance, 'Inner instance reference failed');
         equal(koArticle instanceof $news.Types.ObservableArticle, true, 'Observable type failed');
         equal(koArticle instanceof $data.Entity, false, 'Observable instance not subclass of $data.Entity failed');
-        equal(koArticle instanceof $data.ObjectWrapper, true, 'Observable instance subclass of $data.ObjectWrapper failed');
+        equal(koArticle instanceof $data.EntityWrapper, true, 'Observable instance subclass of $data.EntityWrapper failed');
 
         equal(koArticle._Id, undefined, "JITed property not exists 1");
         koArticle.Id;
@@ -133,7 +133,7 @@ function knockoutTests(providerConfig) {
     });
 
     test("knockout observable result", 23, function () {
-        stop(2);
+        stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
@@ -172,14 +172,14 @@ function knockoutTests(providerConfig) {
 
                 });
 
-                var result = ko.observable();
+                var result = ko.observableArray();
                 db.Articles.toArray(result).then(function () {
                     start();
 
-                    notEqual(resultArray()[0], 5, 'Result array clear failed');
-                    length = resultArray().length;
+                    notEqual(result()[0], 5, 'Result array clear failed');
+                    length = result().length;
 
-                    var koArticle = resultArray()[0];
+                    var koArticle = result()[0];
                     var article = koArticle.innerInstance;
 
 
@@ -197,8 +197,223 @@ function knockoutTests(providerConfig) {
 
                     equal(typeof koArticle.Tags.subscribe, 'function', true, 'array property has observable value');
                     equal(article.Tags, koArticle.Tags(), 'array property equal failed');
-                    
+
                 });
+            });
+        });
+    });
+
+
+    test("knockout observable query Int", 3, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var fired = 2;
+                var id = ko.observable(1);
+                var res = db.Articles.filter(function (article) { return article.Id == this.Id }, { Id: id }).toArray(function (r) {
+                    fired--;
+                    start();
+                    ok(true, "logic fired failed");
+                });
+
+                res.then(function () {
+                    ok(true, "then fired one time failed");
+                });
+
+                id(2);
+
+
+            });
+        });
+    });
+
+    test("knockout observable query string", 3, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var fired = 2;
+                var title = ko.observable('Article1');
+                var res = db.Articles.filter(function (article) { return article.Title == this.Title }, { Title: title }).toArray(function (r) {
+                    fired--;
+                    start();
+                    ok(true, "logic fired failed");
+                });
+
+                res.then(function () {
+                    ok(true, "then fired one time failed");
+                });
+
+                title('Article2');
+
+
+            });
+        });
+    });
+
+    test("knockout observable query date", 5, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var fired = 2;
+                var state = {};
+                var dateValue = new Date();
+                dateValue.setHours(dateValue.getHours() - 1);
+                var date = ko.observable(dateValue);
+                var res = db.Articles.filter(function (article) { return article.CreateDate > this.CreateDate }, { CreateDate: date }).toArray(function (r) {
+                    fired--;
+                    start();
+                    ok(true, "logic fired failed");
+
+                    if (r.length in state) {
+                        ok(false, 'result length equal with last failed');
+                    } else {
+                        ok(true, 'result length equal with last failed');
+                        state[r.length] = true;
+                    }
+                });
+
+                res.then(function () {
+                    ok(true, "then fired one time failed");
+                });
+
+                var dateValue2 = new Date();
+                dateValue2.setHours(dateValue2.getHours() + 1);
+                date(dateValue2);
+
+
+            });
+        });
+    });
+
+    test("knockout observable query take", 3, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var fired = 2;
+                var top = ko.observable(5);
+                var res = db.Articles.take(top).toArray(function (r) {
+                    fired--;
+                    start();
+                    if (r.length === 5)
+                        ok(r.length, 5, "result count failed");
+                    else
+                        ok(r.length, 2, "result count failed");
+                });
+
+                res.then(function () {
+                    ok(true, "then fired one time failed");
+                });
+
+                top(2);
+
+
+            });
+        });
+    });
+
+    test("knockout observable query multiple same observable fire once", 3, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var id = ko.observable(1);
+                var res = db.Articles.filter(function (article) { return article.Id == this.Id || article.Id > this.Id }, { Id: id }).toArray(function (r) {
+                    start();
+                    ok(true, "logic fired failed");
+                });
+
+                res.then(function () {
+                    ok(true, "then fired one time failed");
+                });
+
+                id(2);
+
+
+            });
+        });
+    });
+
+    test("knockout observable query Boolean expression", 2, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start();
+                var title = ko.observable("-");
+                db.Articles.filter(function (article) { return this.Title == "-" || article.Title == this.Title }, { Title: title })
+                    .toArray(function (result) {
+                        //run two times
+                        start();
+                        if (title() === "-") {
+                            ok(result.length > 1, 'many result failed');
+                            title('Article1');
+                        } else {
+                            ok(result.length == 1, 'single result failed');
+                        }
+                    })
+
+            });
+        });
+    });
+
+    test("knockout observable query Boolean expression with empty string", 2, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start();
+                var title = ko.observable("");
+                db.Articles.filter(function (article) { return this.Title == "" || article.Title == this.Title }, { Title: title })
+                    .toArray(function (result) {
+                        //run two times
+                        start();
+                        if (title() === "") {
+                            ok(result.length > 1, 'many result failed');
+                            title('Article1');
+                        } else {
+                            ok(result.length == 1, 'single result failed');
+                        }
+                    })
+
+            });
+        });
+    });
+
+    test("knockout observable query Attach and save", 1, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var fired = 2;
+                var result = ko.observableArray();
+                var id = ko.observable(1);
+                var res = db.Articles.filter(function (article) { return article.Id == this.Id }, { Id: id }).toArray(result);
+                res.then(function () {
+                    start();
+
+                    var article = result()[0];
+                    db.Articles.attach(article);
+
+                    article.Title('ModArticle');
+
+                    db.saveChanges(function () {
+
+                        var res = db.Articles.filter(function (article) { return article.Id == this.Id }, { Id: id }).toArray(result);
+                        res.then(function () {
+                            start();
+                            var article = result()[0];
+
+                            equal(article.Title(), "ModArticle", 'property change failed');
+
+                        });
+
+                    })
+
+                });
+
+
             });
         });
     });

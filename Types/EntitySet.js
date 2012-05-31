@@ -78,7 +78,9 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         var data = entity;
-        if (!(entity instanceof this.createNew)) {
+        if (entity instanceof $data.EntityWrapper) {
+            data = entity.getEntity();
+        } else if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
         }
         data.entityState = $data.EntityState.Added;
@@ -112,7 +114,9 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         var data = entity;
-        if (!(entity instanceof this.createNew)) {
+        if (entity instanceof $data.EntityWrapper) {
+            data = entity.getEntity();
+        } else if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
         }
         data.entityState = $data.EntityState.Deleted;
@@ -149,15 +153,17 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         var data = entity;
-        if (!(entity instanceof this.createNew)) {
+        if (entity instanceof $data.EntityWrapper) {
+            data = entity.getEntity();
+        } else if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
         }
         
         for (var i = 0; i < this.entityContext.stateManager.trackedEntities.length; i++) {
             var current = this.entityContext.stateManager.trackedEntities[i];
-            if (current.data === entity)
+            if (current.data === data)
                 break;
-            if (current.data.equals(entity)) {
+            if (current.data.equals(data)) {
                 Guard.raise(new Exception("Context already contains this entity!!!"));
             }
         }
@@ -193,11 +199,13 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         var data = entity;
-        if (!(entity instanceof this.createNew)) {
+        if (entity instanceof $data.EntityWrapper) {
+            data = entity.getEntity();
+        } else if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
         }
 
-        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(entity); }).pop();
+        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(data); }).pop();
         if (existsItem) {
             var idx = this.entityContext.stateManager.trackedEntities.indexOf(existsItem);
             entity.entityState = $data.EntityState.Detached;
@@ -234,11 +242,13 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         var data = entity;
-        if (!(entity instanceof this.createNew)) {
+        if (entity instanceof $data.EntityWrapper) {
+            data = entity.getEntity();
+        } else if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
         }
 
-        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(entity); }).pop();
+        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(data); }).pop();
         if (existsItem) {
             return existsItem.data;
         }

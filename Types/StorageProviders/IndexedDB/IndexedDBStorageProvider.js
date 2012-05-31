@@ -23,6 +23,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         value: {
             equal: { mapTo: ' == ', dataType: $data.Boolean },
             notEqual: { mapTo: ' != ', dataType: $data.Boolean },
+			equalTyped: { mapTo: ' == ', dataType: $data.Boolean },
+            notEqualTyped: { mapTo: ' != ', dataType: $data.Boolean },
             greaterThan: { mapTo: ' > ', dataType: $data.Boolean },
             greaterThanOrEqual: { mapTo: ' >= ', dataType: $data.Boolean },
 

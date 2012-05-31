@@ -154,10 +154,12 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
             member instanceof $data.Expressions.ConstantExpression) {
             ///TODO implement checking for the member, throw on error
             result = eNode.implementation(expression.value, member.value);
-            if (typeof result === 'function') {
-                return new $data.Expressions.ConstantExpression(
-                    function () { return result.apply(expression.value, arguments); });
-            }
+
+            //Method call processed before
+            //if (typeof result === 'function') {
+            //    return new $data.Expressions.ConstantExpression(
+            //        function () { return result.apply(expression.value, arguments); });
+            //}
             return Container.createConstantExpression(result, typeof result, expression.name + '$' + member.value);
         }
         if (expression === eNode.expression && member === eNode.member)

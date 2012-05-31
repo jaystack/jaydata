@@ -818,7 +818,7 @@ function T3(providerConfig, msg) {
 
                 db.Articles.map(function (a) { return { title: a.Title, c: 5 } }).toArray({
                     success: function (result) {
-                        if (providerConfig.name != "sqLite") { ok(false, "Not supported fail"); return; }
+                        //if (providerConfig.name != "sqLite") { ok(false, "Not supported fail"); return; }
                         expect(3);
                         start(1);
                         ok(result, 'query failed');
@@ -827,7 +827,7 @@ function T3(providerConfig, msg) {
                         equal(typeof a.title === 'string', true, 'result field type failed');
                     },
                     error: function (e) {
-                        if (providerConfig.name != "oData") { ok(true, "Not supported fail"); return; }
+                        //if (providerConfig.name != "oData") { ok(true, "Not supported fail"); return; }
                         expect(2);
                         start(1);
                         ok(e, 'query failed');

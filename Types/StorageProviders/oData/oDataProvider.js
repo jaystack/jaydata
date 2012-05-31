@@ -24,6 +24,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 if (this.providerConfiguration.serviceUrl) {
                     $.ajax({
                         url: that.providerConfiguration.serviceUrl + "/Delete",
+                        type: 'POST',
                         success: function (d) {
                             console.log("RESET oData database");
                             callBack.success(that.context);
@@ -227,6 +228,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         value: {
             equal: { mapTo: 'eq', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
             notEqual: { mapTo: 'ne', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
+            equalTyped: { mapTo: 'eq', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
+            notEqualTyped: { mapTo: 'ne', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
             greaterThan: { mapTo: 'gt', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
             greaterThanOrEqual: { mapTo: 'ge', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
 
@@ -373,15 +376,19 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : undefined; },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
-                '$data.Blob': function (blob) { return blob; }
+                '$data.Blob': function (blob) { return blob; },
+                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
                 '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
-                '$data.String': function (text) { return "'" + text + "'"; },
+                '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
                 '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
-                '$data.Blob': function (blob) { return blob; }
+                '$data.Blob': function (blob) { return blob; },
+                '$data.Object': function (o) { return JSON.stringify(o); },
+                '$data.Array': function (o) { return JSON.stringify(o); }
             }
         }
     },

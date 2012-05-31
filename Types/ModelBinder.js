@@ -41,7 +41,15 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }
         }
 
-        if (meta.$source){
+		if (meta.$value){
+			if (typeof meta.$value === 'function'){
+				result = meta.$value();
+            }else if (meta.$type){
+                var type = Container.resolveName(meta.$type);
+                var converter = this.context.storageProvider.fieldConverter.fromDb[type];
+                result = converter ? converter(meta.$value) : Container['create' + Container.resolveType(meta.$type).name](meta.$value);
+            }else result = meta.$value;
+        }else if (meta.$source){
             if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];

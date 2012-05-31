@@ -32,6 +32,10 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         builder.resetModelBinderProperty();
         this._query.modelBinderConfig = builder.modelBinderConfig;
     },
+	VisitConstantExpression: function (expression, builder) {
+        builder.modelBinderConfig['$type'] = expression.type;
+        builder.modelBinderConfig['$value'] = expression.value;
+    },
 
     VisitExpression: function (expression, builder) {
         var projVisitor = Container.createFindProjectionVisitor();

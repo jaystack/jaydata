@@ -27,6 +27,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             storage: this.providerConfiguration.storage
         };
 
+		if (this.connection) return this.connection;
+
         var connection = null;
         if (this.providerConfiguration.storage) {
             connection = new $data.dbClient.jayStorageClient.JayStorageConnection(ctorParm);
@@ -35,6 +37,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         } else {
             connection = new $data.dbClient.openDatabaseClient.OpenDbConnection(ctorParm);
         }
+
+		this.connection = connection;
 
         return connection;
     },
@@ -121,6 +125,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         value: {
             equal: { mapTo: '=', dataType: "boolean" },
             notEqual: { mapTo: '!=', dataType: "boolean" },
+			equalTyped: { mapTo: '=', dataType: "boolean" },
+			notEqualTyped: { mapTo: '!=', dataType: "boolean" },
             greaterThan: { mapTo: '>', dataType: "boolean" },
             greaterThanOrEqual: { mapTo: '>=', dataType: "boolean" },
 

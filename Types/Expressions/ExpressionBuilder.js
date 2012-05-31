@@ -25,7 +25,7 @@
                     n = this.BuildMethodCall(node, expNode);
                 else if ("." == node.value)
                     n = this.BuildMember(node, expNode);
-                else if (["==", "!=", ">", "<", ">=", "<="].indexOf(node.value) >= 0)
+                else if (["===", "==", "!==", "!=", ">", "<", ">=", "<="].indexOf(node.value) >= 0)
                     n = this.BuildEquality(node, expNode);
                 else if (["&&", "||"].indexOf(node.value) >= 0)
                     n = this.BuildBinary(node, expNode);

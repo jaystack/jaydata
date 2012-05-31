@@ -113,7 +113,8 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         this.mapping += expression.memberName;
     },
     VisitConstantExpression: function (expression, context) {
-        Guard.raise(new Exception('Constant value is not supported in Projection.', 'Not supported!'));
+        //Guard.raise(new Exception('Constant value is not supported in Projection.', 'Not supported!'));
         //context.data += expression.value;
+		context.data = context.data.slice(0, context.data.length - 1);
     }
 });
