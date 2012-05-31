@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-    var serviceURL = "newsReader.svc";
+    var serviceURL = "Services/newsReader.svc";
     module("oData_provider_tests_use_service_full_table");
     test("get_full_table_orderby", 12, function () {
         var expectedValues = ['Health', 'Politics', 'Sport', 'Tech', 'World'];

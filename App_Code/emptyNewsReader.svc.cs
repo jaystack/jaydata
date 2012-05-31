@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
+using System.Data.Objects;
+using System.Data.Services;
+using System.Data.Services.Common;
+using System.Linq;
+using System.ServiceModel.Web;
+using System.Web;
+using JayData.NewsReader;
+
+
+namespace JayData
+{
+    public class EmptyNewsReaderService : DataService<ObjectContext>
+    {
+        // This method is called only once to initialize service-wide policies.
+        public static void InitializeService(DataServiceConfiguration config)
+        {
+            // TODO: set rules to indicate which entity sets and service operations are visible, updatable, etc.
+            // Examples:
+            config.SetEntitySetAccessRule("*", EntitySetRights.All);
+            config.SetServiceOperationAccessRule("*", ServiceOperationRights.All);
+            config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
+        }
+
+        protected override ObjectContext CreateDataSource()
+        {
+            var newsReader = new EmptyNewsReaderContext();
+            var context = ((IObjectContextAdapter)newsReader).ObjectContext;
+            context.ContextOptions.ProxyCreationEnabled = false;
+            return context;
+        }
+        [WebGet]
+        public IQueryable<Article> PrefilteredArticles(int minId, string startsWith)
+        {
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a=>a.Id>minId && a.Title.StartsWith(startsWith));
+        }
+        //protected override void OnStartProcessingRequest(ProcessRequestArgs args)
+        //{
+        //    if (args.RequestUri.Segments[2] == "$resetdb")
+        //    {
+        //        this.CurrentDataSource.DeleteDatabase();
+        //        return;
+        //    }
+        //    base.OnStartProcessingRequest(args);
+        //}
+    }
+}

@@ -4,7 +4,7 @@
 
 $(document).ready(function () {
     if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
-    knockoutTests({ name: "sqLite", dataBaseName: 'knockoutTests', oDataServiceHost: "newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    knockoutTests({ name: "sqLite", dataBaseName: 'knockoutTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
 });
 
 function knockoutTests(providerConfig) {

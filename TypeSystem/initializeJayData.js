@@ -41,3 +41,10 @@ if (!console.error) console.error = function () { };
     $data.root = {};
 
 })($data);
+
+
+// Do not remove this block, it is used by jsdoc 
+/**
+    @name $data.Base
+    @class base class
+*/
