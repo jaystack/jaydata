@@ -1,5 +1,6 @@
-SRC_DIR = ./Types
 TEMP_DIR = ./TMP
+TARGET_DIR = ./Build
+MODULE_DIR = $(TARGET_DIR)/Module
 COMPILER = ./Tools/compiler.jar
 
 TYPE_SYSTEM = ./TypeSystem/initializeJayData.js\
@@ -8,142 +9,146 @@ TYPE_SYSTEM = ./TypeSystem/initializeJayData.js\
 	./TypeSystem/JayLint.js\
 	./TypeSystem/TypeSystem.js\
 
-EXPRESSIONS = $(SRC_DIR)/Expressions/ASTParser.js\
-	$(SRC_DIR)/Expressions/ExpressionNode2.js\
-	$(SRC_DIR)/Expressions/ArrayLiteralExpression.js\
-	$(SRC_DIR)/Expressions/CallExpression.js\
-	$(SRC_DIR)/Expressions/CodeParser.js\
-	$(SRC_DIR)/Expressions/ConstantExpression.js\
-	$(SRC_DIR)/Expressions/FunctionExpression.js\
-	$(SRC_DIR)/Expressions/ObjectFieldExpression.js\
-	$(SRC_DIR)/Expressions/ObjectLiteralExpression.js\
-	$(SRC_DIR)/Expressions/PagingExpression.js\
-	$(SRC_DIR)/Expressions/ParameterExpression.js\
-	$(SRC_DIR)/Expressions/PropertyExpression.js\
-	$(SRC_DIR)/Expressions/SimpleBinaryExpression.js\
-	$(SRC_DIR)/Expressions/ThisExpression.js\
-	$(SRC_DIR)/Expressions/Visitors/ExpressionVisitor.js\
-	$(SRC_DIR)/Expressions/Visitors/ParameterProcessor.js\
-	$(SRC_DIR)/Expressions/Visitors/GlobalContextProcessor.js\
-	$(SRC_DIR)/Expressions/Visitors/LocalContextProcessor.js\
-	$(SRC_DIR)/Expressions/Visitors/LambdaParameterProcessor.js\
-	$(SRC_DIR)/Expressions/Visitors/ParameterResolverVisitor.js\
-	$(SRC_DIR)/Expressions/Visitors/LogicalSchemaBinderVisitor.js\
-	$(SRC_DIR)/Expressions/Visitors/ExpTreeVisitor.js\
-	$(SRC_DIR)/Expressions/Visitors/SetExecutableVisitor.js\
-	$(SRC_DIR)/Expressions/Visitors/ExecutorVisitor.js\
-	$(SRC_DIR)/Expressions/ExpressionBuilder.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/AssociationInfoExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/CodeExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/CodeToEntityConverter.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/ComplexTypeExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/EntityContextExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/EntityExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/EntityExpressionVisitor.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/EntityFieldExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/EntitySetExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/FilterExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/IncludeExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/MemberInfoExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/OrderExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/ParametricQueryExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/ProjectionExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/QueryExpressionCreator.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/QueryParameterExpression.js\
-	$(SRC_DIR)/Expressions/EntityExpressions/RepresentationExpression.js\
+INCLUDED_LIBRARY = ./Scripts/datajs-1.0.2.js\
 
-PLUGINS = $(SRC_DIR)/Validation/EntityValidationBase.js\
-	$(SRC_DIR)/Validation/EntityValidation.js\
-	$(SRC_DIR)/Notifications/ChangeDistributorBase.js\
-	$(SRC_DIR)/Notifications/ChangeCollectorBase.js\
-	$(SRC_DIR)/Notifications/ChangeDistributor.js\
-	$(SRC_DIR)/Notifications/ChangeCollector.js\
-	$(SRC_DIR)/Promise.js\
-	$(SRC_DIR)/Entity.js\
-	$(SRC_DIR)/EntityContext.js\
-	$(SRC_DIR)/QueryProvider.js\
-	$(SRC_DIR)/RowConverter.js\
-	$(SRC_DIR)/Query.js\
-	$(SRC_DIR)/Queryable.js\
-	$(SRC_DIR)/EntitySet.js\
-	$(SRC_DIR)/AuthEntityContext.js\
-	$(SRC_DIR)/EntityState.js\
-	$(SRC_DIR)/EntityStateManager.js\
-	$(SRC_DIR)/Exception.js\
-	$(SRC_DIR)/StorageProviderBase.js\
+VSDOC_SOURCE = ./TypeSystem/VS2010Intellisense.js\
 
-PROVIDERS = $(SRC_DIR)/DbClient/DbCommand.js\
-	$(SRC_DIR)/DbClient/DbConnection.js\
-	$(SRC_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
-	$(SRC_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
-	$(SRC_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
-	$(SRC_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
-	$(SRC_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
-	$(SRC_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
-	$(SRC_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
-	$(SRC_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/SqlProjectionCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/ExpressionMonitor.js\
-	$(SRC_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/ModelBinder/sqLiteEFModelBinderCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/ModelBinder/sqLiteModelBinderCompiler.js\
-	$(SRC_DIR)/StorageProviders/SqLite/ModelBinder/sqLiteOLModelBinderCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/oDataProvider.js\
-	$(SRC_DIR)/StorageProviders/oData/oDataCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/oDataOrderCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/oDataPagingCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/oDataProjectionCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/ModelBinder/oDataModelBinderCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/ModelBinder/oDataEFModelBinderCompiler.js\
-	$(SRC_DIR)/StorageProviders/oData/ModelBinder/oDataOLModelBinderCompiler.js\
-	$(SRC_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
-	$(SRC_DIR)/Authentication/AuthenticationBase.js\
-	$(SRC_DIR)/Authentication/Anonymous.js\
-	$(SRC_DIR)/Authentication/FacebookAuth.js\
-	$(SRC_DIR)/StorageProviders/Facebook/FacebookProvider.js\
-	$(SRC_DIR)/StorageProviders/Facebook/FacebookCompiler.js\
-	$(SRC_DIR)/StorageProviders/Facebook/EntitySets/FQL/user.js\
-	$(SRC_DIR)/StorageProviders/Facebook/EntitySets/FQL/friend.js\
-	$(SRC_DIR)/StorageProviders/Facebook/EntitySets/FQL/page.js\
-	$(SRC_DIR)/StorageProviders/Facebook/EntitySets/FQLContext.js\
-	$(SRC_DIR)/StorageProviders/YQL/YQLProvider.js\
-	$(SRC_DIR)/StorageProviders/YQL/YQLCompiler.js\
-	$(SRC_DIR)/StorageProviders/YQL/EntitySets/geo.js\
-	$(SRC_DIR)/StorageProviders/YQL/EntitySets/YQLContext.js\
-	./Modules/deferred.js\
-	./Modules/formBinder.js\
-	./Modules/template.js\
-	./Modules/validate.js\
+JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
+	./Types/Expressions/ASTParser.js\
+	./Types/Expressions/ExpressionNode2.js\
+	./Types/Expressions/ArrayLiteralExpression.js\
+	./Types/Expressions/CallExpression.js\
+	./Types/Expressions/CodeParser.js\
+	./Types/Expressions/ConstantExpression.js\
+	./Types/Expressions/FunctionExpression.js\
+	./Types/Expressions/ObjectFieldExpression.js\
+	./Types/Expressions/ObjectLiteralExpression.js\
+	./Types/Expressions/PagingExpression.js\
+	./Types/Expressions/ParameterExpression.js\
+	./Types/Expressions/PropertyExpression.js\
+	./Types/Expressions/SimpleBinaryExpression.js\
+	./Types/Expressions/ThisExpression.js\
+	./Types/Expressions/Visitors/ExpressionVisitor.js\
+	./Types/Expressions/Visitors/ParameterProcessor.js\
+	./Types/Expressions/Visitors/GlobalContextProcessor.js\
+	./Types/Expressions/Visitors/LocalContextProcessor.js\
+	./Types/Expressions/Visitors/LambdaParameterProcessor.js\
+	./Types/Expressions/Visitors/ParameterResolverVisitor.js\
+	./Types/Expressions/Visitors/LogicalSchemaBinderVisitor.js\
+	./Types/Expressions/Visitors/ExpTreeVisitor.js\
+	./Types/Expressions/Visitors/SetExecutableVisitor.js\
+	./Types/Expressions/Visitors/ExecutorVisitor.js\
+	./Types/Expressions/ExpressionBuilder.js\
+	./Types/Expressions/EntityExpressions/AssociationInfoExpression.js\
+	./Types/Expressions/EntityExpressions/CodeExpression.js\
+	./Types/Expressions/EntityExpressions/CodeToEntityConverter.js\
+	./Types/Expressions/EntityExpressions/ComplexTypeExpression.js\
+	./Types/Expressions/EntityExpressions/EntityContextExpression.js\
+	./Types/Expressions/EntityExpressions/EntityExpression.js\
+	./Types/Expressions/EntityExpressions/EntityExpressionVisitor.js\
+	./Types/Expressions/EntityExpressions/EntityFieldExpression.js\
+	./Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
+	./Types/Expressions/EntityExpressions/EntitySetExpression.js\
+	./Types/Expressions/EntityExpressions/FilterExpression.js\
+	./Types/Expressions/EntityExpressions/IncludeExpression.js\
+	./Types/Expressions/EntityExpressions/MemberInfoExpression.js\
+	./Types/Expressions/EntityExpressions/OrderExpression.js\
+	./Types/Expressions/EntityExpressions/ParametricQueryExpression.js\
+	./Types/Expressions/EntityExpressions/ProjectionExpression.js\
+	./Types/Expressions/EntityExpressions/QueryExpressionCreator.js\
+	./Types/Expressions/EntityExpressions/QueryParameterExpression.js\
+	./Types/Expressions/EntityExpressions/RepresentationExpression.js\
+	./Types/Validation/EntityValidationBase.js\
+	./Types/Validation/EntityValidation.js\
+	./Types/Notifications/ChangeDistributorBase.js\
+	./Types/Notifications/ChangeCollectorBase.js\
+	./Types/Notifications/ChangeDistributor.js\
+	./Types/Notifications/ChangeCollector.js\
+	./Types/Promise.js\
+	./Types/Entity.js\
+	./Types/EntityContext.js\
+	./Types/QueryProvider.js\
+	./Types/ModelBinder.js\
+	./Types/Query.js\
+	./Types/Queryable.js\
+	./Types/EntitySet.js\
+	./Types/EntityState.js\
+	./Types/EntityStateManager.js\
+	./Types/Exception.js\
+	./Types/StorageProviderBase.js\
+	./Types/EntityWrapper.js\
+	./Types/DbClient/DbCommand.js\
+	./Types/DbClient/DbConnection.js\
+	./Types/DbClient/OpenDatabaseClient/OpenDbCommand.js\
+	./Types/DbClient/OpenDatabaseClient/OpenDbConnection.js\
+	./Types/DbClient/JayStorageClient/JayStorageCommand.js\
+	./Types/DbClient/JayStorageClient/JayStorageConnection.js\
+	./Types/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
+	./Types/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
+	./Types/StorageProviders/SqLite/SqLiteStorageProvider.js\
+	./Types/StorageProviders/SqLite/SqLiteCompiler.js\
+	./Types/StorageProviders/SqLite/SqlPagingCompiler.js\
+	./Types/StorageProviders/SqLite/SqlOrderCompiler.js\
+	./Types/StorageProviders/SqLite/SqlProjectionCompiler.js\
+	./Types/StorageProviders/SqLite/ExpressionMonitor.js\
+	./Types/StorageProviders/SqLite/SqlFilterCompiler.js\
+	./Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
+	./Types/StorageProviders/oData/oDataProvider.js\
+	./Types/StorageProviders/oData/oDataCompiler.js\
+	./Types/StorageProviders/oData/oDataWhereCompiler.js\
+	./Types/StorageProviders/oData/oDataOrderCompiler.js\
+	./Types/StorageProviders/oData/oDataPagingCompiler.js\
+	./Types/StorageProviders/oData/oDataProjectionCompiler.js\
+	./Types/StorageProviders/modelBinderConfigCompiler.js\
+	./Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
+	./Types/Authentication/AuthenticationBase.js\
+	./Types/Authentication/Anonymous.js\
+	./Types/Authentication/FacebookAuth.js\
+	./Types/StorageProviders/Facebook/FacebookProvider.js\
+	./Types/StorageProviders/Facebook/FacebookCompiler.js\
+	./Types/StorageProviders/Facebook/EntitySets/FQL/user.js\
+	./Types/StorageProviders/Facebook/EntitySets/FQL/friend.js\
+	./Types/StorageProviders/Facebook/EntitySets/FQL/page.js\
+	./Types/StorageProviders/Facebook/EntitySets/FQLContext.js\
+	./Types/StorageProviders/YQL/YQLProvider.js\
+	./Types/StorageProviders/YQL/YQLCompiler.js\
+	./Types/StorageProviders/YQL/EntitySets/geo.js\
+	./Types/StorageProviders/YQL/EntitySets/YQLContext.js\
 
-JayDataMin: JayData ./JayData.js
-	@@echo "Build Jaydata standalone min..."
-	@@java -jar $(COMPILER) --js ./JayData.js --js_output_file ./JayData.min.js
+All:JayDataStandaloneMin JayDataStandalone JayDataVsDoc JayDataMin JayData
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
+	@@rm -r $(TEMP_DIR)
 
-JayData: JayDataStandalone ./JayData_standalone.js ./Scripts/datajs-1.0.2.js
-	@@cat ./Scripts/datajs-1.0.2.js ./JayData_standalone.js > JayData.js
+JayDataStandaloneMin: JayDataStandalone $(TARGET_DIR)/JayData-standalone.js
+	@@echo "Minifying Jaydata standalone..."
+	@@java -jar $(COMPILER) --js $(TARGET_DIR)/JayData-standalone.js --js_output_file $(TEMP_DIR)/JayData-standalone.min.js
+	@@cat CREDITS.txt $(TEMP_DIR)/JayData-standalone.min.js > $(TARGET_DIR)/JayData-standalone.min.js
 
-JayDataStandaloneMin: JayDataStandalone ./JayData_standalone.js
-	@@echo "Build Jaydata standalone min..."
-	@@java -jar $(COMPILER) --js ./JayData_standalone.js --js_output_file ./JayData_standalone.min.js
+JayDataStandalone: $(TEMP_DIR)/TypeSystems.js $(INCLUDED_LIBRARY)
+	@@echo "Building JayData standalone version..."
+	@@test -d $(TARGET_DIR) || mkdir -p $(TARGET_DIR)
+	@@cat $(TEMP_DIR)/TypeSystems.js $(INCLUDED_LIBRARY) $(JAYDATA_SOURCE) > $(TEMP_DIR)/JayData-standalone.js
+	@@cat CREDITS.txt $(TEMP_DIR)/JayData-standalone.js > $(TARGET_DIR)/JayData-standalone.js
 
-JayDataStandalone: $(TEMP_DIR)/JayDataRaw.js
-	@@cat $(TEMP_DIR)/JayDataRaw.js > JayData_standalone.js
+JayDataVsDoc: JayData
+	@@echo "Building JayData vsdoc version..."
+	@@cat $(VSDOC_SOURCE) $(TEMP_DIR)/JayData.js > $(TEMP_DIR)/JayData-vsdoc.js
+	@@cat CREDITS.txt $(TEMP_DIR)/JayData-vsdoc.js > $(TARGET_DIR)/JayData-vsdoc.js
 
-$(TEMP_DIR)/JayDataRaw.js : $(TEMP_DIR)/Plugins.js $(PROVIDERS)
-	@@cat $(TEMP_DIR)/Plugins.js $(PROVIDERS) > $(TEMP_DIR)/JayDataRaw.js
+JayDataMin: JayData
+	@@echo "Minifying JayData library..."
+	@@java -jar $(COMPILER) --js $(TARGET_DIR)/JayData.js --js_output_file $(TEMP_DIR)/JayData.min.js
+	@@cat CREDITS.txt $(TEMP_DIR)/JayData.min.js > $(TARGET_DIR)/JayData.min.js
 
-$(TEMP_DIR)/Plugins.js : $(TEMP_DIR)/Expressions.js $(PLUGINS)
-	@@cat $(TEMP_DIR)/Expressions.js $(PLUGINS) > $(TEMP_DIR)/Plugins.js
-
-$(TEMP_DIR)/Expressions.js : $(TEMP_DIR)/TypeSystems.js $(EXPRESSIONS)
-	@@cat $(TEMP_DIR)/TypeSystems.js $(EXPRESSIONS) > $(TEMP_DIR)/Expressions.js
+JayData: $(TEMP_DIR)/TypeSystems.js
+	@@echo "Building JayData library..."
+	@@test -d $(TARGET_DIR) || mkdir -p $(TARGET_DIR)
+	@@cat $(TEMP_DIR)/TypeSystems.js $(JAYDATA_SOURCE) > $(TEMP_DIR)/JayData.js
+	@@cat CREDITS.txt $(TEMP_DIR)/JayData.js > $(TARGET_DIR)/JayData.js
 
 $(TEMP_DIR)/TypeSystems.js : $(TYPE_SYSTEM)
-	@@echo ${SRC_DIR}
+	@@echo "Building JayData type system..."
+	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
 	@@cat $(TYPE_SYSTEM) > $(TEMP_DIR)/TypeSystems.js
 
 .PHONY: JayDataMin JayData JayDataStandaloneMin JayDataStandalone
