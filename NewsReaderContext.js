@@ -1,4 +1,5 @@
-﻿$data.Class.define("$news.Types.Category", $data.Entity, null, {
+﻿// generated file
+$data.Class.define("$news.Types.Category", $data.Entity, null, {
     Id: { type: "int", key: true, computed: true },
     Title: { type: "string" },
     Articles: { type: "Array", elementType: "$news.Types.Article", inverseProperty: "Category" }
