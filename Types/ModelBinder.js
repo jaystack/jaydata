@@ -17,28 +17,44 @@ $data.Class.define('$data.ModelBinder', null, null, {
 		}
 
         if (meta.$selector){
-            var type = meta.$selector.split(':');
-            switch (type[0]){
-                case 'json':
-                    var path = type[1].split('.');
-                    while (path.length) {
-                        data = data[path[0]];
-                        path = path.slice(1);
-                        if (!data) {
-                            return data;
-                        }
-                    }
-                    break;
-				case 'css':
-                case 'xml':
-					if (data.querySelector){
-						data = data[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
-					}else{
-						data = $(data).find(type[1]);
-						if (!meta.$item) data = data[0];
-					}
-                    break;
-            }
+			if (!(meta.$selector instanceof Array)){
+				meta.$selector = [meta.$selector];
+			}
+
+			var i = 0;
+			while (i < meta.$selector.length){
+				var selector = meta.$selector[i];
+				var type = selector.split(':');
+				switch (type[0]){
+					case 'json':
+						var path = type[1].split('.');
+						while (path.length) {
+							if (typeof data[path[0]] === 'undefined'){
+								if (i === meta.$selector.length){
+									return data;
+								}
+							}else{
+								data = data[path[0]];
+								path = path.slice(1);
+								if (!data) {
+									return data;
+								}
+							}
+						}
+						break;
+					case 'css':
+					case 'xml':
+						if (data.querySelector){
+							data = data[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
+						}else{
+							data = $(data).find(type[1]);
+							if (!meta.$item) data = data[0];
+						}
+						break;
+				}
+				i++;
+				if (data) break;
+			}
         }
 
 		if (meta.$value){
