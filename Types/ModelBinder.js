@@ -44,6 +44,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
 								path = path.slice(1);
 							}
 						}
+						if (!path.length){
+							i = metaSelector.length;
+						}
 						break;
 					case 'css':
 					case 'xml':
