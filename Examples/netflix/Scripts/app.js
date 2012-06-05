@@ -1,8 +1,8 @@
-Netflix.context.prepareRequest = function(cfg){
+/*Netflix.context.prepareRequest = function(cfg){
     cfg.url += '&$format=json&$callback=callback';
     cfg.dataType = 'jsonp';
     cfg.jsonpCallback = "callback";
-};
+};*/
 
 var itemTpl = new Ext.XTemplate(
     '<tpl if="BoxArt.SmallUrl">',
