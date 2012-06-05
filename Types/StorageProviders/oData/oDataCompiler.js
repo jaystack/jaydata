@@ -17,7 +17,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         this.Visit(query.expression, queryFragments);
 
         query.modelBinderConfig = {};
-        var modelBinder = Container.createModelBinderConfigCompiler(query, this.includes);
+        var modelBinder = Container.createModelBinderConfigCompiler(query, this.includes, true);
         modelBinder.Visit(query.expression);
 
 

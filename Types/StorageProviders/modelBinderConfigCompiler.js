@@ -6,9 +6,10 @@ $C('$data.modelBinder.FindProjectionVisitor', $data.Expressions.EntityExpression
 });
 
 $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (query, includes) {
+    constructor: function (query, includes, oDataProvider) {
         this._query = query;
         this._includes = includes;
+        this._isoDataProvider = oDataProvider || false;
     },
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
@@ -32,7 +33,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         builder.resetModelBinderProperty();
         this._query.modelBinderConfig = builder.modelBinderConfig;
     },
-	VisitConstantExpression: function (expression, builder) {
+    VisitConstantExpression: function (expression, builder) {
         builder.modelBinderConfig['$type'] = expression.type;
         builder.modelBinderConfig['$value'] = expression.value;
     },
@@ -50,6 +51,9 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     _defaultModelBinder: function (expression) {
         var builder = Container.createqueryBuilder();
         builder.modelBinderConfig['$type'] = $data.Array;
+        if (this._isoDataProvider) {
+            builder.modelBinderConfig['$selector'] = ['json:d.results', 'json:d'];
+        }
         builder.modelBinderConfig['$item'] = {};
         builder.selectModelBinderProperty('$item');
 
@@ -67,7 +71,11 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     //complex type
                     builder.selectModelBinderProperty(prop.name);
                     builder.modelBinderConfig['$type'] = Container.resolveType(prop.dataType);
-                    builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
+                    if (this._isoDataProvider) {
+                        builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
+                    } else {
+                        builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
+                    }
                     this._addPropertyToModelBinderConfig(Container.resolveType(prop.dataType), builder);
                     builder.popModelBinderProperty();
                 } else {
@@ -87,15 +95,20 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
 
             builder.selectModelBinderProperty(ct.FromPropertyName);
             builder.modelBinderConfig['$type'] = ct.ToType;
-            builder.modelBinderConfig['$selector'] = 'json:'+ct.FromPropertyName;
+            if (this._isoDataProvider) {
+                builder.modelBinderConfig['$selector'] = ['json:' + ct.FromPropertyName + '.results', 'json:' + ct.FromPropertyName];
+            } else {
+                builder.modelBinderConfig['$selector'] = 'json:' + ct.FromPropertyName;
+            }
             this._addPropertyToModelBinderConfig(ct.ToType, builder);
-            
+
             builder.popModelBinderProperty();
         }, this);
     },
     DefaultSelection: function (builder) {
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = this._query.entitySet.elementType;
+
         var storageModel = this._query.context._storageModel.getStorageModel(this._query.entitySet.elementType);
 
         this._addPropertyToModelBinderConfig(this._query.entitySet.elementType, builder);
@@ -109,8 +122,11 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     association = tmpStorageModel.Associations[includes[i]];
                     tmpStorageModel = this._query.context._storageModel.getStorageModel(association.ToType);
                 }
-
-                builder.modelBinderConfig['$selector'] = 'json:' + includes[includes.length-1];
+                if (this._isoDataProvider) {
+                    builder.modelBinderConfig['$selector'] = ['json:' + includes[includes.length - 1] + '.results', 'json:' + includes[includes.length - 1]];
+                } else {
+                    builder.modelBinderConfig['$selector'] = 'json:' + includes[includes.length - 1];
+                }
                 if (association.ToMultiplicity === '*') {
                     builder.modelBinderConfig['$type'] = $data.Array;
                     builder.selectModelBinderProperty('$item');
@@ -155,7 +171,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
             this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
         } else {
-            
+
             builder.modelBinderConfig['$source'] = expression.memberName;
         }
     },
@@ -169,23 +185,45 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitComplexTypeExpression: function (expression, builder) {
         this.Visit(expression.source, builder);
         this.Visit(expression.selector, builder);
-        if (!builder.modelBinderConfig['$selector']) {
-            builder.modelBinderConfig['$selector'] = 'json:';
+
+
+        if (('$selector' in builder.modelBinderConfig) && (builder.modelBinderConfig.$selector.length > 0)) {
+            if (builder.modelBinderConfig.$selector instanceof $data.Array) {
+                var temp = builder.modelBinderConfig.$selector[1];
+                builder.modelBinderConfig.$selector[0] = temp + '.' + expression.selector.memberName + '.results';
+                builder.modelBinderConfig.$selector[1] = temp + '.' + expression.selector.memberName;
+            } else {
+                builder.modelBinderConfig.$selector += '.' + expression.selector.memberName;
+            }
+
         } else {
-            builder.modelBinderConfig['$selector'] += '.';
+            if (this._isoDataProvider) {
+                builder.modelBinderConfig['$selector'] = ['json:' + expression.selector.memberName + '.results', 'json:' + expression.selector.memberName];
+            } else {
+                builder.modelBinderConfig['$selector'] = 'json:' + expression.selector.memberName;
+            }
         }
-        builder.modelBinderConfig['$selector'] += expression.selector.memberName;
     },
     VisitEntityExpression: function (expression, builder) {
         this.Visit(expression.source, builder);
     },
     VisitAssociationInfoExpression: function (expression, builder) {
         if (('$selector' in builder.modelBinderConfig) && (builder.modelBinderConfig.$selector.length > 0)) {
-            builder.modelBinderConfig.$selector += '.';
+            if (builder.modelBinderConfig.$selector instanceof $data.Array) {
+                var temp = builder.modelBinderConfig.$selector[1];
+                builder.modelBinderConfig.$selector[0] = temp + '.' + expression.associationInfo.FromPropertyName + '.results';
+                builder.modelBinderConfig.$selector[1] = temp + '.' + expression.associationInfo.FromPropertyName;
+            } else {
+                builder.modelBinderConfig.$selector += '.' + expression.associationInfo.FromPropertyName;
+            }
+
         } else {
-            builder.modelBinderConfig['$selector'] = 'json:';
+            if (this._isoDataProvider) {
+                builder.modelBinderConfig['$selector'] = ['json:' + expression.associationInfo.FromPropertyName + '.results', 'json:' + expression.associationInfo.FromPropertyName];
+            } else {
+                builder.modelBinderConfig['$selector'] = 'json:' + expression.associationInfo.FromPropertyName;
+            }
         }
-        builder.modelBinderConfig['$selector'] += expression.associationInfo.FromPropertyName;
     },
     VisitObjectLiteralExpression: function (expression, builder) {
         builder.modelBinderConfig['$type'] = $data.Object;
