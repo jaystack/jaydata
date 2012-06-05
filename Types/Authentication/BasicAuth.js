@@ -24,7 +24,7 @@ $data.Class.define("$data.Authentication.BasicAuth.BasicAuth", $data.Authenticat
                 origBeforeSend(xhr);
         };
         
-        $.ajax(cfg);
+        $data.ajax(cfg);
     },
     __encodeBase64: function (val) {
         var b64array = "ABCDEFGHIJKLMNOP" +

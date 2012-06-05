@@ -18,7 +18,7 @@ $data.Class.define("$data.Authentication.FacebookAuth", $data.Authentication.Aut
         var provider = this;
         provider.configuration.stateCallbacks = callbacks || {};
 
-        $.ajax({
+        $data.ajax({
             url: this.configuration.Url_code,
             data: 'type=' + provider.configuration.type_code + '&client_id=' + provider.configuration.app_id + '&scope=' + provider.configuration.scope,
             type: 'POST',
@@ -52,12 +52,12 @@ $data.Class.define("$data.Authentication.FacebookAuth", $data.Authentication.Aut
                 cfg.url = cfg.url + andChar + 'access_token=' + this.configuration.access_token;
         }
 
-        $.ajax(cfg);
+        $data.ajax(cfg);
     },
     _processRequestToken: function (verification_data) {
         var provider = this;
 
-        $.ajax({
+        $data.ajax({
             url: provider.configuration.Url_token,
             data: 'type=' + provider.configuration.type_token + '&client_id=' + provider.configuration.app_id + '&code=' + verification_data.code,
             type: 'POST',
