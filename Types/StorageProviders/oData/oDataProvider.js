@@ -99,7 +99,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             dataType: "JSON",
             success: function (data, textStatus, jqXHR) {
                 if (callBack.success) {
-                    query.rawDataList = data.d || [{ cnt: data }];
+                    query.rawDataList = data || [{ cnt: data }];
                     callBack.success(query);
                 }
             },
