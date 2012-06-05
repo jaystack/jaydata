@@ -27,7 +27,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             storage: this.providerConfiguration.storage
         };
 
-		if (this.connection) return this.connection;
+        if (this.connection) return this.connection;
 
         var connection = null;
         if (this.providerConfiguration.storage) {
@@ -38,7 +38,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             connection = new $data.dbClient.openDatabaseClient.OpenDbConnection(ctorParm);
         }
 
-		this.connection = connection;
+        this.connection = connection;
 
         return connection;
     },
@@ -125,8 +125,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         value: {
             equal: { mapTo: '=', dataType: "boolean" },
             notEqual: { mapTo: '!=', dataType: "boolean" },
-			equalTyped: { mapTo: '=', dataType: "boolean" },
-			notEqualTyped: { mapTo: '!=', dataType: "boolean" },
+            equalTyped: { mapTo: '=', dataType: "boolean" },
+            notEqualTyped: { mapTo: '!=', dataType: "boolean" },
             greaterThan: { mapTo: '>', dataType: "boolean" },
             greaterThanOrEqual: { mapTo: '>=', dataType: "boolean" },
 
@@ -154,6 +154,27 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             positive: { mapTo: '+' },
             negative: { maptTo: '-' }
         }
+    },
+
+    supportedSetOperations: {
+        value: {
+            filter: {},
+            map: {},
+            length: {},
+            forEach: {},
+            toArray: {},
+            single: {},
+            some: { allowedIn: [$data.Expressions.FilterExpression] },
+            every: { allowedIn: [$data.Expressions.FilterExpression] },
+            take: {},
+            skip: {},
+            orderBy: {},
+            orderByDescending: {},
+            first: {},
+            include: {}
+        },
+        enumerable: true,
+        writable: true
     },
 
     buildDbType_modifyInstanceDefinition: function (instanceDefinition, storageModel) {
@@ -299,7 +320,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                             }
                         }
                         that.SqlCommands = that.SqlCommands.concat(deleteCmd);
-						console.log(deleteCmd);
+                        console.log(deleteCmd);
                         break;
                     case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
                         for (var objName in existObjectInDB) {
@@ -680,8 +701,8 @@ $data.storageProviders.sqLite.DbCreationType = {
     DropAllExistingTables: 30
 };
 
-if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported){
-	$data.StorageProviderBase.registerProvider("webSql", $data.storageProviders.sqLite.SqLiteStorageProvider);
-	$data.StorageProviderBase.registerProvider("sqLite", $data.storageProviders.sqLite.SqLiteStorageProvider);
-	$data.webSqlProvider = $data.storageProviders.sqLite.SqLiteStorageProvider;
+if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) {
+    $data.StorageProviderBase.registerProvider("webSql", $data.storageProviders.sqLite.SqLiteStorageProvider);
+    $data.StorageProviderBase.registerProvider("sqLite", $data.storageProviders.sqLite.SqLiteStorageProvider);
+    $data.webSqlProvider = $data.storageProviders.sqLite.SqLiteStorageProvider;
 }

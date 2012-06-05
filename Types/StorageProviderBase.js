@@ -199,6 +199,27 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         return result;
     },
 
+    supportedSetOperations: {
+        value: {
+        },
+        enumerable: true,
+        writable: true
+    },
+    resolveSetOperations: function (operation, expression, frameType) {
+        var result = this.supportedSetOperations[operation];
+        if (!result) {
+            Guard.raise(new Exception("Operation '" + operation + "' is not supported by the provider"));
+        };
+        var allowedIn = result.allowedIn || [];
+        if (frameType && allowedIn) {
+            if ((allowedIn instanceof Array && !allowedIn.some(function (type) { return frameType === Container.resolveType(type); })) ||
+                        (!(allowedIn instanceof Array) && frameType !== Container.resolveType(allowedIn))) {
+                Guard.raise(new Exception(operation + " not supported in: " + frameType.name));
+            }
+        }
+        return result;
+    },
+
 
     makePhysicalTypeDefinition: function (entityDefinition, association) {
     }

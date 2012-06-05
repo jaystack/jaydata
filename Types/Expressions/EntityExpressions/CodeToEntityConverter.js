@@ -57,7 +57,9 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
         var self = this;
         var exp = this.Visit(expression.expression, context);
         var member = this.Visit(expression.member, context);
-        var args = expression.args.map(function (arg) { return self.Visit(arg, context); });
+        var args = expression.args.map(function (arg) {
+            return self.Visit(arg, context);
+        });
         var result;
 
         ///filter=>function(p) { return p.Title == this.xyz.BogusFunction('asd','basd');}
@@ -77,6 +79,16 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 member = Container.createMemberInfoExpression(operation);
                 result = Container.createEntityFieldOperationExpression(exp, member, args);
                 return result;
+
+            case exp instanceof $data.Expressions.EntitySetExpression:
+                var operation = this.scopeContext.resolveSetOperations(member.value, exp, context.frameType);
+                if (!operation) {
+                    Guard.raise("Unknown entity field operation: " + member.getJSON());
+                }
+                member = Container.createMemberInfoExpression(operation);
+                result = Container.createFrameOperationExpression(exp, member, args);
+                return result;
+                
             default:
                 Guard.raise("VisitCall: Only fields can have operations: " + expression.getType().name);
                 //TODO we must not alter the visited tree
@@ -125,7 +137,9 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                         if (assocInfo.ToMultiplicity !== "*") {
                             var ee = Container.createEntityExpression(setExpression, {});
                             return ee;
-                        }
+                        }/* else {
+                            context.lambdaParameters.push(setExpression);
+                        }*/
                         return setExpression;
                     case "complexProperty":
                         memberDefinitionExp = Container.createMemberInfoExpression(memberDefinition);

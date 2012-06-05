@@ -368,6 +368,26 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         enumerable: true,
         writable: true
     },
+    supportedSetOperations: {
+        value: {
+            filter: { },
+            map: {},
+            length: {},
+            forEach: {},
+            toArray: {},
+            single: {},
+            some: { allowedIn: [$data.Expressions.FilterExpression] },
+            every: { allowedIn: [$data.Expressions.FilterExpression] },
+            take: {},
+            skip: {},
+            orderBy: {},
+            orderByDescending: {},
+            first: {},
+            include: {}
+        },
+        enumerable: true,
+        writable: true
+    },
     fieldConverter: {
         value: {
             fromDb: {

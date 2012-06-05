@@ -13,6 +13,12 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
+    VisitSomeExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
+    VisitEveryExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
     VisitToArrayExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
