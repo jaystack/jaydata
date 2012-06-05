@@ -164,8 +164,6 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             forEach: {},
             toArray: {},
             single: {},
-            some: { allowedIn: [$data.Expressions.FilterExpression] },
-            every: { allowedIn: [$data.Expressions.FilterExpression] },
             take: {},
             skip: {},
             orderBy: {},

@@ -104,7 +104,6 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
             forEach: {},
             toArray: {},
             single: {},
-            some: {},
             take: {},
             skip: {},
             orderBy: {},

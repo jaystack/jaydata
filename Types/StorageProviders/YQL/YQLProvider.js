@@ -73,7 +73,6 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
             forEach: {},
             toArray: {},
             single: {},
-            some: {},
             take: {},
             skip: {},
             orderBy: {},

@@ -312,13 +312,13 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     some: function (filterPredicate, thisArg, onResult) {
-        ///	<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///	<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
         ///	<param name="filterPredicate" type="Function">Filter function</param>
         ///	<param name="thisArg" type="Function">The query parameters for filter function</param>
         ///	<param name="onResult_items" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
         ///	<signature>
-        ///		<summary>Filters a set of entities using a boolean expression and returns a </summary>
+        ///		<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
         ///		<param name="filterPredicate" type="string">
         ///			Same as in filter.
         ///		</param>
@@ -328,7 +328,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		<returns type="$data.Promise" />
         ///	</signature>
         ///	<signature>
-        ///		<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///		<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
         ///		<param name="filterPredicate" type="Function">
         ///			Same as in filter.
         ///		</param>
@@ -337,8 +337,8 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</param>
         ///		<returns type="$data.Promise" />
         ///		<example>
-        ///			Get "George" from the Person entity set. &#10;
-        ///			Persons.single( function( person ) { return person.FirstName == this.name; }, { name: "George" }, {&#10;
+        ///         Is there any person who's first name is "George"? &#10;
+        ///			Persons.some( function( person ) { return person.FirstName == this.name; }, { name: "George" }, {&#10;
         ///				success: function ( result ){ ... },&#10;
         ///				error: function () { ... }
         ///			});
@@ -370,7 +370,7 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
     every: function (filterPredicate, thisArg, onResult) {
-        ///	<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///	<summary>Filters a set of entities using a boolean expression and returns true if all elements of the EntitySet is in the result set.</summary>
         ///	<param name="filterPredicate" type="Function">Filter function</param>
         ///	<param name="thisArg" type="Function">The query parameters for filter function</param>
         ///	<param name="onResult_items" type="Function">A callback function</param>
@@ -395,8 +395,8 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</param>
         ///		<returns type="$data.Promise" />
         ///		<example>
-        ///			Get "George" from the Person entity set. &#10;
-        ///			Persons.single( function( person ) { return person.FirstName == this.name; }, { name: "George" }, {&#10;
+        ///			Result is true when all person are married. &#10;
+        ///			Persons.every( function( person ) { return person.Married == true; }, null, {&#10;
         ///				success: function ( result ){ ... },&#10;
         ///				error: function () { ... }
         ///			});
@@ -662,7 +662,9 @@ $data.Class.define('$data.Queryable', null, null,
         }
     },
     _checkOperation: function (name) {
-        this.entitySet.entityContext.resolveSetOperations(name);
+        var operation = this.entitySet.entityContext.resolveSetOperations(name);
+        if (operation.invokable != undefined && !operation.invokable)
+            Guard.raise(new Exception("Operation '" + name + "' is not invokable with the provider"));
     },
     entitySet: {}
 

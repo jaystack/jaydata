@@ -1,7 +1,7 @@
 $(document).ready(function () {
     if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
-    frameOperatorTests({ name: "sqLite", dataBaseName: 'frameOperatorTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
-    setOperationTests({ name: "oData", dataBaseName: 'setOperationTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    frameOperatorTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    setOperationTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
 });
 
 function frameOperatorTests(providerConfig) {
@@ -123,21 +123,24 @@ function frameOperatorTests(providerConfig) {
             notEqual(db.Articles.filter(function () { return true; }).some, undefined, 'some on Queryable failed');
 
             $news.Types.NewsContext.generateTestData(db, function () {
-                db.Articles.some(null, null, function (val) {
-                    start();
+                try {
+                    db.Articles.some(null, null, function (val) {
+                        start();
 
-                    equal(val, true, 'result failed');
+                        equal(val, true, 'result failed');
 
-                });
-            });
+                    });
 
-            $news.Types.NewsContext.generateTestData(db, function () {
-                db.Articles.some(function (a) { return a.Id == 1 }, null, function (val) {
-                    start();
+                    db.Articles.some(function (a) { return a.Id == 1 }, null, function (val) {
+                        start();
 
-                    equal(val, true, 'result failed');
+                        equal(val, true, 'result failed');
 
-                });
+                    });
+                } catch (e) {
+                    ok(false, e);
+                    start(5);
+                }
             });
         });
     });
@@ -150,21 +153,25 @@ function frameOperatorTests(providerConfig) {
             notEqual(db.Articles.filter(function () { return true; }).every, undefined, 'every on Queryable failed');
 
             $news.Types.NewsContext.generateTestData(db, function () {
-                db.Articles.every(null, null, function (val) {
-                    start();
+                try {
+                    db.Articles.every(null, null, function (val) {
+                        start();
 
-                    equal(val, true, 'result failed');
+                        equal(val, true, 'result failed');
 
-                });
-            });
+                    });
 
-            $news.Types.NewsContext.generateTestData(db, function () {
-                db.Articles.every(function (a) { return a.Id == 1 }, null, function (val) {
-                    start();
+                    db.Articles.every(function (a) { return a.Id == 1 }, null, function (val) {
+                        start();
 
-                    equal(val, false, 'result failed');
+                        equal(val, false, 'result failed');
 
-                });
+                    });
+                } catch (e) {
+                    ok(false, e);
+                    start(5);
+                }
+
             });
         });
     });
@@ -175,9 +182,10 @@ function setOperationTests(providerConfig) {
     module("setOperationTests Tests");
 
     test("setOperationTests oData inline 1:N operators", 3, function () {
-        //stop(1);
+        stop(1);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             var subFilter = db.Articles.filter(function (a) { return a.Id == 5; });
+            start();
 
             try {
                 var q = db.Categories.filter(function (c) { return c.Articles.some(this.someFilter); }, { someFilter: subFilter }).toTraceString();

@@ -201,6 +201,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
 
     supportedSetOperations: {
         value: {
+            toArray: { invokable: true, allowedIn: [] }
         },
         enumerable: true,
         writable: true
