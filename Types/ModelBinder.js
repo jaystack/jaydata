@@ -17,43 +17,50 @@ $data.Class.define('$data.ModelBinder', null, null, {
 		}
 
         if (meta.$selector){
-			if (!(meta.$selector instanceof Array)){
-				meta.$selector = [meta.$selector];
+			var metaSelector = meta.$selector;
+			if (!(metaSelector instanceof Array)){
+				metaSelector = [metaSelector];
 			}
 
 			var i = 0;
-			while (i < meta.$selector.length){
-				var selector = meta.$selector[i];
+			var part;
+			while (i < metaSelector.length){
+				part = data;
+				var selector = metaSelector[i];
 				var type = selector.split(':');
 				switch (type[0]){
 					case 'json':
 						var path = type[1].split('.');
 						while (path.length) {
-							if (typeof data[path[0]] === 'undefined'){
-								if (i === meta.$selector.length){
-									return data;
+							if (typeof part[path[0]] === 'undefined'){
+								if (i === metaSelector.length){
+									return undefined;
+								}else if (path.length){
+									i++;
+									break;
 								}
 							}else{
-								data = data[path[0]];
+								part = part[path[0]];
 								path = path.slice(1);
-								if (!data) {
-									return data;
-								}
 							}
 						}
 						break;
 					case 'css':
 					case 'xml':
-						if (data.querySelector){
-							data = data[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
+						if (part.querySelector){
+							part = part[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
 						}else{
-							data = $(data).find(type[1]);
-							if (!meta.$item) data = data[0];
+							part = $(part).find(type[1]);
+							if (!meta.$item) part = part[0];
 						}
 						break;
 				}
 				i++;
-				if (data) break;
+			}
+
+			data = part;
+			if (!data){
+				return data;
 			}
         }
 
