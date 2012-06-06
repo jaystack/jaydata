@@ -26,7 +26,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 if (this.providerConfiguration.serviceUrl) {
                     
                     
-                    $.ajax(this._setAjaxAuthHeader({
+                    $data.ajax(this._setAjaxAuthHeader({
                         url: that.providerConfiguration.serviceUrl + "/Delete",
                         type: 'POST',
                         success: function (d) {
@@ -178,7 +178,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         };
 
         this.context.prepareRequest.call(this, requestData);
-        $.ajax(this._setAjaxAuthHeader(requestData));
+        $data.ajax(this._setAjaxAuthHeader(requestData));
     },
     _compile: function (queryable, params) {
         var compiler = new $data.storageProviders.oData.oDataCompiler();
@@ -472,7 +472,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
 
     getServiceMetadata: function () {
-        $.ajax(this._setAjaxAuthHeader({
+        $data.ajax(this._setAjaxAuthHeader({
             url: this.providerConfiguration.oDataServiceHost + "/$metadata",
             dataType: "xml",
             success: function (d) {

@@ -37,7 +37,7 @@
             prop1: { dataType: "integer", key: true },
             prop2: { type: "string" },
             prop3: { type: "$data.String" },
-            prop4: { },
+            prop4: {},
             prop5: { type: $data.String },
             prop6: { type: "date" }
         }, null);
@@ -46,7 +46,7 @@
         ok(memDef.dataType === "integer", 'type equal failed');
         ok(memDef.type === "integer", 'type equal failed');
         ok(Container.resolveType(memDef.dataType) === $data.Integer, 'type equal failed');
-        
+
         var memDef = typeAlias.getMemberDefinition('prop2');
         ok(memDef.dataType === "string", 'type equal failed');
         ok(memDef.type === "string", 'type equal failed');
@@ -91,7 +91,7 @@
 
     test("Type definition - name with namespace ", 3, function () {
         var myNsClass = new nsClass();
-        
+
         notEqual(nsClass, undefined, "nsClass is defined");
         notEqual($namespace5.hello.world.nsClass, undefined, "$namespace5.hello.world.nsClass is defined");
         equal(nsClass.name, "nsClass", "$namespace5.hello.world.nsClass name is nsClass");
@@ -498,4 +498,44 @@
 
     });
 
+    test("Extends fail", 1, function () {
+        raises(function () {
+            var target = "";
+            var obj = { a: 1 };
+            $data.typeSystem.extend(target, obj);
+        }, "Exception thrown");
+    });
+
+    test("Extends noparam", 2, function () {
+        var target = { a: 1 };
+        $data.typeSystem.extend(target);
+        equals(Object.keys(target).length, 1, "Key count");
+        equals(target.a, 1, "Param value");
+    });
+
+    test("Extends multiple param", 4, function () {
+        var target = { a: 1 };
+        var obj1 = { b: 2 };
+        var obj2 = { c: 3 };
+        $data.typeSystem.extend(target, obj1, obj2);
+        equals(Object.keys(target).length, 3, "Key count");
+        equals(target.a, 1, "Param 'a'");
+        equals(target.b, 2, "Param 'b'");
+        equals(target.c, 3, "Param 'c'");
+    });
+    test("Extends overwrite", 2, function () {
+        var target = { a: 1 };
+        var obj = { a: 2 };
+        $data.typeSystem.extend(target, obj);
+        equals(Object.keys(target).length, 1, "Key count");
+        equal(target.a, 2, "Param 'a'");
+    });
+    test("Extends multiple param overwrite", 2, function () {
+        var target = { a: 1 };
+        var obj1 = { a: 2 };
+        var obj2 = { a: 3 };
+        $data.typeSystem.extend(target, obj1, obj2);
+        equals(Object.keys(target).length, 1, "Key count");
+        equal(target.a, 3, "Param 'a'");
+    });
 });
