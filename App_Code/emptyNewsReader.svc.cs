@@ -22,6 +22,11 @@ namespace JayData
             config.SetEntitySetAccessRule("*", EntitySetRights.All);
             config.SetServiceOperationAccessRule("*", ServiceOperationRights.All);
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
+            
+            //config.SetEntitySetPageSize("Articles", 2);
+            //config.SetEntitySetPageSize("Users", 2);
+            //config.SetEntitySetPageSize("UserProfiles", 2);
+            //config.SetEntitySetPageSize("Categories", 2);
         }
 
         protected override ObjectContext CreateDataSource()
@@ -36,14 +41,5 @@ namespace JayData
         {
             return this.CurrentDataSource.CreateObjectSet<Article>().Where(a=>a.Id>minId && a.Title.StartsWith(startsWith));
         }
-        //protected override void OnStartProcessingRequest(ProcessRequestArgs args)
-        //{
-        //    if (args.RequestUri.Segments[2] == "$resetdb")
-        //    {
-        //        this.CurrentDataSource.DeleteDatabase();
-        //        return;
-        //    }
-        //    base.OnStartProcessingRequest(args);
-        //}
     }
 }

@@ -17,28 +17,54 @@ $data.Class.define('$data.ModelBinder', null, null, {
 		}
 
         if (meta.$selector){
-            var type = meta.$selector.split(':');
-            switch (type[0]){
-                case 'json':
-                    var path = type[1].split('.');
-                    while (path.length) {
-                        data = data[path[0]];
-                        path = path.slice(1);
-                        if (!data) {
-                            return data;
-                        }
-                    }
-                    break;
-				case 'css':
-                case 'xml':
-					if (data.querySelector){
-						data = data[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
-					}else{
-						data = $(data).find(type[1]);
-						if (!meta.$item) data = data[0];
-					}
-                    break;
-            }
+			var metaSelector = meta.$selector;
+			if (!(metaSelector instanceof Array)){
+				metaSelector = [metaSelector];
+			}
+
+			var i = 0;
+			var part;
+			while (i < metaSelector.length){
+				part = data;
+				var selector = metaSelector[i];
+				var type = selector.split(':');
+				switch (type[0]){
+					case 'json':
+						var path = type[1].split('.');
+						while (path.length) {
+							if (typeof part[path[0]] === 'undefined'){
+								if (i === metaSelector.length){
+									return undefined;
+								}else if (path.length){
+									i++;
+									break;
+								}
+							}else{
+								part = part[path[0]];
+								path = path.slice(1);
+							}
+						}
+						if (!path.length){
+							i = metaSelector.length;
+						}
+						break;
+					case 'css':
+					case 'xml':
+						if (part.querySelector){
+							part = part[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
+						}else{
+							part = $(part).find(type[1]);
+							if (!meta.$item) part = part[0];
+						}
+						break;
+				}
+				i++;
+			}
+
+			data = part;
+			if (!data){
+				return data;
+			}
         }
 
 		if (meta.$value){

@@ -7,7 +7,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         this.providerConfiguration = $data.typeSystem.extend({
             dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged,
             oDataServiceHost: "/odata.svc",
-            serviceUrl: ""
+            serviceUrl: "",
+            user: null,
+            password: null
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -22,7 +24,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
                 var that = this;
                 if (this.providerConfiguration.serviceUrl) {
-                    $.ajax({
+                    
+                    
+                    $data.ajax(this._setAjaxAuthHeader({
                         url: that.providerConfiguration.serviceUrl + "/Delete",
                         type: 'POST',
                         success: function (d) {
@@ -32,7 +36,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         error: function (error) {
                             callBack.success(that.context);
                         }
-                    });
+                    }));
                 } else {
                     callBack.success(that.context);
                 }
@@ -42,6 +46,60 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 break;
         }
     },
+    _setAjaxAuthHeader: function (cfg) {
+        var encodeBase64 = function (val) {
+            var b64array = "ABCDEFGHIJKLMNOP" +
+                               "QRSTUVWXYZabcdef" +
+                               "ghijklmnopqrstuv" +
+                               "wxyz0123456789+/" +
+                               "=";
+
+            input = val;
+            var base64 = "";
+            var hex = "";
+            var chr1, chr2, chr3 = "";
+            var enc1, enc2, enc3, enc4 = "";
+            var i = 0;
+
+            do {
+                chr1 = input.charCodeAt(i++);
+                chr2 = input.charCodeAt(i++);
+                chr3 = input.charCodeAt(i++);
+
+                enc1 = chr1 >> 2;
+                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+                enc4 = chr3 & 63;
+
+                if (isNaN(chr2)) {
+                    enc3 = enc4 = 64;
+                } else if (isNaN(chr3)) {
+                    enc4 = 64;
+                }
+
+                base64 = base64 +
+                            b64array.charAt(enc1) +
+                            b64array.charAt(enc2) +
+                            b64array.charAt(enc3) +
+                            b64array.charAt(enc4);
+                chr1 = chr2 = chr3 = "";
+                enc1 = enc2 = enc3 = enc4 = "";
+            } while (i < input.length);
+
+            return base64;
+        }
+        if (this.providerConfiguration.user) {
+            var user = this.providerConfiguration.user;
+            var password = this.providerConfiguration.password;
+            var origBeforeSend = cfg.beforeSend;
+            cfg.beforeSend = function(xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + encodeBase64(user + ":" + password || ""));
+                if (typeof origBeforeSend === "function")
+                    origBeforeSend(xhr);
+            }
+        }
+        return cfg;
+    },    
     //buildDbType_modifyInstanceDefinition: function (instanceDefinition, storageModel) {
     //    if (storageModel.Associations) {
     //        storageModel.Associations.forEach(function (association) {
@@ -110,11 +168,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             dataType: "JSON",
             success: function (data, textStatus, jqXHR) {
                 if (callBack.success) {
-                    if ((typeof data === 'object') && (('d' in data) && ('results' in data.d))) {
-                        query.rawDataList = data.d.results;
-                    } else {
-                        query.rawDataList = data.d || [{ cnt: data }];
-                    }
+                    query.rawDataList = typeof data === 'number' ? [{ cnt: data }] : data;
                     callBack.success(query);
                 }
             },
@@ -124,7 +178,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         };
 
         this.context.prepareRequest.call(this, requestData);
-        $.ajax(requestData);
+        $data.ajax(this._setAjaxAuthHeader(requestData));
     },
     _compile: function (queryable, params) {
         var compiler = new $data.storageProviders.oData.oDataCompiler();
@@ -206,6 +260,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }, callBack.error, OData.batchHandler];
 
         this.context.prepareRequest.call(this, requestData);
+
+        if (this.providerConfiguration.user) {
+            requestData[0].user = this.providerConfiguration.user;
+            requestData[0].password = this.providerConfiguration.password || "";
+        }
+
         OData.request.apply(this, requestData);
     },
     save_getInitData: function (item, convertedItems) {
@@ -444,7 +504,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
 
     getServiceMetadata: function () {
-        $.ajax({
+        $data.ajax(this._setAjaxAuthHeader({
             url: this.providerConfiguration.oDataServiceHost + "/$metadata",
             dataType: "xml",
             success: function (d) {
@@ -460,7 +520,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 console.log("error:");
                 console.dir(error);
             }
-        });
+        }));
     },
     nsResolver: function (sPrefix) {
         switch (sPrefix) {

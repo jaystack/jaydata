@@ -36,7 +36,7 @@ $data.Class.define('$data.dbClient.jayStorageClient.JayStorageCommand', $data.db
 
 		query.forEach(function(q, i){
 			if (q){
-				$.ajax({
+				$data.ajax({
 					url: 'http' + (this.connection.connectionParams.storage.ssl ? 's' : '') + '://' + this.connection.connectionParams.storage.src.replace('http://', '').replace('https://', '') + '?db=' + this.connection.connectionParams.storage.key,
 					type: 'POST',
 					headers: {

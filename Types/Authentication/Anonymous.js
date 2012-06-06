@@ -9,7 +9,7 @@ $data.Class.define("$data.Authentication.Anonymous", $data.Authentication.Authen
     Logout: function () {
     },
     CreateRequest: function (cfg) {
-        $.ajax(cfg);
+        $data.ajax(cfg);
     }
 
 }, null);

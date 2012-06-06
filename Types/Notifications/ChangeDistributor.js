@@ -4,7 +4,7 @@ $data.Class.define('$data.Notifications.ChangeDistributor', $data.Notifications.
         this.broadcastUrl = broadcastUrl;
     },
     distributeData: function (data) {
-        $.ajax({
+        $data.ajax({
             url: this.broadcastUrl,
             type: "POST",
             data: 'data=' + JSON.stringify(data),
