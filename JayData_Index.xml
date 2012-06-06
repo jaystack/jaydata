@@ -80,6 +80,9 @@
     <File path="Types/Exception.js"/>
     <File path="Types/StorageProviderBase.js"/>
     <File path="Types/EntityWrapper.js"/>
+    <File path="Types/Ajax/jQueryAjaxWrapper.js"/>
+    <File path="Types/Ajax/WinJSAjaxWrapper.js"/>    
+    <File path="Types/Ajax/ExtJSAjaxWrapper.js"/>
     <File path="Types/Ajax/AjaxStub.js"/>
     <File path="Types/DbClient/DbCommand.js"/>
     <File path="Types/DbClient/DbConnection.js"/>

@@ -77,6 +77,9 @@ JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
 	./Types/Exception.js\
 	./Types/StorageProviderBase.js\
 	./Types/EntityWrapper.js\
+	./Types/Ajax/jQueryAjaxWrapper.js\
+	./Types/Ajax/WinJSAjaxWrapper.js\	
+	./Types/Ajax/ExtJSAjaxWrapper.js\
 	./Types/Ajax/AjaxStub.js\
 	./Types/DbClient/DbCommand.js\
 	./Types/DbClient/DbConnection.js\
