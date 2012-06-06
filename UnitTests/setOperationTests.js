@@ -184,7 +184,8 @@ function setOperationTests(providerConfig) {
     test("setOperationTests oData inline 1:N operators", 3, function () {
         stop(1);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            var subFilter = db.Articles.filter(function (a) { return a.Id == 5; });
+            var subsubFilter = db.Tags.filter(function (t) { t.Id == 5 });
+            var subFilter = db.Articles.filter(function (a) { return a.Tags.some(this.someFilter); }, { someFilter: subsubFilter });
             start();
 
             try {

@@ -376,8 +376,20 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             forEach: {},
             toArray: {},
             single: {},
-            some: { invokable: false, allowedIn: [$data.Expressions.FilterExpression] },
-            every: { invokable: false, allowedIn: [$data.Expressions.FilterExpression] },
+            some: {
+                invokable: false,
+                allowedIn: [$data.Expressions.FilterExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                mapTo: 'any',
+                frameType: $data.Expressions.SomeExpression
+            },
+            every: {
+                invokable: false,
+                allowedIn: [$data.Expressions.FilterExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                mapTo: 'all',
+                frameType: $data.Expressions.EveryExpression
+            },
             take: {},
             skip: {},
             orderBy: {},
