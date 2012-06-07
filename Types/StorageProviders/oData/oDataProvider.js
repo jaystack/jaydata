@@ -467,8 +467,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             return result.join(",");
         }
         return keyValue;
-    },
-    /*
+    }/*,
     getServiceMetadata: function () {
         $data.ajax(this._setAjaxAuthHeader({
             url: this.providerConfiguration.oDataServiceHost + "/$metadata",
