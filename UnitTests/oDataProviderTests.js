@@ -1173,4 +1173,12 @@
             equal(q.queryText, "/Users?$filter=(Id gt 0)&$expand=Profile&$select=Id,Profile/Bio", "Invalid query string");
         });
     });
+    test("filter_chain", 1, function () {
+        stop(1);
+        (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
+            var q = db.Users.where(function (usr) { return usr.Id > 0; }).filter(function (usr) { return usr.LoginName.contains('Joe'); }).toTraceString();
+            start(1);
+            equal(q.queryText, "/Users?$filter=((Id gt 0) and substringof('Joe',LoginName))", "Invalid query string");
+        });
+    });
 });
