@@ -871,10 +871,17 @@ function T3(providerConfig, msg) {
     });
 
 
+}
+
+function T3_oDataV3(providerConfig, msg) {
+    msg = msg || '';
+    module("DataTestsV3" + msg);
+
+
     test("OData_Function_sub_frames", function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        expect(5);
-        stop(3);
+        expect(11);
+        stop(4);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
@@ -887,7 +894,7 @@ function T3(providerConfig, msg) {
                     success: function (result) {
                         start();
                         equal(result.length, 1, 'A1: result length failed');
-                        equal(result[0].title, 'A1: Sport', 'result value failed');
+                        equal(result[0].Title, 'Sport', 'A1: result value failed');
                     },
                     error: function (e) {
                         start();
@@ -911,24 +918,42 @@ function T3(providerConfig, msg) {
                     }
                 });
 
-                articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Name1'; });
-                q = db.Categories.filter(function (ctg) { return ctg.Articles.every(this.filter); }, { filter: articleFilter });
+                articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Full Name2'; });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
                 c = q.toTraceString();
-                equal(c.queryText, "/Categories?$filter=Articles/all(art: (art/Author/Profile/FullName eq 'Name1'))", "A3: Invalid query string");
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Author/Profile/FullName eq 'Full Name2'))", "A3: Invalid query string");
 
                 q.toArray({
                     success: function (result) {
                         start();
-                        equal(result.length, 1, 'A3: result length failed');
-                        equal(result[0].title, 'A3: Sport', 'result value failed');
+                        equal(result.length, 5, 'A3: result length failed');
+                        equal(result[0].Title, 'Sport', 'A3: result value failed');
                     },
                     error: function (e) {
                         start();
-                        ok(false, 'A3: Category every article some Author.Profile.Fullname contains "Name1", error: ' + e);
+                        ok(false, 'A3: Category some article Author.Profile.Fullname "Full Name2", error: ' + e);
+                    }
+                });
+
+                articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Starts With Test'; });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Author/Profile/FullName eq 'Starts With Test'))", "A4: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 1, 'A4: result length failed');
+                        equal(result[0].Title, 'Politics', 'A4: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A4: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
                     }
                 });
 
             });
         });
     });
+
 }
