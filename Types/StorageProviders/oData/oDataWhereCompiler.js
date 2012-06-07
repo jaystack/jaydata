@@ -8,10 +8,7 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
     },
 
     VisitParametricQueryExpression: function (expression, context) {
-        context.data = "";
         this.Visit(expression.expression, context);
-        context["$filter"] = context.data;
-        context.data = "";
     },
 
     VisitUnaryExpression: function (expression, context) {

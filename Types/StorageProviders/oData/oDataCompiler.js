@@ -90,7 +90,11 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         this.Visit(expression.source, context);
 
         var filterCompiler = Container.createoDataWhereCompiler(this.provider);
+        context.data = "";
         filterCompiler.compile(expression.selector, context);
+        context["$filter"] = context.data;
+        context.data = "";
+
     },
     VisitEntitySetExpression: function (expression, context) {
         context.urlText += "/" + expression.instance.tableName;
