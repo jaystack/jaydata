@@ -157,7 +157,11 @@ $data.Class.define('$data.EntityContext', null, null,
                     if (memDef.inverseProperty) {
                         if (memDef.inverseProperty === '$$unbound') {
                             //member definition is navigation but not back reference
-                            //Guard.raise("NOT SUPPORTED YET");
+                            if (memDefResolvedDataType === $data.Array) {
+                                this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            } else {
+                                this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            }
                         } else {
                             //member definition is navigation property one..one or one..many case
                             var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
@@ -279,7 +283,8 @@ $data.Class.define('$data.EntityContext', null, null,
         }
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
-        var association = this._addAssociationElement(storageModel.LogicalType, "0..1", memDef.name, refereedStorageModel.LogicalType, "*", memDef.inverseProperty);
+        var associationType = memDef.inverseProperty === '$$unbound' ? '$$unbound' : '0..1';
+        var association = this._addAssociationElement(storageModel.LogicalType, associationType, memDef.name, refereedStorageModel.LogicalType, "*", memDef.inverseProperty);
         storageModel.Associations[memDef.name] = association;
         storageModel.Associations.push(association);
     },
@@ -298,7 +303,8 @@ $data.Class.define('$data.EntityContext', null, null,
         }
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
-        var association = this._addAssociationElement(storageModel.LogicalType, "*", memDef.name, refereedStorageModel.LogicalType, "0..1", memDef.inverseProperty);
+        var associationType = memDef.inverseProperty === '$$unbound' ? '$$unbound' : '*';
+        var association = this._addAssociationElement(storageModel.LogicalType, associationType, memDef.name, refereedStorageModel.LogicalType, "0..1", memDef.inverseProperty);
         storageModel.Associations[memDef.name] = association;
         storageModel.Associations.push(association);
     },
