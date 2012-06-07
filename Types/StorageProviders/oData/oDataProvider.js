@@ -95,7 +95,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             cfg.beforeSend = function(xhr) {
                 xhr.setRequestHeader("Authorization", "Basic " + encodeBase64(user + ":" + password || ""));
                 if (typeof origBeforeSend === "function")
-                    origBeforeSend(xhr);
+                    origBeforeSend.apply(this, arguments);
             }
         }
         return cfg;
@@ -166,6 +166,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var requestData = {
             url: this.providerConfiguration.oDataServiceHost + sql.queryText,
             dataType: "JSON",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Accept", "application/json; odata=verbose, text/javascript, */*; q=0.01");
+            },
             success: function (data, textStatus, jqXHR) {
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'number' ? [{ cnt: data }] : data;

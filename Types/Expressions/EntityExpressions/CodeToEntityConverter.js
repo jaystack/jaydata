@@ -29,7 +29,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
         var et = $data.Expressions.ExpressionType;
         switch (expression.nodeType) {
             case et.LambdaParameterReference:
-                var result = Container.createEntityExpression(context.lambdaParameters[expression.paramIndex], {});
+                var result = Container.createEntityExpression(context.lambdaParameters[expression.paramIndex], { lambda: expression.name });
                 return result;
             case et.LambdaParameter:
                 //TODO: throw descriptive exception or return a value

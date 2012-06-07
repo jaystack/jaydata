@@ -440,7 +440,7 @@ function T3(providerConfig, msg) {
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
 
-                db.Articles.single(function (a) { return a.Id == 1;}, null,{
+                db.Articles.single(function (a) { return a.Id == 1; }, null, {
                     success: function (result) {
                         start(1);
                         ok(result, 'query failed');
@@ -860,12 +860,74 @@ function T3(providerConfig, msg) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                db.PrefilteredArticles(4, 'Art').filter(function(a){return a.Id<7}).toArray(function(result){
+                db.PrefilteredArticles(4, 'Art').filter(function (a) { return a.Id < 7 }).toArray(function (result) {
                     start(1);
                     ok(result);
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
-                    ok(result[1].Title.length>0, 'Title faild');
+                    ok(result[1].Title.length > 0, 'Title faild');
                 })
+            });
+        });
+    });
+
+
+    test("OData_Function_sub_frames", function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(5);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
+                var q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                var c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Title eq 'Article1'))", "A1: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 1, 'A1: result length failed');
+                        equal(result[0].title, 'A1: Sport', 'result value failed');
+                    },
+                    error: function (e) {
+                        start();
+
+                        ok(false, 'A1: Category some article.Title == "Article1", error: ' + e);
+                    }
+                });
+
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.every(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/all(art: (art/Title eq 'Article1'))", "A2: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 0, 'A2: result length failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A2: Category every article.Title == "Article1", error: ' + e);
+                    }
+                });
+
+                articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Name1'; });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.every(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/all(art: (art/Author/Profile/FullName eq 'Name1'))", "A3: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 1, 'A3: result length failed');
+                        equal(result[0].title, 'A3: Sport', 'result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A3: Category every article some Author.Profile.Fullname contains "Name1", error: ' + e);
+                    }
+                });
+
             });
         });
     });

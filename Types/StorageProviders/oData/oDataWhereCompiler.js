@@ -1,7 +1,7 @@
 $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (provider, memberPrefix) {
+    constructor: function (provider, lambdaPrefix) {
         this.provider = provider;
-        this.memberPrefix = memberPrefix;
+        this.lambdaPrefix = lambdaPrefix;
     },
 
     compile: function (expression, context) {
@@ -66,14 +66,10 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
     },
 
     VisitAssociationInfoExpression: function (expression, context) {
-        var prefix = this.memberPrefix ? (this.memberPrefix + '/') : '';
-        context.data += prefix;
         context.data += expression.associationInfo.FromPropertyName;
     },
 
     VisitMemberInfoExpression: function (expression, context) {
-        var prefix = this.memberPrefix ? (this.memberPrefix + '.') : '';
-        context.data += prefix;
         context.data += expression.memberName;
     },
 
@@ -116,6 +112,12 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
 
     VisitEntityExpression: function (expression, context) {
         this.Visit(expression.source, context);
+
+        if (this.lambdaPrefix && expression.selector.lambda) {
+            context.lambda = expression.selector.lambda;
+            context.data += (expression.selector.lambda + '/');
+        }
+
         //if (expression.selector instanceof $data.Expressions.EntityExpression) {
         //    this.Visit(expression.selector, context);
         //}
@@ -157,13 +159,11 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
                 var preparator = Container.createQueryExpressionCreator(arg.value.entitySet.entityContext);
                 var prep_expression = preparator.Visit(frameExpression);
 
-                var lambda = expression.source.selector.associationInfo.To;
-                var prefix = this.memberPrefix ? (this.memberPrefix + '_' + lambda) : lambda;
-                var compiler = new $data.storageProviders.oData.oDataWhereCompiler(this.provider, prefix);
+                var compiler = new $data.storageProviders.oData.oDataWhereCompiler(this.provider, true);
                 var frameContext = {};
                 var compiled = compiler.compile(prep_expression, frameContext);
 
-                context.data += (prefix + ': ' + frameContext.$filter);
+                context.data += (frameContext.lambda + ': ' + frameContext.$filter);
             };
         }
         context.data += ")";
