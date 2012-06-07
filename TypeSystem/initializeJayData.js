@@ -15,7 +15,7 @@ if (!console.error) console.error = function () { };
 (function (global) {
     /// <summary>NodeJS detecting, handling, and module export.</summary>
 
-    $ = typeof $ !== 'undefined' && $ || require('jquery');
+    //$ = typeof $ !== 'undefined' && $ || require('jquery');
 
     if (typeof window === "undefined") {
         window = this;
