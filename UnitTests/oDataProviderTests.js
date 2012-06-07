@@ -679,6 +679,49 @@
         });
     });
 
+	test("get_full_table_3_include_deep_with_multiplicity", 2, function () {
+        stop(1);
+        (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
+            var q = db.Categories.include("Articles").include('Articles.Author').toTraceString();
+            start(1);
+            equal(q.queryText, "/Categories?$expand=Articles,Articles/Author", "Invalid query string");
+            var expectedObject = {
+                $type: $data.Array,
+                $selector: ['json:d.results', 'json:d'],
+                $item: {
+                    $type: $news.Types.Category,
+                    $keys: ['Id'],
+					Id: 'Id',
+					Title: 'Title',
+					Articles: {
+						$selector: ['json:Articles.results', 'json:Articles'],
+						$type: $data.Array,
+						$item: {
+							$type: $news.Types.Article,
+							$keys: ['Id'],
+							Id: "Id",
+							Title: "Title",
+							Lead: "Lead",
+							Body: "Body",
+							CreateDate: "CreateDate",
+							Thumbnail_LowRes: "Thumbnail_LowRes",
+							Thumbnail_HighRes: "Thumbnail_HighRes",
+							Author: {
+								$selector: ['json:Author.results','json:Author'],
+								$type: $news.Types.User,
+								$keys: ["Id"],
+								Id: "Id",
+								LoginName: "LoginName",
+								Email: "Email"			 
+							}
+						}
+					}
+				}
+            };
+            deepEqual(q.modelBinderConfig, expectedObject, "Model binder error");
+        });
+    });
+
     test("filter_table_many_to_one_field_string", 2, function () {
         stop(1);
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
