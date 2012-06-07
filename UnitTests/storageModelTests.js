@@ -8,14 +8,15 @@ test('Filter_noFilter_orderby', function () {
         window['ctx'] = db;
         console.dir(db._storageModel);
 
-        var item1 = Container.createTestItem({
-            Id: 1,
-            User: Container.createUser({ LoginName: 'User1', Email: 'email1@test.com' }),
-            Tags: [
-                Container.createTag({ Title: 'apple' }),
-                Container.createTag({ Title: 'pear' })]
-        });
+        var usr1 = Container.createUser({ LoginName: 'User1', Email: 'email1@test.com' });
+        var usr2 = Container.createUser({ LoginName: 'User1', Email: 'email1@test.com' });
+        var apple = Container.createTag({ Title: 'apple' });
+        var pear = Container.createTag({ Title: 'pear' });
+        var banana = Container.createTag({ Title: 'banana' });
+        var item1 = Container.createTestItem({ Id: 1, User: usr1, Tags: [apple, pear] });
+        var item2 = Container.createTestItem({ Id: 3, User: usr1, Tags: [banana, pear] });
         db.TestTable.add(item1);
+        db.TestTable.add(item2);
         db.saveChanges(function () {
             start(1);
             ok(true);
