@@ -24,8 +24,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
                 var that = this;
                 if (this.providerConfiguration.serviceUrl) {
-                    
-                    
                     $data.ajax(this._setAjaxAuthHeader({
                         url: that.providerConfiguration.serviceUrl + "/Delete",
                         type: 'POST',
@@ -92,10 +90,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var user = this.providerConfiguration.user;
             var password = this.providerConfiguration.password;
             var origBeforeSend = cfg.beforeSend;
-            cfg.beforeSend = function(xhr) {
+            cfg.beforeSend = function (xhr) {
                 xhr.setRequestHeader("Authorization", "Basic " + encodeBase64(user + ":" + password || ""));
                 if (typeof origBeforeSend === "function")
-                    origBeforeSend(xhr);
+                    origBeforeSend.apply(this, xhr);
             }
         }
         return cfg;
@@ -177,8 +175,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         };
 
-        this.context.prepareRequest.call(this, requestData);
-        $data.ajax(this._setAjaxAuthHeader(requestData));
+        this.context.prepareRequest.call(this, this._setAjaxAuthHeader(requestData));
+        $data.ajax(requestData);
     },
     _compile: function (queryable, params) {
         var compiler = new $data.storageProviders.oData.oDataCompiler();
@@ -469,8 +467,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             return result.join(",");
         }
         return keyValue;
-    },
-
+    }/*,
     getServiceMetadata: function () {
         $data.ajax(this._setAjaxAuthHeader({
             url: this.providerConfiguration.oDataServiceHost + "/$metadata",
@@ -506,6 +503,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 break;
         }
     }
+    */
 }, null);
 
 $data.StorageProviderBase.registerProvider("oData", $data.storageProviders.oData.oDataProvider);

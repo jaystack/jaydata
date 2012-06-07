@@ -118,6 +118,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 var association = null;
                 var tmpStorageModel = storageModel;
                 for (var i = 0; i < includes.length; i++) {
+					if (builder.modelBinderConfig.$item) builder.selectModelBinderProperty('$item');
                     builder.selectModelBinderProperty(includes[i]);
                     association = tmpStorageModel.Associations[includes[i]];
                     tmpStorageModel = this._query.context._storageModel.getStorageModel(association.ToType);
