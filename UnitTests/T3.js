@@ -881,7 +881,7 @@ function T3_oDataV3(providerConfig, msg) {
     test("OData_Function_sub_frames", function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(17);
-        stop(4);
+        stop(6);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
