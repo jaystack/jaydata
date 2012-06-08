@@ -157,10 +157,10 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
                 var prep_expression = preparator.Visit(frameExpression);
 
                 var compiler = new $data.storageProviders.oData.oDataWhereCompiler(this.provider, true);
-                var frameContext = {};
+                var frameContext = { data: "" };
                 var compiled = compiler.compile(prep_expression, frameContext);
 
-                context.data += (frameContext.lambda + ': ' + frameContext.$filter);
+                context.data += (frameContext.lambda + ': ' + frameContext.data);
             };
         }
         context.data += ")";
