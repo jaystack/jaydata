@@ -35,6 +35,15 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             //'in': { mapTo: ' in ', dataType: $data.Boolean, resolvableType: [$data.Array, $data.Queryable] }
         }
     },
+    supportedSetOperations: {
+        value: {
+            length: {},
+            toArray: {},
+            forEach: {}
+        },
+        enumerable: true,
+        writable: true
+    },
     _setupExtensionMethods: function () {
         /// <summary>
         /// Sets the extension method 'setCallback' on IDBRequest, IDBOpenDBRequest, and IDBTransaction types

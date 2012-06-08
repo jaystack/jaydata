@@ -13,19 +13,6 @@ $data.Class.define('$data.Queryable', null, null,
         Object.defineProperty(this, "entitySet", { value: es, enumerable: true, writable: true });
         this.expression = rootExpression;
     },
-    _checkRootExpression: function () {
-        if (!this.expression) {
-            var ec = Container.createEntityContextExpression(this.entitySet.entityContext);
-            var name = this.entitySet.collectionName;
-            var memberdef = this.entitySet.entityContext.getType().getMemberDefinition(name);
-            var es = Container.createEntitySetExpression(ec,
-                Container.createMemberInfoExpression(memberdef), null,
-                this.entitySet);
-            this.expression = es;
-        }
-    },
-
-    entitySet: {},
 
     filter: function (predicate, thisArg) {
         ///<summary>Filters a set of entities using a boolean expression.</summary>
@@ -67,6 +54,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///</example>
         ///</signature>
 
+        this._checkOperation('filter');
         var expression = Container.createCodeExpression(predicate, thisArg);
         var expressionSource = this.expression;
         if (this.expression instanceof $data.Expressions.FilterExpression) {
@@ -121,6 +109,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('map');
         var codeExpression = Container.createCodeExpression(projection, thisArg);
         var exp = Container.createProjectionExpression(this.expression, codeExpression);
         var q = Container.createQueryable(this, exp);
@@ -156,6 +145,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('length');
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult);
 
@@ -194,6 +184,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('forEach');
         var pHandler = new $data.PromiseHandler();
         function iteratorFunc(items) { items.forEach(iterator); }
         var cbWrapper = pHandler.createCallback(iteratorFunc);
@@ -246,6 +237,7 @@ $data.Class.define('$data.Queryable', null, null,
             });
         }
 
+        this._checkOperation('toArray');
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult_items);
 
@@ -295,6 +287,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('single');
         var q = this;
         if (filterPredicate) {
             q = this.filter(filterPredicate, thisArg);
@@ -308,6 +301,122 @@ $data.Class.define('$data.Queryable', null, null,
         var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
         try {
             var expression = preparator.Visit(singleExpression);
+            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+
+            q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
+
+    some: function (filterPredicate, thisArg, onResult) {
+        ///	<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
+        ///	<param name="filterPredicate" type="Function">Filter function</param>
+        ///	<param name="thisArg" type="Function">The query parameters for filter function</param>
+        ///	<param name="onResult_items" type="Function">A callback function</param>
+        ///	<returns type="$data.Promise" />
+        ///	<signature>
+        ///		<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
+        ///		<param name="filterPredicate" type="string">
+        ///			Same as in filter.
+        ///		</param>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result, same as in toArray.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///	</signature>
+        ///	<signature>
+        ///		<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
+        ///		<param name="filterPredicate" type="Function">
+        ///			Same as in filter.
+        ///		</param>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result, same as in toArray.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///		<example>
+        ///         Is there any person who's first name is "George"? &#10;
+        ///			Persons.some( function( person ) { return person.FirstName == this.name; }, { name: "George" }, {&#10;
+        ///				success: function ( result ){ ... },&#10;
+        ///				error: function () { ... }
+        ///			});
+        ///		</example>
+        ///	</signature>
+
+        this._checkOperation('some');
+        var q = this;
+        if (filterPredicate) {
+            q = this.filter(filterPredicate, thisArg);
+        }
+        q = q.take(1);
+
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult);
+
+        var someExpression = Container.createSomeExpression(q.expression);
+        var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
+        try {
+            var expression = preparator.Visit(someExpression);
+            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+
+            q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
+
+    every: function (filterPredicate, thisArg, onResult) {
+        ///	<summary>Filters a set of entities using a boolean expression and returns true if all elements of the EntitySet is in the result set.</summary>
+        ///	<param name="filterPredicate" type="Function">Filter function</param>
+        ///	<param name="thisArg" type="Function">The query parameters for filter function</param>
+        ///	<param name="onResult_items" type="Function">A callback function</param>
+        ///	<returns type="$data.Promise" />
+        ///	<signature>
+        ///		<summary>Filters a set of entities using a boolean expression and returns a </summary>
+        ///		<param name="filterPredicate" type="string">
+        ///			Same as in filter.
+        ///		</param>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result, same as in toArray.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///	</signature>
+        ///	<signature>
+        ///		<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///		<param name="filterPredicate" type="Function">
+        ///			Same as in filter.
+        ///		</param>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result, same as in toArray.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///		<example>
+        ///			Result is true when all person are married. &#10;
+        ///			Persons.every( function( person ) { return person.Married == true; }, null, {&#10;
+        ///				success: function ( result ){ ... },&#10;
+        ///				error: function () { ... }
+        ///			});
+        ///		</example>
+        ///	</signature>
+
+        this._checkOperation('every');
+        var q = this;
+        if (filterPredicate) {
+            q = this.filter(filterPredicate, thisArg);
+        }
+        q = q.take(1);
+
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult);
+
+        var everyExpression = Container.createEveryExpression(q.expression);
+        var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
+        try {
+            var expression = preparator.Visit(everyExpression);
             this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
 
             q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
@@ -335,6 +444,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('take');
         var constExp = Container.createConstantExpression(amount, "number");
         var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Take);
         return Container.createQueryable(this, takeExp);
@@ -355,6 +465,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('skip');
         var constExp = Container.createConstantExpression(amount, "number");
         var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Skip);
         return Container.createQueryable(this, takeExp);
@@ -389,6 +500,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///</example>
         ///</signature>
 
+        this._checkOperation('orderBy');
         var codeExpression = Container.createCodeExpression(selector, thisArg);
         var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderBy);
         var q = Container.createQueryable(this, exp);
@@ -423,6 +535,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///</example>
         ///</signature>
 
+        this._checkOperation('orderByDescending');
         var codeExpression = Container.createCodeExpression(selector, thisArg);
         var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderByDescending);
         var q = Container.createQueryable(this, exp);
@@ -458,6 +571,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('first');
         var q = this;
         if (filterPredicate) {
             q = this.filter(filterPredicate, thisArg);
@@ -498,6 +612,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///		</example>
         ///	</signature>
 
+        this._checkOperation('include');
         var constExp = Container.createConstantExpression(selector, "string");
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
@@ -533,6 +648,24 @@ $data.Class.define('$data.Queryable', null, null,
         //this.expression = expression;
         var q = Container.createQueryable(this, expression)
         return q.entitySet.getTraceString(q);
-    }
+    },
+
+    _checkRootExpression: function () {
+        if (!this.expression) {
+            var ec = Container.createEntityContextExpression(this.entitySet.entityContext);
+            var name = this.entitySet.collectionName;
+            var memberdef = this.entitySet.entityContext.getType().getMemberDefinition(name);
+            var es = Container.createEntitySetExpression(ec,
+                Container.createMemberInfoExpression(memberdef), null,
+                this.entitySet);
+            this.expression = es;
+        }
+    },
+    _checkOperation: function (name) {
+        var operation = this.entitySet.entityContext.resolveSetOperations(name);
+        if (operation.invokable != undefined && !operation.invokable)
+            Guard.raise(new Exception("Operation '" + name + "' is not invokable with the provider"));
+    },
+    entitySet: {}
 
 }, null);

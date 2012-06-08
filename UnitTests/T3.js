@@ -440,7 +440,7 @@ function T3(providerConfig, msg) {
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
 
-                db.Articles.single(function (a) { return a.Id == 1;}, null,{
+                db.Articles.single(function (a) { return a.Id == 1; }, null, {
                     success: function (result) {
                         start(1);
                         ok(result, 'query failed');
@@ -860,13 +860,136 @@ function T3(providerConfig, msg) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                db.PrefilteredArticles(4, 'Art').filter(function(a){return a.Id<7}).toArray(function(result){
+                db.PrefilteredArticles(4, 'Art').filter(function (a) { return a.Id < 7 }).toArray(function (result) {
                     start(1);
                     ok(result);
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
-                    ok(result[1].Title.length>0, 'Title faild');
+                    ok(result[1].Title.length > 0, 'Title faild');
                 })
             });
         });
     });
+
+
+}
+
+function T3_oDataV3(providerConfig, msg) {
+    msg = msg || '';
+    module("DataTestsV3" + msg);
+
+
+    test("OData_Function_sub_frames", function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(17);
+        stop(4);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
+                var q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                var c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Title eq 'Article1'))", "A1: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 1, 'A1: result length failed');
+                        equal(result[0].Title, 'Sport', 'A1: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+
+                        ok(false, 'A1: Category some article.Title == "Article1", error: ' + e);
+                    }
+                });
+
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.every(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/all(art: (art/Title eq 'Article1'))", "A2: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 0, 'A2: result length failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A2: Category every article.Title == "Article1", error: ' + e);
+                    }
+                });
+
+                articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Full Name2'; });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Author/Profile/FullName eq 'Full Name2'))", "A3: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 5, 'A3: result length failed');
+                        equal(result[0].Title, 'Sport', 'A3: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A3: Category some article Author.Profile.Fullname "Full Name2", error: ' + e);
+                    }
+                });
+
+                articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Starts With Test'; });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Author/Profile/FullName eq 'Starts With Test'))", "A4: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 1, 'A4: result length failed');
+                        equal(result[0].Title, 'Politics', 'A4: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A4: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
+                    }
+                });
+
+
+                var tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Tag.Title == 'Tag1'; });
+                articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter); }, { filter: tagFilter });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter })
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: art/Tags/any(tagCon: (tagCon/Tag/Title eq 'Tag1')))", "A5: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 5, 'A5: result length failed');
+                        equal(result[0].Title, 'Sport', 'A5: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A5: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
+                    }
+                });
+
+                tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Tag.Title == 'Tag3'; });
+                articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter) && art.Author.LoginName == 'Usr4'; }, { filter: tagFilter });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter })
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Tags/any(tagCon: (tagCon/Tag/Title eq 'Tag3')) and (art/Author/LoginName eq 'Usr4')))", "A6: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 3, 'A6: result length failed');
+                        equal(result[0].Title, 'World', 'A6: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A6: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
+                    }
+                });
+            });
+        });
+    });
+
 }

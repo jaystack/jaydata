@@ -70,3 +70,25 @@ $C('$data.Expressions.ToArrayExpression', $data.Expressions.FrameOperator, null,
     },
     nodeType: { value: $data.Expressions.ExpressionType.ToArray, enumerable: true }
 });
+
+$C('$data.Expressions.SomeExpression', $data.Expressions.FrameOperator, null, {
+    constructor: function (source) {
+        ///<signature>
+        ///<param name="source" type="$data.Expressions.EntitySetExpression" />
+        ///</signature>
+        this.source = source;
+        this.resultType = $data.Object;
+    },
+    nodeType: { value: $data.Expressions.ExpressionType.Some, enumerable: true }
+});
+
+$C('$data.Expressions.EveryExpression', $data.Expressions.FrameOperator, null, {
+    constructor: function (source) {
+        ///<signature>
+        ///<param name="source" type="$data.Expressions.EntitySetExpression" />
+        ///</signature>
+        this.source = source;
+        this.resultType = $data.Object;
+    },
+    nodeType: { value: $data.Expressions.ExpressionType.Every, enumerable: true }
+});

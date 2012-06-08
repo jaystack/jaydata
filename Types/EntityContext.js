@@ -436,7 +436,9 @@ $data.Class.define('$data.EntityContext', null, null,
         clbWrapper.success = function (query) {
             query.buildResultSet(that);
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
-                query.expression.nodeType === $data.Expressions.ExpressionType.Count) {
+                query.expression.nodeType === $data.Expressions.ExpressionType.Count || 
+                query.expression.nodeType === $data.Expressions.ExpressionType.Some ||
+                query.expression.nodeType === $data.Expressions.ExpressionType.Every) {
                 if (query.result.length !== 1) {
                     callBack.error(new Exception('result count failed'));
                     return;
@@ -795,6 +797,9 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     resolveFieldOperation: function (operation, expression, frameType) {
         return this.storageProvider.resolveFieldOperation(operation, expression, frameType);
+    },
+    resolveSetOperations: function (operation, expression, frameType) {
+        return this.storageProvider.resolveSetOperations(operation, expression, frameType);
     },
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
         var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);

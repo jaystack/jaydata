@@ -6,6 +6,12 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
+    VisitSomeExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
+    VisitEveryExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
     VisitToArrayExpression: function (expression) {
         this._defaultModelBinder(expression);
     },

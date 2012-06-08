@@ -1,6 +1,7 @@
 $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (provider) {
+    constructor: function (provider, lambdaPrefix) {
         this.provider = provider;
+        this.lambdaPrefix = lambdaPrefix;
     },
 
     compile: function (expression, context) {
@@ -108,6 +109,12 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
 
     VisitEntityExpression: function (expression, context) {
         this.Visit(expression.source, context);
+
+        if (this.lambdaPrefix && expression.selector.lambda) {
+            context.lambda = expression.selector.lambda;
+            context.data += (expression.selector.lambda + '/');
+        }
+
         //if (expression.selector instanceof $data.Expressions.EntityExpression) {
         //    this.Visit(expression.selector, context);
         //}
@@ -119,5 +126,43 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
             this.Visit(expression.selector, context);
             context.data += "/";
         }
+    },
+
+    VisitFrameOperationExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+
+        Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
+
+        //TODO refactor!
+        var opDef = expression.operation.memberDefinition;
+        var opName = opDef.mapTo || opDef.name;
+        context.data += opName;
+        context.data += "(";
+        var paramCounter = 0;
+        var params = opDef.parameters || [{ name: "@expression" }];
+
+        var args = params.map(function (item, index) {
+            if (item.name === "@expression") {
+                return expression.source;
+            } else {
+                return expression.parameters[paramCounter++]
+            };
+        });
+
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i];
+            if (arg.value instanceof $data.Queryable) {
+                var frameExpression = new opDef.frameType(arg.value.expression);
+                var preparator = Container.createQueryExpressionCreator(arg.value.entitySet.entityContext);
+                var prep_expression = preparator.Visit(frameExpression);
+
+                var compiler = new $data.storageProviders.oData.oDataWhereCompiler(this.provider, true);
+                var frameContext = { data: "" };
+                var compiled = compiler.compile(prep_expression, frameContext);
+
+                context.data += (frameContext.lambda + ': ' + frameContext.data);
+            };
+        }
+        context.data += ")";
     }
 });

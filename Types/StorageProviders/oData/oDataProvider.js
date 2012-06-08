@@ -93,7 +93,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             cfg.beforeSend = function (xhr) {
                 xhr.setRequestHeader("Authorization", "Basic " + encodeBase64(user + ":" + password || ""));
                 if (typeof origBeforeSend === "function")
-                    origBeforeSend.apply(this, xhr);
+                    origBeforeSend.apply(this, arguments);
             }
         }
         return cfg;
@@ -164,6 +164,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var requestData = {
             url: this.providerConfiguration.oDataServiceHost + sql.queryText,
             dataType: "JSON",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Accept", "application/json; odata=verbose, text/javascript, */*; q=0.01");
+            },
             success: function (data, textStatus, jqXHR) {
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'number' ? [{ cnt: data }] : data;
@@ -422,6 +425,38 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             }
+        },
+        enumerable: true,
+        writable: true
+    },
+    supportedSetOperations: {
+        value: {
+            filter: { },
+            map: {},
+            length: {},
+            forEach: {},
+            toArray: {},
+            single: {},
+            some: {
+                invokable: false,
+                allowedIn: [$data.Expressions.FilterExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                mapTo: 'any',
+                frameType: $data.Expressions.SomeExpression
+            },
+            every: {
+                invokable: false,
+                allowedIn: [$data.Expressions.FilterExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                mapTo: 'all',
+                frameType: $data.Expressions.EveryExpression
+            },
+            take: {},
+            skip: {},
+            orderBy: {},
+            orderByDescending: {},
+            first: {},
+            include: {}
         },
         enumerable: true,
         writable: true
