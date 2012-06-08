@@ -56,6 +56,20 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         return expression;
     },
 
+    VisitSomeExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        if (source !== expression.source)
+            return Container.createSomeExpression(source);
+        return expression;
+    },
+
+    VisitEveryExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        if (source !== expression.source)
+            return Container.createEveryExpression(source);
+        return expression;
+    },
+
     VisitCountExpression: function (expression, context) {
         var source = this.Visit(expression.source, context);
         if (source !== expression.source)

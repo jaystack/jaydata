@@ -24,7 +24,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var queryText = queryFragments.urlText;
         var addAmp = false;
         for (var name in queryFragments) {
-            if (name != "urlText" && name != "actionPack" && name != "data" && queryFragments[name] != "") {
+            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && queryFragments[name] != "") {
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
                 if(name != "$urlParams"){

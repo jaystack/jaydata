@@ -49,6 +49,7 @@ JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
 	./Types/Expressions/EntityExpressions/EntityFieldExpression.js\
 	./Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
 	./Types/Expressions/EntityExpressions/EntitySetExpression.js\
+	./Types/Expressions/EntityExpressions/FrameOperationExpression.js\
 	./Types/Expressions/EntityExpressions/FilterExpression.js\
 	./Types/Expressions/EntityExpressions/IncludeExpression.js\
 	./Types/Expressions/EntityExpressions/MemberInfoExpression.js\

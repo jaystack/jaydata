@@ -410,8 +410,8 @@ $data.Class.define('$data.EntityContext', null, null,
         ///     <returns type="$data.EntitySet" />
         /// </signature>
         /// <signature>
-    	///     <summary>Gets the matching EntitySet for an element type.</summary>
-    	///     <param name="elementType" type="String" />
+        ///     <summary>Gets the matching EntitySet for an element type.</summary>
+        ///     <param name="elementType" type="String" />
         ///     <returns type="$data.EntitySet" />
         /// </signature>
         var result = this._entitySetReferences[elementType];
@@ -430,23 +430,25 @@ $data.Class.define('$data.EntityContext', null, null,
         clbWrapper.success = function (query) {
             query.buildResultSet(that);
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
-                query.expression.nodeType === $data.Expressions.ExpressionType.Count) {
-                    if (query.result.length !== 1) {
-                        callBack.error(new Exception('result count failed'));
-                        return;
-                    }
-
-                    callBack.success(query.result[0]);
-                } else if (query.expression.nodeType === $data.Expressions.ExpressionType.First) {
-                    if (query.result.length === 0) {
-                        callBack.error(new Exception('result count failed'));
-                        return;
-                    }
-
-                    callBack.success(query.result[0]);
-                } else {
-                    callBack.success(query.result);
+                query.expression.nodeType === $data.Expressions.ExpressionType.Count || 
+                query.expression.nodeType === $data.Expressions.ExpressionType.Some ||
+                query.expression.nodeType === $data.Expressions.ExpressionType.Every) {
+                if (query.result.length !== 1) {
+                    callBack.error(new Exception('result count failed'));
+                    return;
                 }
+
+                callBack.success(query.result[0]);
+            } else if (query.expression.nodeType === $data.Expressions.ExpressionType.First) {
+                if (query.result.length === 0) {
+                    callBack.error(new Exception('result count failed'));
+                    return;
+                }
+
+                callBack.success(query.result[0]);
+            } else {
+                callBack.success(query.result);
+            }
         };
         clbWrapper.error = callBack.error;
         this.storageProvider.executeQuery(query, clbWrapper);
@@ -605,8 +607,8 @@ $data.Class.define('$data.EntityContext', null, null,
             }
             if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
                 && !entity.data.isValid()) {
-                    errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
-                }
+                errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
+            }
         });
         if (errors.length > 0) {
             clbWrapper.error(errors);
@@ -636,13 +638,13 @@ $data.Class.define('$data.EntityContext', null, null,
         callBack.success(changedEntities.length);
     },
     forEachEntitySet: function (fn, ctx) {
-    	/// <summary>
-    	///     Iterates over the entity sets' of current EntityContext.
-    	/// </summary>
+        /// <summary>
+        ///     Iterates over the entity sets' of current EntityContext.
+        /// </summary>
         /// <param name="fn" type="Function">
         ///     <param name="entitySet" type="$data.EntitySet" />
         /// </param>
-    	/// <param name="ctx">'this' argument for the 'fn' function.</param>
+        /// <param name="ctx">'this' argument for the 'fn' function.</param>
         for (var entitySetName in this._entitySetReferences) {
             var actualEntitySet = this._entitySetReferences[entitySetName];
             fn.call(ctx, actualEntitySet);
@@ -652,8 +654,8 @@ $data.Class.define('$data.EntityContext', null, null,
     loadItemProperty: function (entity, property, callback) {
         /// <signature>
         ///     <summary>Loads a property of the entity through the storage provider.</summary>
-    	///     <param name="entity" type="$data.Entity">Entity object</param>
-    	///     <param name="property" type="String">Property name</param>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="String">Property name</param>
         ///     <param name="callback" type="Function">
         ///         <summary>C  allback function</summary>
         ///         <param name="propertyValue" />
@@ -696,7 +698,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         if (entity[memberDefinition.name] != undefined) {
             var pHandler = new $data.PromiseHandler();
-            callBack = pHandler.createCallback(callback);                        
+            callBack = pHandler.createCallback(callback);
             callback.success(entity[memberDefinition.name]);
             return pHandler.getPromise();
         }
@@ -753,11 +755,11 @@ $data.Class.define('$data.EntityContext', null, null,
     },
 
     getTraceString: function (queryable) {
-    	/// <summary>
-    	/// Returns a trace string. Used for debugging purposes!
-    	/// </summary>
-    	/// <param name="queryable" type="$data.Queryable" />
-    	/// <returns>Trace string</returns>
+        /// <summary>
+        /// Returns a trace string. Used for debugging purposes!
+        /// </summary>
+        /// <param name="queryable" type="$data.Queryable" />
+        /// <returns>Trace string</returns>
         var query = new $data.Query(queryable.expression, queryable.entitySet, this);
         return this.storageProvider.getTraceString(query);
     },
@@ -773,6 +775,9 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     resolveFieldOperation: function (operation, expression, frameType) {
         return this.storageProvider.resolveFieldOperation(operation, expression, frameType);
+    },
+    resolveSetOperations: function (operation, expression, frameType) {
+        return this.storageProvider.resolveSetOperations(operation, expression, frameType);
     },
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
         var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
@@ -796,15 +801,15 @@ $data.Class.define('$data.EntityContext', null, null,
         return q;
     },
     attach: function (entity) {
-    	/// <summary>
-    	///     Attaches an entity to its matching entity set.
-    	/// </summary>
-    	/// <param name="entity" type="$data.Entity" />
+        /// <summary>
+        ///     Attaches an entity to its matching entity set.
+        /// </summary>
+        /// <param name="entity" type="$data.Entity" />
         /// <returns type="$data.Entity">Returns the attached entity.</returns>
 
         if (entity instanceof $data.EntityWrapper) {
             entity = entity.getEntity();
-        } 
+        }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attach(entity);
     },
