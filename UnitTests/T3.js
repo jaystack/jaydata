@@ -880,7 +880,7 @@ function T3_oDataV3(providerConfig, msg) {
 
     test("OData_Function_sub_frames", function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        expect(11);
+        expect(17);
         stop(4);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
@@ -952,6 +952,42 @@ function T3_oDataV3(providerConfig, msg) {
                     }
                 });
 
+
+                var tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Tag.Title == 'Tag1'; });
+                articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter); }, { filter: tagFilter });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter })
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: art/Tags/any(tagCon: (tagCon/Tag/Title eq 'Tag1')))", "A5: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 5, 'A5: result length failed');
+                        equal(result[0].Title, 'Sport', 'A5: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A5: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
+                    }
+                });
+
+                tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Tag.Title == 'Tag3'; });
+                articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter) && art.Author.LoginName == 'Usr4'; }, { filter: tagFilter });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter })
+                c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Tags/any(tagCon: (tagCon/Tag/Title eq 'Tag3')) and (art/Author/LoginName eq 'Usr4')))", "A6: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 3, 'A6: result length failed');
+                        equal(result[0].Title, 'World', 'A6: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+                        ok(false, 'A6: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
+                    }
+                });
             });
         });
     });

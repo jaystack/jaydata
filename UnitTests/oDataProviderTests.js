@@ -1143,7 +1143,7 @@
             equal(q.queryText, "/Categories?$filter=Articles/all(art: (art/Title eq 'Article1'))", "Invalid query string");
 
             /*Tag != Tagconnection ( 1..* *..1 ) */
-            tagFilter = db.Tags.filter(function (tagCon) { return tagCon.Id > 0; });
+            tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Id > 0; });
             articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter); }, { filter: tagFilter });
             q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter }).toTraceString();
             equal(q.queryText, "/Categories?$filter=Articles/any(art: art/Tags/any(tagCon: (tagCon/Id gt 0)))", "Invalid query string");
@@ -1151,7 +1151,7 @@
             q = db.Categories.filter(function (ctg) { return ctg.Articles.every(this.filter); }, { filter: articleFilter }).toTraceString();
             equal(q.queryText, "/Categories?$filter=Articles/all(art: art/Tags/any(tagCon: (tagCon/Id gt 0)))", "Invalid query string");
 
-            tagFilter = db.Tags.filter(function (tagCon) { return tagCon.Title == 'Article1'; });
+            tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Article.Title == 'Article1'; });
             articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter); }, { filter: tagFilter });
             q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter }).toTraceString();
             equal(q.queryText, "/Categories?$filter=Articles/any(art: art/Tags/any(tagCon: (tagCon/Article/Title eq 'Article1')))", "Invalid query string, 1..* *..1 ");
