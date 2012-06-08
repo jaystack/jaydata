@@ -157,7 +157,11 @@ $data.Class.define('$data.EntityContext', null, null,
                     if (memDef.inverseProperty) {
                         if (memDef.inverseProperty === '$$unbound') {
                             //member definition is navigation but not back reference
-                            //Guard.raise("NOT SUPPORTED YET");
+                            if (memDefResolvedDataType === $data.Array) {
+                                this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            } else {
+                                this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            }
                         } else {
                             //member definition is navigation property one..one or one..many case
                             var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
@@ -279,7 +283,8 @@ $data.Class.define('$data.EntityContext', null, null,
         }
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
-        var association = this._addAssociationElement(storageModel.LogicalType, "0..1", memDef.name, refereedStorageModel.LogicalType, "*", memDef.inverseProperty);
+        var associationType = memDef.inverseProperty === '$$unbound' ? '$$unbound' : '0..1';
+        var association = this._addAssociationElement(storageModel.LogicalType, associationType, memDef.name, refereedStorageModel.LogicalType, "*", memDef.inverseProperty);
         storageModel.Associations[memDef.name] = association;
         storageModel.Associations.push(association);
     },
@@ -298,7 +303,8 @@ $data.Class.define('$data.EntityContext', null, null,
         }
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
-        var association = this._addAssociationElement(storageModel.LogicalType, "*", memDef.name, refereedStorageModel.LogicalType, "0..1", memDef.inverseProperty);
+        var associationType = memDef.inverseProperty === '$$unbound' ? '$$unbound' : '*';
+        var association = this._addAssociationElement(storageModel.LogicalType, associationType, memDef.name, refereedStorageModel.LogicalType, "0..1", memDef.inverseProperty);
         storageModel.Associations[memDef.name] = association;
         storageModel.Associations.push(association);
     },
@@ -410,8 +416,8 @@ $data.Class.define('$data.EntityContext', null, null,
         ///     <returns type="$data.EntitySet" />
         /// </signature>
         /// <signature>
-    	///     <summary>Gets the matching EntitySet for an element type.</summary>
-    	///     <param name="elementType" type="String" />
+        ///     <summary>Gets the matching EntitySet for an element type.</summary>
+        ///     <param name="elementType" type="String" />
         ///     <returns type="$data.EntitySet" />
         /// </signature>
         var result = this._entitySetReferences[elementType];
@@ -431,22 +437,22 @@ $data.Class.define('$data.EntityContext', null, null,
             query.buildResultSet(that);
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Count) {
-                    if (query.result.length !== 1) {
-                        callBack.error(new Exception('result count failed'));
-                        return;
-                    }
-
-                    callBack.success(query.result[0]);
-                } else if (query.expression.nodeType === $data.Expressions.ExpressionType.First) {
-                    if (query.result.length === 0) {
-                        callBack.error(new Exception('result count failed'));
-                        return;
-                    }
-
-                    callBack.success(query.result[0]);
-                } else {
-                    callBack.success(query.result);
+                if (query.result.length !== 1) {
+                    callBack.error(new Exception('result count failed'));
+                    return;
                 }
+
+                callBack.success(query.result[0]);
+            } else if (query.expression.nodeType === $data.Expressions.ExpressionType.First) {
+                if (query.result.length === 0) {
+                    callBack.error(new Exception('result count failed'));
+                    return;
+                }
+
+                callBack.success(query.result[0]);
+            } else {
+                callBack.success(query.result);
+            }
         };
         clbWrapper.error = callBack.error;
         this.storageProvider.executeQuery(query, clbWrapper);
@@ -517,42 +523,58 @@ $data.Class.define('$data.EntityContext', null, null,
                         if (data) {
                             var value = data[navPropertyName];
                             var associationType = association.FromMultiplicity + association.ToMultiplicity;
-                            switch (associationType) {
-                                case "*0..1": //Array
-                                    if (value) {
-                                        if (value instanceof Array) {
-                                            if (value.indexOf(entityCachedItem.data) == -1) {
-                                                value.push(entityCachedItem.data);
-                                            }
-                                        } else {
-                                            if (typeof intellisense === 'undefined') {
-                                                Guard.raise("Item must be array or subtype of array");
-                                            }
+                            if (association.FromMultiplicity === '$$unbound') {
+                                if (data instanceof $data.Array) {
+                                    entityCachedItem.dependentOn = entityCachedItem.dependentOn || [];
+                                    data.forEach(function (dataItem) {
+                                        if ((entityCachedItem.dependentOn.indexOf(data) < 0) && (data.skipSave !== true)) {
+                                            entityCachedItem.dependentOn.push(data);
                                         }
-                                    } else {
-                                        data[navPropertyName] = [entityCachedItem.data];
-                                    }
-                                    break;
-                                default: //Item
-                                    if (value) {
-                                        if (value !== entityCachedItem.data) {
-                                            if (typeof intellisense === 'undefined') {
-                                                Guard.raise("Integrity check error! Item assigned to another entity!");
-                                            }
-                                        }
-                                    } else {
-                                        data[navPropertyName] = entityCachedItem.data; //set back reference for live object
-                                    }
-                                    break;
-                            }
-                            switch (associationType) {
-                                case "*0..1":
-                                case "0..11":
+                                    }, this);
+                                } else {
                                     entityCachedItem.dependentOn = entityCachedItem.dependentOn || [];
                                     if ((entityCachedItem.dependentOn.indexOf(data) < 0) && (data.skipSave !== true)) {
                                         entityCachedItem.dependentOn.push(data);
                                     }
-                                    break;
+                                }
+                            } else {
+                                switch (associationType) {
+                                    case "*0..1": //Array
+                                        if (value) {
+                                            if (value instanceof Array) {
+                                                if (value.indexOf(entityCachedItem.data) == -1) {
+                                                    value.push(entityCachedItem.data);
+                                                }
+                                            } else {
+                                                if (typeof intellisense === 'undefined') {
+                                                    Guard.raise("Item must be array or subtype of array");
+                                                }
+                                            }
+                                        } else {
+                                            data[navPropertyName] = [entityCachedItem.data];
+                                        }
+                                        break;
+                                    default: //Item
+                                        if (value) {
+                                            if (value !== entityCachedItem.data) {
+                                                if (typeof intellisense === 'undefined') {
+                                                    Guard.raise("Integrity check error! Item assigned to another entity!");
+                                                }
+                                            }
+                                        } else {
+                                            data[navPropertyName] = entityCachedItem.data; //set back reference for live object
+                                        }
+                                        break;
+                                }
+                                switch (associationType) {
+                                    case "*0..1":
+                                    case "0..11":
+                                        entityCachedItem.dependentOn = entityCachedItem.dependentOn || [];
+                                        if ((entityCachedItem.dependentOn.indexOf(data) < 0) && (data.skipSave !== true)) {
+                                            entityCachedItem.dependentOn.push(data);
+                                        }
+                                        break;
+                                }
                             }
                             if (!data.entityState) {
                                 data.entityState = $data.EntityState.Added;
@@ -605,8 +627,8 @@ $data.Class.define('$data.EntityContext', null, null,
             }
             if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
                 && !entity.data.isValid()) {
-                    errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
-                }
+                errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
+            }
         });
         if (errors.length > 0) {
             clbWrapper.error(errors);
@@ -636,13 +658,13 @@ $data.Class.define('$data.EntityContext', null, null,
         callBack.success(changedEntities.length);
     },
     forEachEntitySet: function (fn, ctx) {
-    	/// <summary>
-    	///     Iterates over the entity sets' of current EntityContext.
-    	/// </summary>
+        /// <summary>
+        ///     Iterates over the entity sets' of current EntityContext.
+        /// </summary>
         /// <param name="fn" type="Function">
         ///     <param name="entitySet" type="$data.EntitySet" />
         /// </param>
-    	/// <param name="ctx">'this' argument for the 'fn' function.</param>
+        /// <param name="ctx">'this' argument for the 'fn' function.</param>
         for (var entitySetName in this._entitySetReferences) {
             var actualEntitySet = this._entitySetReferences[entitySetName];
             fn.call(ctx, actualEntitySet);
@@ -652,8 +674,8 @@ $data.Class.define('$data.EntityContext', null, null,
     loadItemProperty: function (entity, property, callback) {
         /// <signature>
         ///     <summary>Loads a property of the entity through the storage provider.</summary>
-    	///     <param name="entity" type="$data.Entity">Entity object</param>
-    	///     <param name="property" type="String">Property name</param>
+        ///     <param name="entity" type="$data.Entity">Entity object</param>
+        ///     <param name="property" type="String">Property name</param>
         ///     <param name="callback" type="Function">
         ///         <summary>C  allback function</summary>
         ///         <param name="propertyValue" />
@@ -696,7 +718,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         if (entity[memberDefinition.name] != undefined) {
             var pHandler = new $data.PromiseHandler();
-            callBack = pHandler.createCallback(callback);                        
+            callBack = pHandler.createCallback(callback);
             callback.success(entity[memberDefinition.name]);
             return pHandler.getPromise();
         }
@@ -753,11 +775,11 @@ $data.Class.define('$data.EntityContext', null, null,
     },
 
     getTraceString: function (queryable) {
-    	/// <summary>
-    	/// Returns a trace string. Used for debugging purposes!
-    	/// </summary>
-    	/// <param name="queryable" type="$data.Queryable" />
-    	/// <returns>Trace string</returns>
+        /// <summary>
+        /// Returns a trace string. Used for debugging purposes!
+        /// </summary>
+        /// <param name="queryable" type="$data.Queryable" />
+        /// <returns>Trace string</returns>
         var query = new $data.Query(queryable.expression, queryable.entitySet, this);
         return this.storageProvider.getTraceString(query);
     },
@@ -796,15 +818,15 @@ $data.Class.define('$data.EntityContext', null, null,
         return q;
     },
     attach: function (entity) {
-    	/// <summary>
-    	///     Attaches an entity to its matching entity set.
-    	/// </summary>
-    	/// <param name="entity" type="$data.Entity" />
+        /// <summary>
+        ///     Attaches an entity to its matching entity set.
+        /// </summary>
+        /// <param name="entity" type="$data.Entity" />
         /// <returns type="$data.Entity">Returns the attached entity.</returns>
 
         if (entity instanceof $data.EntityWrapper) {
             entity = entity.getEntity();
-        } 
+        }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attach(entity);
     },

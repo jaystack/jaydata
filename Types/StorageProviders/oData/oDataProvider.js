@@ -97,18 +97,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         }
         return cfg;
-    },
-    //buildDbType_modifyInstanceDefinition: function (instanceDefinition, storageModel) {
-    //    if (storageModel.Associations) {
-    //        storageModel.Associations.forEach(function (association) {
-    //            if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
-    //                console.dir(association);
-    //            }
-
-    //        }, this);
-    //    }
-    //    console.dir(instanceDefinition);
-    //},
+    },    
     buildDbType_generateConvertToFunction: function (storageModel, context) {
         return function (logicalEntity, convertedItems) {
             var dbInstance = new storageModel.PhysicalType();
@@ -120,22 +109,33 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
             if (storageModel.Associations) {
                 storageModel.Associations.forEach(function (association) {
-                    if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
+                    if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") ||
+                        (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1") ||
+                        (association.FromMultiplicity == '$$unbound')) {
                         var refValue = logicalEntity[association.FromPropertyName];
                         if (refValue !== null && refValue !== undefined) {
-                            if (refValue.entityState === $data.EntityState.Modified) {
-                                var tblName = context._storageModel.getStorageModel(refValue.getType()).TableName;
-                                var pk = '(';
-                                refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
-                                    if (index > 0) { pk += ','; }
-                                    pk += refValue[k.name];
+                            if (refValue instanceof $data.Array) {
+                                dbInstance[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
+                                refValue.forEach(function (rv) {
+                                    var contentId = convertedItems.indexOf(rv);
+                                    if (contentId < 0) { Guard.raise("Dependency graph error"); }
+                                    dbInstance[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
                                 }, this);
-                                pk += ')';
-                                dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                             } else {
-                                var contentId = convertedItems.indexOf(refValue);
-                                if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                dbInstance[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
+                                if (refValue.entityState === $data.EntityState.Modified) {
+                                    var tblName = context._storageModel.getStorageModel(refValue.getType()).TableName;
+                                    var pk = '(';
+                                    refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
+                                        if (index > 0) { pk += ','; }
+                                        pk += refValue[k.name];
+                                    }, this);
+                                    pk += ')';
+                                    dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
+                                } else {
+                                    var contentId = convertedItems.indexOf(refValue);
+                                    if (contentId < 0) { Guard.raise("Dependency graph error"); }
+                                    dbInstance[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
+                                }
                             }
                         }
                     }

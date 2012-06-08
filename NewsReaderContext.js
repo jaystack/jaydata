@@ -33,7 +33,7 @@ $data.Class.define("$news.Types.User", $data.Entity, null, {
     Email: { type: "string" },
     Articles: { type: "Array", elementType: "$news.Types.Article", inverseProperty: "Author" },
     ReviewedArticles: { type: "Array", elementType: "$news.Types.Article", inverseProperty: "Reviewer" },
-    Profile: { type: "$news.Types.UserProfile", inverseProperty: "User" },
+    Profile: { type: "$news.Types.UserProfile", inverseProperty: "User" }
     /*Children: { type: 'Array', elementType: '$news.Types.User', inverseProperty: "Parent" },
     Parent: { type: '$news.Types.User' }*/
 }, null);
@@ -59,7 +59,9 @@ $data.Class.define("$news.Types.TestItem", $data.Entity, null, {
     s0: { type: "string" },
     blob: { type: "blob" },
     n0: { type: "number" },
-    d0: { type: "date" }
+    d0: { type: "date" },
+    Tags: { type: 'Array', elementType: '$news.Types.Tag', inverseProperty: '$$unbound' },
+    User: { type: '$news.Types.User', inverseProperty: '$$unbound' }
 }, null);
 $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     Categories: { type: $data.EntitySet, elementType: $news.Types.Category },
