@@ -11,6 +11,13 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
         return expression;
     },
 
+    VisitServiceOperationExpression: function (expression, context) {
+        if (expression.source instanceof $data.Expressions.EntityContextExpression) {
+            this.lambdaTypes.push(expression);
+        }
+        return expression;
+    },
+
     VisitCodeExpression: function (expression, context) {
         ///<summary>Converts the CodeExpression into an EntityExpression</summary>
         ///<param name="expression" type="$data.Expressions.CodeExpression" />

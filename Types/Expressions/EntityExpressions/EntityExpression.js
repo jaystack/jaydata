@@ -14,7 +14,7 @@ $C('$data.Expressions.EntityExpression', $data.Expressions.ExpressionNode, null,
         ///</signature>
         Guard.requireValue("source", source);
         Guard.requireValue("selector", selector);
-        if (!(source instanceof $data.Expressions.EntitySetExpression)) {
+        if (!(source instanceof $data.Expressions.EntitySetExpression) && !(source instanceof $data.Expressions.ServiceOperationExpression)) {
             Guard.raise("Only EntitySetExpressions can be the source for an EntityExpression");
         }
 

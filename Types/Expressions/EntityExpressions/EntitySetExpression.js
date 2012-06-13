@@ -56,6 +56,10 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
                 this.elementType = this.source.elementType;
                 this.storageModel = this.source.storageModel;
                 break;
+            case this.source instanceof $data.Expressions.ServiceOperationExpression:
+                this.elementType = this.source.elementType;//?????????
+                this.storageModel = this.source.storageModel;
+                break;
             default:
                 Guard.raise("Unknown source type for EntitySetExpression: " + this.source.getType().name);
         }

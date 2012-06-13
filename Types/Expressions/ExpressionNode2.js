@@ -55,6 +55,7 @@ ExpressionType.Function = "Function";
 ExpressionType.Unknown = "UNKNOWN";
 
 ExpressionType.EntitySet = "EntitySet";
+ExpressionType.ServiceOperation = "ServiceOperation";
 ExpressionType.EntityField = "EntityField";
 ExpressionType.EntityContext = "EntityContext";
 ExpressionType.Entity = "Entity";
