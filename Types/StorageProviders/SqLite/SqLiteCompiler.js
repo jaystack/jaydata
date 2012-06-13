@@ -234,7 +234,7 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
     compile: function (query) {
         /// <param name="query" type="$data.Query" />
         var expression = query.expression;
-        var context = { sets: [], infos: [], entityContext: query.entitySet.entityContext };
+        var context = { sets: [], infos: [], entityContext: query.context };
         var optimizedExpression = expression.monitor({
 
             MonitorEntitySetExpression: function (expression, context) {

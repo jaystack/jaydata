@@ -41,8 +41,8 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
     },
 
     autoGenerateProjection: function (query) {
-        var newQueryable = new $data.Queryable(query.entitySet);
-        newQueryable._checkRootExpression();
+        var newQueryable = new $data.Queryable(query.context);
+        newQueryable._checkRootExpression(query.entitySet);
         var codeExpression = Container.createCodeExpression(this.generateProjectionFunc(query));
         var exp = Container.createProjectionExpression(newQueryable.expression, codeExpression);
         var q = Container.createQueryable(newQueryable, exp);

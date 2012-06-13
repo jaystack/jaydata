@@ -1,16 +1,22 @@
 $data.Class.define('$data.Queryable', null, null,
 {
     constructor: function (source, rootExpression) {
-        /// <description>
-        ///		Provides a base class for classes supporting JavaScript Language Query.
-        /// </description>
-        /// <summary>
-        ///		Provides a base class for classes supporting JavaScript Language Query.
-        /// </summary>
+        ///	<signature>
+        /// <summary>Provides a base class for classes supporting JavaScript Language Query.</summary>
+        /// <description>Provides a base class for classes supporting JavaScript Language Query.</description>
         /// <param name="source" type="$data.EntitySet" />
         /// <param name="rootExpression" type="$data.Expressions.ExpressionNode"></param>
-        var es = source.entitySet instanceof $data.EntitySet ? source.entitySet : source;
-        Object.defineProperty(this, "entitySet", { value: es, enumerable: true, writable: true });
+        ///	</signature>
+        ///	<signature>
+        /// <summary>Provides a base class for classes supporting JavaScript Language Query.</summary>
+        /// <description>Provides a base class for classes supporting JavaScript Language Query.</description>
+        /// <param name="source" type="$data.EntityContext" />
+        /// <param name="rootExpression" type="$data.Expressions.ExpressionNode"></param>
+        ///	</signature>
+
+        var context = source instanceof $data.EntityContext ? source : source.entityContext;
+        this.entitySet = source instanceof $data.EntityContext ? null : source.entitySet;
+        Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
         this.expression = rootExpression;
     },
 
@@ -60,7 +66,7 @@ $data.Class.define('$data.Queryable', null, null,
         if (this.expression instanceof $data.Expressions.FilterExpression) {
             expressionSource = this.expression.source;
 
-            var operatorResolution = this.entitySet.entityContext.storageProvider.resolveBinaryOperator("and");
+            var operatorResolution = this.entityContext.storageProvider.resolveBinaryOperator("and");
             expression = Container.createSimpleBinaryExpression(this.expression.selector, expression, "and", "filter", "boolean", operatorResolution);
         }
         var exp = Container.createFilterExpression(expressionSource, expression);
@@ -150,12 +156,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(onResult);
 
         var countExpression = Container.createCountExpression(this.expression);
-        var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(this.entityContext);
         try {
             var expression = preparator.Visit(countExpression);
-            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entitySet.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -190,12 +196,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(iteratorFunc);
 
         var forEachExpression = Container.createForEachExpression(this.expression);
-        var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(this.entityContext);
         try {
             var expression = preparator.Visit(forEachExpression);
-            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entitySet.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -242,12 +248,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(onResult_items);
 
         var toArrayExpression = Container.createToArrayExpression(this.expression);
-        var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(this.entityContext);
         try {
             var expression = preparator.Visit(toArrayExpression);
-            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entitySet.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -298,12 +304,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(onResult);
 
         var singleExpression = Container.createSingleExpression(q.expression);
-        var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(q.entityContext);
         try {
             var expression = preparator.Visit(singleExpression);
-            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -356,12 +362,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(onResult);
 
         var someExpression = Container.createSomeExpression(q.expression);
-        var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(q.entityContext);
         try {
             var expression = preparator.Visit(someExpression);
-            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -414,12 +420,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(onResult);
 
         var everyExpression = Container.createEveryExpression(q.expression);
-        var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(q.entityContext);
         try {
             var expression = preparator.Visit(everyExpression);
-            this.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -582,12 +588,12 @@ $data.Class.define('$data.Queryable', null, null,
         var cbWrapper = pHandler.createCallback(onResult);
 
         var firstExpression = Container.createFirstExpression(q.expression);
-        var preparator = Container.createQueryExpressionCreator(q.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(q.entityContext);
         try {
             var expression = preparator.Visit(firstExpression);
-            q.entitySet.entityContext.log({ event: "EntityExpression", data: expression });
+            q.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entitySet.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -642,27 +648,29 @@ $data.Class.define('$data.Queryable', null, null,
             expression = Container.createToArrayExpression(expression);
         }
 
-        var preparator = Container.createQueryExpressionCreator(this.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(this.entityContext);
         expression = preparator.Visit(expression);
 
         //this.expression = expression;
         var q = Container.createQueryable(this, expression)
-        return q.entitySet.getTraceString(q);
+        return q.entityContext.getTraceString(q);
     },
 
-    _checkRootExpression: function () {
+    _checkRootExpression: function (entitySet) {
         if (!this.expression) {
-            var ec = Container.createEntityContextExpression(this.entitySet.entityContext);
-            var name = this.entitySet.collectionName;
-            var memberdef = this.entitySet.entityContext.getType().getMemberDefinition(name);
+            var ec = Container.createEntityContextExpression(this.entityContext);
+            var name = entitySet.collectionName;
+            var memberdef = this.entityContext.getType().getMemberDefinition(name);
             var es = Container.createEntitySetExpression(ec,
                 Container.createMemberInfoExpression(memberdef), null,
-                this.entitySet);
+                entitySet);
             this.expression = es;
+            this.entitySet = entitySet;
         }
     },
+
     _checkOperation: function (name) {
-        var operation = this.entitySet.entityContext.resolveSetOperations(name);
+        var operation = this.entityContext.resolveSetOperations(name);
         if (operation.invokable != undefined && !operation.invokable)
             Guard.raise(new Exception("Operation '" + name + "' is not invokable with the provider"));
     },

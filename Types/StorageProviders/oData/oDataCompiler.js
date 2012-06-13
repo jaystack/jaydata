@@ -8,7 +8,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     compile: function (query) {
 
-        this.provider = query.entitySet.entityContext.storageProvider;
+        this.provider = query.context.storageProvider;
         this.context = query.context;
         this.mainEntitySet = query.entitySet;
 

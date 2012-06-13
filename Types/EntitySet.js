@@ -12,7 +12,7 @@ $data.entitySetState = { created: 0, defined: 1, active: 2 };
 
 $data.Class.defineEx('$data.EntitySet',
     [
-        { type: $data.Queryable, params: [function () { return this; }] }
+        { type: $data.Queryable, params: [new ConstructorParameter(1)] }
     ], null,
 {
     constructor: function (elementType, context, collectionName) {
@@ -24,11 +24,10 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
         this.createNew = this[elementType.name] = elementType;
         this.stateManager = new $data.EntityStateManager(this);
-        Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
         Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
         Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
 
-        this._checkRootExpression();
+        this._checkRootExpression(this);
     },
     executeQuery: function (expression, on_ready) {
         //var compiledQuery = this.entityContext
@@ -320,5 +319,4 @@ $data.Class.defineEx('$data.EntitySet',
 
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
     },
-    Queryable: {}
 }, null);

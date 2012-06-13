@@ -278,15 +278,15 @@
             return expressionRes;
         };
 
-        var esExecuteQuery = $data.EntitySet.prototype.executeQuery;
-        $data.EntitySet.prototype.executeQuery = function (expression, on_ready) {
+        var esExecuteQuery = $data.EntityContext.prototype.executeQuery;
+        $data.EntityContext.prototype.executeQuery = function (expression, on_ready) {
             var self = this;
             var observables = expression.expression.observables;
             if (observables && observables.length > 0) {
                 observables.forEach(function (obsObj) {
                     obsObj.observable.subscribe(function () {
                         if (!obsObj.skipExecute) {
-                            var preparator = Container.createQueryExpressionCreator(self.entityContext);
+                            var preparator = Container.createQueryExpressionCreator(self);
                             var newExpression = preparator.Visit(expression.expression.baseExpression);
 
                             esExecuteQuery.call(self, Container.createQueryable(expression, newExpression), on_ready);

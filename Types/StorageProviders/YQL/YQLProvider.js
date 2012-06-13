@@ -139,7 +139,6 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
                 query.rawDataList = resultData;
                 if (entitSetDefinition.anonymousResult) {
                     query.rawDataList = resultData;
-                    query.actionPack.push({ op: "copyToResult" });
                     callBack.success(query);
                     return;
                 } else {
@@ -147,8 +146,6 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
                     compiler.Visit(query.expression);
                 }
 
-                query.actionPack.push({ op: "buildType", context: ctx, logicalType: schema, tempObjectName: schema.name, includes: includes, propertyMapping: sql.selectMapping });
-                query.actionPack.push({ op: "copyToResult", tempObjectName: schema.name });
                 callBack.success(query);
             },
             error: function (jqXHR, textStatus, errorThrow) {
