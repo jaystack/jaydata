@@ -14,6 +14,7 @@ namespace JayData
 {
     public class EmptyNewsReaderService : DataService<ObjectContext>
     {
+
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config)
         {
@@ -37,9 +38,53 @@ namespace JayData
             return context;
         }
         [WebGet]
+        public Location PrefilteredLocation(int minId, string startsWith)
+        {
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Select(a => a.Reviewer.Profile.Location).First();
+        }
+        [WebGet]
+        public IQueryable<Location> PrefilteredLocations(int minId, string startsWith)
+        {
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Select(a => a.Reviewer.Profile.Location);
+        }
+
+
+        [WebGet]
+        public int PrefilteredArticlesCount(int minId, string startsWith)
+        {
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Count();
+        }
+        [WebGet]
+        public IQueryable<int> PrefilteredArticlesId(int minId, string startsWith)
+        {
+
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Select(a => a.Id);
+        }
+
+
+        [WebGet]
         public IQueryable<Article> PrefilteredArticles(int minId, string startsWith)
         {
-            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a=>a.Id>minId && a.Title.StartsWith(startsWith));
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith));
         }
+        [WebGet]
+        public ICollection<Article> PrefilteredArticleList(int minId, string startsWith)
+        {
+            return new List<Article>(this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Select(a => a));
+        }
+        [WebGet]
+        public Article PrefilteredArticle(int minId, string startsWith)
+        {
+            return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).First();
+        }
+
+        [WebInvoke(Method = "POST")]
+        public void CreateCategory(string title, string subTitle)
+        {
+            this.CurrentDataSource.CreateObjectSet<Category>().AddObject(new Category{Title=title, Subtitle= subTitle});
+            this.CurrentDataSource.SaveChanges();
+        }
+        
+        
     }
 }
