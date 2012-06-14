@@ -27,7 +27,7 @@ $data.Class.defineEx('$data.EntitySet',
         Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
         Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
 
-        this._checkRootExpression(this);
+        this._checkRootExpression();
     },
     executeQuery: function (expression, on_ready) {
         //var compiledQuery = this.entityContext
@@ -319,4 +319,17 @@ $data.Class.defineEx('$data.EntitySet',
 
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
     },
+    _checkRootExpression: function () {
+        if (!this.expression) {
+            var ec = Container.createEntityContextExpression(this.entityContext);
+            //var name = entitySet.collectionName;
+            //var entitySet = this.entityContext[entitySetName];
+            var memberdef = this.entityContext.getType().getMemberDefinition(this.collectionName);
+            var es = Container.createEntitySetExpression(ec,
+                Container.createMemberInfoExpression(memberdef), null,
+                this);
+            this.expression = es;
+            this.defaultType = this.elementType;
+        }
+    }
 }, null);

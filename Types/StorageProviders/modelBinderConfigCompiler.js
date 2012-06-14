@@ -70,28 +70,33 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     },
     _addPropertyToModelBinderConfig: function (elementType, builder) {
         var storageModel = this._query.context._storageModel.getStorageModel(elementType);
-        elementType.memberDefinitions.getPublicMappedProperties().forEach(function (prop) {
-            if ((!storageModel) || (storageModel && !storageModel.Associations[prop.name] && !storageModel.ComplexTypes[prop.name])) {
+        if (elementType.memberDefinitions) {
+            elementType.memberDefinitions.getPublicMappedProperties().forEach(function (prop) {
+                if ((!storageModel) || (storageModel && !storageModel.Associations[prop.name] && !storageModel.ComplexTypes[prop.name])) {
 
-                if (!storageModel && this._query.context.storageProvider.supportedDataTypes.indexOf(Container.resolveType(prop.dataType)) < 0) {
-                    //complex type
-                    builder.selectModelBinderProperty(prop.name);
-                    builder.modelBinderConfig['$type'] = Container.resolveType(prop.dataType);
-                    if (this._isoDataProvider) {
-                        builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
+                    if (!storageModel && this._query.context.storageProvider.supportedDataTypes.indexOf(Container.resolveType(prop.dataType)) < 0) {
+                        //complex type
+                        builder.selectModelBinderProperty(prop.name);
+                        builder.modelBinderConfig['$type'] = Container.resolveType(prop.dataType);
+                        if (this._isoDataProvider) {
+                            builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
+                        } else {
+                            builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
+                        }
+                        this._addPropertyToModelBinderConfig(Container.resolveType(prop.dataType), builder);
+                        builder.popModelBinderProperty();
                     } else {
-                        builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
+                        if (prop.key) {
+                            builder.addKeyField(prop.name);
+                        }
+                        builder.modelBinderConfig[prop.name] = prop.name;
                     }
-                    this._addPropertyToModelBinderConfig(Container.resolveType(prop.dataType), builder);
-                    builder.popModelBinderProperty();
-                } else {
-                    if (prop.key) {
-                        builder.addKeyField(prop.name);
-                    }
-                    builder.modelBinderConfig[prop.name] = prop.name;
                 }
-            }
-        }, this);
+            }, this);
+        } else {
+            builder._binderConfig.$item = {};
+            builder.modelBinderConfig = builder._binderConfig.$item;
+        }
         if (storageModel) {
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);
         }
@@ -113,11 +118,11 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     },
     DefaultSelection: function (builder) {
         //no projection, get all item from entitySet
-        builder.modelBinderConfig['$type'] = this._query.entitySet.elementType;
+        builder.modelBinderConfig['$type'] = this._query.defaultType;
 
-        var storageModel = this._query.context._storageModel.getStorageModel(this._query.entitySet.elementType);
+        var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
 
-        this._addPropertyToModelBinderConfig(this._query.entitySet.elementType, builder);
+        this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
         if (this._includes) {
             this._includes.forEach(function (include) {
                 var includes = include.name.split('.');

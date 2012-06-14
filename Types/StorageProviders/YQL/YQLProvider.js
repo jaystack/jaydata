@@ -107,8 +107,8 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
     executeQuery: function (query, callBack) {
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var schema = query.entitySet.createNew;
-        var entitSetDefinition = query.entitySet.entityContext.getType().memberDefinitions.asArray().filter(function (m) { return m.elementType == schema })[0] || {};
+        var schema = query.defaultType;
+        var entitSetDefinition = query.context.getType().memberDefinitions.asArray().filter(function (m) { return m.elementType == schema })[0] || {};
         var ctx = this.context;
 
         if (!this.AuthenticationProvider)

@@ -1,6 +1,6 @@
 $C('$data.Query', null, null,
 {
-    constructor: function (expression, entitySet, context) {
+    constructor: function (expression, defaultType, context) {
         ///<param name="context" type="$data.EntityContext" />
         ///<field name="expression" type="$data.Expressions.ExpressionNode" />
         ///<field name="context" type="$data.EntityContext" />
@@ -9,7 +9,7 @@ $C('$data.Query', null, null,
         //TODO: expressions get as JSON string?!
         
         this.expressions = expression;
-        this.entitySet = entitySet;
+        this.defaultType = defaultType;
         this.result = [];
         this.rawDataList = [];
         this.modelBinderConfig = {};

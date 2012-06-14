@@ -127,7 +127,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
             return;
         }
 
-        var schema = query.entitySet.createNew;
+        var schema = query.defaultType;
         var ctx = this.context;
 
         var includes = [];

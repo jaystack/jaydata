@@ -153,7 +153,7 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
             var arg = args[i];
             if (arg.value instanceof $data.Queryable) {
                 var frameExpression = new opDef.frameType(arg.value.expression);
-                var preparator = Container.createQueryExpressionCreator(arg.value.entitySet.entityContext);
+                var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
                 var prep_expression = preparator.Visit(frameExpression);
 
                 var compiler = new $data.storageProviders.oData.oDataWhereCompiler(this.provider, true);

@@ -15,7 +15,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///	</signature>
 
         var context = source instanceof $data.EntityContext ? source : source.entityContext;
-        this.entitySet = source instanceof $data.EntityContext ? null : source.entitySet;
+        this.defaultType = source instanceof $data.EntityContext ? null : source.defaultType;
         Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
         this.expression = rootExpression;
     },
@@ -624,6 +624,23 @@ $data.Class.define('$data.Queryable', null, null,
         return Container.createQueryable(this, takeExp);
     },
 
+    _runQuery: function (onResult_items) {
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult_items);
+
+        var preparator = Container.createQueryExpressionCreator(this.entityContext);
+        try {
+            var expression = preparator.Visit(this.expression);
+            this.entityContext.log({ event: "EntityExpression", data: expression });
+
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
+
     toTraceString: function (name) {
 		///	<summary>Returns the trace string of the query.</summary>
         ///	<param name="name" type="$data.String">Name of the execution method (toArray, length, etc.).</param>
@@ -656,24 +673,11 @@ $data.Class.define('$data.Queryable', null, null,
         return q.entityContext.getTraceString(q);
     },
 
-    _checkRootExpression: function (entitySet) {
-        if (!this.expression) {
-            var ec = Container.createEntityContextExpression(this.entityContext);
-            var name = entitySet.collectionName;
-            var memberdef = this.entityContext.getType().getMemberDefinition(name);
-            var es = Container.createEntitySetExpression(ec,
-                Container.createMemberInfoExpression(memberdef), null,
-                entitySet);
-            this.expression = es;
-            this.entitySet = entitySet;
-        }
-    },
-
     _checkOperation: function (name) {
         var operation = this.entityContext.resolveSetOperations(name);
         if (operation.invokable != undefined && !operation.invokable)
             Guard.raise(new Exception("Operation '" + name + "' is not invokable with the provider"));
     },
-    entitySet: {}
+    defaultType: {}
 
 }, null);

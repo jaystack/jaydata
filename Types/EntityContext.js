@@ -429,7 +429,7 @@ $data.Class.define('$data.EntityContext', null, null,
         return result;
     },
     executeQuery: function (queryable, callBack) {
-        var query = new $data.Query(queryable.expression, queryable.entitySet, this);
+        var query = new $data.Query(queryable.expression, queryable.defaultType, this);
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var that = this;
         var clbWrapper = {};
@@ -782,7 +782,7 @@ $data.Class.define('$data.EntityContext', null, null,
         /// </summary>
         /// <param name="queryable" type="$data.Queryable" />
         /// <returns>Trace string</returns>
-        var query = new $data.Query(queryable.expression, queryable.entitySet, this);
+        var query = new $data.Query(queryable.expression, queryable.defaultType, this);
         return this.storageProvider.getTraceString(query);
     },
     log: function (logInfo) {
@@ -802,6 +802,28 @@ $data.Class.define('$data.EntityContext', null, null,
         return this.storageProvider.resolveSetOperations(operation, expression, frameType);
     },
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
+        var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
+        virtualEs.tableName = functionName;
+
+        var paramConstExpression = null;
+        if (parameters) {
+            paramConstExpression = [];
+            for (var i = 0; i < parameters.length; i++) {
+                paramConstExpression.push(Container.createConstantExpression(arg[i], null, parameters[i]));
+            }
+        }
+        var ec = Container.createEntityContextExpression(this);
+        var memberdef = this.getType().getMemberDefinition(returnEntitySet);
+        var es = Container.createEntitySetExpression(ec,
+                Container.createMemberInfoExpression(memberdef),
+                paramConstExpression,
+                virtualEs);
+
+        var q = Container.createQueryable(this[returnEntitySet], es);
+        return q;
+    },
+    _generateServiceOperationQueryable2: function (functionName, returnEntitySet, arg, parameters) {
+        var virtualEntitySet = Container.createEntitySet($data.Object, this, "PrefilteredArticlesCount");
         var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
         virtualEs.tableName = functionName;
 

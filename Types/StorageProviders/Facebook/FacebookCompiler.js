@@ -7,7 +7,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
     },
 
     compile: function (query) {
-        this.provider = query.entitySet.entityContext.storageProvider;
+        this.provider = query.context.storageProvider;
 
         var context = {
             filterSql: { sql: '' },
@@ -41,14 +41,15 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
     },
 
     autoGenerateProjection: function (query) {
-        var newQueryable = new $data.Queryable(query.context);
-        newQueryable._checkRootExpression(query.entitySet);
+        var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
+        var newQueryable = new $data.Queryable(query.context, entitySet.expression);
+        //newQueryable._checkRootExpression(entitySet.collectionName);
         var codeExpression = Container.createCodeExpression(this.generateProjectionFunc(query));
         var exp = Container.createProjectionExpression(newQueryable.expression, codeExpression);
         var q = Container.createQueryable(newQueryable, exp);
 
         var expression = q.expression;
-        var preparator = Container.createQueryExpressionCreator(query.entitySet.entityContext);
+        var preparator = Container.createQueryExpressionCreator(query.context);
         expression = preparator.Visit(expression);
 
         var databaseQuery = {
@@ -60,7 +61,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
     },
     generateProjectionFunc: function (query) {
         var isAuthenticated = this.provider.AuthenticationProvider.Authenticated;
-        var publicMemberDefinitions = query.entitySet.createNew.memberDefinitions.getPublicMappedProperties();
+        var publicMemberDefinitions = query.defaultType.memberDefinitions.getPublicMappedProperties();
         if (!isAuthenticated && publicMemberDefinitions.some(function (memDef) { return memDef.isPublic == true; })) {
             publicMemberDefinitions = publicMemberDefinitions.filter(function (memDef) { return memDef.isPublic == true; });
         }

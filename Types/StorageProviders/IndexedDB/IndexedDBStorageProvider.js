@@ -212,13 +212,14 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         //var compiledQuery = self._compile(query);
 
         // Creating read only transaction for query. Results are passed in transaction's oncomplete event
-        var store = self.db.transaction([query.entitySet.tableName], self.IDBTransaction.READ_ONLY).setCallbacks({
+        var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
+        var store = self.db.transaction([entitySet.tableName], self.IDBTransaction.READ_ONLY).setCallbacks({
             onerror: callBack.error,
             onabort: callBack.error,
             oncomplete: function (event) {
                 callBack.success(query);
             }
-        }).objectStore(query.entitySet.tableName);
+        }).objectStore(entitySet.tableName);
         var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
         modelBinderCompiler.Visit(query.expression);
         switch (query.expression.nodeType) {

@@ -9,7 +9,6 @@ using System.ServiceModel.Web;
 using System.Web;
 using JayData.NewsReader;
 
-
 namespace JayData
 {
     public class EmptyNewsReaderServiceV3 : DataService<ObjectContext>
@@ -46,8 +45,6 @@ namespace JayData
         {
             return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Select(a => a.Reviewer.Profile.Location);
         }
-
-
         [WebGet]
         public int PrefilteredArticlesCount(int minId, string startsWith)
         {
@@ -59,8 +56,6 @@ namespace JayData
 
             return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).Select(a => a.Id);
         }
-
-
         [WebGet]
         public IQueryable<Article> PrefilteredArticles(int minId, string startsWith)
         {
@@ -76,7 +71,6 @@ namespace JayData
         {
             return this.CurrentDataSource.CreateObjectSet<Article>().Where(a => a.Id > minId && a.Title.StartsWith(startsWith)).First();
         }
-
         [WebInvoke(Method = "POST")]
         public void CreateCategory(string title, string subTitle)
         {

@@ -69,29 +69,52 @@ $data.createServiceOperation = function (cfg) {
     var fn = function () {
         var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(cfg.elementType) : null;
 
+        var paramConstExpression = null;
+        if (cfg.params) {
+            paramConstExpression = [];
+            for (var i = 0; i < cfg.params.length; i++) {
+                //TODO: check params type
+                for (var name in cfg.params[i]) {
+                    paramConstExpression.push(Container.createConstantExpression(arguments[i], cfg.params[i][name], name));
+                }
+            }
+        }
+
         var ec = Container.createEntityContextExpression(this);
         var memberdef = this.getType().getMemberDefinition(cfg.Name);
         var es = Container.createServiceOperationExpression(ec,
                 Container.createMemberInfoExpression(memberdef),
-                null,
+                paramConstExpression,
                 cfg);
 
-
+        //Get callback function
+        var clb = arguments[arguments.length - 1];
+        if (typeof clb !== 'function') {
+            clb = undefined;
+        }
 
         if (virtualEntitySet) {
-            return Container.createQueryable(virtualEntitySet, es);
+            var q = Container.createQueryable(virtualEntitySet, es);
+            if (clb) {
+                es.isTerminated= true;
+                return q._runQuery(clb);
+            }
+            return q;
         }
         else {
             var q = Container.createQueryable(this, es);
-            var clb = arguments[arguments.lenght - 1];
-            if (typeof clb !== 'function') {
-                clb = undefined;
-            }
+            q.defaultType = cfg.returnType;
+
             if (cfg.returnType === $data.Queryable) {
-                return q.toArray(clb);
-            } else {
-                return q.single(undefined, undefined, clb);
+                q.defaultType = cfg.elementType;
+                if (clb) {
+                    es.isTerminated= true;
+                    return q._runQuery(clb);
+                }
+                return q;
             }
+            es.isTerminated = true;
+            return q._runQuery(clb);
         }
     };
     //fn.EntitySet = ctx["PrefilteredArticlesCount"];

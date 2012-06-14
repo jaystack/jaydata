@@ -15,6 +15,9 @@ $C('$data.Expressions.FilterExpression', $data.Expressions.EntitySetExpression, 
 });
 
 $C('$data.Expressions.FrameOperator', $data.Expressions.ExpressionNode, null, {
+    constructor: function () {
+        this.isTerminated = true;
+    }
 });
 
 $C('$data.Expressions.CountExpression', $data.Expressions.FrameOperator, null, {

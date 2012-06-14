@@ -852,7 +852,7 @@ function T3(providerConfig, msg) {
         });
     });
 
-    test('OData_Function_Call', function () {
+    test('OData_Function_Import_ComplexType', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(3);
         stop(3);
@@ -860,7 +860,75 @@ function T3(providerConfig, msg) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                db.PrefilteredArticles(4, 'Art').filter(function (a) { return a.Id < 7 }).toArray(function (result) {
+                db.PrefilteredLocation(4, 'Art').then(function (result) {
+                    start(1);
+                    ok(result);
+                    ok(result[0] instanceof $news.Types.Location, 'Return type faild');
+                    ok(result[1].Address.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_ComplexTypes', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredLocations(4, 'Art').toArray(function (result) {
+                    start(1);
+                    ok(result);
+                    ok(result[0] instanceof $news.Types.Location, 'Return type faild');
+                    ok(result[1].Address.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_Scalar', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticlesCount(4, 'Art').then(function (result) {
+                    start(1);
+                    ok(result);
+                    ok(result[0] instanceof $news.Types.Location, 'Return type faild');
+                    ok(result[1].Address.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_ScalarList', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticlesId(4, 'Art').toArray(function (result) {
+                    start(1);
+                    ok(result);
+                    ok(typeof result[0] === 'number', 'Return type faild');
+                    ok(typeof result[1] === 'number', 'Return type faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_Articles', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticles(4, 'Art').toArray(function (result) {
                     start(1);
                     ok(result);
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
@@ -869,8 +937,40 @@ function T3(providerConfig, msg) {
             });
         });
     });
-
-
+    test('OData_Function_Import_ArticleList', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticleList(4, 'Art').toArray(function (result) {
+                    start(1);
+                    ok(result);
+                    ok(result[0] instanceof $news.Types.Article, 'Return type faild');
+                    ok(result[1].Title.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_ArticleObject', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(3);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticle(4, 'Art').then(function (result) {
+                    start(1);
+                    ok(result);
+                    ok(result[0] instanceof $news.Types.Article, 'Return type faild');
+                    ok(result[1].Title.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
 }
 
 function T3_oDataV3(providerConfig, msg) {

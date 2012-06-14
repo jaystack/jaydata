@@ -2,7 +2,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     constructor: function () {
         this.context = {};
         this.provider = {};
-        this.logicalType = null;
+        //this.logicalType = null;
         this.includes = null;
         this.mainEntitySet = null;
     },
@@ -10,7 +10,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         this.provider = query.context.storageProvider;
         this.context = query.context;
-        this.mainEntitySet = query.entitySet;
+        this.mainEntitySet = query.context.getEntitySetFromElementType(query.defaultType);
 
         var queryFragments = { urlText: "" };
         
@@ -98,7 +98,16 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitEntitySetExpression: function (expression, context) {
         context.urlText += "/" + expression.instance.tableName;
-        this.logicalType = expression.instance.elementType;
+        //this.logicalType = expression.instance.elementType;
+        if (expression.params) {
+            for (var i = 0; i < expression.params.length; i++) {
+                this.Visit(expression.params[i], context);
+            }
+        }
+    },
+    VisitServiceOperationExpression: function (expression, context) {
+        context.urlText += "/" + expression.cfg.Name;
+        //this.logicalType = expression.returnType;
         if (expression.params) {
             for (var i = 0; i < expression.params.length; i++) {
                 this.Visit(expression.params[i], context);

@@ -97,10 +97,10 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     },
     DefaultSelection: function (builder) {
         //no projection, get all item from entitySet
-        builder.modelBinderConfig['$type'] = this._query.entitySet.elementType;
-        var storageModel = this._query.context._storageModel.getStorageModel(this._query.entitySet.elementType);
+        builder.modelBinderConfig['$type'] = this._query.defaultType;
+        var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
 
-        this._addPropertyToModelBinderConfig(this._query.entitySet.elementType, builder);
+        this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
         if (this._includes) {
             this._includes.forEach(function (include) {
                 var includes = include.name.split('.');

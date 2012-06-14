@@ -7,7 +7,7 @@ $C('$data.storageProviders.YQL.YQLCompiler', $data.Expressions.EntityExpressionV
     },
 
     compile: function (query) {
-        this.provider = query.entitySet.entityContext.storageProvider;
+        this.provider = query.context.storageProvider;
 
         var context = {
             filterSql: { sql: '' },

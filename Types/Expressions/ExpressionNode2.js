@@ -246,6 +246,8 @@ $C('$data.Expressions.ExpressionNode', $data.Entity, null, {
 
     type: {},
 
+    isTerminated: { value: false },
+
     toString: function () {
         return this.value;
     }
@@ -271,52 +273,3 @@ $C('$data.Expressions.UnaryExpression', $data.Expressions.ExpressionNode, null, 
     operand: { value: undefined, writable: true },
     nodeType: { value: undefined, writable: true }
 });
-
-
-
-
-//$data.Expressions.ExpressionNodeTypes.NewExpressionNode = $C('NewExpressionNode', $data.Expressions.ExpressionNodeTypes.ExpressionNode, null, {
-//    values: { value: undefined },
-//    constructor: function (type, executable, values) {
-//        this.values = values;
-//    }
-//}, {
-//    create: function (executable, values) {
-//        return new $data.Expressions.ExpressionNodeTypes.NewExpressionNode(NEW, executable, values);
-//    }
-//});
-
-
-//$data.Expressions.ExpressionNodeTypes.IncDecExpressionNode = $C('IncDecExpressionNode', $data.Expressions.ExpressionNodeTypes.ExpressionNode, null, {
-//    operator: { value: undefined },
-//    operand: { value: undefined },
-//    suffix: { value: undefined },
-//    constructor: function (type, executable, operator, operand, suffix) {
-//        this.operator = operator;
-//        this.operand = operand;
-//        this.suffix = suffix;
-//    }
-//}, {
-//    create: function (executable, operator, operand, suffix) {
-//        return new $data.Expressions.ExpressionNodeTypes.IncDecExpressionNode(INCDEC, executable, operator, operand, suffix);
-//    }
-//});
-
-
-//$data.Expressions.ExpressionNodeTypes.DecisionExpressionNode = $C('DecisionExpressionNode', $data.Expressions.ExpressionNodeTypes.ExpressionNode, null, {
-//    expression: { value: undefined },
-//    left: { value: undefined },
-//    right: { value: undefined },
-//    constructor: function (type, executable, expression, left, right) {
-//        this.expression = expression;
-//        this.left = left;
-//        this.right = right;
-//    }
-//}, {
-//    create: function (executable, expression, left, right) {
-//        return new $data.Expressions.ExpressionNodeTypes.DecisionExpressionNode(DECISION, executable, expression, left, right);
-//    }
-//});
-
-
-
