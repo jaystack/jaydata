@@ -1,7 +1,7 @@
 
 $C('$data.modelBinder.FindProjectionVisitor', $data.Expressions.EntityExpressionVisitor, null, {
     VisitProjectionExpression: function (expression) {
-        this.projectionExpresison = expression;
+        this.projectionExpression = expression;
     }
 });
 
@@ -29,6 +29,18 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitForEachExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
+    VisitServiceOperationExpression: function (expression) {
+        var builder = Container.createqueryBuilder();
+        builder.modelBinderConfig['$type'] = expression.cfg.returnType;
+        if (expression.cfg.returnType.inheritsFrom === $data.Entity) {
+            builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
+        } else {
+            builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
+        }
+        this.VisitExpression(expression, builder);
+        builder.resetModelBinderProperty();
+        this._query.modelBinderConfig = builder.modelBinderConfig;
+    },
     VisitCountExpression: function (expression) {
         var builder = Container.createqueryBuilder();
 
@@ -48,8 +60,8 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         var projVisitor = Container.createFindProjectionVisitor();
         projVisitor.Visit(expression);
 
-        if (projVisitor.projectionExpresison) {
-            this.Visit(projVisitor.projectionExpresison, builder);
+        if (projVisitor.projectionExpression) {
+            this.Visit(projVisitor.projectionExpression, builder);
         } else {
             this.DefaultSelection(builder);
         }
@@ -119,9 +131,8 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     DefaultSelection: function (builder) {
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = this._query.defaultType;
-
+        
         var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
-
         this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
         if (this._includes) {
             this._includes.forEach(function (include) {

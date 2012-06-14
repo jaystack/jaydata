@@ -863,8 +863,8 @@ function T3(providerConfig, msg) {
                 db.PrefilteredLocation(4, 'Art').then(function (result) {
                     start(1);
                     ok(result);
-                    ok(result[0] instanceof $news.Types.Location, 'Return type faild');
-                    ok(result[1].Address.length > 0, 'Title faild');
+                    ok(result instanceof $news.Types.Location, 'Return type faild');
+                    ok(result.Address.length > 0, 'Title faild');
                 })
             });
         });
@@ -888,7 +888,7 @@ function T3(providerConfig, msg) {
     });
     test('OData_Function_Import_Scalar', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        expect(3);
+        expect(2);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
@@ -897,8 +897,7 @@ function T3(providerConfig, msg) {
                 db.PrefilteredArticlesCount(4, 'Art').then(function (result) {
                     start(1);
                     ok(result);
-                    ok(result[0] instanceof $news.Types.Location, 'Return type faild');
-                    ok(result[1].Address.length > 0, 'Title faild');
+                    ok(typeof result === 'number', 'Return type faild');
                 })
             });
         });
@@ -922,7 +921,7 @@ function T3(providerConfig, msg) {
     });
     test('OData_Function_Import_Articles', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        expect(3);
+        expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
@@ -931,6 +930,7 @@ function T3(providerConfig, msg) {
                 db.PrefilteredArticles(4, 'Art').toArray(function (result) {
                     start(1);
                     ok(result);
+                    equal(result.length, 22, 'Result number faild');
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
                     ok(result[1].Title.length > 0, 'Title faild');
                 })
@@ -965,8 +965,44 @@ function T3(providerConfig, msg) {
                 db.PrefilteredArticle(4, 'Art').then(function (result) {
                     start(1);
                     ok(result);
+                    ok(result instanceof $news.Types.Article, 'Return type faild');
+                    ok(result.Title.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_Articles_With_PostFilter', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(4);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticles(4, 'Art').filter(function (a) { return a.Id < 10;}).toArray(function (result) {
+                    start(1);
+                    ok(result);
+                    equal(result.length, 5, 'Result number faild');
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
                     ok(result[1].Title.length > 0, 'Title faild');
+                })
+            });
+        });
+    });
+    test('OData_Function_Import_Articles_With_PostFilter_Map', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(4);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.PrefilteredArticles(4, 'Art').filter(function (a) { return a.Id < 10; }).map(function (a) { return {T:a.Id}}).toArray(function (result) {
+                    start(1);
+                    ok(result);
+                    equal(result.length, 5, 'Result number faild');
+                    ok(!(result[0] instanceof $news.Types.Article), 'Return type faild');
+                    ok(typeof result[1].T === 'number', 'Filed data type error');
                 })
             });
         });

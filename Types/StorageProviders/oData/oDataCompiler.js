@@ -106,7 +106,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
     },
     VisitServiceOperationExpression: function (expression, context) {
-        context.urlText += "/" + expression.cfg.Name;
+        context.urlText += "/" + expression.cfg.serviceName;
         //this.logicalType = expression.returnType;
         if (expression.params) {
             for (var i = 0; i < expression.params.length; i++) {

@@ -36,8 +36,8 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         var projVisitor = Container.createFindProjectionVisitor();
         projVisitor.Visit(expression);
 
-        if (projVisitor.projectionExpresison) {
-            this.Visit(projVisitor.projectionExpresison, builder);
+        if (projVisitor.projectionExpression) {
+            this.Visit(projVisitor.projectionExpression, builder);
         } else {
             this.DefaultSelection(builder);
         }

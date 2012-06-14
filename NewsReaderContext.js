@@ -64,63 +64,6 @@ $data.Class.define("$news.Types.TestItem", $data.Entity, null, {
     User: { type: '$news.Types.User', inverseProperty: '$$unbound' }
 }, null);
 
-$data.createServiceOperation = function (cfg) {
-
-    var fn = function () {
-        var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(cfg.elementType) : null;
-
-        var paramConstExpression = null;
-        if (cfg.params) {
-            paramConstExpression = [];
-            for (var i = 0; i < cfg.params.length; i++) {
-                //TODO: check params type
-                for (var name in cfg.params[i]) {
-                    paramConstExpression.push(Container.createConstantExpression(arguments[i], cfg.params[i][name], name));
-                }
-            }
-        }
-
-        var ec = Container.createEntityContextExpression(this);
-        var memberdef = this.getType().getMemberDefinition(cfg.Name);
-        var es = Container.createServiceOperationExpression(ec,
-                Container.createMemberInfoExpression(memberdef),
-                paramConstExpression,
-                cfg);
-
-        //Get callback function
-        var clb = arguments[arguments.length - 1];
-        if (typeof clb !== 'function') {
-            clb = undefined;
-        }
-
-        if (virtualEntitySet) {
-            var q = Container.createQueryable(virtualEntitySet, es);
-            if (clb) {
-                es.isTerminated= true;
-                return q._runQuery(clb);
-            }
-            return q;
-        }
-        else {
-            var q = Container.createQueryable(this, es);
-            q.defaultType = cfg.returnType;
-
-            if (cfg.returnType === $data.Queryable) {
-                q.defaultType = cfg.elementType;
-                if (clb) {
-                    es.isTerminated= true;
-                    return q._runQuery(clb);
-                }
-                return q;
-            }
-            es.isTerminated = true;
-            return q._runQuery(clb);
-        }
-    };
-    //fn.EntitySet = ctx["PrefilteredArticlesCount"];
-    return fn;
-}
-
 $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     Categories: { type: $data.EntitySet, elementType: $news.Types.Category },
     Articles: { type: $data.EntitySet, elementType: $news.Types.Article },
@@ -130,14 +73,14 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     UserProfiles: { type: $data.EntitySet, elementType: $news.Types.UserProfile },
     TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItem },
 
-    PrefilteredLocation: $data.createServiceOperation({ Name: 'PrefilteredLocation', Type: $data.ServiceMethod, returnType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredLocations: $data.createServiceOperation({ Name: 'PrefilteredLocations', Type: $data.ServiceMethod, returnType: $data.Queryable, elementType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticlesCount: $data.createServiceOperation({ Name: 'PrefilteredArticlesCount', Type: $data.ServiceMethod, returnType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticlesId: $data.createServiceOperation({ Name: 'PrefilteredArticlesId', Type: $data.ServiceMethod, returnType: $data.Queryable, elementType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticles: $data.createServiceOperation({ Name: 'PrefilteredArticles', Type: $data.ServiceMethod, returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticleList: $data.createServiceOperation({ Name: 'PrefilteredArticleList', Type: $data.ServiceMethod, returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticle: $data.createServiceOperation({ Name: 'PrefilteredArticle', Type: $data.ServiceMethod, returnType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    CreateCategory: $data.createServiceOperation({ Name: 'CreateCategory', Type: $data.ServiceMethod, returnType: null, params: [{ title: $data.String }, { subTitle: $data.String }] })
+    PrefilteredLocation: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocation', returnType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredLocations: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocations', returnType: $data.Queryable, elementType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticlesCount: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticlesCount', returnType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticlesId: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticlesId', returnType: $data.Queryable, elementType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticles: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticles', returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticleList: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticleList', returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticle: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticle', returnType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    CreateCategory: $data.EntityContext.generateServiceOperation({ serviceName: 'CreateCategory', returnType: null, params: [{ title: $data.String }, { subTitle: $data.String }] })
 
 }, null);
 

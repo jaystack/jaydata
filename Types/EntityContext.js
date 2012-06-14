@@ -822,28 +822,6 @@ $data.Class.define('$data.EntityContext', null, null,
         var q = Container.createQueryable(this[returnEntitySet], es);
         return q;
     },
-    _generateServiceOperationQueryable2: function (functionName, returnEntitySet, arg, parameters) {
-        var virtualEntitySet = Container.createEntitySet($data.Object, this, "PrefilteredArticlesCount");
-        var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
-        virtualEs.tableName = functionName;
-
-        var paramConstExpression = null;
-        if (parameters) {
-            paramConstExpression = [];
-            for (var i = 0; i < parameters.length; i++) {
-                paramConstExpression.push(Container.createConstantExpression(arg[i], null, parameters[i]));
-            }
-        }
-        var ec = Container.createEntityContextExpression(this);
-        var memberdef = this.getType().getMemberDefinition(returnEntitySet);
-        var es = Container.createEntitySetExpression(ec,
-                Container.createMemberInfoExpression(memberdef),
-                paramConstExpression,
-                virtualEs);
-
-        var q = Container.createQueryable(this[returnEntitySet], es);
-        return q;
-    },
     attach: function (entity) {
         /// <summary>
         ///     Attaches an entity to its matching entity set.
@@ -897,6 +875,61 @@ $data.Class.define('$data.EntityContext', null, null,
         return entitySet.remove(entity);
     }
 }, {
+    generateServiceOperation: function (cfg) {
+
+        var fn = function () {
+            var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(cfg.elementType) : null;
+
+            var paramConstExpression = null;
+            if (cfg.params) {
+                paramConstExpression = [];
+                for (var i = 0; i < cfg.params.length; i++) {
+                    //TODO: check params type
+                    for (var name in cfg.params[i]) {
+                        paramConstExpression.push(Container.createConstantExpression(arguments[i], cfg.params[i][name], name));
+                    }
+                }
+            }
+
+            var ec = Container.createEntityContextExpression(this);
+            var memberdef = this.getType().getMemberDefinition(cfg.serviceName);
+            var es = Container.createServiceOperationExpression(ec,
+                    Container.createMemberInfoExpression(memberdef),
+                    paramConstExpression,
+                    cfg);
+
+            //Get callback function
+            var clb = arguments[arguments.length - 1];
+            if (typeof clb !== 'function') {
+                clb = undefined;
+            }
+
+            if (virtualEntitySet) {
+                var q = Container.createQueryable(virtualEntitySet, es);
+                if (clb) {
+                    es.isTerminated = true;
+                    return q._runQuery(clb);
+                }
+                return q;
+            }
+            else {
+                var q = Container.createQueryable(this, es);
+                q.defaultType = cfg.returnType;
+
+                if (cfg.returnType === $data.Queryable) {
+                    q.defaultType = cfg.elementType;
+                    if (clb) {
+                        es.isTerminated = true;
+                        return q._runQuery(clb);
+                    }
+                    return q;
+                }
+                es.isTerminated = true;
+                return q._runQuery(clb);
+            }
+        };
+        return fn;
+    },
     _convertLogicalTypeNameToPhysical: function (name) {
         return name + '_$db$';
     },
