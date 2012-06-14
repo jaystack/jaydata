@@ -2,12 +2,17 @@
 $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctx) {
+        if (typeof OData === 'undefined') {
+            Guard.raise(new Exception('datajs is required', 'Not Found!'));
+        }
+
         this.SqlCommands = [];
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
             dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged,
             oDataServiceHost: "/odata.svc",
             serviceUrl: "",
+            maxDataServiceVersion: '2.0',
             user: null,
             password: null
         }, cfg);
@@ -24,17 +29,24 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
                 var that = this;
                 if (this.providerConfiguration.serviceUrl) {
-                    $data.ajax(this._setAjaxAuthHeader({
-                        url: that.providerConfiguration.serviceUrl + "/Delete",
-                        type: 'POST',
-                        success: function (d) {
-                            console.log("RESET oData database");
-                            callBack.success(that.context);
-                        },
-                        error: function (error) {
-                            callBack.success(that.context);
-                        }
-                    }));
+
+                    var requestData = [{
+                        requestUri: that.providerConfiguration.serviceUrl + "/Delete",
+                        method: 'POST'
+                    }, function (d) {
+                        console.log("RESET oData database");
+                        callBack.success(that.context);
+                    }, function (error) {
+                        callBack.success(that.context);
+                    }];
+
+                    if (this.providerConfiguration.user) {
+                        requestData[0].user = this.providerConfiguration.user;
+                        requestData[0].password = this.providerConfiguration.password || "";
+                    }
+
+                    this.context.prepareRequest.call(this, requestData);
+                    OData.request.apply(this, requestData);
                 } else {
                     callBack.success(that.context);
                 }
@@ -44,60 +56,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 break;
         }
     },
-    _setAjaxAuthHeader: function (cfg) {
-        var encodeBase64 = function (val) {
-            var b64array = "ABCDEFGHIJKLMNOP" +
-                               "QRSTUVWXYZabcdef" +
-                               "ghijklmnopqrstuv" +
-                               "wxyz0123456789+/" +
-                               "=";
-
-            input = val;
-            var base64 = "";
-            var hex = "";
-            var chr1, chr2, chr3 = "";
-            var enc1, enc2, enc3, enc4 = "";
-            var i = 0;
-
-            do {
-                chr1 = input.charCodeAt(i++);
-                chr2 = input.charCodeAt(i++);
-                chr3 = input.charCodeAt(i++);
-
-                enc1 = chr1 >> 2;
-                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-                enc4 = chr3 & 63;
-
-                if (isNaN(chr2)) {
-                    enc3 = enc4 = 64;
-                } else if (isNaN(chr3)) {
-                    enc4 = 64;
-                }
-
-                base64 = base64 +
-                            b64array.charAt(enc1) +
-                            b64array.charAt(enc2) +
-                            b64array.charAt(enc3) +
-                            b64array.charAt(enc4);
-                chr1 = chr2 = chr3 = "";
-                enc1 = enc2 = enc3 = enc4 = "";
-            } while (i < input.length);
-
-            return base64;
-        }
-        if (this.providerConfiguration.user) {
-            var user = this.providerConfiguration.user;
-            var password = this.providerConfiguration.password;
-            var origBeforeSend = cfg.beforeSend;
-            cfg.beforeSend = function (xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + encodeBase64(user + ":" + password || ""));
-                if (typeof origBeforeSend === "function")
-                    origBeforeSend.apply(this, arguments);
-            }
-        }
-        return cfg;
-    },    
     buildDbType_generateConvertToFunction: function (storageModel, context) {
         return function (logicalEntity, convertedItems) {
             var dbInstance = new storageModel.PhysicalType();
@@ -161,25 +119,33 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
         var schema = this.context;
 
-        var requestData = {
-            url: this.providerConfiguration.oDataServiceHost + sql.queryText,
-            dataType: "JSON",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Accept", "application/json; odata=verbose, text/javascript, */*; q=0.01");
+        var requestData = [
+            {
+                requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
+                headers: {
+                    MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
+                }
             },
-            success: function (data, textStatus, jqXHR) {
+            function (data, textStatus, jqXHR) {
                 if (callBack.success) {
-                    query.rawDataList = typeof data === 'number' ? [{ cnt: data }] : data;
+                    query.rawDataList = typeof data === 'string' ? [{ cnt: data }] : data;
                     callBack.success(query);
                 }
             },
-            error: function (jqXHR, textStatus, errorThrow) {
+            function (jqXHR, textStatus, errorThrow) {
                 callBack.error(errorThrow);
             }
-        };
+        ];
 
-        this.context.prepareRequest.call(this, this._setAjaxAuthHeader(requestData));
-        $data.ajax(requestData);
+        if (this.providerConfiguration.user) {
+            requestData[0].user = this.providerConfiguration.user;
+            requestData[0].password = this.providerConfiguration.password || "";
+        }
+
+        this.context.prepareRequest.call(this, requestData);
+        //$data.ajax(requestData);
+        //OData.request(requestData, requestData.success, requestData.error);
+        OData.request.apply(this, requestData);
     },
     _compile: function (queryable, params) {
         var compiler = new $data.storageProviders.oData.oDataCompiler();
@@ -187,10 +153,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         return compiled;
     },
     saveChanges: function (callBack, changedItems) {
-        if (typeof OData === 'undefined') {
-            Guard.raise(new Exception('datajs is required', 'Not Found!'));
-        }
-
         if (changedItems.length > 0) {
             var independentBlocks = this.buildIndependentBlocks(changedItems);
             this.saveInternal(independentBlocks, 0, callBack);
@@ -260,13 +222,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         }, callBack.error, OData.batchHandler];
 
-        this.context.prepareRequest.call(this, requestData);
-
         if (this.providerConfiguration.user) {
             requestData[0].user = this.providerConfiguration.user;
             requestData[0].password = this.providerConfiguration.password || "";
         }
 
+        this.context.prepareRequest.call(this, requestData);
         OData.request.apply(this, requestData);
     },
     save_getInitData: function (item, convertedItems) {
@@ -431,7 +392,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
     supportedSetOperations: {
         value: {
-            filter: { },
+            filter: {},
             map: {},
             length: {},
             forEach: {},

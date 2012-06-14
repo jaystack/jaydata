@@ -21,7 +21,7 @@
             equal(q.queryText, "/Users", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -42,7 +42,7 @@
             equal(q.queryText, "/Users?$orderby=LoginName", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -64,7 +64,7 @@
             equal(q.queryText, "/Users?$orderby=Email,Id,LoginName", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -86,7 +86,7 @@
             equal(q.queryText, "/Users?$orderby=Email desc,Id desc,LoginName desc", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -108,7 +108,7 @@
             equal(q.queryText, "/Users?$orderby=Email,Id desc,LoginName", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -130,7 +130,7 @@
             equal(q.queryText, "/Users?$orderby=Email desc,Id,LoginName desc", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -151,7 +151,7 @@
             equal(q.queryText, "/Users?$top=10", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -171,7 +171,7 @@
             equal(q.queryText, "/Users?$skip=11", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -191,7 +191,7 @@
             equal(q.queryText, "/Users?$skip=11&$top=10", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -212,7 +212,7 @@
             equal(q.queryText, "/Users?$filter=(LoginName eq 'alma')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -232,7 +232,7 @@
             equal(q.queryText, "/Users?$filter=(LoginName eq 'alma')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -252,7 +252,7 @@
             equal(q.queryText, "/Users?$filter=(Id eq 15)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -272,7 +272,7 @@
             equal(q.queryText, "/Users?$filter=(Id eq 15)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -302,7 +302,7 @@
             equal(q.queryText, "/Articles?$filter=(CreateDate gt datetime'" + dateString + "')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -326,7 +326,7 @@
             equal(q.queryText, "/TestTable?$filter=(n0 gt 4.5m)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.TestItem,
                     $keys: ['Id'],
@@ -350,7 +350,7 @@
             equal(q.queryText, "/TestTable?$filter=(n0 gt 4.5m)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.TestItem,
                     $keys: ['Id'],
@@ -374,7 +374,7 @@
             equal(q.queryText, "/TestTable?$filter=(b0 eq true)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.TestItem,
                     $keys: ['Id'],
@@ -398,7 +398,7 @@
             equal(q.queryText, "/TestTable?$filter=(b0 eq true)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.TestItem,
                     $keys: ['Id'],
@@ -422,7 +422,7 @@
             equal(q.queryText, "/Users?$filter=((LoginName eq 'alma') and (Email eq 'email@company.com'))", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -443,7 +443,7 @@
             equal(q.queryText, "/Articles?$filter=((Title eq 'alma') and (CreateDate eq datetime'" + dateString + "'))", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -471,7 +471,7 @@
             equal(q.queryText, "/Articles?$filter=((Title eq 'alma') and (CreateDate eq datetime'" + dateString + "'))&$orderby=Title", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -497,7 +497,7 @@
             equal(q.queryText, "/Users?$filter=substringof('aj',LoginName)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -517,7 +517,7 @@
             equal(q.queryText, "/Users?$filter=startswith(LoginName,'aj')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -537,7 +537,7 @@
             equal(q.queryText, "/Users?$filter=endswith(LoginName,'aj')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -559,7 +559,7 @@
             equal(q.queryText, "/Articles?$expand=Category", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -590,7 +590,7 @@
             equal(q.queryText, "/Articles?$expand=Category,Author", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -629,7 +629,7 @@
             equal(q.queryText, "/Articles?$expand=Category,Author/Profile", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -687,7 +687,7 @@
             equal(q.queryText, "/Categories?$expand=Articles,Articles/Author", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Category,
                     $keys: ['Id'],
@@ -731,7 +731,7 @@
             equal(q.queryText, "/Articles?$filter=(Category/Title eq 'Sport')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -756,7 +756,7 @@
             equal(q.queryText, "/Articles?$filter=(Author/Profile/Bio eq 'Bio1')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
@@ -780,7 +780,7 @@
             equal(q.queryText, "/Users?$filter=(Profile/Bio eq 'Bio2')", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.User,
                     $keys: ['Id'],
@@ -811,7 +811,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: 'int',
                     $source: 'Id'
@@ -829,7 +829,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $selector: ['json:Author.Profile.results','json:Author.Profile'],
                     $type: 'string',
@@ -865,7 +865,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: { $type: 'string', $source: 'Title' },
@@ -884,7 +884,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: { $type: 'string', $selector: ['json:Author.Profile.results','json:Author.Profile'], $source: 'FullName' },
@@ -903,7 +903,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: { $type: 'string', $selector: ['json:Author.Profile.results','json:Author.Profile'], $source: 'FullName' },
@@ -931,7 +931,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: { $type: 'string', $selector: ['json:Author.Profile.results','json:Author.Profile'], $source: 'FullName' },
@@ -963,7 +963,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
@@ -999,7 +999,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: {
@@ -1024,7 +1024,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: {
@@ -1061,7 +1061,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
                     t: {
@@ -1116,7 +1116,7 @@
 
             var expectedObject = {
                 $type: $data.Array,
-                $selector: ['json:d.results', 'json:d'],
+                $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $news.Types.UserProfile,
                     $selector: ['json:Reviewer.Profile.results', 'json:Reviewer.Profile'],

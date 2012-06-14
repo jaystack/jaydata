@@ -36,7 +36,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
 								if (i === metaSelector.length){
 									return undefined;
 								}else if (path.length){
-									i++;
 									break;
 								}
 							}else{
