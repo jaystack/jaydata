@@ -31,8 +31,9 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     },
     VisitServiceOperationExpression: function (expression) {
         var builder = Container.createqueryBuilder();
-        builder.modelBinderConfig['$type'] = expression.cfg.returnType;
-        if (expression.cfg.returnType.inheritsFrom === $data.Entity) {
+        var returnType = Container.resolveType(expression.cfg.returnType);
+        builder.modelBinderConfig['$type'] = returnType;
+        if (returnType.inheritsFrom === $data.Entity) {
             builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
         } else {
             builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
