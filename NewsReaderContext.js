@@ -6,7 +6,7 @@ $data.Class.define("$news.Types.Category", $data.Entity, null, {
 }, null);
 $data.Class.define("$news.Types.Article", $data.Entity, null, {
     Id: { type: "int", key: true, computed: true },
-    RowVersion: { type: $data.Blob, concurrencyMode:'fixed'},
+    RowVersion: { type: $data.Blob, concurrencyMode: $data.ConcurrencyMode.Fixed },
     Title: { type: "string" },
     Lead: { type: "string" },
     Body: { type: "string" },

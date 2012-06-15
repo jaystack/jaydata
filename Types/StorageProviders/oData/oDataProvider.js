@@ -209,7 +209,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     var item = convertedItem[i];
                     if (result[i].statusCode == 204) {
                         if (result[i].headers.ETag) {
-                            var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === "fixed" });
+                            var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
                             if (property && property[0]) {
                                 item[property[0].name] = result[i].headers.ETag;
                             }
@@ -219,7 +219,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         if (memDef.computed) {
-                            if (memDef.concurrencyMode === "fixed") {
+                            if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 item[memDef.name] = result[i].headers.ETag;
                             } else {
                                 item[memDef.name] = result[i].data[memDef.name];
@@ -255,11 +255,15 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         return serializableObject;
     },
     save_addConcurrencyHeader: function (item, headers) {
-        if (item.data.RowVersion || item.data.RowVersion === 0) {
-            //headers['If-Match'] = "W/\"X'00000000000000CB'\"";
-            headers['If-Match'] = item.data.RowVersion.toString();
-            item.data.RowVersion = "";
+        var property = item.data.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
+        if (property && property[0]) {
+            headers['If-Match'] = item.data[property[0].name];
+            item.data[property[0].name] = "";
         }
+        //if (item.data.RowVersion || item.data.RowVersion === 0) {
+        //    headers['If-Match'] = item.data.RowVersion.toString();
+        //    item.data.RowVersion = "";
+        //}
     },
     getTraceString: function (queryable) {
         var sqlText = this._compile(queryable);

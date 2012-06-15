@@ -102,8 +102,8 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                         if (prop.key) {
                             builder.addKeyField(prop.name);
                         }
-                        if (prop.concurrencyMode === "fixed") {
-                            builder.modelBinderConfig[prop.name] = {$selector:'json:__metadata', $source:'etag'}
+                        if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                            builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
                         } else {
                             builder.modelBinderConfig[prop.name] = prop.name;
                         }
@@ -136,7 +136,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     DefaultSelection: function (builder) {
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = this._query.defaultType;
-        
+
         var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
         this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
         if (this._includes) {
@@ -145,7 +145,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 var association = null;
                 var tmpStorageModel = storageModel;
                 for (var i = 0; i < includes.length; i++) {
-					if (builder.modelBinderConfig.$item) builder.selectModelBinderProperty('$item');
+                    if (builder.modelBinderConfig.$item) builder.selectModelBinderProperty('$item');
                     builder.selectModelBinderProperty(includes[i]);
                     association = tmpStorageModel.Associations[includes[i]];
                     tmpStorageModel = this._query.context._storageModel.getStorageModel(association.ToType);

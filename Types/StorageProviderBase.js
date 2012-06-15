@@ -1,3 +1,4 @@
+$data.ConcurrencyMode = {Fixed : 'fixed', None: 'nonde'};
 $data.Class.define('$data.StorageProviderBase', null, null,
 {
     constructor: function (schemaConfiguration) {
