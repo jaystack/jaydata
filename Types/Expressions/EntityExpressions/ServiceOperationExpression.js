@@ -28,8 +28,8 @@ $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionN
         var c = findContext();
         switch (true) {
             case this.source instanceof $data.Expressions.EntityContextExpression:
-                this.elementType = cfg.elementType ? cfg.elementType : cfg.returnType;
-                this.storageModel = cfg.elementType ? c.instance._storageModel.getStorageModel(cfg.elementType) : null;
+                this.elementType = cfg.elementType ? Container.resolveType(cfg.elementType) : Container.resolveType(cfg.returnType);
+                this.storageModel = cfg.elementType ? c.instance._storageModel.getStorageModel(Container.resolveType(cfg.elementType)) : null;
                 break;
             default:
                 Guard.raise("Unknown source type for EntitySetExpression: " + this.source.getType().name);

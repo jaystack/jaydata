@@ -74,10 +74,10 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItem },
 
     PrefilteredLocation: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocation', returnType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredLocations: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocations', returnType: $data.Queryable, elementType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredLocations: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocations', returnType: $data.Queryable, elementType: '$news.Types.Location', params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     PrefilteredArticlesCount: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticlesCount', returnType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticlesId: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticlesId', returnType: $data.Queryable, elementType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    PrefilteredArticles: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticles', returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticlesId: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticlesId', returnType: '$data.Queryable', elementType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
+    PrefilteredArticles: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticles', returnType: '$data.Queryable', elementType: '$news.Types.Article', params: [{ minId: '$data.Integer' }, { startsWith: '$data.String' }] }),
     PrefilteredArticleList: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticleList', returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     PrefilteredArticle: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticle', returnType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     CreateCategory: $data.EntityContext.generateServiceOperation({ serviceName: 'CreateCategory', returnType: null, params: [{ title: $data.String }, { subTitle: $data.String }] })
