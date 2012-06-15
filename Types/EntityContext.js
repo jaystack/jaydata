@@ -436,7 +436,7 @@ $data.Class.define('$data.EntityContext', null, null,
         clbWrapper.success = function (query) {
             query.buildResultSet(that);
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
-                query.expression.nodeType === $data.Expressions.ExpressionType.Count || 
+                query.expression.nodeType === $data.Expressions.ExpressionType.Count ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Some ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Every) {
                 if (query.result.length !== 1) {
@@ -802,25 +802,18 @@ $data.Class.define('$data.EntityContext', null, null,
         return this.storageProvider.resolveSetOperations(operation, expression, frameType);
     },
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
-        var virtualEs = Container.createEntitySet(this[returnEntitySet].elementType, this, returnEntitySet);
-        virtualEs.tableName = functionName;
+        if(typeof console !== 'undefined' && console.log)
+            console.log('Obsolate: _generateServiceOperationQueryable, $data.EntityContext');
 
-        var paramConstExpression = null;
-        if (parameters) {
-            paramConstExpression = [];
-            for (var i = 0; i < parameters.length; i++) {
-                paramConstExpression.push(Container.createConstantExpression(arg[i], null, parameters[i]));
-            }
+        var params = [];
+        for (var i = 0; i < parameters.length; i++) {
+            var obj = {};
+            obj[parameters[i]] = Container.resolveType(Container.getTypeName(arg[i]));
+            params.push(obj);
         }
-        var ec = Container.createEntityContextExpression(this);
-        var memberdef = this.getType().getMemberDefinition(returnEntitySet);
-        var es = Container.createEntitySetExpression(ec,
-                Container.createMemberInfoExpression(memberdef),
-                paramConstExpression,
-                virtualEs);
 
-        var q = Container.createQueryable(this[returnEntitySet], es);
-        return q;
+        var tempOperation = $data.EntityContext.generateServiceOperation({ serviceName: functionName, returnType: $data.Queryable, elementType: this[returnEntitySet].elementType, params: params });
+        return tempOperation.apply(this, arg);
     },
     attach: function (entity) {
         /// <summary>
@@ -878,7 +871,8 @@ $data.Class.define('$data.EntityContext', null, null,
     generateServiceOperation: function (cfg) {
 
         var fn = function () {
-            var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(cfg.elementType) : null;
+
+            var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(Container.resolveType(cfg.elementType)) : null;
 
             var paramConstExpression = null;
             if (cfg.params) {
@@ -886,7 +880,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 for (var i = 0; i < cfg.params.length; i++) {
                     //TODO: check params type
                     for (var name in cfg.params[i]) {
-                        paramConstExpression.push(Container.createConstantExpression(arguments[i], cfg.params[i][name], name));
+                        paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(cfg.params[i][name]), name));
                     }
                 }
             }
@@ -913,11 +907,13 @@ $data.Class.define('$data.EntityContext', null, null,
                 return q;
             }
             else {
-                var q = Container.createQueryable(this, es);
-                q.defaultType = cfg.returnType;
+                var returnType = Container.resolveType(cfg.returnType);
 
-                if (cfg.returnType === $data.Queryable) {
-                    q.defaultType = cfg.elementType;
+                var q = Container.createQueryable(this, es);
+                q.defaultType = returnType;
+
+                if (returnType === $data.Queryable) {
+                    q.defaultType = Container.resolveType(cfg.elementType);
                     if (clb) {
                         es.isTerminated = true;
                         return q._runQuery(clb);

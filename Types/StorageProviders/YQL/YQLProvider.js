@@ -8,6 +8,7 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
         this.providerConfiguration = $data.typeSystem.extend({
             YQLFormat: "format=json",
             YQLQueryUrl: "http://query.yahooapis.com/v1/public/yql?q=",
+            YQLEnv: '',
             resultPath: ["query", "results"],
             resultSkipFirstLevel: true
         }, cfg);
@@ -123,11 +124,8 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
         }
 
         var includes = [];
-        if (!sql.selectMapping && !entitSetDefinition.anonymousResult)
-            this._discoverType('', schema, includes);
-
         var requestData = {
-            url: this.providerConfiguration.YQLQueryUrl + encodeURIComponent(sql.queryText) + "&" + this.providerConfiguration.YQLFormat,
+            url: this.providerConfiguration.YQLQueryUrl + encodeURIComponent(sql.queryText) + "&" + this.providerConfiguration.YQLFormat + (this.providerConfiguration.YQLEnv ? ("&env=" + this.providerConfiguration.YQLEnv) : ""),
             dataType: "JSON",
             success: function (data, textStatus, jqXHR) {
                 var resultData = self._preProcessData(data, entitSetDefinition);
@@ -161,25 +159,6 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
 
         this.context.prepareRequest.call(this, requestData);
         this.AuthenticationProvider.CreateRequest(requestData);
-    },
-    _discoverType: function (dept, type, result) {
-        type.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-            var type = Container.resolveType(memDef.dataType);
-
-            if (type.isAssignableTo || type == Array) {
-                var name = dept ? (dept + '.' + memDef.name) : memDef.name;
-
-                if (type == Array || type.isAssignableTo($data.EntitySet)) {
-                    if (memDef.inverseProperty)
-                        type = Container.resolveType(memDef.elementType);
-                    else
-                        return;
-                }
-
-                result.push({ name: name, type: type })
-                this._discoverType(name, type, result);
-            }
-        }, this);
     },
     _preProcessData: function (jsonResult, entityDef) {
         var resultData = jsonResult;
