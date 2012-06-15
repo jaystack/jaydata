@@ -189,7 +189,7 @@
 
     });
 
-    test("Entity validation - partial update", 3, function () {
+    test("Entity validation - partial update", 4, function () {
         $data.Class.define('vtestEntity', $data.Entity, null, {
             Id: { type: 'int', key: true, computed: true },
             Title: { type: 'string', required: true },
@@ -224,6 +224,7 @@
                         success: function () {
                             context.Items.filter(function (v) { return v.Id == this.Id }, { Id: e.Id }).single(undefined, undefined, function (result) {
                                 equal(result.Title, e.Title + '_changed', 'changed text failed');
+                                equal(result.Lead, e.Lead, 'original text failed');
                                 start();
                             })
                         },
