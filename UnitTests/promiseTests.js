@@ -3,7 +3,7 @@
 $(document).ready(function () {
 	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
 
-	promiseTests({ name: "sqLite", dataBaseName: 'promiseTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+	promiseTests({ name: "sqLite", databaseName: 'promiseTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
 });
 
 function promiseTests(providerConfig) {

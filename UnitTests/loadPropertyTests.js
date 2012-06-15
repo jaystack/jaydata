@@ -2,7 +2,7 @@
 $(document).ready(function () {
 	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
 
-	loadPropertyTests({ name: "sqLite", dataBaseName: 'loadPropertyTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+	loadPropertyTests({ name: "sqLite", databaseName: 'loadPropertyTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
 });
 
 function loadPropertyTests(providerConfig) {
