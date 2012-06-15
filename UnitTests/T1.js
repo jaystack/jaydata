@@ -453,7 +453,7 @@
             });
         });
     });
-    test('976_updating entity will result in cleared out fields in db', 6, function () {
+    test('976_updating entity will result in cleared out fields in db', 7, function () {
         stop(5);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
@@ -477,6 +477,14 @@
                             start(1);
                             var uArticle = uArticles[0];
                             ok(uArticle instanceof $news.Types.Article, "Return value do not an article instance");
+
+                            if (providerConfig.name[0] === 'sqLite')//ETag
+                            {
+                                ok(true, 'sqLite ETag update not supported yet');
+                            } else {
+                                notEqual(pin_ArticleInitData.RowVersion, uArticle.RowVersion, 'ETag update faild');
+                                pin_ArticleInitData.RowVersion = uArticle.RowVersion;//deepEqual helper
+                            }
                             var pin_uArticleInitData = JSON.parse(JSON.stringify(uArticle.initData));
                             deepEqual(pin_uArticleInitData, pin_ArticleInitData, "Article saved faild");
                         });

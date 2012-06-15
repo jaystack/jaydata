@@ -101,7 +101,11 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                         if (prop.key) {
                             builder.addKeyField(prop.name);
                         }
-                        builder.modelBinderConfig[prop.name] = prop.name;
+                        if (prop.concurrencyMode === "fixed") {
+                            builder.modelBinderConfig[prop.name] = {$selector:'json:__metadata', $source:'etag'}
+                        } else {
+                            builder.modelBinderConfig[prop.name] = prop.name;
+                        }
                     }
                 }
             }, this);

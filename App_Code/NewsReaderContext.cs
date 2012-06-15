@@ -23,6 +23,8 @@ namespace JayData.NewsReader
                 .HasKey(i => i.Id)
                 .Property(i => i.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
+            //modelBuilder.Entity<Category>().Property(p => p.RowVersion).IsRowVersion().IsConcurrencyToken();
+            //modelBuilder.Entity<Article>().Property(p => p.RowVersion).IsRowVersion().IsConcurrencyToken();
         }
 
         public DbSet<Category> Categories { get; set; }
@@ -66,6 +68,8 @@ namespace JayData.NewsReader
     {
         [Key]
         public int Id { get; set; }
+        //[Timestamp]
+        public byte[] RowVersion { get; set; }
         public string Title { get; set; }
         public string Subtitle { get; set; }
         public string Description { get; set; }
@@ -75,6 +79,8 @@ namespace JayData.NewsReader
     {
         [Key]
         public int Id { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
         //[Column(TypeName = "ntext"), MaxLength]
         [Required]
         public string Title { get; set; }

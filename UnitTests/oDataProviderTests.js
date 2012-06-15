@@ -307,6 +307,7 @@
                     $type: $news.Types.Article,
                     $keys: ['Id'],
                     Id: "Id",
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Title: "Title",
                     Lead: "Lead",
                     Body: "Body",
@@ -448,6 +449,7 @@
                     $type: $news.Types.Article,
                     $keys: ['Id'],
                     Id: "Id",
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Title: "Title",
                     Lead: "Lead",
                     Body: "Body",
@@ -476,6 +478,7 @@
                     $type: $news.Types.Article,
                     $keys: ['Id'],
                     Id: "Id",
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Title: "Title",
                     Lead: "Lead",
                     Body: "Body",
@@ -564,6 +567,7 @@
                     $type: $news.Types.Article,
                     $keys: ['Id'],
                     Id: "Id",
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Title: "Title",
                     Lead: "Lead",
                     Body: "Body",
@@ -571,7 +575,7 @@
                     Thumbnail_LowRes: "Thumbnail_LowRes",
                     Thumbnail_HighRes: "Thumbnail_HighRes",
                     Category: {
-                        $selector: ['json:Category.results','json:Category'],
+                        $selector: ['json:Category.results', 'json:Category'],
                         $type: $news.Types.Category,
                         $keys: ['Id'],
                         Id: 'Id',
@@ -595,6 +599,7 @@
                     $type: $news.Types.Article,
                     $keys: ['Id'],
                     Id: "Id",
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Title: "Title",
                     Lead: "Lead",
                     Body: "Body",
@@ -602,14 +607,14 @@
                     Thumbnail_LowRes: "Thumbnail_LowRes",
                     Thumbnail_HighRes: "Thumbnail_HighRes",
                     Category: {
-                        $selector: ['json:Category.results','json:Category'],
+                        $selector: ['json:Category.results', 'json:Category'],
                         $type: $news.Types.Category,
                         $keys: ['Id'],
                         Id: 'Id',
                         Title: 'Title'
                     },
                     Author: {
-                        $selector: ['json:Author.results','json:Author'],
+                        $selector: ['json:Author.results', 'json:Author'],
                         $type: $news.Types.User,
                         $keys: ["Id"],
                         Id: "Id",
@@ -634,6 +639,7 @@
                     $type: $news.Types.Article,
                     $keys: ['Id'],
                     Id: "Id",
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Title: "Title",
                     Lead: "Lead",
                     Body: "Body",
@@ -641,21 +647,21 @@
                     Thumbnail_LowRes: "Thumbnail_LowRes",
                     Thumbnail_HighRes: "Thumbnail_HighRes",
                     Category: {
-                        $selector: ['json:Category.results','json:Category'],
+                        $selector: ['json:Category.results', 'json:Category'],
                         $type: $news.Types.Category,
                         $keys: ['Id'],
                         Id: 'Id',
                         Title: 'Title'
                     },
                     Author: {
-                        $selector: ['json:Author.results','json:Author'],
+                        $selector: ['json:Author.results', 'json:Author'],
                         $type: $news.Types.User,
                         $keys: ["Id"],
                         Id: "Id",
                         LoginName: "LoginName",
                         Email: "Email",
                         Profile: {
-                            $selector: ['json:Profile.results','json:Profile'],
+                            $selector: ['json:Profile.results', 'json:Profile'],
                             $type: $news.Types.UserProfile,
                             $keys: ['Id'],
                             Id: "Id",
@@ -664,7 +670,7 @@
                             Avatar: "Avatar",
                             Birthday: "Birthday",
                             Location: {
-                                $selector:['json:Location.results','json:Location'],
+                                $selector: ['json:Location.results', 'json:Location'],
                                 $type: $news.Types.Location,
                                 Address: "Address",
                                 City: "City",
@@ -679,7 +685,7 @@
         });
     });
 
-	test("get_full_table_3_include_deep_with_multiplicity", 2, function () {
+    test("get_full_table_3_include_deep_with_multiplicity", 2, function () {
         stop(1);
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var q = db.Categories.include("Articles").include('Articles.Author').toTraceString();
@@ -691,32 +697,33 @@
                 $item: {
                     $type: $news.Types.Category,
                     $keys: ['Id'],
-					Id: 'Id',
-					Title: 'Title',
-					Articles: {
-						$selector: ['json:Articles.results', 'json:Articles'],
-						$type: $data.Array,
-						$item: {
-							$type: $news.Types.Article,
-							$keys: ['Id'],
-							Id: "Id",
-							Title: "Title",
-							Lead: "Lead",
-							Body: "Body",
-							CreateDate: "CreateDate",
-							Thumbnail_LowRes: "Thumbnail_LowRes",
-							Thumbnail_HighRes: "Thumbnail_HighRes",
-							Author: {
-								$selector: ['json:Author.results','json:Author'],
-								$type: $news.Types.User,
-								$keys: ["Id"],
-								Id: "Id",
-								LoginName: "LoginName",
-								Email: "Email"			 
-							}
-						}
-					}
-				}
+                    Id: 'Id',
+                    Title: 'Title',
+                    Articles: {
+                        $selector: ['json:Articles.results', 'json:Articles'],
+                        $type: $data.Array,
+                        $item: {
+                            $type: $news.Types.Article,
+                            $keys: ['Id'],
+                            Id: "Id",
+                            RowVersion: { $selector: "json:__metadata", $source: "etag" },
+                            Title: "Title",
+                            Lead: "Lead",
+                            Body: "Body",
+                            CreateDate: "CreateDate",
+                            Thumbnail_LowRes: "Thumbnail_LowRes",
+                            Thumbnail_HighRes: "Thumbnail_HighRes",
+                            Author: {
+                                $selector: ['json:Author.results', 'json:Author'],
+                                $type: $news.Types.User,
+                                $keys: ["Id"],
+                                Id: "Id",
+                                LoginName: "LoginName",
+                                Email: "Email"
+                            }
+                        }
+                    }
+                }
             };
             deepEqual(q.modelBinderConfig, expectedObject, "Model binder error");
         });
@@ -735,6 +742,7 @@
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Id: "Id",
                     Title: "Title",
                     Lead: "Lead",
@@ -760,6 +768,7 @@
                 $item: {
                     $type: $news.Types.Article,
                     $keys: ['Id'],
+                    RowVersion: { $selector: "json:__metadata", $source: "etag" },
                     Id: "Id",
                     Title: "Title",
                     Lead: "Lead",
@@ -831,7 +840,7 @@
                 $type: $data.Array,
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
-                    $selector: ['json:Author.Profile.results','json:Author.Profile'],
+                    $selector: ['json:Author.Profile.results', 'json:Author.Profile'],
                     $type: 'string',
                     $source: 'Bio'
                 }
@@ -887,8 +896,8 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results','json:Author.Profile'], $source: 'FullName' },
-                    l: { $type: 'string', $selector: ['json:Author.results','json:Author'], $source: 'LoginName' }
+                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
+                    l: { $type: 'string', $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
                 }
             };
             deepEqual(q.modelBinderConfig, expectedObject, "Model binder error");
@@ -906,14 +915,14 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results','json:Author.Profile'], $source: 'FullName' },
+                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
                     a: {
                         $type: $data.Object,
                         b: {
                             $type: $data.Object,
                             c: {
                                 $type: $data.Object,
-                                d: { $type: 'string', $selector: ['json:Author.results','json:Author'], $source: 'LoginName' }
+                                d: { $type: 'string', $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
                             }
                         }
                     }
@@ -934,7 +943,7 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results','json:Author.Profile'], $source: 'FullName' },
+                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
                     a: {
                         $type: $data.Object,
                         b: {
@@ -1004,7 +1013,7 @@
                     $type: $data.Object,
                     t: {
                         $type: $news.Types.User,
-                        $selector: ['json:Author.results','json:Author'],
+                        $selector: ['json:Author.results', 'json:Author'],
                         $keys: ['Id'],
                         Id: 'Id',
                         LoginName: 'LoginName',
@@ -1093,7 +1102,7 @@
                                 Birthday: "Birthday",
                                 Location: {
                                     $type: $news.Types.Location,
-                                    $selector:['json:Location.results', 'json:Location'],
+                                    $selector: ['json:Location.results', 'json:Location'],
                                     Address: "Address",
                                     City: "City",
                                     Zip: "Zip",
@@ -1128,7 +1137,7 @@
                     Birthday: "Birthday",
                     Location: {
                         $type: $news.Types.Location,
-                        $selector:['json:Location.results', 'json:Location'],
+                        $selector: ['json:Location.results', 'json:Location'],
                         Address: "Address",
                         City: "City",
                         Zip: "Zip",

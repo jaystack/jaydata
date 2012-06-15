@@ -722,19 +722,19 @@
         test("WhereExp: filter one_many navProp", 1, function () {
             equal(_resultToString(
                 $data.NewsReaderContext.Articles.where(function (m) { return m.Category.Id == 1; }).toTraceString()),
-                "SELECT T0.Id, T0.Title, T0.Lead, T0.Body, T0.CreateDate, T0.Thumbnail_LowRes, T0.Thumbnail_HighRes, T0.Category__Id, T0.Author__Id, T0.Reviewer__Id FROM Articles T0 \n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) WHERE (T1.Id = ?) | [1]");
+                "SELECT T0.Id, T0.RowVersion, T0.Title, T0.Lead, T0.Body, T0.CreateDate, T0.Thumbnail_LowRes, T0.Thumbnail_HighRes, T0.Category__Id, T0.Author__Id, T0.Reviewer__Id FROM Articles T0 \n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) WHERE (T1.Id = ?) | [1]");
         });
         test("WhereExp: filter one_many navProp_same_deep", 1, function () {
             equal(_resultToString(
                 $data.NewsReaderContext.Articles.where(function (m) { return m.Author.Profile.Bio == "Test" && m.Author.Profile.FullName == "Joe"; }).toTraceString()),
-                "SELECT T0.Id, T0.Title, T0.Lead, T0.Body, T0.CreateDate, T0.Thumbnail_LowRes, T0.Thumbnail_HighRes, T0.Category__Id, T0.Author__Id, T0.Reviewer__Id FROM Articles T0 "
+                "SELECT T0.Id, T0.RowVersion, T0.Title, T0.Lead, T0.Body, T0.CreateDate, T0.Thumbnail_LowRes, T0.Thumbnail_HighRes, T0.Category__Id, T0.Author__Id, T0.Reviewer__Id FROM Articles T0 "
                         + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
                         + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) WHERE ((T2.Bio = ?) AND (T2.FullName = ?)) | [\"Test\",\"Joe\"]");
         });
         test("WhereExp: filter one_many navProp_variant_deep", 1, function () {
             equal(_resultToString(
                 $data.NewsReaderContext.Articles.where(function (m) { return m.Author.Profile.Bio == "Test" && m.Reviewer.Profile.FullName == "Joe"; }).toTraceString()),
-                "SELECT T0.Id, T0.Title, T0.Lead, T0.Body, T0.CreateDate, T0.Thumbnail_LowRes, T0.Thumbnail_HighRes, T0.Category__Id, T0.Author__Id, T0.Reviewer__Id FROM Articles T0 "
+                "SELECT T0.Id, T0.RowVersion, T0.Title, T0.Lead, T0.Body, T0.CreateDate, T0.Thumbnail_LowRes, T0.Thumbnail_HighRes, T0.Category__Id, T0.Author__Id, T0.Reviewer__Id FROM Articles T0 "
                         + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
                         + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) "
                         + "\n\tLEFT OUTER JOIN Users T3 ON (T0.Reviewer__Id = T3.Id) "

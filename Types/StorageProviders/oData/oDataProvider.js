@@ -180,6 +180,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         request.method = "MERGE";
                         request.requestUri = independentBlocks[index][i].entitySet.name;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
+                        this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Deleted:
@@ -205,11 +206,24 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 var result = data.__batchResponses[0].__changeResponses;
                 var resultEntities = [];
                 for (var i = 0; i < result.length; i++) {
-                    if (result[i].statusCode == 204) { callBack.success(result[i]); return; }
                     var item = convertedItem[i];
+                    if (result[i].statusCode == 204) {
+                        if (result[i].headers.ETag) {
+                            var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === "fixed" });
+                            if (property && property[0]) {
+                                item[property[0].name] = result[i].headers.ETag;
+                            }
+                        }
+                        continue;
+                    }
+
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         if (memDef.computed) {
-                            item[memDef.name] = result[i].data[memDef.name];
+                            if (memDef.concurrencyMode === "fixed") {
+                                item[memDef.name] = result[i].headers.ETag;
+                            } else {
+                                item[memDef.name] = result[i].data[memDef.name];
+                            }
                         }
                     }, this);
                 }
@@ -239,6 +253,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         }, this);
         return serializableObject;
+    },
+    save_addConcurrencyHeader: function (item, headers) {
+        if (item.data.RowVersion || item.data.RowVersion === 0) {
+            //headers['If-Match'] = "W/\"X'00000000000000CB'\"";
+            headers['If-Match'] = item.data.RowVersion.toString();
+            item.data.RowVersion = "";
+        }
     },
     getTraceString: function (queryable) {
         var sqlText = this._compile(queryable);
