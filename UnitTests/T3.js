@@ -1016,14 +1016,31 @@ function T3_oDataV3(providerConfig, msg) {
 
     test("OData_Function_sub_frames", function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        expect(17);
-        stop(6);
+        expect(20);
+        stop(7);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
-                var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
-                var q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                var q = db.Categories.filter(function (ctg) { return ctg.Articles.some(); });
                 var c = q.toTraceString();
+                equal(c.queryText, "/Categories?$filter=Articles/any()", "A0: Invalid query string");
+
+                q.toArray({
+                    success: function (result) {
+                        start();
+                        equal(result.length, 5, 'A0: result length failed');
+                        equal(result[0].Title, 'Sport', 'A0: result value failed');
+                    },
+                    error: function (e) {
+                        start();
+
+                        ok(false, 'A0: Category some article, error: ' + e);
+                    }
+                });
+
+                var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
+                q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+                c = q.toTraceString();
                 equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Title eq 'Article1'))", "A1: Invalid query string");
 
                 q.toArray({
