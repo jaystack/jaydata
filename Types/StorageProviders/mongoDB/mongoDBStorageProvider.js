@@ -829,8 +829,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
 }, {
     isSupported: {
         get: function(){
-            /*if (typeof module === 'undefined') return false;
-            try{ require('mongodb'); } catch(e) { return false; }*/
+            if (typeof module === 'undefined') return false;
+            try{ require('mongodb'); } catch(e) { return false; }
             return true;
         },
         set: function(value){}
@@ -844,6 +844,6 @@ $data.storageProviders.mongoDB.DbCreationType = {
     DropAllExistingCollections: 30
 };
 
-//if ($data.storageProviders.mongoDB.mongoDBProvider.isSupported){
+if ($data.storageProviders.mongoDB.mongoDBProvider.isSupported){
     $data.StorageProviderBase.registerProvider('mongoDB', $data.storageProviders.mongoDB.mongoDBProvider);
-//}
+}
