@@ -18,7 +18,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                         builder.popModelBinderProperty();
                     } else {
                         if (prop.key) {
-                            builder.addKeyField(prop.name);
+                            builder.addKeyField(prop.computed ? '_id' : prop.name);
                         }
                         if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
@@ -461,7 +461,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             
             var collection = new self.driver.Collection(client, self.entitySet.tableName);
             var find = query.find;
-            
+            console.log(find);
             var cb = function(error, results){
                 if (error) callBack.error(error);
                 
