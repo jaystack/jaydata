@@ -627,7 +627,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                serializableObject[memdef.name] = item.physicalData[memdef.name];
+                serializableObject[memdef.computed ? '_id' : memdef.name] = item.physicalData[memdef.name];
             }
         }, this);
         return serializableObject;
