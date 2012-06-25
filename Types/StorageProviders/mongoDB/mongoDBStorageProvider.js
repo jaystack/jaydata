@@ -123,9 +123,9 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 var field = context.stack.pop();
                 var expr = {};
                 
-                expr[field] = context.query[field];
+                expr[field.field] = field.query;
                 or.push(expr);
-                delete context.query[field];
+                delete context.query[field.field];
             }
             if (or.length == 1) context.query = or[0];
             else context.query.$or = or;
@@ -143,8 +143,8 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             
             if (context.or){
-                if (!context.stack) context.stack = [context.field];
-                else if (context.stack.indexOf(context.field) < 0) context.stack.push(context.field);
+                if (!context.stack) context.stack = [];
+                context.stack.push({ field: context.field, query: context.query[context.field] });
             }
             context.field = undefined;
             context.value = undefined;
@@ -549,7 +549,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var keys = u.type.memberDefinitions.getKeyProperties();
                     for (var j = 0; j < keys.length; j++){
                         var k = keys[j];
-                        where[k.computed ? '_id' : k.name] = u.data[k.name];
+                        where[k.computed ? '_id' : k.name] = u.data[k.computed ? '_id' : k.name];
                     }
                     
                     var set = {};
