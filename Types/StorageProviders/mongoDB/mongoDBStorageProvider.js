@@ -461,7 +461,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             
             var collection = new self.driver.Collection(client, self.entitySet.tableName);
             var find = query.find;
-            console.log(find);
+            
             var cb = function(error, results){
                 if (error) callBack.error(error);
                 
@@ -525,11 +525,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 if (--counterState == 0) callback();
             }
             
-            var readyFn = function(){
-                callBack.success(successItems);
-                client.close();
-            };
-            
             var insertFn = function(client, c, collection){
                 collection.insert(c.insertAll, { safe: true }, function(error, result){
                     if (error) callBack.error(error);
@@ -570,7 +565,10 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         if (error) callBack.error(error);
                         
                         successItems++;
-                        counterFn(readyFn);
+                        counterFn(function(){
+                            callBack.success(successItems);
+                            client.close();
+                        });
                     });
                 }
                 callBack.success(successItems);
@@ -584,7 +582,14 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         if (error) callBack.error(error);
                         
                         successItems += cnt;
-                        counterFn(readyFn);
+                        counterFn(function(){
+                            if (c.updateAll && c.updateAll.length){
+                                updateFn(client, c, collection);
+                            }else{
+                                callBack.success(successItems);
+                                client.close();
+                            }
+                        });
                     });
                 }
             };
@@ -807,7 +812,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             fromDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (date) { return date; },
+                '$data.Date': function (date) { return new Date(date); },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
