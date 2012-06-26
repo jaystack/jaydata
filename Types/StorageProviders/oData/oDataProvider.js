@@ -479,8 +479,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
-                if (field.dataType == "string")
-                    keyValue = "'" + keyValue + "'";
+                switch (field.dataType) {
+                    case "Edm.Guid":
+                        keyValue = ("guid'" + keyValue + "'");
+                        break;
+                    case "string":
+                        keyValue = ("'" + keyValue + "'");
+                        break;
+                }
                 result.push(field.name + "=" + keyValue);
             }
         }
