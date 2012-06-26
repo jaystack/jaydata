@@ -113,23 +113,55 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
 
     VisitSimpleBinaryExpression: function (expression, context) {
         if (expression.nodeType == $data.Expressions.ExpressionType.Or) context.or = true;
+        else if (expression.nodeType == $data.Expressions.ExpressionType.And) context.and = true;
         
         this.Visit(expression.left, context);
         this.Visit(expression.right, context);
         
-        if (expression.nodeType == $data.Expressions.ExpressionType.Or && context.stack && context.stack.length){
+        if (expression.nodeType == $data.Expressions.ExpressionType.Or && context.stackOr && context.stackOr.length){
             var or = [];
-            while (context.stack.length){
-                var field = context.stack.pop();
+            while (context.stackOr.length){
+                var field = context.stackOr.pop();
                 var expr = {};
                 
                 expr[field.field] = field.query;
                 or.push(expr);
                 delete context.query[field.field];
             }
-            if (or.length == 1) context.query = or[0];
-            else context.query.$or = or;
+            if (or.length == 1){
+                if (context.and){
+                    if (!context.stackAnd) context.stackAnd = [];
+                    context.stackAnd.push({ field: '$or', query: [or[0]] });
+                }else context.query = or[0];
+            }else{
+                if (context.and){
+                    if (!context.stackAnd) context.stackAnd = [];
+                    context.stackAnd.push({ field: '$or', query: or });
+                }else context.query.$or = or;
+            }
             context.or = false;
+        }else if (expression.nodeType == $data.Expressions.ExpressionType.And && context.stackAnd && context.stackAnd.length){
+            var and = [];
+            while (context.stackAnd.length){
+                var field = context.stackAnd.pop();
+                var expr = {};
+                
+                expr[field.field] = field.query;
+                and.push(expr);
+                delete context.query[field.field];
+            }
+            if (and.length == 1){
+                if (context.or){
+                    if (!context.stackOr) context.stackOr = [];
+                    context.stackOr.push({ field: '$and', query: [and[0]] });
+                }else context.query = and[0];
+            }else{
+                if (context.or){
+                    if (!context.stackOr) context.stackOr = [];
+                    context.stackOr.push({ field: '$and', query: and });
+                }else context.query.$and = and;
+            }
+            context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
             if (expression.nodeType == $data.Expressions.ExpressionType.Equal){
                 context.query[context.field] = context.value;
@@ -143,9 +175,13 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             
             if (context.or){
-                if (!context.stack) context.stack = [];
-                context.stack.push({ field: context.field, query: context.query[context.field] });
+                if (!context.stackOr) context.stackOr = [];
+                context.stackOr.push({ field: context.field, query: context.query[context.field] });
+            }else if (context.and){
+                if (!context.stackAnd) context.stackAnd = [];
+                context.stackAnd.push({ field: context.field, query: context.query[context.field] });
             }
+            
             context.field = undefined;
             context.value = undefined;
         }

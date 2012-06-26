@@ -298,7 +298,25 @@ exports.testFilterOr = function(test){
     });
 };
 
-exports.testFilterOrComplex = function(test){
+exports.testFilterAnd = function(test){
+    test.expect(2);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.filter(function(it){ return it.Rank == this.minRank && it.Rank == this.maxRank; }, { minRank: 2, maxRank: 4 }).toArray(function(data){
+                test.equal(data.length, 0, 'Not 0 items selected from collection');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testFilterAndOr = function(test){
     test.expect(5);
     $test.Context.init(function(db){
         db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
