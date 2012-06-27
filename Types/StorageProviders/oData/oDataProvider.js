@@ -483,6 +483,26 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     case "Edm.Guid":
                         keyValue = ("guid'" + keyValue + "'");
                         break;
+                    case "Edm.Binary":
+                        keyValue = ("binary'" + keyValue + "'");
+                        break;
+                    case "Edm.Byte":
+                        var hexDigits = '0123456789ABCDEF';
+                        keyValue = (hexDigits[(i >> 4) & 15] + hexDigits[i & 15]);
+                        break;
+                    case "Edm.DateTime":
+                        keyValue = ("datetime'" + keyValue.toISOString() + "'");
+                        break;
+                    case "Edm.Decimal":
+                        keyValue = (keyValue + "M");
+                        break;
+                    case "Edm.Single":
+                        keyValue = (keyValue + "f");
+                        break;
+                    case "Edm.Int64":
+                        keyValue = (keyValue + "L");
+                        break;
+                    case 'Edm.String':
                     case "string":
                         keyValue = ("'" + keyValue + "'");
                         break;
