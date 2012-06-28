@@ -187,6 +187,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         request.method = "DELETE";
                         request.requestUri = independentBlocks[index][i].entitySet.name;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
+                        this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         break;
                     default: Guard.raise(new Exception("Not supported Entity state"));
                 }
