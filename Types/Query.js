@@ -23,5 +23,20 @@ $C('$data.Query', null, null,
         var converter = new $data.ModelBinder(this.context);
         this.result = converter.call(this.rawDataList, this.modelBinderConfig);
         return;
+    },
+    getEntitySets: function(){
+        var ret = [];
+        var ctx = this.context;
+        
+        var fn = function(expression){
+            if (expression instanceof $data.Expressions.EntitySetExpression){
+                ret.push(ctx._entitySetReferences[expression.elementType.name]);
+            }
+            if (expression.source) fn(expression.source);
+        };
+        
+        fn(this.expression);
+        
+        return ret;
     }
 }, null);

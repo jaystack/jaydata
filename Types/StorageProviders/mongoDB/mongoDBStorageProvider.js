@@ -470,8 +470,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         if (self.context._entitySetReferences.hasOwnProperty(i)){
                             
                             client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
-                                if (error) callBack.error(error);
-                                
                                 readyFn(client);
                             });
                         }
@@ -570,8 +568,12 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (c.removeAll && c.removeAll.length){
                         removeFn(client, c, collection);
                     }else{
-                        callBack.success(successItems);
-                        client.close();
+                        if (c.updateAll && c.updateAll.length){
+                            updateFn(client, c, collection);
+                        }else{
+                            callBack.success(successItems);
+                            client.close();
+                        }
                     }
                 });
             };

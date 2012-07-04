@@ -3,6 +3,7 @@
     $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
         constructor: function () {
             this.deferred = new $.Deferred();
+            console.log(this.deferred);
         },
         deferred: {},
         createCallback: function (callBack) {
