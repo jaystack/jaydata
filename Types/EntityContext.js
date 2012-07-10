@@ -8,12 +8,14 @@ $data.Class.define('$data.StorageModel', null, null, {
     LogicalTypeName: {},
     PhysicalType: {},
     PhysicalTypeName: {},
+    EventHandlers: {},
+    Roles: {},
     TableName: {},
     ComplexTypes: {},
     Associations: {},
     EntitySetReference: {}
 }, null);
-$data.Class.define('$data.Assiociation', null, null, {
+$data.Class.define('$data.Association', null, null, {
     constructor: function (initParam) {
         if (initParam) {
             this.From = initParam.From;
@@ -36,7 +38,7 @@ $data.Class.define('$data.Assiociation', null, null, {
     ToPropertyName: {},
     ReferentialConstraint: {}
 }, null);
-$data.Class.define('$data.ComplexType', $data.Assiociation, null, {}, null);
+$data.Class.define('$data.ComplexType', $data.Association, null, {}, null);
 
 $data.Class.define('$data.EntityContext', null, null,
 {
@@ -98,7 +100,7 @@ $data.Class.define('$data.EntityContext', null, null,
             this._initializeEntitySets(ctor.inheritsFrom);
         }
         this._storageModel.forEach(function (storageModel) {
-            this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers);
+            this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers, storageModel.Roles);
             this[storageModel.ItemName].name = storageModel.ItemName;
             this[storageModel.ItemName].tableName = storageModel.TableName;
             this[storageModel.ItemName].eventHandlers = storageModel.EventHandlers;
@@ -129,6 +131,14 @@ $data.Class.define('$data.EntityContext', null, null,
                         afterUpdate: item.afterUpdate,
                         afterDelete: item.afterDelete
                     };
+                    var roles = item.roles;
+                    var r = {};
+                    if (roles instanceof Array){
+                        for (var i = 0; i < roles.length; i++){
+                            if (typeof roles[i] === 'string') r[roles[i]] = true;
+                        }
+                    }else r = roles;
+                    storageModel.Roles = r;
                     this._storageModel.push(storageModel);
                 }
             }
@@ -356,7 +366,7 @@ $data.Class.define('$data.EntityContext', null, null,
         definition[member.name] = t;
     },
     _addAssociationElement: function (fromType, fromMultiplicity, fromPropName, toType, toMultiplicity, toPropName) {
-        return new $data.Assiociation({
+        return new $data.Association({
             From: fromType.name,
             FromType: fromType,
             FromMultiplicity: fromMultiplicity,

@@ -15,7 +15,7 @@ $data.Class.defineEx('$data.EntitySet',
         { type: $data.Queryable, params: [new ConstructorParameter(1)] }
     ], null,
 {
-    constructor: function (elementType, context, collectionName, eventHandlers) {
+    constructor: function (elementType, context, collectionName, eventHandlers, roles) {
         /// <signature>
         ///     <summary>Represents a typed entity set that is used to perform create, read, update, and delete operations</summary>
         ///     <param name="elementType" type="Function" subClassOf="$data.Entity">Type of entity set elements, elementType must be subclass of $data.Entity</param>
@@ -26,6 +26,7 @@ $data.Class.defineEx('$data.EntitySet',
         this.stateManager = new $data.EntityStateManager(this);
         Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
         Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
+        Object.defineProperty(this, "roles", { value: roles, enumerable: true });
         
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
