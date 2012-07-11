@@ -958,8 +958,23 @@ $data.Class.define('$data.EntityContext', null, null,
                     return q._runQuery(clb);
                 }
             };
+        };
+
+        var params = [];
+        if (cfg.params) {
+            for (var i = 0; i < cfg.params.length; i++) {
+                var param = cfg.params[i];
+                for (var name in param)
+                {
+                    params.push({
+                        name: name,
+                        type: param[name]
+                    });
+                }
+            }
         }
-        fn.serviceConfig = cfg;
+        $data.typeSystem.extend(fn, cfg, { params: params });
+
         return fn;
     },
     _convertLogicalTypeNameToPhysical: function (name) {
