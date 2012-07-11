@@ -41,6 +41,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 							}else{
 								part = part[path[0]];
 								path = path.slice(1);
+								if (part === null) return part;
 							}
 						}
 						if (!path.length){
