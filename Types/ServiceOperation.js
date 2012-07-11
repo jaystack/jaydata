@@ -68,45 +68,61 @@ $data.ServiceOperation = function(){
     }
 };
 
-Function.prototype.before = function(on){
+Function.prototype.chain = function(){
     var fn = this;
     
     var ret = function(){
+        var chain = arguments.callee.chainFn;
         var args = arguments.length ? arguments : [];
+        var i = 0;
+        
         var readyFn = function(result){
-            args[args.length++] = result;
-            fn.apply(this, args);
+            if (args[args.length - 1] && args[args.length - 1].success && typeof args[args.length - 1].success === 'function'){
+                var fn = args[args.length - 1].success;
+                args[args.length++] = result;
+                fn.apply(this, args);
+            }else return result;
         };
         
-        var r = on.apply(this, args);
-        if (typeof r === 'function'){
-            args[args.length++] = readyFn;
-            r.apply(this, args);
-        }else{
-            args[args.length++] = r;
-            return fn.apply(this, args);
+        var callbackFn = function(result){
+            if (typeof result !== 'undefined') args[args.length++] = result;
+            var fn = chain[i];
+            i++;
+            
+            var r = fn.apply(this, args);
+            if (typeof r === 'function'){
+                args[args.length++] = (i < chain.length ? callbackFn : readyFn);
+                r.apply(this, args);
+            }else{
+                if (i < chain.length){
+                    callbackFn(r);
+                }else readyFn(r);
+            }
         }
+        
+        callbackFn();
     };
     
-    if (!ret.beforeFn) ret.beforeFn = [];
-    ret.beforeFn.push(on);
+    if (!ret.chainFn) ret.chainFn = [fn];
     
     return ret;
 };
 
+Function.prototype.before = function(on){
+    var ret = this;
+    
+    if (!this.chainFn) ret = ret.chain();
+    ret.chainFn.unshift(on);
+        
+    return ret;
+};
+
 Function.prototype.after = function(on){
-    var fn = this;
+    var ret = this;
     
-    var ret = function(){
-        var r = fn.apply(this, arguments);
-        var args = arguments.length ? arguments : [];
-        args[args.length++] = r;
-        return on.apply(this, args);
-    };
-    
-    if (!ret.afterFn) ret.afterFn = [];
-    ret.afterFn.push(on);
-    
+    if (!this.chainFn) ret = ret.chain();
+    ret.chainFn.push(on);
+        
     return ret;
 };
 
@@ -144,6 +160,14 @@ Function.prototype.method = function(method){
     return this.extend({
         method: method
     });
+};
+
+Function.prototype.webGet = function(){
+    return this.method('GET');
+};
+
+Function.prototype.webInvoke = function(){
+    return this.method('POST');
 };
 
 Function.prototype.authorize = function(roles, callback){
