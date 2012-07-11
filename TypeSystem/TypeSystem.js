@@ -996,8 +996,7 @@ $data.typeSystem = {
         /// <param name="objectN" optional="true" parameterArray="true" type="Object">Object to extend target with.</param>
         /// </signature>        
     	/// <returns></returns>
-        if (typeof target !== 'object')
-            Guard.raise('Target must be object');
+
         for (var i = 1; i < arguments.length; i++) {
             var obj = arguments[i];
             if (obj === null || typeof obj === 'undefined')
