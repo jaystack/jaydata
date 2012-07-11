@@ -1,15 +1,23 @@
 $data.Class.define('$data.Access', null, null, {}, {
     isAuthorized: function(access, user, roles, callback){
+        console.log('isAuthorized', arguments);
         var error;
         
         if (!access) error = 'Access undefined';
         if (typeof access !== 'number') error = 'Invalid access type';
-        if (!user) error = 'User undefined';
-        if (!user.roles) error = 'User has no roles';
-        if (!roles) error = 'Roles undefined';
-        if (!(roles instanceof Array || roles instanceof Object)) error = 'Invald roles type';
+        if (!user) user = {}; //error = 'User undefined';
+        if (!user.roles) user.roles = {}; //error = 'User has no roles';
+        if (!roles) roles = {}; //error = 'Roles undefined';
+        if (!(roles instanceof Array || typeof roles === 'object')) error = 'Invald roles type';
         
-        if (error) Guard.raise(error, 'Access authorization');
+        var pHandler = new $data.PromiseHandler();
+        var clbWrapper = pHandler.createCallback(callback);
+        var pHandlerResult = pHandler.getPromise();
+        
+        if (error){
+            clbWrapper.error(error, 'Access authorization');
+            return pHandlerResult;
+        }
         
         if (user.roles instanceof Array){
             var r = {};
@@ -27,12 +35,10 @@ $data.Class.define('$data.Access', null, null, {}, {
             roles = r;
         }
         
-        var pHandler = new $data.PromiseHandler();
-        var clbWrapper = pHandler.createCallback(callback);
-        var pHandlerResult = pHandler.getPromise();
-        
+        var args = arguments;
         var readyFn = function(result){
-            clbWrapper[result ? 'success' : 'error'](result);
+            if (result) clbWrapper.success(result);
+            else clbWrapper.error('Authorization failed', args);
         };
         
         var rolesKeys = Object.getOwnPropertyNames(roles);

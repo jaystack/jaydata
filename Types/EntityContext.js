@@ -42,7 +42,7 @@ $data.Class.define('$data.ComplexType', $data.Association, null, {}, null);
 
 $data.Class.define('$data.EntityContext', null, null,
 {
-    constructor: function (storageProviderCfg) {
+    constructor: function (storageProviderCfg, user){
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
@@ -61,28 +61,28 @@ $data.Class.define('$data.EntityContext', null, null,
             var tmp = storageProviderCfg.name;
             storageProviderCfg.name = [tmp];
         }
-        var i = 0,
-			providerType;
+        var i = 0, providerType;
         while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
-        if (providerType) {
+        if (providerType){
             this.storageProvider = new providerType(storageProviderCfg, this);
             this.storageProvider.setContext(this);
             this.stateManager = new $data.EntityStateManager(this);
 
-            if (storageProviderCfg.name in this.getType()._storageModelCache) {
+            if (storageProviderCfg.name in this.getType()._storageModelCache){
                 this._storageModel = this.getType()._storageModelCache[storageProviderCfg.name];
-            } else {
+            }else{
                 this._initializeStorageModel();
                 this.getType()._storageModelCache[storageProviderCfg.name] = this._storageModel;
             }
-        } else {
+        }else{
             Guard.raise(new Exception("Provider fallback failed!", "Not Found"));
         }
         this._initializeEntitySets(this.constructor);
+        this._user = (storageProviderCfg && storageProviderCfg.user) || user;
 
         this._isOK = false;
         var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider });
-        if (this.storageProvider) {
+        if (this.storageProvider){
             this.storageProvider.initializeStore(callBack);
         }
     },
