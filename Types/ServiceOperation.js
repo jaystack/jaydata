@@ -68,42 +68,47 @@ $data.ServiceOperation = function(){
     }
 };
 
-Function.prototype.chain = function(){
+Function.prototype.chain = function(before, after){
     var fn = this;
     
     var ret = function(){
         var chain = arguments.callee.chainFn;
-        var args = arguments.length ? arguments : [];
+        var args = [];
+        if (arguments.length){
+            for (var i = 0; i < arguments.length; i++){
+                args.push(arguments[i]);
+            }
+        }
+        var argsCount = args.length;
         var i = 0;
         
-        var readyFn = function(result){
+        var readyFn = function(){
             if (args[args.length - 1] && args[args.length - 1].success && typeof args[args.length - 1].success === 'function'){
                 var fn = args[args.length - 1].success;
-                args[args.length++] = result;
-                fn.apply(this, args);
-            }else return result;
+                fn.apply(this, arguments);
+            }else return arguments.length ? arguments[0] : undefined;
         };
         
-        var callbackFn = function(result){
-            if (typeof result !== 'undefined') args[args.length++] = result;
+        var callbackFn = function(){
             var fn = chain[i];
             i++;
             
             var r = fn.apply(this, args);
             if (typeof r === 'function'){
-                args[args.length++] = (i < chain.length ? callbackFn : readyFn);
+                var argsFn = arguments;
+                args[argsCount] = (i < chain.length ? (function(){ return callbackFn.apply(this, argsFn); }) : (function(){ return readyFn.apply(this, argsFn); }));
                 r.apply(this, args);
             }else{
                 if (i < chain.length){
-                    callbackFn(r);
-                }else readyFn(r);
+                    callbackFn.apply(this, arguments);
+                }else readyFn(this, arguments);
             }
         }
         
         callbackFn();
     };
     
-    if (!ret.chainFn) ret.chainFn = [fn];
+    if (!ret.chainFn) ret.chainFn = (before || []).concat([fn].concat(after || []));
     
     return ret;
 };
