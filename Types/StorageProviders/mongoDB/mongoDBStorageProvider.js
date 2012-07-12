@@ -23,7 +23,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                         if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
                         } else {
-                            builder.modelBinderConfig[prop.name] = prop.computed ? '_id' : prop.name;
+                            builder.modelBinderConfig[prop.name] = prop.computed ? { $type: $data.String, $source: '_id' } : prop.name;
                         }
                     }
                 }
@@ -561,7 +561,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var keys = Container.resolveType(u.type).memberDefinitions.getKeyProperties();
                 for (var j = 0; j < keys.length; j++){
                     var k = keys[j];
-                    where[k.computed ? '_id' : k.name] = k.computed ? (typeof u.data._id === 'string' ? new self.driver.ObjectID.createFromHexString(u.data._id) : u.data._id) : u.data[k.name];
+                    where[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](u.data[k.computed ? '_id' : k.name]);
                 }
                 
                 var set = {};
@@ -671,6 +671,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         }
     },
     save_getInitData: function(item, convertedItems) {
+        var self = this;
         item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
@@ -861,7 +862,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return new Date(date); },
-                '$data.String': function (text) { return text; },
+                '$data.String': function (text) { return typeof text !== 'string' && typeof text !== 'undefined' ? 'ObjectID("' + text.toString() + '")' : text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
@@ -871,7 +872,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
-                '$data.String': function (text) { return text; },
+                '$data.String': function (text) {
+                        if (typeof text === 'undefined') return undefined;
+                        var m = new RegExp(/ObjectID\("([0-9a-f]+)"\)/).exec(text);
+                        return m ? new require('mongodb').ObjectID.createFromHexString(m[1]) : text;
+                    },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },

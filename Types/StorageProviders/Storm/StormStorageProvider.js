@@ -102,7 +102,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                             break;
                         case $data.EntityState.Modified:
                             if (!es.updateAll) es.updateAll = [];
-                            es.updateAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
+                            es.updateAll.push(/*{ data: */this.save_getInitData(independentBlocks[i][j], convertedItems)/*, type: Container.resolveName(independentBlocks[i][j].data.getType()) }*/);
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];
@@ -139,7 +139,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                serializableObject[memdef.computed ? '_id' : memdef.name] = item.physicalData[memdef.name];
+                serializableObject[memdef.name] = item.physicalData[memdef.name];
             }
         }, this);
         return serializableObject;

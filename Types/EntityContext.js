@@ -700,7 +700,7 @@ $data.Class.define('$data.EntityContext', null, null,
         });
         skipItems = null;
         var ctx = this;
-        if (changedEntities.length == 0) { clbWrapper.success(); return pHandlerResult; }
+        if (changedEntities.length == 0) { clbWrapper.success(0); return pHandlerResult; }
 
         //validate entities
         var errors = [];
