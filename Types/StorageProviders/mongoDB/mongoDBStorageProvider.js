@@ -440,13 +440,21 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             databaseName: 'test'
         }, cfg);
     },
+    _getServer: function(){
+        if (this.providerConfiguration.slave && this.providerConfiguration.slave.address && this.providerConfiguration.slave.port){
+            return new this.driver.ReplSetServers([
+                new this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions),
+                new this.driver.Server(this.providerConfiguration.slave.address, this.providerConfiguration.slave.port, this.providerConfiguration.slave.serverOptions || {})
+            ]);
+        }else return this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
+    },
     initializeStore: function(callBack){
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         switch (this.providerConfiguration.dbCreation){
             case $data.storageProviders.mongoDB.DbCreationType.DropAllExistingCollections:
-                var server = this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
+                var server = this._getServer();
                 new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
                     if (error) callBack.error(error);
                     
@@ -489,7 +497,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         this.entitySet = query.context.getEntitySetFromElementType(query.defaultType);
         new $data.storageProviders.mongoDB.mongoDBCompiler().compile(query);
         
-        var server = this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
+        var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
             if (error) callBack.error(error);
             
@@ -552,7 +560,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }
             
             var successItems = 0;
-            var server = this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
+            var server = this._getServer();
             
             var counterState = 0;
             var counterFn = function(callback){
