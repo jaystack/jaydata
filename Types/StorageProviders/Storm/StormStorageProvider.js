@@ -30,7 +30,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                         if (typeof compiled[i][k] === 'function'){
                             var dir = compiled[i][k].ASC;
                             compiled[i][k] = compiled[i][k].toString().replace('function anonymous', 'function').replace(/\n/g, ' ');
-                            compiled[i][k] = (dir ? '.orderBy' : '.orderByDescending') + '(' + compiled[i][k] + ')';
+                            compiled[i][k] = { fn: compiled[i][k], direction: dir };
                             /*if (compiled[i][k].ASC){
                                 if (!compiled.$orderby) compiled*/
                         }
@@ -39,7 +39,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
             }
         }
         
-        var qs = 'db.' + sets[0];
+        /*var qs = 'db.' + sets[0];
         if (compiled.$include){
             for (var i = 0; i < compiled.$include.length; i++){
                 qs += '.include("' + compiled.$include[i] + '")';
@@ -54,15 +54,12 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
         if (compiled.$skip) qs += '.skip(' + compiled.$skip + ')';
         if (compiled.$take) qs += '.take(' + compiled.$take + ')';
         if (compiled.$length) qs += '.length(callback)';
-        else qs += '.toArray(callback)';
-        
-        console.log('compiled', compiled);
-        console.log(qs);
+        else qs += '.toArray(callback)';*/
         
         $data.ajax({
             url: this.providerConfiguration.url,
             dataType: 'json',
-            data: { expression: qs },
+            data: { entitySet: sets[0], expression: compiled },
             success: function(data, textStatus, jqXHR){
                 query.rawDataList = data;
                 query.context = this;
@@ -116,7 +113,6 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                 }
             }
             
-            //console.log(collections);
             $data.ajax({
                 url: this.providerConfiguration.url,
                 type: 'post',
