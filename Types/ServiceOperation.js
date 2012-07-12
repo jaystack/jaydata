@@ -131,6 +131,12 @@ Function.prototype.after = function(on){
     return ret;
 };
 
+Function.prototype.contentType = function(mime){
+    return this.extend({
+        contentType: mime
+    });
+};
+
 Function.prototype.returns = function(type, elementType){
     if (typeof type === 'string')
         type = Container.resolveType(type);

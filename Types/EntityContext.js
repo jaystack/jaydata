@@ -496,7 +496,7 @@ $data.Class.define('$data.EntityContext', null, null,
                             callbackFn();
                         }else readyFn();
                     }
-                }
+                }else readyFn();
             }
             
             callbackFn();
@@ -537,7 +537,7 @@ $data.Class.define('$data.EntityContext', null, null,
                         callbackFn();
                     }else readyFn();
                 }
-            }
+            }else readyFn();
         };
         
         callbackFn();
