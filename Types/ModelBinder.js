@@ -76,7 +76,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 result = converter ? converter(meta.$value) : Container['create' + Container.resolveType(meta.$type).name](meta.$value);
             }else result = meta.$value;
         }else if (meta.$source){
-            if (meta.$type){
+            if (typeof data[meta.$source] === 'function'){
+                result = data[meta.$source]();
+            }else if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
                 result = converter ? converter(data[meta.$source]) : Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
