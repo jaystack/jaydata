@@ -187,6 +187,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         request.method = "DELETE";
                         request.requestUri = independentBlocks[index][i].entitySet.name;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
+                        this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         break;
                     default: Guard.raise(new Exception("Not supported Entity state"));
                 }
@@ -479,8 +480,34 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
-                if (field.dataType == "string")
-                    keyValue = "'" + keyValue + "'";
+                switch (field.dataType) {
+                    case "Edm.Guid":
+                        keyValue = ("guid'" + keyValue + "'");
+                        break;
+                    case "Edm.Binary":
+                        keyValue = ("binary'" + keyValue + "'");
+                        break;
+                    case "Edm.Byte":
+                        var hexDigits = '0123456789ABCDEF';
+                        keyValue = (hexDigits[(i >> 4) & 15] + hexDigits[i & 15]);
+                        break;
+                    case "Edm.DateTime":
+                        keyValue = ("datetime'" + keyValue.toISOString() + "'");
+                        break;
+                    case "Edm.Decimal":
+                        keyValue = (keyValue + "M");
+                        break;
+                    case "Edm.Single":
+                        keyValue = (keyValue + "f");
+                        break;
+                    case "Edm.Int64":
+                        keyValue = (keyValue + "L");
+                        break;
+                    case 'Edm.String':
+                    case "string":
+                        keyValue = ("'" + keyValue + "'");
+                        break;
+                }
                 result.push(field.name + "=" + keyValue);
             }
         }

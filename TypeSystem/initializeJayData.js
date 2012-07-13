@@ -24,8 +24,11 @@ if (!console.error) console.error = function () { };
     $data = window["$data"] || (window["$data"] = {});
 
     if (typeof module !== "undefined" && module.exports) {
-        sqLiteModule = require('sqlite3');
-		if (sqLiteModule) window['openDatabase'] = true;
+        try {
+            sqLiteModule = require('sqlite3');
+            if (sqLiteModule) window['openDatabase'] = true;
+        }
+        catch (e) { }
         module.exports = $data;
     }
 

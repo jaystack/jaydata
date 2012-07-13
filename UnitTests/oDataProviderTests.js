@@ -1184,7 +1184,7 @@
     });
 
     module('oData_compiler_tests_innerFilter');
-    test("filter_table_select_sub_frames", 7, function () {
+    test("filter_table_select_sub_frames", 8, function () {
         stop(1);
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
@@ -1215,6 +1215,9 @@
 
             q = db.Categories.filter(function (ctg) { return ctg.Title == 'Sport' && ctg.Articles.some(this.filter); }, { filter: articleFilter }).toTraceString();
             equal(q.queryText, "/Categories?$filter=((Title eq 'Sport') and Articles/any(art: (art/Title eq 'Article1')))", "Invalid query string");
+
+            q = db.Categories.filter(function (ctg) { return ctg.Title == 'Sport' && ctg.Articles.some(); }).toTraceString();
+            equal(q.queryText, "/Categories?$filter=((Title eq 'Sport') and Articles/any())", "Invalid query string");
 
             start(1);
         });
