@@ -6,16 +6,16 @@ $.ajaxSettings.xhr = function(){
     return new XMLHttpRequest;
 };
 
-require('../project/jaydata/Types/Access.js');
-require('../project/jaydata/Types/ServiceOperation.js');
-require('../project/jaydata/Types/StorageProviders/mongoDB/mongoDBStorageProvider.js');
-require('../project/jaydata/Types/StorageProviders/Storm/StormStorageProvider.js');
-require('../project/jaydata/Types/Query.js');
-require('../project/jaydata/Types/Queryable.js');
-require('../project/jaydata/Types/EntitySet.js');
-require('../project/jaydata/Types/EntityContext.js');
-require('../project/jaydata_borzav/Types/StorageProviders/InMemory/InMemoryCompiler.js');
-require('../project/jaydata_borzav/Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js');
+require('../../Access.js');
+require('../../ServiceOperation.js');
+require('../../StorageProviders/mongoDB/mongoDBStorageProvider.js');
+require('../../StorageProviders/Storm/StormStorageProvider.js');
+require('../../Query.js');
+require('../../Queryable.js');
+require('../../EntitySet.js');
+require('../../EntityContext.js');
+require('../../StorageProviders/InMemory/InMemoryCompiler.js');
+require('../../StorageProviders/InMemory/InMemoryFunctionCompiler.js');
 
 require('./stormcontext.js');
 
