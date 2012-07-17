@@ -1,30 +1,27 @@
+$ = jQuery = require('jquery');
 var $data = require('jaydata');
-window.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
-$.support.cors = true;
-$.ajaxSettings.xhr = function(){
-    return new XMLHttpRequest;
-};
+$data.Entity.extend('$test.Item', {
+    Id: { type: 'string', computed: true, key: true },
+    Key: { type: 'string' },
+    Value: { type: 'string' },
+    Rank: { type: 'int' }
+});
 
-require('../../Access.js');
-require('../../ServiceOperation.js');
-require('../../StorageProviders/mongoDB/mongoDBStorageProvider.js');
-require('../../StorageProviders/Storm/StormStorageProvider.js');
-require('../../Query.js');
-require('../../Queryable.js');
-require('../../EntitySet.js');
-require('../../EntityContext.js');
-require('../../StorageProviders/InMemory/InMemoryCompiler.js');
-require('../../StorageProviders/InMemory/InMemoryFunctionCompiler.js');
-
-require('./stormcontext.js');
+$data.EntityContext.extend('$test.Context', {
+    Items: { type: $data.EntitySet, elementType: $test.Item },
+    GetThat: $data.ServiceOperation.returns($data.Array, $data.Integer).serviceName('GetThat').params([])
+});
 
 $test.context = new $test.Context({ name: 'storm' });
 $test.context.onReady(function(db){
+//    db.GetThat(function(data){
+//        console.log(data);
+//    });
     db.Items
         //.include('Things')
         .filter(function(it){ return it.Key == 'ccc'; })
-        .filter(function(it){ return it.Rank > 100; })
+        .filter(function(it){ return it.Rank > Math.floor(Math.random() * 100); })
         /*.orderBy('it.Key')
         .orderBy('it.Id')
         .orderByDescending('it.Value')
@@ -34,7 +31,7 @@ $test.context.onReady(function(db){
             data.forEach(function(it){
                 console.log(it.initData);
                 db.Items.attach(it);
-                it.Value = 'updated4';
+                it.Value = 'updated';
             });
             
             //db.Items.add(new $test.Item({ Key: 'abc', Value: 'cba', Rank: 199 }));

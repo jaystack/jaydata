@@ -1,18 +1,26 @@
-require('mongodb');
-var $data = require('jaydata');
+require('jaydata');
 
-require('../../Access.js');
-require('../../ServiceOperation.js');
-require('../../StorageProviders/mongoDB/mongoDBStorageProvider.js');
-require('../../StorageProviders/Storm/StormStorageProvider.js');
-require('../../Query.js');
-require('../../Queryable.js');
-require('../../EntitySet.js');
-require('../../EntityContext.js');
-require('../../StorageProviders/InMemory/InMemoryCompiler.js');
-require('../../StorageProviders/InMemory/InMemoryFunctionCompiler.js');
+$data.Entity.extend('$test.Item', {
+    Id: { type: 'string', computed: true, key: true },
+    Key: { type: 'string' },
+    Value: { type: 'string' },
+    Rank: { type: 'int' }/*,
+    Thing: { type: '$test.Thing', inverseProperty: 'Item' }*/
+});
 
-require('./stormcontext.js');
+/*$data.Entity.extend('$test.Thing', {
+    Id: { type: 'int', computed: true, key: true },
+    Oh: { type: 'string' },
+    Item: { type: '$test.Item', required: true }
+});*/
+
+$data.EntityContext.extend('$test.Context', {
+    Items: { type: $data.EntitySet, elementType: $test.Item },
+    GetThat: (function(){
+        return [1, 2, 3];
+    }).returns($data.Array, $data.Integer).serviceName('GetThat').params([])
+    /*Things: { type: $data.EntitySet, elementType: $test.Thing }*/
+});
 
 var connect = require('connect');
 var app = require('connect')();
@@ -32,24 +40,33 @@ app.use('/', function(req, res){
                 res.end();
             };
             
-            var compiled = req.query.expression;
+            var compiled = req.query.expression || {};
             
-            var qs = db[req.query.entitySet];
-            /*if (compiled.$include){
-                for (var i = 0; i < compiled.$include.length; i++){
-                    qs += '.include("' + compiled.$include[i] + '")';
+            var qs = db[req.query.entitySet] || db;
+            if (compiled.$serviceOperation){
+                var fn = qs[compiled.$serviceOperation.name];
+                if ((typeof fn.returnType.isAssignableTo === 'function' && fn.returnType.isAssignableTo($data.Queryable))){
+                    qs = fn.apply(this, compiled.$serviceOperation.params);
+                }else{
+                    callback(fn.apply(this, compiled.$serviceOperation.params));
                 }
-            }*/
-            if (compiled.$filter) qs = qs.filter(compiled.$filter);
-            if (compiled.$order){
-                for (var i = 0; i < compiled.$order.length; i++){
-                    qs = qs[compiled.$order[i].direction ? 'orderBy' : 'orderByDescending'](compiled.$order[i]);
+            }else{
+                /*if (compiled.$include){
+                    for (var i = 0; i < compiled.$include.length; i++){
+                        qs += '.include("' + compiled.$include[i] + '")';
+                    }
+                }*/
+                if (compiled.$filter) qs = qs.filter(compiled.$filter);
+                if (compiled.$order){
+                    for (var i = 0; i < compiled.$order.length; i++){
+                        qs = qs[(JSON.parse(compiled.$order[i].direction) ? 'orderBy' : 'orderByDescending')](compiled.$order[i].fn);
+                    }
                 }
+                if (compiled.$take) qs = qs.take(compiled.$take);
+                if (compiled.$skip) qs = qs.skip(compiled.$skip);
+                if (compiled.$length) qs.length(callback);
+                else qs.toArray(callback);
             }
-            if (compiled.$skip) qs = qs.skip(compiled.$skip);
-            if (compiled.$take) qs = qs.take(compiled.$take);
-            if (compiled.$length) qs.length(callback);
-            else qs.toArray(callback);
         });
     }else if (req.method === 'POST'){
         $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'storm' });
@@ -81,7 +98,6 @@ app.use('/', function(req, res){
                 
                 if (c.updateAll && c.updateAll.length){
                     for (var i = 0; i < c.updateAll.length; i++){
-                        console.log('attach', c.updateAll[i]);
                         var item = new db[es].createNew(c.updateAll[i]);
                         db[es].attach(item);
                         item.entityState = $data.EntityState.Modified;
@@ -89,7 +105,7 @@ app.use('/', function(req, res){
                 }
             }
             
-            console.log(JSON.stringify(collections));
+            //console.log(JSON.stringify(collections));
             db.saveChanges(callback);
         });
     }
