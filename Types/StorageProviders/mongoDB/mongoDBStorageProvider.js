@@ -584,15 +584,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var removeFn = function(client, c, collection){
             counterState = c.removeAll.length;
             for (var i = 0; i < c.removeAll.length; i++){
-                var r = c.removeAll[i];
-                
-                var keys = Container.resolveType(r.type).memberDefinitions.getKeyProperties();
-                for (var j = 0; j < keys.length; j++){
-                    var k = keys[j];
-                    r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.data[k.computed ? '_id' : k.name]);
-                }
-                
-                collection.remove(r.data, { safe: true }, function(error, cnt){
+                collection.remove(c.removeAll[i], { safe: true }, function(error, cnt){
                     if (error) callBack.error(error);
                     
                     successItems += cnt;
@@ -662,7 +654,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];
-                            es.removeAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
+                            es.removeAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
                             break;
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
