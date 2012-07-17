@@ -1,6 +1,7 @@
-TEMP_DIR = ./TMP
-TARGET_DIR = ./Build
-MODULE_DIR = $(TARGET_DIR)/Module
+TARGET_DIR = ./build
+TEMP_DIR = $(TARGET_DIR)/TMP
+MODULE_DIR = $(TARGET_DIR)/Modules
+PROVIDERS_DIR = $(TARGET_DIR)/Providers
 COMPILER = ./Tools/compiler.jar
 
 TYPE_SYSTEM = ./TypeSystem/initializeJayData.js\
@@ -9,14 +10,11 @@ TYPE_SYSTEM = ./TypeSystem/initializeJayData.js\
 	./TypeSystem/JayLint.js\
 	./TypeSystem/TypeSystem.js\
 
-INCLUDED_LIBRARY = ./Scripts/datajs-1.0.2.js\
-
 VSDOC_SOURCE = ./TypeSystem/VS2010Intellisense.js\
 
 JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
-	./Types/Expressions/ASTParser.js\
-	./Types/Expressions/ExpressionNode2.js\
 	./Types/Expressions/ArrayLiteralExpression.js\
+	./Types/Expressions/ExpressionNode2.js\
 	./Types/Expressions/CallExpression.js\
 	./Types/Expressions/CodeParser.js\
 	./Types/Expressions/ConstantExpression.js\
@@ -59,12 +57,14 @@ JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
 	./Types/Expressions/EntityExpressions/QueryExpressionCreator.js\
 	./Types/Expressions/EntityExpressions/QueryParameterExpression.js\
 	./Types/Expressions/EntityExpressions/RepresentationExpression.js\
+	./Types/Expressions/EntityExpressions/ServiceOperationExpression.js\
 	./Types/Validation/EntityValidationBase.js\
 	./Types/Validation/EntityValidation.js\
 	./Types/Notifications/ChangeDistributorBase.js\
 	./Types/Notifications/ChangeCollectorBase.js\
 	./Types/Notifications/ChangeDistributor.js\
 	./Types/Notifications/ChangeCollector.js\
+	./Types/Access.js\
 	./Types/Promise.js\
 	./Types/Entity.js\
 	./Types/EntityContext.js\
@@ -76,10 +76,11 @@ JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
 	./Types/EntityState.js\
 	./Types/EntityStateManager.js\
 	./Types/Exception.js\
+	./Types/ServiceOperation.js\
 	./Types/StorageProviderBase.js\
 	./Types/EntityWrapper.js\
 	./Types/Ajax/jQueryAjaxWrapper.js\
-	./Types/Ajax/WinJSAjaxWrapper.js\	
+	./Types/Ajax/WinJSAjaxWrapper.js\
 	./Types/Ajax/ExtJSAjaxWrapper.js\
 	./Types/Ajax/AjaxStub.js\
 	./Types/DbClient/DbCommand.js\
@@ -90,7 +91,15 @@ JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
 	./Types/DbClient/JayStorageClient/JayStorageConnection.js\
 	./Types/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
 	./Types/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
-	./Types/StorageProviders/SqLite/SqLiteStorageProvider.js\
+	./Types/StorageProviders/modelBinderConfigCompiler.js\
+	./Types/Authentication/AuthenticationBase.js\
+	./Types/Authentication/Anonymous.js\
+	./Types/Authentication/FacebookAuth.js\
+	./Types/Authentication/BasicAuth.js\
+
+IndexDbProvider = ./Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
+
+SqLiteProvider = ./Types/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	./Types/StorageProviders/SqLite/SqLiteCompiler.js\
 	./Types/StorageProviders/SqLite/SqlPagingCompiler.js\
 	./Types/StorageProviders/SqLite/SqlOrderCompiler.js\
@@ -98,63 +107,102 @@ JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
 	./Types/StorageProviders/SqLite/ExpressionMonitor.js\
 	./Types/StorageProviders/SqLite/SqlFilterCompiler.js\
 	./Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
-	./Types/StorageProviders/oData/oDataProvider.js\
+
+oDataProvider = ./Types/StorageProviders/oData/oDataProvider.js\
 	./Types/StorageProviders/oData/oDataCompiler.js\
 	./Types/StorageProviders/oData/oDataWhereCompiler.js\
 	./Types/StorageProviders/oData/oDataOrderCompiler.js\
 	./Types/StorageProviders/oData/oDataPagingCompiler.js\
 	./Types/StorageProviders/oData/oDataProjectionCompiler.js\
-	./Types/StorageProviders/modelBinderConfigCompiler.js\
-	./Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
-	./Types/Authentication/AuthenticationBase.js\
-	./Types/Authentication/Anonymous.js\
-	./Types/Authentication/FacebookAuth.js\
-	./Types/StorageProviders/Facebook/FacebookProvider.js\
+
+FacebookProvider = ./Types/StorageProviders/Facebook/FacebookProvider.js\
 	./Types/StorageProviders/Facebook/FacebookCompiler.js\
 	./Types/StorageProviders/Facebook/EntitySets/FQL/user.js\
 	./Types/StorageProviders/Facebook/EntitySets/FQL/friend.js\
 	./Types/StorageProviders/Facebook/EntitySets/FQL/page.js\
 	./Types/StorageProviders/Facebook/EntitySets/FQLContext.js\
-	./Types/StorageProviders/YQL/YQLProvider.js\
+
+YQLProvider = ./Types/StorageProviders/YQL/YQLProvider.js\
 	./Types/StorageProviders/YQL/YQLCompiler.js\
 	./Types/StorageProviders/YQL/EntitySets/geo.js\
 	./Types/StorageProviders/YQL/EntitySets/YQLContext.js\
 
-All:JayDataStandaloneMin JayDataStandalone JayDataVsDoc JayDataMin JayData
+InMemoryProvider = ./Types/StorageProviders/InMemory/InMemoryProvider.js\
+	./Types/StorageProviders/InMemory/InMemoryCompiler.js\
+	./Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
+
+MongoDbProvider = ./Types/StorageProviders/mongoDB/mongoDBStorageProvider.js\
+
+StormProvider = ./Types/StorageProviders/Storm/StormStorageProvider.js\
+
+all: jaydatavsdoc jaydatamin jaydata providers
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)
 
-JayDataStandaloneMin: JayDataStandalone $(TARGET_DIR)/JayData-standalone.js
-	@@echo "Minifying Jaydata standalone..."
-	@@java -jar $(COMPILER) --js $(TARGET_DIR)/JayData-standalone.js --js_output_file $(TEMP_DIR)/JayData-standalone.min.js
-	@@cat CREDITS.txt $(TEMP_DIR)/JayData-standalone.min.js > $(TARGET_DIR)/JayData-standalone.min.js
+providers: indexdbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider
 
-JayDataStandalone: $(TEMP_DIR)/TypeSystems.js $(INCLUDED_LIBRARY)
-	@@echo "Building JayData standalone version..."
-	@@test -d $(TARGET_DIR) || mkdir -p $(TARGET_DIR)
-	@@cat $(TEMP_DIR)/TypeSystems.js $(INCLUDED_LIBRARY) $(JAYDATA_SOURCE) > $(TEMP_DIR)/JayData-standalone.js
-	@@cat CREDITS.txt $(TEMP_DIR)/JayData-standalone.js > $(TARGET_DIR)/JayData-standalone.js
+indexdbprovider: $(IndexDbProvider)
+	@@echo "Building IndexDbProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(IndexDbProvider) > $(PROVIDERS_DIR)/IndexDbProvider.js
 
-JayDataVsDoc: JayData
+sqliteprovider: $(SqLiteProvider)
+	@@echo "Building SqLiteProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(SqLiteProvider) > $(PROVIDERS_DIR)/SqLiteProvider.js
+
+odataprovider: $(oDataProvider)
+	@@echo "Building oDataProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(oDataProvider) > $(PROVIDERS_DIR)/oDataProvider.js
+
+facebookprovider: $(FacebookProvider)
+	@@echo "Building FacebookProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(FacebookProvider) > $(PROVIDERS_DIR)/FacebookProvider.js
+
+yqlprovider: $(YQLProvider)
+	@@echo "Building YQLProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(YQLProvider) > $(PROVIDERS_DIR)/YQLProvider.js
+
+inmemoryprovider: $(InMemoryProvider)
+	@@echo "Building InMemoryProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(InMemoryProvider) > $(PROVIDERS_DIR)/InMemoryProvider.js
+
+mongodbprovider: $(MongoDbProvider)
+	@@echo "Building MongoDbProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(MongoDbProvider) > $(PROVIDERS_DIR)/MongoDbProvider.js
+
+stormprovider: $(StormProvider)
+	@@echo "Building StormProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(StormProvider) > $(PROVIDERS_DIR)/StormProvider.js
+
+jaydatavsdoc: jaydata
 	@@echo "Building JayData vsdoc version..."
-	@@cat $(VSDOC_SOURCE) $(TEMP_DIR)/JayData.js > $(TEMP_DIR)/JayData-vsdoc.js
-	@@cat CREDITS.txt $(TEMP_DIR)/JayData-vsdoc.js > $(TARGET_DIR)/JayData-vsdoc.js
+	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
+	@@cat $(VSDOC_SOURCE) $(TEMP_DIR)/jaydata.js > $(TEMP_DIR)/jaydata-vsdoc.js
+	@@cat CREDITS.txt $(TEMP_DIR)/jaydata-vsdoc.js > $(TARGET_DIR)/jaydata-vsdoc.js
 
-JayDataMin: JayData
+jaydatamin: jaydata
 	@@echo "Minifying JayData library..."
-	@@java -jar $(COMPILER) --js $(TARGET_DIR)/JayData.js --js_output_file $(TEMP_DIR)/JayData.min.js
-	@@cat CREDITS.txt $(TEMP_DIR)/JayData.min.js > $(TARGET_DIR)/JayData.min.js
+	@@test -d $(TARGET_DIR) || mkdir -p $(TARGET_DIR)
+	@@java -jar $(COMPILER) --js $(TARGET_DIR)/jaydata.js --js_output_file $(TEMP_DIR)/jaydata.min.js
+	@@cat CREDITS.txt $(TEMP_DIR)/jaydata.min.js > $(TARGET_DIR)/jaydata.min.js
 
-JayData: $(TEMP_DIR)/TypeSystems.js
+jaydata: $(TEMP_DIR)/TypeSystems.js
 	@@echo "Building JayData library..."
 	@@test -d $(TARGET_DIR) || mkdir -p $(TARGET_DIR)
-	@@cat $(TEMP_DIR)/TypeSystems.js $(JAYDATA_SOURCE) > $(TEMP_DIR)/JayData.js
-	@@cat CREDITS.txt $(TEMP_DIR)/JayData.js > $(TARGET_DIR)/JayData.js
+	@@cat $(TEMP_DIR)/TypeSystems.js $(JAYDATA_SOURCE) > $(TEMP_DIR)/jaydata.js
+	@@cat CREDITS.txt $(TEMP_DIR)/jaydata.js > $(TARGET_DIR)/jaydata.js
 
 $(TEMP_DIR)/TypeSystems.js : $(TYPE_SYSTEM)
 	@@echo "Building JayData type system..."
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
 	@@cat $(TYPE_SYSTEM) > $(TEMP_DIR)/TypeSystems.js
 
-.PHONY: JayDataMin JayData JayDataStandaloneMin JayDataStandalone
+.PHONY: JayDataMin JayData JayDataStandaloneMin JayDataStandalone All
 
