@@ -484,6 +484,8 @@ $data.Class.define('$data.EntityContext', null, null,
             };
             
             var i = 0;
+            var sets = query.getEntitySets();
+            
             var callbackFn = function(){
                 var es = sets[i];
                 if (es.afterRead){
@@ -499,7 +501,8 @@ $data.Class.define('$data.EntityContext', null, null,
                 }else readyFn();
             }
             
-            callbackFn();
+            if (sets.length) callbackFn();
+            else readyFn();
         };
         
         clbWrapper.error = callBack.error;
@@ -540,7 +543,8 @@ $data.Class.define('$data.EntityContext', null, null,
             }else readyFn();
         };
         
-        callbackFn();
+        if (sets.length) callbackFn();
+        else readyFn();
     },
     saveChanges: function (callback) {
         /// <signature>

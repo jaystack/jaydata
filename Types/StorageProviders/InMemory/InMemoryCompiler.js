@@ -77,7 +77,9 @@ $C('$data.storageProviders.InMemory.InMemoryCompiler', $data.Expressions.EntityE
         this.Visit(expression.source, context);
         context['$length'] = true;
     },
-
+    VisitServiceOperationExpression: function (expression, context) {
+        context.$serviceOperation = { name: expression.cfg.serviceName, params: expression.params };
+    },
     defaultFunctionCompiler: function (expression, context, type) {
         this.Visit(expression.source, context);
         context.data = "";

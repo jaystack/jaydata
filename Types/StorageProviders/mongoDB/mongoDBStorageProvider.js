@@ -426,11 +426,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
 $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, null,
 {
     constructor: function(cfg, ctx){
-        if (typeof module === 'undefined'){
-            Guard.raise('mongoDB provider not supported on client side. node.js required!', 'Not supported!');
-        }
-        
-        this.driver = require('mongodb');
+        this.driver = $data.mongoDBDriver;
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
             dbCreation: $data.storageProviders.mongoDB.DbCreationType.Default,
@@ -588,7 +584,15 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var removeFn = function(client, c, collection){
             counterState = c.removeAll.length;
             for (var i = 0; i < c.removeAll.length; i++){
-                collection.remove(c.removeAll[i], { safe: true }, function(error, cnt){
+                var r = c.removeAll[i];
+                
+                var keys = Container.resolveType(r.type).memberDefinitions.getKeyProperties();
+                for (var j = 0; j < keys.length; j++){
+                    var k = keys[j];
+                    r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.data[k.computed ? '_id' : k.name]);
+                }
+                
+                collection.remove(r.data, { safe: true }, function(error, cnt){
                     if (error) callBack.error(error);
                     
                     successItems += cnt;
@@ -658,7 +662,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];
-                            es.removeAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
+                            es.removeAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
                             break;
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
@@ -875,7 +879,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.String': function (text) {
                         if (typeof text === 'undefined') return undefined;
                         var m = new RegExp(/ObjectID\("([0-9a-f]+)"\)/).exec(text);
-                        return m ? new require('mongodb').ObjectID.createFromHexString(m[1]) : text;
+                        return m ? new $data.mongoDBDriver.ObjectID.createFromHexString(m[1]) : text;
                     },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
@@ -887,8 +891,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
 }, {
     isSupported: {
         get: function(){
-            if (typeof module === 'undefined') return false;
-            try{ require('mongodb'); } catch(e) { return false; }
+            if (!$data.mongoDBDriver) return false;
             return true;
         },
         set: function(value){}

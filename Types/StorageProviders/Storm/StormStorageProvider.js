@@ -61,7 +61,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
             dataType: 'json',
             data: { entitySet: sets[0], expression: compiled },
             success: function(data, textStatus, jqXHR){
-                query.rawDataList = data;
+                query.rawDataList = typeof data.length !== 'undefined' ? data : [{ cnt: data }];
                 query.context = this;
                 
                 callBack.success(query);
@@ -119,7 +119,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                 dataType: 'json',
                 data: { items: JSON.stringify(collections) },
                 success: function(data, textStatus, jqXHR){
-                    console.log(data);
+                    callBack.success(data);
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     var errorData = {};

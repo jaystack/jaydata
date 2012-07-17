@@ -13,11 +13,22 @@ $data.EntityContext.extend('$test.Context', {
 });
 
 $test.Context.init = function(callback){
-    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', dbCreation: $data.storageProviders.mongoDB.DbCreationType.DropAllExistingCollections });
+    $test.context = new $test.Context({ name: 'storm' });
     $test.context.onReady(function(db){
-        callback(db);
+        db.Items.toArray(function(data){
+            for (var i = 0; i < data.length; i++){
+                db.Items.remove(data[i]);
+            }
+            
+            db.saveChanges(function(){
+                $test.context = new $test.Context({ name: 'storm' });
+                $test.context.onReady(function(db){
+                    callback(db);
+                });
+            });
+        });
     });
-}
+};
 
 exports.testAdd = function(test){
     test.expect(1);
