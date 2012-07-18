@@ -1,143 +1,163 @@
 TARGET_DIR = ./build
-TEMP_DIR = $(TARGET_DIR)/TMP
-MODULE_DIR = $(TARGET_DIR)/Modules
-PROVIDERS_DIR = $(TARGET_DIR)/Providers
+TEMP_DIR = $(TARGET_DIR)/tmp
+MODULE_DIR = $(TARGET_DIR)/modules
+PROVIDERS_DIR = $(TARGET_DIR)/providers
+NPM_DIR = $(TARGET_DIR)/npm/jaydata
+NPM_BASE_DIR = ./npm
+TYPESYSTEM_DIR = ./TypeSystem
+TYPES_DIR = ./Types
 COMPILER = ./Tools/compiler.jar
+GPL_LIC = ./GPL-LICENSE.txt
+MIT_LIC = ./MIT-LICENSE.txt
+CREDITS = ./CREDITS.txt
 
-TYPE_SYSTEM = ./TypeSystem/initializeJayData.js\
-	./TypeSystem/utils.js\
-	./TypeSystem/PreHtml5Compatible.js\
-	./TypeSystem/JayLint.js\
-	./TypeSystem/TypeSystem.js\
+TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
+	$(TYPESYSTEM_DIR)/utils.js\
+	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
+	$(TYPESYSTEM_DIR)/JayLint.js\
+	$(TYPESYSTEM_DIR)/TypeSystem.js\
 
-VSDOC_SOURCE = ./TypeSystem/VS2010Intellisense.js\
+VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
 
-JAYDATA_SOURCE = ./Types/Expressions/ASTParser.js\
-	./Types/Expressions/ArrayLiteralExpression.js\
-	./Types/Expressions/ExpressionNode2.js\
-	./Types/Expressions/CallExpression.js\
-	./Types/Expressions/CodeParser.js\
-	./Types/Expressions/ConstantExpression.js\
-	./Types/Expressions/FunctionExpression.js\
-	./Types/Expressions/ObjectFieldExpression.js\
-	./Types/Expressions/ObjectLiteralExpression.js\
-	./Types/Expressions/PagingExpression.js\
-	./Types/Expressions/ParameterExpression.js\
-	./Types/Expressions/PropertyExpression.js\
-	./Types/Expressions/SimpleBinaryExpression.js\
-	./Types/Expressions/ThisExpression.js\
-	./Types/Expressions/Visitors/ExpressionVisitor.js\
-	./Types/Expressions/Visitors/ParameterProcessor.js\
-	./Types/Expressions/Visitors/GlobalContextProcessor.js\
-	./Types/Expressions/Visitors/LocalContextProcessor.js\
-	./Types/Expressions/Visitors/LambdaParameterProcessor.js\
-	./Types/Expressions/Visitors/ParameterResolverVisitor.js\
-	./Types/Expressions/Visitors/LogicalSchemaBinderVisitor.js\
-	./Types/Expressions/Visitors/ExpTreeVisitor.js\
-	./Types/Expressions/Visitors/SetExecutableVisitor.js\
-	./Types/Expressions/Visitors/ExecutorVisitor.js\
-	./Types/Expressions/ExpressionBuilder.js\
-	./Types/Expressions/EntityExpressions/AssociationInfoExpression.js\
-	./Types/Expressions/EntityExpressions/CodeExpression.js\
-	./Types/Expressions/EntityExpressions/CodeToEntityConverter.js\
-	./Types/Expressions/EntityExpressions/ComplexTypeExpression.js\
-	./Types/Expressions/EntityExpressions/EntityContextExpression.js\
-	./Types/Expressions/EntityExpressions/EntityExpression.js\
-	./Types/Expressions/EntityExpressions/EntityExpressionVisitor.js\
-	./Types/Expressions/EntityExpressions/EntityFieldExpression.js\
-	./Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
-	./Types/Expressions/EntityExpressions/EntitySetExpression.js\
-	./Types/Expressions/EntityExpressions/FrameOperationExpression.js\
-	./Types/Expressions/EntityExpressions/FilterExpression.js\
-	./Types/Expressions/EntityExpressions/IncludeExpression.js\
-	./Types/Expressions/EntityExpressions/MemberInfoExpression.js\
-	./Types/Expressions/EntityExpressions/OrderExpression.js\
-	./Types/Expressions/EntityExpressions/ParametricQueryExpression.js\
-	./Types/Expressions/EntityExpressions/ProjectionExpression.js\
-	./Types/Expressions/EntityExpressions/QueryExpressionCreator.js\
-	./Types/Expressions/EntityExpressions/QueryParameterExpression.js\
-	./Types/Expressions/EntityExpressions/RepresentationExpression.js\
-	./Types/Expressions/EntityExpressions/ServiceOperationExpression.js\
-	./Types/Validation/EntityValidationBase.js\
-	./Types/Validation/EntityValidation.js\
-	./Types/Notifications/ChangeDistributorBase.js\
-	./Types/Notifications/ChangeCollectorBase.js\
-	./Types/Notifications/ChangeDistributor.js\
-	./Types/Notifications/ChangeCollector.js\
-	./Types/Access.js\
-	./Types/Promise.js\
-	./Types/Entity.js\
-	./Types/EntityContext.js\
-	./Types/QueryProvider.js\
-	./Types/ModelBinder.js\
-	./Types/Query.js\
-	./Types/Queryable.js\
-	./Types/EntitySet.js\
-	./Types/EntityState.js\
-	./Types/EntityStateManager.js\
-	./Types/Exception.js\
-	./Types/ServiceOperation.js\
-	./Types/StorageProviderBase.js\
-	./Types/EntityWrapper.js\
-	./Types/Ajax/jQueryAjaxWrapper.js\
-	./Types/Ajax/WinJSAjaxWrapper.js\
-	./Types/Ajax/ExtJSAjaxWrapper.js\
-	./Types/Ajax/AjaxStub.js\
-	./Types/DbClient/DbCommand.js\
-	./Types/DbClient/DbConnection.js\
-	./Types/DbClient/OpenDatabaseClient/OpenDbCommand.js\
-	./Types/DbClient/OpenDatabaseClient/OpenDbConnection.js\
-	./Types/DbClient/JayStorageClient/JayStorageCommand.js\
-	./Types/DbClient/JayStorageClient/JayStorageConnection.js\
-	./Types/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
-	./Types/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
-	./Types/StorageProviders/modelBinderConfigCompiler.js\
-	./Types/Authentication/AuthenticationBase.js\
-	./Types/Authentication/Anonymous.js\
-	./Types/Authentication/FacebookAuth.js\
-	./Types/Authentication/BasicAuth.js\
+JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
+	$(TYPES_DIR)/Expressions/ArrayLiteralExpression.js\
+	$(TYPES_DIR)/Expressions/ExpressionNode2.js\
+	$(TYPES_DIR)/Expressions/CallExpression.js\
+	$(TYPES_DIR)/Expressions/CodeParser.js\
+	$(TYPES_DIR)/Expressions/ConstantExpression.js\
+	$(TYPES_DIR)/Expressions/FunctionExpression.js\
+	$(TYPES_DIR)/Expressions/ObjectFieldExpression.js\
+	$(TYPES_DIR)/Expressions/ObjectLiteralExpression.js\
+	$(TYPES_DIR)/Expressions/PagingExpression.js\
+	$(TYPES_DIR)/Expressions/ParameterExpression.js\
+	$(TYPES_DIR)/Expressions/PropertyExpression.js\
+	$(TYPES_DIR)/Expressions/SimpleBinaryExpression.js\
+	$(TYPES_DIR)/Expressions/ThisExpression.js\
+	$(TYPES_DIR)/Expressions/Visitors/ExpressionVisitor.js\
+	$(TYPES_DIR)/Expressions/Visitors/ParameterProcessor.js\
+	$(TYPES_DIR)/Expressions/Visitors/GlobalContextProcessor.js\
+	$(TYPES_DIR)/Expressions/Visitors/LocalContextProcessor.js\
+	$(TYPES_DIR)/Expressions/Visitors/LambdaParameterProcessor.js\
+	$(TYPES_DIR)/Expressions/Visitors/ParameterResolverVisitor.js\
+	$(TYPES_DIR)/Expressions/Visitors/LogicalSchemaBinderVisitor.js\
+	$(TYPES_DIR)/Expressions/Visitors/ExpTreeVisitor.js\
+	$(TYPES_DIR)/Expressions/Visitors/SetExecutableVisitor.js\
+	$(TYPES_DIR)/Expressions/Visitors/ExecutorVisitor.js\
+	$(TYPES_DIR)/Expressions/ExpressionBuilder.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/AssociationInfoExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/CodeExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/CodeToEntityConverter.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/ComplexTypeExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/EntityContextExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/EntityExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/EntityExpressionVisitor.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/EntityFieldExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/EntitySetExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/FrameOperationExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/FilterExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/IncludeExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/MemberInfoExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/OrderExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/ParametricQueryExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/ProjectionExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/QueryExpressionCreator.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/QueryParameterExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/RepresentationExpression.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/ServiceOperationExpression.js\
+	$(TYPES_DIR)/Validation/EntityValidationBase.js\
+	$(TYPES_DIR)/Validation/EntityValidation.js\
+	$(TYPES_DIR)/Notifications/ChangeDistributorBase.js\
+	$(TYPES_DIR)/Notifications/ChangeCollectorBase.js\
+	$(TYPES_DIR)/Notifications/ChangeDistributor.js\
+	$(TYPES_DIR)/Notifications/ChangeCollector.js\
+	$(TYPES_DIR)/Access.js\
+	$(TYPES_DIR)/Promise.js\
+	$(TYPES_DIR)/Entity.js\
+	$(TYPES_DIR)/EntityContext.js\
+	$(TYPES_DIR)/QueryProvider.js\
+	$(TYPES_DIR)/ModelBinder.js\
+	$(TYPES_DIR)/Query.js\
+	$(TYPES_DIR)/Queryable.js\
+	$(TYPES_DIR)/EntitySet.js\
+	$(TYPES_DIR)/EntityState.js\
+	$(TYPES_DIR)/EntityStateManager.js\
+	$(TYPES_DIR)/Exception.js\
+	$(TYPES_DIR)/ServiceOperation.js\
+	$(TYPES_DIR)/StorageProviderBase.js\
+	$(TYPES_DIR)/EntityWrapper.js\
+	$(TYPES_DIR)/Ajax/jQueryAjaxWrapper.js\
+	$(TYPES_DIR)/Ajax/WinJSAjaxWrapper.js\
+	$(TYPES_DIR)/Ajax/ExtJSAjaxWrapper.js\
+	$(TYPES_DIR)/Ajax/AjaxStub.js\
+	$(TYPES_DIR)/DbClient/DbCommand.js\
+	$(TYPES_DIR)/DbClient/DbConnection.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
+	$(TYPES_DIR)/StorageProviders/modelBinderConfigCompiler.js\
+	$(TYPES_DIR)/Authentication/AuthenticationBase.js\
+	$(TYPES_DIR)/Authentication/Anonymous.js\
+	$(TYPES_DIR)/Authentication/FacebookAuth.js\
+	$(TYPES_DIR)/Authentication/BasicAuth.js\
 
-IndexDbProvider = ./Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
+IndexDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
-SqLiteProvider = ./Types/StorageProviders/SqLite/SqLiteStorageProvider.js\
-	./Types/StorageProviders/SqLite/SqLiteCompiler.js\
-	./Types/StorageProviders/SqLite/SqlPagingCompiler.js\
-	./Types/StorageProviders/SqLite/SqlOrderCompiler.js\
-	./Types/StorageProviders/SqLite/SqlProjectionCompiler.js\
-	./Types/StorageProviders/SqLite/ExpressionMonitor.js\
-	./Types/StorageProviders/SqLite/SqlFilterCompiler.js\
-	./Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
+SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlProjectionCompiler.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/ExpressionMonitor.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
-oDataProvider = ./Types/StorageProviders/oData/oDataProvider.js\
-	./Types/StorageProviders/oData/oDataCompiler.js\
-	./Types/StorageProviders/oData/oDataWhereCompiler.js\
-	./Types/StorageProviders/oData/oDataOrderCompiler.js\
-	./Types/StorageProviders/oData/oDataPagingCompiler.js\
-	./Types/StorageProviders/oData/oDataProjectionCompiler.js\
+oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataPagingCompiler.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataProjectionCompiler.js\
 
-FacebookProvider = ./Types/StorageProviders/Facebook/FacebookProvider.js\
-	./Types/StorageProviders/Facebook/FacebookCompiler.js\
-	./Types/StorageProviders/Facebook/EntitySets/FQL/user.js\
-	./Types/StorageProviders/Facebook/EntitySets/FQL/friend.js\
-	./Types/StorageProviders/Facebook/EntitySets/FQL/page.js\
-	./Types/StorageProviders/Facebook/EntitySets/FQLContext.js\
+FacebookProvider = $(TYPES_DIR)/StorageProviders/Facebook/FacebookProvider.js\
+	$(TYPES_DIR)/StorageProviders/Facebook/FacebookCompiler.js\
+	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/user.js\
+	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/friend.js\
+	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/page.js\
+	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQLContext.js\
 
-YQLProvider = ./Types/StorageProviders/YQL/YQLProvider.js\
-	./Types/StorageProviders/YQL/YQLCompiler.js\
-	./Types/StorageProviders/YQL/EntitySets/geo.js\
-	./Types/StorageProviders/YQL/EntitySets/YQLContext.js\
+YQLProvider = $(TYPES_DIR)/StorageProviders/YQL/YQLProvider.js\
+	$(TYPES_DIR)/StorageProviders/YQL/YQLCompiler.js\
+	$(TYPES_DIR)/StorageProviders/YQL/EntitySets/geo.js\
+	$(TYPES_DIR)/StorageProviders/YQL/EntitySets/YQLContext.js\
 
-InMemoryProvider = ./Types/StorageProviders/InMemory/InMemoryProvider.js\
-	./Types/StorageProviders/InMemory/InMemoryCompiler.js\
-	./Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
+InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
+	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryCompiler.js\
+	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
 
-MongoDbProvider = ./Types/StorageProviders/mongoDB/mongoDBStorageProvider.js\
+MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
 
-StormProvider = ./Types/StorageProviders/Storm/StormStorageProvider.js\
+StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 
-all: jaydatavsdoc jaydatamin jaydata providers
+all: jaydatavsdoc jaydatamin jaydata providers npmpackage
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)
+
+npmpackage: $(TYPE_SYSTEM) $(JAYDATA_SOURCE)
+	@@echo "Building npm package..."
+	@@test -d $(NPM_DIR) || mkdir -p $(NPM_DIR)
+	@@cp -r $(NPM_BASE_DIR)/* $(NPM_DIR)
+	@@cp -xr $(TYPESYSTEM_DIR) $(NPM_DIR)/lib
+	@@cp -xr $(TYPES_DIR) $(NPM_DIR)/lib
+	@@cp -r $(GPL_LIC) $(NPM_DIR)
+	@@cp -r $(MIT_LIC) $(NPM_DIR)
+	@@cp -r $(CREDITS) $(NPM_DIR)
+	@$(foreach dir,$(TYPE_SYSTEM),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/lib/index.js;)
+	@$(foreach dir,$(JAYDATA_SOURCE),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/lib/index.js;)
+	@@echo "module.exports = $data;" >> $(NPM_DIR)/lib/index.js
 
 providers: indexdbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider
 
