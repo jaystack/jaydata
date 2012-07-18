@@ -1,7 +1,7 @@
 $C('$data.Expressions.IncludeExpression', $data.Expressions.EntitySetExpression, null, {
     constructor: function (source, selector) {
     },
-    nodeType: { value: ExpressionType.Include, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.Include, writable: true },
 
     toString: function (debug) {
         //var result;

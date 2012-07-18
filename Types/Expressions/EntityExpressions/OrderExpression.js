@@ -6,7 +6,7 @@ $C('$data.Expressions.OrderExpression', $data.Expressions.EntitySetExpression, n
         //this.selector = expression;
         this.nodeType = nType;
     },
-    nodeType: { value: ExpressionType.OrderBy, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.OrderBy, writable: true },
 
     toString: function (debug) {
         //var result;

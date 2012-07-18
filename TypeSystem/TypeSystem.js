@@ -146,6 +146,16 @@
 			}
 			return this.pubMapPropsCache;// || (this.pubMapPropsCache = this.asArray().filter(function (m) { return m.kind == 'property' && !m.notMapped && m.enumerable; }));
 		},
+		getPublicMappedPropertyNames: function(){
+		    if (!this.pubMapPropNamesCache){
+		        this.pubMapPropNamesCache = [];
+		        for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].kind == 'property' && !this[i].notMapped && this[i].enumerable)
+						this.pubMapPropNamesCache.push(this[i].name);
+				}
+		    }
+		    return this.pubMapPropNamesCache;
+		},
         getKeyProperties: function () {
 			if (!this.keyPropsCache){
 				this.keyPropsCache = [];
@@ -897,16 +907,16 @@
 
     var c;
     global["Container"] = $data.Container = c = global["C$"] = new ContainerCtor();
-    c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
-    c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64", "JayInteger"], $data.Integer);
-    c.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
-    c.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
+    c.registerType(["$data.Number", "number", "float", "real", "decimal"], $data.Number);
+    c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64"], $data.Integer);
+    c.registerType(["$data.String", "string", "text", "character"], $data.String);
+    c.registerType(["$data.Array", "array", "Array", "[]"], $data.Array, function () {
         return $data.Array.apply(undefined, arguments);
     });
-    c.registerType(["$data.Date", "datetime", "date", "JayDate"], $data.Date);
-    c.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"], $data.Boolean);
-    c.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
-    c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
+    c.registerType(["$data.Date", "datetime", "date"], $data.Date);
+    c.registerType(["$data.Boolean", "bool", "boolean"], $data.Boolean);
+    c.registerType(["$data.Blob", "blob"], $data.Blob);
+    c.registerType(["$data.Object", "Object", "object"], $data.Object);
     c.registerType(["$data.Function", "Function", "function"], $data.Function);
 
 

@@ -113,18 +113,18 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
             Guard.raise(new Exception('Multiple sorting not supported', 'not supported'));
 
         this.Visit(expression.selector, context.orderSql);
-        context.orderSql.sql += expression.nodeType == ExpressionType.OrderByDescending ? " DESC" : " ASC";
+        context.orderSql.sql += expression.nodeType == $data.Expressions.ExpressionType.OrderByDescending ? " DESC" : " ASC";
     },
     VisitPagingExpression: function (expression, context) {
         ///<param name="expression" type="$data.Expressions.PagingExpression" />
         this.Visit(expression.source, context);
 
-        if (expression.nodeType == ExpressionType.Skip) {
+        if (expression.nodeType == $data.Expressions.ExpressionType.Skip) {
             context.skipSql.type = expression.nodeType;
             context.skipSql.sql = ' OFFSET ';
             this.Visit(expression.amount, context.skipSql);
         }
-        else if (expression.nodeType == ExpressionType.Take) {
+        else if (expression.nodeType == $data.Expressions.ExpressionType.Take) {
             context.takeSql.type = expression.nodeType;
             context.takeSql.sql = ' LIMIT ';
             this.Visit(expression.amount, context.takeSql);

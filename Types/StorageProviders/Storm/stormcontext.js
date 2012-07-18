@@ -13,7 +13,6 @@ $data.Entity.extend('$test.Item', {
 });*/
 
 $data.EntityContext.extend('$test.Context', {
-    Items: { type: $data.EntitySet, elementType: $test.Item },
-    GetThat: $data.ServiceOperation.returns($data.Array, $data.Integer).serviceName('GetThat').params([])
-    /*Things: { type: $data.EntitySet, elementType: $test.Thing }*/
+    Items: { type: $data.EntitySet, elementType: $test.Item }/*,
+    Things: { type: $data.EntitySet, elementType: $test.Thing }*/
 });

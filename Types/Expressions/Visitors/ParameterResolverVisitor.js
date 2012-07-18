@@ -135,7 +135,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         ///<return type="$data.Expressions.ExpressionNodeTypes.BinaryExpressionNode"/>
 
         var operand = this.Visit(eNode.operand, context);
-        //var imp = unaryOperators.getOperator(
+        //var imp = $data.unaryOperators.getOperator(
         var expr = $data.Expressions;
         if (operand  instanceof expr.ConstantExpression)
         {

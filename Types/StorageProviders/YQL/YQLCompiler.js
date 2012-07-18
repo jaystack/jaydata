@@ -78,20 +78,20 @@ $C('$data.storageProviders.YQL.YQLCompiler', $data.Expressions.EntityExpressionV
 
         var orderContext = { sql: '' };
         this.Visit(expression.selector, orderContext);
-        context.orderSql.sql = "field='" + orderContext.sql + "', descending='" + (expression.nodeType == ExpressionType.OrderByDescending) + "'" +
+        context.orderSql.sql = "field='" + orderContext.sql + "', descending='" + (expression.nodeType == $data.Expressions.ExpressionType.OrderByDescending) + "'" +
             (context.orderSql.sql != '' ? (', ' + context.orderSql.sql) : '');
     },
     VisitPagingExpression: function (expression, context) {
         ///<param name="expression" type="$data.Expressions.PagingExpression" />
         this.Visit(expression.source, context);
 
-        if (expression.nodeType == ExpressionType.Skip) {
+        if (expression.nodeType == $data.Expressions.ExpressionType.Skip) {
             context.skipSql.type = expression.nodeType;
             context.skipSql.sqlPre = ' | tail(count=';
             this.Visit(expression.amount, context.skipSql);
             context.skipSql.sqlSuf = ')';
         }
-        else if (expression.nodeType == ExpressionType.Take) {
+        else if (expression.nodeType == $data.Expressions.ExpressionType.Take) {
             context.takeSql.type = expression.nodeType;
             context.takeSql.sqlPre = ' | truncate(count=';
             this.Visit(expression.amount, context.takeSql);

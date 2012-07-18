@@ -29,7 +29,7 @@ $C('$data.Expressions.CodeParser', null, null, {
             errorDetails: ''
         };
         ///<var name="AST" type="Date" />
-        var AST = ASTParser.parseCode(code);
+        var AST = $data.ASTParser.parseCode(code);
         this.log({ event: "AST", data: AST });
         if (!AST.success) {
             return {
@@ -81,7 +81,7 @@ $C('$data.Expressions.CodeParser', null, null, {
                     case "[":
                         n = this.BuildArrayLiteral(node);
                         break;
-                    case unaryOperators.resolve(node.value):
+                    case $data.unaryOperators.resolve(node.value):
                         n = this.BuildUnary(node);
                         break;
                     //TODO: default case
@@ -89,7 +89,7 @@ $C('$data.Expressions.CodeParser', null, null, {
                 break;
             case "suffix":
                 switch (node.value) {
-                    case unaryOperators.resolve(node.value):
+                    case $data.unaryOperators.resolve(node.value):
                         n = this.BuildUnary(node);
                         break;
                     default:
@@ -101,7 +101,7 @@ $C('$data.Expressions.CodeParser', null, null, {
                     case "[":
                         n = this.BuildArray(node);
                         break;
-                    case binaryOperators.resolve(node.value):
+                    case $data.binaryOperators.resolve(node.value):
                         n = this.BuildSimpleBinary(node);
                         break;
                     case "function":
@@ -186,12 +186,12 @@ $C('$data.Expressions.CodeParser', null, null, {
         var paramName = node.value;
         //TODO
         //var paramType = this.resolver.resolveParameterType(node);
-        var nodeType = node.funct ? ExpressionType.LambdaParameter :
+        var nodeType = node.funct ? $data.Expressions.ExpressionType.LambdaParameter :
                                     this.lambdaParams.indexOf(node.value) > -1 ?
-                                                ExpressionType.LambdaParameterReference : ExpressionType.Parameter;
+                                                $data.Expressions.ExpressionType.LambdaParameterReference : $data.Expressions.ExpressionType.Parameter;
         var result = new $data.Expressions.ParameterExpression(node.value, null, nodeType);
 
-        if (nodeType == ExpressionType.LambdaParameterReference) {
+        if (nodeType == $data.Expressions.ExpressionType.LambdaParameterReference) {
             result.paramIndex = this.lambdaParams.indexOf(node.value);
         }
 
@@ -291,7 +291,7 @@ $C('$data.Expressions.CodeParser', null, null, {
 
 
     BuildUnary: function(node) {
-        var operator = unaryOperators.getOperator(node.value, node.arity);
+        var operator = $data.unaryOperators.getOperator(node.value, node.arity);
         var nodeType = operator.expressionType;
         var operand = this.Build2(node.first);
         var result = new $data.Expressions.UnaryExpression(operand, operator, nodeType);
@@ -301,7 +301,7 @@ $C('$data.Expressions.CodeParser', null, null, {
     BuildSimpleBinary: function (node) {
         ///<param name="node" type="LintInflixNode" />
 
-        var operator = binaryOperators.getOperator(node.value);
+        var operator = $data.binaryOperators.getOperator(node.value);
         var nodeType = operator.expressionType;
 
         var left = this.Build2(node.first || node.left);

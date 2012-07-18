@@ -5,7 +5,7 @@ $C('$data.Expressions.ObjectFieldExpression', $data.Expressions.ExpressionNode, 
         this.fieldName = fieldName;
         this.expression = expression;
     },
-    nodeType: { value: ExpressionType.ObjectField, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.ObjectField, writable: true },
 
     toString: function (debug) {
         //var result;

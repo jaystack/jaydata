@@ -46,5 +46,5 @@
         WinJS.xhr(options)
         .done(success, error, progress);
     }
-};
+}
 
