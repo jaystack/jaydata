@@ -22,40 +22,21 @@
     "name": "JayData",
     "url": "http://jaydata.org"
   },
+ dependencies: {
+    "datajs": "1.0.3"
+  },
   "contributors": [
-    {
-      "name": "Dániel József"
-    },
-    {
-      "name": "Hajnalka Battancs"
-    },
-    {
-      "name": "János Roden"
-    },
-    {
-      "name": "László Horváth"
-    },
-    {
-      "name": "Péter Zentai"
-    },
-    {
-      "name": "Péter Nochta"
-    },
-    {
-      "name": "Róbert Bónay"
-    },
-    {
-      "name": "Szabolcs Czinege"
-    },
-    {
-      "name": "Viktor Borza"
-    },
-    {
-      "name": "Viktor Lázár"
-    },
-    {
-      "name": "Zoltán Gyebrovszki"
-    }
+    {"name": "Dániel József"},
+    {"name": "Hajnalka Battancs"},
+    {"name": "János Roden"},
+    {"name": "László Horváth"},
+    {"name": "Péter Zentai"},
+    {"name": "Péter Nochta"},
+    {"name": "Róbert Bónay"},
+    {"name": "Szabolcs Czinege"},
+    {"name": "Viktor Borza"},
+    {"name": "Viktor Lázár"},
+    {"name": "Zoltán Gyebrovszki"}
   ],
   "repository": {
     "type": "git",
@@ -73,10 +54,4 @@
       "type": "GPLv2",
       "url": "http://jaydata.org/licensing"
     }
-  ],
-  "_id": "jaydata@1.1.0",
-  "dist": {
-    "shasum": "5075a058b0635927198466503c4dcd89f486b42e"
-  },
-  "_from": "/home/lazarv/node-jaydata/"
-}
+  ]}
