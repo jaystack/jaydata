@@ -1,4 +1,4 @@
-VERSION = '7.1.1'
+VERSION = '0.0.0'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/modules
@@ -12,6 +12,8 @@ GPL_LIC = ./GPL-LICENSE.txt
 MIT_LIC = ./MIT-LICENSE.txt
 CREDITS_BASE = ./CREDITS.txt
 CREDITS = $(TEMP_DIR)/CREDITS.txt
+
+TYPE_SYSTEM_CLIENT = $(TYPESYSTEM_DIR)/initializeJayDataClient.js\
 
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/utils.js\
@@ -143,6 +145,9 @@ InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
 MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
 
 StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
+
+clean: 
+	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 
 all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
@@ -312,10 +317,10 @@ jaydata: $(TEMP_DIR)/TypeSystems.js $(CREDITS)
 	@@cat $(TEMP_DIR)/TypeSystems.js $(JAYDATA_SOURCE) > $(TEMP_DIR)/jaydata.js
 	@@cat $(CREDITS) $(TEMP_DIR)/jaydata.js > $(TARGET_DIR)/jaydata.js
 
-$(TEMP_DIR)/TypeSystems.js : $(TYPE_SYSTEM)
+$(TEMP_DIR)/TypeSystems.js : $(TYPE_SYSTEM) $(TYPE_SYSTEM_CLIENT)
 	@@echo "Building JayData type system..."
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
-	@@cat $(TYPE_SYSTEM) | \
+	@@cat $(TYPE_SYSTEM_CLIENT) $(TYPE_SYSTEM) | \
 	sed -e 's/$data.version = "JayData [0-9].[0-9].[0-9]"/$data.version = "JayData $(VERSION)"/;s/$data.versionNumber = "[0-9].[0-9].[0-9]"/$data.versionNumber = "$(VERSION)"/' > $(TEMP_DIR)/TypeSystems.js
 
 $(CREDITS): $(CREDITS_BASE)
