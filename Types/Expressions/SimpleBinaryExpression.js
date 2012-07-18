@@ -15,11 +15,11 @@ $C('$data.Expressions.SimpleBinaryExpression', $data.Expressions.ExpressionNode,
 
     implementation: {
         get: function () {
-            return binaryOperators.getOperator(this.operator).implementation;
+            return $data.binaryOperators.getOperator(this.operator).implementation;
         },
         set: function () { }
 
     },
-    //nodeType: { value: ExpressionType },
+    //nodeType: { value: $data.Expressions.ExpressionType },
     type: { value: "number", writable: true }
 });

@@ -11,7 +11,7 @@ $C('$data.Expressions.PropertyExpression', $data.Expressions.ExpressionNode, nul
     },
 
     nodeType: {
-        value: ExpressionType.MemberAccess
+        value: $data.Expressions.ExpressionType.MemberAccess
     },
 
     expression: {

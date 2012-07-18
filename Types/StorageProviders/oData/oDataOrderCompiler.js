@@ -11,7 +11,7 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
         this.Visit(expression.selector, orderContext);
         if (context['$orderby']) { context['$orderby'] += ','; } else { context['$orderby'] = ''; }
         context['$orderby'] += orderContext.data
-                           + (expression.nodeType == ExpressionType.OrderByDescending ? " desc" : "");
+                           + (expression.nodeType == $data.Expressions.ExpressionType.OrderByDescending ? " desc" : "");
     },
     VisitParametricQueryExpression: function (expression, context) {
         this.Visit(expression.expression, context);

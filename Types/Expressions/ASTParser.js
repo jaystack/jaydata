@@ -1,4 +1,4 @@
-function ASTNode() {
+$data.ASTNode = function() {
     ///<field name="arity" type="string">represents the kind of the AST node</field>
     ///<field name="edge" type="Boolean" />
     ///<field name="identifier" type="Boolean" />
@@ -7,33 +7,33 @@ function ASTNode() {
     ///<field name="type" type="String" />
 }
 
-function FunctionASTNode() {
+$data.FunctionASTNode = function() {
     ///<field name="value" type="string">The name of the function</field>
     ///<field name="first" type="Array" elementType="ASTNode">Contains the function parameters</field>
     ///<field name="block" type="ASTNode">The function body</field>
 }
-FunctionASTNode.prototype = new ASTNode();
+$data.FunctionASTNode.prototype = new $data.ASTNode();
 
-function ParameterASTNode() {
+$data.ParameterASTNode = function() {
     ///<field name="value" type="string">The name of the parameter</field>
     ///<field name="type" type="string" />
     ///<field name="func" type="" />
 }
-function MemberAccessASTNode() {
+$data.MemberAccessASTNode = function() {
     ///<field name="value" type="string">The name of the parameter</field>
     ///<field name="type" type="string" />
     ///<field name="first" type="ASTNode" />
     ///<field name="second" type="ParameterASTNode" />
 }
-MemberAccessASTNode.prototype = new ASTNode();
+$data.MemberAccessASTNode.prototype = new $data.ASTNode();
 
-function ConstantASTNode() {
+$data.ConstantASTNode = function() {
     ///<field name="type" type="string">The datatype of the constant value</field>
     ///<field name="value" type="Object">The constant value</field>
 }
 
 
-function ASTParserResult(result, tree, errors) {
+$data.ASTParserResult = function(result, tree, errors) {
     ///<field name="success" type="boolean"></field>
     this.success = (tree != '');
     this.result = result;
@@ -41,14 +41,14 @@ function ASTParserResult(result, tree, errors) {
     this.errors = errors;
 }
 
-function ASTParser() {
+$data.ASTParser = function() {
 }
 
-ASTParser.parseCode = function (code) {
+$data.ASTParser.parseCode = function (code) {
     var codeStr;
 
     if (!code || (codeStr = code.toString()) === '') {
-        return new ASTParserResult(false, null, null);
+        return new $data.ASTParserResult(false, null, null);
     }
 
     if (typeof JAYLINT === 'undefined') {
@@ -56,7 +56,7 @@ ASTParser.parseCode = function (code) {
     }
 
     var jsLint = JAYLINT(codeStr);
-    var result = new ASTParserResult(jsLint, JAYLINT.tree, JAYLINT.errors);
+    var result = new $data.ASTParserResult(jsLint, JAYLINT.tree, JAYLINT.errors);
     
     return result;
 };

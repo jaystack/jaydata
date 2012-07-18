@@ -4,7 +4,8 @@ $data.Entity.extend('$test.Item', {
     Id: { type: 'string', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: 'string' },
-    Rank: { type: 'int' }/*,
+    Rank: { type: 'int' },
+    CreatedAt: { type: 'datetime' }/*,
     Thing: { type: '$test.Thing', inverseProperty: 'Item' }*/
 });
 
@@ -30,6 +31,10 @@ app.use(connect.urlencoded());
 app.use(connect.json());
 app.use(connect.bodyParser());
 app.use(connect.query());
+
+ISODate = function(date){
+    return new Date(date);
+};
 
 app.use('/', function(req, res){
     if (req.method === 'GET'){
@@ -105,7 +110,6 @@ app.use('/', function(req, res){
                 }
             }
             
-            //console.log(JSON.stringify(collections));
             db.saveChanges(callback);
         });
     }

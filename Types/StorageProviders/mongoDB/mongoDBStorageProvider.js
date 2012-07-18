@@ -167,11 +167,11 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 context.query[context.field] = context.value;
             }else if (expression.nodeType == $data.Expressions.ExpressionType.In && context.unary == $data.Expressions.ExpressionType.Not){
                 if (!context.query[context.field]) context.query[context.field] = {};
-                context.query[context.field].$nin = typeof context.value === 'object' ? JSON.parse(context.value) : context.value;
+                context.query[context.field].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
                 context.unary = undefined;
             }else{
                 if (!context.query[context.field]) context.query[context.field] = {};
-                context.query[context.field][expression.resolution.mapTo] = typeof context.value === 'object' ? JSON.parse(context.value) : context.value;
+                context.query[context.field][expression.resolution.mapTo] = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
             }
             
             if (context.or){
@@ -584,7 +584,15 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var removeFn = function(client, c, collection){
             counterState = c.removeAll.length;
             for (var i = 0; i < c.removeAll.length; i++){
-                collection.remove(c.removeAll[i], { safe: true }, function(error, cnt){
+                var r = c.removeAll[i];
+                
+                var keys = Container.resolveType(r.type).memberDefinitions.getKeyProperties();
+                for (var j = 0; j < keys.length; j++){
+                    var k = keys[j];
+                    r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.data[k.computed ? '_id' : k.name]);
+                }
+                
+                collection.remove(r.data, { safe: true }, function(error, cnt){
                     if (error) callBack.error(error);
                     
                     successItems += cnt;
@@ -600,12 +608,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }
         };
         
-        for (var es in collections){
-            if (collections.hasOwnProperty(es)){
-                var c = collections[es];
-                new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-                    if (error) callBack.error(error);
-                    
+        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+            if (error) callBack.error(error);
+            for (var es in collections){
+                if (collections.hasOwnProperty(es)){
+                    var c = collections[es];
                     var collection = new self.driver.Collection(client, es);
                     if (c.insertAll && c.insertAll.length){
                         insertFn(client, c, collection);
@@ -621,9 +628,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             }
                         }
                     }
-                });
+                }
             }
-        }
+        });
     },
     saveChanges: function(callBack, changedItems){
         var self = this;
@@ -654,7 +661,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];
-                            es.removeAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
+                            es.removeAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
                             break;
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
@@ -857,7 +864,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             fromDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (date) { return new Date(date); },
+                '$data.Date': function (date) { return date ? new Date(date) : date; },
                 '$data.String': function (text) { return typeof text !== 'string' && typeof text !== 'undefined' ? 'ObjectID("' + text.toString() + '")' : text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },

@@ -1,4 +1,4 @@
-var Guard = {};
+Guard = {};
 Guard.requireValue = function (name, value) {
     if (typeof value === 'undefined' || value === null) {
         Guard.raise(name + " requires a value other than undefined or null");

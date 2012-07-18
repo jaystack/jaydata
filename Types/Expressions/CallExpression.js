@@ -9,7 +9,7 @@ $C('$data.Expressions.CallExpression', $data.Expressions.ExpressionNode, null, {
     },
 
     nodeType: {
-        value: ExpressionType.Call
+        value: $data.Expressions.ExpressionType.Call
     },
 
     expression: {

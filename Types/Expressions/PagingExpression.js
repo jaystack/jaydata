@@ -6,7 +6,7 @@ $C('$data.Expressions.PagingExpression', $data.Expressions.ExpressionNode, null,
         this.amount = expression;
         this.nodeType = nType;
     },
-    nodeType: { value: ExpressionType.Unknown, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.Unknown, writable: true },
 
     toString: function (debug) {
         //var result;

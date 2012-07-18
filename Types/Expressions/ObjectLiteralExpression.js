@@ -4,7 +4,7 @@ $C('$data.Expressions.ObjectLiteralExpression', $data.Expressions.ExpressionNode
         ///<param name="member" type="Array" elementType="$data.Expressions.ObjectFieldExpression" />
         this.members = members;
     },
-    nodeType: { value: ExpressionType.ObjectLiteral, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.ObjectLiteral, writable: true },
 
     toString: function (debug) {
         //var result;
