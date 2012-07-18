@@ -145,41 +145,49 @@ indexdbprovider: $(IndexDbProvider)
 	@@echo "Building IndexDbProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(IndexDbProvider) > $(PROVIDERS_DIR)/IndexDbProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/IndexDbProvider.js --js_output_file $(PROVIDERS_DIR)/IndexDbProvider.min.js
 
 sqliteprovider: $(SqLiteProvider)
 	@@echo "Building SqLiteProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(SqLiteProvider) > $(PROVIDERS_DIR)/SqLiteProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/SqLiteProvider.js --js_output_file $(PROVIDERS_DIR)/SqLiteProvider.min.js
 
 odataprovider: $(oDataProvider)
 	@@echo "Building oDataProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(oDataProvider) > $(PROVIDERS_DIR)/oDataProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/oDataProvider.js --js_output_file $(PROVIDERS_DIR)/oDataProvider.min.js
 
 facebookprovider: $(FacebookProvider)
 	@@echo "Building FacebookProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(FacebookProvider) > $(PROVIDERS_DIR)/FacebookProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/FacebookProvider.js --js_output_file $(PROVIDERS_DIR)/FacebookProvider.min.js
 
 yqlprovider: $(YQLProvider)
 	@@echo "Building YQLProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(YQLProvider) > $(PROVIDERS_DIR)/YQLProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/YQLProvider.js --js_output_file $(PROVIDERS_DIR)/YQLProvider.min.js
 
 inmemoryprovider: $(InMemoryProvider)
 	@@echo "Building InMemoryProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(InMemoryProvider) > $(PROVIDERS_DIR)/InMemoryProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/InMemoryProvider.js --js_output_file $(PROVIDERS_DIR)/InMemoryProvider.min.js
 
 mongodbprovider: $(MongoDbProvider)
 	@@echo "Building MongoDbProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(MongoDbProvider) > $(PROVIDERS_DIR)/MongoDbProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/IndexDbProvider.js --js_output_file $(PROVIDERS_DIR)/IndexDbProvider.min.js
 
 stormprovider: $(StormProvider)
 	@@echo "Building StormProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
 	@@cat $(StormProvider) > $(PROVIDERS_DIR)/StormProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/StormProvider.js --js_output_file $(PROVIDERS_DIR)/StormProvider.min.js
 
 jaydatavsdoc: jaydata
 	@@echo "Building JayData vsdoc version..."
