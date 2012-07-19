@@ -1,4 +1,4 @@
-﻿if (typeof WinJS !== 'undefined' && WinJS.xhr) {
+if (typeof WinJS !== 'undefined' && WinJS.xhr) {
     $data.ajax = $data.ajax || function (options) {
         $data.typeSystem.extend(options, {
             dataType: 'json',
