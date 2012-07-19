@@ -1005,11 +1005,6 @@ $data.typeSystem = {
         /// <param name="object" type="Object">Object to extend target with.</param>
         /// <param name="objectN" optional="true" parameterArray="true" type="Object">Object to extend target with.</param>
         /// </signature>        
-        /// <signature>
-        /// <param name="target" type="Function">Function that will be extended.</param>
-        /// <param name="object" type="Object">Object to extend target with.</param>
-        /// <param name="objectN" optional="true" parameterArray="true" type="Object">Object to extend target with.</param>
-        /// </signature>
     	/// <returns></returns>
         if (typeof target !== 'object' && typeof target !== 'function')
             Guard.raise('Target must be object or function');
