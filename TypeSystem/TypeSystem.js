@@ -904,20 +904,22 @@
     $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
     $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
     $data.Function = Function;
+    $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID(){};
 
     var c;
     global["Container"] = $data.Container = c = global["C$"] = new ContainerCtor();
-    c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
-    c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64", "JayInteger"], $data.Integer);
-    c.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
-    c.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
+    c.registerType(["$data.Number", "number", "float", "real", "decimal"], $data.Number);
+    c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64"], $data.Integer);
+    c.registerType(["$data.String", "string", "text", "character"], $data.String);
+    c.registerType(["$data.Array", "array", "Array", "[]"], $data.Array, function () {
         return $data.Array.apply(undefined, arguments);
     });
-    c.registerType(["$data.Date", "datetime", "date", "JayDate"], $data.Date);
-    c.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"], $data.Boolean);
-    c.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
-    c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
+    c.registerType(["$data.Date", "datetime", "date"], $data.Date);
+    c.registerType(["$data.Boolean", "bool", "boolean"], $data.Boolean);
+    c.registerType(["$data.Blob", "blob"], $data.Blob);
+    c.registerType(["$data.Object", "Object", "object"], $data.Object);
     c.registerType(["$data.Function", "Function", "function"], $data.Function);
+    c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id'], $data.ObjectID);
 
 
 })(window);
@@ -1006,7 +1008,8 @@ $data.typeSystem = {
         /// <param name="objectN" optional="true" parameterArray="true" type="Object">Object to extend target with.</param>
         /// </signature>        
     	/// <returns></returns>
-
+        if (typeof target !== 'object')
+            Guard.raise('Target must be object');
         for (var i = 1; i < arguments.length; i++) {
             var obj = arguments[i];
             if (obj === null || typeof obj === 'undefined')

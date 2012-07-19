@@ -530,7 +530,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         }
         
         var insertFn = function(client, c, collection){
-            collection.insert(c.insertAll, { safe: true }, function(error, result){
+            var docs = [];
+            for (var i = 0; i < c.insertAll.length; i++){
+                var d = c.insertAll[i];
+                var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
+                for (var j = 0; j < props.length; j++){
+                    var p = props[j];
+                    if (!p.computed){
+                        d.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
+                    }
+                }
+                docs.push(d.data);
+            }
+        
+            collection.insert(docs, { safe: true }, function(error, result){
                 if (error) callBack.error(error);
                 
                 successItems += result.length;
@@ -592,6 +605,14 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.data[k.computed ? '_id' : k.name]);
                 }
                 
+                var props = Container.resolveType(r.type).memberDefinitions.getPublicMappedProperties();
+                for (var j = 0; j < props.length; j++){
+                    var p = props[j];
+                    if (!p.computed){
+                        r.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](r.data[p.name]);
+                    }
+                }
+                
                 collection.remove(r.data, { safe: true }, function(error, cnt){
                     if (error) callBack.error(error);
                     
@@ -649,19 +670,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         collections[independentBlocks[i][j].entitySet.name] = es;
                     }
                     
+                    var initData = { data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) };
                     switch (independentBlocks[i][j].data.entityState){
                         case $data.EntityState.Unchanged: continue; break;
                         case $data.EntityState.Added:
                             if (!es.insertAll) es.insertAll = [];
-                            es.insertAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
+                            es.insertAll.push(initData);
                             break;
                         case $data.EntityState.Modified:
                             if (!es.updateAll) es.updateAll = [];
-                            es.updateAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
+                            es.updateAll.push(initData);
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];
-                            es.removeAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
+                            es.removeAll.push(initData);
                             break;
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
@@ -685,7 +707,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         return serializableObject;
     },
     
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID], writable: false },
     
     supportedBinaryOperators: {
         value: {
@@ -865,25 +887,23 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date ? new Date(date) : date; },
-                '$data.String': function (text) { return typeof text !== 'string' && typeof text !== 'undefined' ? 'ObjectID("' + text.toString() + '")' : text; },
+                '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); }
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
+                '$data.ObjectID': function(id){ return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
-                '$data.String': function (text) {
-                        if (typeof text === 'undefined') return undefined;
-                        var m = new RegExp(/ObjectID\("([0-9a-f]+)"\)/).exec(text);
-                        return m ? new $data.mongoDBDriver.ObjectID.createFromHexString(m[1]) : text;
-                    },
+                '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); }
+                '$data.Array': function (o) { return JSON.stringify(o); },
+                '$data.ObjectID': function(id){ return id && typeof id === 'string' ? new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id).toString('ascii')) : id; }
             }
         }
     }

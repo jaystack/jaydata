@@ -1,11 +1,12 @@
-$ = jQuery = require('jquery');
-var $data = require('jaydata');
+require('jaydata');
 
 $data.Entity.extend('$test.Item', {
-    Id: { type: 'string', computed: true, key: true },
+    Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: 'string' },
-    Rank: { type: 'int' }
+    Rank: { type: 'int' },
+    CreatedAt: { type: 'datetime' },
+    ForeignKey: { type: 'id' }
 });
 
 $data.EntityContext.extend('$test.Context', {
@@ -75,6 +76,7 @@ exports.testUpdate = function(test){
                 for (var i = 0; i < data.length; i++){
                     db.Items.attach(data[i]);
                     data[i].Value = 'updated';
+                    data[i].ForeignKey = data[i].Id;
                 }
                 db.saveChanges(function(cnt){
                     test.equal(cnt, 5, 'Not 5 items updated in collection');
@@ -331,6 +333,23 @@ exports.testFilterAndOr = function(test){
                 else test.ok(false, 'Item 1 not found in result set');
                 if (data[1]) test.equal(data[1].Value, 'bbb9', 'Value of second item is not "bbb9"');
                 else test.ok(false, 'Item 2 not found in result set');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testFilterByDate = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1, CreatedAt: new Date() }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 1, 'Not 1 item added to collection');
+            db.Items.filter(function(it){ return it.CreatedAt < this.now; }, { now: new Date() }).toArray(function(data){
+                test.equal(data.length, 1, 'Filtering by date failed');
+                test.ok(data[0] instanceof $test.Item, 'Entity is not an Item');
+                if (data[0]) test.ok(data[0].CreatedAt instanceof Date, 'CreatedAt is not a Date');
+                else test.ok(false, 'Item 1 not found in result set');
                 test.done();
             });
         });

@@ -2,11 +2,12 @@ $ = jQuery = require('jquery');
 var $data = require('jaydata');
 
 $data.Entity.extend('$test.Item', {
-    Id: { type: 'string', computed: true, key: true },
+    Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: 'string' },
     Rank: { type: 'int' },
-    CreatedAt: { type: 'datetime' }
+    CreatedAt: { type: 'datetime' },
+    ForeignKey: { type: 'id' }
 });
 
 $data.EntityContext.extend('$test.Context', {
