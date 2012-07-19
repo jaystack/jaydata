@@ -4,14 +4,14 @@ $C('$data.Expressions.ParameterExpression', $data.Expressions.ExpressionNode, nu
         ///<field name="name" type="string" />
         //this.writePropertyValue("name", name);
         //this.writePropertyValue("type", type);
-        this.nodeType = nodeType || ExpressionType.Parameter;
+        this.nodeType = nodeType || $data.Expressions.ExpressionType.Parameter;
         this.name = name;
         this.type = type || "unknown";
         var _owningFunction;
     },
 
     owningFunction: { value: undefined, enumerable: false },
-    nodeType: { value: ExpressionType.Parameter, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.Parameter, writable: true },
     name: { value: undefined, dataType: String, writable: true },
     type: { value: undefined, dataType: "object", writable: true},
     toString: function (debug) {

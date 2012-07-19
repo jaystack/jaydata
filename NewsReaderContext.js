@@ -81,7 +81,8 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     PrefilteredArticles: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticles', returnType: '$data.Queryable', elementType: '$news.Types.Article', params: [{ minId: '$data.Integer' }, { startsWith: '$data.String' }] }),
     PrefilteredArticleList: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticleList', returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     PrefilteredArticle: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticle', returnType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
-    CreateCategory: $data.EntityContext.generateServiceOperation({ serviceName: 'CreateCategory', returnType: null, params: [{ title: $data.String }, { subTitle: $data.String }] })
+    CreateCategory: $data.EntityContext.generateServiceOperation({ serviceName: 'CreateCategory', returnType: null, params: [{ title: $data.String }, { subTitle: $data.String }] }),
+    GetCollection: $data.EntityContext.generateServiceOperation({ serviceName: 'GetCollection', returnType: $data.Queryable, elementType: $data.Integer, params: [] })
 
 }, null);
 

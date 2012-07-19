@@ -5,7 +5,7 @@ $C('$data.Expressions.ArrayLiteralExpression', $data.Expressions.ExpressionNode,
         ///<field name="items" type="Array" elementType="$data.Expression.ExpressionNode" />
         this.items = items || [];
     },
-    nodeType: { value: ExpressionType.ArrayLiteral, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.ArrayLiteral, writable: true },
 
     items: { value: undefined, dataType: Array, elementType: $data.Expressions.ExpressionNode },
 

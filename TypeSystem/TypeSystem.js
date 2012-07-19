@@ -146,6 +146,16 @@
 			}
 			return this.pubMapPropsCache;// || (this.pubMapPropsCache = this.asArray().filter(function (m) { return m.kind == 'property' && !m.notMapped && m.enumerable; }));
 		},
+		getPublicMappedPropertyNames: function(){
+		    if (!this.pubMapPropNamesCache){
+		        this.pubMapPropNamesCache = [];
+		        for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].kind == 'property' && !this[i].notMapped && this[i].enumerable)
+						this.pubMapPropNamesCache.push(this[i].name);
+				}
+		    }
+		    return this.pubMapPropNamesCache;
+		},
         getKeyProperties: function () {
 			if (!this.keyPropsCache){
 				this.keyPropsCache = [];
@@ -996,8 +1006,7 @@ $data.typeSystem = {
         /// <param name="objectN" optional="true" parameterArray="true" type="Object">Object to extend target with.</param>
         /// </signature>        
     	/// <returns></returns>
-        if (typeof target !== 'object')
-            Guard.raise('Target must be object');
+
         for (var i = 1; i < arguments.length; i++) {
             var obj = arguments[i];
             if (obj === null || typeof obj === 'undefined')

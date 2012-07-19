@@ -22,7 +22,7 @@ $C('$data.Expressions.FunctionExpression', $data.Expressions.ExpressionNode, nul
         var bodyString = (this.body ? this.body.toString(debug) : '');
         return "function " + this.name + "(" + paramStrings + ") { " + bodyString + "}";
     },
-    nodeType: { value: ExpressionType.Function, writable: true },
+    nodeType: { value: $data.Expressions.ExpressionType.Function, writable: true },
     parameters: { value: undefined, dataType: Array, elementType: $data.Expressions.ParameterExpression },
     body: { value: undefined, dataType: $data.Expressions.ExpressionNode },
     type: {}

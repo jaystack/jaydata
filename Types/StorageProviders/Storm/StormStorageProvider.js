@@ -33,6 +33,9 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                             compiled[i][k] = { fn: compiled[i][k], direction: dir };
                             /*if (compiled[i][k].ASC){
                                 if (!compiled.$orderby) compiled*/
+                        }else{
+                            var dir = compiled[i][k].ASC;
+                            compiled[i][k] = { fn: compiled[i][k], direction: dir };
                         }
                     }
                 }
@@ -136,7 +139,8 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
     },
     save_getInitData: function(item, convertedItems) {
         item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
-        var serializableObject = {}
+        var serializableObject = {};
+        var self = this;
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
                 serializableObject[memdef.name] = item.physicalData[memdef.name];
@@ -204,7 +208,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
             fromDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (date) { return new Date(date); },
+                '$data.Date': function (date) { return typeof date === 'string' ? new Date(date) : date; },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },

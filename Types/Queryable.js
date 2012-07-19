@@ -452,7 +452,7 @@ $data.Class.define('$data.Queryable', null, null,
 
         this._checkOperation('take');
         var constExp = Container.createConstantExpression(amount, "number");
-        var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Take);
+        var takeExp = Container.createPagingExpression(this.expression, constExp, $data.Expressions.ExpressionType.Take);
         return Container.createQueryable(this, takeExp);
     },
     skip: function (amount) {
@@ -473,7 +473,7 @@ $data.Class.define('$data.Queryable', null, null,
 
         this._checkOperation('skip');
         var constExp = Container.createConstantExpression(amount, "number");
-        var takeExp = Container.createPagingExpression(this.expression, constExp, ExpressionType.Skip);
+        var takeExp = Container.createPagingExpression(this.expression, constExp, $data.Expressions.ExpressionType.Skip);
         return Container.createQueryable(this, takeExp);
     },
 
@@ -508,7 +508,7 @@ $data.Class.define('$data.Queryable', null, null,
 
         this._checkOperation('orderBy');
         var codeExpression = Container.createCodeExpression(selector, thisArg);
-        var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderBy);
+        var exp = Container.createOrderExpression(this.expression, codeExpression, $data.Expressions.ExpressionType.OrderBy);
         var q = Container.createQueryable(this, exp);
         return q;
     },
@@ -543,7 +543,7 @@ $data.Class.define('$data.Queryable', null, null,
 
         this._checkOperation('orderByDescending');
         var codeExpression = Container.createCodeExpression(selector, thisArg);
-        var exp = Container.createOrderExpression(this.expression, codeExpression, ExpressionType.OrderByDescending);
+        var exp = Container.createOrderExpression(this.expression, codeExpression, $data.Expressions.ExpressionType.OrderByDescending);
         var q = Container.createQueryable(this, exp);
         return q;
     },

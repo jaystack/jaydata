@@ -15,7 +15,7 @@ $C('$data.sqLite.SqlOrderCompiler', $data.Expressions.EntityExpressionVisitor, n
     },
     VisitOrderExpression: function (expression, sqlBuilder) {
         this.Visit(expression.selector, sqlBuilder);
-        if (expression.nodeType == ExpressionType.OrderByDescending) {
+        if (expression.nodeType == $data.Expressions.ExpressionType.OrderByDescending) {
             sqlBuilder.addText(" DESC");
         } else {
             sqlBuilder.addText(" ASC");

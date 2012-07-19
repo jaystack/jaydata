@@ -84,7 +84,12 @@ namespace JayData
             this.CurrentDataSource.CreateObjectSet<Category>().AddObject(new Category{Title=title, Subtitle= subTitle});
             this.CurrentDataSource.SaveChanges();
         }
-        
-        
+
+        [WebGet]
+        public ICollection<int> GetCollection()
+        {
+            return new List<int>() { 1, 2, 3, 4, 5 };
+        }
+
     }
 }

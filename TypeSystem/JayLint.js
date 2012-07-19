@@ -365,7 +365,7 @@ yellowgreen, 'z-index', '|', '~'
 // value is the JSLINT function itself. That function is also an object that
 // can contain data and other functions.
 
-var JAYLINT = (function () {
+JAYLINT = (function () {
     'use strict';
 
     var adsafe_id,      // The widget's ADsafe id.

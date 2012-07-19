@@ -1,3 +1,6 @@
 *.sln
 *.sou
 *.v11.sou
+build
+*~
+.idea

@@ -149,10 +149,10 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         this.Visit(expression.source, sqlBuilder);
 
         switch (expression.nodeType) {
-            case ExpressionType.Skip:
+            case $data.Expressions.ExpressionType.Skip:
                 sqlBuilder.selectTextPart('skip');
                 sqlBuilder.addText(SqlStatementBlocks.skip); break;
-            case ExpressionType.Take:
+            case $data.Expressions.ExpressionType.Take:
                 sqlBuilder.selectTextPart('take');
                 sqlBuilder.addText(SqlStatementBlocks.take); break;
             default: Guard.raise("Not supported nodeType"); break;

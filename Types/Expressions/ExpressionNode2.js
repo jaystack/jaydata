@@ -1,176 +1,169 @@
 //TODO: Finish refactoring ExpressionNode.js
 
-$data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {});
-
-
-var ExpressionType = $data.Expressions.ExpressionType;
-
-ExpressionType.Constant = "constant"; // { type:LITERAL, executable:true, valueType:, value: }
-ExpressionType.Variable = "variable"; // { type:VARIABLE, executable:true, name: }
-ExpressionType.MemberAccess = "memberAccess";    // { type:MEMBERACCESS, executable:true, expression:, member: }
-ExpressionType.Call = "call";
+$data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
+    Constant: "constant", // { type:LITERAL, executable:true, valueType:, value: }
+    Variable: "variable", // { type:VARIABLE, executable:true, name: }
+    MemberAccess: "memberAccess",    // { type:MEMBERACCESS, executable:true, expression:, member: }
+    Call: "call",
 
 /* binary operators */
-ExpressionType.Equal = "equal";
-ExpressionType.NotEqual = "notEqual";
-ExpressionType.EqualTyped = "equalTyped";
-ExpressionType.NotEqualTyped = "notEqualTyped";
-ExpressionType.GreaterThen = "greaterThan";
-ExpressionType.LessThen = "lessThan";
-ExpressionType.GreaterThenOrEqual = "greaterThanOrEqual";
-ExpressionType.LessThenOrEqual = "lessThenOrEqual"; 
-ExpressionType.Or = "or";
-ExpressionType.OrBitwise = "orBitwise";
-ExpressionType.And = "and";
-ExpressionType.AndBitwise = "andBitwise";
+    Equal: "equal",
+    NotEqual: "notEqual",
+    EqualTyped: "equalTyped",
+    NotEqualTyped: "notEqualTyped",
+    GreaterThen: "greaterThan",
+    LessThen: "lessThan",
+    GreaterThenOrEqual: "greaterThanOrEqual",
+    LessThenOrEqual: "lessThenOrEqual", 
+    Or: "or",
+    OrBitwise: "orBitwise",
+    And: "and",
+    AndBitwise: "andBitwise",
 
 
-ExpressionType.In = "in";
+    In: "in",
 
-ExpressionType.Add = "add";
-ExpressionType.Divide = "divide";
-ExpressionType.Multiply = "multiply";
-ExpressionType.Subtract = "subtract";
-ExpressionType.Modulo = "modulo";
-ExpressionType.ArrayIndex = "arrayIndex";
+    Add: "add",
+    Divide: "divide",
+    Multiply: "multiply",
+    Subtract: "subtract",
+    Modulo: "modulo",
+    ArrayIndex: "arrayIndex",
 
 /* unary operators */
-ExpressionType.New = "new";
-ExpressionType.Positive = "positive";
-ExpressionType.Negative = "negative";
-ExpressionType.Increment = "increment";
-ExpressionType.Decrement = "decrement";
-ExpressionType.Not = "not";
+    New: "new",
+    Positive: "positive",
+    Negative: "negative",
+    Increment: "increment",
+    Decrement: "decrement",
+    Not: "not",
 
 
-ExpressionType.This = "this";
-ExpressionType.LambdaParameterReference = "lambdaParameterReference";
-ExpressionType.LambdaParameter = "lambdaParameter";
-ExpressionType.Parameter = "parameter";
+    This: "this",
+    LambdaParameterReference: "lambdaParameterReference",
+    LambdaParameter: "lambdaParameter",
+    Parameter: "parameter",
 
-ExpressionType.ArrayLiteral = "arrayLiteral";
-ExpressionType.ObjectLiteral = "objectLiteral";
-ExpressionType.ObjectField = "objectField";
-ExpressionType.Function = "Function";
-ExpressionType.Unknown = "UNKNOWN";
+    ArrayLiteral: "arrayLiteral",
+    ObjectLiteral: "objectLiteral",
+    ObjectField: "objectField",
+    Function: "Function",
+    Unknown: "UNKNOWN",
 
-ExpressionType.EntitySet = "EntitySet";
-ExpressionType.ServiceOperation = "ServiceOperation";
-ExpressionType.EntityField = "EntityField";
-ExpressionType.EntityContext = "EntityContext";
-ExpressionType.Entity = "Entity";
-ExpressionType.Filter = "Filter";
-ExpressionType.First = "First";
-ExpressionType.Count = "Count";
-ExpressionType.Single = "Single";
-ExpressionType.Some = "Some";
-ExpressionType.Every = "Every";
-ExpressionType.ToArray = "ToArray";
-ExpressionType.ForEach = "ForEach";
-ExpressionType.Projection = "Projection";
-ExpressionType.EntityMember = "EntityMember";
-ExpressionType.EntityFieldOperation = "EntityFieldOperation";
-ExpressionType.FrameOperation = "FrameOperation";
-ExpressionType.EntityBinary = "EntityBinary";
-ExpressionType.Code = "Code";
-ExpressionType.ParametricQuery = "ParametricQuery";
-ExpressionType.MemberInfo = "MemberInfo";
-ExpressionType.QueryParameter = "QueryParameter";
-ExpressionType.ComplexEntityField = "ComplexEntityField";
+    EntitySet: "EntitySet",
+    ServiceOperation: "ServiceOperation",
+    EntityField: "EntityField",
+    EntityContext: "EntityContext",
+    Entity: "Entity",
+    Filter: "Filter",
+    First: "First",
+    Count: "Count",
+    Single: "Single",
+    Some: "Some",
+    Every: "Every",
+    ToArray: "ToArray",
+    ForEach: "ForEach",
+    Projection: "Projection",
+    EntityMember: "EntityMember",
+    EntityFieldOperation: "EntityFieldOperation",
+    FrameOperation: "FrameOperation",
+    EntityBinary: "EntityBinary",
+    Code: "Code",
+    ParametricQuery: "ParametricQuery",
+    MemberInfo: "MemberInfo",
+    QueryParameter: "QueryParameter",
+    ComplexEntityField: "ComplexEntityField",
+    
+    Take: "Take",
+    Skip: "Skip",
+    OrderBy: "OrderBy",
+    OrderByDescending: "OrderByDescending",
+    Include: "Include",
+    Count: "Count"
+});
 
-
-ExpressionType.Take = "Take";
-ExpressionType.Skip= "Skip";
-ExpressionType.OrderBy = "OrderBy";
-ExpressionType.OrderByDescending = "OrderByDescending";
-ExpressionType.Include = "Include";
-ExpressionType.Count = "Count";
-
-
-
-$data.Expressions.ExpressionType = ExpressionType;
-
-function BinaryOperator() {
+$data.BinaryOperator = function() {
     ///<field name="operator" type="string" />
     ///<field name="expressionType" type="$data.ExpressionType" />
     ///<field name="type" type="string" />
 }
 
-var binaryOperators = [
-    { operator: "==", expressionType: ExpressionType.Equal, type: "boolean", implementation: function (a, b) { return a == b; } },
-    { operator: "===", expressionType: ExpressionType.EqualTyped, type: "boolean", implementation: function (a, b) { return a === b; } },
-    { operator: "!=", expressionType: ExpressionType.NotEqual, type: "boolean", implementation: function (a, b) { return a != b; } },
-    { operator: "!==", expressionType: ExpressionType.NotEqualTyped, type: "boolean", implementation: function (a, b) { return a !== b; } },
-    { operator: ">", expressionType: ExpressionType.GreaterThen, type: "boolean", implementation: function (a, b) { return a > b; } },
-    { operator: ">=", expressionType: ExpressionType.GreaterThenOrEqual, type: "boolean", implementation: function (a, b) { return a >= b; } },
-    { operator: "<=", expressionType: ExpressionType.LessThenOrEqual, type: "boolean", implementation: function (a, b) { return a <= b; } },
-    { operator: "<", expressionType: ExpressionType.LessThen, type: "boolean", implementation: function (a, b) { return a < b; } },
-    { operator: "&&", expressionType: ExpressionType.And, type: "boolean", implementation: function (a, b) { return a && b; } },
-    { operator: "||", expressionType: ExpressionType.Or, type: "boolean", implementation: function (a, b) { return a || b; } },
-    { operator: "&", expressionType: ExpressionType.AndBitwise, type: "number", implementation: function (a, b) { return a & b; } },
-    { operator: "|", expressionType: ExpressionType.OrBitwise, type: "number", implementation: function (a, b) { return a | b; } },
-    { operator: "+", expressionType: ExpressionType.Add, type: "number", implementation: function (a, b) { return a + b; } },
-    { operator: "-", expressionType: ExpressionType.Subtract, type: "number", implementation: function (a, b) { return a - b; } },
-    { operator: "/", expressionType: ExpressionType.Divide, type: "number", implementation: function (a, b) { return a / b; } },
-    { operator: "%", expressionType: ExpressionType.Modulo, type: "number", implementation: function (a, b) { return a % b; } },
-    { operator: "*", expressionType: ExpressionType.Multiply, type: "number", implementation: function (a, b) { return a * b; } },
-    { operator: "[", expressionType: ExpressionType.ArrayIndex, type: "number", implementation: function (a, b) { return a[b]; } },
-    { operator: "in", expressionType: ExpressionType.In, type: 'boolean', implementation: function (a, b) { return a in b; } }
+$data.binaryOperators = [
+    { operator: "==", expressionType: $data.Expressions.ExpressionType.Equal, type: "boolean", implementation: function (a, b) { return a == b; } },
+    { operator: "===", expressionType: $data.Expressions.ExpressionType.EqualTyped, type: "boolean", implementation: function (a, b) { return a === b; } },
+    { operator: "!=", expressionType: $data.Expressions.ExpressionType.NotEqual, type: "boolean", implementation: function (a, b) { return a != b; } },
+    { operator: "!==", expressionType: $data.Expressions.ExpressionType.NotEqualTyped, type: "boolean", implementation: function (a, b) { return a !== b; } },
+    { operator: ">", expressionType: $data.Expressions.ExpressionType.GreaterThen, type: "boolean", implementation: function (a, b) { return a > b; } },
+    { operator: ">=", expressionType: $data.Expressions.ExpressionType.GreaterThenOrEqual, type: "boolean", implementation: function (a, b) { return a >= b; } },
+    { operator: "<=", expressionType: $data.Expressions.ExpressionType.LessThenOrEqual, type: "boolean", implementation: function (a, b) { return a <= b; } },
+    { operator: "<", expressionType: $data.Expressions.ExpressionType.LessThen, type: "boolean", implementation: function (a, b) { return a < b; } },
+    { operator: "&&", expressionType: $data.Expressions.ExpressionType.And, type: "boolean", implementation: function (a, b) { return a && b; } },
+    { operator: "||", expressionType: $data.Expressions.ExpressionType.Or, type: "boolean", implementation: function (a, b) { return a || b; } },
+    { operator: "&", expressionType: $data.Expressions.ExpressionType.AndBitwise, type: "number", implementation: function (a, b) { return a & b; } },
+    { operator: "|", expressionType: $data.Expressions.ExpressionType.OrBitwise, type: "number", implementation: function (a, b) { return a | b; } },
+    { operator: "+", expressionType: $data.Expressions.ExpressionType.Add, type: "number", implementation: function (a, b) { return a + b; } },
+    { operator: "-", expressionType: $data.Expressions.ExpressionType.Subtract, type: "number", implementation: function (a, b) { return a - b; } },
+    { operator: "/", expressionType: $data.Expressions.ExpressionType.Divide, type: "number", implementation: function (a, b) { return a / b; } },
+    { operator: "%", expressionType: $data.Expressions.ExpressionType.Modulo, type: "number", implementation: function (a, b) { return a % b; } },
+    { operator: "*", expressionType: $data.Expressions.ExpressionType.Multiply, type: "number", implementation: function (a, b) { return a * b; } },
+    { operator: "[", expressionType: $data.Expressions.ExpressionType.ArrayIndex, type: "number", implementation: function (a, b) { return a[b]; } },
+    { operator: "in", expressionType: $data.Expressions.ExpressionType.In, type: 'boolean', implementation: function (a, b) { return a in b; } }
 ];
 
 
-binaryOperators.resolve = function (operator) {
-    var result = binaryOperators.filter(function (item) { return item.operator == operator; });
+$data.binaryOperators.resolve = function (operator) {
+    var result = $data.binaryOperators.filter(function (item) { return item.operator == operator; });
     if (result.length > 0)
         return operator;
     //Guard.raise("Unknown operator: " + operator);
 };
 
-binaryOperators.contains = function (operator) {
-    return binaryOperators.some(function (item) { return item.operator == operator; });
+$data.binaryOperators.contains = function (operator) {
+    return $data.binaryOperators.some(function (item) { return item.operator == operator; });
 };
 
-binaryOperators.getOperator = function (operator) {
+$data.binaryOperators.getOperator = function (operator) {
     ///<returns type="BinaryOperator" />
-    var result = binaryOperators.filter(function (item) { return item.operator == operator; });
+    var result = $data.binaryOperators.filter(function (item) { return item.operator == operator; });
     if (result.length < 1)
         Guard.raise("Unknown operator: " + operator);
     return result[0];
 };
 
 
-var unaryOperators = [
-    { operator: "+", arity:"prefix", expressionType : ExpressionType.Positive, type: "number", implementation: function(operand) { return +operand; } },
-    { operator: "-", arity:"prefix", expressionType : ExpressionType.Negative, type: "number", implementation: function(operand) { return -operand; } },
-    { operator: "++", arity:"prefix", expressionType : ExpressionType.Increment, type: "number", implementation: function(operand) { return ++operand; } },
-    { operator: "--", arity:"prefix", expressionType: ExpressionType.Decrement, type: "number", implementation: function (operand) { return --operand; } },
-    { operator: "++", arity: "suffix", expressionType: ExpressionType.Increment, type: "number", implementation: function (operand) { return operand++; } },
-    { operator: "!", arity: "prefix", expressionType: ExpressionType.Not, type: "boolean", implementation: function (operand) { return !operand; } },
-    { operator: "--", arity:"suffix", expressionType: ExpressionType.Decrement, type: "number", implementation: function (operand) { return operand--; } }
+$data.unaryOperators = [
+    { operator: "+", arity:"prefix", expressionType : $data.Expressions.ExpressionType.Positive, type: "number", implementation: function(operand) { return +operand; } },
+    { operator: "-", arity:"prefix", expressionType : $data.Expressions.ExpressionType.Negative, type: "number", implementation: function(operand) { return -operand; } },
+    { operator: "++", arity:"prefix", expressionType : $data.Expressions.ExpressionType.Increment, type: "number", implementation: function(operand) { return ++operand; } },
+    { operator: "--", arity:"prefix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return --operand; } },
+    { operator: "++", arity: "suffix", expressionType: $data.Expressions.ExpressionType.Increment, type: "number", implementation: function (operand) { return operand++; } },
+    { operator: "!", arity: "prefix", expressionType: $data.Expressions.ExpressionType.Not, type: "boolean", implementation: function (operand) { return !operand; } },
+    { operator: "--", arity:"suffix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return operand--; } }
     
-    //{ operator: "new", expressionType : ExpressionType.New, type: "object", implementation: function(operand) { return new operand; }
+    //{ operator: "new", expressionType : $data.Expressions.ExpressionType.New, type: "object", implementation: function(operand) { return new operand; }
 ];
-unaryOperators.resolve = function (operator) {
-    var result = unaryOperators.filter(function (item) { return item.operator == operator ; });
+
+$data.unaryOperators.resolve = function (operator) {
+    var result = $data.unaryOperators.filter(function (item) { return item.operator == operator ; });
     if (result.length > 0)
         return operator;
     //Guard.raise("Unknown operator: " + operator);
 };
 
-unaryOperators.contains = function (operator) {
-    return unaryOperators.some(function (item) { return item.operator == operator; });
+$data.unaryOperators.contains = function (operator) {
+    return $data.unaryOperators.some(function (item) { return item.operator == operator; });
 };
 
-unaryOperators.getOperator = function (operator, arity) {
+$data.unaryOperators.getOperator = function (operator, arity) {
     ///<returns type="BinaryOperator" />
-    var result = unaryOperators.filter(function (item) { return item.operator == operator && (!arity || item.arity == arity); });
+    var result = $data.unaryOperators.filter(function (item) { return item.operator == operator && (!arity || item.arity == arity); });
     if (result.length < 1)
         Guard.raise("Unknown operator: " + operator);
     return result[0];
 };
 
 
-function timeIt(fn, iterations) {
+$data.timeIt = function(fn, iterations) {
     iterations = iterations || 1;
 
     console.time("!");
@@ -180,16 +173,18 @@ function timeIt(fn, iterations) {
     console.timeEnd("!");
 }
 
-var UNARY = "UNARY";                  // { type:UNARY, executable:true, operator:, operand: }
-var INCDEC = "INCDEC";                // { type:INCDEC, executable:true, operator:, operand:, suffix: }
-var DECISION = "DECISION";            // { type:DECISION, executable:true, expression:, left:, right: }
-var METHODCALL = "METHODCALL";        // { type:METHODCALL, executable:true, object:, method:, args: }
-var NEW = "NEW";                      // { type:NEW, executable:true, values: [] };
-var JSONASSIGN = "JSONASSIGN";        // { type:JSONASSIGN, executable:true, left:, right: }
-var ARRAYACCESS = "ARRAYACCESS";      // { type:ARRAYACCESS, executable:true, array:, index: }
-var UNKNOWN = "UNKNOWN";
+$data.Expressions.OperatorTypes = {
+    UNARY: "UNARY",                  // { type:UNARY, executable:true, operator:, operand: }
+    INCDEC: "INCDEC",                // { type:INCDEC, executable:true, operator:, operand:, suffix: }
+    DECISION: "DECISION",            // { type:DECISION, executable:true, expression:, left:, right: }
+    METHODCALL: "METHODCALL",        // { type:METHODCALL, executable:true, object:, method:, args: }
+    NEW: "NEW",                      // { type:NEW, executable:true, values: [] };
+    JSONASSIGN: "JSONASSIGN",        // { type:JSONASSIGN, executable:true, left:, right: }
+    ARRAYACCESS: "ARRAYACCESS",      // { type:ARRAYACCESS, executable:true, array:, index: }
+    UNKNOWN: "UNKNOWN"
+};
 
-var executable = true;
+$data.executable = true;
 
 function jsonify(obj) { return JSON.stringify(obj, null, "\t"); }
 
@@ -201,9 +196,9 @@ $C('$data.Expressions.ExpressionNode', $data.Entity, null, {
         ///</field>
         ///<field name="type" type="Function">The result type of the expression</field>
         ///<field name="executable" type="boolean">True if the expression can be evaluated to yield a result</field>
-        ///this.nodeType = ExpressionType.Unknown;
+        ///this.nodeType = $data.Expressions.ExpressionType.Unknown;
         ///this.type = type;
-        ///this.nodeType = ExpressionType.Unknown;
+        ///this.nodeType = $data.Expressions.ExpressionType.Unknown;
         ///this.executable = (executable === undefined || executable === null) ? true : executable;
         ///TODO
         this.expressionType = this.constructor;
@@ -242,7 +237,7 @@ $C('$data.Expressions.ExpressionNode', $data.Entity, null, {
     },
 
     ///toString: function () { },
-    nodeType: { value: ExpressionType.Unknown, writable: false },
+    nodeType: { value: $data.Expressions.ExpressionType.Unknown, writable: false },
 
     type: {},
 
