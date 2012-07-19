@@ -1,4 +1,4 @@
-VERSION = '7.1.1'
+VERSION = '0.0.0'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/modules
@@ -12,6 +12,8 @@ GPL_LIC = ./GPL-LICENSE.txt
 MIT_LIC = ./MIT-LICENSE.txt
 CREDITS_BASE = ./CREDITS.txt
 CREDITS = $(TEMP_DIR)/CREDITS.txt
+
+TYPE_SYSTEM_CLIENT = $(TYPESYSTEM_DIR)/initializeJayDataClient.js\
 
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/utils.js\
@@ -144,6 +146,9 @@ MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.j
 
 StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 
+clean: 
+	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
+
 all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)
@@ -159,8 +164,8 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata
-	@$(foreach dir,$(TYPE_SYSTEM),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
-	@$(foreach dir,$(JAYDATA_SOURCE),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
+	@$(foreach dir,$(TYPE_SYSTEM),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
+	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
 	@@sed -e 's/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
@@ -172,7 +177,7 @@ npmindexdb: $(IndexDbProvider)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/indexdb
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/indexdb
 	@@cp -r $(CREDITS) $(NPM_DIR)/indexdb
-	@$(foreach dir,$(IndexDbProvider),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/indexdb/lib/index.js;)
+	@$(foreach dir,$(IndexDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/indexdb/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/indexdb/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-indexdb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/indexdb/package.json
 
@@ -184,7 +189,7 @@ npmsqlite: $(SqLiteProvider)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/sqlite
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/sqlite
 	@@cp -r $(CREDITS) $(NPM_DIR)/sqlite
-	@$(foreach dir,$(SqLiteProvider),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/sqlite/lib/index.js;)
+	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/sqlite/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/sqlite/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-sqlite"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/sqlite/package.json
 
@@ -196,7 +201,7 @@ npmodata: $(oDataProvider)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/odata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/odata
 	@@cp -r $(CREDITS) $(NPM_DIR)/odata
-	@$(foreach dir,$(oDataProvider),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/odata/lib/index.js;)
+	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/odata/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/odata/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-odata"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/odata/package.json
 
@@ -208,7 +213,7 @@ npminmemory: $(InMemoryProvider)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/inmemory
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/inmemory
 	@@cp -r $(CREDITS) $(NPM_DIR)/inmemory
-	@$(foreach dir,$(InMemoryProvider),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/inmemory/lib/index.js;)
+	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/inmemory/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/inmemory/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-inmemory"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/inmemory/package.json
 
@@ -220,7 +225,7 @@ npmmongodb: $(MongoDbProvider)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/mongodb
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/mongodb
 	@@cp -r $(CREDITS) $(NPM_DIR)/mongodb
-	@$(foreach dir,$(MongoDbProvider),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/mongodb/lib/index.js;)
+	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/mongodb/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/mongodb/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-mongodb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/mongodb/package.json
 
@@ -232,7 +237,7 @@ npmstorm: $(StormProvider)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/storm
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/storm
 	@@cp -r $(CREDITS) $(NPM_DIR)/storm
-	@$(foreach dir,$(StormProvider),echo "reguire('"$(dir)"');" >> $(NPM_DIR)/storm/lib/index.js;)
+	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/storm/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/storm/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-storm"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/storm/package.json
 
@@ -312,10 +317,10 @@ jaydata: $(TEMP_DIR)/TypeSystems.js $(CREDITS)
 	@@cat $(TEMP_DIR)/TypeSystems.js $(JAYDATA_SOURCE) > $(TEMP_DIR)/jaydata.js
 	@@cat $(CREDITS) $(TEMP_DIR)/jaydata.js > $(TARGET_DIR)/jaydata.js
 
-$(TEMP_DIR)/TypeSystems.js : $(TYPE_SYSTEM)
+$(TEMP_DIR)/TypeSystems.js : $(TYPE_SYSTEM) $(TYPE_SYSTEM_CLIENT)
 	@@echo "Building JayData type system..."
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
-	@@cat $(TYPE_SYSTEM) | \
+	@@cat $(TYPE_SYSTEM_CLIENT) $(TYPE_SYSTEM) | \
 	sed -e 's/$data.version = "JayData [0-9].[0-9].[0-9]"/$data.version = "JayData $(VERSION)"/;s/$data.versionNumber = "[0-9].[0-9].[0-9]"/$data.versionNumber = "$(VERSION)"/' > $(TEMP_DIR)/TypeSystems.js
 
 $(CREDITS): $(CREDITS_BASE)

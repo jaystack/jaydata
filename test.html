@@ -152,12 +152,19 @@
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/geo.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/YQLContext.js"></script>
         
+    <!--******************************* StorageProvider - inMemory ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
+
     <!--******************************* jsExtensions ****************************************-->
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>
     <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
     <script type="text/javascript" src="JayDataModules/template.js"></script>
     <script type="text/javascript" src="JayDataModules/validate.js"></script>
     <script type="text/javascript" src="JayDataModules/knockout.js"></script>
+    <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
+
     <!--************************************************************************************-->
     
 
@@ -165,6 +172,7 @@
     <script src="NewsReaderContext.js" type="text/javascript"></script>
     
 
+    <script src="UnitTests/inMemoryProviderTests.js" type="text/javascript"></script>
     <script src="UnitTests/storageModelTests.js" type="text/javascript"></script>
     <script src="UnitTests/typeSystemTests.js" type="text/javascript"></script>
     <script src="UnitTests/EntityContextTests.js" type="text/javascript"></script>
