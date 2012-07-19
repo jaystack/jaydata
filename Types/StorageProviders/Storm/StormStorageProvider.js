@@ -214,7 +214,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
             toDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (date) { return date; },
+                '$data.Date': function (date) { return 'ISODate("' + date.toISOString() + '")'; },
                 '$data.String': function (text) { return "\"" + text + "\""; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },

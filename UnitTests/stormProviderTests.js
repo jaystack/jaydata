@@ -5,7 +5,8 @@ $data.Entity.extend('$test.Item', {
     Id: { type: 'string', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: 'string' },
-    Rank: { type: 'int' }
+    Rank: { type: 'int' },
+    CreatedAt: { type: 'datetime' }
 });
 
 $data.EntityContext.extend('$test.Context', {
@@ -20,10 +21,13 @@ $test.Context.init = function(callback){
                 db.Items.remove(data[i]);
             }
             
-            db.saveChanges(function(){
-                $test.context = new $test.Context({ name: 'storm' });
-                $test.context.onReady(function(db){
-                    callback(db);
+            db.saveChanges(function(cnt){
+                db.Items.length(function(cnt){
+                    if (cnt > 0) throw 'Database clear failed!';
+                    $test.context = new $test.Context({ name: 'storm' });
+                    $test.context.onReady(function(db){
+                        callback(db);
+                    });
                 });
             });
         });
@@ -342,6 +346,23 @@ exports.testFilterAndOr = function(test){
                 else test.ok(false, 'Item 1 not found in result set');
                 if (data[1]) test.equal(data[1].Value, 'bbb9', 'Value of second item is not "bbb9"');
                 else test.ok(false, 'Item 2 not found in result set');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testFilterByDate = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1, CreatedAt: new Date() }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 1, 'Not 1 item added to collection');
+            db.Items.filter(function(it){ return it.CreatedAt < this.now; }, { now: new Date() }).toArray(function(data){
+                test.equal(data.length, 1, 'Filtering by date failed');
+                test.ok(data[0] instanceof $test.Item, 'Entity is not an Item');
+                if (data[0]) test.ok(data[0].CreatedAt instanceof Date, 'CreatedAt is not a Date');
+                else test.ok(false, 'Item 1 not found in result set');
                 test.done();
             });
         });
