@@ -30,17 +30,21 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         this._defaultModelBinder(expression);
     },
     VisitServiceOperationExpression: function (expression) {
-        var builder = Container.createqueryBuilder();
         var returnType = Container.resolveType(expression.cfg.returnType);
-        builder.modelBinderConfig['$type'] = returnType;
-        if (returnType.inheritsFrom === $data.Entity) {
-            builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
+        if ((typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Queryable)) || returnType === $data.Array) {
+            this._defaultModelBinder(expression);
         } else {
-            builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
+            var builder = Container.createqueryBuilder();
+            builder.modelBinderConfig['$type'] = returnType;
+            if (typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Entity)) {
+                builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
+            } else {
+                builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
+            }
+            this.VisitExpression(expression, builder);
+            builder.resetModelBinderProperty();
+            this._query.modelBinderConfig = builder.modelBinderConfig;
         }
-        this.VisitExpression(expression, builder);
-        builder.resetModelBinderProperty();
-        this._query.modelBinderConfig = builder.modelBinderConfig;
     },
     VisitCountExpression: function (expression) {
         var builder = Container.createqueryBuilder();
@@ -111,8 +115,19 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 }
             }, this);
         } else {
-            builder._binderConfig.$item = {};
+            /*builder._binderConfig = {
+                $selector: ['json:results'],
+                $type: $data.Array,
+                $item:{
+                    $type: elementType,
+                    $value: function (meta, data) { return data; }
+                }
+            }*/
+            builder._binderConfig.$item = { };
             builder.modelBinderConfig = builder._binderConfig.$item;
+
+
+            
         }
         if (storageModel) {
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);

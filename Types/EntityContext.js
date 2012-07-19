@@ -1138,60 +1138,111 @@ $data.Class.define('$data.EntityContext', null, null,
 }, {
     generateServiceOperation: function (cfg) {
 
-        var fn = function () {
+        var fn;
+        if (cfg.serviceMethod) {
+            var returnType = cfg.returnType ? Container.resolveType(cfg.returnType) : {};
+            if (returnType.isAssignableTo && returnType.isAssignableTo($data.Queryable)) {
+                fn = cfg.serviceMethod;
+            } else {
+                fn = function () {
+                    var lastParam = arguments[arguments.length - 1];
 
-            var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(Container.resolveType(cfg.elementType)) : null;
+                    var pHandler = new $data.PromiseHandler();
+                    var cbWrapper;
 
-            var paramConstExpression = null;
-            if (cfg.params) {
-                paramConstExpression = [];
-                for (var i = 0; i < cfg.params.length; i++) {
-                    //TODO: check params type
-                    for (var name in cfg.params[i]) {
-                        paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(cfg.params[i][name]), name));
+                    var args = arguments;
+                    if (typeof lastParam === 'function') {
+                        cbWrapper = pHandler.createCallback(lastParam);
+                        arguments[arguments.length - 1] = cbWrapper;
+                    } else {
+                        cbWrapper = pHandler.createCallback();
+                        arguments.push(cbWrapper);
+                    }
+
+                    try {
+                        var result = cfg.serviceMethod.apply(this, arguments);
+                        if (result !== undefined)
+                            cbWrapper.success(result);
+                    } catch (e) {
+                        cbWrapper.error(e);
+                    }
+
+                    return pHandler.getPromise();
+                }
+            }
+
+        } else {
+            fn = function () {
+
+                var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(Container.resolveType(cfg.elementType)) : null;
+
+                var paramConstExpression = null;
+                if (cfg.params) {
+                    paramConstExpression = [];
+                    for (var i = 0; i < cfg.params.length; i++) {
+                        //TODO: check params type
+                        for (var name in cfg.params[i]) {
+                            paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(cfg.params[i][name]), name));
+                        }
                     }
                 }
-            }
 
-            var ec = Container.createEntityContextExpression(this);
-            var memberdef = this.getType().getMemberDefinition(cfg.serviceName);
-            var es = Container.createServiceOperationExpression(ec,
-                    Container.createMemberInfoExpression(memberdef),
-                    paramConstExpression,
-                    cfg);
+                var ec = Container.createEntityContextExpression(this);
+                var memberdef = this.getType().getMemberDefinition(cfg.serviceName);
+                var es = Container.createServiceOperationExpression(ec,
+                        Container.createMemberInfoExpression(memberdef),
+                        paramConstExpression,
+                        cfg);
 
-            //Get callback function
-            var clb = arguments[arguments.length - 1];
-            if (typeof clb !== 'function') {
-                clb = undefined;
-            }
-
-            if (virtualEntitySet) {
-                var q = Container.createQueryable(virtualEntitySet, es);
-                if (clb) {
-                    es.isTerminated = true;
-                    return q._runQuery(clb);
+                //Get callback function
+                var clb = arguments[arguments.length - 1];
+                if (typeof clb !== 'function') {
+                    clb = undefined;
                 }
-                return q;
-            }
-            else {
-                var returnType = Container.resolveType(cfg.returnType);
 
-                var q = Container.createQueryable(this, es);
-                q.defaultType = returnType;
-
-                if (returnType === $data.Queryable) {
-                    q.defaultType = Container.resolveType(cfg.elementType);
+                if (virtualEntitySet) {
+                    var q = Container.createQueryable(virtualEntitySet, es);
                     if (clb) {
                         es.isTerminated = true;
                         return q._runQuery(clb);
                     }
                     return q;
                 }
-                es.isTerminated = true;
-                return q._runQuery(clb);
-            }
+                else {
+                    var returnType = Container.resolveType(cfg.returnType);
+
+                    var q = Container.createQueryable(this, es);
+                    q.defaultType = returnType;
+
+                    if (returnType === $data.Queryable) {
+                        q.defaultType = Container.resolveType(cfg.elementType);
+                        if (clb) {
+                            es.isTerminated = true;
+                            return q._runQuery(clb);
+                        }
+                        return q;
+                    }
+                    es.isTerminated = true;
+                    return q._runQuery(clb);
+                }
+            };
         };
+
+        var params = [];
+        if (cfg.params) {
+            for (var i = 0; i < cfg.params.length; i++) {
+                var param = cfg.params[i];
+                for (var name in param)
+                {
+                    params.push({
+                        name: name,
+                        type: param[name]
+                    });
+                }
+            }
+        }
+        $data.typeSystem.extend(fn, cfg, { params: params });
+
         return fn;
     },
     _convertLogicalTypeNameToPhysical: function (name) {
