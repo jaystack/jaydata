@@ -189,6 +189,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
 	@$(foreach dir,$(IndexedDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/indexeddb_index.js;)
 	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/sqlite_index.js;)
+	@@echo "require('datajs');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;
 	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;)
 	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/inmemory_index.js;)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
@@ -202,7 +203,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
 	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
-npmindexdb: $(IndexedDbProvider) $(CREDITS)
+npmindexeddb: $(IndexedDbProvider) $(CREDITS)
 	@@echo "Building IndexedDb provider npm package..."
 	@@test -d $(NPM_DIR)/indexeddb || mkdir -p $(NPM_DIR)/indexeddb
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/indexeddb
@@ -234,6 +235,7 @@ npmodata: $(oDataProvider) $(CREDITS)
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/odata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/odata
 	@@cp -r $(CREDITS) $(NPM_DIR)/odata
+	@@echo "require('datajs');" >> $(NPM_DIR)/odata/lib/index.js;
 	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/odata/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/odata/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-odata"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/odata/package.json
