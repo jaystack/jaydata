@@ -1067,7 +1067,7 @@
             start(1);
         }
 
-        $news.context = new $news.Types.NewsContext({ name: "sqLite", databaseName: "emptyNewsReader", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+        $news.context = new $news.Types.NewsContext({ name: "sqLite", databaseName: "emptyNewsReader", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
         $news.context.onReady(addTestData);
 
         console.log('\nstarting...');

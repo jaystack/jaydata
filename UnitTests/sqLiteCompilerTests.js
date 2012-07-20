@@ -1,7 +1,7 @@
 ﻿$(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
-    $data.NewsReaderContext = new $news.Types.NewsContext({ databaseName: "sqLiteCompilerTestDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    $data.NewsReaderContext = new $news.Types.NewsContext({ databaseName: "sqLiteCompilerTestDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     $data.NewsReaderContext.onReady(function () {
         module("sqLiteCompilerTests");
 

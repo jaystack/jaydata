@@ -14,7 +14,7 @@ $data.EntityContext.extend('$test.Context', {
 });
 
 $test.Context.init = function(callback){
-    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', dbCreation: $data.storageProviders.mongoDB.DbCreationType.DropAllExistingCollections });
+    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     $test.context.onReady(function(db){
         callback(db);
     });

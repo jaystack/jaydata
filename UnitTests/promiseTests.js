@@ -1,9 +1,9 @@
 ﻿
 
 $(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
-	promiseTests({ name: "sqLite", databaseName: 'promiseTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+	promiseTests({ name: "sqLite", databaseName: 'promiseTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
 });
 
 function promiseTests(providerConfig) {

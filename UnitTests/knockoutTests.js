@@ -3,8 +3,8 @@
 /// <reference path="../Modules/knockout.js" />
 
 $(document).ready(function () {
-    if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
-    knockoutTests({ name: "sqLite", databaseName: 'knockoutTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
+    knockoutTests({ name: "sqLite", databaseName: 'knockoutTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
 });
 
 function knockoutTests(providerConfig) {

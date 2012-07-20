@@ -9,7 +9,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         this.SqlCommands = [];
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
-            dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged,
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
             oDataServiceHost: "/odata.svc",
             serviceUrl: "",
             maxDataServiceVersion: '2.0',
@@ -26,7 +26,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         switch (this.providerConfiguration.dbCreation) {
-            case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
+            case $data.storageProviders.DbCreationType.DropAllExistingTables:
                 var that = this;
                 if (this.providerConfiguration.serviceUrl) {
 

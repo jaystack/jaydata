@@ -1,4 +1,4 @@
-﻿var providerConfig = { name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables };
+﻿var providerConfig = { name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables };
 module("Storage model tests");
 test('Filter_noFilter_orderby', function () {
 
