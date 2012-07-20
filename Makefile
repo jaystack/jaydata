@@ -1,4 +1,4 @@
-VERSION = '0.0.0'
+VERSION = '1.1.1'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/modules
@@ -153,93 +153,125 @@ all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)
 
-npms: npmjaydata npmindexdb npmsqlite npmodata npminmemory npmmongodb npmstorm
+npms: npmjaydata npmjaydata-core npmindexdb npmsqlite npmodata npminmemory npmmongodb npmstorm
+
+npmjaydata-core: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
+	@@echo "Building jaydata-core npm package..."
+	@@test -d $(NPM_DIR)/jaydata-core || mkdir -p $(NPM_DIR)/jaydata-core
+	@@cp -r $(NPM_BASE_DIR)/jaydata/* $(NPM_DIR)/jaydata-core
+	@@cp -xr $(TYPESYSTEM_DIR) $(NPM_DIR)/jaydata-core/lib
+	@@cp -xr $(TYPES_DIR) $(NPM_DIR)/jaydata-core/lib
+	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata-core
+	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata-core
+	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata-core
+	@$(foreach dir,$(TYPE_SYSTEM),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
+	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
+	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata-core/lib/index.js
+	@@sed -e 's/"dependencies": {},//;s/"name": "jaydata"/"name": "jaydata-core"/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata-core/package.json
 
 npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata npm package..."
 	@@test -d $(NPM_DIR)/jaydata || mkdir -p $(NPM_DIR)/jaydata
 	@@cp -r $(NPM_BASE_DIR)/jaydata/* $(NPM_DIR)/jaydata
-	@@cp -xr $(TYPESYSTEM_DIR) $(NPM_DIR)/jaydata/lib
-	@@cp -xr $(TYPES_DIR) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(TYPE_SYSTEM) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(JAYDATA_SOURCE) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(IndexDbProvider) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(SqLiteProvider) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(oDataProvider) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(StormProvider) $(NPM_DIR)/jaydata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata
 	@$(foreach dir,$(TYPE_SYSTEM),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
+	@$(foreach dir,$(IndexDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/indexdb_index.js;)
+	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/sqlite_index.js;)
+	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;)
+	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/inmemory_index.js;)
+	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
+	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/storm_index.js;)
+	@@echo "require('./indexdb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./sqlite_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./odata_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./inmemory_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
-	@@sed -e 's/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
+	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
-npmindexdb: $(IndexDbProvider)
+npmindexdb: $(IndexDbProvider) $(CREDITS)
 	@@echo "Building IndexDb provider npm package..."
 	@@test -d $(NPM_DIR)/indexdb || mkdir -p $(NPM_DIR)/indexdb
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/indexdb
-	@@cp -xr $(IndexDbProvider) $(NPM_DIR)/indexdb/lib
+	@@cp --parents $(IndexDbProvider) $(NPM_DIR)/indexdb/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/indexdb
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/indexdb
 	@@cp -r $(CREDITS) $(NPM_DIR)/indexdb
 	@$(foreach dir,$(IndexDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/indexdb/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/indexdb/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-indexdb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/indexdb/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-indexdb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/indexdb/package.json
 
-npmsqlite: $(SqLiteProvider)
+npmsqlite: $(SqLiteProvider) $(CREDITS)
 	@@echo "Building SqLiteProvider provider npm package..."
 	@@test -d $(NPM_DIR)/sqlite || mkdir -p $(NPM_DIR)/sqlite
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/sqlite
-	@@cp -xr $(SqLiteProvider) $(NPM_DIR)/sqlite/lib
+	@@cp --parents $(SqLiteProvider) $(NPM_DIR)/sqlite/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/sqlite
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/sqlite
 	@@cp -r $(CREDITS) $(NPM_DIR)/sqlite
 	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/sqlite/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/sqlite/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-sqlite"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/sqlite/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-sqlite"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/sqlite/package.json
 
-npmodata: $(oDataProvider)
+npmodata: $(oDataProvider) $(CREDITS)
 	@@echo "Building oDataProvider provider npm package..."
 	@@test -d $(NPM_DIR)/odata || mkdir -p $(NPM_DIR)/odata
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/odata
-	@@cp -xr $(oDataProvider) $(NPM_DIR)/odata/lib
+	@@cp --parents $(oDataProvider) $(NPM_DIR)/odata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/odata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/odata
 	@@cp -r $(CREDITS) $(NPM_DIR)/odata
 	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/odata/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/odata/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-odata"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/odata/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-odata"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/odata/package.json
 
-npminmemory: $(InMemoryProvider)
+npminmemory: $(InMemoryProvider) $(CREDITS)
 	@@echo "Building InMemoryProvider provider npm package..."
 	@@test -d $(NPM_DIR)/inmemory || mkdir -p $(NPM_DIR)/inmemory
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/inmemory
-	@@cp -xr $(InMemoryProvider) $(NPM_DIR)/inmemory/lib
+	@@cp --parents $(InMemoryProvider) $(NPM_DIR)/inmemory/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/inmemory
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/inmemory
 	@@cp -r $(CREDITS) $(NPM_DIR)/inmemory
 	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/inmemory/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/inmemory/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-inmemory"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/inmemory/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-inmemory"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/inmemory/package.json
 
-npmmongodb: $(MongoDbProvider)
+npmmongodb: $(MongoDbProvider) $(CREDITS)
 	@@echo "Building MongoDbProvider provider npm package..."
 	@@test -d $(NPM_DIR)/mongodb || mkdir -p $(NPM_DIR)/mongodb
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/mongodb
-	@@cp -xr $(MongoDbProvider) $(NPM_DIR)/mongodb/lib
+	@@cp --parents $(MongoDbProvider) $(NPM_DIR)/mongodb/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/mongodb
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/mongodb
 	@@cp -r $(CREDITS) $(NPM_DIR)/mongodb
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/mongodb/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/mongodb/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-mongodb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/mongodb/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-mongodb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/mongodb/package.json
 
-npmstorm: $(StormProvider)
+npmstorm: $(StormProvider) $(CREDITS)
 	@@echo "Building StormProvider provider npm package..."
 	@@test -d $(NPM_DIR)/storm || mkdir -p $(NPM_DIR)/storm
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/storm
-	@@cp -xr $(StormProvider) $(NPM_DIR)/storm/lib
+	@@cp --parents $(StormProvider) $(NPM_DIR)/storm/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/storm
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/storm
 	@@cp -r $(CREDITS) $(NPM_DIR)/storm
 	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/storm/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/storm/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-storm"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/storm/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-storm"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","jaydata-inmemory": "$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/storm/package.json
 
 providers: indexdbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider
 

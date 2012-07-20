@@ -22,9 +22,7 @@
     "name": "JayData",
     "url": "http://jaydata.org"
   },
- "dependencies": {
-    "datajs": "1.0.3"
-  },
+  "dependencies": {},
   "contributors": [
     {"name": "Dániel József"},
     {"name": "Hajnalka Battancs"},
