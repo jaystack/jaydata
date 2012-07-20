@@ -28,7 +28,9 @@ $data.StorageProviderLoader = {
                     providerName = 'Storm';
                     break;
             }
-            return 'providers/' + providerName + 'Provider.js';
+            var jaydataScript = document.querySelector('script[src*="jaydata"]');
+            if (jaydataScript) return jaydataScript.src.substring(0, jaydataScript.src.lastIndexOf('/') + 1) + providerName + 'Provider.js';
+            else return 'providers/' + providerName + 'Provider.js';
         };
 
         function loadScript(url, callback) {
@@ -46,7 +48,7 @@ $data.StorageProviderLoader = {
             oXmlHttp.onreadystatechange = function () {
                 if (oXmlHttp.readyState == 4) {
                     if (oXmlHttp.status == 200 || oXmlHttp.status == 304) {
-                        eval(oXmlHttp.responseText);
+                        eval.call(window, oXmlHttp.responseText);
                         if (typeof callback === 'function')
                             callback(true);
                     } else {

@@ -81,6 +81,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/EntityContext.js\
 	$(TYPES_DIR)/QueryProvider.js\
 	$(TYPES_DIR)/ModelBinder.js\
+	$(TYPES_DIR)/QueryBuilder.js\
 	$(TYPES_DIR)/Query.js\
 	$(TYPES_DIR)/Queryable.js\
 	$(TYPES_DIR)/EntitySet.js\
@@ -95,14 +96,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Ajax/WinJSAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/ExtJSAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/AjaxStub.js\
-	$(TYPES_DIR)/DbClient/DbCommand.js\
-	$(TYPES_DIR)/DbClient/DbConnection.js\
-	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
-	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
-	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
-	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
-	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
-	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
 	$(TYPES_DIR)/StorageProviders/modelBinderConfigCompiler.js\
 	$(TYPES_DIR)/Authentication/AuthenticationBase.js\
 	$(TYPES_DIR)/Authentication/Anonymous.js\
@@ -111,7 +104,15 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
-SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
+SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
+	$(TYPES_DIR)/DbClient/DbConnection.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
@@ -120,7 +121,8 @@ SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
-oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
+oDataProvider = ./Scripts/datajs-1.0.3.js\
+    $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\
