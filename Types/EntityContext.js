@@ -62,6 +62,34 @@ $data.Class.define('$data.EntityContext', null, null,
             storageProviderCfg.name = [tmp];
         }
         var i = 0, providerType;
+        var providerList = [].concat(storageProviderCfg.name);
+        var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider });
+        $data.StorageProviderLoader.load(providerList, {
+            success: function (providerType) {
+                ctx.storageProvider = new providerType(storageProviderCfg, ctx);
+                ctx.storageProvider.setContext(ctx);
+                ctx.stateManager = new $data.EntityStateManager(ctx);
+
+                if (storageProviderCfg.name in ctx.getType()._storageModelCache) {
+                    ctx._storageModel = ctx.getType()._storageModelCache[storageProviderCfg.name];
+                } else {
+                    ctx._initializeStorageModel();
+                    ctx.getType()._storageModelCache[storageProviderCfg.name] = ctx._storageModel;
+                }
+
+                ctx._initializeEntitySets(ctx.constructor);
+                ctx._user = (storageProviderCfg && storageProviderCfg.user) || user;
+
+                ctx._isOK = false;
+                if (ctx.storageProvider) {
+                    ctx.storageProvider.initializeStore(callBack);
+                }
+            },
+            error: function () {
+                callBack.error('Provider fallback failed!');
+            }
+        });
+        /*
         while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
         if (providerType){
             this.storageProvider = new providerType(storageProviderCfg, this);
@@ -85,6 +113,7 @@ $data.Class.define('$data.EntityContext', null, null,
         if (this.storageProvider){
             this.storageProvider.initializeStore(callBack);
         }
+        */
     },
     getDataType: function (dataType) {
         // Obsolate

@@ -88,6 +88,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/EntityStateManager.js\
 	$(TYPES_DIR)/Exception.js\
 	$(TYPES_DIR)/ServiceOperation.js\
+	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
 	$(TYPES_DIR)/EntityWrapper.js\
 	$(TYPES_DIR)/Ajax/jQueryAjaxWrapper.js\
@@ -108,7 +109,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/FacebookAuth.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
 
-IndexDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
+IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
 SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
@@ -153,7 +154,7 @@ all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)
 
-npms: npmjaydata npmindexdb npmsqlite npmodata npminmemory npmmongodb npmstorm
+npms: npmjaydata npmindexeddb npmsqlite npmodata npminmemory npmmongodb npmstorm
 
 npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata npm package..."
@@ -169,17 +170,17 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
 	@@sed -e 's/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
-npmindexdb: $(IndexDbProvider)
-	@@echo "Building IndexDb provider npm package..."
-	@@test -d $(NPM_DIR)/indexdb || mkdir -p $(NPM_DIR)/indexdb
-	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/indexdb
-	@@cp -xr $(IndexDbProvider) $(NPM_DIR)/indexdb/lib
-	@@cp -r $(GPL_LIC) $(NPM_DIR)/indexdb
-	@@cp -r $(MIT_LIC) $(NPM_DIR)/indexdb
-	@@cp -r $(CREDITS) $(NPM_DIR)/indexdb
-	@$(foreach dir,$(IndexDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/indexdb/lib/index.js;)
-	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/indexdb/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-indexdb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/indexdb/package.json
+npmindexeddb: $(IndexedDbProvider)
+	@@echo "Building IndexedDb provider npm package..."
+	@@test -d $(NPM_DIR)/indexeddb || mkdir -p $(NPM_DIR)/indexeddb
+	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/indexeddb
+	@@cp -xr $(IndexedDbProvider) $(NPM_DIR)/indexeddb/lib
+	@@cp -r $(GPL_LIC) $(NPM_DIR)/indexeddb
+	@@cp -r $(MIT_LIC) $(NPM_DIR)/indexeddb
+	@@cp -r $(CREDITS) $(NPM_DIR)/indexeddb
+	@$(foreach dir,$(IndexedDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/indexeddb/lib/index.js;)
+	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/indexeddb/lib/index.js
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-indexeddb"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/indexdb/package.json
 
 npmsqlite: $(SqLiteProvider)
 	@@echo "Building SqLiteProvider provider npm package..."
@@ -241,14 +242,14 @@ npmstorm: $(StormProvider)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/storm/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-storm"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata": "[0-9].[0-9].[0-9]"/"jaydata":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/storm/package.json
 
-providers: indexdbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider
+providers: indexeddbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider
 
-indexdbprovider: $(IndexDbProvider) $(CREDITS)
-	@@echo "Building IndexDbProvider provider..."
+indexeddbprovider: $(IndexedDbProvider) $(CREDITS)
+	@@echo "Building IndexedDbProvider provider..."
 	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
-	@@cat $(CREDITS) $(IndexDbProvider) > $(PROVIDERS_DIR)/IndexDbProvider.js
-	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/IndexDbProvider.js --js_output_file $(TEMP_DIR)/IndexDbProvider.min.js
-	@@cat $(CREDITS) $(TEMP_DIR)/IndexDbProvider.min.js > $(PROVIDERS_DIR)/IndexDbProvider.min.js
+	@@cat $(CREDITS) $(IndexedDbProvider) > $(PROVIDERS_DIR)/IndexedDbProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/IndexedDbProvider.js --js_output_file $(TEMP_DIR)/IndexedDbProvider.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/IndexedDbProvider.min.js > $(PROVIDERS_DIR)/IndexedDbProvider.min.js
 
 sqliteprovider: $(SqLiteProvider) $(CREDITS)
 	@@echo "Building SqLiteProvider provider..."

@@ -1,8 +1,8 @@
 ﻿
 $(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
-	loadPropertyTests({ name: "sqLite", databaseName: 'loadPropertyTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+	loadPropertyTests({ name: "sqLite", databaseName: 'loadPropertyTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
 });
 
 function loadPropertyTests(providerConfig) {

@@ -15,7 +15,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         this.providerConfiguration = $data.typeSystem.extend({
             databaseName: 'JayDataDemo',
             version: 1,
-            dbCreation: $data.storageProviders.indexedDb.DbCreationType.Default
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
         this._setupExtensionMethods();
     },
@@ -132,7 +132,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 }
                 if (db.objectStoreNames.contains(memDef.TableName)) {
                     // ObjectStore already present.
-                    if (self.providerConfiguration.dbCreation === $data.storageProviders.indexedDb.DbCreationType.DropStoreIfExists) {
+                    if (self.providerConfiguration.dbCreation === $data.storageProviders.DbCreationType.DropAllExistingTables) {
                         // Force drop and recreate object store
                         db.deleteObjectStore(memDef.TableName);
                         createStore();
@@ -171,8 +171,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                             }
                         }).objectStore(self.sequenceStore);
                         switch (self.providerConfiguration.dbCreation) {
-                            case $data.storageProviders.indexedDb.DbCreationType.DropStoreIfExists:
-                            case $data.storageProviders.indexedDb.DbCreationType.DropStoreIfOlderVersion:
+                            case $data.storageProviders.DbCreationType.DropAllExistingTables:
+                            case $data.storageProviders.DbCreationType.DropTableIfChanged:
                                 // Clearing all data
                                 store.clear();
                                 break;
@@ -479,12 +479,6 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         set: function () { }
     }
 });
-
-$data.storageProviders.indexedDb.DbCreationType = {
-    Default: 1,
-    DropStoreIfOlderVersion: 2,
-    DropStoreIfExists: 3
-};
 
 if ($data.storageProviders.indexedDb.IndexedDBStorageProvider.isSupported)
 	$data.StorageProviderBase.registerProvider('indexedDb', $data.storageProviders.indexedDb.IndexedDBStorageProvider);

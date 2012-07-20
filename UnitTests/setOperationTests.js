@@ -1,7 +1,7 @@
 $(document).ready(function () {
-    if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
-    frameOperatorTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
-    setOperationTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
+    frameOperatorTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
+    setOperationTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
 });
 
 function frameOperatorTests(providerConfig) {

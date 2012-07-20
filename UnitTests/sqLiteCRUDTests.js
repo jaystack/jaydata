@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
     var sqlite;
 
@@ -28,7 +28,7 @@
         setup: function () {
             stop(1);
 
-            $blog.Context = new $blog.Types.BlogContext({ name: "sqLite", databaseName: "Blog", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistsTables });
+            $blog.Context = new $blog.Types.BlogContext({ name: "sqLite", databaseName: "Blog", dbCreation: $data.storageProviders.DbCreationType.DropAllExistsTables });
             $blog.Context.onReady(function (db) {
                 WebSql.openDatabase($blog.Context.storageProvider.providerConfiguration.databaseName, $blog.Context.storageProvider.providerConfiguration.displayName, $blog.Context.storageProvider.providerConfiguration.maxSize).then(function (db) {
                     sqlite = db;

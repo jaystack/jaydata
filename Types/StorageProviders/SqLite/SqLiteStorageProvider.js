@@ -8,7 +8,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             version: "",
             displayName: "JayData demo db",
             maxSize: 1024 * 1024,
-            dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
 
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
@@ -292,10 +292,10 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     existObjectInDB[item.tbl_name] = item;
                 }
                 switch (that.providerConfiguration.dbCreation) {
-                    case $data.storageProviders.sqLite.DbCreationType.Merge:
+                    case $data.storageProviders.DbCreationType.Merge:
                         Guard.raise(new Exception('Not supported db creation type'));
                         break;
-                    case $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged:
+                    case $data.storageProviders.DbCreationType.DropTableIfChanged:
                         var deleteCmd = [];
                         for (var i = 0; i < that.SqlCommands.length; i++) {
                             if (that.SqlCommands[i] == "") { continue; }
@@ -320,7 +320,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                         that.SqlCommands = that.SqlCommands.concat(deleteCmd);
                         console.log(deleteCmd);
                         break;
-                    case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
+                    case $data.storageProviders.DbCreationType.DropAllExistingTables:
                         for (var objName in existObjectInDB) {
                             if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
                                 that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
@@ -692,12 +692,6 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         set: function () { }
     }
 });
-$data.storageProviders.sqLite.DbCreationType = {
-    //Default: 20,
-    Merge: 10,
-    DropTableIfChanged: 20,
-    DropAllExistingTables: 30
-};
 
 if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) {
     $data.StorageProviderBase.registerProvider("webSql", $data.storageProviders.sqLite.SqLiteStorageProvider);

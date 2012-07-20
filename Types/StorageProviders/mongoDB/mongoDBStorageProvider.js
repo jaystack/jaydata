@@ -429,7 +429,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         this.driver = $data.mongoDBDriver;
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
-            dbCreation: $data.storageProviders.mongoDB.DbCreationType.Default,
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
             address: '127.0.0.1',
             port: 27017,
             serverOptions: {},
@@ -449,7 +449,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         switch (this.providerConfiguration.dbCreation){
-            case $data.storageProviders.mongoDB.DbCreationType.DropAllExistingCollections:
+            case $data.storageProviders.DbCreationType.DropAllExistingTables:
                 var server = this._getServer();
                 new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
                     if (error) callBack.error(error);
@@ -896,13 +896,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         set: function(value){}
     }
 });
-
-$data.storageProviders.mongoDB.DbCreationType = {
-    Default: 20,
-    Merge: 10,
-    DropCollectionIfChanged: 20,
-    DropAllExistingCollections: 30
-};
 
 if ($data.storageProviders.mongoDB.mongoDBProvider.isSupported){
     $data.StorageProviderBase.registerProvider('mongoDB', $data.storageProviders.mongoDB.mongoDBProvider);

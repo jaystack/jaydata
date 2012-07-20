@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+	if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
     module("dataDistributeTest");
 
@@ -36,7 +36,7 @@
         }, null);
 
         stop(3);
-        var c = new context({ databaseName: "sqLiteDataDistributeTest", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+        var c = new context({ databaseName: "sqLiteDataDistributeTest", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
         c.onReady(function (db) {
             db.Table1Items.add(new db.Table1Items.createNew({ fld2: 'prop2', fld3: 'prop3', fld4: 'prop4' }));
             db.Table1Items.add(new db.Table1Items.createNew({ fld2: 'prop22', fld3: 'prop23' }));

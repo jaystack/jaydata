@@ -1,4 +1,12 @@
-$data.ConcurrencyMode = {Fixed : 'fixed', None: 'nonde'};
+$data.storageProviders = {
+    DbCreationType: {
+        Merge: 10,
+        DropTableIfChanged: 20,
+        DropAllExistingTables: 30
+    }
+}
+
+$data.ConcurrencyMode = { Fixed: 'fixed', None: 'nonde' };
 $data.Class.define('$data.StorageProviderBase', null, null,
 {
     constructor: function (schemaConfiguration) {
@@ -228,15 +236,15 @@ $data.Class.define('$data.StorageProviderBase', null, null,
 },
 {
     registerProvider: function (name, provider) {
-        $data.RegistredStorageProviders = $data.RegistredStorageProviders || [];
-        $data.RegistredStorageProviders[name] = provider;
+        $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || [];
+        $data.RegisteredStorageProviders[name] = provider;
     },
     getProvider: function (name) {
-		var provider = $data.RegistredStorageProviders[name];
+		var provider = $data.RegisteredStorageProviders[name];
 		if (!provider)
             console.warn("Provider not found: '" + name + "'");
 		return provider;
-        /*var provider = $data.RegistredStorageProviders[name];
+        /*var provider = $data.RegisteredStorageProviders[name];
         if (!provider)
             Guard.raise(new Exception("Provider not found: '" + name + "'", "Not Found"));
         return provider;*/
