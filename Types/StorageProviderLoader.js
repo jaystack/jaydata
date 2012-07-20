@@ -12,7 +12,16 @@ $data.StorageProviderLoader = {
                 return true;
         }
     },
-    load: function (providerList, callback) {        
+    npmModules: {        
+        'indexedDb': 'jaydata-indexeddb',
+        'InMemory': 'jaydata-inmemory',
+        'mongoDB': 'jaydata-mongodb',
+        'oData': 'jaydata-odata',
+        'sqLite': 'jaydata-sqlite',
+        'webSql': 'jaydata-sqlite',
+        'storm': 'jaydata-storm'
+    },
+    load: function (providerList, callback) {
         function getUrl(providerName) {
             switch (providerName) {
                 case 'storm':
@@ -64,6 +73,26 @@ $data.StorageProviderLoader = {
 
         if (!this.isSupported(provider)) {
             this.load(providerList, callback);
+            return;
+        }
+
+        if (module && require) {
+            // NodeJS
+            var provider = null;
+            try {
+                require(this.npmModules[currentProvider]);
+                provider = $data.RegisteredStorageProviders[currentProvider];
+            } catch (e) {
+            }
+            if (provider) {
+                var provider = $data.RegisteredStorageProviders[currentProvider];
+                callback.success(provider);
+            } else if (providerList.length > 0) {
+                this.load(providerList, callback);
+            } else {
+                callback.error();
+            }
+
             return;
         }
 
