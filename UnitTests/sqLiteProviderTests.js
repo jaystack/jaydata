@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-	if (!$data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) return;
+    if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
     module("sqLiteProviderTest");
     test("simpleFieldDataTypeTest", function () {
@@ -20,7 +20,7 @@
             }
         }, null);
 
-        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
         var provType = $data.storageProviders.sqLite.SqLiteStorageProvider;
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
         var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
@@ -64,7 +64,7 @@
                 }, null)
             }
         }, null);
-        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
         var provType = $data.storageProviders.sqLite.SqLiteStorageProvider;
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
 
@@ -101,7 +101,7 @@
 
         stop(2);
         expect(14);
-        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables }).onReady(function (db) {
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }).onReady(function (db) {
             $data.Db1 = db;
             $data.Db1.name = 'db1';
             db.Table1Items.add(new db.Table1Items.createNew({ fld1: 1, fld2: 'alma' }));
@@ -116,7 +116,7 @@
                     equal(result[1].fld2, 'alma2', "Inconsistency data in db");
 
 
-                    new context2({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged }).onReady(function (reconnectedDb) {
+                    new context2({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged }).onReady(function (reconnectedDb) {
                         $data.Db2 = reconnectedDb;
                         $data.Db2.name = 'db2';
                         reconnectedDb.Table1Items.add(new reconnectedDb.Table1Items.createNew({ fld1: 3, fld2: 'alma3' }));
@@ -167,7 +167,7 @@
 
         stop(3);
         expect(17);
-        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables }).onReady(function (db) {
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }).onReady(function (db) {
             $data.Db1 = db;
             $data.Db1.name = 'db1';
             db.Table1Items.add(new db.Table1Items.createNew({ fld1: 1, fld2: 'alma' }));
@@ -181,7 +181,7 @@
                     equal(result[1].fld1, 2, "Inconsistency data in db");
                     equal(result[1].fld2, 'alma2', "Inconsistency data in db");
 
-                    var c2 = new context2({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged }).onReady(function (reconnectedDb) {
+                    var c2 = new context2({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged }).onReady(function (reconnectedDb) {
                         $data.Db2 = reconnectedDb;
                         $data.Db2.name = 'db2';
                         reconnectedDb.Table1Items.add(new reconnectedDb.Table1Items.createNew({ fld1: 3, fld2: 'alma3' }));
@@ -234,7 +234,7 @@
 
         stop(2);
         expect(10);
-        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables }).onReady(function (db) {
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }).onReady(function (db) {
             $data.Db1 = db;
             $data.Db1.name = 'db1';
             db.Table1Items.add(new db.Table1Items.createNew({ fld1: 1, fld2: 'alma' }));
@@ -248,7 +248,7 @@
                     equal(result[1].fld1, 2, "Inconsistency data in db");
                     equal(result[1].fld2, 'alma2', "Inconsistency data in db");
 
-                    var c2 = new context2({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged }).onReady(function (reconnectedDb) {
+                    var c2 = new context2({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged }).onReady(function (reconnectedDb) {
                         $data.Db2 = reconnectedDb;
                         $data.Db2.name = 'db2';
                         reconnectedDb.Table1Items.add(new reconnectedDb.Table1Items.createNew({ fld1: 3, fld2: 'alma3' }));
@@ -294,7 +294,7 @@
 
         stop(1);
         expect(1);
-        var c = new context({ databaseName: "sqLiteProviderTest_relations", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables }).onReady(function (db) {
+        var c = new context({ databaseName: "sqLiteProviderTest_relations", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }).onReady(function (db) {
             $data.db = db;
             var person1 = new db.Persons.createNew({ Id: 1, Name: 'person1' });
             $data.person1 = person1;
@@ -344,7 +344,7 @@
 
         stop(2);
         expect(1);
-        var c = new context({ databaseName: "sqLiteProviderTest_subselect", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables }).onReady(function (db) {
+        var c = new context({ databaseName: "sqLiteProviderTest_subselect", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }).onReady(function (db) {
 			var catA = new Category({ Title: 'CatA' });
 			var catB = new Category({ Title: 'CatB' });
             db.Categories.add(catA);
@@ -422,7 +422,7 @@
             }, null)
             }
         }, null);
-        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
         var provType = $data.storageProviders.sqLite.SqLiteStorageProvider;
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
         var sql1 = prov.createSqlFromStorageModel(context.ComputedWithPrimaryKeys);

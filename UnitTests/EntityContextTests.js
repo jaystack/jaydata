@@ -95,7 +95,7 @@
         });
     });
     module("Context initialize");
-	if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported){
+    if ($data.StorageProviderLoader.isSupported('sqLite')) {
 		test('Crate context', 1, function () {
 			stop(1);
 			$C('$t.EntityContextTest.TestItem', $data.Entity, null, {
@@ -284,7 +284,7 @@
     //module("EntityContext_Basic");
     //test('save_entity_with_pk', 10, function () {
     //    stop(2);
-    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var cat1 = new $news.Types.Category({ Id: 4, Title: "Category1" });
     //        var cat2 = new $news.Types.Category({ Id: 9, Title: "Category2" });
     //        db.Categories.add(cat1);
@@ -313,7 +313,7 @@
     //});
     //test('save_one_many___Articles', 25, function () {
     //    stop(3);
-    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var p1 = new db.Articles.createNew({ Title: 'Post_1', Body: 'Description1' });
     //        var p2 = new db.Articles.createNew({ Title: 'Post_2', Body: 'Description2' });
     //        var b1 = new db.Categories.createNew({ Title: 'Blog_1', Articles: [p1, p2] });
@@ -370,7 +370,7 @@
     //});
     //test('save_one_many___Category', 25, function () {
     //    stop(3);
-    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new db.Categories.createNew({ Title: 'Blog_1' });
     //        var p1 = new db.Articles.createNew({ Title: 'Post_1', Body: 'Description1', Category: b1 });
     //        var p2 = new db.Articles.createNew({ Title: 'Post_2', Body: 'Description2', Category: b1 });
@@ -430,7 +430,7 @@
     //});
     ////test('save_one_one___User', 20, function () {
     ////    stop(3);
-    ////    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    ////    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     ////        var u1 = new db.Users.createNew({ LoginName: 'User_1' });
     ////        var up1 = new db.UserProfiles.createNew({ FullName: 'Hát Izsak', User: u1 });
 
@@ -476,7 +476,7 @@
     ////});
     ////test('save_one_one___Profile', 20, function () {
     ////    stop(3);
-    ////    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    ////    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     ////        var up1 = new db.UserProfiles.createNew({ FullName: 'Hát Izsak' });
     ////        var u1 = new db.Users.createNew({ LoginName: 'User_1', Profile: up1 });
 
@@ -523,7 +523,7 @@
     //module("EntityContext_Basic_EntityState");
     //test('simple_crud_function', 2, function () {
     //    stop(6);
-    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic_EntityState", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic_EntityState", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        start();
     //        ok(db, 'Database create faild');
     //        //TODO: automaic added entity
@@ -575,7 +575,7 @@
     //module("EntityContext_BufferedChange");
     //test('simple_crud_function', 2, function () {
     //    stop(2);
-    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic_EntityState", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new $news.Types.NewsContext({ databaseName: "EntityContext_Basic_EntityState", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        start();
     //        ok(db, 'Database create faild');
     //        var cUser = new db.Users.createNew({ LoginName: "User1" });
@@ -643,7 +643,7 @@
     ////    }, null);
 
     ////    stop(3);
-    ////    (new ContextType({ name: "sqLite", databaseName: "NewsReaderTest", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    ////    (new ContextType({ name: "sqLite", databaseName: "NewsReaderTest", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     ////        start();
     ////        var cat = new $data.t1.Category({ Id: 1, Title: "cat1" });
     ////        var art = new $data.t1.Article({ Id: 1, Title: "article", Category: cat });
@@ -682,7 +682,7 @@
     //    }, null);
 
     //    stop(2);
-    //    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new $data.t1.Blog({ Id: 1, Title: "test1" });
     //        var p1 = new $data.t1.Post({ Id: 1, Title: "Post1", BlogRef: b1 });
     //        db.Blogs.add(b1);
@@ -722,7 +722,7 @@
     //    }, null);
 
     //    stop(2);
-    //    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new $data.t1.Blog({ Id: 1, Title: "test1" });
     //        var ct1 = new $data.t1.ComplexType({ Title: "ComplexTyp1", Description: "desc" });
     //        var p1 = new $data.t1.Post({ Id: 1, Title: "Post1", BlogRef: b1, CmpType: ct1 });
@@ -760,7 +760,7 @@
     //    }, null);
 
     //    stop(2);
-    //    var c = (new ContextType({ name: "mock", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    var c = (new ContextType({ name: "mock", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new Blog({ Id: 1, Title: "test1" });
     //        var p1 = new Post({ Id: 1, Title: "Post1", BlogRef: b1 });
     //        db.Posts.add(p1);
@@ -795,7 +795,7 @@
     //    }, null);
 
     //    stop(2);
-    //    var c = (new ContextType({ name: "mock", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    var c = (new ContextType({ name: "mock", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new Blog({ Id: 1, Title: "test1" });
     //        var ct1 = new ComplexType({ Title: "ComplexTyp1", Description: "desc" });
     //        var p1 = new Post({ Id: 1, Title: "Post1", BlogRef: b1, CmpType: ct1 });
@@ -832,7 +832,7 @@
     //    }, null);
 
     //    stop(2);
-    //    var c = (new ContextType({ name: "mock", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    var c = (new ContextType({ name: "mock", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        $data.db = db;
     //        var ct1 = new ComplexType({ Title: "ComplexTyp1", Description: "desc" });
     //        var p1 = new Post({ Id: 1, Title: "Post1", CmpType: ct1 });
@@ -862,7 +862,7 @@
     //    }, null);
 
     //    stop(2);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -910,7 +910,7 @@
     //    }, null);
 
     //    stop(2);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -958,7 +958,7 @@
     //    }, null);
 
     //    stop(3);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        start();
     //        var data1 = new db.Table1Items.createNew({ fld1: 7, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
@@ -1015,7 +1015,7 @@
     //    }, null);
 
     //    stop(3);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new db.Blogs.createNew({ Title: 'Blog_1' });
     //        var p1 = new db.Posts.createNew({ Title: 'Post_1', Description: 'Description1', Blog: b1 });
     //        var p2 = new db.Posts.createNew({ Title: 'Post_2', Description: 'Description2', Blog: b1 });
@@ -1097,7 +1097,7 @@
     //    }, null);
 
     //    stop(3);
-    //    var c = new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+    //    var c = new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     //    c.onReady(function (db) {
     //        var b1 = new $data.t1.Blog({ Id: 1, Title: "Blog1" });
     //        var ct1 = new ComplexType({ Title: "ComplexType1", Description: "desc" });
@@ -1139,7 +1139,7 @@
     //        }
     //    }, null);
     //    stop(2);
-    //    (new $test.Types.BlobTestContext({ databaseName: "EntityContextBlobTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new $test.Types.BlobTestContext({ databaseName: "EntityContextBlobTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        start();
     //        ok(db, "Db create faild");
     //        db.Table1Items.add(new $test.Types.TestEntity({ fld1: 1, fld2: "Test data1", fld3: "kjkjkj" }));
@@ -1166,7 +1166,7 @@
 
     //    expect(2);
     //    stop(2);
-    //    (new EntityContextTestDatabase({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new EntityContextTestDatabase({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -1203,7 +1203,7 @@
 
     //    expect(2);
     //    stop(2);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -1241,7 +1241,7 @@
     //    }, null);
     //    expect(2);
     //    stop(2);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 5.5, fld4: true, fld5: new Date() });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 30.5, fld4: false, fld5: new Date() });
@@ -1279,7 +1279,7 @@
 
     //    expect(8);
     //    stop(2);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -1327,7 +1327,7 @@
 
     //    expect(3);
     //    stop(1);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -1361,7 +1361,7 @@
 
     //    expect(3);
     //    stop(1);
-    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    (new context({ databaseName: "EntityContextTestDatabase", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var data1 = new db.Table1Items.createNew({ fld1: 5, fld2: 'fld2_1', fld3: 'fld3_1' });
     //        db.Table1Items.add(data1);
     //        var data2 = new db.Table1Items.createNew({ fld1: 30, fld2: 'fld2_2', fld3: 'fld3_2' });
@@ -1401,7 +1401,7 @@
     ////    }, null);
 
     ////    stop(2);
-    ////    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    ////    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     ////        var b1 = new Blog({ Id: 1, Title: "test1" });
     ////        var p1 = new Post({ Id: 1, Title: "Post1", BlogRef: b1/*, CmpType: ct1*/ });
     ////        db.Posts.add(p1);
@@ -1434,7 +1434,7 @@
     ////    }, null);
 
     ////    stop(2);
-    ////    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    ////    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_lp", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     ////        var b1 = new Blog({ Id: 1, Title: "test1" });
     ////        var p1 = new Post({ Id: 1, Title: "Post1", BlogRef: b1/*, CmpType: ct1*/ });
     ////        db.Posts.add(p1);
@@ -1461,7 +1461,7 @@
     //    }, null);
     //    var newDate = new Date();
     //    stop(6);
-    //    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_DateTime", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+    //    var c = (new ContextType({ name: "sqLite", databaseName: "EntityContextTest_DateTime", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
     //        var b1 = new TestType({ Id: newDate, Title: "test1", CreateDate: newDate });
     //        db.TestTable.add(b1);
     //        db.saveChanges(function (result) {

@@ -23,7 +23,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                         if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
                         } else {
-                            builder.modelBinderConfig[prop.name] = prop.computed ? { $type: $data.String, $source: '_id' } : prop.name;
+                            builder.modelBinderConfig[prop.name] = prop.computed ? '_id' : prop.name;
                         }
                     }
                 }
@@ -164,7 +164,12 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
             if (expression.nodeType == $data.Expressions.ExpressionType.Equal){
-                context.query[context.field] = context.value;
+                var v = context.value;
+                if (context.entityType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
+                else if (context.valueType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
+                context.query[context.field] = v;
             }else if (expression.nodeType == $data.Expressions.ExpressionType.In && context.unary == $data.Expressions.ExpressionType.Not){
                 if (!context.query[context.field]) context.query[context.field] = {};
                 context.query[context.field].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
@@ -247,10 +252,12 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
 
     VisitConstantExpression: function (expression, context) {
         var valueType = Container.getTypeName(expression.value);
-        context.value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        context.valueType = valueType;
+        context.value = expression.value; //this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
     },
 
     VisitEntityExpression: function (expression, context) {
+        context.entityType = expression.entityType;
         this.Visit(expression.source, context);
     },
 
@@ -429,7 +436,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         this.driver = $data.mongoDBDriver;
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
-            dbCreation: $data.storageProviders.mongoDB.DbCreationType.Default,
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
             address: '127.0.0.1',
             port: 27017,
             serverOptions: {},
@@ -449,7 +456,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         switch (this.providerConfiguration.dbCreation){
-            case $data.storageProviders.mongoDB.DbCreationType.DropAllExistingCollections:
+            case $data.storageProviders.DbCreationType.DropAllExistingTables:
                 var server = this._getServer();
                 new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
                     if (error) callBack.error(error);
@@ -530,8 +537,31 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         }
         
         var insertFn = function(client, c, collection){
-            collection.insert(c.insertAll, { safe: true }, function(error, result){
+            var docs = [];
+            for (var i = 0; i < c.insertAll.length; i++){
+                var d = c.insertAll[i];
+                var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
+                for (var j = 0; j < props.length; j++){
+                    var p = props[j];
+                    if (!p.computed){
+                        d.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
+                    }
+                }
+                docs.push(d.data);
+            }
+        
+            collection.insert(docs, { safe: true }, function(error, result){
                 if (error) callBack.error(error);
+                
+                for (var k = 0; k < result.length; k++){
+                    var it = result[k];
+                    var d = c.insertAll[k];
+                    var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
+                    for (var j = 0; j < props.length; j++){
+                        var p = props[j];
+                        d.entity[p.name] = self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
+                    }
+                }
                 
                 successItems += result.length;
                 
@@ -592,6 +622,14 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.data[k.computed ? '_id' : k.name]);
                 }
                 
+                var props = Container.resolveType(r.type).memberDefinitions.getPublicMappedProperties();
+                for (var j = 0; j < props.length; j++){
+                    var p = props[j];
+                    if (!p.computed){
+                        r.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](r.data[p.name]);
+                    }
+                }
+                
                 collection.remove(r.data, { safe: true }, function(error, cnt){
                     if (error) callBack.error(error);
                     
@@ -649,19 +687,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         collections[independentBlocks[i][j].entitySet.name] = es;
                     }
                     
+                    var initData = { entity: independentBlocks[i][j].data, data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) };
                     switch (independentBlocks[i][j].data.entityState){
                         case $data.EntityState.Unchanged: continue; break;
                         case $data.EntityState.Added:
                             if (!es.insertAll) es.insertAll = [];
-                            es.insertAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
+                            es.insertAll.push(initData);
                             break;
                         case $data.EntityState.Modified:
                             if (!es.updateAll) es.updateAll = [];
-                            es.updateAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
+                            es.updateAll.push(initData);
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];
-                            es.removeAll.push({ data: this.save_getInitData(independentBlocks[i][j], convertedItems), type: Container.resolveName(independentBlocks[i][j].data.getType()) });
+                            es.removeAll.push(initData);
                             break;
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
@@ -685,7 +724,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         return serializableObject;
     },
     
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID], writable: false },
     
     supportedBinaryOperators: {
         value: {
@@ -865,25 +904,23 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date ? new Date(date) : date; },
-                '$data.String': function (text) { return typeof text !== 'string' && typeof text !== 'undefined' ? 'ObjectID("' + text.toString() + '")' : text; },
+                '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); }
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
+                '$data.ObjectID': function(id){ return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
-                '$data.String': function (text) {
-                        if (typeof text === 'undefined') return undefined;
-                        var m = new RegExp(/ObjectID\("([0-9a-f]+)"\)/).exec(text);
-                        return m ? new $data.mongoDBDriver.ObjectID.createFromHexString(m[1]) : text;
-                    },
+                '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); }
+                '$data.Array': function (o) { return JSON.stringify(o); },
+                '$data.ObjectID': function(id){ return id && typeof id === 'string' ? new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii')) : id; }
             }
         }
     }
@@ -896,13 +933,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         set: function(value){}
     }
 });
-
-$data.storageProviders.mongoDB.DbCreationType = {
-    Default: 20,
-    Merge: 10,
-    DropCollectionIfChanged: 20,
-    DropAllExistingCollections: 30
-};
 
 if ($data.storageProviders.mongoDB.mongoDBProvider.isSupported){
     $data.StorageProviderBase.registerProvider('mongoDB', $data.storageProviders.mongoDB.mongoDBProvider);

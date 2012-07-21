@@ -903,6 +903,7 @@
     $data.Blob = /*typeof Blob !== 'undefined' ? Blob :*/ function JayBlob() { };
     $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
     $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
+    $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID(){};
     $data.Function = Function;
 
     var c;
@@ -918,7 +919,7 @@
     c.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
     c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
     c.registerType(["$data.Function", "Function", "function"], $data.Function);
-
+    c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
 
 })(window);
 
@@ -1006,6 +1007,8 @@ $data.typeSystem = {
         /// <param name="objectN" optional="true" parameterArray="true" type="Object">Object to extend target with.</param>
         /// </signature>        
     	/// <returns></returns>
+        if (typeof target !== 'object' && typeof target !== 'function')
+            Guard.raise('Target must be object or function');
 
         for (var i = 1; i < arguments.length; i++) {
             var obj = arguments[i];

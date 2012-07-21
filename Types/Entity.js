@@ -143,12 +143,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             /*if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
                 this.initData = initData;
             }*/
-            
+            this.initData = {};
             for (var i in initData){
                 if (memDefNames.indexOf(i) > -1){
-                    this[i] = Container.resolveType(typeMemDefs.getMember(i).type) === $data.Date && typeof initData[i] === 'string' ? new Date(initData[i]) : initData[i];
+                    this.initData[i] = Container.resolveType(typeMemDefs.getMember(i).type) === $data.Date && typeof initData[i] === 'string' ? new Date(initData[i]) : initData[i];
                 }
             }
+            
+            this.changedProperties = undefined;
+            this.entityState = undefined;
         }
     },
     toString: function () {

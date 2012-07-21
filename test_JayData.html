@@ -13,8 +13,18 @@
     
 
     <script type="text/javascript" src="Scripts/datajs-1.0.3.js"></script>
+
     <script type="text/javascript" src="JayData.js"></script>
-    
+
+    <script type="text/javascript" src="providers/FacebookProvider.js"></script>
+    <script type="text/javascript" src="providers/YQLProvider.js"></script>
+<!--<script type="text/javascript" src="providers/IndexDbProvider.js"></script>
+    <script type="text/javascript" src="providers/InMemoryProvider.js"></script>
+    <script type="text/javascript" src="providers/MongoDbProvider.js"></script>
+    <script type="text/javascript" src="providers/oDataProvider.js"></script>
+    <script type="text/javascript" src="providers/SqLiteProvider.js"></script>
+    <script type="text/javascript" src="providers/StormProvider.js"></script>-->
+
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>
     <script type="text/javascript" src="JayDataModules/errorhandler.js"></script>
     <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
@@ -23,19 +33,21 @@
     <script type="text/javascript" src="JayDataModules/validate.js"></script>
     <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
 
+
+
     <!--**********************************UNIT TESTS****************************************-->
     <script src="NewsReaderContext.js" type="text/javascript"></script>
 
     <script src="UnitTests/inMemoryProviderTests.js" type="text/javascript"></script>
+    <script src="UnitTests/storageModelTests.js" type="text/javascript"></script>
     <script src="UnitTests/typeSystemTests.js" type="text/javascript"></script>
     <script src="UnitTests/EntityContextTests.js" type="text/javascript"></script>
     <script src="UnitTests/dataDistributeTest.js" type="text/javascript"></script>
     <script src="UnitTests/ValidationTests.js" type="text/javascript"></script>
+    <!--<script src="UnitTests/indexedDbProviderTest.js" type="text/javascript"></script>-->
+
     <script src="UnitTests/knockoutTests.js" type="text/javascript"></script>
     <script src="UnitTests/setOperationTests.js" type="text/javascript"></script>
-
-    <script src="UnitTests/FaceBookProviderTests.js" type="text/javascript"></script>
-    <script src="UnitTests/YQLProviderTests.js" type="text/javascript"></script>
 
     <script src="UnitTests/sqLiteProviderTests.js" type="text/javascript"></script>
     <script src="UnitTests/sqLiteCompilerTests.js" type="text/javascript"></script>
@@ -45,16 +57,18 @@
     
     <!--Commented out because of popups-->
     <!--<script src="UnitTests/oDataProviderTests_auth.js" type="text/javascript"></script>-->
-    
-    <script src="UnitTests/T1.js" type="text/javascript"></script>
+
     <script src="UnitTests/T2.js" type="text/javascript"></script>
+    <script src="UnitTests/T1.js" type="text/javascript"></script>
     <script src="UnitTests/T3.js" type="text/javascript"></script>
     <script src="UnitTests/loadPropertyTests.js" type="text/javascript"></script>
     <script src="UnitTests/ValidatonPluginTest.js" type="text/javascript"></script>
     <script src="UnitTests/promiseTests.js" type="text/javascript"></script>
 
+    <script src="UnitTests/FaceBookProviderTests.js" type="text/javascript"></script>
+    <script src="UnitTests/YQLProviderTests.js" type="text/javascript"></script>
+
     <!--<script src="UnitTests/AuthEntityContextTests.js" type="text/javascript"></script>--> <!--//TODO: fixed authentication context bugs-->
-    <script src="UnitTests/indexedDbProviderTest.js" type="text/javascript"></script>
 </head>
 <body>
     <h1 id="qunit-header">

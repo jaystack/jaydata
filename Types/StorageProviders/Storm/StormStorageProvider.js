@@ -105,7 +105,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                             break;
                         case $data.EntityState.Modified:
                             if (!es.updateAll) es.updateAll = [];
-                            es.updateAll.push(/*{ data: */this.save_getInitData(independentBlocks[i][j], convertedItems)/*, type: Container.resolveName(independentBlocks[i][j].data.getType()) }*/);
+                            es.updateAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
                             break;
                         case $data.EntityState.Deleted:
                             if (!es.removeAll) es.removeAll = [];

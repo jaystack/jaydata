@@ -27,7 +27,7 @@
         var context = new indexedDbProviderTest_Context({
             name: 'indexedDb',
             databaseName: 'indexedDbProvider_openDbSimpleContext',
-            dbCreation: $data.storageProviders.indexedDb.DbCreationType.DropStoreIfExists
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {
@@ -51,7 +51,7 @@
         var context = new $news.Types.NewsContext({
             name: 'indexedDb',
             databaseName: 'indexedDbProvider_openDbNewsContext',
-            dbCreation: $data.storageProviders.indexedDb.DbCreationType.DropStoreIfExists
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {
@@ -82,7 +82,7 @@
         var context = new indexedDbProviderTest_Context({
             name: 'indexedDb',
             databaseName: 'indexedDbProvider_openDbInsertSingleKeyCRUD',
-            dbCreation: $data.storageProviders.indexedDb.DbCreationType.DropAllExistingTables
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {
@@ -211,7 +211,7 @@
         var context = new $news.Types.NewsContext({
             name: 'indexedDb',
             databaseName: 'indexedDbProvider_count',
-            dbCreation: $data.storageProviders.indexedDb.DbCreationType.DropStoreIfExists
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {

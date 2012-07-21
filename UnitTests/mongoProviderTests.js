@@ -1,11 +1,12 @@
-$ = jQuery = require('jquery');
-var $data = require('jaydata');
+require('jaydata');
 
 $data.Entity.extend('$test.Item', {
-    Id: { type: 'string', computed: true, key: true },
+    Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: 'string' },
-    Rank: { type: 'int' }
+    Rank: { type: 'int' },
+    CreatedAt: { type: 'datetime' },
+    ForeignKey: { type: 'id' }
 });
 
 $data.EntityContext.extend('$test.Context', {
@@ -13,7 +14,7 @@ $data.EntityContext.extend('$test.Context', {
 });
 
 $test.Context.init = function(callback){
-    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', dbCreation: $data.storageProviders.mongoDB.DbCreationType.DropAllExistingCollections });
+    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     $test.context.onReady(function(db){
         callback(db);
     });
@@ -30,6 +31,35 @@ exports.testAdd = function(test){
         db.saveChanges(function(cnt){
             test.equal(cnt, 5, 'Not 5 items added to collection');
             test.done();
+        });
+    });
+};
+
+exports.testAddEntity = function(test){
+    test.expect(1);
+    $test.Context.init(function(db){
+        var add1 = new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 });
+        var add2 = new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 });
+        var add3 = new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 });
+        var add4 = new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 });
+        var add5 = new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 });
+        
+        db.Items.add(add1);
+        db.Items.add(add2);
+        db.Items.add(add3);
+        db.Items.add(add4);
+        db.Items.add(add5);
+        
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            
+            var add6 = new $test.Item({ Key: 'aaa6', Value: 'bbb-1', Rank: 6 });
+            db.Items.add(add6);
+            db.Items.remove(add1);
+            
+            db.saveChanges(function(cnt){
+                test.done();
+            });
         });
     });
 };
@@ -75,6 +105,7 @@ exports.testUpdate = function(test){
                 for (var i = 0; i < data.length; i++){
                     db.Items.attach(data[i]);
                     data[i].Value = 'updated';
+                    data[i].ForeignKey = data[i].Id;
                 }
                 db.saveChanges(function(cnt){
                     test.equal(cnt, 5, 'Not 5 items updated in collection');
@@ -332,6 +363,48 @@ exports.testFilterAndOr = function(test){
                 if (data[1]) test.equal(data[1].Value, 'bbb9', 'Value of second item is not "bbb9"');
                 else test.ok(false, 'Item 2 not found in result set');
                 test.done();
+            });
+        });
+    });
+};
+
+exports.testFilterByDate = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1, CreatedAt: new Date() }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 1, 'Not 1 item added to collection');
+            db.Items.filter(function(it){ return it.CreatedAt < this.now; }, { now: new Date() }).toArray(function(data){
+                test.equal(data.length, 1, 'Filtering by date failed');
+                test.ok(data[0] instanceof $test.Item, 'Entity is not an Item');
+                if (data[0]) test.ok(data[0].CreatedAt instanceof Date, 'CreatedAt is not a Date');
+                else test.ok(false, 'Item 1 not found in result set');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testFilterByKey = function(test){
+    test.expect(1);
+    $test.Context.init(function(db){
+        var master = new $test.Item({ Key: 'master', Value: 'master', Rank: 0 });
+        db.Items.add(master);
+        db.saveChanges(function(cnt){
+            var slave1 = new $test.Item({ Key: 'slave1', Value: 'value1', Rank: 1, ForeignKey: master.Id });
+            var slave2 = new $test.Item({ Key: 'slave2', Value: 'value2', Rank: 2, ForeignKey: master.Id });
+            var slave3 = new $test.Item({ Key: 'slave3', Value: 'value3', Rank: 3, ForeignKey: master.Id });
+            
+            db.Items.add(slave1);
+            db.Items.add(slave2);
+            db.Items.add(slave3);
+            
+            test.equal(cnt, 1, 'Not 1 item inserted into collection');
+            
+            db.saveChanges(function(cnt){
+                db.Items.filter(function(it){ return it.ForeignKey == this.id; }, { id: master.Id }).toArray(function(result){
+                    test.done();
+                });
             });
         });
     });

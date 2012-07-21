@@ -20,7 +20,7 @@
     var testItem = this;
     this.name = name;
     this.run = function (onResult) {
-        var context = new $test.Types.TestContext({ name: "sqLite", databaseName: name + "_Db", dbCreation: $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables });
+        var context = new $test.Types.TestContext({ name: "sqLite", databaseName: name + "_Db", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
         context.onReady(function (db) {
             function onTimeout() {
                 if (finished)
