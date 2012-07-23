@@ -498,6 +498,23 @@
 
     });
 
+    test("Type simple mixin", 3, function () {
+        $data.Class.define("Types.A", null, null, {
+        });
+
+        $data.Class.define("Types.B", null, null, {
+        });
+
+        $data.Class.defineEx("Types.C", [Types.A, Types.B], null, {
+        });
+
+        equal(Types.C.mixins.length, 1, 'mixins count failed');
+        equal(Types.C.mixins[0].type.fullName, 'Types.B', 'mixin failed');
+        equal(Types.C.inheritsFrom.fullName, 'Types.A', 'mixin failed');
+
+    });
+
+
     test("Extends fail", 1, function () {
         raises(function () {
             var target = "";

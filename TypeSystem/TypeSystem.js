@@ -334,10 +334,73 @@
 
 
     define: function (className, baseClass, interfaces, instanceDefinition, classDefinition) {
+        /// <signature>
+        ///     <summary>Creates a Jaydata type</summary>
+        ///     <param name="className" type="String">Name of the class</param>
+        ///     <param name="baseClass" type="Function">Basetype of the class</param>
+        ///     <param name="interfaces" type="Object" elementType="Function" />
+        ///     <param name="instanceDefinition" type="Object">Class definition (properties, methods, etc)</param>
+        ///     <param name="classDefinition" type="Object">Class static definition</param>
+        ///     <example>
+        ///         
+        ///         var t = new $data.Class.define('Types.A', $data.Base, null, {
+        ///             constructor: function(){ },
+        ///             func1: function(){ },
+        ///             member1: { type: 'string' }
+        ///         }, { 
+        ///             staticFunc1: function() {}    
+        ///         })
+        ///         
+        ///     </example>
+        /// </signature>
+
         return this.defineEx(className, [{ type: baseClass }], interfaces, instanceDefinition, classDefinition);
     },
     defineEx: function (className, baseClasses, interfaces, instanceDefinition, classDefinition) {
-        ///<param name="baseClasses" type="Array" elementType="Function" />
+        /// <signature>
+        ///     <summary>Creates a Jaydata type</summary>
+        ///     <param name="className" type="String">Name of the class</param>
+        ///     <param name="baseClasses" type="Array" elementType="Functions">Basetypes of the class. First is a real base, others are mixins</param>
+        ///     <param name="interfaces" type="Object" elementType="Function" />
+        ///     <param name="instanceDefinition" type="Object">Class definition (properties, methods, etc)</param>
+        ///     <param name="classDefinition" type="Object">Class static definition</param>
+        ///     <example>
+        ///         
+        ///         var t = new $data.Class.define('Types.A', [$data.Base, $data.Mixin1, $data.Mixin2], null, {
+        ///             constructor: function(){ },
+        ///             func1: function(){ },
+        ///             member1: { type: 'string' }
+        ///         }, { 
+        ///             staticFunc1: function() {}    
+        ///         })
+        ///         
+        ///     </example>
+        /// </signature>
+        /// <signature>
+        ///     <summary>Creates a Jaydata type</summary>
+        ///     <param name="className" type="String">Name of the class</param>
+        ///     <param name="baseClasses" type="Array" elementType="Object">Basetypes of the class. First is a real base, others are mixins or propagations</param>
+        ///     <param name="interfaces" type="Object" elementType="Function" />
+        ///     <param name="instanceDefinition" type="Object">Class definition (properties, methods, etc)</param>
+        ///     <param name="classDefinition" type="Object">Class static definition</param>
+        ///     <example>
+        ///         
+        ///         var t = new $data.Class.define('Types.A', [
+        ///                         { type: $data.Base, params: [1, 'secondParameterValue', new ConstructorParameter(0)] },
+        ///                         { type: $data.Mixin1, },
+        ///                         { type: $data.Mixin2, },
+        ///                         { type: $data.Propagation1, params: [new ConstructorParameter(1)], propagateTo:'Propagation1' },
+        ///                         { type: $data.Propagation2, params: ['firstParameterValue'], propagateTo:'Propagation2' }
+        ///                     ], null, {
+        ///             constructor: function(){ },
+        ///             func1: function(){ },
+        ///             member1: { type: 'string' }
+        ///         }, { 
+        ///             staticFunc1: function() {}    
+        ///         })
+        ///         
+        ///     </example>
+        /// </signature>
 
         //il("!defineClass was invoked:" + className);
 
@@ -345,6 +408,10 @@
             baseClasses.push({ type: $data.Base });
         } else if (baseClasses.length > 0 && !baseClasses[0].type){
             baseClasses[0].type = $data.Base;
+        }
+        for (var i = 0, l=baseClasses.length; i < l; i++) {
+            if (typeof baseClasses[i] === 'function')
+                baseClasses[i] = { type: baseClasses[i] };
         }
 
         var providedCtor = instanceDefinition.constructor;
