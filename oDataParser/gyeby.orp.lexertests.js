@@ -1,6 +1,6 @@
 $(document).ready(function () {
     module("ODataRequestParser Lexer tests");
-
+/*
     test("NextChar: empty source", 2, function () {
 		var src = "";
 		var l = new ODataRequestLexer(src);
@@ -95,4 +95,5 @@ $(document).ready(function () {
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.DIGITS, "t4"); equal(t.value, "12",     "v4"); equal(t.column, 19, "c4");
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.EOF,    "t5"); equal(t.value, "\u0000", "v5"); equal(t.column, 22, "c5");
     });
+*/
 });

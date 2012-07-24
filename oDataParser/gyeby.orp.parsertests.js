@@ -1,5 +1,6 @@
 $(document).ready(function () {
     module("ODataRequestParser tests");
+/*
     test("Filter: BoolLiteralExpr", 6, function () {
         var p = new ODataRequestParser();
         var src = new ODataQueryRequest();
@@ -34,6 +35,54 @@ $(document).ready(function () {
             "and",//op
             "boolean"//type
         ));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 142L", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "142L";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(142, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42.56", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42.56";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42.56, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42.56f", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42.56f";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42.56, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42.56m", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42.56m";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42.56, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 0.456789e3m", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "0.456789e3m";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(456.789, "number"));
         equal(current, expected);
     });
     test("Filter: Datetime", 5, function () {
@@ -277,16 +326,17 @@ $(document).ready(function () {
         src.filter = "'aaa' eq 'aaa' and 'bbb' eq 'bbb'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            right:{
-                left:{nodeType:"constant",type:"string",value:"bbb"},
-                right:{nodeType:"constant",type:"string",value:"bbb"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("aaa"), //left
+                p.builder.buildConstant("aaa"), //right
+                "eq"),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("bbb"), //left
+                p.builder.buildConstant("bbb"), //right
+                "eq"),
+            "and"
+        ));
         equal(current, expected);
     });
     test("Filter: 'aaa' ne 'aaa' or 'bbb' ne 'bbb'", 1, function () {
@@ -294,33 +344,17 @@ $(document).ready(function () {
         src.filter = "'aaa' ne 'aaa' or 'bbb' ne 'bbb'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"ne",operator:"!=",type:"boolean"},
-            right:{
-                left:{nodeType:"constant",type:"string",value:"bbb"},
-                right:{nodeType:"constant",type:"string",value:"bbb"},
-                nodeType:"ne",operator:"!=",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
-        equal(current, expected);
-    });
-    test("Filter: 'aaa' eq 'aaa' and 'bbb' eq 'bbb'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
-        src.filter = "'aaa' eq 'aaa' and 'bbb' eq 'bbb'";
-        p.parseFilterExpr();
-        var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            right:{
-                left:{nodeType:"constant",type:"string",value:"bbb"},
-                right:{nodeType:"constant",type:"string",value:"bbb"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("aaa"), //left
+                p.builder.buildConstant("aaa"), //right
+                "ne"),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("bbb"), //left
+                p.builder.buildConstant("bbb"), //right
+                "ne"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Chain: 'aaa' ne 'aaa' or 'bbb' ne 'bbb' or 'ccc' ne 'ccc'", 1, function () {
@@ -328,22 +362,23 @@ $(document).ready(function () {
         src.filter = "'aaa' ne 'aaa' or 'bbb' ne 'bbb' or 'ccc' ne 'ccc'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"ne",operator:"!=",type:"boolean"},
-            right:{
-                left:{
-                    left:{nodeType:"constant",type:"string",value:"bbb"},
-                    right:{nodeType:"constant",type:"string",value:"bbb"},
-                    nodeType:"ne",operator:"!=",type:"boolean"},
-                right:{
-                    left:{nodeType:"constant",type:"string",value:"ccc"},
-                    right:{nodeType:"constant",type:"string",value:"ccc"},
-                    nodeType:"ne",operator:"!=",type:"boolean"},
-                nodeType:"or",operator:"||",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("aaa"), //left
+                p.builder.buildConstant("aaa"), //right
+                "ne"),
+            p.builder.buildSimpleBinary(
+                p.builder.buildSimpleBinary(
+                    p.builder.buildConstant("bbb"), //left
+                    p.builder.buildConstant("bbb"), //right
+                    "ne"),
+                p.builder.buildSimpleBinary(
+                    p.builder.buildConstant("ccc"), //left
+                    p.builder.buildConstant("ccc"), //right
+                    "ne"),
+                "or"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: true or true or true", 1, function () {
@@ -351,13 +386,14 @@ $(document).ready(function () {
         src.filter = "true or true or true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{nodeType:"constant",type:"boolean",value:true},
-            right:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"or",operator:"||",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(true),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "or"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: true or true and true", 1, function () {
@@ -365,13 +401,14 @@ $(document).ready(function () {
         src.filter = "true or true and true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{nodeType:"constant",type:"boolean",value:true},
-            right:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"and",operator:"&&",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(true),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "and"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: true and true or true", 1, function () {
@@ -379,13 +416,14 @@ $(document).ready(function () {
         src.filter = "true and true or true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"and",operator:"&&",type:"boolean"},
-            right:{nodeType:"constant",type:"boolean",value:true},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "and"),
+            p.builder.buildConstant(true),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: (true or true) and true", 1, function () {
@@ -393,13 +431,14 @@ $(document).ready(function () {
         src.filter = "(true or true) and true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"or",operator:"||",type:"boolean"},
-            right:{nodeType:"constant",type:"boolean",value:true},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "or"),
+            p.builder.buildConstant(true),
+            "and"
+        ));
         equal(current, expected);
     });
     test("Filter: Call(a,b): ceiling, floor, round", 3, function () {
@@ -407,19 +446,21 @@ $(document).ready(function () {
         src.filter = "ceiling(12.3)";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = {
-            expression:null,
-            member:"ceiling",
-            args:[
-                {nodeType:"constant",type:"number",value:"12.3"}
-            ],
-            type:"number"};
+        var expected = p.builder.buildGlobalCall(null, "ceiling", [
+            p.builder.buildConstant(12.3)
+        ]);
         equal(current, JSON.stringify(expected));
 
-        src.filter = "floor(12.3)";expected.member = "floor";p.parseFilterExpr();
+        src.filter = "floor(12.3)";p.parseFilterExpr();
+        var expected = p.builder.buildGlobalCall(null, "floor", [
+            p.builder.buildConstant(12.3)
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
-        src.filter = "round(12.3)";expected.member = "round";p.parseFilterExpr();
+        src.filter = "round(12.3)";p.parseFilterExpr();
+        var expected = p.builder.buildGlobalCall(null, "round", [
+            p.builder.buildConstant(12.3)
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
     test("Filter: Call(a,b): substringof, startswith, endswith, concat, indexof", 5, function () {
@@ -427,28 +468,40 @@ $(document).ready(function () {
         src.filter = "substringof('vadalma', 'ada')";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = {
-            expression:null,
-            member:"substringof",
-            args:[
-                {nodeType:"constant",type:"string",value:"vadalma"},
-                {nodeType:"constant",type:"string",value:"ada"}
-            ],
-            type:"boolean"};
+        var expected = p.builder.buildGlobalCall(null, "substringof", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(current, JSON.stringify(expected));
 
-        src.filter = "startswith('vadalma', 'ada')";expected.member = "startswith";p.parseFilterExpr();
+        src.filter = "startswith('vadalma', 'ada')";p.parseFilterExpr();
+        var expected = p.builder.buildGlobalCall(null, "startswith", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
-        src.filter = "endswith('vadalma', 'ada')";expected.member = "endswith";p.parseFilterExpr();
+        src.filter = "endswith('vadalma', 'ada')";p.parseFilterExpr();
+        var expected = p.builder.buildGlobalCall(null, "endswith", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         expected.type = "string";
-        src.filter = "concat('vadalma', 'ada')";expected.member = "concat";p.parseFilterExpr();
+        src.filter = "concat('vadalma', 'ada')";p.parseFilterExpr();
+        var expected = p.builder.buildGlobalCall(null, "concat", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         expected.type = "int";
-        src.filter = "indexof('vadalma', 'ada')";expected.member = "indexof";p.parseFilterExpr();
+        src.filter = "indexof('vadalma', 'ada')";p.parseFilterExpr();
+        var expected = p.builder.buildGlobalCall(null, "indexof", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
 
@@ -555,7 +608,7 @@ $(document).ready(function () {
         }
         equal(names, "aA_Aa___456z__|__a|_aa45a4a7_|");
     });
-
+*/
     test("Filter: Member: Name eq 'John'", 1, function () {
         var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
         src.filter = "Name eq 'John'";
