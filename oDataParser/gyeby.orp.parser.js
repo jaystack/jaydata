@@ -272,13 +272,15 @@ ODataRequestParser.prototype.parseNumberLiteral = function() {
     }
     digits1 = token.value;
     v += digits1;
+    var int = true;
     this.lexer.nextToken();
     token = this.lexer.token;
     if(token.value == "L"){
         this.lexer.nextToken();
-        return this.builder.buildConstant(v, "number"); // long
+        return this.builder.buildConstant(parseInt(v), "number"); // long
     }
     if (token.value == ASCII.DOT) {
+        int = false;
         this.lexer.nextToken();
         token = this.lexer.token;
         if (token.tokenType != TokenType.DIGITS)
@@ -290,9 +292,10 @@ ODataRequestParser.prototype.parseNumberLiteral = function() {
     }
     if(token.value=="f"){
         this.lexer.nextToken();
-        return this.builder.buildConstant(v, "number"); // single
+        return this.builder.buildConstant(parseFloat(v), "number"); // single
     }
     if (token.value == "e") {
+        int = false;
         this.lexer.nextToken();
         sign2 = this.parseSign();
         token = this.lexer.token;
@@ -306,7 +309,8 @@ ODataRequestParser.prototype.parseNumberLiteral = function() {
     if(token.value=="m" || token.value=="M"){
         this.lexer.nextToken();
     }
-    return this.builder.buildConstant(v, "number"); // double
+    var n = int ? parseInt(v) : parseFloat(v);
+    return this.builder.buildConstant(n, "number");
 };
 ODataRequestParser.prototype.parseSign = function() { // returns "+", "-" or null
     //bnf: Sign          : "+" | "-"
