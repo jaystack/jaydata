@@ -1,7 +1,7 @@
 function BuildError(msg) {
 	throw msg;
 }
-function ODataExpressionBuilder(context) {
+function ODataExpressionBuilder() {
 	this.buildConstant = function (value, type) {
 		return new $data.Expressions.ConstantExpression(value, type);
     };
