@@ -1,12 +1,12 @@
 function ODataQueryRequest() {
-    //this.expand =      "";
     this.filter =      "";
     this.orderby =     "";
     this.skip =        "";
     this.top =         "";
-    this.format =      "";
+    //this.expand =      "";
+    //this.select =      "";
+    //this.format =      "";
     //this.inlinecount = "";
-    this.select =      "";
 }
 function ODataRequestParser() {
     this.req = null;
@@ -15,14 +15,14 @@ function ODataRequestParser() {
 }
 ODataRequestParser.prototype.parse = function(req) { // req : ODataQueryRequest
     this.req = req;
-    this.parseFilterExpr();
-    this.parseOrderByExpr();
-    this.parseSkipExpr();
-    this.parseTopExpr();
-    this.parseInlineCountExpr();
-    this.parseExpandExpr();
-    this.parseFormatExpr();
-    this.parseSelectExpr();
+    if(req.filter.length>0)      this.parseFilterExpr();
+    if(req.orderby.length>0)     this.parseOrderByExpr();
+    if(req.skip.length>0)        this.parseSkipExpr();
+    if(req.top.length>0)         this.parseTopExpr();
+    //if(req.expand.length>0)      this.parseExpandExpr();
+    //if(req.select.length>0)      this.parseSelectExpr();
+    //if(req.format.length>0)      this.parseFormatExpr();
+    //if(req.inlinecount.length>0) this.parseInlineCountExpr();
 };
 
 ODataRequestParser.prototype.parseFilterExpr = function() {
@@ -272,13 +272,15 @@ ODataRequestParser.prototype.parseNumberLiteral = function() {
     }
     digits1 = token.value;
     v += digits1;
+    var isInteger = true;
     this.lexer.nextToken();
     token = this.lexer.token;
     if(token.value == "L"){
         this.lexer.nextToken();
-        return this.builder.buildConstant(v, "number"); // long
+        return this.builder.buildConstant(parseInt(v), "number"); // long
     }
     if (token.value == ASCII.DOT) {
+        isInteger = false;
         this.lexer.nextToken();
         token = this.lexer.token;
         if (token.tokenType != TokenType.DIGITS)
@@ -290,9 +292,10 @@ ODataRequestParser.prototype.parseNumberLiteral = function() {
     }
     if(token.value=="f"){
         this.lexer.nextToken();
-        return this.builder.buildConstant(v, "number"); // single
+        return this.builder.buildConstant(parseFloat(v), "number"); // single
     }
     if (token.value == "e") {
+        isInteger = false;
         this.lexer.nextToken();
         sign2 = this.parseSign();
         token = this.lexer.token;
@@ -306,7 +309,8 @@ ODataRequestParser.prototype.parseNumberLiteral = function() {
     if(token.value=="m" || token.value=="M"){
         this.lexer.nextToken();
     }
-    return this.builder.buildConstant(v, "number"); // double
+    var n = isInteger ? parseInt(v) : parseFloat(v);
+    return this.builder.buildConstant(n, "number");
 };
 ODataRequestParser.prototype.parseSign = function() { // returns "+", "-" or null
     //bnf: Sign          : "+" | "-"
