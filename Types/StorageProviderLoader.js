@@ -80,7 +80,7 @@ $data.StorageProviderLoader = {
             return;
         }
 
-        if (module && require) {
+        if (typeof module !== 'undefined' && typeof require !== 'undefined') {
             // NodeJS
             var provider = null;
             try {
