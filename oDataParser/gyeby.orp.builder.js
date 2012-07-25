@@ -80,13 +80,7 @@ function ODataExpressionBuilder() {
     this.buildOrderBy = function (items) {
         var newItems = new Array(items.length);
         for (var i = 0; i < items.length; i++) {
-            var pExp = this.buildParameter('it', 'unknown', $data.Expressions.ExpressionType.LambdaParameterReference);
-            pExp.paramIndex = 0;
-
-            var cExp = this.buildConstant(items[i].prop, 'string');
-
-            var propExp = this.buildProperty(pExp, cExp);
-            newItems[i] = { expression: propExp, frameType: items[i].dir === 'asc' ? 'orderBy' : 'orderByDescending' };
+            newItems[i] = { expression: items[i].prop, nodeType: items[i].dir === 'asc' ? $data.Expressions.ExpressionType.OrderBy : $data.Expressions.ExpressionType.OrderByDescending };
         }
         return newItems;
     };
