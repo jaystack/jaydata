@@ -200,7 +200,7 @@
                 equal(JSON.stringify(expression), JSON.stringify(q.expression.source), name + ' builder test failed');
             });
         }
-
+/*
         var c = new $news.Types.NewsContext({ name: 'oData' });
         var date = new Date();
 
@@ -217,7 +217,7 @@
         builderTest('take', c.Articles.take(6), c);
         builderTest('field compare, order by, skip, take', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title').skip(10).take(5), c);
         //builderTest('map', c.Articles.map(function (it) { return { a: it.Title, b: it.Body }; }), c);
-
+*/
     </script>
 </head>
 <body>

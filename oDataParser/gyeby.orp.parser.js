@@ -3,8 +3,8 @@ function ODataQueryRequest() {
     this.orderby =     "";
     this.skip =        "";
     this.top =         "";
+    this.select =      "";
     //this.expand =      "";
-    //this.select =      "";
     //this.format =      "";
     //this.inlinecount = "";
 }
@@ -19,8 +19,8 @@ ODataRequestParser.prototype.parse = function(req) { // req : ODataQueryRequest
     if(req.orderby.length>0)     this.parseOrderByExpr();
     if(req.skip.length>0)        this.parseSkipExpr();
     if(req.top.length>0)         this.parseTopExpr();
+    if(req.select.length>0)      this.parseSelectExpr();
     //if(req.expand.length>0)      this.parseExpandExpr();
-    //if(req.select.length>0)      this.parseSelectExpr();
     //if(req.format.length>0)      this.parseFormatExpr();
     //if(req.inlinecount.length>0) this.parseInlineCountExpr();
 };
@@ -29,13 +29,8 @@ ODataRequestParser.prototype.parseFilterExpr = function() {
     this.lexer = new ODataRequestLexer(this.req.filter);
     var expr = this.parseExpr();
     var token = this.lexer.token;
-    if(token && token.tokenType != TokenType.EOF) {
-        var tokenType;
-        for(var key in TokenType)
-            if(TokenType[tokenType=key] == token.tokenType)
-                break;
-        SyntaxError.call(this, "Unexpected "+tokenType+" in $filter: '"+token.value+"'.", "parseFilterExpr");
-    }
+    if(token && token.tokenType != TokenType.EOF)
+        SyntaxError.call(this, "Unexpected "+this.tokenName(token.tokenType)+" in $filter: '"+token.value+"'.", "parseFilterExpr");
     this.req.filter = expr;
 };
 ODataRequestParser.prototype.parseOrderByExpr = function() {
@@ -43,33 +38,49 @@ ODataRequestParser.prototype.parseOrderByExpr = function() {
     var expr = this.parseOrderBy();
     var token = this.lexer.token;
     if(token && token.tokenType != TokenType.EOF) {
-        var tokenType;
-        for(var key in TokenType)
-            if(TokenType[tokenType=key] == token.tokenType)
-                break;
-        SyntaxError.call(this, "Unexpected "+tokenType+" in $orderby: '"+token.value+"'.", "parseOrderByExpr");
+        SyntaxError.call(this, "Unexpected "+this.tokenName(token.tokenType)+" in $orderby: '"+token.value+"'.", "parseOrderByExpr");
     }
     this.req.orderby = expr;
 };
 ODataRequestParser.prototype.parseSkipExpr = function() {
     this.req.skip = parseInt(this.req.skip);
+    //TODO: return with ConstantExpr
+    //TODO: some tests
 };
 ODataRequestParser.prototype.parseTopExpr = function() {
     this.req.top = parseInt(this.req.top);
-};
-ODataRequestParser.prototype.parseInlineCountExpr = function() {
-    //TODO: parseInlineCountExpr
-};
-ODataRequestParser.prototype.parseExpandExpr = function() {
-    //TODO: parseExpandExpr
-};
-ODataRequestParser.prototype.parseFormatExpr = function() {
-    //TODO: parseFormatExpr
+    //TODO: return with ConstantExpr
+    //TODO: some tests
 };
 ODataRequestParser.prototype.parseSelectExpr = function() {
-    //TODO: parseSelectExpr
-};
+    this.lexer = new ODataRequestLexer(this.req.select);
+    var expressions = [];
 
+    var expr = this.parseExpr();
+    expressions.push(expr);
+    var token = this.lexer.token;
+    while(token && token.value == ASCII.COMMA) {
+        this.lexer.nextToken();
+        expr = this.parseExpr();
+        expressions.push(expr);
+        token = this.lexer.token;
+    }
+    if(token.tokenType != TokenType.EOF)
+        SyntaxError.call(this, "Unexpected "+this.tokenName(token.tokenType)+" in $filter: '"+token.value+"'.", "parseSelectExpr");
+
+    this.req.select = expressions;
+};
+/*
+ODataRequestParser.prototype.parseInlineCountExpr = function() {
+    //TO DO: parseInlineCountExpr
+};
+ODataRequestParser.prototype.parseExpandExpr = function() {
+    //TO DO: parseExpandExpr
+};
+ODataRequestParser.prototype.parseFormatExpr = function() {
+    //TO DO: parseFormatExpr
+};
+*/
 function SyntaxError(reason, caller) {
     var src = this.lexer.src;
     var token = this.lexer.token;
@@ -79,6 +90,13 @@ function SyntaxError(reason, caller) {
         msg+=". Caller: "+caller;
     throw {message:msg,reason:reason,source:caller,line:token.line,column:token.column};
 }
+ODataRequestParser.prototype.tokenName = function(tokenType) {
+    var tokenName;
+    for(var key in TokenType)
+        if(TokenType[tokenName=key] == tokenType)
+            break;
+    return tokenName;
+};
 /***************************************************     BNF    *****************************************************/
 ODataRequestParser.prototype.functionNames = [
     //string
@@ -419,13 +437,13 @@ ODataRequestParser.prototype.parseMemberPath = function() {
     if (hasDot && !hasSlash)
         SyntaxError.call(this, "Expected: / after namespace.", "parseMemberPath");
     if(this.lexer.token.value != ASCII.LPAREN)
-        return this.builder.buildMemberPath(/*member*/ steps); //TODO: buildMemberPath: expression chain instead of a path in string
+        return this.builder.buildMemberPath(steps);
     //-- parse instance method
     this.lexer.nextToken();
     if(this.lexer.token.value != ASCII.RPAREN)
         SyntaxError.call(this, "Expected: right parenthesis: ')'.", "parseMemberPath");
     this.lexer.nextToken();
-    return this.builder.buildMemberPath(/*member*/ steps); //TODO: buildMemberPath: expression chain instead of a path in string
+    return this.builder.buildMemberPath(steps);
 };
 ODataRequestParser.prototype.parseName = function() {
     //bnf: Name               : (WORD | UNDERSCORE) *(WORD | UNDERSCORE | DIGIT)
@@ -454,6 +472,7 @@ ODataRequestParser.prototype.getNextNamePart = function() {
 
 ODataRequestParser.prototype.parseOrderBy = function() {
     //bnf: OrderByExpr:     [ "asc" | "desc"] *( "," MemberPath [ "asc" | "desc"] )
+    //TODO: //bnf: OrderByExpr:     Expr [ "asc" | "desc"] *( "," Expr [ "asc" | "desc"] )
     var member = this.parseMemberPath();
     if(!member)
         return null;

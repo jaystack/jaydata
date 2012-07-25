@@ -475,14 +475,14 @@ $(document).ready(function () {
         equal(current, JSON.stringify(expected));
 
         src.filter = "startswith('vadalma', 'ada')";p.parseFilterExpr();
-        var expected = p.builder.buildGlobalCall(null, "startswith", [
+        expected = p.builder.buildGlobalCall(null, "startswith", [
             p.builder.buildConstant("vadalma"),
             p.builder.buildConstant("ada")
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         src.filter = "endswith('vadalma', 'ada')";p.parseFilterExpr();
-        var expected = p.builder.buildGlobalCall(null, "endswith", [
+        expected = p.builder.buildGlobalCall(null, "endswith", [
             p.builder.buildConstant("vadalma"),
             p.builder.buildConstant("ada")
         ]);
@@ -490,7 +490,7 @@ $(document).ready(function () {
 
         expected.type = "string";
         src.filter = "concat('vadalma', 'ada')";p.parseFilterExpr();
-        var expected = p.builder.buildGlobalCall(null, "concat", [
+        expected = p.builder.buildGlobalCall(null, "concat", [
             p.builder.buildConstant("vadalma"),
             p.builder.buildConstant("ada")
         ]);
@@ -498,7 +498,7 @@ $(document).ready(function () {
 
         expected.type = "int";
         src.filter = "indexof('vadalma', 'ada')";p.parseFilterExpr();
-        var expected = p.builder.buildGlobalCall(null, "indexof", [
+        expected = p.builder.buildGlobalCall(null, "indexof", [
             p.builder.buildConstant("vadalma"),
             p.builder.buildConstant("ada")
         ]);
@@ -615,7 +615,7 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
-                p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
                 p.builder.buildConstant("Name")
             ),
             p.builder.buildConstant("John"),
@@ -630,7 +630,7 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
-                p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
                 p.builder.buildConstant("Age")
             ),
             p.builder.buildConstant(12),
@@ -645,7 +645,7 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
-                p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
                 p.builder.buildConstant("Name2_a34")
             ),
             p.builder.buildConstant("John"),
@@ -662,7 +662,7 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
                 p.builder.buildProperty(
-                    p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
                     p.builder.buildConstant("Author")
                 ),
                 p.builder.buildConstant("Name")
@@ -693,7 +693,7 @@ $(document).ready(function () {
            p.builder.buildProperty(
                p.builder.buildProperty(
                    p.builder.buildProperty(
-                       p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                       p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
                        p.builder.buildConstant("MainNamespace.SubNamespace")
                    ),
                    p.builder.buildConstant("Author")
@@ -747,9 +747,6 @@ $(document).ready(function () {
     test("OrderBy: 'Name'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"}
-        ]));
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
