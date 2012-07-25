@@ -1,6 +1,6 @@
 $(document).ready(function () {
     module("ODataRequestParser tests");
-/*
+
     test("Filter: BoolLiteralExpr", 6, function () {
         var p = new ODataRequestParser();
         var src = new ODataQueryRequest();
@@ -452,13 +452,13 @@ $(document).ready(function () {
         equal(current, JSON.stringify(expected));
 
         src.filter = "floor(12.3)";p.parseFilterExpr();
-        var expected = p.builder.buildGlobalCall(null, "floor", [
+        expected = p.builder.buildGlobalCall(null, "floor", [
             p.builder.buildConstant(12.3)
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         src.filter = "round(12.3)";p.parseFilterExpr();
-        var expected = p.builder.buildGlobalCall(null, "round", [
+        expected = p.builder.buildGlobalCall(null, "round", [
             p.builder.buildConstant(12.3)
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
@@ -608,16 +608,19 @@ $(document).ready(function () {
         }
         equal(names, "aA_Aa___456z__|__a|_aa45a4a7_|");
     });
-*/
     test("Filter: Member: Name eq 'John'", 1, function () {
         var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
         src.filter = "Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Name"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                p.builder.buildConstant("Name")
+            ),
+            p.builder.buildConstant("John"),
+            "eq"
+        ));
         equal(current, expected);
     });
     test("Filter: Member: Age add 12", 1, function () {
@@ -625,10 +628,14 @@ $(document).ready(function () {
         src.filter = "Age add 12";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Age"]},
-            right:{nodeType:"constant",type:"number",value:"12"},
-            nodeType:"add",operator:"+",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                p.builder.buildConstant("Age")
+            ),
+            p.builder.buildConstant(12),
+            "add"
+        ));
         equal(current, expected);
     });
     test("Filter: Member: Name2_a34 eq 'John'", 1, function () {
@@ -636,10 +643,14 @@ $(document).ready(function () {
         src.filter = "Name2_a34 eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Name2_a34"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                p.builder.buildConstant("Name2_a34")
+            ),
+            p.builder.buildConstant("John"),
+            "eq"
+        ));
         equal(current, expected);
     });
 
@@ -648,10 +659,17 @@ $(document).ready(function () {
         src.filter = "Author/Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Author","Name"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            p.builder.buildConstant("John"),
+            "eq"
+        ));
         equal(current, expected);
     });
     test("Filter: Invalid Member: Author.Name eq 'John'", 1, function () {
@@ -671,11 +689,21 @@ $(document).ready(function () {
         src.filter = "MainNamespace.SubNamespace/Author/Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["MainNamespace.SubNamespace","Author","Name"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
-        equal(current, expected);
+       var expected = JSON.stringify(p.builder.buildSimpleBinary(
+           p.builder.buildProperty(
+               p.builder.buildProperty(
+                   p.builder.buildProperty(
+                       p.builder.buildParameter("it", "unknown","lambdaParameterReference",0),
+                       p.builder.buildConstant("MainNamespace.SubNamespace")
+                   ),
+                   p.builder.buildConstant("Author")
+               ),
+               p.builder.buildConstant("Name")
+           ),
+           p.builder.buildConstant("John"),
+           "eq"
+       ));
+       equal(current, expected);
     });
     test("Filter: Invalid Member: MainNamespace.SubNamespace/Author.Name eq 'John'", 2, function () {
         var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
@@ -713,7 +741,6 @@ $(document).ready(function () {
         equal(err.column, 12, "Column is "+err.column+", expected: 11");
     });
 
-
     //==================================================================================================
 
 
@@ -723,91 +750,161 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildOrderBy([
             {prop:{member:["Name"]}, dir:"asc"}
         ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Author/Name";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Author","Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name asc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name asc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name asc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Author/Name asc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Author","Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Author/Name desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Author","Name"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
+
+
+
+
     test("OrderBy: 'Name, Age'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name, Age";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"},
-            {prop:{member:["Age"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Age")
+            ),nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Age, Name'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Age, Name";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Age"]}, dir:"asc"},
-            {prop:{member:["Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name, Age desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name, Age desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"},
-            {prop:{member:["Age"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name desc, Age desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name desc, Age desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"desc"},
-            {prop:{member:["Age"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderByDescending"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name desc, Age'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name desc, Age";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"desc"},
-            {prop:{member:["Age"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderByDescending"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
 
