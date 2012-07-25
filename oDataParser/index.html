@@ -204,7 +204,7 @@
         var c = new $news.Types.NewsContext({ name: 'oData' });
         var date = new Date();
 
-        module('ODataEntityExpressionBuilder')
+        module('ODataEntityExpressionBuilder');
         builderTest('field compare int', c.Articles.filter(function (it) { return it.Id <= 500; }), c);
         builderTest('field compare string', c.Articles.filter(function (it) { return it.Title == 'Article1'; }), c);
         //builderTest('ODataEntityExpressionBuilder field multipleFilter', c.Articles.filter(function (it) { return it.Title == 'Article1'; }).filter(function (it) { return it.Body.contains('Body1'); }), c);
