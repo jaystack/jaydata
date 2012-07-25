@@ -1,7 +1,7 @@
 ﻿$data.Class.define('$data.oDataServer.oDataResponseDataBuilder', null, null, {
-    constructor: function(cfg){
+    constructor:function (cfg) {
         this.config = $data.typeSystem.extend({
-            Version: 'V2'
+            Version:'V2'
             //context
             //baseUrl
             //CountRequest
@@ -17,7 +17,7 @@
 
         }, cfg);
     },
-    convertToResponse: function (data) {
+    convertToResponse:function (data) {
         if (this.config.CountRequest)
             return data;
 
@@ -30,22 +30,21 @@
             } else {
                 return this._convertFunction(data);
             }
-        } else if(this.config.collectionName){
+        } else if (this.config.collectionName) {
             return this._convertData(data);
         }
     },
-
-    _convertFunction: function(data){
+    _convertFunction:function (data) {
         var methodCfg = this.config.methodConfig;
         if (Container.resolveType(methodCfg.returnType) === $data.Array && methodCfg.elementType) {
-            return { d: data };
+            return { d:data };
         } else {
-            var result = { d: {} };
+            var result = { d:{} };
             result.d[methodCfg.serviceOpName || this.config.methodName] = data;
             return result;
         }
     },
-    _convertJayDataFunction: function (data) {
+    _convertJayDataFunction:function (data) {
         var methodCfg = this.config.methodConfig;
         if (!methodCfg.returnType)
             return undefined;
@@ -68,30 +67,30 @@
                 return this._convertData(data, elementType);
             } else {
                 //primitiveType
-                return { d: data };
+                return { d:data };
             }
         } else {
             if (typeof rType.isAssignableTo === 'function' && rType.isAssignableTo($data.Entity))
                 data = this._convertData([data], rType, false)[0];
 
-            var result = { d: {} };
+            var result = { d:{} };
             result.d[methodCfg.serviceOpName || this.config.methodName] = data;
             return result;
         }
     },
-    _convertData: function (data, elementType, versionSelector) {
+    _convertData:function (data, elementType, versionSelector) {
         var transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
         var result = transform.convertToResponse(
-                            data,
-                            elementType || this.config.collectionName,
-                            this.config.selectedFields,
-                            this.config.includes);
+            data,
+            elementType || this.config.collectionName,
+            this.config.selectedFields,
+            this.config.includes);
 
         if (versionSelector || versionSelector === undefined) {
             if (this.config.version === 'V1')
-                return { d: result };
+                return { d:result };
             else
-                return { d: { results: result, __count: result.length } };
+                return { d:{ results:result, __count:result.length } };
         } else {
             return result
         }

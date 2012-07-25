@@ -1,41 +1,60 @@
-var serviceFunc = require("./ServiceFunction.js");
+//var $data = require('jaydata');
 
+require('./oDataMetaDataGenerator.js');
+require('./XmlResult.js');
+require('./JSObjectAdapter.js');
+$data.Class.define("$data.JayService", null, null, {
+    constructor:function () {
+    }
+}, {
+    serviceFunction:function (fn) {
 
-exports.serviceFunctionPrototype = serviceFunc.serviceFunctionPrototype;
-exports.serviceFunction = serviceFunc.serviceFunction;
+        var f = fn || function (fn) {
+            var keys = Object.keys(f);
+            for (var i = 0; i < keys.length; i++) {
+                fn[keys[i]] = f[keys[i]];
+            }
+            return fn;
+        }
 
+        f.param = function (name, type) {
+            f.params = f.params || [];
+            f.params.push({name:name, type:type});
+            return f;
+        }
 
-var q = require('q');
-var url = require('url');
-var $data = require('jaydata');
+        f.returns = function (type) {
+            f.returnType = type;
+            return f;
+        }
 
+        f.returnsArrayOf = function (type) {
+            f.returnType = "Array";
+            f.elementType = type;
+            return f;
+        }
+
+        f.returnsCollectionOf = function (type) {
+            f.returnType = "Collection";
+            f.elementType = type;
+            return f;
+        }
+
+        return f;
+    },
+    createAdapter:function (type, instanceFactory) {
+        return function (req, res, next) {
+            var adapter = new $data.JSObjectAdapter(type, instanceFactory);
+            adapter.handleRequest(req, res, next);
+        }
+    },
+    resultAsXml:function (data) {
+        return new $data.XmlResult(data);
+    }
+});
+require('./ServiceBase.js');
 require('./EntityTransform.js');
 require('./oDataResponseDataBuilder.js');
-
-
-function XmlResult(data) {
-    this.data = data;
-    this.toString = function() {
-        return data;
-    }
-}
-
-function asXml(data) {
-    return new XmlResult(data);
-}
-
-exports.serviceResult = {
-    asXml: asXml
-};
-
-//function ArrayType(elementType) {
-//    this.elementType = elementType;
-//}
-
-
-
-
-
 
 //function NoopFormat(data) {
 //    return data;
@@ -46,16 +65,3 @@ exports.serviceResult = {
 //    'text/plain': NoopFormat,
 //    'text/xml': NoopFormat
 //};
-
-require("./ServiceBase.js");
-var JSObjectAdapter = require("./JsObjectAdapter.js");
-
-
-
-exports.ServiceBase = $data.ServiceBase;
-exports.createAdapter = function(type, instanceFactory) {
-    return function(req, res, next) {
-        var adapter = new JSObjectAdapter(type, instanceFactory);
-        adapter.handleRequest(req, res, next);
-    }
-}

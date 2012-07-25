@@ -1,64 +1,63 @@
-﻿
-var genx = require('genx');
+﻿var genx = require('genx');
 var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
 
 $data.Class.define('$data.GenxXMLCreator', null, null, {
-    constructor: function () {
+    constructor:function () {
         this.writer = new genx.Writer();
     },
-    startDocument: function () {
+    startDocument:function () {
         return this.writer.startDocument.apply(this.writer, arguments);
     },
-    endDocument: function () {
+    endDocument:function () {
         return this.writer.endDocument.apply(this.writer, arguments);
     },
 
-    startElement: function () {
+    startElement:function () {
         return this.writer.startElement.apply(this.writer, arguments);
     },
-    endElement: function () {
+    endElement:function () {
         return this.writer.endElement.apply(this.writer, arguments);
     },
 
-    addAttribute: function () {
+    addAttribute:function () {
         return this.writer.addAttribute.apply(this.writer, arguments);
     },
 
-    declareNamespace: function (schema, schemaName) {
+    declareNamespace:function (schema, schemaName) {
         return this.writer.declareNamespace.apply(this.writer, arguments);
     },
-    declareElement: function (namespace, elementName) {
+    declareElement:function (namespace, elementName) {
         return this.writer.declareElement.apply(this.writer, arguments);
     },
-    declareAttribute: function (namespace, elementName) {
+    declareAttribute:function (namespace, elementName) {
         return this.writer.declareAttribute.apply(this.writer, arguments);
     }
 });
 
 
 $data.Class.define('$data.oDataServer.MetaDataGeneratorRole', null, null, {
-    constructor: function (typeName, entitySetName, multiplicity) {
+    constructor:function (typeName, entitySetName, multiplicity) {
         this.typeName = typeName;
         this.entitySetName = entitySetName;
         this.multiplicity = multiplicity;
     },
-    typeName: {},
-    multiplicity: {},
-    entitySetName: {}
+    typeName:{},
+    multiplicity:{},
+    entitySetName:{}
 });
 $data.Class.define('$data.oDataServer.MetaDataGeneratorAssoctiation', null, null, {
-    constructor: function (name, srole, trole) {
+    constructor:function (name, srole, trole) {
         this.name = name,
-        this.source = srole;
+            this.source = srole;
         this.target = trole;
     },
-    name: {},
-    source: {},
-    target: {}
+    name:{},
+    source:{},
+    target:{}
 });
 
 $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
-    constructor: function (config, context) {
+    constructor:function (config, context) {
         var _context = context;
         if (_context instanceof $data.EntityContext)
             _context = _context.getType();
@@ -67,31 +66,31 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         this.isJayDataClass = !!this.context.isAssignableTo;
 
         this.cfg = $data.typeSystem.extend({
-            version: 'V2',
-            maxVersion: 'V2',
-            extended: true,
+            version:'V2',
+            maxVersion:'V2',
+            extended:true,
 
-            edmx: 'http://schemas.microsoft.com/ado/2007/06/edmx',
-            m: 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
-            d: 'http://schemas.microsoft.com/ado/2007/08/dataservices',
-            namespace: 'http://schemas.microsoft.com/ado/2008/09/edm',
+            edmx:'http://schemas.microsoft.com/ado/2007/06/edmx',
+            m:'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+            d:'http://schemas.microsoft.com/ado/2007/08/dataservices',
+            namespace:'http://schemas.microsoft.com/ado/2008/09/edm',
 
-            nsV1: 'http://schemas.microsoft.com/ado/2006/04/edm',
-            nsV2: 'http://schemas.microsoft.com/ado/2008/09/edm',
-            nsV3: 'http://schemas.microsoft.com/ado/2009/11/edm',
+            nsV1:'http://schemas.microsoft.com/ado/2006/04/edm',
+            nsV2:'http://schemas.microsoft.com/ado/2008/09/edm',
+            nsV3:'http://schemas.microsoft.com/ado/2009/11/edm',
 
-            V1: '1.0',
-            V2: '2.0',
-            V3: '3.0',
+            V1:'1.0',
+            V2:'2.0',
+            V3:'3.0',
 
-            xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
+            xmlHead:'<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
 
 
-            contextNamespace: this.context.namespace || 'System'
+            contextNamespace:this.context.namespace || 'System'
 
         }, config);
     },
-    generateMetadataXml: function () {
+    generateMetadataXml:function () {
         var xml = new $data.GenxXMLCreator();
         var xmlResult = this.cfg.xmlHead;
 
@@ -107,7 +106,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
     },
 
 
-    _buildEdmx: function (xml) {
+    _buildEdmx:function (xml) {
         var ns = xml.declareNamespace(this.cfg.edmx, 'edmx');
         var edmx = xml.declareElement(ns, 'Edmx');
         var version = xml.declareAttribute('Version');
@@ -119,7 +118,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         xml.endElement();
     },
 
-    _buildDataServices: function (xml) {
+    _buildDataServices:function (xml) {
         var ns = xml.declareNamespace(this.cfg.edmx, 'edmx');
         var dataservice = xml.declareElement(ns, 'DataServices');
         var m = xml.declareNamespace(this.cfg.m, 'm');
@@ -134,7 +133,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         xml.endElement();
     },
 
-    _buildSchema: function (xml) {
+    _buildSchema:function (xml) {
         var xmlns = xml.declareAttribute('xmlns');
         var schema = xml.declareElement('Schema');
         var namespace = xml.declareAttribute('Namespace');
@@ -169,7 +168,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         xml.endElement();
     },
 
-    _buildEntityContainer: function (xml) {
+    _buildEntityContainer:function (xml) {
         var entityContainer = xml.declareElement('EntityContainer');
         var name = xml.declareAttribute('Name');
         var m = xml.declareNamespace(this.cfg.m, 'm');
@@ -202,7 +201,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         xml.endElement();
     },
 
-    _buildEntitySets: function (xml) {
+    _buildEntitySets:function (xml) {
         this.context.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
             if (!memDef.type)
                 return;
@@ -215,7 +214,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
     },
 
-    _buildEntitySet: function (xml, memDef) {
+    _buildEntitySet:function (xml, memDef) {
         var elementType = Container.resolveType(memDef.elementType);
 
         this.entitySetDefinitions.push(memDef);
@@ -224,7 +223,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         this._buildType(xml, elementType, 'EntityType');
     },
 
-    _buildType: function (xml, type, xmlElementName) {
+    _buildType:function (xml, type, xmlElementName) {
         if (typeof type.isAssignableTo === 'function' && type.isAssignableTo($data.Entity)) {
 
             var rootElement = xml.declareElement(xmlElementName);
@@ -241,7 +240,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.endElement();
         }
     },
-    _buildAssociations: function (xml) {
+    _buildAssociations:function (xml) {
         var association = xml.declareElement('Association');
         var name = xml.declareAttribute('Name');
 
@@ -272,7 +271,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.endElement();
         }, this);
     },
-    _buildAssociationSets: function (xml) {
+    _buildAssociationSets:function (xml) {
         var associationSet = xml.declareElement('AssociationSet');
         var name = xml.declareAttribute('Name');
         var association = xml.declareAttribute('Association');
@@ -302,7 +301,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.endElement();
         }, this);
     },
-    _buildFunctionImports: function (xml) {
+    _buildFunctionImports:function (xml) {
         var functionImport = xml.declareElement('FunctionImport');
         var parameter = xml.declareElement('Parameter');
         var name = xml.declareAttribute('Name');
@@ -349,7 +348,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }
     },
 
-    _buildEntityKeys: function (xml, type) {
+    _buildEntityKeys:function (xml, type) {
         var key = xml.declareElement('Key');
         var propRef = xml.declareElement('PropertyRef');
         var name = xml.declareAttribute('Name');
@@ -365,7 +364,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.endElement();
         }
     },
-    _buildProperties: function (xml, type) {
+    _buildProperties:function (xml, type) {
         type.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
             if (memDef.inverseProperty !== undefined) {
                 this._buildNavigationProperty(xml, type, memDef);
@@ -379,7 +378,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             }
         }, this);
     },
-    _buildProperty: function (xml, memDef) {
+    _buildProperty:function (xml, memDef) {
         var property = xml.declareElement('Property');
 
         xml.startElement(property);
@@ -391,7 +390,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
         xml.endElement();
     },
-    _buildPropertyAttribute: function (xml, name, value, memDef) {
+    _buildPropertyAttribute:function (xml, name, value, memDef) {
         var resolvedConfig = this._supportedPropertyAttributes[name];
         if (typeof resolvedConfig === 'object' && (!resolvedConfig.cancelRender || !resolvedConfig.cancelRender.call(this, name, memDef))) {
             var attr;
@@ -406,7 +405,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.addAttribute(attr, value.toString());
         }
     },
-    _buildNavigationProperty: function (xml, classType, memDef) {
+    _buildNavigationProperty:function (xml, classType, memDef) {
         var navProperty = xml.declareElement('NavigationProperty');
         xml.startElement(navProperty);
 
@@ -429,10 +428,10 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
         xml.endElement();
     },
-    _createOrGetAssociation: function (classType, memDef) {
+    _createOrGetAssociation:function (classType, memDef) {
         var assocName = classType.name + '_' + memDef.name;
         if (this.associations[assocName])
-            return { association: this.associations[assocName], source: false };
+            return { association:this.associations[assocName], source:false };
 
         //build association
         //targetType
@@ -473,9 +472,9 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
         var association = new $data.oDataServer.MetaDataGeneratorAssoctiation(assocName, sourceRole, targetRole);
         this.associations[assocName] = association;
-        return { association: association, source: true };
+        return { association:association, source:true };
     },
-    _findEntitySetDef: function (elementType) {
+    _findEntitySetDef:function (elementType) {
         var entityDefs = this.context.memberDefinitions.getPublicMappedProperties();
         for (var i = 0; i < entityDefs.length; i++) {
             var esMemDef = entityDefs[i];
@@ -485,61 +484,79 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }
         return null;
     },
-    _resolveTypeName: function (type) {
+    _resolveTypeName:function (type) {
         var resolvedType = Container.getType(type);
         if (typeof resolvedType.isAssignableTo === 'function' && resolvedType.isAssignableTo($data.Entity))
             return this.cfg.contextNamespace + '.' + resolvedType.name;
         else
-            return Container.getName(resolvedType);;
+            return Container.getName(resolvedType);
+        ;
     },
-    _supportedPropertyAttributes: {
-        value: {
-            name: {
-                name: 'Name',
-                cancelRender: function (name, memDef) { return memDef.serviceOpName !== undefined; }
+    _supportedPropertyAttributes:{
+        value:{
+            name:{
+                name:'Name',
+                cancelRender:function (name, memDef) {
+                    return memDef.serviceOpName !== undefined;
+                }
             },
-            required: {
-                name: 'Nullable',
-                converter: function (name, value) { return !value; }
+            required:{
+                name:'Nullable',
+                converter:function (name, value) {
+                    return !value;
+                }
             },
-            nullable: {
-                name: 'Nullable',
-                cancelRender: function (name, memDef) { return memDef.required !== undefined; }
+            nullable:{
+                name:'Nullable',
+                cancelRender:function (name, memDef) {
+                    return memDef.required !== undefined;
+                }
             },
-            maxLength: {
-                name: 'MaxLength',
-                converter: function (name, value) { return value === Number.POSITIVE_INFINITY ? 'MAX' : value }
+            maxLength:{
+                name:'MaxLength',
+                converter:function (name, value) {
+                    return value === Number.POSITIVE_INFINITY ? 'MAX' : value
+                }
             },
-            concurrencyMode: {
-                name: 'ConcurrencyMode',
-                converter: function (name, value) { return value[0].toUpperCase() + value.slice(1); }
+            concurrencyMode:{
+                name:'ConcurrencyMode',
+                converter:function (name, value) {
+                    return value[0].toUpperCase() + value.slice(1);
+                }
             },
-            type: {
-                name: 'Type',
-                converter: function (name, value, memDef) { return this._resolveTypeName(value); /*Container.getName(Container.getType(value));*/ },
-                cancelRender: function (name, memdef) { return memdef.type === undefined }
+            type:{
+                name:'Type',
+                converter:function (name, value, memDef) {
+                    return this._resolveTypeName(value);
+                    /*Container.getName(Container.getType(value));*/
+                },
+                cancelRender:function (name, memdef) {
+                    return memdef.type === undefined
+                }
             },
-            computed: {
-                name: 'StoreGeneratedPattern',
-                namespace: 'http://schemas.microsoft.com/ado/2009/02/edm/annotation',
-                namespaceName: 'p6',
-                converter: function (name, value, memDef) { return memDef.key ? 'Identity' : 'Computed'; }
+            computed:{
+                name:'StoreGeneratedPattern',
+                namespace:'http://schemas.microsoft.com/ado/2009/02/edm/annotation',
+                namespaceName:'p6',
+                converter:function (name, value, memDef) {
+                    return memDef.key ? 'Identity' : 'Computed';
+                }
             },
-            edmx_FixedLength: { name: 'FixedLength' },
-            edmx_Unicode: { name: 'Unicode' },
-            edmx_Precision: { name: 'Precision' },
-            edmx_Scale: { name: 'Scale' },
+            edmx_FixedLength:{ name:'FixedLength' },
+            edmx_Unicode:{ name:'Unicode' },
+            edmx_Precision:{ name:'Precision' },
+            edmx_Scale:{ name:'Scale' },
 
-            serviceOpName: { name: 'Name' },
-            method: {
-                name: 'HttpMethod',
-                namespace: 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
-                namespaceName: 'm'
+            serviceOpName:{ name:'Name' },
+            method:{
+                name:'HttpMethod',
+                namespace:'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+                namespaceName:'m'
             },
-            entitySetName: { name: 'EntitySet' },
-            returnType: {
-                name: 'ReturnType',
-                converter: function (name, value, memDef) {
+            entitySetName:{ name:'EntitySet' },
+            returnType:{
+                name:'ReturnType',
+                converter:function (name, value, memDef) {
                     var type = Container.getType(value);
                     var typeName = this._resolveTypeName(type);
                     if (memDef.elementType && ((type.isAssignableTo && type.isAssignableTo($data.Queryable)) || type === $data.Array)) {
@@ -548,7 +565,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                     }
                     return typeName;
                 },
-                cancelRender: function (name, memDef) {
+                cancelRender:function (name, memDef) {
                     if (!memDef.returnType)
                         return true;
 
@@ -560,7 +577,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }
     },
 
-    _discoverFunctionImports: function () {
+    _discoverFunctionImports:function () {
         this.FunctionImports = [];
         this.UnknownTypes = [];
 
@@ -574,9 +591,9 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             var protMembers = Object.keys(this.context.prototype);
             for (var i = 0, l = protMembers.length; i < l; i++) {
                 allMembers.push({
-                    kind: 'method',
-                    name: protMembers[i],
-                    method: this.context.prototype[protMembers[i]]
+                    kind:'method',
+                    name:protMembers[i],
+                    method:this.context.prototype[protMembers[i]]
                 })
             }
 
@@ -589,7 +606,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
             var parsedInfo = serviceDefParser.parseFromMethod(member.method);
             var vMember = {};
-            $data.typeSystem.extend(vMember, { serviceOpName: member.name, method: "GET" }, parsedInfo, member.method);
+            $data.typeSystem.extend(vMember, { serviceOpName:member.name, method:"GET" }, parsedInfo, member.method);
 
             if (vMember.returnType && this._isExtendedType(vMember.returnType)) {
                 var uType = Container.resolveType(vMember.returnType);
@@ -623,7 +640,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             this.FunctionImports.push(vMember);
         }
     },
-    _isExtendedType: function (type) {
+    _isExtendedType:function (type) {
         var resolvedType = Container.resolveType(type);
         if (typeof resolvedType.isAssignableTo === 'function' && resolvedType.isAssignableTo($data.Entity)) {
 
@@ -640,7 +657,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
 
 $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
-    parseFromMethod: function (method, target) {
+    parseFromMethod:function (method, target) {
         var lines = method.toString().split('\n');
         var commentLines = [];
         for (var i = 1, l = lines.length; i < l; i++) {
@@ -683,36 +700,38 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
 
         return resultDef;
     },
-    ltrim: function (str) { return str.replace(/^\s+/, ''); },
-    supportedFunctionDefinitisons: {
-        value: {
-            returns: {
-                single: true,
-                attrValue: 'type',
-                fieldName: 'returnType'
+    ltrim:function (str) {
+        return str.replace(/^\s+/, '');
+    },
+    supportedFunctionDefinitisons:{
+        value:{
+            returns:{
+                single:true,
+                attrValue:'type',
+                fieldName:'returnType'
             },
-            entitySet: {
-                single: true,
-                attrValue: 'name',
-                fieldName: 'entitySetName'
+            entitySet:{
+                single:true,
+                attrValue:'name',
+                fieldName:'entitySetName'
             },
-            serviceMethod: {
-                single: true,
-                attrValue: 'name',
-                fieldName: 'serviceOpName'
+            serviceMethod:{
+                single:true,
+                attrValue:'name',
+                fieldName:'serviceOpName'
             },
-            method: {
-                single: true,
-                attrValue: 'type',
-                fieldName: 'method'
+            method:{
+                single:true,
+                attrValue:'type',
+                fieldName:'method'
             },
-            elements: {
-                single: true,
-                attrValue: 'type',
-                fieldName: 'elementType'
+            elements:{
+                single:true,
+                attrValue:'type',
+                fieldName:'elementType'
             },
-            param: {
-                valueConverter: function (xmlDomElements) {
+            param:{
+                valueConverter:function (xmlDomElements) {
                     for (var i = 0, l = xmlDomElements.length; i < l; i++) {
                         if (i === 0)
                             this.params = [];
