@@ -1,8 +1,8 @@
 VERSION = '1.1.1'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
-MODULE_DIR = $(TARGET_DIR)/modules
-PROVIDERS_DIR = $(TARGET_DIR)/providers
+MODULE_DIR = $(TARGET_DIR)/jaydatamodules
+PROVIDERS_DIR = $(TARGET_DIR)/jaydataproviders
 NPM_DIR = $(TARGET_DIR)/npm
 NPM_BASE_DIR = ./npm
 TYPESYSTEM_DIR = ./TypeSystem
@@ -122,7 +122,7 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
 oDataProvider = ./Scripts/datajs-1.0.3.js\
-    $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\

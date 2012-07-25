@@ -28,9 +28,11 @@ $data.StorageProviderLoader = {
                     providerName = 'Storm';
                     break;
             }
-            var jaydataScript = document.querySelector('script[src*="jaydata"]');
-            if (jaydataScript) return jaydataScript.src.substring(0, jaydataScript.src.lastIndexOf('/') + 1) + providerName + 'Provider.js';
-            else return 'providers/' + providerName + 'Provider.js';
+            var jaydataScriptMin = document.querySelector('script[src$="jaydata.min.js"]');
+	    var jaydataScript = document.querySelector('script[src$="jaydata.js"]');
+            if (jaydataScriptMin) return jaydataScriptMin.src.substring(0, jaydataScriptMin.src.lastIndexOf('/') + 1) + 'jaydataproviders/' + providerName + 'Provider.min.js';
+            else if (jaydataScript) return jaydataScript.src.substring(0, jaydataScript.src.lastIndexOf('/') + 1) + 'jaydataproviders/' + providerName + 'Provider.js';
+            else return 'jaydataproviders/' + providerName + 'Provider.js';
         };
 
         function loadScript(url, callback) {
@@ -78,7 +80,7 @@ $data.StorageProviderLoader = {
             return;
         }
 
-        if (module && require) {
+        if (typeof module !== 'undefined' && typeof require !== 'undefined') {
             // NodeJS
             var provider = null;
             try {
