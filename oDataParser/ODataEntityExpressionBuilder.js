@@ -3,7 +3,7 @@
         Guard.requireValue("scopeContext", scopeContext);
         this.scopeContext = scopeContext;
         this.lambdaTypes = [];
-        
+
     },
     supportedParameters: {
         value: [
@@ -13,7 +13,7 @@
             { name: 'skip', expType: $data.Expressions.PagingExpression },
             { name: 'top', expType: $data.Expressions.PagingExpression },
             { name: 'select', expType: $data.Expressions.ProjectionExpression },
-            { name: 'count', expType: $data.Expressions.CountExpression },
+            { name: 'count', expType: $data.Expressions.CountExpression }
         ]
     },
     buildExpression: function (queryParams) {
@@ -33,6 +33,12 @@
             if (typeof this[funcName] === 'function' && req[paramName]) {
                 expression = this[funcName].call(this, req[paramName], expression);
             }
+        }
+
+        if (queryParams.count === true) {
+            expression = new $data.Expressions.CountExpression(expression);
+        } else {
+            expression = new $data.Expressions.ToArrayExpression(expression);
         }
 
         return expression;
@@ -90,6 +96,5 @@
             var expression = new $data.Expressions.IncludeExpression(rootExpr, expConf.expression, $data.Expressions.ExpressionType[expConf.nodeType]);
         }
         return expression;
-    },
-
+    }
 });
