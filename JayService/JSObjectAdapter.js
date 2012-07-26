@@ -1,5 +1,4 @@
-var url = require('url');
-var q = require('q');
+
 function DefaultArgumentBinder(name, options, request) {
     var result = request.query[name];
     return result;
@@ -18,8 +17,12 @@ Function.prototype.curry = function () {
 
 $data.Class.define("$data.JSObjectAdapter", null, null, {
     constructor:function (type, instanceFactory) {
+        var url = require('url');
+        var q = require('q');
         Object.defineProperty(this, "type", { value:type, enumerable:true, writable:false, configurable:false });
         Object.defineProperty(this, "instanceFactory", { value:instanceFactory, enumerable:true, writable:false, configurable:false });
+        Object.defineProperty(this, 'urlHelper', {value: url, enumerable:true, writable:false, configurable:false});
+        Object.defineProperty(this, 'promiseHelper', {value: q, enumerable:true, writable:false, configurable:false});
     },
     handleRequest:function (req, res, next) {
         var serviceInstance = this.instanceFactory();
@@ -37,7 +40,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 
         var self = this;
 
-        q.when(_v).then(function (value) {
+        this.promiseHelper.when(_v).then(function (value) {
             var isXml = false;
             var responseType = "text/plain";
             if (value instanceof $data.XmlResult) {
@@ -71,7 +74,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
     },
 
     resolveMemberName:function (request, serviceInstance) {
-        var parsedUrl = url.parse(request.url);
+        var parsedUrl = this.urlHelper.parse(request.url);
         //there will always be a leading '/'
         var pathElements = parsedUrl.pathname.split('/').slice(1);
         return pathElements[0];
@@ -121,7 +124,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             var result = member.apply(serviceInstance, args);
 
 
-            var defer = q.defer();
+            var defer = self.promiseHelper.defer();
 
             function success(r) {
                 defer.resolve(r);
@@ -134,7 +137,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             if (typeof result === 'function') {
                 result(success, error);
             } else {
-                return q.fcall(function () {
+                return self.promiseHelper.fcall(function () {
                     return result
                 });
             }

@@ -1,8 +1,3 @@
-//var $data = require('jaydata');
-
-require('./oDataMetaDataGenerator.js');
-require('./XmlResult.js');
-require('./JSObjectAdapter.js');
 $data.Class.define("$data.JayService", null, null, {
     constructor:function () {
     }
@@ -52,16 +47,4 @@ $data.Class.define("$data.JayService", null, null, {
         return new $data.XmlResult(data);
     }
 });
-require('./ServiceBase.js');
-require('./EntityTransform.js');
-require('./oDataResponseDataBuilder.js');
 
-//function NoopFormat(data) {
-//    return data;
-//}
-//
-//var responseFormatters = {
-//    'application/json': function(data) { return JSON.stringify(data); },
-//    'text/plain': NoopFormat,
-//    'text/xml': NoopFormat
-//};

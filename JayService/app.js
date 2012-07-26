@@ -5,8 +5,7 @@
  * Time: 8:00 PM
  * To change this template use File | Settings | File Templates.
  */
-$data = require('jaydata');//["$data"];
-service = require('./JayService.js');
+require('jaydata');//["$data"];
 
 $data.Entity.extend("Demo.Person", {
     FirstName:{ type:"string" },
