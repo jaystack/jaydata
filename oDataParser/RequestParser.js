@@ -30,7 +30,7 @@
         constructor: function () {
             this.req = null;
             this.lexer = null;
-            this.builder = new $data.oDataParser.ExpressionBuilder();
+            this.builder = new $data.oDataParser.RequestExpressionBuilder();
         },
         parse: function (req) {
             ///<param name="req" type="$data.oDataParser.QueryRequest" />

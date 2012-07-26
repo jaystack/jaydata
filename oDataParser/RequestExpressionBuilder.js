@@ -1,4 +1,4 @@
-$data.Class.define('$data.oDataParser.ExpressionBuilder', null, null, {
+$data.Class.define('$data.oDataParser.RequestExpressionBuilder', null, null, {
     buildConstant: function (value, type) {
         return new $data.Expressions.ConstantExpression(value, type);
     },
@@ -29,7 +29,7 @@ $data.Class.define('$data.oDataParser.ExpressionBuilder', null, null, {
             case "div": type = "number"; nodeType = "divide"; operator = "/"; value = "/"; break;
             case "mod": type = "number"; nodeType = "modulo"; operator = "%"; value = "%"; break;
 
-            default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.ExpressionBuilder.buildConstant: " + op)); break;
+            default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.RequestExpressionBuilder.buildConstant: " + op)); break;
         }
         return new $data.Expressions.SimpleBinaryExpression(left, right, nodeType, value, type);
     },
@@ -56,7 +56,7 @@ $data.Class.define('$data.oDataParser.ExpressionBuilder', null, null, {
             case "round": callName = "round"; break;
             case "floor": callName = "floor"; break;
             case "ceiling": callName = "ceiling"; break;
-            default: Guard.raise(new Exception("Not implemented globalCall name in $data.oDataParser.ExpressionBuilder.buildGlobalCall: " + name)); break;
+            default: Guard.raise(new Exception("Not implemented globalCall name in $data.oDataParser.RequestExpressionBuilder.buildGlobalCall: " + name)); break;
         }
 
         var i = 0;
@@ -88,7 +88,7 @@ $data.Class.define('$data.oDataParser.ExpressionBuilder', null, null, {
             case "not": type = "boolean"; nodeType = "not"; operator = "!"; value = "!"; break;
             case "minus": type = "number"; nodeType = "minus"; operator = "-"; value = "-"; break;
             case "plus": type = "number"; nodeType = "plus"; operator = "+"; value = "+"; break;
-            default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.ExpressionBuilder.buildConstant: " + op)); break;
+            default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.RequestExpressionBuilder.buildConstant: " + op)); break;
         }
         return new $data.Expressions.UnaryExpression(operand, nodeType, operator, type);
     }
