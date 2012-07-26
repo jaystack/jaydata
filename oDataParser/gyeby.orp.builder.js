@@ -9,10 +9,12 @@ function ODataExpressionBuilder() {
         return new $data.Expressions.PropertyExpression(expr, source);
     };
     this.buildParameter = function (name, type, nodeType) {
-        return new $data.Expressions.ParameterExpression(name, type, nodeType);
+        expr = new $data.Expressions.ParameterExpression(name, type, nodeType);
+        expr.paramIndex = 0;
+        return expr;
     };
     this.buildSimpleBinary = function (left, right, op, type) {
-        var operator, nodeType, value
+        var operator, nodeType, value;
         switch (op) {
             case "or": type = "boolean"; nodeType = "or"; operator = "||"; value = "||"; break;
             case "and": type = "boolean"; nodeType = "and"; operator = "&&"; value = "&&"; break;
@@ -72,7 +74,6 @@ function ODataExpressionBuilder() {
     };
     this.buildMemberPath = function (chain) {
         var expr = this.buildParameter('it', 'unknown', $data.Expressions.ExpressionType.LambdaParameterReference);
-        expr.paramIndex = 0;
         for (var i = 0; i < chain.length; i++)
             expr = this.buildProperty(expr, this.buildConstant(chain[i], 'string'));
         return expr;

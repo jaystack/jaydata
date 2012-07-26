@@ -1,5 +1,6 @@
 $(document).ready(function () {
     module("ODataRequestParser tests");
+
     test("Filter: BoolLiteralExpr", 6, function () {
         var p = new ODataRequestParser();
         var src = new ODataQueryRequest();
@@ -15,10 +16,12 @@ $(document).ready(function () {
         src.filter = "true or false";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"boolean",value:true},
-            right:{nodeType:"constant",type:"boolean",value:false},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(true, "boolean"), //left
+            p.builder.buildConstant(false, "boolean"), //right
+            "or",//op
+            "boolean"//type
+        ));
         equal(current, expected);
     });
     test("Filter: 'true and false'", 1, function () {
@@ -26,10 +29,60 @@ $(document).ready(function () {
         src.filter = "true and false";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"boolean",value:true},
-            right:{nodeType:"constant",type:"boolean",value:false},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(true, "boolean"), //left
+            p.builder.buildConstant(false, "boolean"), //right
+            "and",//op
+            "boolean"//type
+        ));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 142L", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "142L";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(142, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42.56", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42.56";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42.56, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42.56f", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42.56f";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42.56, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 42.56m", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "42.56m";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(42.56, "number"));
+        equal(current, expected);
+    });
+    test("Filter: Number: 0.456789e3m", 1, function () {
+        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        src.filter = "0.456789e3m";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(456.789, "number"));
         equal(current, expected);
     });
     test("Filter: Datetime", 5, function () {
@@ -37,31 +90,35 @@ $(document).ready(function () {
         src.filter = "datetime'2012-07-15'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = {nodeType:"constant",type:"datetime",value:"2012-07-15T00:00:00.000Z"};
+        var expected = p.builder.buildConstant(new Date("2012-07-15T00:00:00.000Z")); //{nodeType:"constant",type:"datetime",value:"2012-07-15T00:00:00.000Z"};
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45.123'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
-        expected.value = "2012-07-15T18:25:45.123Z";
+        //expected.value = "2012-07-15T18:25:45.123Z";
+        expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123Z"));
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45+02:00'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
-        expected.value = "2012-07-15T16:25:45.000Z";
+        //expected.value = "2012-07-15T16:25:45.000Z";
+        expected = p.builder.buildConstant(new Date("2012-07-15T16:25:45.000Z"));
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45.123+02:00'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
-        expected.value = "2012-07-15T16:25:45.123Z";
+        //expected.value = "2012-07-15T16:25:45.123Z";
+        expected = p.builder.buildConstant(new Date("2012-07-15T16:25:45.123Z"));
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45.123456789'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
-        expected.value = "2012-07-15T18:25:45.123Z";
+        //expected.value = "2012-07-15T18:25:45.123Z";
+        expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123456789"));
         equal(current, JSON.stringify(expected));
     });
     test("Filter: '1 eq 2'", 1, function () {
@@ -69,10 +126,11 @@ $(document).ready(function () {
         src.filter = "1 eq 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "eq" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '1 ne 2'", 1, function () {
@@ -80,10 +138,11 @@ $(document).ready(function () {
         src.filter = "1 ne 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"ne",operator:"!=",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "ne" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '1 lt 2'", 1, function () {
@@ -91,10 +150,11 @@ $(document).ready(function () {
         src.filter = "1 lt 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"lt",operator:"<",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "lt" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '1 gt 2'", 1, function () {
@@ -102,10 +162,11 @@ $(document).ready(function () {
         src.filter = "1 gt 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"gt",operator:">",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "gt" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '1 le 2'", 1, function () {
@@ -113,10 +174,11 @@ $(document).ready(function () {
         src.filter = "1 le 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"le",operator:"<=",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "le" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '1 ge 2'", 1, function () {
@@ -124,10 +186,11 @@ $(document).ready(function () {
         src.filter = "1 ge 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"ge",operator:">=",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "ge" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '1 add 2'", 1, function () {
@@ -135,10 +198,11 @@ $(document).ready(function () {
         src.filter = "1 add 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"1"},
-            right:{nodeType:"constant",type:"number",value:"2"},
-            nodeType:"add",operator:"+",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(1), //left
+            p.builder.buildConstant(2), //right
+            "add" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '42 sub 12'", 1, function () {
@@ -146,10 +210,11 @@ $(document).ready(function () {
         src.filter = "42 sub 12";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"42"},
-            right:{nodeType:"constant",type:"number",value:"12"},
-            nodeType:"sub",operator:"-",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(42), //left
+            p.builder.buildConstant(12), //right
+            "sub" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '123.5 mul 9e2'", 1, function () {
@@ -157,10 +222,11 @@ $(document).ready(function () {
         src.filter = "123.5 mul 9e2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"123.5"},
-            right:{nodeType:"constant",type:"number",value:"9e2"},
-            nodeType:"mul",operator:"*",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(123.5), //left
+            p.builder.buildConstant(9e2), //right
+            "mul" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '123.4e-5 div -9.0'", 1, function () {
@@ -168,10 +234,11 @@ $(document).ready(function () {
         src.filter = "123.4e-5 div -9.0";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"123.4e-5"},
-            right:{nodeType:"constant",type:"number",value:"-9.0"},
-            nodeType:"div",operator:"/",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(123.4e-5), //left
+            p.builder.buildConstant(-9.0), //right
+            "div" //op
+        ));
         equal(current, expected);
     });
     test("Filter: '-123.456789e-53 mod 6'", 1, function () {
@@ -179,10 +246,11 @@ $(document).ready(function () {
         src.filter = "-123.456789e-53 mod 6";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"-123.456789e-53"},
-            right:{nodeType:"constant",type:"number",value:"6"},
-            nodeType:"mod",operator:"%",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(-123.456789e-53), //left
+            p.builder.buildConstant(6), //right
+            "mod" //op
+        ));
         equal(current, expected);
     });
     test("Filter: Long '12345L div 6'", 1, function () {
@@ -190,10 +258,11 @@ $(document).ready(function () {
         src.filter = "12345L div 6";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"12345"},
-            right:{nodeType:"constant",type:"number",value:"6"},
-            nodeType:"div",operator:"/",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(12345), //left
+            p.builder.buildConstant(6), //right
+            "div" //op
+        ));
         equal(current, expected);
     });
     test("Filter: Single '12345f div 12.34f'", 1, function () {
@@ -201,10 +270,11 @@ $(document).ready(function () {
         src.filter = "12345f div 12.34f";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"12345"},
-            right:{nodeType:"constant",type:"number",value:"12.34"},
-            nodeType:"div",operator:"/",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(12345), //left
+            p.builder.buildConstant(12.34), //right
+            "div" //op
+        ));
         equal(current, expected);
     });
     test("Filter: Double '0.12e-4m div -0.12e-4M'", 1, function () {
@@ -212,10 +282,11 @@ $(document).ready(function () {
         src.filter = "0.12e-4m div -0.12e-4M";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left: {nodeType:"constant",type:"number",value:"0.12e-4"},
-            right:{nodeType:"constant",type:"number",value:"-0.12e-4"},
-            nodeType:"div",operator:"/",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(0.12e-4), //left
+            p.builder.buildConstant(-0.12e-4), //right
+            "div" //op
+        ));
         equal(current, expected);
     });
     test("Filter: Invalid Number: Age add 12.", 2, function () {
@@ -255,16 +326,17 @@ $(document).ready(function () {
         src.filter = "'aaa' eq 'aaa' and 'bbb' eq 'bbb'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            right:{
-                left:{nodeType:"constant",type:"string",value:"bbb"},
-                right:{nodeType:"constant",type:"string",value:"bbb"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("aaa"), //left
+                p.builder.buildConstant("aaa"), //right
+                "eq"),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("bbb"), //left
+                p.builder.buildConstant("bbb"), //right
+                "eq"),
+            "and"
+        ));
         equal(current, expected);
     });
     test("Filter: 'aaa' ne 'aaa' or 'bbb' ne 'bbb'", 1, function () {
@@ -272,33 +344,17 @@ $(document).ready(function () {
         src.filter = "'aaa' ne 'aaa' or 'bbb' ne 'bbb'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"ne",operator:"!=",type:"boolean"},
-            right:{
-                left:{nodeType:"constant",type:"string",value:"bbb"},
-                right:{nodeType:"constant",type:"string",value:"bbb"},
-                nodeType:"ne",operator:"!=",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
-        equal(current, expected);
-    });
-    test("Filter: 'aaa' eq 'aaa' and 'bbb' eq 'bbb'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
-        src.filter = "'aaa' eq 'aaa' and 'bbb' eq 'bbb'";
-        p.parseFilterExpr();
-        var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            right:{
-                left:{nodeType:"constant",type:"string",value:"bbb"},
-                right:{nodeType:"constant",type:"string",value:"bbb"},
-                nodeType:"eq",operator:"==",type:"boolean"},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("aaa"), //left
+                p.builder.buildConstant("aaa"), //right
+                "ne"),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("bbb"), //left
+                p.builder.buildConstant("bbb"), //right
+                "ne"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Chain: 'aaa' ne 'aaa' or 'bbb' ne 'bbb' or 'ccc' ne 'ccc'", 1, function () {
@@ -306,22 +362,23 @@ $(document).ready(function () {
         src.filter = "'aaa' ne 'aaa' or 'bbb' ne 'bbb' or 'ccc' ne 'ccc'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"string",value:"aaa"},
-                right:{nodeType:"constant",type:"string",value:"aaa"},
-                nodeType:"ne",operator:"!=",type:"boolean"},
-            right:{
-                left:{
-                    left:{nodeType:"constant",type:"string",value:"bbb"},
-                    right:{nodeType:"constant",type:"string",value:"bbb"},
-                    nodeType:"ne",operator:"!=",type:"boolean"},
-                right:{
-                    left:{nodeType:"constant",type:"string",value:"ccc"},
-                    right:{nodeType:"constant",type:"string",value:"ccc"},
-                    nodeType:"ne",operator:"!=",type:"boolean"},
-                nodeType:"or",operator:"||",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant("aaa"), //left
+                p.builder.buildConstant("aaa"), //right
+                "ne"),
+            p.builder.buildSimpleBinary(
+                p.builder.buildSimpleBinary(
+                    p.builder.buildConstant("bbb"), //left
+                    p.builder.buildConstant("bbb"), //right
+                    "ne"),
+                p.builder.buildSimpleBinary(
+                    p.builder.buildConstant("ccc"), //left
+                    p.builder.buildConstant("ccc"), //right
+                    "ne"),
+                "or"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: true or true or true", 1, function () {
@@ -329,13 +386,14 @@ $(document).ready(function () {
         src.filter = "true or true or true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{nodeType:"constant",type:"boolean",value:true},
-            right:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"or",operator:"||",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(true),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "or"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: true or true and true", 1, function () {
@@ -343,13 +401,14 @@ $(document).ready(function () {
         src.filter = "true or true and true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{nodeType:"constant",type:"boolean",value:true},
-            right:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"and",operator:"&&",type:"boolean"},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildConstant(true),
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "and"),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: true and true or true", 1, function () {
@@ -357,13 +416,14 @@ $(document).ready(function () {
         src.filter = "true and true or true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"and",operator:"&&",type:"boolean"},
-            right:{nodeType:"constant",type:"boolean",value:true},
-            nodeType:"or",operator:"||",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "and"),
+            p.builder.buildConstant(true),
+            "or"
+        ));
         equal(current, expected);
     });
     test("Filter: Precedence: (true or true) and true", 1, function () {
@@ -371,13 +431,14 @@ $(document).ready(function () {
         src.filter = "(true or true) and true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{
-                left:{nodeType:"constant",type:"boolean",value:true},
-                right:{nodeType:"constant",type:"boolean",value:true},
-                nodeType:"or",operator:"||",type:"boolean"},
-            right:{nodeType:"constant",type:"boolean",value:true},
-            nodeType:"and",operator:"&&",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildConstant(true),
+                "or"),
+            p.builder.buildConstant(true),
+            "and"
+        ));
         equal(current, expected);
     });
     test("Filter: Call(a,b): ceiling, floor, round", 3, function () {
@@ -385,19 +446,21 @@ $(document).ready(function () {
         src.filter = "ceiling(12.3)";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = {
-            expression:null,
-            member:"ceiling",
-            args:[
-                {nodeType:"constant",type:"number",value:"12.3"}
-            ],
-            type:"number"};
+        var expected = p.builder.buildGlobalCall(null, "ceiling", [
+            p.builder.buildConstant(12.3)
+        ]);
         equal(current, JSON.stringify(expected));
 
-        src.filter = "floor(12.3)";expected.member = "floor";p.parseFilterExpr();
+        src.filter = "floor(12.3)";p.parseFilterExpr();
+        expected = p.builder.buildGlobalCall(null, "floor", [
+            p.builder.buildConstant(12.3)
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
-        src.filter = "round(12.3)";expected.member = "round";p.parseFilterExpr();
+        src.filter = "round(12.3)";p.parseFilterExpr();
+        expected = p.builder.buildGlobalCall(null, "round", [
+            p.builder.buildConstant(12.3)
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
     test("Filter: Call(a,b): substringof, startswith, endswith, concat, indexof", 5, function () {
@@ -405,28 +468,40 @@ $(document).ready(function () {
         src.filter = "substringof('vadalma', 'ada')";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = {
-            expression:null,
-            member:"substringof",
-            args:[
-                {nodeType:"constant",type:"string",value:"vadalma"},
-                {nodeType:"constant",type:"string",value:"ada"}
-            ],
-            type:"boolean"};
+        var expected = p.builder.buildGlobalCall(null, "substringof", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(current, JSON.stringify(expected));
 
-        src.filter = "startswith('vadalma', 'ada')";expected.member = "startswith";p.parseFilterExpr();
+        src.filter = "startswith('vadalma', 'ada')";p.parseFilterExpr();
+        expected = p.builder.buildGlobalCall(null, "startswith", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
-        src.filter = "endswith('vadalma', 'ada')";expected.member = "endswith";p.parseFilterExpr();
+        src.filter = "endswith('vadalma', 'ada')";p.parseFilterExpr();
+        expected = p.builder.buildGlobalCall(null, "endswith", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         expected.type = "string";
-        src.filter = "concat('vadalma', 'ada')";expected.member = "concat";p.parseFilterExpr();
+        src.filter = "concat('vadalma', 'ada')";p.parseFilterExpr();
+        expected = p.builder.buildGlobalCall(null, "concat", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         expected.type = "int";
-        src.filter = "indexof('vadalma', 'ada')";expected.member = "indexof";p.parseFilterExpr();
+        src.filter = "indexof('vadalma', 'ada')";p.parseFilterExpr();
+        expected = p.builder.buildGlobalCall(null, "indexof", [
+            p.builder.buildConstant("vadalma"),
+            p.builder.buildConstant("ada")
+        ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
 
@@ -533,16 +608,19 @@ $(document).ready(function () {
         }
         equal(names, "aA_Aa___456z__|__a|_aa45a4a7_|");
     });
-
     test("Filter: Member: Name eq 'John'", 1, function () {
         var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
         src.filter = "Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Name"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            p.builder.buildConstant("John"),
+            "eq"
+        ));
         equal(current, expected);
     });
     test("Filter: Member: Age add 12", 1, function () {
@@ -550,10 +628,14 @@ $(document).ready(function () {
         src.filter = "Age add 12";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Age"]},
-            right:{nodeType:"constant",type:"number",value:"12"},
-            nodeType:"add",operator:"+",type:"number"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),
+            p.builder.buildConstant(12),
+            "add"
+        ));
         equal(current, expected);
     });
     test("Filter: Member: Name2_a34 eq 'John'", 1, function () {
@@ -561,10 +643,14 @@ $(document).ready(function () {
         src.filter = "Name2_a34 eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Name2_a34"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name2_a34")
+            ),
+            p.builder.buildConstant("John"),
+            "eq"
+        ));
         equal(current, expected);
     });
 
@@ -573,10 +659,17 @@ $(document).ready(function () {
         src.filter = "Author/Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["Author","Name"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
+        var expected = JSON.stringify(p.builder.buildSimpleBinary(
+            p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            p.builder.buildConstant("John"),
+            "eq"
+        ));
         equal(current, expected);
     });
     test("Filter: Invalid Member: Author.Name eq 'John'", 1, function () {
@@ -596,11 +689,21 @@ $(document).ready(function () {
         src.filter = "MainNamespace.SubNamespace/Author/Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = JSON.stringify({
-            left:{member:["MainNamespace.SubNamespace","Author","Name"]},
-            right:{nodeType:"constant",type:"string",value:"John"},
-            nodeType:"eq",operator:"==",type:"boolean"});
-        equal(current, expected);
+       var expected = JSON.stringify(p.builder.buildSimpleBinary(
+           p.builder.buildProperty(
+               p.builder.buildProperty(
+                   p.builder.buildProperty(
+                       p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                       p.builder.buildConstant("MainNamespace.SubNamespace")
+                   ),
+                   p.builder.buildConstant("Author")
+               ),
+               p.builder.buildConstant("Name")
+           ),
+           p.builder.buildConstant("John"),
+           "eq"
+       ));
+       equal(current, expected);
     });
     test("Filter: Invalid Member: MainNamespace.SubNamespace/Author.Name eq 'John'", 2, function () {
         var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
@@ -638,101 +741,167 @@ $(document).ready(function () {
         equal(err.column, 12, "Column is "+err.column+", expected: 11");
     });
 
-
     //==================================================================================================
 
 
     test("OrderBy: 'Name'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Author/Name";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Author","Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name asc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name asc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name asc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Author/Name asc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Author","Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Author/Name desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Author","Name"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([{
+            expression:p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Name")
+            ),
+            nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
+
+
+
+
     test("OrderBy: 'Name, Age'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name, Age";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"},
-            {prop:{member:["Age"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Age")
+            ),nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Age, Name'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Age, Name";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Age"]}, dir:"asc"},
-            {prop:{member:["Name"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name, Age desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name, Age desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"asc"},
-            {prop:{member:["Age"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name desc, Age desc'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name desc, Age desc";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"desc"},
-            {prop:{member:["Age"]}, dir:"desc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderByDescending"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderByDescending"}
+        ]);
         equal(current, expected);
     });
     test("OrderBy: 'Name desc, Age'", 1, function () {
         var src = new ODataQueryRequest(); src.orderby = "Name desc, Age";
         var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
-        var expected = JSON.stringify(p.builder.buildOrderBy([
-            {prop:{member:["Name"]}, dir:"desc"},
-            {prop:{member:["Age"]}, dir:"asc"}
-        ]));
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),nodeType:"OrderByDescending"},
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),nodeType:"OrderBy"}
+        ]);
         equal(current, expected);
     });
 
