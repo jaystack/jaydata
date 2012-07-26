@@ -500,12 +500,11 @@
         //=====================================================================================================================
 
         parseOrderBy: function () {
-            //bnf: OrderByExpr:     [ "asc" | "desc"] *( "," MemberPath [ "asc" | "desc"] )
-            //TODO: //bnf: OrderByExpr:     Expr [ "asc" | "desc"] *( "," Expr [ "asc" | "desc"] )
-            var member = this.parseMemberPath();
-            if (!member)
+            //bnf: OrderByExpr:     Expr [ "asc" | "desc"] *( "," Expr [ "asc" | "desc"] )
+            var expr = this.parseExpr();
+            if (!expr)
                 return null;
-            var items = [];  // [{prop:member, dir:"asc"}]
+            var items = [];  // [{expr:expr, dir:"asc"}]
             var dir = "asc";
             var token = this.lexer.token;
             if (token.value == "asc" || token.value == "desc") {
@@ -513,14 +512,14 @@
                 this.lexer.nextToken();
                 token = this.lexer.token;
             }
-            items.push({ prop: member, dir: dir });
+            items.push({ expr: expr, dir: dir });
 
             while (token.value == ASCII.COMMA) {
                 this.lexer.nextToken();
                 token = this.lexer.token;
-                member = this.parseMemberPath();
-                if (!member)
-                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: member", "parseOrderBy");
+                expr = this.parseExpr();
+                if (!expr)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: expr", "parseOrderBy");
                 dir = "asc";
                 token = this.lexer.token;
                 if (token.value == "asc" || token.value == "desc") {
@@ -528,7 +527,7 @@
                     this.lexer.nextToken();
                     token = this.lexer.token;
                 }
-                items.push({ prop: member, dir: dir });
+                items.push({ expr: expr, dir: dir });
             }
 
             return this.builder.buildOrderBy(items);

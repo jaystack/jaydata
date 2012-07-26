@@ -1025,6 +1025,28 @@ $(document).ready(function () {
         ]);
         equal(current, expected);
     });
+    test("OrderBy: 'Body, substring(Author/FirstName,1,2)'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Body, substring(Author/FirstName,1,2)";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Body")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildGlobalCall("string", "substring", [
+                p.builder.buildProperty(
+                    p.builder.buildProperty(
+                        p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                        p.builder.buildConstant("Author")
+                    ),
+                    p.builder.buildConstant("FirstName")
+                ),
+                p.builder.buildConstant(1),
+                p.builder.buildConstant(2)
+            ]),nodeType:"OrderBy"}
+        ]);
+        equal(current, expected);
+    });
 
 });
 
