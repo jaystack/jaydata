@@ -1,7 +1,7 @@
 $(document).ready(function () {
 	module("Current tests");
     test("Select: Name, Age, City", 1, function () {
-        var req = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = req;
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
         req.select = "Name, Age, City";
         p.parseSelectExpr();
         var current = JSON.stringify(p.req.select);
@@ -22,7 +22,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Select: Name, Age add 20, City", 1, function () {
-        var req = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = req;
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
         req.select = "Name, Age add 20, City";
         p.parseSelectExpr();
         var current = JSON.stringify(p.req.select);
@@ -47,7 +47,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Select: Title, concat(Author/FirstName, Author/LastName)", 1, function () {
-        var req = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = req;
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
         req.select = "Title, concat(Author/FirstName, Author/LastName)";
         p.parseSelectExpr();
         var current = JSON.stringify(p.req.select);
@@ -79,7 +79,7 @@ $(document).ready(function () {
 
     /*
         test("Lambda syntax: Products/any()", 1, function () {
-            var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+            var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
             src.filter = "Products/any()";
             p.parseFilterExpr();
             var current = JSON.stringify(p.req.filter);

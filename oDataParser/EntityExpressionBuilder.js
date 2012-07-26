@@ -1,4 +1,4 @@
-﻿$data.Class.define('$data.oDataParser.ODataEntityExpressionBuilder', null, null, {
+﻿$data.Class.define('$data.oDataParser.EntityExpressionBuilder', null, null, {
     constructor: function (scopeContext) {
         Guard.requireValue("scopeContext", scopeContext);
         this.scopeContext = scopeContext;
@@ -19,9 +19,9 @@
     buildExpression: function (queryParams) {
         ///<param name="queryParams" type="Object">{ filter: expression, orderby: [{}], entitySetName: string}</param>
 
-        var req = new ODataQueryRequest();
+        var req = new $data.oDataParser.QueryRequest();
         $data.typeSystem.extend(req, queryParams);
-        var parser = new ODataRequestParser();
+        var parser = new $data.oDataParser.RequestParser();
         parser.parse(req);
 
         var expression = this.createRootExpression(queryParams.entitySetName);
