@@ -68,9 +68,9 @@
             var entityExpressionTree = converter.Visit(expConf.expression, { queryParameters: [], lambdaParameters: this.lambdaTypes });
 
             var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
-            var expression = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
+            rootExpr = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
         }
-        return expression;
+        return rootExpr;
     },
     selectConverter: function (expr, rootExpr) {
         var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
