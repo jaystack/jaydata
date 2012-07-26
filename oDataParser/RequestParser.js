@@ -22,7 +22,7 @@
         select: { type: 'string' },
         expand: { type: 'string' },
         format: { type: 'string' },
-        inlinecount: { type: 'string' },
+        inlinecount: { type: 'string' }
     });
 
     // ODataRequestParser
@@ -64,14 +64,26 @@
             this.req.orderby = expr;
         },
         parseSkipExpr: function () {
-            this.req.skip = parseInt(this.req.skip);
-            //TODO: return with ConstantExpr
-            //TODO: some tests
+            this.lexer = new $data.oDataParser.RequestLexer(this.req.skip);
+            var token = this.lexer.token;
+            if(this.lexer.token.tokenType != TokenType.DIGITS)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid expression in $skip: '" + token.value + "'.", "parseSkipExpr");
+            var expr = this.parseNumberLiteral();
+            token = this.lexer.token;
+            if (token && token.tokenType != TokenType.EOF)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Unexpected " + this.tokenName(token.tokenType) + " in $skip: '" + token.value + "'.", "parseSkipExpr");
+            this.req.skip = expr;
         },
         parseTopExpr: function () {
-            this.req.top = parseInt(this.req.top);
-            //TODO: return with ConstantExpr
-            //TODO: some tests
+            this.lexer = new $data.oDataParser.RequestLexer(this.req.top);
+            var token = this.lexer.token;
+            if(this.lexer.token.tokenType != TokenType.DIGITS)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid expression in $top: '" + token.value + "'.", "parseTopExpr");
+            var expr = this.parseNumberLiteral();
+            token = this.lexer.token;
+            if (token && token.tokenType != TokenType.EOF)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Unexpected " + this.tokenName(token.tokenType) + " in $top: '" + token.value + "'.", "parseTopExpr");
+            this.req.top = expr;
         },
         parseSelectExpr: function () {
             this.lexer = new $data.oDataParser.RequestLexer(this.req.select);

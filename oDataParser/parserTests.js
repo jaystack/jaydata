@@ -746,6 +746,124 @@ $(document).ready(function () {
 
     //==================================================================================================
 
+    test("Skip: '42'", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.skip = "42";
+        p.parseSkipExpr();
+        var current = JSON.stringify(p.req.skip);
+        var expected = JSON.stringify(
+            p.builder.buildConstant(42)
+        );
+        equal(current, expected);
+    });
+    test("Skip (invalid):  '-10'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "-10";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Skip (invalid): '10.'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "10.";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Skip (invalid): 'ten'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "ten";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Skip (invalid): '10 years'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "10 years";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top: '42'", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.top = "42";
+        p.parseTopExpr();
+        var current = JSON.stringify(p.req.top);
+        var expected = JSON.stringify(
+            p.builder.buildConstant(42)
+        );
+        equal(current, expected);
+    });
+    test("Top (invalid):  '-10'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "-10";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top (invalid): '10.'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "10.";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top (invalid): 'ten'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "ten";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top (invalid): '10 years'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "10 years";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+
+    //==================================================================================================
 
     test("OrderBy: 'Name'", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name";

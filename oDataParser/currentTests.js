@@ -1,5 +1,9 @@
 $(document).ready(function () {
 	module("Current tests");
+
+
+
+
     test("Select: Name, Age, City", 1, function () {
         var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
         req.select = "Name, Age, City";
