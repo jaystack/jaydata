@@ -725,10 +725,16 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
                 attrValue:'type',
                 fieldName:'method'
             },
-            elements:{
-                single:true,
-                attrValue:'type',
-                fieldName:'elementType'
+            elementType: {
+                elementName: 'returns',
+                single: true,
+                attrValue: 'elementType',
+                fieldName: 'elementType'
+            },
+            responseType: {
+                single: true,
+                attrValue: 'type',
+                fieldName: 'responseType'
             },
             param:{
                 valueConverter:function (xmlDomElements) {
