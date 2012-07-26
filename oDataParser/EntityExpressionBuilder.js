@@ -1,9 +1,9 @@
-﻿$data.Class.define('$data.oDataParser.ODataEntityExpressionBuilder', null, null, {
+﻿$data.Class.define('$data.oDataParser.EntityExpressionBuilder', null, null, {
     constructor: function (scopeContext) {
         Guard.requireValue("scopeContext", scopeContext);
         this.scopeContext = scopeContext;
         this.lambdaTypes = [];
-        
+
     },
     supportedParameters: {
         value: [
@@ -13,15 +13,15 @@
             { name: 'skip', expType: $data.Expressions.PagingExpression },
             { name: 'top', expType: $data.Expressions.PagingExpression },
             { name: 'select', expType: $data.Expressions.ProjectionExpression },
-            { name: 'count', expType: $data.Expressions.CountExpression },
+            { name: 'count', expType: $data.Expressions.CountExpression }
         ]
     },
     buildExpression: function (queryParams) {
         ///<param name="queryParams" type="Object">{ filter: expression, orderby: [{}], entitySetName: string}</param>
 
-        var req = new ODataQueryRequest();
+        var req = new $data.oDataParser.QueryRequest();
         $data.typeSystem.extend(req, queryParams);
-        var parser = new ODataRequestParser();
+        var parser = new $data.oDataParser.RequestParser();
         parser.parse(req);
 
         var expression = this.createRootExpression(queryParams.entitySetName);
@@ -33,6 +33,12 @@
             if (typeof this[funcName] === 'function' && req[paramName]) {
                 expression = this[funcName].call(this, req[paramName], expression);
             }
+        }
+
+        if (queryParams.count === true) {
+            expression = new $data.Expressions.CountExpression(expression);
+        } else {
+            expression = new $data.Expressions.ToArrayExpression(expression);
         }
 
         return expression;
@@ -62,9 +68,9 @@
             var entityExpressionTree = converter.Visit(expConf.expression, { queryParameters: [], lambdaParameters: this.lambdaTypes });
 
             var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
-            var expression = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
+            rootExpr = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
         }
-        return expression;
+        return rootExpr;
     },
     selectConverter: function (expr, rootExpr) {
         var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
@@ -90,6 +96,5 @@
             var expression = new $data.Expressions.IncludeExpression(rootExpr, expConf.expression, $data.Expressions.ExpressionType[expConf.nodeType]);
         }
         return expression;
-    },
-
+    }
 });

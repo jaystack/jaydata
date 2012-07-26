@@ -1,9 +1,12 @@
 $(document).ready(function () {
     module("ODataRequestParser tests");
+    var ASCII = $data.oDataParser.ASCII;
+    var CharType = $data.oDataParser.CharType;
+    var TokenType = $data.oDataParser.TokenType;
 
     test("Filter: BoolLiteralExpr", 6, function () {
-        var p = new ODataRequestParser();
-        var src = new ODataQueryRequest();
+        var p = new $data.oDataParser.RequestParser();
+        var src = new $data.oDataParser.QueryRequest();
         p.req = src;
         var f;
         src.filter = "true"; p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,"boolean");equal(f.value,true);
@@ -12,7 +15,7 @@ $(document).ready(function () {
         //src.filter = "0";    p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,"boolean");equal(f.value,false);
     });
     test("Filter: 'true or false'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "true or false";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -25,7 +28,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: 'true and false'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "true and false";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -38,7 +41,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Number: 42", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "42";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -46,7 +49,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Number: 142L", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "142L";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -54,7 +57,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Number: 42.56", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "42.56";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -62,7 +65,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Number: 42.56f", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "42.56f";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -70,7 +73,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Number: 42.56m", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "42.56m";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -78,7 +81,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Number: 0.456789e3m", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "0.456789e3m";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -86,7 +89,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Datetime", 5, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "datetime'2012-07-15'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -122,7 +125,7 @@ $(document).ready(function () {
         equal(current, JSON.stringify(expected));
     });
     test("Filter: '1 eq 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 eq 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -134,7 +137,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '1 ne 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 ne 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -146,7 +149,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '1 lt 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 lt 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -158,7 +161,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '1 gt 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 gt 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -170,7 +173,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '1 le 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 le 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -182,7 +185,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '1 ge 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 ge 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -194,7 +197,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '1 add 2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 add 2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -206,7 +209,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '42 sub 12'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "42 sub 12";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -218,7 +221,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '123.5 mul 9e2'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "123.5 mul 9e2";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -230,7 +233,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '123.4e-5 div -9.0'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "123.4e-5 div -9.0";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -242,7 +245,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: '-123.456789e-53 mod 6'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "-123.456789e-53 mod 6";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -254,7 +257,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Long '12345L div 6'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "12345L div 6";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -266,7 +269,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Single '12345f div 12.34f'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "12345f div 12.34f";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -278,7 +281,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Double '0.12e-4m div -0.12e-4M'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "0.12e-4m div -0.12e-4M";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -290,7 +293,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Invalid Number: Age add 12.", 2, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         //            012345678901
         src.filter = "Age add 12.";
         var thrown = false;
@@ -306,7 +309,7 @@ $(document).ready(function () {
         equal(col, 11, "Column is "+col+", expected: 11");
     });
     test("Filter: Invalid Number: Age add .12", 2, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         //            012345678901
         src.filter = "Age add .12";
         var thrown = false;
@@ -322,7 +325,7 @@ $(document).ready(function () {
         equal(col, 8, "Column is "+col+", expected: 8");
     });
     test("Filter: 'aaa' eq 'aaa' and 'bbb' eq 'bbb'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "'aaa' eq 'aaa' and 'bbb' eq 'bbb'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -340,7 +343,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: 'aaa' ne 'aaa' or 'bbb' ne 'bbb'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "'aaa' ne 'aaa' or 'bbb' ne 'bbb'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -358,7 +361,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Chain: 'aaa' ne 'aaa' or 'bbb' ne 'bbb' or 'ccc' ne 'ccc'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "'aaa' ne 'aaa' or 'bbb' ne 'bbb' or 'ccc' ne 'ccc'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -382,7 +385,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Precedence: true or true or true", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "true or true or true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -397,7 +400,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Precedence: true or true and true", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "true or true and true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -412,7 +415,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Precedence: true and true or true", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "true and true or true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -427,7 +430,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Precedence: (true or true) and true", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "(true or true) and true";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -442,7 +445,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Call(a,b): ceiling, floor, round", 3, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "ceiling(12.3)";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -464,7 +467,7 @@ $(document).ready(function () {
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
     test("Filter: Call(a,b): substringof, startswith, endswith, concat, indexof", 5, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "substringof('vadalma', 'ada')";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -507,7 +510,7 @@ $(document).ready(function () {
 
     test("Parser: Parsing names 'aaa'", 6, function () {
         var source = "aaa";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var name = p.parseName();
         equal(name, "aaa");
         equal(p.lexer.token.tokenType, TokenType.EOF);
@@ -518,7 +521,7 @@ $(document).ready(function () {
     });
     test("Parser: Parsing names 'aaa '", 6, function () {
         var source = "aaa ";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var name = p.parseName();
         equal(name, "aaa");
         equal(p.lexer.token.tokenType, TokenType.EOF);
@@ -529,7 +532,7 @@ $(document).ready(function () {
     });
     test("Parser: Parsing names 'aaa:'", 6, function () {
         var source = "aaa:";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var name = p.parseName();
         equal(name, "aaa");
         equal(p.lexer.token.tokenType, TokenType.CHAR);
@@ -540,7 +543,7 @@ $(document).ready(function () {
     });
     test("Parser: Parsing names 'bbb a'", 12, function () {
         var source = "bbb a";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var name = p.parseName();
         equal(name, "bbb");                                    // 1
         equal(p.lexer.token.tokenType, TokenType.WORD); // 2
@@ -559,7 +562,7 @@ $(document).ready(function () {
     });
     test("Parser: Parsing names 'bbb a, z '", 18, function () {
         var source = "bbb a, z ";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var name = p.parseName();
         equal(name, "bbb");                                    // 1
         equal(p.lexer.token.tokenType, TokenType.WORD); // 2
@@ -588,7 +591,7 @@ $(document).ready(function () {
     });
     test("Parser: Parsing names 'aAa456z a:aa45a4a7'", 1, function () {
         var source = "aAa456z a:aa45a4a7";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var names = p.parseName() + "|";
         names += p.parseName() + "|";
         p.lexer.nextToken();
@@ -597,7 +600,7 @@ $(document).ready(function () {
     });
     test("Parser: Parsing names 'aA_Aa___456z__ __a:_aa45a4a7_'", 1, function () {
         var source = "aA_Aa___456z__ __a _aa45a4a7_";
-        var req = new ODataQueryRequest();var p = new ODataRequestParser();p.req = req;req.filter = source;p.lexer = new ODataRequestLexer(p.req.filter);
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req; req.filter = source; p.lexer = new $data.oDataParser.RequestLexer(p.req.filter);
         var name;
         var names="";
         var count = 0;
@@ -609,7 +612,7 @@ $(document).ready(function () {
         equal(names, "aA_Aa___456z__|__a|_aa45a4a7_|");
     });
     test("Filter: Member: Name eq 'John'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -624,7 +627,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Member: Age add 12", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Age add 12";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -639,7 +642,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Member: Name2_a34 eq 'John'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Name2_a34 eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -655,7 +658,7 @@ $(document).ready(function () {
     });
 
     test("Filter: Member: Author/Name eq 'John'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Author/Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -673,7 +676,7 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("Filter: Invalid Member: Author.Name eq 'John'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Author.Name eq 'John'";
         var thrown = false;
         try {
@@ -685,7 +688,7 @@ $(document).ready(function () {
         equal(thrown, true, "Syntax error was not thrown.");
     });
    test("Filter: Member: MainNamespace.SubNamespace/Author/Name eq 'John'", 1, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "MainNamespace.SubNamespace/Author/Name eq 'John'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
@@ -706,7 +709,7 @@ $(document).ready(function () {
        equal(current, expected);
     });
     test("Filter: Invalid Member: MainNamespace.SubNamespace/Author.Name eq 'John'", 2, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         //            0         1         2         3         4
         //            012345678901234567890123456789012345678901234567
         src.filter = "MainNamespace.SubNamespace/Author.Name eq 'John'";
@@ -723,7 +726,7 @@ $(document).ready(function () {
         equal(col, 33, "Column is "+col+", expected: 33");
     });
     test("Filter: Invalid sequence: Author Name eq 'John'", 3, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Author Name eq 'John'";
         var thrown, err;
         try { p.parseFilterExpr(); } catch (e) { thrown = true; err = e; }
@@ -732,7 +735,7 @@ $(document).ready(function () {
         equal(err.column, 7, "Column is "+err.column+", expected: 11");
     });
     test("Filter: Invalid operator: Author/Name Eq 'John'", 3, function () {
-        var src = new ODataQueryRequest(); var p = new ODataRequestParser(); p.req = src;
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "Author/Name Eq 'John'";
         var thrown, err;
         try { p.parseFilterExpr(); } catch (e) { thrown = true; err = e; }
@@ -745,8 +748,8 @@ $(document).ready(function () {
 
 
     test("OrderBy: 'Name'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -757,8 +760,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Author/Name";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Author/Name";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildProperty(
@@ -772,8 +775,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Name asc'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name asc";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name asc";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -784,8 +787,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name asc'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Author/Name asc";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Author/Name asc";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildProperty(
@@ -799,8 +802,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Name desc'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name desc";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name desc";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -811,8 +814,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Author/Name desc'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Author/Name desc";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Author/Name desc";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildProperty(
@@ -830,8 +833,8 @@ $(document).ready(function () {
 
 
     test("OrderBy: 'Name, Age'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name, Age";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name, Age";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -845,8 +848,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Age, Name'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Age, Name";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Age, Name";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -860,8 +863,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Name, Age desc'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name, Age desc";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name, Age desc";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -875,8 +878,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Name desc, Age desc'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name desc, Age desc";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name desc, Age desc";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -890,8 +893,8 @@ $(document).ready(function () {
         equal(current, expected);
     });
     test("OrderBy: 'Name desc, Age'", 1, function () {
-        var src = new ODataQueryRequest(); src.orderby = "Name desc, Age";
-        var p = new ODataRequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name desc, Age";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
@@ -906,14 +909,4 @@ $(document).ready(function () {
     });
 
 });
-
-
-
-
-
-
-
-
-
-
 
