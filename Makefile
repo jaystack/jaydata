@@ -7,6 +7,7 @@ NPM_DIR = $(TARGET_DIR)/npm
 NPM_BASE_DIR = ./npm
 TYPESYSTEM_DIR = ./TypeSystem
 TYPES_DIR = ./Types
+JSERVICE_DIR = ./JayService
 COMPILER = ./Tools/compiler.jar
 GPL_LIC = ./GPL-LICENSE.txt
 MIT_LIC = ./MIT-LICENSE.txt
@@ -102,6 +103,14 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/FacebookAuth.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
 
+JAYDATA_SERVER = $(JSERVICE_DIR)/oDataMetaDataGenerator.js\
+	$(JSERVICE_DIR)/XmlResult.js\
+	$(JSERVICE_DIR)/JSObjectAdapter.js\
+	$(JSERVICE_DIR)/JayService.js\
+	$(JSERVICE_DIR)/ServiceBase.js\
+	$(JSERVICE_DIR)/EntityTransform.js\
+	$(JSERVICE_DIR)/oDataResponseDataBuilder.js\
+
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
 SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
@@ -164,13 +173,15 @@ npmjaydata-core: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@cp -r $(NPM_BASE_DIR)/jaydata/* $(NPM_DIR)/jaydata-core
 	@@cp -xr $(TYPESYSTEM_DIR) $(NPM_DIR)/jaydata-core/lib
 	@@cp -xr $(TYPES_DIR) $(NPM_DIR)/jaydata-core/lib
+	@@cp --parents $(JAYDATA_SERVER) $(NPM_DIR)/jaydata-core/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata-core
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata-core
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata-core
 	@$(foreach dir,$(TYPE_SYSTEM),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
+	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata-core/lib/index.js
-	@@sed -e 's/"dependencies": {},//;s/"name": "jaydata"/"name": "jaydata-core"/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata-core/package.json
+	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "url": ">0.0.1", "genx": "0.9.0", "libxmljs": "0.5.4"},/;s/"name": "jaydata"/"name": "jaydata-core"/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata-core/package.json
 
 npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata npm package..."
@@ -184,6 +195,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@cp --parents $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
 	@@cp --parents $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
 	@@cp --parents $(StormProvider) $(NPM_DIR)/jaydata/lib
+	@@cp --parents $(JAYDATA_SERVER) $(NPM_DIR)/jaydata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata
@@ -196,14 +208,16 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/inmemory_index.js;)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
 	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/storm_index.js;)
+	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/service_index.js;)
 	@@echo "require('./indexeddb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./sqlite_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./odata_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./inmemory_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./service_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
-	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
+	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "url": ">0.0.1", "genx": "0.9.0", "libxmljs": "0.5.4"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
 npmindexeddb: $(IndexedDbProvider) $(CREDITS)
 	@@echo "Building IndexedDb provider npm package..."
