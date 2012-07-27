@@ -1,6 +1,6 @@
 ﻿
 $(document).ready(function () {
-    function builderTest(name, queryable, context, isCount) {
+    function builderTest(name, queryable, context, isCount, hasInclude) {
         test(name, 2, function () {
 
             var q;
@@ -18,6 +18,8 @@ $(document).ready(function () {
                 var name = parts[0].substr(1);
                 obj[name] = parts[1];
             }
+            if (!hasInclude)
+                obj.expand = '';
 
             obj.entitySetName = queryParts[0].split('/')[1];
             obj.count = queryParts[0].indexOf('$count') > 0;
@@ -41,13 +43,22 @@ $(document).ready(function () {
     builderTest('field compare complex', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }), c);
     builderTest('orderBy string', c.Articles.orderBy('it.Title'), c);
     builderTest('orderBy', c.Articles.orderBy(function (it) { return it.Title; }), c);
-    //builderTest('orderBy orderBy add', c.Articles.orderBy(function (it) { return it.Title + it.Body; }), c);
+    builderTest('orderBy orderBy add', c.Articles.orderBy(function (it) { return it.Title + it.Body; }), c);
     builderTest('orderBy orderBy', c.Articles.orderBy(function (it) { return it.Title; }).orderBy(function (it) { return it.Body; }), c);
-    //builderTest('orderBy orderBy.call', c.Articles.orderBy(function (it) { return it.Title; }).orderBy(function (it) { return it.Body.substr(1,2); }), c);
+    builderTest('orderBy orderBy.call', c.Articles.orderBy(function (it) { return it.Title; }).orderBy(function (it) { return it.Body.substr(1,2); }), c);
     builderTest('field compare, order by', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title'), c);
     builderTest('field compare, order by / $count', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title'), c, true);
     builderTest('skip', c.Articles.skip(5), c);
     builderTest('take', c.Articles.take(6), c);
     builderTest('field compare, order by, skip, take', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title').skip(10).take(5), c);
-    //builderTest('map', c.Articles.map(function (it) { return { a: it.Title, b: it.Body }; }), c);
+    builderTest('map', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body }; }), c);
+    builderTest('map navProp simple', c.Articles.map(function (it) { return { Author: it.Author.LoginName }; }), c);
+    builderTest('map navProp complex', c.Articles.map(function (it) { return { Title: it.Title, Author: it.Author }; }), c);
+    builderTest('map navProp complex deep prop', c.Articles.map(function (it) { return { Title: it.Title, Author: it.Author.LoginName }; }), c);
+    builderTest('include singleProp', c.Articles.include('Category'), c, false, true);
+    builderTest('include deep 1', c.Articles.include('Author.Articles'), c, false, true);
+    builderTest('include deep 2', c.Articles.include('Author.Profile'), c, false, true);
+    builderTest('include deep 3', c.Articles.include('Author.Articles.Reviewer'), c, false, true);
+    builderTest('include multiple 1', c.Articles.include('Category').include('Author'), c, false, true);
+    builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author.Articles'), c, false, true);
 });
