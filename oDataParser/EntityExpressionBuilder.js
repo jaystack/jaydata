@@ -81,13 +81,11 @@
         return expression;
     },
     skipConverter: function (expr, rootExpr) {
-        var skipExp = new $data.Expressions.ConstantExpression(expr, 'number');
-        var expression = new $data.Expressions.PagingExpression(rootExpr, skipExp, $data.Expressions.ExpressionType.Skip);
+        var expression = new $data.Expressions.PagingExpression(rootExpr, expr, $data.Expressions.ExpressionType.Skip);
         return expression;
     },
     topConverter: function (expr, rootExpr) {
-        var topExp = new $data.Expressions.ConstantExpression(expr, 'number');
-        var expression = new $data.Expressions.PagingExpression(rootExpr, topExp, $data.Expressions.ExpressionType.Take);
+        var expression = new $data.Expressions.PagingExpression(rootExpr, expr, $data.Expressions.ExpressionType.Take);
         return expression;
     },
     expandConverter: function (exprObjArray, rootExpr) {
