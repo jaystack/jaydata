@@ -163,7 +163,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
-            if (expression.nodeType == $data.Expressions.ExpressionType.Equal || $data.Expressions.ExpressionType.EqualTyped){
+            if (expression.nodeType === $data.Expressions.ExpressionType.Equal || expression.nodeType === $data.Expressions.ExpressionType.EqualTyped){
                 var v = context.value;
                 if (context.entityType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
