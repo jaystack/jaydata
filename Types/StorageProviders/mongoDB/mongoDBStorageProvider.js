@@ -294,7 +294,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             var arg = args[i];
             if (arg.value instanceof $data.Queryable) {
                 var frameExpression = new opDef.frameType(arg.value.expression);
-                var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
+                var preparator = new $data.Expressions.QueryExpressionCreator(arg.value.entityContext);
                 var prep_expression = preparator.Visit(frameExpression);
 
                 var compiler = new $data.storageProviders.mongoDB.mongoDBWhereCompiler(this.provider, true);
@@ -390,7 +390,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
         };
         
         query.modelBinderConfig = {};
-        var modelBinder = Container.createmongoDBModelBinderConfigCompiler(query, this.includes, false);
+        var modelBinder = new $data.modelBinder.mongoDBModelBinderConfigCompiler(query, this.includes, false);
         modelBinder.Visit(query.expression);
         
         this.Visit(query.expression, query.find);
@@ -406,26 +406,26 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
     VisitOrderExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var orderCompiler = Container.createmongoDBOrderCompiler(this.provider);
+        var orderCompiler = new $data.storageProviders.mongoDB.mongoDBOrderCompiler(this.provider);
         orderCompiler.compile(expression, context);
     },
     VisitPagingExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var pagingCompiler = Container.createmongoDBPagingCompiler();
+        var pagingCompiler = new $data.storageProviders.mongoDB.mongoDBPagingCompiler();
         pagingCompiler.compile(expression, context);
     },
     VisitFilterExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var filterCompiler = Container.createmongoDBWhereCompiler(this.provider);
+        var filterCompiler = new $data.storageProviders.mongoDB.mongoDBWhereCompiler(this.provider);
         context.data = "";
         filterCompiler.compile(expression.selector, context);
     },
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var projectionCompiler = Container.createmongoDBProjectionCompiler(this.context);
+        var projectionCompiler = new $data.storageProviders.mongoDB.mongoDBProjectionCompiler(this.context);
         projectionCompiler.compile(expression, context);
     }
 });
@@ -916,7 +916,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
                 '$data.String': function (text) { return text; },
-                '$data.Boolean': function (bool) { return bool; },
+                '$data.Boolean': function (bool) { return !!bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },

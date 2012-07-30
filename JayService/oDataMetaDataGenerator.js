@@ -338,8 +338,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             if (methodParameters) {
                 methodParameters.forEach(function (param) {
                     xml.startElement(parameter)
-                        .addAttribute(name, param.name)
-                        .addAttribute(type, this._resolveTypeName(param.type))
+                        .addAttribute(name, param.name || param)
+                        .addAttribute(type, this._resolveTypeName(param.type || 'string'))
                         .endElement();
                 }, this);
             }
@@ -601,12 +601,21 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         for (var i = 0; i < allMembers.length; i++) {
             var member = allMembers[i];
 
-            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || !this.context.prototype.hasOwnProperty(member.name))
+            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/){
                 continue;
+            }
 
             var parsedInfo = serviceDefParser.parseFromMethod(member.method);
             var vMember = {};
-            $data.typeSystem.extend(vMember, { serviceOpName:member.name, method:"GET" }, parsedInfo, member.method);
+            
+            mMember = member.method || member;
+            for (var prop in mMember){
+                if (mMember.hasOwnProperty(prop)){
+                    vMember[prop] = mMember[prop];
+                }
+            }
+            
+            $data.typeSystem.extend(vMember, { serviceOpName: member.method && member.method.hasOwnProperty('serviceName') ? member.method.serviceName || member.name : member.name, method:"GET" }, parsedInfo);
 
             if (vMember.returnType && this._isExtendedType(vMember.returnType)) {
                 var uType = Container.resolveType(vMember.returnType);
@@ -627,7 +636,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             if (vMember.params) {
                 for (var j = 0, l = vMember.params.length; j < l; j++) {
                     var param = vMember.params[j];
-                    if (param.type && this._isExtendedType(param.type)) {
+                    if (param && param.type && this._isExtendedType(param.type)) {
                         var uType = Container.resolveType(param.type);
                         if (this.UnknownTypes.indexOf(uType) === -1) {
                             this.UnknownTypes.push(uType);

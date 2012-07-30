@@ -34,7 +34,7 @@
         //this.definedBy = definedClass;
         Object.defineProperty(this, 'definedBy', { value: definedClass, enumerable:false, configurable: false, writable: false });
         if (memberDefinitionData) {
-            if (typeof memberDefinitionData === 'function') {
+            if (typeof memberDefinitionData === 'function' || typeof memberDefinitionData.asFunction === 'function') {
                 this.method = memberDefinitionData;
                 this.kind = MemberTypes.method;
             } else {
@@ -166,6 +166,16 @@
 			}
 			return this.keyPropsCache;
 			//return this.keyPropsCache || (this.keyPropsCache = this.asArray().filter(function (m) { return m.kind == 'property' && m.key; }));
+		},
+		getPublicMappedMethods: function(){
+		    if (!this.pubMapMethodsCache){
+				this.pubMapMethodsCache = [];
+				for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].kind == 'method' && this[i].method/* && this.hasOwnProperty(i)*/)
+						this.pubMapMethodsCache.push(this[i]);
+				}
+			}
+			return this.pubMapMethodsCache;
 		},
         getPropertyByType: function (type) {
 			if (!this.propByTypeCache){
@@ -409,18 +419,19 @@
         } else if (baseClasses.length > 0 && !baseClasses[0].type){
             baseClasses[0].type = $data.Base;
         }
-        for (var i = 0, l=baseClasses.length; i < l; i++) {
+        for (var i = 0, l=baseClasses.length; i < l; i++){
             if (typeof baseClasses[i] === 'function')
                 baseClasses[i] = { type: baseClasses[i] };
         }
 
-        var providedCtor = instanceDefinition.constructor;
+        var providedCtor = instanceDefinition ? instanceDefinition.constructor : undefined;
 
         var classNameParts = className.split('.');
         var shortClassName = classNameParts.splice(classNameParts.length - 1, 1)[0];
 
         var root = window;
-        classNameParts.forEach(function (part) {
+        for (var i = 0; i < classNameParts.length; i++){
+            var part = classNameParts[i];
             if (!root[part]) {
                 //console.log("namespace missing:" + part + ", creating");
                 var ns = {};
@@ -428,7 +439,17 @@
                 root[part] = ns;
             }
             root = root[part];
-        });
+        }
+        
+        /*classNameParts.forEach(function (part) {
+            if (!root[part]) {
+                //console.log("namespace missing:" + part + ", creating");
+                var ns = {};
+                ns.__namespace = true;
+                root[part] = ns;
+            }
+            root = root[part];
+        });*/
 
         var classFunction = null;
         classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
@@ -507,7 +528,11 @@
             		}
 				}
 			}
-            classFunction.baseTypes = (baseClass.baseTypes || []).concat(baseClasses.map(function (base) { return base.type; }));
+            classFunction.baseTypes = baseClass.baseTypes || [];
+            for (var i = 0; i < baseClasses.length; i++){
+                classFunction.baseTypes.push(baseClasses[i].type);
+            }
+            //classFunction.baseTypes = (baseClass.baseTypes || []).concat(baseClasses.map(function (base) { return base.type; }));
             if (!classFunction.isAssignableTo) {
                 Object.defineProperty(classFunction, "isAssignableTo", {
                     value: function (type) {
@@ -810,9 +835,17 @@
         };
 
         this.getTypes = function () {
-            return Object.keys(classNames).map(function (className, index) {
+            var keys = Object.keys(classNames);
+            var ret = [];
+            for (var i = 0; i < keys.length; i++){
+                var className = keys[i];
+                ret.push({ name: className, type: classTypes[classNames[className]], toString: function () { return this.name; } });
+            }
+            return ret;
+            
+            /*return Object.keys(classNames).map(function (className, index) {
                 return { name: className, type: classTypes[classNames[className]], toString: function () { return this.name; } };
-            });
+            });*/
         };
 
         //this.getTypeName( in type);
