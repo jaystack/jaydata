@@ -1,0 +1,13 @@
+{{layout "layout"}}
+<h2>Products by category</h2>
+<h3>${category.CategoryName}</h3>
+<a href="/categories/${category.CategoryID}/products/add"><button>Create new product</button></a>
+<ul>
+{{each(i, product) result}}
+<li>
+    <a href="/categories/${category.CategoryID}/products/edit/${product.ProductID}"><button>Edit</button></a>
+    <a href="/categories/${category.CategoryID}/products/delete/${product.ProductID}"><button>Remove</button></a>    
+    ${product.ProductName.toString('utf8')}</li>
+{{/each}}
+</ul>
+<a href="/categories"><button>Back</button></a>

@@ -1,0 +1,35 @@
+{{layout "layout"}}
+<section id="wrapper" class="container iblock">
+    <h2 class="marginb15 show tacenter">Log entries</h2>
+
+    <button class="btn" id="log-clear">Clear log</button>
+    <table class="table span12 reset-m" style="margin-bottom: 200px !important;">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>IP address</th>
+                <th>URL</th>
+                <th>HTTP method</th>
+                <th>Browser</th>
+            </tr>
+        </thead>
+<!--        <thead>-->
+<!--            <tr>-->
+<!--                <th><select data-bind="options: $root.categoryNames, optionsCaption: '-', optionsCaptionValue: -1, optionsText: 'Category_Name', optionsValue: 'Category_ID', value: $root.filterCategory"></select></th>-->
+<!--                <th><input type="text" data-bind="value: $root.filterProductName, valueUpdate: 'keyup'" /></th>-->
+<!--                <th></th>-->
+<!--                <th></th>-->
+<!--                <th></th>-->
+<!--            </tr>-->
+<!--        </thead>-->
+        <tbody data-bind="foreach: logs">
+            <tr>
+                <td data-bind="text: Timestamp"></td>
+                <td data-bind="text: IPAddress"></td>
+                <td data-bind="text: Url"></td>
+                <td data-bind="text: Method"></td>
+                <td data-bind="text: Browser"></td>
+            </tr>
+        </tbody>
+    </table>
+</section>

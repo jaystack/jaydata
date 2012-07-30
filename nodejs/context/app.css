@@ -1,0 +1,78 @@
+body, html{
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.icon{
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    display: inline-block;
+}
+
+.key{
+    background-image: url('icons/key.png');
+}
+
+.column{
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    border-right: dashed 1px;
+    height: 100%;
+}
+
+.container{
+    padding: 1em;
+}
+
+.entity{
+    display: block;
+    padding: 1em;
+    margin: 1em;
+    border: dashed 1px;
+    border-radius: 0.5em;
+    width: 16em;
+}
+
+.entity-controls{
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.fullname{
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.entity, .entityset{
+    cursor: pointer;
+}
+
+.entityset.selected{
+    font-style: italic;
+}
+
+.entityset .controls{
+    display: none;
+    position: relative;
+}
+
+.entityset.selected .controls{
+    display: inline-block;
+}
+
+.entity .controls{
+    display: none;
+    float: left;
+    position: relative;
+    top: 0.25em;
+}
+
+.entity.selected .controls{
+    display: block;
+}
