@@ -163,13 +163,13 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
-            if (expression.nodeType == $data.Expressions.ExpressionType.Equal){
+            if (expression.nodeType == $data.Expressions.ExpressionType.Equal || $data.Expressions.ExpressionType.EqualTyped){
                 var v = context.value;
                 if (context.entityType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
                 else if (context.valueType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
-                context.query[context.field] = v;
+                context.query[context.entityType.memberDefinitions.getMember(context.field).computed ? '_id' : context.field] = v;
             }else if (expression.nodeType == $data.Expressions.ExpressionType.In && context.unary == $data.Expressions.ExpressionType.Not){
                 if (!context.query[context.field]) context.query[context.field] = {};
                 context.query[context.field].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
