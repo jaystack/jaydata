@@ -2413,7 +2413,6 @@ exports['entityContext'] = {
 
         test.done();
     }
-    //associations
 };
 
 exports.annotateFromVSDoc = function (test) {
