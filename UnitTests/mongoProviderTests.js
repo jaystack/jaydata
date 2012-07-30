@@ -409,3 +409,27 @@ exports.testFilterByKey = function(test){
         });
     });
 };
+
+exports.testFilterByComputed = function(test){
+    test.expect(3);
+    $test.Context.init(function(db){
+        var master = new $test.Item({ Key: 'master', Value: 'master', Rank: 0 });
+        db.Items.add(master);
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 1, 'Not 1 item inserted into collection');
+            db.Items.toArray(function(result){
+                test.equal(result.length, 1, 'Not only 1 item in collection');
+                db.Items.single(function(it){ return it.Id == this.id; }, { id: master.Id }, {
+                    success: function(){
+                        test.ok(true, 'Filter success');
+                        test.done();
+                    },
+                    error: function(){
+                        test.ok(true, 'Filter failed');
+                        test.done();
+                    }
+                });
+            });
+        });
+    });
+};
