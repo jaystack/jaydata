@@ -149,7 +149,20 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
         { name: 'entityid', type: 'id' },
         { name: 'name', type: 'string' }
     ]).returns('int'),
-    removeAllFieldsByEntityID: 
+    removeAllFieldsByEntityID: (function(entityid){
+        return function(success, error){
+            var self = this;
+            this.context.EntityFields.filter(function(it){ return it.EntityID === this.entityid; }, { entityid: entityid }).toArray({
+                success: function(result){
+                    if (result.length){
+                        for (var i = 0; i < result.length; i++) self.context.EntityFields.remove(result[i]);
+                        self.context.saveChanges(self);
+                    }
+                },
+                error: self.error
+            });
+        };
+    }).toServiceOperation().params([{ name: 'entityid', type: 'id' }]).returns('int'),
     getAllFields: (function(){
         return this.context.EntityFields.toArray(this);
     }).toServiceOperation().returns($data.Array, $data.ContextAPI.EntityField),

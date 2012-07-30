@@ -433,3 +433,25 @@ exports.testFilterByComputed = function(test){
         });
     });
 };
+
+exports.testFilterInComputed = function(test){
+    test.expect(3);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items selected from collection');
+                var keys = data.map(function(it){ return it.Id; }).slice(0, 3);
+                db.Items.filter(function(it){ return it.Id in this.keys; }, { keys: keys }).toArray(function(data){
+                    test.equal(data.length, 3, 'Not 3 items filtered by "in" operator');
+                    test.done();
+                });
+            });
+        });
+    });
+};

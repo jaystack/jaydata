@@ -163,28 +163,46 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
+            context.queryField = context.field;
+            if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                delete context.query[context.field];
+                context.queryField = '_id';
+            }
             if (expression.nodeType === $data.Expressions.ExpressionType.Equal || expression.nodeType === $data.Expressions.ExpressionType.EqualTyped){
                 var v = context.value;
                 if (context.entityType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
                 else if (context.valueType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
-                context.query[context.entityType.memberDefinitions.getMember(context.field).computed ? '_id' : context.field] = v;
-            }else if (expression.nodeType == $data.Expressions.ExpressionType.In && context.unary == $data.Expressions.ExpressionType.Not){
-                if (!context.query[context.field]) context.query[context.field] = {};
-                context.query[context.field].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
-                context.unary = undefined;
+                context.query[context.queryField] = v;
+            }else if (expression.nodeType == $data.Expressions.ExpressionType.In){
+                var v = context.value;
+                if (v instanceof Array){
+                    for (var i = 0; i < v.length; i++){
+                        if (context.entityType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v[i]);
+                        else if (context.valueType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v[i]);
+                    }
+                }
+                if (!context.query[context.queryField]) context.query[context.queryField] = {};
+                if (context.unary == $data.Expressions.ExpressionType.Not){
+                    context.query[context.queryField].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */v;
+                    context.unary = undefined;
+                }else{
+                    context.query[context.queryField][expression.resolution.mapTo] = v;
+                }
             }else{
-                if (!context.query[context.field]) context.query[context.field] = {};
-                context.query[context.field][expression.resolution.mapTo] = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
+                if (!context.query[context.queryField]) context.query[context.queryField] = {};
+                context.query[context.queryField][expression.resolution.mapTo] = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
             }
             
             if (context.or){
                 if (!context.stackOr) context.stackOr = [];
-                context.stackOr.push({ field: context.field, query: context.query[context.field] });
+                context.stackOr.push({ field: context.queryField, query: context.query[context.queryField] });
             }else if (context.and){
                 if (!context.stackAnd) context.stackAnd = [];
-                context.stackAnd.push({ field: context.field, query: context.query[context.field] });
+                context.stackAnd.push({ field: context.queryField, query: context.query[context.queryField] });
             }
             
             context.field = undefined;
