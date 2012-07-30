@@ -1,7 +1,0 @@
-# Settings
-theme            = "Reseif"
-fontName         = "Courier"
-fontSize         = 13
-fileBrowserGlob  = "{*,.tm_properties,.htaccess}"
-tabSize          = 2
-softTabs 		 = true
