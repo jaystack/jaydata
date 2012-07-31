@@ -88,6 +88,14 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildConstant(456.789, "number"));
         equal(current, expected);
     });
+    test("Filter: Number: 456789e-3m", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "0456789e-3m";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant(456.789, "number"));
+        equal(current, expected);
+    });
     test("Filter: Datetime", 5, function () {
         var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "datetime'2012-07-15'";
@@ -232,15 +240,134 @@ $(document).ready(function () {
         ));
         equal(current, expected);
     });
+
+    test("Filter: Unary '-9'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "-9";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildConstant(9),
+            "minus"));
+        equal(current, expected);
+    });
+    test("Filter: Unary '--9'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "--9";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildUnary(
+                p.builder.buildConstant(9),
+                "minus"),
+            "minus"));
+        equal(current, expected);
+    });
+    test("Filter: Unary '-IntVar'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "-IntVar";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("IntVar")
+            ),
+            "minus"));
+        equal(current, expected);
+    });
+    test("Filter: Unary '--IntVar'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "--IntVar";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildUnary(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("IntVar")
+                ),
+                "minus"),
+            "minus"));
+        equal(current, expected);
+    });
+    test("Filter: Unary 'not true'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "not true";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildConstant(true),
+            "not"));
+        equal(current, expected);
+    });
+    test("Filter: Unary 'not not true'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "not true";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildConstant(true),
+            "not"));
+        equal(current, expected);
+    });
+    test("Filter: Unary 'not (true and not false)'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "not (true and not false)";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildSimpleBinary(
+                p.builder.buildConstant(true),
+                p.builder.buildUnary(
+                    p.builder.buildConstant(false),
+                    "not"
+                ),
+                "and"
+            ),
+            "not"));
+        equal(current, expected);
+    });
+    test("Filter: Unary 'not BoolVar'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "not BoolVar";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("BoolVar")
+            ),
+            "not"));
+        equal(current, expected);
+    });
+    test("Filter: Unary 'not not BoolVar'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "not not BoolVar";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildUnary(
+            p.builder.buildUnary(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("BoolVar")
+                ),
+                "not"),
+            "not"));
+        equal(current, expected);
+    });
+
     test("Filter: '123.4e-5 div -9.0'", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "123.4e-5 div -9.0";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(123.4e-5), //left
-            p.builder.buildConstant(-9.0), //right
-            "div" //op
+            p.builder.buildConstant(123.4e-5),
+            p.builder.buildUnary(
+                p.builder.buildConstant(9),
+                "minus"),
+            "div"
         ));
         equal(current, expected);
     });
@@ -250,12 +377,15 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(-123.456789e-53), //left
-            p.builder.buildConstant(6), //right
-            "mod" //op
+            p.builder.buildUnary(
+                p.builder.buildConstant(123.456789e-53),
+                "minus"),
+            p.builder.buildConstant(6),
+            "mod"
         ));
         equal(current, expected);
     });
+
     test("Filter: Long '12345L div 6'", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "12345L div 6";
@@ -286,9 +416,11 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(0.12e-4), //left
-            p.builder.buildConstant(-0.12e-4), //right
-            "div" //op
+            p.builder.buildConstant(0.12e-4),
+            p.builder.buildUnary(
+                p.builder.buildConstant(0.12e-4),
+                "minus"),
+            "div"
         ));
         equal(current, expected);
     });
@@ -746,6 +878,124 @@ $(document).ready(function () {
 
     //==================================================================================================
 
+    test("Skip: '42'", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.skip = "42";
+        p.parseSkipExpr();
+        var current = JSON.stringify(p.req.skip);
+        var expected = JSON.stringify(
+            p.builder.buildConstant(42)
+        );
+        equal(current, expected);
+    });
+    test("Skip (invalid):  '-10'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "-10";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Skip (invalid): '10.'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "10.";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Skip (invalid): 'ten'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "ten";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Skip (invalid): '10 years'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.skip = "10 years";
+        var thrown = false;
+        try {
+            p.parseSkipExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top: '42'", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.top = "42";
+        p.parseTopExpr();
+        var current = JSON.stringify(p.req.top);
+        var expected = JSON.stringify(
+            p.builder.buildConstant(42)
+        );
+        equal(current, expected);
+    });
+    test("Top (invalid):  '-10'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "-10";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top (invalid): '10.'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "10.";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top (invalid): 'ten'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "ten";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+    test("Top (invalid): '10 years'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.top = "10 years";
+        var thrown = false;
+        try {
+            p.parseTopExpr();
+        }
+        catch (e) {
+            thrown = true;
+        }
+        equal(thrown, true, "Syntax error was not thrown.");
+    });
+
+    //==================================================================================================
 
     test("OrderBy: 'Name'", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); src.orderby = "Name";
@@ -904,6 +1154,28 @@ $(document).ready(function () {
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
                 p.builder.buildConstant("Age")
             ),nodeType:"OrderBy"}
+        ]);
+        equal(current, expected);
+    });
+    test("OrderBy: 'Body, substring(Author/FirstName,1,2)'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); src.orderby = "Body, substring(Author/FirstName,1,2)";
+        var p = new $data.oDataParser.RequestParser(); p.req = src; p.parseOrderByExpr(); var current = JSON.stringify(p.req.orderby);
+        var expected = JSON.stringify([
+            {expression:p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Body")
+            ),nodeType:"OrderBy"},
+            {expression:p.builder.buildGlobalCall("string", "substring", [
+                p.builder.buildProperty(
+                    p.builder.buildProperty(
+                        p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                        p.builder.buildConstant("Author")
+                    ),
+                    p.builder.buildConstant("FirstName")
+                ),
+                p.builder.buildConstant(1),
+                p.builder.buildConstant(2)
+            ]),nodeType:"OrderBy"}
         ]);
         equal(current, expected);
     });

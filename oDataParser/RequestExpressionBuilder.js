@@ -78,7 +78,7 @@ $data.Class.define('$data.oDataParser.RequestExpressionBuilder', null, null, {
     buildOrderBy: function (items) {
         var newItems = new Array(items.length);
         for (var i = 0; i < items.length; i++) {
-            newItems[i] = { expression: items[i].prop, nodeType: items[i].dir === 'asc' ? $data.Expressions.ExpressionType.OrderBy : $data.Expressions.ExpressionType.OrderByDescending };
+            newItems[i] = { expression: items[i].expr, nodeType: items[i].dir === 'asc' ? $data.Expressions.ExpressionType.OrderBy : $data.Expressions.ExpressionType.OrderByDescending };
         }
         return newItems;
     },

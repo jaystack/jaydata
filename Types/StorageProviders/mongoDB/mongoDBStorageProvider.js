@@ -163,28 +163,46 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
-            if (expression.nodeType == $data.Expressions.ExpressionType.Equal){
+            context.queryField = context.field;
+            if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                delete context.query[context.field];
+                context.queryField = '_id';
+            }
+            if (expression.nodeType === $data.Expressions.ExpressionType.Equal || expression.nodeType === $data.Expressions.ExpressionType.EqualTyped){
                 var v = context.value;
                 if (context.entityType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
                 else if (context.valueType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
-                context.query[context.field] = v;
-            }else if (expression.nodeType == $data.Expressions.ExpressionType.In && context.unary == $data.Expressions.ExpressionType.Not){
-                if (!context.query[context.field]) context.query[context.field] = {};
-                context.query[context.field].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
-                context.unary = undefined;
+                context.query[context.queryField] = v;
+            }else if (expression.nodeType == $data.Expressions.ExpressionType.In){
+                var v = context.value;
+                if (v instanceof Array){
+                    for (var i = 0; i < v.length; i++){
+                        if (context.entityType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v[i]);
+                        else if (context.valueType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v[i]);
+                    }
+                }
+                if (!context.query[context.queryField]) context.query[context.queryField] = {};
+                if (context.unary == $data.Expressions.ExpressionType.Not){
+                    context.query[context.queryField].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */v;
+                    context.unary = undefined;
+                }else{
+                    context.query[context.queryField][expression.resolution.mapTo] = v;
+                }
             }else{
-                if (!context.query[context.field]) context.query[context.field] = {};
-                context.query[context.field][expression.resolution.mapTo] = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
+                if (!context.query[context.queryField]) context.query[context.queryField] = {};
+                context.query[context.queryField][expression.resolution.mapTo] = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
             }
             
             if (context.or){
                 if (!context.stackOr) context.stackOr = [];
-                context.stackOr.push({ field: context.field, query: context.query[context.field] });
+                context.stackOr.push({ field: context.queryField, query: context.query[context.queryField] });
             }else if (context.and){
                 if (!context.stackAnd) context.stackAnd = [];
-                context.stackAnd.push({ field: context.field, query: context.query[context.field] });
+                context.stackAnd.push({ field: context.queryField, query: context.query[context.queryField] });
             }
             
             context.field = undefined;
@@ -294,7 +312,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             var arg = args[i];
             if (arg.value instanceof $data.Queryable) {
                 var frameExpression = new opDef.frameType(arg.value.expression);
-                var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
+                var preparator = new $data.Expressions.QueryExpressionCreator(arg.value.entityContext);
                 var prep_expression = preparator.Visit(frameExpression);
 
                 var compiler = new $data.storageProviders.mongoDB.mongoDBWhereCompiler(this.provider, true);
@@ -390,7 +408,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
         };
         
         query.modelBinderConfig = {};
-        var modelBinder = Container.createmongoDBModelBinderConfigCompiler(query, this.includes, false);
+        var modelBinder = new $data.modelBinder.mongoDBModelBinderConfigCompiler(query, this.includes, false);
         modelBinder.Visit(query.expression);
         
         this.Visit(query.expression, query.find);
@@ -406,26 +424,26 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
     VisitOrderExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var orderCompiler = Container.createmongoDBOrderCompiler(this.provider);
+        var orderCompiler = new $data.storageProviders.mongoDB.mongoDBOrderCompiler(this.provider);
         orderCompiler.compile(expression, context);
     },
     VisitPagingExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var pagingCompiler = Container.createmongoDBPagingCompiler();
+        var pagingCompiler = new $data.storageProviders.mongoDB.mongoDBPagingCompiler();
         pagingCompiler.compile(expression, context);
     },
     VisitFilterExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var filterCompiler = Container.createmongoDBWhereCompiler(this.provider);
+        var filterCompiler = new $data.storageProviders.mongoDB.mongoDBWhereCompiler(this.provider);
         context.data = "";
         filterCompiler.compile(expression.selector, context);
     },
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var projectionCompiler = Container.createmongoDBProjectionCompiler(this.context);
+        var projectionCompiler = new $data.storageProviders.mongoDB.mongoDBProjectionCompiler(this.context);
         projectionCompiler.compile(expression, context);
     }
 });
@@ -916,7 +934,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
                 '$data.String': function (text) { return text; },
-                '$data.Boolean': function (bool) { return bool; },
+                '$data.Boolean': function (bool) { return !!bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },

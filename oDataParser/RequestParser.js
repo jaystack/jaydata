@@ -22,7 +22,7 @@
         select: { type: 'string' },
         expand: { type: 'string' },
         format: { type: 'string' },
-        inlinecount: { type: 'string' },
+        inlinecount: { type: 'string' }
     });
 
     // ODataRequestParser
@@ -64,14 +64,26 @@
             this.req.orderby = expr;
         },
         parseSkipExpr: function () {
-            this.req.skip = parseInt(this.req.skip);
-            //TODO: return with ConstantExpr
-            //TODO: some tests
+            this.lexer = new $data.oDataParser.RequestLexer(this.req.skip);
+            var token = this.lexer.token;
+            if(this.lexer.token.tokenType != TokenType.DIGITS)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid expression in $skip: '" + token.value + "'.", "parseSkipExpr");
+            var expr = this.parseNumberLiteral();
+            token = this.lexer.token;
+            if (token && token.tokenType != TokenType.EOF)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Unexpected " + this.tokenName(token.tokenType) + " in $skip: '" + token.value + "'.", "parseSkipExpr");
+            this.req.skip = expr;
         },
         parseTopExpr: function () {
-            this.req.top = parseInt(this.req.top);
-            //TODO: return with ConstantExpr
-            //TODO: some tests
+            this.lexer = new $data.oDataParser.RequestLexer(this.req.top);
+            var token = this.lexer.token;
+            if(this.lexer.token.tokenType != TokenType.DIGITS)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid expression in $top: '" + token.value + "'.", "parseTopExpr");
+            var expr = this.parseNumberLiteral();
+            token = this.lexer.token;
+            if (token && token.tokenType != TokenType.EOF)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Unexpected " + this.tokenName(token.tokenType) + " in $top: '" + token.value + "'.", "parseTopExpr");
+            this.req.top = expr;
         },
         parseSelectExpr: function () {
             this.lexer = new $data.oDataParser.RequestLexer(this.req.select);
@@ -145,6 +157,8 @@
             if (this.lexer.token.value == "or") {
                 this.lexer.nextToken();
                 var right = this.parseOrExpr();
+                if(!right)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseOrExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, "or", "or");
             }
             return expr;
@@ -155,6 +169,8 @@
             if (this.lexer.token.value == "and") {
                 this.lexer.nextToken();
                 var right = this.parseAndExpr();
+                if(!right)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseAndExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, "and", "and");
             }
             return expr;
@@ -166,17 +182,21 @@
             if (token.value == "eq" || token.value == "ne") {
                 this.lexer.nextToken();
                 var right = this.parseEqualityExpr();
+                if(!right)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseEqualityExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
             return expr;
         },
         parseRelationalExpr: function () {
-            //bnf: RelationalExpr     : AdditiveExpr | RelationalExpr "lt" AdditiveExpr | RelationalExpr "gt" AdditiveExpr | RelationalExpr "le" AdditiveExpr | RelationalExpr "ge" AdditiveExpr;
+            //bnf: RelationalExpr     : AdditiveExpr | RelationalExpr ( "lt" | "gt" | "le" | "ge" ) AdditiveExpr;
             var expr = this.parseAdditiveExpr();
             var token = this.lexer.token;
             if (token.value == "lt" || token.value == "gt" || token.value == "le" || token.value == "ge") {
                 this.lexer.nextToken();
                 var right = this.parseRelationalExpr();
+                if(!right)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "RelationalExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
             return expr;
@@ -188,6 +208,8 @@
             if (token.value == "add" || token.value == "sub") {
                 this.lexer.nextToken();
                 var right = this.parseAdditiveExpr();
+                if(!right)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "AdditiveExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
             return expr;
@@ -199,27 +221,38 @@
             if (token.value == "mul" || token.value == "div" || token.value == "mod") {
                 this.lexer.nextToken();
                 var right = this.parseMultiplicativeExpr();
+                if(!right)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "MultiplicativeExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
             return expr;
         },
         parseUnaryExpr: function () {
-            //bnf: UnaryExpr          : PrimaryExpr | "-" UnaryExpr | "not" UnaryExpr;
+            //bnf: UnaryExpr          : PrimaryExpr | "-" PrimaryExpr | "not" PrimaryExpr;
             var expr = this.parsePrimaryExpr();
-            if (expr != null)
+            if (expr)
                 return expr;
             var token = this.lexer.token;
-            if (token.value == "-") {
+            if (token.value == ASCII.MINUS) {
                 this.lexer.nextToken();
                 expr = this.parseUnaryExpr();
-                //TODO: parseUnaryExpr: build negation and return with it
-                return null;
+                if(!expr)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseUnaryExpr");
+                return this.builder.buildUnary(expr, "minus")
+            }
+            if (token.value == ASCII.PLUS) {
+                this.lexer.nextToken();
+                expr = this.parseUnaryExpr();
+                if(!expr)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseUnaryExpr");
+                return this.builder.buildUnary(expr, "plus")
             }
             if (token.value == "not") {
                 this.lexer.nextToken();
                 expr = this.parseUnaryExpr();
-                //TODO: parseUnaryExpr: build "not" and return with it
-                return null;
+                if(!expr)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseUnaryExpr");
+                return this.builder.buildUnary(expr, "not")
             }
         },
         parsePrimaryExpr: function () {
@@ -293,18 +326,15 @@
             return null;
         },
         parseNumberLiteral: function () {
-            //bnf: NumberLiteral      : [ Sign ] 1*DIGIT [ "." 1*DIGIT ] [ "E" [ Sign ] 1*DIGIT ] [ "M" | "m" ] |  //double
-            //bnf:                      [ Sign ] 1*DIGIT [ "." 1*DIGIT ] [ "f" ]                                |  //single
-            //bnf:                      [ Sign ] 1*DIGIT [ "L" ]                                                   //long
-            var sign1, sign2, digits1, digits2, digits3;
-            sign1 = this.parseSign();
-            var v = sign1 ? String.fromCharCode(sign1) : "";
+            //bnf: NumberLiteral      : 1*DIGIT [ "." 1*DIGIT ] [ "E" [ Sign ] 1*DIGIT ] [ "M" | "m" ] |  //double
+            //bnf:                      1*DIGIT [ "." 1*DIGIT ] [ "f" ]                                |  //single
+            //bnf:                      1*DIGIT [ "L" ]                                                   //long
+            var sign, digits1, digits2, digits3;
+            var v = "";
             var token = this.lexer.token;
-            if (token.tokenType != TokenType.DIGITS) {
-                if (sign1 == null)
-                    return null;
-                $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected DIGITS (after Sign1).", "parseDoubleStrict");
-            }
+            if (token.tokenType != TokenType.DIGITS)
+                return null;
+
             digits1 = token.value;
             v += digits1;
             var isInteger = true;
@@ -332,12 +362,12 @@
             if (token.value == "e") {
                 isInteger = false;
                 this.lexer.nextToken();
-                sign2 = this.parseSign();
+                sign = this.parseSign();
                 token = this.lexer.token;
                 if (token.tokenType != TokenType.DIGITS)
-                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected DIGITS (after Sign2).", "parseDoubleStrict");
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected DIGITS (after Sign).", "parseDoubleStrict");
                 digits3 = token.value;
-                v += "e" + (sign2 ? String.fromCharCode(sign2) : "") + digits3;
+                v += "e" + (sign ? String.fromCharCode(sign) : "") + digits3;
                 this.lexer.nextToken();
                 token = this.lexer.token;
             }
@@ -414,14 +444,17 @@
             //bnf: NavigationProperty : NAME
             //bnf: Field              : NAME
             //short: MemberPath         : [ Name *("." Name) "/" ] *(Name "/") Name
+            if(this.lexer.token.value == "not")
+                return null;
             var name = this.parseName();
             var token = this.lexer.token;
             if (!name) {
-                var msg = "Expected: member";
-                if (token.value == ASCII.DOT)
-                    msg += " or DIGIT";
-                msg += " before dot ('.').";
-                $data.oDataParser.RequestParser.SyntaxError.call(this, msg, "parseMemberPath");
+                return null;
+                //var msg = "Expected: member";
+                //if (token.value == ASCII.DOT)
+                //    msg += " or DIGIT";
+                //msg += " before dot ('.').";
+                //$data.oDataParser.RequestParser.SyntaxError.call(this, msg, "parseMemberPath");
             }
             var member = name;
 
@@ -488,12 +521,11 @@
         //=====================================================================================================================
 
         parseOrderBy: function () {
-            //bnf: OrderByExpr:     [ "asc" | "desc"] *( "," MemberPath [ "asc" | "desc"] )
-            //TODO: //bnf: OrderByExpr:     Expr [ "asc" | "desc"] *( "," Expr [ "asc" | "desc"] )
-            var member = this.parseMemberPath();
-            if (!member)
+            //bnf: OrderByExpr:     Expr [ "asc" | "desc"] *( "," Expr [ "asc" | "desc"] )
+            var expr = this.parseExpr();
+            if (!expr)
                 return null;
-            var items = [];  // [{prop:member, dir:"asc"}]
+            var items = [];  // [{expr:expr, dir:"asc"}]
             var dir = "asc";
             var token = this.lexer.token;
             if (token.value == "asc" || token.value == "desc") {
@@ -501,14 +533,14 @@
                 this.lexer.nextToken();
                 token = this.lexer.token;
             }
-            items.push({ prop: member, dir: dir });
+            items.push({ expr: expr, dir: dir });
 
             while (token.value == ASCII.COMMA) {
                 this.lexer.nextToken();
                 token = this.lexer.token;
-                member = this.parseMemberPath();
-                if (!member)
-                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: member", "parseOrderBy");
+                expr = this.parseExpr();
+                if (!expr)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: expr", "parseOrderBy");
                 dir = "asc";
                 token = this.lexer.token;
                 if (token.value == "asc" || token.value == "desc") {
@@ -516,7 +548,7 @@
                     this.lexer.nextToken();
                     token = this.lexer.token;
                 }
-                items.push({ prop: member, dir: dir });
+                items.push({ expr: expr, dir: dir });
             }
 
             return this.builder.buildOrderBy(items);

@@ -409,3 +409,49 @@ exports.testFilterByKey = function(test){
         });
     });
 };
+
+exports.testFilterByComputed = function(test){
+    test.expect(3);
+    $test.Context.init(function(db){
+        var master = new $test.Item({ Key: 'master', Value: 'master', Rank: 0 });
+        db.Items.add(master);
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 1, 'Not 1 item inserted into collection');
+            db.Items.toArray(function(result){
+                test.equal(result.length, 1, 'Not only 1 item in collection');
+                db.Items.single(function(it){ return it.Id == this.id; }, { id: master.Id }, {
+                    success: function(){
+                        test.ok(true, 'Filter success');
+                        test.done();
+                    },
+                    error: function(){
+                        test.ok(true, 'Filter failed');
+                        test.done();
+                    }
+                });
+            });
+        });
+    });
+};
+
+exports.testFilterInComputed = function(test){
+    test.expect(3);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items selected from collection');
+                var keys = data.map(function(it){ return it.Id; }).slice(0, 3);
+                db.Items.filter(function(it){ return it.Id in this.keys; }, { keys: keys }).toArray(function(data){
+                    test.equal(data.length, 3, 'Not 3 items filtered by "in" operator');
+                    test.done();
+                });
+            });
+        });
+    });
+};
