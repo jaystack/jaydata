@@ -85,6 +85,7 @@
     <script type="text/javascript" src="../Types/EntityContext.js"></script>
     <script type="text/javascript" src="../Types/QueryProvider.js"></script>
     <script type="text/javascript" src="../Types/ModelBinder.js"></script>
+    <script type="text/javascript" src="../Types/QueryBuilder.js"></script>
     <script type="text/javascript" src="../Types/Query.js"></script>
     <script type="text/javascript" src="../Types/Queryable.js"></script>
     <script type="text/javascript" src="../Types/EntitySet.js"></script>
@@ -169,56 +170,16 @@
     <!--************************************************************************************-->
     <script src="../NewsReaderContext.js" type="text/javascript"></script>
 
-    <script type="text/javascript" src="gyeby.orp.builder.js"></script>
-    <script type="text/javascript" src="gyeby.orp.lexer.js"></script>
-    <script type="text/javascript" src="gyeby.orp.parser.js"></script>
+    <script type="text/javascript" src="RequestExpressionBuilder.js"></script>
+    <script type="text/javascript" src="RequestLexer.js"></script>
+    <script type="text/javascript" src="RequestParser.js"></script>
+
+    <script type="text/javascript" src="EntityExpressionBuilder.js"></script>
     <!--**********************************UNIT TESTS****************************************-->
-    <script type="text/javascript" src="ODataEntityExpressionBuilder.js"></script>
-
-    <script type="text/javascript" src="gyeby.orp.currenttest.js"></script>
-    <script type="text/javascript" src="gyeby.orp.lexertests.js"></script>
-    <script type="text/javascript" src="gyeby.orp.parsertests.js"></script>
-    <script type="text/javascript">
-        function builderTest(name, queryable, context) {
-            test(name, 1, function () {
-
-                var q = queryable.toTraceString();
-
-                var queryParts = q.queryText.split('?');
-                var paramParts = queryParts[1].split('&');
-                var obj = {};
-                for (var i = 0; i < paramParts.length; i++) {
-                    var parts = paramParts[i].split('=');
-                    var name = parts[0].substr(1);
-                    obj[name] = parts[1];
-                }
-
-                obj.entitySetName = queryParts[0].substr(1);
-                var builder = new $data.oDataParser.ODataEntityExpressionBuilder(context);
-                var expression = builder.buildExpression(obj);
-
-                equal(JSON.stringify(expression), JSON.stringify(q.expression.source), name + ' builder test failed');
-            });
-        }
-/*
-        var c = new $news.Types.NewsContext({ name: 'oData' });
-        var date = new Date();
-
-        module('ODataEntityExpressionBuilder');
-        builderTest('field compare int', c.Articles.filter(function (it) { return it.Id <= 500; }), c);
-        builderTest('field compare string', c.Articles.filter(function (it) { return it.Title == 'Article1'; }), c);
-        //builderTest('ODataEntityExpressionBuilder field multipleFilter', c.Articles.filter(function (it) { return it.Title == 'Article1'; }).filter(function (it) { return it.Body.contains('Body1'); }), c);
-        builderTest('field contains', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa'); }), c);
-        builderTest('field compare complex', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }), c);
-        builderTest('orderBy string', c.Articles.orderBy('it.Title'), c);
-        builderTest('orderBy', c.Articles.orderBy(function (it) { return it.Title; }), c);
-        builderTest('field compare, order by', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title'), c);
-        builderTest('skip', c.Articles.skip(5), c);
-        builderTest('take', c.Articles.take(6), c);
-        builderTest('field compare, order by, skip, take', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title').skip(10).take(5), c);
-        //builderTest('map', c.Articles.map(function (it) { return { a: it.Title, b: it.Body }; }), c);
-*/
-    </script>
+    <script type="text/javascript" src="currentTests.js"></script>
+    <script type="text/javascript" src="lexerTests.js"></script>
+    <script type="text/javascript" src="parserTests.js"></script>
+    <script type="text/javascript" src="expressionParserTests.js"></script>
 </head>
 <body>
     <h1 id="qunit-header">JayData oData Parser tests</h1>

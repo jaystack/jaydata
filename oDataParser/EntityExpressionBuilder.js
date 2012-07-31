@@ -1,9 +1,9 @@
-﻿$data.Class.define('$data.oDataParser.ODataEntityExpressionBuilder', null, null, {
+﻿$data.Class.define('$data.oDataParser.EntityExpressionBuilder', null, null, {
     constructor: function (scopeContext) {
         Guard.requireValue("scopeContext", scopeContext);
         this.scopeContext = scopeContext;
         this.lambdaTypes = [];
-        
+
     },
     supportedParameters: {
         value: [
@@ -13,15 +13,15 @@
             { name: 'skip', expType: $data.Expressions.PagingExpression },
             { name: 'top', expType: $data.Expressions.PagingExpression },
             { name: 'select', expType: $data.Expressions.ProjectionExpression },
-            { name: 'count', expType: $data.Expressions.CountExpression },
+            { name: 'count', expType: $data.Expressions.CountExpression }
         ]
     },
     buildExpression: function (queryParams) {
         ///<param name="queryParams" type="Object">{ filter: expression, orderby: [{}], entitySetName: string}</param>
 
-        var req = new ODataQueryRequest();
+        var req = new $data.oDataParser.QueryRequest();
         $data.typeSystem.extend(req, queryParams);
-        var parser = new ODataRequestParser();
+        var parser = new $data.oDataParser.RequestParser();
         parser.parse(req);
 
         var expression = this.createRootExpression(queryParams.entitySetName);
@@ -33,6 +33,12 @@
             if (typeof this[funcName] === 'function' && req[paramName]) {
                 expression = this[funcName].call(this, req[paramName], expression);
             }
+        }
+
+        if (queryParams.count === true) {
+            expression = new $data.Expressions.CountExpression(expression);
+        } else {
+            expression = new $data.Expressions.ToArrayExpression(expression);
         }
 
         return expression;
@@ -48,7 +54,7 @@
     },
     filterConverter: function (expr, rootExpr) {
         var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
-        var entityExpressionTree = converter.Visit(expr, { queryParameters: [], lambdaParameters: this.lambdaTypes });
+        var entityExpressionTree = converter.Visit(expr, { queryParameters: [], lambdaParameters: this.lambdaTypes, frameType: $data.Expressions.FilterExpression });
 
         var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
         var expression = new $data.Expressions.FilterExpression(rootExpr, pqExp);
@@ -59,37 +65,53 @@
 
         for (var i = 0; i < exprObjArray.length; i++) {
             var expConf = exprObjArray[i];
-            var entityExpressionTree = converter.Visit(expConf.expression, { queryParameters: [], lambdaParameters: this.lambdaTypes });
+            var entityExpressionTree = converter.Visit(expConf.expression, { queryParameters: [], lambdaParameters: this.lambdaTypes, frameType: $data.Expressions.OrderExpression });
 
             var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
-            var expression = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
+            rootExpr = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
         }
-        return expression;
+        return rootExpr;
     },
-    selectConverter: function (expr, rootExpr) {
+    selectConverter: function (exprObjArray, rootExpr) {
         var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
-        var entityExpressionTree = converter.Visit(expr, { queryParameters: [], lambdaParameters: this.lambdaTypes });
+
+        var objectFields = [];
+        for (var i = 0; i < exprObjArray.length; i++) {
+            var expr = exprObjArray[i];
+            var ofExpr = new $data.Expressions.ObjectFieldExpression(this.findMemberPathBaseName(expr), expr);
+            objectFields.push(ofExpr);
+        }
+
+        var objectLiteralExpr = new $data.Expressions.ObjectLiteralExpression(objectFields);
+
+        var entityExpressionTree = converter.Visit(objectLiteralExpr, { queryParameters: undefined, lambdaParameters: this.lambdaTypes, frameType: $data.Expressions.ProjectionExpression });
 
         var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
         var expression = new $data.Expressions.ProjectionExpression(rootExpr, pqExp);
         return expression;
     },
+    findMemberPathBaseName: function(expr){
+        if(expr.expression instanceof $data.Expressions.PropertyExpression)
+            return this.findMemberPathBaseName(expr.expression);
+        else
+            return expr.member.value;
+    },
     skipConverter: function (expr, rootExpr) {
-        var skipExp = new $data.Expressions.ConstantExpression(expr, 'number');
-        var expression = new $data.Expressions.PagingExpression(rootExpr, skipExp, $data.Expressions.ExpressionType.Skip);
+        var expression = new $data.Expressions.PagingExpression(rootExpr, expr, $data.Expressions.ExpressionType.Skip);
         return expression;
     },
     topConverter: function (expr, rootExpr) {
-        var topExp = new $data.Expressions.ConstantExpression(expr, 'number');
-        var expression = new $data.Expressions.PagingExpression(rootExpr, topExp, $data.Expressions.ExpressionType.Take);
+        var expression = new $data.Expressions.PagingExpression(rootExpr, expr, $data.Expressions.ExpressionType.Take);
         return expression;
     },
-    expandConverter: function (exprObjArray, rootExpr) {
-        for (var i = 0; i < exprObjArray.length; i++) {
-            var expConf = exprObjArray[i];
-            var expression = new $data.Expressions.IncludeExpression(rootExpr, expConf.expression, $data.Expressions.ExpressionType[expConf.nodeType]);
+    expandConverter: function (expandValues, rootExpr) {
+        if (expandValues.length > 0) {
+            var expand = expandValues.replace(/\//g, '.')
+            var expandArray = expand.split(',');
+            for (var i = 0; i < expandArray.length; i++) {
+                rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(expandArray[i], 'string'));
+            }
         }
-        return expression;
-    },
-
+        return rootExpr;
+    }
 });

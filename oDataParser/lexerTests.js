@@ -1,16 +1,19 @@
 $(document).ready(function () {
     module("ODataRequestParser Lexer tests");
+    var ASCII = $data.oDataParser.ASCII;
+    var CharType = $data.oDataParser.CharType;
+    var TokenType = $data.oDataParser.TokenType;
 
     test("NextChar: empty source", 2, function () {
 		var src = "";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		l.nextChar();
 		equal(l.currentChar, ASCII.NULL);
 		equal(l.currentCharType, CharType.EOF);
     });
     test("NextChar: character classes", 36, function () {
 		var src = ". aAzZ	09\r\n.asdf42";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		              equal(l.currentChar, ASCII.SPC, "1");           equal(l.currentCharType, CharType.WSP, "2");
 		l.nextChar(); equal(l.currentChar, ASCII.a, "3");             equal(l.currentCharType, CharType.ALPHA, "4");
 		l.nextChar(); equal(l.currentChar, ASCII.A, "5");             equal(l.currentCharType, CharType.ALPHA, "6");
@@ -32,42 +35,42 @@ $(document).ready(function () {
     });
     test("OneToken: word", 2, function () {
 		var src = "asdf";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t=l.token;
 		equal(t.tokenType, TokenType.WORD);
 		equal(t.value, "asdf");
     });
     test("OneToken: word and spaces", 2, function () {
 		var src = " 	asdf ";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t=l.token;
 		equal(t.tokenType, TokenType.WORD);
 		equal(t.value, "asdf");
     });
     test("OneToken: digits", 2, function () {
 		var src = "42";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t=l.token;
 		equal(t.tokenType, TokenType.DIGITS);
 		equal(t.value, "42");
     });
     test("OneToken: lot of digits", 2, function () {
 		var src = "1234567890123456789012345678901234567890";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t=l.token;
 		equal(t.tokenType, TokenType.DIGITS);
 		equal(t.value, "1234567890123456789012345678901234567890");
     });
     test("OneToken: string", 2, function () {
 		var src = " 'asdf' ";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t=l.token;
 		equal(t.tokenType, TokenType.STRING);
 		equal(t.value, "asdf");
     });
     test("Next token", 10, function () {
 		var src = "x asdf 'yxcv' qwer 12 ";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t;
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.WORD, "1");    equal(t.value, "asdf", "2");
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.STRING, "3");  equal(t.value, "yxcv", "4");
@@ -78,7 +81,7 @@ $(document).ready(function () {
     test("Column info 1", 6, function () {
 		//         012345678
 		var src = "x asdf  ";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t;
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.WORD,   "t1");	equal(t.value, "asdf",   "v1"); equal(t.column, 2, "c1");
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.EOF,    "t2"); equal(t.value, "\u0000", "v2"); equal(t.column, 8, "c2");
@@ -87,7 +90,7 @@ $(document).ready(function () {
 		//         0         1         2
 		//         0123456789012345678901
 		var src = "x asdf 'yxcv' qwer 12 ";
-		var l = new ODataRequestLexer(src);
+		var l = new $data.oDataParser.RequestLexer(src);
 		var t;
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.WORD,   "t1");	equal(t.value, "asdf",   "v1"); equal(t.column, 2,  "c1");
 		l.nextToken();t=l.token; equal(t.tokenType, TokenType.STRING, "t2"); equal(t.value, "yxcv",   "v2"); equal(t.column, 7,  "c2");

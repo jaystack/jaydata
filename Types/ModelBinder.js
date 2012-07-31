@@ -32,7 +32,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 					case 'json':
 						var path = type[1].split('.');
 						while (path.length) {
-						    if ((typeof part[path[0]] === 'undefined') || (part[path[0]] === null)) {
+						    if (typeof part[path[0]] === 'undefined') {
 								if (i === metaSelector.length){
 									return undefined;
 								}else if (path.length){

@@ -1,19 +1,16 @@
-function BuildError(msg) {
-    throw msg;
-}
-function ODataExpressionBuilder() {
-    this.buildConstant = function (value, type) {
+$data.Class.define('$data.oDataParser.RequestExpressionBuilder', null, null, {
+    buildConstant: function (value, type) {
         return new $data.Expressions.ConstantExpression(value, type);
-    };
-    this.buildProperty = function (expr, source) {
+    },
+    buildProperty: function (expr, source) {
         return new $data.Expressions.PropertyExpression(expr, source);
-    };
-    this.buildParameter = function (name, type, nodeType) {
+    },
+    buildParameter: function (name, type, nodeType) {
         expr = new $data.Expressions.ParameterExpression(name, type, nodeType);
         expr.paramIndex = 0;
         return expr;
-    };
-    this.buildSimpleBinary = function (left, right, op, type) {
+    },
+    buildSimpleBinary: function (left, right, op, type) {
         var operator, nodeType, value;
         switch (op) {
             case "or": type = "boolean"; nodeType = "or"; operator = "||"; value = "||"; break;
@@ -32,11 +29,11 @@ function ODataExpressionBuilder() {
             case "div": type = "number"; nodeType = "divide"; operator = "/"; value = "/"; break;
             case "mod": type = "number"; nodeType = "modulo"; operator = "%"; value = "%"; break;
 
-            default: BuildError("Not implemented operator in ODataExpressionBuilder.buildConstant: " + op); break;
+            default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.RequestExpressionBuilder.buildConstant: " + op)); break;
         }
         return new $data.Expressions.SimpleBinaryExpression(left, right, nodeType, value, type);
-    };
-    this.buildGlobalCall = function (type, name, args) {
+    },
+    buildGlobalCall: function (type, name, args) {
         var callName;
         switch (name) {
             case "substringof": callName = "contains"; break;
@@ -59,7 +56,7 @@ function ODataExpressionBuilder() {
             case "round": callName = "round"; break;
             case "floor": callName = "floor"; break;
             case "ceiling": callName = "ceiling"; break;
-            default: BuildError("Not implemented globalCall name in ODataExpressionBuilder.buildGlobalCall: " + name); break;
+            default: Guard.raise(new Exception("Not implemented globalCall name in $data.oDataParser.RequestExpressionBuilder.buildGlobalCall: " + name)); break;
         }
 
         var i = 0;
@@ -71,60 +68,28 @@ function ODataExpressionBuilder() {
 
         var memberExp = this.buildConstant(callName, 'string');
         return new $data.Expressions.CallExpression(propertyExp, memberExp, args);
-    };
-    this.buildMemberPath = function (chain) {
+    },
+    buildMemberPath: function (chain) {
         var expr = this.buildParameter('it', 'unknown', $data.Expressions.ExpressionType.LambdaParameterReference);
         for (var i = 0; i < chain.length; i++)
             expr = this.buildProperty(expr, this.buildConstant(chain[i], 'string'));
         return expr;
-    };
-    this.buildOrderBy = function (items) {
+    },
+    buildOrderBy: function (items) {
         var newItems = new Array(items.length);
         for (var i = 0; i < items.length; i++) {
-            newItems[i] = { expression: items[i].prop, nodeType: items[i].dir === 'asc' ? $data.Expressions.ExpressionType.OrderBy : $data.Expressions.ExpressionType.OrderByDescending };
+            newItems[i] = { expression: items[i].expr, nodeType: items[i].dir === 'asc' ? $data.Expressions.ExpressionType.OrderBy : $data.Expressions.ExpressionType.OrderByDescending };
         }
         return newItems;
-    };
-    this.buildUnary = function (operand, op, type) {
+    },
+    buildUnary: function (operand, op, type) {
         var operator, nodeType, value;
         switch (op) {
             case "not": type = "boolean"; nodeType = "not"; operator = "!"; value = "!"; break;
             case "minus": type = "number"; nodeType = "minus"; operator = "-"; value = "-"; break;
             case "plus": type = "number"; nodeType = "plus"; operator = "+"; value = "+"; break;
-            default: BuildError("Not implemented operator in ODataExpressionBuilder.buildConstant: " + op); break;
+            default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.RequestExpressionBuilder.buildConstant: " + op)); break;
         }
         return new $data.Expressions.UnaryExpression(operand, nodeType, operator, type);
-    };
-}
-/*var $data = {
-	Expressions: {
-		ConstantExpression: function(value, type) {
-			this.nodeType = "constant";
-			this.type = type;
-			this.value = value;
-			this.toString = function (debug) {
-				return this.value.toString();
-			};
-		},
-		SimpleBinaryExpression: function(left, right, nodeType, operator, type, resolution) {
-			this.left = left;
-			this.right = right;
-			this.nodeType = nodeType;
-			this.operator = operator;
-			this.type = type;
-			this.resolution = resolution;
-		},
-		CallExpression: function(expression, member, args, type) {
-			this.expression = expression;
-			this.member = member;
-			this.args = args;
-			this.type = type;
-		},
-		MemberExpresion: function(member) {
-			this.member = member;
-		},
-		OrderByExpression: function(items) {
-			this.items = items;
-		}
-	}
-}*/
+    }
+});

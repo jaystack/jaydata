@@ -112,7 +112,113 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     VisitSimpleBinaryExpression: function (expression, context) {
-        if (expression.nodeType == $data.Expressions.ExpressionType.Or) context.or = true;
+        if (!context.cursor){
+            context.query = {};
+            context.cursor = context.query;
+        }
+        
+        switch (expression.nodeType){
+            case $data.Expressions.ExpressionType.Or:
+                if (context.cursor instanceof Array){
+                    var or = { $or: [] };
+                    context.cursor.push(or);
+                    context.cursor = or.$or;
+                }else{
+                    context.cursor.$or = [];
+                    context.cursor = context.cursor.$or;
+                }
+                this.Visit(expression.left, context);
+                this.Visit(expression.right, context);
+                break;
+            case $data.Expressions.ExpressionType.And:
+                if (context.cursor instanceof Array){
+                    var and = { $and: [] };
+                    context.cursor.push(and);
+                    context.cursor = and.$and;
+                }else{
+                    context.cursor.$and = [];
+                    context.cursor = context.cursor.$and;
+                }
+                this.Visit(expression.left, context);
+                this.Visit(expression.right, context);
+                break;
+            case $data.Expressions.ExpressionType.Equal:
+            case $data.Expressions.ExpressionType.EqualTyped:
+                this.Visit(expression.left, context);
+                this.Visit(expression.right, context);
+                context.queryField = context.field;
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                    delete context.query[context.field];
+                    context.queryField = '_id';
+                }
+                var v = context.value;
+                if (context.entityType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
+                else if (context.valueType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
+                context.value = v;
+                if (context.cursor instanceof Array){
+                    var o = {};
+                    o[context.queryField] = context.value;
+                    context.cursor.push(o);
+                }else context.cursor[context.queryField] = context.value;
+                break;
+            case $data.Expressions.ExpressionType.In:
+                this.Visit(expression.left, context);
+                this.Visit(expression.right, context);
+                context.queryField = context.field;
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                    delete context.query[context.field];
+                    context.queryField = '_id';
+                }
+                var v = context.value;
+                if (v instanceof Array){
+                    for (var i = 0; i < v.length; i++){
+                        if (context.entityType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v[i]);
+                        else if (context.valueType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v[i]);
+                    }
+                }
+                context.value = v;
+                if (context.cursor instanceof Array){
+                    var o = {};
+                    o[context.queryField] = {};
+                    o[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
+                    context.cursor.push(o);
+                }else{
+                    context.cursor[context.queryField] = {};
+                    context.cursor[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
+                }
+                if (context.unary === $data.Expressions.ExpressionType.Not) context.unary = undefined;
+                break;
+            default:
+                this.Visit(expression.left, context);
+                this.Visit(expression.right, context);
+                context.queryField = context.field;
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                    delete context.query[context.field];
+                    context.queryField = '_id';
+                }
+                var v = context.value;
+                if (context.entityType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
+                else if (context.valueType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
+                context.value = v;
+                if (context.cursor instanceof Array){
+                    var o = {};
+                    o[context.queryField] = {};
+                    o[context.queryField][expression.resolution.mapTo] = context.value;
+                    context.cursor.push(o);
+                }else{
+                    context.cursor[context.queryField] = {};
+                    context.cursor[context.queryField][expression.resolution.mapTo] = context.value;
+                }
+                break;
+        }
+        
+        /*if (expression.nodeType == $data.Expressions.ExpressionType.Or) context.or = true;
         else if (expression.nodeType == $data.Expressions.ExpressionType.And) context.and = true;
         
         this.Visit(expression.left, context);
@@ -163,10 +269,12 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             }
             context.and = false;
         }else if (expression.nodeType !== $data.Expressions.ExpressionType.And){
-            context.queryField = context.field;
-            if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
-                delete context.query[context.field];
-                context.queryField = '_id';
+            if (expression.nodeType !== $data.Expressions.ExpressionType.Or){
+                context.queryField = context.field;
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                    delete context.query[context.field];
+                    context.queryField = '_id';
+                }
             }
             if (expression.nodeType === $data.Expressions.ExpressionType.Equal || expression.nodeType === $data.Expressions.ExpressionType.EqualTyped){
                 var v = context.value;
@@ -187,14 +295,14 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 if (!context.query[context.queryField]) context.query[context.queryField] = {};
                 if (context.unary == $data.Expressions.ExpressionType.Not){
-                    context.query[context.queryField].$nin = /*typeof context.value === 'object' ? JSON.parse(context.value) : */v;
+                    context.query[context.queryField].$nin = v;
                     context.unary = undefined;
                 }else{
                     context.query[context.queryField][expression.resolution.mapTo] = v;
                 }
             }else{
                 if (!context.query[context.queryField]) context.query[context.queryField] = {};
-                context.query[context.queryField][expression.resolution.mapTo] = /*typeof context.value === 'object' ? JSON.parse(context.value) : */context.value;
+                context.query[context.queryField][expression.resolution.mapTo] = context.value;
             }
             
             if (context.or){
@@ -207,7 +315,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             
             context.field = undefined;
             context.value = undefined;
-        }
+        }*/
     },
 
     VisitEntityFieldExpression: function (expression, context) {
@@ -220,7 +328,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     VisitMemberInfoExpression: function (expression, context) {
-        if (!context.query[expression.memberName]) context.query[expression.memberName] = null;
+        //if (!context.query[expression.memberName]) context.query[expression.memberName] = null;
         context.field = expression.memberName;
     },
 
@@ -605,7 +713,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var keys = Container.resolveType(u.type).memberDefinitions.getKeyProperties();
                 for (var j = 0; j < keys.length; j++){
                     var k = keys[j];
-                    where[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](u.data[k.computed ? '_id' : k.name]);
+                    where[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](u.entity[k.name]);
                 }
                 
                 var set = {};
@@ -637,7 +745,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var keys = Container.resolveType(r.type).memberDefinitions.getKeyProperties();
                 for (var j = 0; j < keys.length; j++){
                     var k = keys[j];
-                    r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.data[k.computed ? '_id' : k.name]);
+                    r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.entity[k.name]);
                 }
                 
                 var props = Container.resolveType(r.type).memberDefinitions.getPublicMappedProperties();
