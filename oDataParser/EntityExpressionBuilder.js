@@ -109,14 +109,18 @@
         var expression = new $data.Expressions.PagingExpression(rootExpr, expr, $data.Expressions.ExpressionType.Take);
         return expression;
     },
-    expandConverter: function (expandValues, rootExpr) {
-        if (expandValues.length > 0) {
-            var expand = expandValues.replace(/\//g, '.')
-            var expandArray = expand.split(',');
-            for (var i = 0; i < expandArray.length; i++) {
-                rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(expandArray[i], 'string'));
+    expandConverter: function (exprObjArray, rootExpr) {
+        if (exprObjArray.length > 0) {
+            for (var i = 0; i < exprObjArray.length; i++) {
+                rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(this._getMemberPath(exprObjArray[i]), 'string'));
             }
         }
         return rootExpr;
+    },
+    _getMemberPath: function (expr) {
+        if (expr.expression instanceof $data.Expressions.PropertyExpression)
+            return this._getMemberPath(expr.expression) + '.' + expr.member.value;
+        else
+            return expr.member.value;
     }
 });

@@ -11,7 +11,7 @@
             this.skip = "";
             this.top = "";
             this.select = "";
-            //this.expand =      "";
+            this.expand = "";
             //this.format =      "";
             //this.inlinecount = "";
         },
@@ -36,12 +36,12 @@
             ///<param name="req" type="$data.oDataParser.QueryRequest" />
 
             this.req = req;
-            if (req.filter.length > 0) this.parseFilterExpr();
+            if (req.filter.length > 0)  this.parseFilterExpr();
             if (req.orderby.length > 0) this.parseOrderByExpr();
-            if (req.skip.length > 0) this.parseSkipExpr();
-            if (req.top.length > 0) this.parseTopExpr();
-            if (req.select.length > 0) this.parseSelectExpr();
-            //if(req.expand.length>0)      this.parseExpandExpr();
+            if (req.skip.length > 0)    this.parseSkipExpr();
+            if (req.top.length > 0)     this.parseTopExpr();
+            if (req.select.length > 0)  this.parseSelectExpr();
+            if (req.expand.length>0)     this.parseExpandExpr();
             //if(req.format.length>0)      this.parseFormatExpr();
             //if(req.inlinecount.length>0) this.parseInlineCountExpr();
         },
@@ -103,12 +103,16 @@
 
             this.req.select = expressions;
         },
+        parseExpandExpr: function() {
+            this.lexer = new $data.oDataParser.RequestLexer(this.req.expand);
+            this.req.expand = this.parseExpand();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.EOF)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Unexpected " + this.tokenName(token.tokenType) + " in $filter: '" + token.value + "'.", "parseExpandExpr");
+        },
         /*
         parseInlineCountExpr: function() {
             //TO DO: parseInlineCountExpr
-        },
-        parseExpandExpr: function() {
-            //TO DO: parseExpandExpr
         },
         parseFormatExpr: function() {
             //TO DO: parseFormatExpr
@@ -552,6 +556,30 @@
             }
 
             return this.builder.buildOrderBy(items);
+        },
+
+        //=====================================================================================================================
+
+        parseExpand: function () {
+            //bnf: OrderByExpr:     MemberPath *( "," MemberPath)
+            var expr = this.parseMemberPath();
+            if (!expr)
+                return null;
+            var items = [];
+            var token = this.lexer.token;
+            items.push(expr);
+
+            while (token.value == ASCII.COMMA) {
+                this.lexer.nextToken();
+                token = this.lexer.token;
+                expr = this.parseMemberPath();
+                if (!expr)
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: expr", "parseExpand");
+                items.push(expr);
+                token = this.lexer.token;
+            }
+
+            return items;
         }
     }, {
         SyntaxError: function (reason, caller) {

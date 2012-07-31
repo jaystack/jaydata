@@ -86,5 +86,5 @@ $(document).ready(function () {
     builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author.Articles'), c, false, true);
 
     selectTest('selectTest map', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body }; }), c, ['Title', 'Body'], []);
-    selectTest('selectTest map', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body, Author: it.Author }; }), c, ['Title', 'Body', 'Author'], ['Author']);
+    selectTest('selectTest map 2', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body, Author: it.Author }; }), c, ['Title', 'Body', 'Author'], ['Author']);
 });

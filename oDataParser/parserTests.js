@@ -1180,5 +1180,110 @@ $(document).ready(function () {
         equal(current, expected);
     });
 
+    test("Select: Name, Age, City", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.select = "Name, Age, City";
+        p.parseSelectExpr();
+        var current = JSON.stringify(p.req.select);
+        var expected = JSON.stringify([
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Age")
+            ),
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("City")
+            )
+        ]);
+        equal(current, expected);
+    });
+    test("Select: Name, Age add 20, City", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.select = "Name, Age add 20, City";
+        p.parseSelectExpr();
+        var current = JSON.stringify(p.req.select);
+        var expected = JSON.stringify([
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Name")
+            ),
+            p.builder.buildSimpleBinary(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Age")
+                ),
+                p.builder.buildConstant(20),
+                "add"
+            ),
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("City")
+            )
+        ]);
+        equal(current, expected);
+    });
+    test("Select: Title, concat(Author/FirstName, Author/LastName)", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = req;
+        req.select = "Title, concat(Author/FirstName, Author/LastName)";
+        p.parseSelectExpr();
+        var current = JSON.stringify(p.req.select);
+        var expected = JSON.stringify([
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Title")
+            ),
+            p.builder.buildGlobalCall("string", "concat", [
+                p.builder.buildProperty(
+                    p.builder.buildProperty(
+                        p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                        p.builder.buildConstant("Author")
+                    ),
+                    p.builder.buildConstant("FirstName")
+                ),
+                p.builder.buildProperty(
+                    p.builder.buildProperty(
+                        p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                        p.builder.buildConstant("Author")
+                    ),
+                    p.builder.buildConstant("LastName")
+                )]
+            )
+        ]);
+        equal(current, expected);
+    });
+
+    test("Expand: 'Tags,Author/Articles,Reviewer/Articles/Category'", 1, function () {
+        var req = new $data.oDataParser.QueryRequest(); req.expand = "Tags,Author/Articles,Reviewer/Articles/Category";
+        var p = new $data.oDataParser.RequestParser(); p.req = req; p.parseExpandExpr(); var current = JSON.stringify(p.req.expand);
+        var expected = JSON.stringify([
+            p.builder.buildProperty(
+                p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                p.builder.buildConstant("Tags")
+            ),
+            p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                    p.builder.buildConstant("Author")
+                ),
+                p.builder.buildConstant("Articles")
+            ),
+            p.builder.buildProperty(
+                p.builder.buildProperty(
+                    p.builder.buildProperty(
+                        p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
+                        p.builder.buildConstant("Reviewer")
+                    ),
+                    p.builder.buildConstant("Articles")
+                ),
+                p.builder.buildConstant("Category")
+            )
+        ]);
+        equal(current, expected);
+    });
+
 });
 

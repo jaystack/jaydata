@@ -22,13 +22,13 @@
 
         var expressionBuilder = new $data.oDataParser.RequestExpressionBuilder();
         var entityKeys = setElementType.memberDefinitions.getKeyProperties();
-        for (var i = 0; i < entityKeys; i++) {
-            if (!context.selectedFields.contains(entityKeys.name)) {
-                exprObjArray.push(expressionBuilder.buildMemberPath(entityKeys.name));
+        for (var i = 0; i < entityKeys.length; i++) {
+            if (this.selectedFields.indexOf(entityKeys[i].name) < 0) {
+                exprObjArray.push(expressionBuilder.buildMemberPath([entityKeys[i].name]));
             }
         }
 
-        return $data.oDataParser.EntityExpressionBuilder.apply(this, [exprObjArray, rootExpr]);
+        return $data.oDataParser.EntityExpressionBuilder.prototype.selectConverter.apply(this, [exprObjArray, rootExpr]);
     },
     expandConverter: function (exprObjArray, rootExpr) {
         //includesFields
@@ -36,12 +36,6 @@
             this.includes.push(this._getMemberPath(exprObjArray[i]));
         }
 
-        return $data.oDataParser.EntityExpressionBuilder.apply(this, arguments);
-    },
-    _getMemberPath: function (expr) {
-        if (expr.expression instanceof $data.Expressions.PropertyExpression)
-            return expr.member.value + '.' + this._getMemberPath(expr.expression);
-        else
-            return expr.member.value;
+        return $data.oDataParser.EntityExpressionBuilder.prototype.expandConverter.apply(this, arguments);
     }
 });
