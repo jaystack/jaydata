@@ -68,31 +68,73 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         Object.defineProperty(this, 'promiseHelper', {value: q, enumerable:true, writable:false, configurable:false});
     },
     handleRequest:function (req, res, next) {
+        var self = this;
+        
         var serviceInstance = this.instanceFactory();
 
         var memberName = this.resolveMemberName(req, serviceInstance);
         var member = this.resolveMember(req, memberName);
-        var memberInfo = this.createMemberContext(member, serviceInstance);
-        var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
+        var _v;
+        var oDataBuidlerCfg;
+        if (member){
+            var memberInfo = this.createMemberContext(member, serviceInstance);
+            var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
 
-        //this will be something much more dynamic
-        var _v = memberInfo.invoke(methodArgs, req, res);
+            //this will be something much more dynamic
+            _v = memberInfo.invoke(methodArgs, req, res);
+            
+            oDataBuidlerCfg = {
+                version: 'V2',
+                baseUrl: 'http://localhost:3000/contextapi.svc',
+                context: self.type,
+                methodConfig: member,
+                methodName: memberName
+            };
+        }else{
+            if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
+            member = this.resolveEntitySet(req, memberName, serviceInstance);
+            if (member){
+                var pHandler = new $data.PromiseHandler();
+                var cbWrapper = pHandler.createCallback();
 
-        var self = this;
+                //try {
+                    var builder = new $data.oDataParser.ODataEntityExpressionBuilder(serviceInstance, memberName);
+                    var result = builder.parse({
+                        count: false,
+                        filter: req.query.$filter || '',
+                        orderby: req.query.$orderby || '',
+                        select: req.query.$select || '',
+                        skip: req.query.$skip || '',
+                        top: req.query.$top || '',
+                        expand: req.query.$expand || ''
+                    });
+                    
+                    serviceInstance.executeQuery(new $data.Queryable(member, result.expression), cbWrapper);
+                /*} catch (e) {
+                    cbWrapper.error(e);
+                }*/
+
+                _v = pHandler.getPromise();
+                
+                oDataBuidlerCfg = {
+                    version: 'V2',
+                    baseUrl: 'http://localhost:3000/contextapi.svc',
+                    context: self.type,
+                    countRequest: false,
+                    collectionName: memberName,
+                    selectedFields: result.selectedFields,
+                    includes: result.includes
+                };
+            }
+        }
 
         this.promiseHelper.when(_v).then(function (value){
-            console.log(memberName, value);
             if (!(value instanceof $data.ServiceResult)){
                 if (typeof member === 'object'){
                     if (member.hasOwnProperty('resultType') && member.resultType instanceof $data.ServiceResult){
-                        value = member.resultType(value, member.resultCfg);
+                        value = new member.resultType(value, member.resultCfg);
                     }else{
-                        value = new $data.oDataJSONResult(value, {
-                            version: 'V2',
-                            context: self.type,
-                            methodConfig: member,
-                            methodName: memberName
-                        });
+                        value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
                     }
                 }else{
                     value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
@@ -119,6 +161,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         } else {
             return this.type.prototype[this.route[memberName]];
         }
+    },
+    resolveEntitySet: function(request, memberName, serviceInstance){
+        return serviceInstance[this.route[memberName]];
     },
     createMemberContext:function (member, serviceInstance) {
         var self = this;
