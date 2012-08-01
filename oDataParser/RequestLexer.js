@@ -28,7 +28,7 @@
     });
 
     $data.Class.define('$data.oDataParser.CharType', null, null, {}, {
-        EOF: { value: 0 }, WSP: { value: 1 }, CTRLCHAR: { value: 2 }, CHAR: { value: 3 }, DIGITS: { value: 4 }, ALPHA: { value: 5 }
+        EOF: { value: 0 }, WSP: { value: 1 }, CTRLCHAR: { value: 2 }, CHAR: { value: 3 }, DIGIT: { value: 4 }, ALPHA: { value: 5 }
     });
 
     $data.Class.define('$data.oDataParser.TokenType', null, null, {}, {
