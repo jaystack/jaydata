@@ -175,6 +175,12 @@
     converter:{
         value:{
             fromDb:{
+                '$data.ObjectID': function(o){
+                    if (o === undefined) {
+                        return new $data.ObjectID();
+                    }
+                    return o;
+                },
                 '$data.Integer':function (o) {
                     if (o === undefined) {
                         return new $data.Integer();
@@ -225,6 +231,9 @@
                 }
             },
             toDb:{
+                '$data.ObjectID':function (id) {
+                    return id;
+                },
                 '$data.Integer':function (number) {
                     return number;
                 },
