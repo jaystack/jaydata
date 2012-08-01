@@ -681,6 +681,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         d.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
                     }
                 }
+
                 docs.push(d.data);
             }
         
@@ -729,7 +730,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
                     if (!p.computed){
-                        set[p.name] = u.data[p.name];
+                        set[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
                     }
                 }
                 
