@@ -35,6 +35,14 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
         if (storageModel) {
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);
         }
+    },
+    VisitMemberInfoExpression: function (expression, builder) {
+        builder.modelBinderConfig['$type'] = expression.memberDefinition.type;
+        if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
+            this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
+        } else {
+            builder.modelBinderConfig['$source'] = expression.memberDefinition.computed ? '_id' : expression.memberName;
+        }
     }
 });
 
