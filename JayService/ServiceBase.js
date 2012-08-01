@@ -1,7 +1,6 @@
 $data.Class.define("$data.ServiceBase", null, null, {
-    $metadata:$data.JayService.serviceFunction().returns("string")(
-        function (a, b) {
-            var meta = new $data.oDataServer.MetaDataGenerator({}, this.getType());
-            return $data.JayService.resultAsXml(meta.generateMetadataXml());
-        })
+    $metadata: (function(){
+        var meta = new $data.oDataServer.MetaDataGenerator({}, this.context.getType());
+        return new $data.XmlResult(meta.generateMetadataXml());
+    }).toServiceOperation()
 });

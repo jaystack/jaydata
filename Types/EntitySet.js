@@ -24,9 +24,12 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
         this.createNew = this[elementType.name] = elementType;
         this.stateManager = new $data.EntityStateManager(this);
-        Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
+        this.elementType = elementType;
+        this.collectionName = collectionName;
+        this.roles = roles;
+        /*Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
         Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
-        Object.defineProperty(this, "roles", { value: roles, enumerable: true });
+        Object.defineProperty(this, "roles", { value: roles, enumerable: true });*/
         
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
@@ -326,6 +329,7 @@ $data.Class.defineEx('$data.EntitySet',
     },
     _checkRootExpression: function () {
         if (!this.expression) {
+            //var ec = new $data.Expressions.EntityContextExpression(this.entityContext);
             var ec = Container.createEntityContextExpression(this.entityContext);
             //var name = entitySet.collectionName;
             //var entitySet = this.entityContext[entitySetName];

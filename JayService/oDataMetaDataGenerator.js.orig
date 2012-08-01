@@ -547,7 +547,6 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 name: 'Type',
                 converter: function (name, value, memDef) {
                     return this._resolveTypeName(value);
-                    /*Container.getName(Container.getType(value));*/
                 },
                 cancelRender: function (name, memdef) {
                     return memdef.type === undefined
@@ -636,6 +635,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
             var parsedInfo = serviceDefParser.parseFromMethod(member.method);
             var vMember = {};
+<<<<<<< HEAD
             
             mMember = member.method || member;
             for (var prop in mMember){
@@ -644,7 +644,10 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 }
             }
             
-            vMember = $data.typeSystem.extend({ serviceOpName: member.name, method:"GET" }, parsedInfo, vMember);
+            $data.typeSystem.extend(vMember, { serviceOpName: member.method && member.method.hasOwnProperty('serviceName') ? member.method.serviceName || member.name : member.name, method:"GET" }, parsedInfo);
+=======
+            $data.typeSystem.extend(vMember, { serviceOpName: member.name, method: "GET" }, parsedInfo, member.method);
+>>>>>>> jaydata/development
 
             if (vMember.returnType && this._isExtendedType(vMember.returnType)) {
                 var uType = Container.resolveType(vMember.returnType);
