@@ -8,7 +8,6 @@ NPM_BASE_DIR = ./npm
 TYPESYSTEM_DIR = ./TypeSystem
 TYPES_DIR = ./Types
 JSERVICE_DIR = ./JayService
-ODATAPARSER_DIR = ./oDataParser
 COMPILER = ./Tools/compiler.jar
 GPL_LIC = ./GPL-LICENSE.txt
 MIT_LIC = ./MIT-LICENSE.txt
@@ -103,11 +102,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/Anonymous.js\
 	$(TYPES_DIR)/Authentication/FacebookAuth.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
-	$(ODATAPARSER_DIR)/RequestExpressionBuilder.js\
-	$(ODATAPARSER_DIR)/RequestLexer.js\
-	$(ODATAPARSER_DIR)/RequestParser.js\
-	$(ODATAPARSER_DIR)/EntityExpressionBuilder.js\
-	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 
 JAYDATA_SERVER = $(JSERVICE_DIR)/oDataMetaDataGenerator.js\
 	$(JSERVICE_DIR)/XmlResult.js\
@@ -136,8 +130,7 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
-oDataProvider = ./Scripts/datajs-1.0.3.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
+oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\
