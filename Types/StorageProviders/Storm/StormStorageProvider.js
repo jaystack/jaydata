@@ -87,6 +87,7 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
             
             var convertedItems = [];
             var collections = {};
+            var entities = [];
             for (var i = 0; i < independentBlocks.length; i++){
                 for (var j = 0; j < independentBlocks[i].length; j++) {
                     convertedItems.push(independentBlocks[i][j].data);
@@ -100,16 +101,23 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                     switch (independentBlocks[i][j].data.entityState){
                         case $data.EntityState.Unchanged: continue; break;
                         case $data.EntityState.Added:
-                            if (!es.insertAll) es.insertAll = [];
+                            /*if (!es.insertAll) es.insertAll = [];
                             es.insertAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
-                            break;
+                            break;*/
                         case $data.EntityState.Modified:
-                            if (!es.updateAll) es.updateAll = [];
+                            /*if (!es.updateAll) es.updateAll = [];
                             es.updateAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
-                            break;
+                            break;*/
                         case $data.EntityState.Deleted:
-                            if (!es.removeAll) es.removeAll = [];
+                            /*if (!es.removeAll) es.removeAll = [];
                             es.removeAll.push(this.save_getInitData(independentBlocks[i][j], convertedItems));
+                            break;*/
+                            entities.push({
+                                entitySet: independentBlocks[i][j].entitySet.name,
+                                entityState: independentBlocks[i][j].data.entityState,
+                                entity: independentBlocks[i][j].data,
+                                data: this.save_getInitData(independentBlocks[i][j], convertedItems)
+                            });
                             break;
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
@@ -120,9 +128,15 @@ $C('$data.storageProviders.Storm.StormProvider', $data.StorageProviderBase, null
                 url: this.providerConfiguration.url,
                 type: 'post',
                 dataType: 'json',
-                data: { items: JSON.stringify(collections) },
+                data: { items: JSON.stringify(entities.map(function(it){ return { entitySet: it.entitySet, entityState: it.entityState, data: it.data }; })) },
                 success: function(data, textStatus, jqXHR){
-                    callBack.success(data);
+                    for (var i = 0; i < data.items.length; i++){
+                        var item = data.items[i];
+                        for (var p in item){
+                            entities[i].entity[p] = item[p];
+                        }
+                    }
+                    callBack.success(data.__count);
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     var errorData = {};
