@@ -125,6 +125,8 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             context.cursor = context.query;
         }
         
+        var cursor = context.cursor;
+        
         switch (expression.nodeType){
             case $data.Expressions.ExpressionType.Or:
                 if (context.cursor instanceof Array){
@@ -137,6 +139,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
+                context.cursor = cursor;
                 break;
             case $data.Expressions.ExpressionType.And:
                 if (context.cursor instanceof Array){
@@ -149,6 +152,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
+                context.cursor = cursor;
                 break;
             case $data.Expressions.ExpressionType.Equal:
             case $data.Expressions.ExpressionType.EqualTyped:
@@ -1051,7 +1055,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
                 '$data.String': function (text) { return text; },
-                '$data.Boolean': function (bool) { return !!bool; },
+                '$data.Boolean': function (bool) { return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },

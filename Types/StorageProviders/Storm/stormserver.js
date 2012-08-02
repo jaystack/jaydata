@@ -18,10 +18,10 @@ $data.Entity.extend('$test.Item', {
 
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
-    GetThat: (function(){
+    /*GetThat: (function(){
         return [1, 2, 3];
     }).returns($data.Array, $data.Integer).serviceName('GetThat').params([])
-    /*Things: { type: $data.EntitySet, elementType: $test.Thing }*/
+    Things: { type: $data.EntitySet, elementType: $test.Thing }*/
 });
 
 var connect = require('connect');
