@@ -391,6 +391,29 @@ exports.testFilterAndOr = function(test){
     });
 };
 
+exports.testFilterOrAnd = function(test){
+    test.expect(5);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.filter(function(it){ return (it.Rank == this.minRank || it.Rank == this.maxRank) && it.Rank < this.rank; }, { rank: 5, minRank: 2, maxRank: 4 }).toArray(function(data){
+                test.equal(data.length, 2, 'Not 2 items selected from collection');
+                test.ok(data[0] instanceof $test.Item, 'Entity is not an Item');
+                if (data[0]) test.equal(data[0].Value, 'bbb7', 'Value of first item is not "bbb7"');
+                else test.ok(false, 'Item 1 not found in result set');
+                if (data[1]) test.equal(data[1].Value, 'bbb9', 'Value of second item is not "bbb9"');
+                else test.ok(false, 'Item 2 not found in result set');
+                test.done();
+            });
+        });
+    });
+};
+
 exports.testFilterByDate = function(test){
     test.expect(4);
     $test.Context.init(function(db){
