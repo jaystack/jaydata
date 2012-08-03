@@ -25,6 +25,7 @@ body, html{
 }
 
 .container{
+    height: 100%;
     padding: 1em;
 }
 
@@ -34,7 +35,7 @@ body, html{
     margin: 1em;
     border: dashed 1px;
     border-radius: 0.5em;
-    width: 16em;
+    /*width: 16em;*/
 }
 
 .entity-controls{
@@ -42,6 +43,7 @@ body, html{
     padding-right: 1em;
     margin-left: 1em;
     margin-right: 1em;
+    margin-bottom: 2em;
 }
 
 .fullname{

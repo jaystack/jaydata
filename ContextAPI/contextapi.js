@@ -9,6 +9,7 @@ var app = connect();
 
 app.use(connect.query());
 app.use(connect.bodyParser());
+app.use("/client", connect.static(__dirname + '/client'));
 app.use("/contextapi.svc", $data.JayService.createAdapter($data.ContextAPI.API, function(){
     return new $data.ContextAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
 }));

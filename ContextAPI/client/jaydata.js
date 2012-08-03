@@ -7153,7 +7153,7 @@ JAYLINT = (function () {
         //this.definedBy = definedClass;
         Object.defineProperty(this, 'definedBy', { value: definedClass, enumerable:false, configurable: false, writable: false });
         if (memberDefinitionData) {
-            if (typeof memberDefinitionData === 'function') {
+            if (typeof memberDefinitionData === 'function' || typeof memberDefinitionData.asFunction === 'function') {
                 this.method = memberDefinitionData;
                 this.kind = MemberTypes.method;
             } else {
@@ -7285,6 +7285,16 @@ JAYLINT = (function () {
 			}
 			return this.keyPropsCache;
 			//return this.keyPropsCache || (this.keyPropsCache = this.asArray().filter(function (m) { return m.kind == 'property' && m.key; }));
+		},
+		getPublicMappedMethods: function(){
+		    if (!this.pubMapMethodsCache){
+				this.pubMapMethodsCache = [];
+				for (var i in this){
+					if (i.indexOf(memberDefinitionPrefix) === 0 && this[i].kind == 'method' && this[i].method/* && this.hasOwnProperty(i)*/)
+						this.pubMapMethodsCache.push(this[i]);
+				}
+			}
+			return this.pubMapMethodsCache;
 		},
         getPropertyByType: function (type) {
 			if (!this.propByTypeCache){
@@ -7533,7 +7543,7 @@ JAYLINT = (function () {
                 baseClasses[i] = { type: baseClasses[i] };
         }
 
-        var providedCtor = instanceDefinition.constructor;
+        var providedCtor = instanceDefinition ? instanceDefinition.constructor : undefined;
 
         var classNameParts = className.split('.');
         var shortClassName = classNameParts.splice(classNameParts.length - 1, 1)[0];
@@ -10716,9 +10726,11 @@ $C('$data.Expressions.EntityContextExpression', $data.Expressions.ExpressionNode
     constructor: function (instance) {
         ///<param name="instance" type="$data.EntityContext" />
         Object.defineProperty(this, "instance", { value: instance, enumerable: false });
+        //this.instance = instance;
         //this.storage_type = {};
         //this.typeName = this.type.name;
     },
+    //instance: { enumerable: false, value: undefined },
     nodeType : { value: $data.Expressions.ExpressionType.EntityContext, enumerable: true }
 
 });
@@ -11051,6 +11063,10 @@ $C('$data.Expressions.EntityFieldOperationExpression', $data.Expressions.Express
         Object.defineProperty(this, "params", { value: params, enumerable: true, writable: true });
 
         Object.defineProperty(this, "instance", { value: instance, enumerable: false, writable: true });
+        /*this.source = source;
+        this.selector = selector;
+        this.params = params;
+        this.instance = instance;*/
 
         function findContext() {
             //TODO: use source from function parameter and return a value at the end of the function
@@ -11096,8 +11112,13 @@ $C('$data.Expressions.EntityFieldOperationExpression', $data.Expressions.Express
         //EntityTypeInfo
 
     },
+    /*source: { enumerable: true, writable: true, value: undefined },
+    selector: { enumerable: true, writable: true, value: undefined },
+    params: { enumerable: true, writable: true, value: undefined },
+    instance: { enumerable: false, writable: true, value: undefined },*/
     nodeType: { value: $data.Expressions.ExpressionType.EntitySet, enumerable: true }
-});$C('$data.Expressions.FrameOperationExpression', $data.Expressions.ExpressionNode, null, {
+});
+$C('$data.Expressions.FrameOperationExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, operation, parameters) {
         this.source = source;
         this.operation = operation;
@@ -11867,14 +11888,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
 
         Object.defineProperty(this, 'initData', { enumerable: false, configurable: true, writable: true, value: {} });
+        //this.initData = {};
         var ctx = null;
         Object.defineProperty(this, 'context', { enumerable: false, configurable: false, get: function () { return ctx; }, set: function (value) { ctx = value; } });
+        //this.context = ctx;
         if (arguments.length == 1 && typeof initData === "object") {
             var typeMemDefs = this.getType().memberDefinitions;
             var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
-            /*if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
-                this.initData = initData;
-            }*/
+//            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
+//                this.initData = initData;
+//            }
             this.initData = {};
             for (var i in initData){
                 if (memDefNames.indexOf(i) > -1){
@@ -11886,6 +11909,8 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             this.entityState = undefined;
         }
     },
+    //initData: { enumerable: false, configurable: true, writable: true },
+    //context: { enumerable: false, configurable: false, get: function () { return ctx; }, set: function (value) { ctx = value; } },
     toString: function () {
         /// <summary>Returns a string that represents the current $data.Entity</summary>
         /// <returns type="String"/>
@@ -12272,15 +12297,19 @@ $data.Class.define('$data.EntityContext', null, null,
         if (ctor.inheritsFrom !== null && ctor.inheritsFrom !== undefined) {
             this._initializeEntitySets(ctor.inheritsFrom);
         }
-        this._storageModel.forEach(function (storageModel) {
+        //this._storageModel.forEach(function (storageModel) {
+        for (var i = 0, l = this._storageModel.length; i < l; i++){
+            var storageModel = this._storageModel[i];
             this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers, storageModel.Roles);
-            this[storageModel.ItemName].name = storageModel.ItemName;
-            this[storageModel.ItemName].tableName = storageModel.TableName;
-            this[storageModel.ItemName].eventHandlers = storageModel.EventHandlers;
-            this._entitySetReferences[storageModel.LogicalType.name] = this[storageModel.ItemName];
+            var sm = this[storageModel.ItemName];
+            sm.name = storageModel.ItemName;
+            sm.tableName = storageModel.TableName;
+            sm.eventHandlers = storageModel.EventHandlers;
+            this._entitySetReferences[storageModel.LogicalType.name] = sm;
 
-            storageModel.EntitySetReference = this[storageModel.ItemName];
-        }, this);
+            storageModel.EntitySetReference = sm;
+        }
+        //}, this);
     },
     _initializeStorageModel: function () {
 
@@ -12294,16 +12323,38 @@ $data.Class.define('$data.EntityContext', null, null,
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
-                    storageModel.EventHandlers = {
-                        beforeCreate: item.beforeCreate,
-                        beforeRead: item.beforeRead,
-                        beforeUpdate: item.beforeUpdate,
-                        beforeDelete: item.beforeDelete,
-                        afterCreate: item.afterCreate,
-                        afterRead: item.afterRead,
-                        afterUpdate: item.afterUpdate,
-                        afterDelete: item.afterDelete
-                    };
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeCreate = item.beforeCreate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeRead = item.beforeRead;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeUpdate = item.beforeUpdate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeDelete = item.beforeDelete;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterCreate = item.afterCreate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterRead = item.afterRead;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterUpdate = item.afterUpdate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterDelete = item.afterDelete;
+                    }
                     var roles = item.roles;
                     var r = {};
                     if (roles instanceof Array){
@@ -13455,7 +13506,7 @@ $data.Class.define('$data.QueryProvider', null, null,
 		if (meta.$type){
 			var type = Container.resolveName(meta.$type);
             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-			var result = converter ? converter() : Container['create' + Container.resolveType(meta.$type).name]();
+			var result = converter ? converter() : new (Container.resolveType(meta.$type))(); //Container['create' + Container.resolveType(meta.$type).name]();
 		}
 
         if (meta.$selector){
@@ -13474,7 +13525,7 @@ $data.Class.define('$data.QueryProvider', null, null,
 					case 'json':
 						var path = type[1].split('.');
 						while (path.length) {
-						    if ((typeof part[path[0]] === 'undefined') || (part[path[0]] === null)) {
+						    if (typeof part[path[0]] === 'undefined') {
 								if (i === metaSelector.length){
 									return undefined;
 								}else if (path.length){
@@ -13515,13 +13566,13 @@ $data.Class.define('$data.QueryProvider', null, null,
             }else if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                result = converter ? converter(meta.$value) : Container['create' + Container.resolveType(meta.$type).name](meta.$value);
+                result = converter ? converter(meta.$value) : new (Container.resolveType(meta.$type))(meta.$value); //Container['create' + Container.resolveType(meta.$type).name](meta.$value);
             }else result = meta.$value;
         }else if (meta.$source){
             if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                result = converter ? converter(data[meta.$source]) : Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
+                result = converter ? converter(data[meta.$source]) : new (Container.resolveType(meta.$type))(data[meta.$source]); //Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
             }else result = (meta.$source.split(':')[0] == 'attr' && data.getAttribute) ? data.getAttribute(meta.$source.split(':')[1]) : (meta.$source == 'textContent' && !data[meta.$source] ? $(data).text() : data[meta.$source]);
         }else if (meta.$item){
             for (var i = 0; i < data.length; i++){
@@ -13540,7 +13591,7 @@ $data.Class.define('$data.QueryProvider', null, null,
                                 else if (meta.$type) {
                                     var type = Container.resolveName(meta.$type.memberDefinitions.getMember(j).type);
                                     var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                    result[j] = converter ? converter(data[meta[j]]) : Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
+                                    result[j] = converter ? converter(data[meta[j]]) : new (Container.resolveType(meta.$type.memberDefinitions.getMember(j).type))(data[meta[j]]); //Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
                                 } else { result[j] = meta[j].$source ? data[meta[j].$source] : data[meta[j]]; }
                             } else { result[j] = this.call(data, meta[j]); }
                         }
@@ -13562,7 +13613,7 @@ $data.Class.define('$data.QueryProvider', null, null,
                             else if (meta.$type) {
                                 var type = Container.resolveName(Container.resolveType(meta.$type).memberDefinitions.getMember(j).type);
                                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                result[j] = converter ? converter(data[meta[j]]) : Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
+                                result[j] = converter ? converter(data[meta[j]]) : new (Container.resolveType(meta.$type.memberDefinitions.getMember(j).type))(data[meta[j]]); //Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
                             } else { result[j] = meta[j].$source ? data[meta[j].$source] : data[meta[j]]; }
                         } else { result[j] = this.call(data, meta[j]); }
                     }
@@ -14373,9 +14424,12 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
         this.createNew = this[elementType.name] = elementType;
         this.stateManager = new $data.EntityStateManager(this);
-        Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
+        this.elementType = elementType;
+        this.collectionName = collectionName;
+        this.roles = roles;
+        /*Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
         Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
-        Object.defineProperty(this, "roles", { value: roles, enumerable: true });
+        Object.defineProperty(this, "roles", { value: roles, enumerable: true });*/
         
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
@@ -14675,6 +14729,7 @@ $data.Class.defineEx('$data.EntitySet',
     },
     _checkRootExpression: function () {
         if (!this.expression) {
+            //var ec = new $data.Expressions.EntityContextExpression(this.entityContext);
             var ec = Container.createEntityContextExpression(this.entityContext);
             //var name = entitySet.collectionName;
             //var entitySet = this.entityContext[entitySetName];
@@ -14778,32 +14833,262 @@ Exception.prototype._getStackTrace = function () {
     //}
     return callstack.join("\n\r");	 */
 };
-Function.prototype.extend = function(extend){
-    for (var i in extend){
-        this[i] = extend[i];
-    }
-    
-    return this;
+Function.prototype.toServiceOperation = function(config){
+    return new $data.FunctionImport(this, config);
 };
 
-$data.ServiceOperation = function(){
-    var fn = arguments.callee;
+Function.prototype.extend = function(extend){
+    var fn = this;
     
-    var virtualEntitySet = fn.elementType ? this.getEntitySetFromElementType(Container.resolveType(fn.elementType)) : null;
+    var ret = function(){
+        fn.apply(this, arguments);
+    };
+    
+    for (var i in fn){
+        if (fn.hasOwnProperty(i)){
+            ret[i] = fn[i];
+        }
+    }
+    
+    for (var i in extend){
+        ret[i] = extend[i];
+    }
+        
+    return ret;
+};
+
+Function.prototype.returns = function(type, elementType){
+    if (typeof type === 'string')
+        type = Container.resolveType(type);
+        
+    if (typeof elementType === 'string')
+        elementType = Container.resolveType(elementType);
+
+    return this.extend({
+        returnType: type,
+        elementType: elementType
+    });
+};
+
+Function.prototype.params = function(params){
+    /*for (var p in params){
+        if (typeof params[p] === 'string')
+            params[p] = Container.resolveType(params[p]);
+    }*/
+    
+    return this.extend({
+        params: params
+    });
+};
+
+$data.FunctionImport = function(fn, config){
+    Object.defineProperty(this, 'asFunction', { value: fn });
+    Object.getPrototypeOf(this).valueOf = function(){
+        return this.asFunction;
+    };
+    Object.getPrototypeOf(this).toString = function(){
+        return this.asFunction.toString();
+    };
+    Object.getPrototypeOf(this).call = function(){
+        return this.asFunction.call.apply(arguments[0], Array.prototype.slice.call(arguments, 1));
+    };
+    Object.getPrototypeOf(this).apply = function(scope, args){
+        return this.asFunction.apply(scope, args);
+    };
+    if (config) fn.extend(config);
+};
+
+$data.FunctionImport.prototype = {
+    toServiceOperation: function(config){
+        return new $data.FunctionImport(this.asFunction, config);
+    },
+    extend: function(extend){
+        for (var i in extend){
+            this[i] = extend[i];
+            this.asFunction[i] = extend[i];
+        }
+        
+        return this;
+    },
+    chain: function(before, after){
+        var fn = this;
+        
+        var ret = function(){
+            var chain = arguments.callee.chainFn;
+            var args = [];
+            if (arguments.length){
+                for (var i = 0; i < arguments.length; i++){
+                    args.push(arguments[i]);
+                }
+            }
+            var argsCount = args.length;
+            var i = 0;
+            
+            var readyFn = function(){
+                if (args[args.length - 1] && args[args.length - 1].success && typeof args[args.length - 1].success === 'function'){
+                    var fn = args[args.length - 1].success;
+                    fn.apply(this, arguments);
+                }else return arguments.length ? arguments[0] : undefined;
+            };
+            
+            var callbackFn = function(){
+                var fn = chain[i];
+                i++;
+                
+                var r = fn.apply(this, args);
+                if (typeof r === 'function'){
+                    var argsFn = arguments;
+                    args[argsCount] = (i < chain.length ? (function(){ return callbackFn.apply(this, argsFn); }) : (function(){ return readyFn.apply(this, argsFn); }));
+                    r.apply(this, args);
+                }else{
+                    if (i < chain.length){
+                        callbackFn.apply(this, arguments);
+                    }else readyFn(this, arguments);
+                }
+            }
+            
+            callbackFn();
+        };
+        
+        if (!ret.chainFn) ret.chainFn = (before || []).concat([fn].concat(after || []));
+        
+        return ret;
+    },
+    before: function(on){
+        var ret = this;
+        
+        if (!this.chainFn) ret = ret.chain();
+        ret.chainFn.unshift(on);
+            
+        return ret;
+    },
+    after: function(on){
+        var ret = this;
+        
+        if (!this.chainFn) ret = ret.chain();
+        ret.chainFn.push(on);
+            
+        return ret;
+    },
+    asResult: function(type, config){
+        return this.extend({
+            resultType: type,
+            resultCfg: config
+        });
+    },
+    returns: function(type, elementType){
+        if (typeof type === 'string')
+            type = Container.resolveType(type);
+            
+        if (typeof elementType === 'string')
+            elementType = Container.resolveType(elementType);
+
+        return this.extend({
+            returnType: type,
+            elementType: elementType
+        });
+    },
+    params: function(params){
+        /*for (var p in params){
+            if (typeof params[p] === 'string')
+                params[p] = Container.resolveType(params[p]);
+        }*/
+        
+        return this.extend({
+            params: params
+        });
+    },
+    serviceName: function(serviceName){
+        return this.extend({
+            serviceName: serviceName
+        });
+    },
+    httpMethod: function(method){
+        return this.extend({
+            method: method
+        });
+    },
+    webGet: function(){
+        return this.method('GET');
+    },
+    webInvoke: function(){
+        return this.method('POST');
+    },
+    authorize: function(roles, callback){
+        var r = {};
+        if (roles instanceof Array){
+            for (var i = 0; i < roles.length; i++){
+                if (typeof roles[i] === 'string') r[roles[i]] = true;
+            }
+        }else r = roles;
+        
+        this.roles = r;
+
+        var fn = this;
+        
+        ret = function(){
+            var pHandler = new $data.PromiseHandler();
+            var clbWrapper = pHandler.createCallback(callback);
+            var pHandlerResult = pHandler.getPromise();
+            var args = arguments;
+            
+            clbWrapper.success = clbWrapper.success.after(function(){
+                fn.apply(this, args);
+            });
+            
+            $data.Access.isAuthorized($data.Access.Execute, this.user, fn.roles, clbWrapper);
+            
+            return pHandlerResult;
+        };
+        
+        return ret;
+    },
+    toPromise: function(callback){
+        var fn = this;
+        
+        var ret = function(){
+            var pHandler = new $data.PromiseHandler();
+            var clbWrapper = pHandler.createCallback(callback);
+            var pHandlerResult = pHandler.getPromise();
+            
+            arguments[arguments.length++] = clbWrapper;
+            fn.apply(this, arguments);
+            
+            return pHandlerResult;
+        };
+        
+        return this;
+    }
+};
+
+$data.ServiceOperation = (function(){
+    var fn = arguments.callee.caller;
+    
+    var virtualEntitySet = fn.hasOwnProperty('elementType') ? this.getEntitySetFromElementType(Container.resolveType(fn.elementType)) : null;
     
     var paramConstExpression = null;
-    if (fn.params) {
+    if (fn.hasOwnProperty('params')) {
         paramConstExpression = [];
         for (var i = 0; i < fn.params.length; i++) {
+            paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(fn.params[i].type), fn.params[i].name));
             //TODO: check params type
-            for (var name in fn.params[i]) {
+            /*for (var name in fn.params[i]) {
                 paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(fn.params[i][name]), name));
-            }
+            }*/
         }
     }
 
     var ec = Container.createEntityContextExpression(this);
-    var memberdef = this.getType().getMemberDefinition(fn.serviceName);
+    var memDefs = this.getType().memberDefinitions.asArray();
+    var memberdef;
+    for (var i = 0; i < memDefs.length; i++){
+         if (fn === memDefs[i].method){
+            memberdef = memDefs[i];
+            break;
+         };
+    }
+    fn.serviceName = memberdef.name;
+    //var memberdef = this.getType().getMemberDefinition(fn.hasOwnProperty('serviceOpName') ? fn.serviceOpName : fn.memberDefinition.name);
     var es = Container.createServiceOperationExpression(ec,
             Container.createMemberInfoExpression(memberdef),
             paramConstExpression,
@@ -14840,167 +15125,8 @@ $data.ServiceOperation = function(){
         es.isTerminated = true;
         return q._runQuery(clb);
     }
-};
+});
 
-Function.prototype.chain = function(before, after){
-    var fn = this;
-    
-    var ret = function(){
-        var chain = arguments.callee.chainFn;
-        var args = [];
-        if (arguments.length){
-            for (var i = 0; i < arguments.length; i++){
-                args.push(arguments[i]);
-            }
-        }
-        var argsCount = args.length;
-        var i = 0;
-        
-        var readyFn = function(){
-            if (args[args.length - 1] && args[args.length - 1].success && typeof args[args.length - 1].success === 'function'){
-                var fn = args[args.length - 1].success;
-                fn.apply(this, arguments);
-            }else return arguments.length ? arguments[0] : undefined;
-        };
-        
-        var callbackFn = function(){
-            var fn = chain[i];
-            i++;
-            
-            var r = fn.apply(this, args);
-            if (typeof r === 'function'){
-                var argsFn = arguments;
-                args[argsCount] = (i < chain.length ? (function(){ return callbackFn.apply(this, argsFn); }) : (function(){ return readyFn.apply(this, argsFn); }));
-                r.apply(this, args);
-            }else{
-                if (i < chain.length){
-                    callbackFn.apply(this, arguments);
-                }else readyFn(this, arguments);
-            }
-        }
-        
-        callbackFn();
-    };
-    
-    if (!ret.chainFn) ret.chainFn = (before || []).concat([fn].concat(after || []));
-    
-    return ret;
-};
-
-Function.prototype.before = function(on){
-    var ret = this;
-    
-    if (!this.chainFn) ret = ret.chain();
-    ret.chainFn.unshift(on);
-        
-    return ret;
-};
-
-Function.prototype.after = function(on){
-    var ret = this;
-    
-    if (!this.chainFn) ret = ret.chain();
-    ret.chainFn.push(on);
-        
-    return ret;
-};
-
-Function.prototype.contentType = function(mime){
-    return this.extend({
-        contentType: mime
-    });
-};
-
-Function.prototype.returns = function(type, elementType){
-    if (typeof type === 'string')
-        type = Container.resolveType(type);
-        
-    if (typeof elementType === 'string')
-        elementType = Container.resolveType(elementType);
-
-    return this.extend({
-        returnType: type,
-        elementType: elementType
-    });
-};
-
-Function.prototype.params = function(params){
-    /*for (var p in params){
-        if (typeof params[p] === 'string')
-            params[p] = Container.resolveType(params[p]);
-    }*/
-    
-    return this.extend({
-        params: params
-    });
-};
-
-Function.prototype.serviceName = function(serviceName){
-    return this.extend({
-        serviceName: serviceName
-    });
-};
-
-Function.prototype.method = function(method){
-    return this.extend({
-        method: method
-    });
-};
-
-Function.prototype.webGet = function(){
-    return this.method('GET');
-};
-
-Function.prototype.webInvoke = function(){
-    return this.method('POST');
-};
-
-Function.prototype.authorize = function(roles, callback){
-    var r = {};
-    if (roles instanceof Array){
-        for (var i = 0; i < roles.length; i++){
-            if (typeof roles[i] === 'string') r[roles[i]] = true;
-        }
-    }else r = roles;
-    
-    this.roles = r;
-
-    var fn = this;
-    
-    ret = function(){
-        var pHandler = new $data.PromiseHandler();
-        var clbWrapper = pHandler.createCallback(callback);
-        var pHandlerResult = pHandler.getPromise();
-        var args = arguments;
-        
-        clbWrapper.success = clbWrapper.success.after(function(){
-            fn.apply(this, args);
-        });
-        
-        $data.Access.isAuthorized($data.Access.Execute, this.user, fn.roles, clbWrapper);
-        
-        return pHandlerResult;
-    };
-    
-    return ret;
-};
-
-Function.prototype.promise = function(callback){
-    var fn = this;
-    
-    var ret = function(){
-        var pHandler = new $data.PromiseHandler();
-        var clbWrapper = pHandler.createCallback(callback);
-        var pHandlerResult = pHandler.getPromise();
-        
-        arguments[arguments.length++] = clbWrapper;
-        fn.apply(this, arguments);
-        
-        return pHandlerResult;
-    };
-    
-    return ret;
-};
 $data.StorageProviderLoader = {
     isSupported: function (providerName) {
         switch (providerName) {
@@ -15031,9 +15157,11 @@ $data.StorageProviderLoader = {
                     providerName = 'Storm';
                     break;
             }
-            var jaydataScript = document.querySelector('script[src*="jaydata"]');
-            if (jaydataScript) return jaydataScript.src.substring(0, jaydataScript.src.lastIndexOf('/') + 1) + providerName + 'Provider.js';
-            else return 'providers/' + providerName + 'Provider.js';
+            var jaydataScriptMin = document.querySelector('script[src$="jaydata.min.js"]');
+	    var jaydataScript = document.querySelector('script[src$="jaydata.js"]');
+            if (jaydataScriptMin) return jaydataScriptMin.src.substring(0, jaydataScriptMin.src.lastIndexOf('/') + 1) + 'jaydataproviders/' + providerName + 'Provider.min.js';
+            else if (jaydataScript) return jaydataScript.src.substring(0, jaydataScript.src.lastIndexOf('/') + 1) + 'jaydataproviders/' + providerName + 'Provider.js';
+            else return 'jaydataproviders/' + providerName + 'Provider.js';
         };
 
         function loadScript(url, callback) {
@@ -15065,16 +15193,13 @@ $data.StorageProviderLoader = {
             oXmlHttp.send(null);
         };
 
-        if (!providerList.length){
-            callback.error();
-            return;
-        }
+
         var currentProvider = providerList.shift();
 
         if ($data.RegisteredStorageProviders) {
             var provider = $data.RegisteredStorageProviders[currentProvider];
             if (provider) {
-                callback.success(provider);
+                callback.success(provider)
                 return;
             }
         }
@@ -15729,54 +15854,6 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
             this.Visit(expression.expression, builder);
         }
         builder.popModelBinderProperty();
-    }
-});
-$C('$data.queryBuilder', null, null, {
-    constructor: function () {
-        this._fragments = {};
-        this.selectedFragment = null;
-        this._binderConfig = {};
-        this.modelBinderConfig = this._binderConfig;
-        this._binderConfigPropertyStack = [];
-    },
-    selectTextPart: function (name) {
-        if (!this._fragments[name]) {
-            this._fragments[name] = { text: '', params: [] };
-        }
-        this.selectedFragment = this._fragments[name];
-    },
-    getTextPart: function (name) {
-        return this._fragments[name];
-    },
-    addText: function (textParticle) {
-        this.selectedFragment.text += textParticle;
-    },
-    addParameter: function (param) {
-        this.selectedFragment.params.push(param);
-    },
-    selectModelBinderProperty: function (name) {
-        this._binderConfigPropertyStack.push(this.modelBinderConfig);
-        if (!(name in this.modelBinderConfig)) {
-            this.modelBinderConfig[name] = {};
-        }
-        this.modelBinderConfig = this.modelBinderConfig[name];
-    },
-    popModelBinderProperty: function () {
-        if (this._binderConfigPropertyStack.length === 0) {
-            this.modelBinderConfig = this._binderConfig();
-        } else {
-            this.modelBinderConfig = this._binderConfigPropertyStack.pop();
-        }
-    },
-    resetModelBinderProperty: function (name) {
-        this._binderConfigPropertyStack = [];
-        this.modelBinderConfig = this._binderConfig;
-    },
-    addKeyField: function (name) {
-        if (!this.modelBinderConfig['$keys']) {
-            this.modelBinderConfig['$keys'] = new Array();
-        }
-        this.modelBinderConfig['$keys'].push(name);
     }
 });$data.Class.define("$data.Authentication.AuthenticationBase", null, null, {
     constructor: function (cfg) {

@@ -1,4 +1,4 @@
-// JayData 0.0.0
+// JayData 1.1.1
 // Dual licensed under MIT and GPL v2
 // Copyright JayStack Technologies (http://jaydata.org/licensing)
 //
@@ -11,7 +11,305 @@
 //     Zoltán Gyebrovszki
 //
 // More info: http://jaydata.org
-$data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.StorageProviderBase, null,
+$data.Class.define('$data.dbClient.DbCommand', null, null,
+{
+    connection: {},
+    parameters: {},
+    execute: function (callback) {
+        Guard.raise("Pure class");
+    }
+}, null);$data.Class.define('$data.dbClient.DbConnection', null, null,
+{
+    connectionParams: {},
+    database: {},
+    isOpen: function () {
+        Guard.raise("Pure class");
+    },
+    open: function () {
+        Guard.raise("Pure class");
+    },
+    close: function () {
+        Guard.raise("Pure class");
+    },
+    createCommand: function () {
+        Guard.raise("Pure class");
+    }
+}, null);$data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbClient.DbCommand, null,
+{
+    constructor: function (con, queryStr, params) {
+        this.query = queryStr;
+        this.connection = con;
+        this.parameters = params;
+    },
+    executeNonQuery: function (callback) {
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
+    },
+    executeQuery: function (callback) {
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
+    },
+    exec: function (query, parameters, callback, errorhandler) {
+		// suspicious code
+        /*if (console) {
+            //console.log(query);
+        }*/
+        this.connection.open({
+            success: function (tran) {
+                var single = false;
+                if (!(query instanceof Array)) {
+                    single = true;
+                    query = [query];
+                    parameters = [parameters];
+                }
+                
+                var results = [];
+                var remainingCommands = 0;
+
+                function decClb() {
+                    if (--remainingCommands == 0) {
+                        callback(single ? results[0] : results);
+                    }
+                }
+
+                query.forEach(function (q, i) {
+                    remainingCommands++;
+                    if (q) {
+                        tran.executeSql(
+                            query[i],
+                            parameters[i],
+                            function (trx, result) {
+                                var r = { rows: [] };
+                                try {
+                                    r.insertId = result.insertId;
+                                } catch (e) {
+                                    // If insertId is present, no rows are returned
+                                    r.rowsAffected = result.rowsAffected;
+                                    var maxItem = result.rows.length;
+                                    for (var j = 0; j < maxItem; j++) {
+                                        r.rows.push(result.rows.item(j));
+                                    }
+                                }
+                                results[i] = r;
+                                decClb();
+                            },
+                            function (trx, err) {
+                                if (errorhandler)
+                                    errorhandler(err);
+                            }
+                        );
+                    } else {
+                        results[i] = null;
+                        decClb();
+                    }
+                });
+            }
+        });
+    }
+}, null);$data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.dbClient.DbConnection, null,
+{
+    constructor: function (params) {
+        this.connectionParams = params;
+    },
+    isOpen: function () {
+        return this.database !== null && this.database !== undefined && this.transaction !== null && this.transaction !== undefined;
+    },
+    open: function (callBack) {
+		if (this.database){
+			this.database.transaction(function (tran) { callBack.success(tran); });
+        } else {
+            var p = this.connectionParams;
+            var con = this;
+			this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
+			this.database.transaction(function (tran) { callBack.success(tran); });
+        }
+    },
+    close: function () {
+        this.transaction = undefined;
+        this.database = undefined;
+    },
+    createCommand: function (queryStr, params) {
+        var cmd = new $data.dbClient.openDatabaseClient.OpenDbCommand(this, queryStr, params);
+        return cmd;
+    }
+}, null);$data.Class.define('$data.dbClient.jayStorageClient.JayStorageCommand', $data.dbClient.DbCommand, null,
+{
+    constructor: function (con, queryStr, params) {
+        this.query = queryStr;
+        this.connection = con;
+        this.parameters = params;
+    },
+    executeNonQuery: function (callback) {
+        // TODO
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
+    },
+    executeQuery: function (callback) {
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
+    },
+    exec: function (query, parameters, callback, errorhandler) {
+        if (parameters == null || parameters == undefined) {
+            parameters = {};
+        }
+        var single = false;
+        if (!(query instanceof Array)) {
+            single = true;
+            query = [query];
+            parameters = [parameters];
+        }
+
+        var provider = this;
+        var results = [];
+        var remainingCommands = query.length;
+        var decClb = function () {
+            if (--remainingCommands == 0) {
+                callback(single ? results[0] : results);
+            }
+        };
+
+		query.forEach(function(q, i){
+			if (q){
+				$data.ajax({
+					url: 'http' + (this.connection.connectionParams.storage.ssl ? 's' : '') + '://' + this.connection.connectionParams.storage.src.replace('http://', '').replace('https://', '') + '?db=' + this.connection.connectionParams.storage.key,
+					type: 'POST',
+					headers: {
+						'X-PINGOTHER': 'pingpong'
+					},
+					data: { query: q, parameters: parameters[i] },
+					dataType: 'json',
+					contentType: 'application/json;charset=UTF-8',
+					success: function(data){
+						if (data && data.error){
+							console.log('JayStorage error', data.error);
+							errorhandler(data.error);
+							return;
+						}
+						if (this.lastID){
+							results[i] = { insertId: this.lastID, rows: (data || { rows: [] }).rows };
+						}else results[i] = { rows: (data || { rows: [] }).rows };
+ 						decClb();
+					}
+				});
+			}else{
+				results[i] = null;
+				decClb();
+			}
+		}, this);
+    }
+}, null);$data.Class.define('$data.dbClient.jayStorageClient.JayStorageConnection', $data.dbClient.DbConnection, null,
+{
+    constructor: function (params) {
+        this.connectionParams = params;
+    },
+    isOpen: function () {
+		return true;
+        //return this.database !== null && this.database !== undefined;
+    },
+    open: function () {
+        /*if (this.database == null) {
+            var p = this.connectionParams;
+            this.database = new sqLiteModule.Database(p.fileName);
+        }*/
+    },
+    close: function () {
+        //not supported yet (performance issue)
+    },
+    createCommand: function (queryStr, params) {
+        var cmd = new $data.dbClient.jayStorageClient.JayStorageCommand(this, queryStr, params);
+        return cmd;
+    }
+}, null);$data.Class.define('$data.dbClient.sqLiteNJClient.SqLiteNjCommand', $data.dbClient.DbCommand, null,
+{
+    constructor: function (con, queryStr, params) {
+        this.query = queryStr;
+        this.connection = con;
+        this.parameters = params;
+    },
+    executeNonQuery: function (callback) {
+        // TODO
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
+    },
+    executeQuery: function (callback) {
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
+    },
+    exec: function (query, parameters, callback, errorhandler) {
+        if (!this.connection.isOpen()) {
+            this.connection.open();
+        }
+        if (parameters == null || parameters == undefined) {
+            parameters = {};
+        }
+        var single = false;
+        if (!(query instanceof Array)) {
+            single = true;
+            query = [query];
+            parameters = [parameters];
+        }
+
+        var provider = this;
+        var results = [];
+        var remainingCommands = 0;
+        var decClb = function () {
+            if (--remainingCommands == 0) {
+                provider.connection.database.exec('COMMIT');
+                callback(single ? results[0] : results);
+            }
+        };
+        provider.connection.database.exec('BEGIN');
+        query.forEach(function (q, i) {
+            remainingCommands++;
+            if (q) {
+                var sqlClb = function (error, rows) {
+                    if (error != null) {
+                        errorhandler(error);
+                        return;
+                    }
+                    if (this.lastID) {
+                        results[i] = { insertId: this.lastID, rows: [] };
+                    } else {
+                        results[i] = { rows: rows };
+                    }
+                    decClb();
+                };
+
+                var stmt = provider.connection.database.prepare(q, parameters[i]);
+                if (q.indexOf('SELECT') == 0) {
+                    stmt.all(sqlClb);
+                } else {
+                    stmt.run(sqlClb);
+                }
+                stmt.finalize();
+            } else {
+                results[i] = null;
+                decClb();
+            }
+        }, this);
+    }
+}, null);$data.Class.define('$data.dbClient.sqLiteNJClient.SqLiteNjConnection', $data.dbClient.DbConnection, null,
+{
+    constructor: function (params) {
+        this.connectionParams = params;
+    },
+    isOpen: function () {
+        return this.database !== null && this.database !== undefined;
+    },
+    open: function () {
+        if (this.database == null) {
+            var p = this.connectionParams;
+            this.database = new sqLiteModule.Database(p.fileName);
+        }
+    },
+    close: function () {
+        //not supported yet (performance issue)
+    },
+    createCommand: function (queryStr, params) {
+        var cmd = new $data.dbClient.sqLiteNJClient.SqLiteNjCommand(this, queryStr, params);
+        return cmd;
+    }
+}, null);$data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, context) {
         this.SqlCommands = [];
@@ -21,7 +319,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             version: "",
             displayName: "JayData demo db",
             maxSize: 1024 * 1024,
-            dbCreation: $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
 
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
@@ -305,10 +603,10 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     existObjectInDB[item.tbl_name] = item;
                 }
                 switch (that.providerConfiguration.dbCreation) {
-                    case $data.storageProviders.sqLite.DbCreationType.Merge:
+                    case $data.storageProviders.DbCreationType.Merge:
                         Guard.raise(new Exception('Not supported db creation type'));
                         break;
-                    case $data.storageProviders.sqLite.DbCreationType.DropTableIfChanged:
+                    case $data.storageProviders.DbCreationType.DropTableIfChanged:
                         var deleteCmd = [];
                         for (var i = 0; i < that.SqlCommands.length; i++) {
                             if (that.SqlCommands[i] == "") { continue; }
@@ -333,7 +631,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                         that.SqlCommands = that.SqlCommands.concat(deleteCmd);
                         console.log(deleteCmd);
                         break;
-                    case $data.storageProviders.sqLite.DbCreationType.DropAllExistingTables:
+                    case $data.storageProviders.DbCreationType.DropAllExistingTables:
                         for (var objName in existObjectInDB) {
                             if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
                                 that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
@@ -705,12 +1003,6 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         set: function () { }
     }
 });
-$data.storageProviders.sqLite.DbCreationType = {
-    //Default: 20,
-    Merge: 10,
-    DropTableIfChanged: 20,
-    DropAllExistingTables: 30
-};
 
 if ($data.storageProviders.sqLite.SqLiteStorageProvider.isSupported) {
     $data.StorageProviderBase.registerProvider("webSql", $data.storageProviders.sqLite.SqLiteStorageProvider);
@@ -734,54 +1026,6 @@ var SqlStatementBlocks = {
     rowIdName: 'rowid$$',
     count: 'select count(*) cnt from ('
 };
-$C('$data.queryBuilder', null, null, {
-    constructor: function () {
-        this._fragments = {};
-        this.selectedFragment = null;
-        this._binderConfig = {};
-        this.modelBinderConfig = this._binderConfig;
-        this._binderConfigPropertyStack = [];
-    },
-    selectTextPart: function (name) {
-        if (!this._fragments[name]) {
-            this._fragments[name] = { text: '', params: [] };
-        }
-        this.selectedFragment = this._fragments[name];
-    },
-    getTextPart: function (name) {
-        return this._fragments[name];
-    },
-    addText: function (textParticle) {
-        this.selectedFragment.text += textParticle;
-    },
-    addParameter: function (param) {
-        this.selectedFragment.params.push(param);
-    },
-    selectModelBinderProperty: function (name) {
-        this._binderConfigPropertyStack.push(this.modelBinderConfig);
-        if (!(name in this.modelBinderConfig)) {
-            this.modelBinderConfig[name] = {};
-        }
-        this.modelBinderConfig = this.modelBinderConfig[name];
-    },
-    popModelBinderProperty: function () {
-        if (this._binderConfigPropertyStack.length === 0) {
-            this.modelBinderConfig = this._binderConfig();
-        } else {
-            this.modelBinderConfig = this._binderConfigPropertyStack.pop();
-        }
-    },
-    resetModelBinderProperty: function (name) {
-        this._binderConfigPropertyStack = [];
-        this.modelBinderConfig = this._binderConfig;
-    },
-    addKeyField: function (name) {
-        if(!this.modelBinderConfig['$keys']){
-            this.modelBinderConfig['$keys'] = new Array();
-        }
-        this.modelBinderConfig['$keys'].push(name);
-    }
-});
 $C('$data.sqLite.SqlBuilder', $data.queryBuilder, null, {
     constructor: function (sets, context) {
         this.sets = sets;

@@ -20,6 +20,9 @@ $data.FunctionImport = function(fn, config){
 };
 
 $data.FunctionImport.prototype = {
+    toServiceOperation: function(config){
+        return new $data.FunctionImport(this.asFunction, config);
+    },
     extend: function(extend){
         for (var i in extend){
             this[i] = extend[i];
@@ -232,4 +235,4 @@ $data.ServiceOperation = (function(){
         es.isTerminated = true;
         return q._runQuery(clb);
     }
-}).toServiceOperation();
+});
