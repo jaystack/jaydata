@@ -18,10 +18,10 @@ $data.Entity.extend('$test.Item', {
 
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
-    GetThat: (function(){
+    /*GetThat: (function(){
         return [1, 2, 3];
     }).returns($data.Array, $data.Integer).serviceName('GetThat').params([])
-    /*Things: { type: $data.EntitySet, elementType: $test.Thing }*/
+    Things: { type: $data.EntitySet, elementType: $test.Thing }*/
 });
 
 var connect = require('connect');
@@ -75,39 +75,37 @@ app.use('/', function(req, res){
             }
         });
     }else if (req.method === 'POST'){
+        var entities = JSON.parse(req.body.items);
         $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'storm' });
         $test.context.onReady(function(db){
             var callback = $data.typeSystem.createCallbackSetting({
                 success: function(cnt){
-                    res.write(cnt.toString());
+                    res.write(JSON.stringify({ __count: cnt, items: entities.map(function(it){ return it.initData; }) }));
                     res.end();
                 },
                 error: function(err){
-                    res.write('ohoh');
+                    res.write(err.toString());
                     res.end();
                 }
             });
             
-            var collections = JSON.parse(req.body.items);
-            
-            for (var es in collections){
-                var c = collections[es];
-                if (c.insertAll && c.insertAll.length){
-                    for (var i = 0; i < c.insertAll.length; i++)
-                        db[es].add(c.insertAll[i]);
-                }
-                
-                if (c.removeAll && c.removeAll.length){
-                    for (var i = 0; i < c.removeAll.length; i++)
-                        db[es].remove(c.removeAll[i]);
-                }
-                
-                if (c.updateAll && c.updateAll.length){
-                    for (var i = 0; i < c.updateAll.length; i++){
-                        var item = new db[es].createNew(c.updateAll[i]);
-                        db[es].attach(item);
+            for (var i = 0; i < entities.length; i++){
+                var e = entities[i];
+                var item = new db[e.entitySet].createNew(e.data);
+                entities[i] = item;
+                switch (e.entityState){
+                    case $data.EntityState.Added:
+                        db[e.entitySet].add(item);
+                        break;
+                    case $data.EntityState.Deleted:
+                        db[e.entitySet].remove(item);
+                        break;
+                    case $data.EntityState.Modified:
+                        db[e.entitySet].attach(item);
                         item.entityState = $data.EntityState.Modified;
-                    }
+                        break;
+                    default:
+                        break;
                 }
             }
             
