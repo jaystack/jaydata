@@ -130,8 +130,7 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
-oDataProvider = ./Scripts/datajs-1.0.3.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
+oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\

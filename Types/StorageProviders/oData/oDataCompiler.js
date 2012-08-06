@@ -57,7 +57,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         this.Visit(expression.source, context);
         if (!context['$select']) {
             if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += expression.selector.value.replace('.', '/');
+            context['$expand'] += expression.selector.value.replace(/\./g, '/');
 
             this.includes = this.includes || [];
             var includeFragment = expression.selector.value.split('.');

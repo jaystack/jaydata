@@ -13,7 +13,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 		if (meta.$type){
 			var type = Container.resolveName(meta.$type);
             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-			var result = converter ? converter() : Container['create' + Container.resolveType(meta.$type).name]();
+			var result = converter ? converter() : new (Container.resolveType(meta.$type))(); //Container['create' + Container.resolveType(meta.$type).name]();
 		}
 
         if (meta.$selector){
@@ -32,7 +32,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 					case 'json':
 						var path = type[1].split('.');
 						while (path.length) {
-						    if ((typeof part[path[0]] === 'undefined') || (part[path[0]] === null)) {
+						    if (typeof part[path[0]] === 'undefined') {
 								if (i === metaSelector.length){
 									return undefined;
 								}else if (path.length){
@@ -73,13 +73,13 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }else if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                result = converter ? converter(meta.$value) : Container['create' + Container.resolveType(meta.$type).name](meta.$value);
+                result = converter ? converter(meta.$value) : new (Container.resolveType(meta.$type))(meta.$value); //Container['create' + Container.resolveType(meta.$type).name](meta.$value);
             }else result = meta.$value;
         }else if (meta.$source){
             if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                result = converter ? converter(data[meta.$source]) : Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
+                result = converter ? converter(data[meta.$source]) : new (Container.resolveType(meta.$type))(data[meta.$source]); //Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
             }else result = (meta.$source.split(':')[0] == 'attr' && data.getAttribute) ? data.getAttribute(meta.$source.split(':')[1]) : (meta.$source == 'textContent' && !data[meta.$source] ? $(data).text() : data[meta.$source]);
         }else if (meta.$item){
             for (var i = 0; i < data.length; i++){
@@ -98,7 +98,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 else if (meta.$type) {
                                     var type = Container.resolveName(meta.$type.memberDefinitions.getMember(j).type);
                                     var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                    result[j] = converter ? converter(data[meta[j]]) : Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
+                                    result[j] = converter ? converter(data[meta[j]]) : new (Container.resolveType(meta.$type.memberDefinitions.getMember(j).type))(data[meta[j]]); //Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
                                 } else { result[j] = meta[j].$source ? data[meta[j].$source] : data[meta[j]]; }
                             } else { result[j] = this.call(data, meta[j]); }
                         }
@@ -120,7 +120,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             else if (meta.$type) {
                                 var type = Container.resolveName(Container.resolveType(meta.$type).memberDefinitions.getMember(j).type);
                                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                result[j] = converter ? converter(data[meta[j]]) : Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
+                                result[j] = converter ? converter(data[meta[j]]) : new (Container.resolveType(meta.$type.memberDefinitions.getMember(j).type))(data[meta[j]]); //Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
                             } else { result[j] = meta[j].$source ? data[meta[j].$source] : data[meta[j]]; }
                         } else { result[j] = this.call(data, meta[j]); }
                     }

@@ -127,6 +127,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 }
             },
             function (data, textStatus, jqXHR) {
+                if (!data) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'string' ? [{ cnt: data }] : data;
                     callBack.success(query);

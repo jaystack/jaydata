@@ -128,15 +128,19 @@ $data.Class.define('$data.EntityContext', null, null,
         if (ctor.inheritsFrom !== null && ctor.inheritsFrom !== undefined) {
             this._initializeEntitySets(ctor.inheritsFrom);
         }
-        this._storageModel.forEach(function (storageModel) {
+        //this._storageModel.forEach(function (storageModel) {
+        for (var i = 0, l = this._storageModel.length; i < l; i++){
+            var storageModel = this._storageModel[i];
             this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers, storageModel.Roles);
-            this[storageModel.ItemName].name = storageModel.ItemName;
-            this[storageModel.ItemName].tableName = storageModel.TableName;
-            this[storageModel.ItemName].eventHandlers = storageModel.EventHandlers;
-            this._entitySetReferences[storageModel.LogicalType.name] = this[storageModel.ItemName];
+            var sm = this[storageModel.ItemName];
+            sm.name = storageModel.ItemName;
+            sm.tableName = storageModel.TableName;
+            sm.eventHandlers = storageModel.EventHandlers;
+            this._entitySetReferences[storageModel.LogicalType.name] = sm;
 
-            storageModel.EntitySetReference = this[storageModel.ItemName];
-        }, this);
+            storageModel.EntitySetReference = sm;
+        }
+        //}, this);
     },
     _initializeStorageModel: function () {
 
@@ -150,16 +154,38 @@ $data.Class.define('$data.EntityContext', null, null,
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
-                    storageModel.EventHandlers = {
-                        beforeCreate: item.beforeCreate,
-                        beforeRead: item.beforeRead,
-                        beforeUpdate: item.beforeUpdate,
-                        beforeDelete: item.beforeDelete,
-                        afterCreate: item.afterCreate,
-                        afterRead: item.afterRead,
-                        afterUpdate: item.afterUpdate,
-                        afterDelete: item.afterDelete
-                    };
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeCreate = item.beforeCreate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeRead = item.beforeRead;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeUpdate = item.beforeUpdate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.beforeDelete = item.beforeDelete;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterCreate = item.afterCreate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterRead = item.afterRead;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterUpdate = item.afterUpdate;
+                    }
+                    if (item.beforeCreate){
+                        if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
+                        storageModel.EventHandlers.afterDelete = item.afterDelete;
+                    }
                     var roles = item.roles;
                     var r = {};
                     if (roles instanceof Array){

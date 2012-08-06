@@ -4,7 +4,7 @@
         this.requesUrl = requesUrl;
     },
     convertToResponse:function (results, collectionNameOrElementType, selectedFields, includes) {
-        if (!(results instanceof $data.Object))
+        if (!(results instanceof $data.Array) || !collectionNameOrElementType)
             return results;
 
         if (!selectedFields) selectedFields = [];
@@ -15,6 +15,8 @@
         if (typeof collectionNameOrElementType === 'string') {
             entitySetDef = this.context.memberDefinitions.getMember(collectionNameOrElementType);
             defaultType = entitySetDef.elementType;
+        } else {
+            entitySetDef = this._getEntitySetDefByType(defaultType);
         }
 
         var memDefs = defaultType.memberDefinitions.getPublicMappedProperties();
@@ -173,6 +175,12 @@
     converter:{
         value:{
             fromDb:{
+                '$data.ObjectID': function(o){
+                    if (o === undefined) {
+                        return new $data.ObjectID();
+                    }
+                    return o;
+                },
                 '$data.Integer':function (o) {
                     if (o === undefined) {
                         return new $data.Integer();
@@ -223,6 +231,9 @@
                 }
             },
             toDb:{
+                '$data.ObjectID':function (id) {
+                    return id;
+                },
                 '$data.Integer':function (number) {
                     return number;
                 },

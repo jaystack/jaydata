@@ -1,10 +1,10 @@
 ﻿$data.Class.define('$data.oDataServer.oDataResponseDataBuilder', null, null, {
     constructor:function (cfg) {
         this.config = $data.typeSystem.extend({
-            Version:'V2'
+            version:'V2'
             //context
             //baseUrl
-            //CountRequest
+            //countRequest
 
             //collectionName
             //selectedFields
@@ -13,12 +13,17 @@
             //or
 
             //methodConfig,
+            //{ 
+            //  returnType
+            //  serviceOpName
+            //  elementType
+            //}
             //methodName
 
         }, cfg);
     },
     convertToResponse:function (data) {
-        if (this.config.CountRequest)
+        if (this.config.countRequest)
             return data;
 
         if (this.config.methodConfig) {
@@ -37,7 +42,7 @@
     _convertFunction:function (data) {
         var methodCfg = this.config.methodConfig;
         if (Container.resolveType(methodCfg.returnType) === $data.Array && methodCfg.elementType) {
-            return { d:data };
+            return this._buildVersionPath(data);
         } else {
             var result = { d:{} };
             result.d[methodCfg.serviceOpName || this.config.methodName] = data;
@@ -67,7 +72,7 @@
                 return this._convertData(data, elementType);
             } else {
                 //primitiveType
-                return { d:data };
+                return this._buildVersionPath(data);
             }
         } else {
             if (typeof rType.isAssignableTo === 'function' && rType.isAssignableTo($data.Entity))
@@ -87,12 +92,15 @@
             this.config.includes);
 
         if (versionSelector || versionSelector === undefined) {
-            if (this.config.version === 'V1')
-                return { d:result };
-            else
-                return { d:{ results:result, __count:result.length } };
+            return this._buildVersionPath(result);
         } else {
             return result
         }
+    },
+    _buildVersionPath: function (result) {
+        if (this.config.version === 'V1')
+            return { d: result };
+        else
+            return { d: { results: result, __count: result.length } };
     }
 });

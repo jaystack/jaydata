@@ -135,14 +135,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
 
         Object.defineProperty(this, 'initData', { enumerable: false, configurable: true, writable: true, value: {} });
+        //this.initData = {};
         var ctx = null;
         Object.defineProperty(this, 'context', { enumerable: false, configurable: false, get: function () { return ctx; }, set: function (value) { ctx = value; } });
+        //this.context = ctx;
         if (arguments.length == 1 && typeof initData === "object") {
             var typeMemDefs = this.getType().memberDefinitions;
             var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
-            /*if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
-                this.initData = initData;
-            }*/
+//            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
+//                this.initData = initData;
+//            }
             this.initData = {};
             for (var i in initData){
                 if (memDefNames.indexOf(i) > -1){
@@ -154,6 +156,8 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             this.entityState = undefined;
         }
     },
+    //initData: { enumerable: false, configurable: true, writable: true },
+    //context: { enumerable: false, configurable: false, get: function () { return ctx; }, set: function (value) { ctx = value; } },
     toString: function () {
         /// <summary>Returns a string that represents the current $data.Entity</summary>
         /// <returns type="String"/>
