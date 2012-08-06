@@ -14,6 +14,7 @@
   <xsl:param name="contextNamespace" />
 
   <xsl:param name="SerivceUri" />
+    
   <xsl:variable name="EntityBaseClass">$data.Entity</xsl:variable>
   <xsl:variable name="ContextBaseClass">$data.EntityContext</xsl:variable>
   <xsl:variable name="AutoCreateContext">true</xsl:variable>
