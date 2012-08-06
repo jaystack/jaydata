@@ -2,7 +2,7 @@ $data.Class.define('$data.ServiceResult', null, null, {
     constructor: function(data){
         this.data = data;
     },
-    data: { value: {} },
+    data: { },
     contentType: { value: 'text/plain' },
     toString: function(){
         return this.data.toString();
@@ -19,6 +19,16 @@ $data.ServiceResult.extend('$data.JSONResult', {
 $data.ServiceResult.extend('$data.XmlResult', {
     contentType: { value: 'text/xml' },
     toString: function(){
+        return this.data.toString();
+    }
+});
+
+$data.ServiceResult.extend('$data.MultiPartMixedResult', {
+    constructor: function(data, boundary){
+        this.contentType = this.contentType + '; boundary=' + boundary;
+    },
+    contentType: { value: 'multipart/mixed' },
+    toString: function () {
         return this.data.toString();
     }
 });
