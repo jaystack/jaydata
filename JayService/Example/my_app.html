@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="../../build/jaydata.js"></script>
+    <script type="text/javascript">
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'string', key: true, computed: true },
+            Prop1: { type: 'string' },
+            Prop2: { type: 'string' },
+            Prop3: { type: 'string' }
+        });
+
+        $data.Class.defineEx('$test.TContext', [$data.EntityContext], null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var z = new $test.TContext({ name: 'oData', oDataServiceHost: "http://192.168.1.119:3000/my.svc" });
+        var res;
+        z.onReady(function () {
+            z.A.toArray(function (a) { console.log(a); res = a; });
+            //z.A.add({Prop1: 'asd', Prop2:'asdf'});
+            //z.saveChanges();
+        });
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>
