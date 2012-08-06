@@ -602,7 +602,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             '$data.Date': 'Edm.DateTime',
             '$data.Number': 'Edm.Decimal',
             '$data.Integer': 'Edm.Int32',
-            '$data.String': 'Edm.String'
+            '$data.String': 'Edm.String',
+            '$data.ObjectID': 'Edm.String'
         }
     },
 

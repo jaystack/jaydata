@@ -29,12 +29,12 @@ Function.prototype.curry = function () {
 
             return cbWrapper = {
                 success: function () {
-                    callBack.success.apply(this, arguments);
-                    self.deferred.resolve.apply(this, arguments);
+                    callBack.success.apply(self.deferred, arguments);
+                    self.deferred.resolve.apply(self.deferred, arguments);
                 },
                 error: function () {
-                    callBack.error.apply(this, arguments);
-                    self.deferred.reject.apply(this, arguments);
+                    callBack.error.apply(self.deferred, arguments);
+                    self.deferred.reject.apply(self.deferred, arguments);
                 }
             };
         },
