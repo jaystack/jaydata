@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="datajs-1.0.3.min.js"></script>
+    <script src="build/jaydata.min.js"></script>
+    <script src="build/jaydataproviders/oDataProvider.js"></script>
+    <script src="build/jaydataproviders/InMemoryProvider.js"></script>
+    <script src="/JayDataModules/deferred.js"></script>
+    <script src="JaySvcUtil/JaySvcUtil.js"></script>
+    <script>
+        $(function() {
+            $data.MetadataLoader.xsltRepoUrl = '/JaySvcUtil/';
+//            $data.MetadataLoader.load('/ServiceClass/$metadata', function () {
+//
+//                //a context is preinitialized for convenience
+//                alert(System.context);
+//            });
+            $data.MetadataLoader.load('/x/$metadata', function () {
+
+                //a context is preinitialized for convenience
+                alert("!!!");
+            });
+
+
+        })
+    </script>
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>

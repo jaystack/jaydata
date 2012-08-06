@@ -7,8 +7,6 @@
  */
 
 var c = require('connect');
-
 var app = c();
-
 app.use("/", c["static"]("../"));
 app.listen(8888);

@@ -114,12 +114,31 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             }
         }
     },
+
     VisitConstantExpression: function (expression, context) {
         if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
 
-        var valueType = Container.getTypeName(expression.value);
-        context['$urlParams'] += expression.name + '=' + this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        var value;
+        if (expression.value instanceof $data.Entity) {
+            value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
+        } else {
+            var valueType = Container.getTypeName(expression.value);
+            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        }
+        context['$urlParams'] += expression.name + '=' + value;
     },
+//    VisitConstantExpression: function (expression, context) {
+//        if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
+//
+//
+//        var valueType = Container.getTypeName(expression.value);
+//
+//
+//
+//        context['$urlParams'] += expression.name + '=' + this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+//    },
+
+
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
         context.urlText += '/$count';       

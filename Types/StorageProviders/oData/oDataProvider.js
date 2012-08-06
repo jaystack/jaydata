@@ -462,6 +462,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); }
             },
             toDb: {
+                '$data.Entity': function(e) { return "'" + JSON.stringify(e.initData) + "'"},
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
                 '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },

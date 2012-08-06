@@ -23,27 +23,25 @@ $data.ServiceBase.extend("Demo.Service", {
         }),
 
 
-    GetPersonsByAge:function (age) {
-        ///<param name="age" type="number" />
-        ///<returns type="Array" />
-        ///<elements type="Object" />
-        return function (result, error) {
-
-            result([
-                new Demo.Person({FirstName:"Viktor", LastName:'Borza'}),
-                new Demo.Person({FirstName:"Viktor", LastName:'Lazar'})
-            ]);
-        }
+    SomeFunction: function(a,b,c) {
+        return 42;
     },
+
+    GetPersonsByAge: $data.JayService.serviceFunction().
+        param("age", "Array").
+        returnsArrayOf("Demo.Person")
+        (function (age) {
+            return [ new Demo.Person({FirstName:"Viktor", LastName:'Borza'}), new Demo.Person({FirstName:"Viktor", LastName:'Lazar'}) ];
+        }),
 
     MyOtherFunction:function (a, b, c) {
         ///<param name="a" type="string" />
         ///<param name="b" type="string" />
         ///<param name="c" type="number" />
-        ///<returns type="Array" />
-        ///<elements type="string" />
-        return [a, b, c];
+        ///<returns type="Array" elementType="Object" />
+        return [ new Demo.Person({FirstName:"Viktor", LastName:'Borza'}), new Demo.Person({FirstName:"Viktor", LastName:'Lazar'}) ];
     },
+
     MyOtherFunctionX:function (a, b, c) {
         ///<param name="a" type="string" />
         ///<param name="b" type="string" />
@@ -59,7 +57,7 @@ Demo.Service.annotateFromVSDoc();
 var connect = require('connect');
 var app = require('connect')();
 app.use(connect.query());
-app.use("/", connect.static("/home/zpace/JSService/"));
+app.use("/", connect.static("../"));
 //app.use("/ServiceClass", adapter);
 app.use("/x", $data.JayService.createAdapter(Demo.Service, function () {
     return new Demo.Service

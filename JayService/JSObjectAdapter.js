@@ -15,9 +15,10 @@ Function.prototype.curry = function () {
     }
 };
 
-﻿(function ($data, q) {
+(function ($data, q) {
 
     $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
+
         constructor: function () {
             this.deferred = new q.defer();
         },
@@ -67,6 +68,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         Object.defineProperty(this, 'urlHelper', {value: url, enumerable:true, writable:false, configurable:false});
         Object.defineProperty(this, 'promiseHelper', {value: q, enumerable:true, writable:false, configurable:false});
     },
+
     handleRequest:function (req, res, next) {
         var self = this;
         
@@ -136,8 +138,17 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     }else{
                         value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
                     }
-                }else{
-                    value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
+                } else {
+                    oDataBuidlerCfg = {
+                        version: 'V2',
+                        context: self.type,
+                        baseUrl: 'http://localhost:3000/contextapi.svc',
+                        methodConfig: member,
+                        methodName: memberName
+
+                    };
+                    value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
+                    //value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
                 }
             }
 
@@ -154,6 +165,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         var pathElements = parsedUrl.pathname.split('/').slice(1);
         return pathElements[0];
     },
+
     resolveMember:function (request, memberName) {
         var prefixedMemberName = request.method + "_" + memberName;
         if (prefixedMemberName in this.route) {
@@ -162,6 +174,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             return this.type.prototype[this.route[memberName]];
         }
     },
+
     resolveEntitySet: function(request, memberName, serviceInstance){
         return serviceInstance[this.route[memberName]];
     },
@@ -223,11 +236,11 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             
             var result = member.apply(executionContext, args);
 
-            if (typeof result === 'function'){
+            if (typeof result === 'function') {
                 result.call(executionContext);
-            }else if (self.promiseHelper.isPromise(result)){
+            } else if (self.promiseHelper.isPromise(result)) {
                 return result;
-            }else{
+            } else {
                 return self.promiseHelper.fcall(function () {
                     return result;
                 });
