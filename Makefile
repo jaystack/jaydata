@@ -170,9 +170,9 @@ npmjaydata-core: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata-core npm package..."
 	@@test -d $(NPM_DIR)/jaydata-core || mkdir -p $(NPM_DIR)/jaydata-core
 	@@cp -r $(NPM_BASE_DIR)/jaydata/* $(NPM_DIR)/jaydata-core
-	@@cp -xr $(TYPESYSTEM_DIR) $(NPM_DIR)/jaydata-core/lib
-	@@cp -xr $(TYPES_DIR) $(NPM_DIR)/jaydata-core/lib
-	@@cp --parents $(JAYDATA_SERVER) $(NPM_DIR)/jaydata-core/lib
+	@@cp -r $(TYPESYSTEM_DIR) $(NPM_DIR)/jaydata-core/lib
+	@@cp -r $(TYPES_DIR) $(NPM_DIR)/jaydata-core/lib
+	@@rsync -R $(JAYDATA_SERVER) $(NPM_DIR)/jaydata-core/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata-core
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata-core
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata-core
@@ -186,15 +186,15 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata npm package..."
 	@@test -d $(NPM_DIR)/jaydata || mkdir -p $(NPM_DIR)/jaydata
 	@@cp -r $(NPM_BASE_DIR)/jaydata/* $(NPM_DIR)/jaydata
-	@@cp --parents $(TYPE_SYSTEM) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(JAYDATA_SOURCE) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(IndexedDbProvider) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(SqLiteProvider) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(oDataProvider) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(StormProvider) $(NPM_DIR)/jaydata/lib
-	@@cp --parents $(JAYDATA_SERVER) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(TYPE_SYSTEM) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(JAYDATA_SOURCE) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(IndexedDbProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(SqLiteProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(oDataProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(StormProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(JAYDATA_SERVER) $(NPM_DIR)/jaydata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata
@@ -222,7 +222,7 @@ npmindexeddb: $(IndexedDbProvider) $(CREDITS)
 	@@echo "Building IndexedDb provider npm package..."
 	@@test -d $(NPM_DIR)/indexeddb || mkdir -p $(NPM_DIR)/indexeddb
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/indexeddb
-	@@cp --parents $(IndexedDbProvider) $(NPM_DIR)/indexeddb/lib
+	@@rsync -R $(IndexedDbProvider) $(NPM_DIR)/indexeddb/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/indexeddb
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/indexeddb
 	@@cp -r $(CREDITS) $(NPM_DIR)/indexeddb
@@ -234,7 +234,7 @@ npmsqlite: $(SqLiteProvider) $(CREDITS)
 	@@echo "Building SqLiteProvider provider npm package..."
 	@@test -d $(NPM_DIR)/sqlite || mkdir -p $(NPM_DIR)/sqlite
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/sqlite
-	@@cp --parents $(SqLiteProvider) $(NPM_DIR)/sqlite/lib
+	@@rsync -R $(SqLiteProvider) $(NPM_DIR)/sqlite/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/sqlite
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/sqlite
 	@@cp -r $(CREDITS) $(NPM_DIR)/sqlite
@@ -246,7 +246,7 @@ npmodata: $(oDataProvider) $(CREDITS)
 	@@echo "Building oDataProvider provider npm package..."
 	@@test -d $(NPM_DIR)/odata || mkdir -p $(NPM_DIR)/odata
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/odata
-	@@cp --parents $(oDataProvider) $(NPM_DIR)/odata/lib
+	@@rsync -R $(oDataProvider) $(NPM_DIR)/odata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/odata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/odata
 	@@cp -r $(CREDITS) $(NPM_DIR)/odata
@@ -259,7 +259,7 @@ npminmemory: $(InMemoryProvider) $(CREDITS)
 	@@echo "Building InMemoryProvider provider npm package..."
 	@@test -d $(NPM_DIR)/inmemory || mkdir -p $(NPM_DIR)/inmemory
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/inmemory
-	@@cp --parents $(InMemoryProvider) $(NPM_DIR)/inmemory/lib
+	@@rsync -R $(InMemoryProvider) $(NPM_DIR)/inmemory/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/inmemory
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/inmemory
 	@@cp -r $(CREDITS) $(NPM_DIR)/inmemory
@@ -271,7 +271,7 @@ npmmongodb: $(MongoDbProvider) $(CREDITS)
 	@@echo "Building MongoDbProvider provider npm package..."
 	@@test -d $(NPM_DIR)/mongodb || mkdir -p $(NPM_DIR)/mongodb
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/mongodb
-	@@cp --parents $(MongoDbProvider) $(NPM_DIR)/mongodb/lib
+	@@rsync -R $(MongoDbProvider) $(NPM_DIR)/mongodb/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/mongodb
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/mongodb
 	@@cp -r $(CREDITS) $(NPM_DIR)/mongodb
@@ -283,7 +283,7 @@ npmstorm: $(StormProvider) $(CREDITS)
 	@@echo "Building StormProvider provider npm package..."
 	@@test -d $(NPM_DIR)/storm || mkdir -p $(NPM_DIR)/storm
 	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/storm
-	@@cp --parents $(StormProvider) $(NPM_DIR)/storm/lib
+	@@rsync -R $(StormProvider) $(NPM_DIR)/storm/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/storm
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/storm
 	@@cp -r $(CREDITS) $(NPM_DIR)/storm
