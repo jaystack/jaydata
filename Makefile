@@ -8,6 +8,7 @@ NPM_BASE_DIR = ./npm
 TYPESYSTEM_DIR = ./TypeSystem
 TYPES_DIR = ./Types
 JSERVICE_DIR = ./JayService
+ODATAPARSER_DIR = ./oDataParser
 COMPILER = ./Tools/compiler.jar
 GPL_LIC = ./GPL-LICENSE.txt
 MIT_LIC = ./MIT-LICENSE.txt
@@ -103,13 +104,20 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/FacebookAuth.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
 
-JAYDATA_SERVER = $(JSERVICE_DIR)/oDataMetaDataGenerator.js\
+JAYDATA_SERVER = $(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\
+	$(JSERVICE_DIR)/oDataMetaDataGenerator.js\
 	$(JSERVICE_DIR)/XmlResult.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
 	$(JSERVICE_DIR)/JayService.js\
 	$(JSERVICE_DIR)/ServiceBase.js\
 	$(JSERVICE_DIR)/EntityTransform.js\
 	$(JSERVICE_DIR)/oDataResponseDataBuilder.js\
+	$(JSERVICE_DIR)/OData/BatchProcessor.js\
+	$(ODATAPARSER_DIR)/RequestExpressionBuilder.js\
+	$(ODATAPARSER_DIR)/RequestLexer.js\
+	$(ODATAPARSER_DIR)/RequestParser.js\
+	$(ODATAPARSER_DIR)/EntityExpressionBuilder.js\
+	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
@@ -202,7 +210,6 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
 	@$(foreach dir,$(IndexedDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/indexeddb_index.js;)
 	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/sqlite_index.js;)
-	@@echo "require('datajs');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;
 	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;)
 	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/inmemory_index.js;)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)

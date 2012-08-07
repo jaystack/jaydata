@@ -1,15 +1,4 @@
-﻿$ = jQuery = require('jquery');
-require('jaydata');
-require('../oDataMetaDataGenerator.js');
-require('../XmlResult.js');
-require('../JSObjectAdapter.js');
-require('../JayService.js');
-require('../OData/BatchProcessor.js');
-require('../ServiceBase.js');
-require('../EntityTransform.js');
-require('../oDataResponseDataBuilder.js');
-require('../Scripts/datajs-1.0.3-patched.js');
-//var OData= require('../Scripts/datajs-1.0.3.js')['OData'];
+﻿require('jaydata');
 
 var connect = require('connect');
 var app = connect();
