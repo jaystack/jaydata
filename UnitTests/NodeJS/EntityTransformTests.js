@@ -249,7 +249,7 @@ exports.Tests = {
             test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
             test.notEqual(item.__metadata, undefined, '__metadata is undefined');
 
-            test.equal(JSON.stringify(item.Birthday), JSON.stringify(new Date('2000/05/0' + (i + 1))), 'result[i].Birthday Data failed');
+            test.equal(item.Birthday, '/Date(' + new Date('2000/05/0' + (i + 1)).valueOf() + ')/', 'result[i].Birthday Data failed');
 
             var meta = {
                 type: '$news.Types.UserProfile',
