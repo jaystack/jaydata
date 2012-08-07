@@ -2,6 +2,5 @@
 *.sou
 *.v11.sou
 build
-nodejs
 *~
 .idea
