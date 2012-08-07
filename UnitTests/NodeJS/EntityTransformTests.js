@@ -74,16 +74,16 @@ exports.Tests = {
         test.expect(6);
 
         var entity = new $news.Types.Article({ Id: 1, Title: 'title', Body: 'body' });
-        var res = transform.convertToResponse(entity);
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity])[0];
+        test.deepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
-        var res = transform.convertToResponse(entity, 'Articles');
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity], 'Articles')[0];
+        test.notDeepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
-        var res = transform.convertToResponse(entity, $news.Types.Article);
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity], $news.Types.Article)[0];
+        test.notDeepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
         test.done();
