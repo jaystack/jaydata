@@ -10,6 +10,7 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Id: { type: 'string', key: true, computed: true },
     Value: { type: 'int' },
     Date: { type: 'date' },
+    Completed: { type: 'bool' },
     //Person: { type: '$example.Person', inverseProperty: 'Orders' }
 });
 
