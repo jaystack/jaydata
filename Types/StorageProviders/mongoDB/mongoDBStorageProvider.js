@@ -735,6 +735,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var p = props[j];
                     if (!p.computed){
                         set[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
+                        if (typeof set[p.name] === 'undefined') delete set[p.name];
                     }
                 }
                 
@@ -766,6 +767,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var p = props[j];
                     if (!p.computed){
                         r.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](r.data[p.name]);
+                        if (typeof r.data[p.name] === 'undefined') delete r.data[p.name];
                     }
                 }
                 

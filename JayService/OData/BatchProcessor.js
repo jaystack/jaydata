@@ -188,6 +188,9 @@
         };
     },
     paramMapping: function (values, set) {
+        if (!values)
+            return;
+
         var keyProps = set.elementType.memberDefinitions.getKeyProperties();
         result = {};
 
@@ -201,7 +204,8 @@
             }
 
             //TODO converter
-            result[memDef.name] = Container.resolveType(memDef.type) !== $data.String ? value : value.splice(1, value.length - 2);
+            var resolvedType = Container.resolveType(memDef.type);
+            result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
         }
 
         return result;
