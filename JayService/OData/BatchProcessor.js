@@ -210,16 +210,12 @@
     connectBodyReader: function (req, res, next) {
         var contentType = req.headers['content-type'];
         if (contentType && contentType.indexOf('multipart/mixed') >= 0) {
-            var hasData = false;
-
+            req.body = '';
             req.on('data', function (chunk) {
-                req.body = chunk.toString();
-                hasData = true;
-                next();
+                req.body += chunk.toString();
             });
             req.on('end', function (chunk) {
-                if (!hasData)
-                    next();
+                next();
             });
         } else {
             next();
