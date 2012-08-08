@@ -1,5 +1,4 @@
 ﻿require('jaydata');
-require('../EntityTransform.js');
 
 var connect = require('connect');
 var app = connect();
@@ -10,14 +9,14 @@ $data.Class.define('$example.Person', $data.Entity, null, {
     Name: { type: 'string' },
     Description: { type: 'string' },
     Age: { type: 'int' },
-    Orders: { type: 'Array', elementType: '$example.Order', inverseProperty: 'Person' }
+    //Orders: { type: 'Array', elementType: '$example.Order', inverseProperty: 'Person' }
 });
 
 $data.Class.define('$example.Order', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
     Value: { type:'int'},
     Date: { type: 'date' },
-    Person: { type: '$example.Person', inverseProperty: 'Orders' }
+    //Person: { type: '$example.Person', inverseProperty: 'Orders' }
 });
 
 $data.Class.defineEx('$example.Context', [$data.EntityContext, $data.ServiceBase], null, {
