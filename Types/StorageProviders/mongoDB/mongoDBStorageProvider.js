@@ -733,9 +733,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed){
+                    if (!p.computed) {
+                        if (typeof u.entity[p.name] === 'undefined') continue;
                         set[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
-                        if (typeof set[p.name] === 'undefined') delete set[p.name];
                     }
                 }
                 
@@ -769,6 +769,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         r.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](r.data[p.name]);
                         if (typeof r.data[p.name] === 'undefined') delete r.data[p.name];
                     }
+
+                    //todo
+                    delete r.data[p.name];
                 }
                 
                 collection.remove(r.data, { safe: true }, function(error, cnt){
@@ -1057,7 +1060,19 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
                 '$data.String': function (text) { return text; },
-                '$data.Boolean': function (bool) { return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool; },
+                '$data.Boolean': function (bool) {
+                    if (typeof bool === 'string') {
+                        switch (bool) {
+                            case 'true': case 'true': case 'TRUE':
+                            case 'yes': case 'Yes': case 'YES':
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                    //return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool;
+                    return bool === null || bool === undefined ? null : !!bool;
+                },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },
