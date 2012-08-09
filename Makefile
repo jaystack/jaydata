@@ -8,6 +8,7 @@ NPM_BASE_DIR = ./npm
 TYPESYSTEM_DIR = ./TypeSystem
 TYPES_DIR = ./Types
 JSERVICE_DIR = ./JayService
+BASEMODULE_DIR = ./JayDataModules
 ODATAPARSER_DIR = ./oDataParser
 COMPILER = ./Tools/compiler.jar
 GPL_LIC = ./GPL-LICENSE.txt
@@ -104,7 +105,8 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/FacebookAuth.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
 
-JAYDATA_SERVER = $(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\
+JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
+	$(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\
 	$(JSERVICE_DIR)/oDataMetaDataGenerator.js\
 	$(JSERVICE_DIR)/XmlResult.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
