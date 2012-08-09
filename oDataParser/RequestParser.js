@@ -259,13 +259,23 @@
                 return this.builder.buildUnary(expr, "not")
             }
         },
-        parsePrimaryExpr: function () {
+       parsePrimaryExpr: function () {
             //bnf: PrimaryExpr        : ParenExpr | LiteralExpr | FunctionCall | MemberPath
             var expr;
+            if (expr = this.parseNULLLiteral()) return expr;
             if (expr = this.parseParenExpr()) return expr;
             if (expr = this.parseLiteralExpr()) return expr;
             if (expr = this.parseFunctionCall()) return expr;
             if (expr = this.parseMemberPath()) return expr;
+            return null;
+        },
+        parseNULLLiteral: function () {
+	//TODO: validate by gyeby
+            var v = this.lexer.token.value;
+            if (v == "NULL" || v=="null") {
+                this.lexer.nextToken();
+                return this.builder.buildConstant(null, typeof null);
+            }
             return null;
         },
         parseParenExpr: function () {
