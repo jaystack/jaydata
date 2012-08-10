@@ -21,15 +21,10 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
         Guard.requireType("selector", source,
                     [$data.Expressions.MemberInfoExpression, $data.Expressions.CodeExpression, $data.Expressions.ParametricQueryExpression]);
 
-        Object.defineProperty(this, "source", { value: source, enumerable: true, writable: true });
-        Object.defineProperty(this, "selector", { value: selector, enumerable: true, writable: true });
-        Object.defineProperty(this, "params", { value: params, enumerable: true, writable: true });
-
-        Object.defineProperty(this, "instance", { value: instance, enumerable: false, writable: true });
-        /*this.source = source;
+        this.source = source;
         this.selector = selector;
         this.params = params;
-        this.instance = instance;*/
+        this.instance = instance;
 
         function findContext() {
             //TODO: use source from function parameter and return a value at the end of the function
@@ -75,9 +70,5 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
         //EntityTypeInfo
 
     },
-    /*source: { enumerable: true, writable: true, value: undefined },
-    selector: { enumerable: true, writable: true, value: undefined },
-    params: { enumerable: true, writable: true, value: undefined },
-    instance: { enumerable: false, writable: true, value: undefined },*/
     nodeType: { value: $data.Expressions.ExpressionType.EntitySet, enumerable: true }
 });

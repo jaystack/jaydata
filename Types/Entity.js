@@ -129,16 +129,14 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <field name="entityState" type="Integer"></field>
         /// <field name="changedProperties" type="Array">array of MemberDefinition</field>
 
-        //this.initData = {};
+        this.initData = {};
         if (this.getType().__copyPropertiesToInstance) {
             $data.typeSystem.writePropertyValues(this);
         }
 
-        Object.defineProperty(this, 'initData', { enumerable: false, configurable: true, writable: true, value: {} });
-        //this.initData = {};
         var ctx = null;
-        Object.defineProperty(this, 'context', { enumerable: false, configurable: false, get: function () { return ctx; }, set: function (value) { ctx = value; } });
-        //this.context = ctx;
+        this.context = ctx;
+
         if (arguments.length == 1 && typeof initData === "object") {
             var typeMemDefs = this.getType().memberDefinitions;
             var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
@@ -156,8 +154,6 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             this.entityState = undefined;
         }
     },
-    //initData: { enumerable: false, configurable: true, writable: true },
-    //context: { enumerable: false, configurable: false, get: function () { return ctx; }, set: function (value) { ctx = value; } },
     toString: function () {
         /// <summary>Returns a string that represents the current $data.Entity</summary>
         /// <returns type="String"/>
@@ -278,12 +274,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         if (memberDefinition.storeOnObject == true) {
             //TODO refactor to Base.getBackingFieldName
             var backingFieldName = "_" + memberDefinition.name;
-            if (!this[backingFieldName]) {
-                Object.defineProperty(this, backingFieldName, memberDefinition.createStorePropertyDescriptor(value));
-            }
-            else {
-                this[backingFieldName] = value;
-            }
+            this[backingFieldName] = value;
         } else {
             this.initData[memberDefinition.name] = value;
         }

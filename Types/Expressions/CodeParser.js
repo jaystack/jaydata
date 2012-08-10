@@ -240,7 +240,7 @@ $C('$data.Expressions.CodeParser', null, null, {
 
         var result = new $data.Expressions.FunctionExpression(node.value, params, body);
         params.forEach(function (param) {
-            Object.defineProperty(param, "owningFunction", { value: result, enumerable: false });
+            param.owningFunction = result;
         });
 
         //TODO place on prototyope

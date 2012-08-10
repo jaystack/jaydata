@@ -316,7 +316,7 @@
                     innerInstance = new wrappedType(innerData);
                 }
 
-                Object.defineProperty(this, 'innerInstance', { enumerable: false, configurable: true, writable: true, value: innerInstance });
+                this.innerInstance = innerInstance;
             },
             getEntity: function () {
                 return this.innerInstance;

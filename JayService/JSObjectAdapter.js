@@ -1,6 +1,6 @@
 function DefaultArgumentBinder(name, options, request){
     var result = request.query[name];
-    console.log(name, options, request.query[name], new (options.type)(request.query[name]));
+    //console.log(name, options, request.query[name], new (options.type)(request.query[name]));
     return result;
 }
 
@@ -30,11 +30,11 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             route = type;
         }
         
-        Object.defineProperty(this, "type", { value:type, enumerable:true, writable:false, configurable:false });
-        Object.defineProperty(this, "route", { value:route, enumerable:true, writable:false, configurable:false });
-        Object.defineProperty(this, "instanceFactory", { value:instanceFactory, enumerable:true, writable:false, configurable:false });
-        Object.defineProperty(this, 'urlHelper', {value: url, enumerable:true, writable:false, configurable:false});
-        Object.defineProperty(this, 'promiseHelper', {value: q, enumerable:true, writable:false, configurable:false});
+        this.type = type;
+        this.route = route;
+        this.instanceFactory = instanceFactory;
+        this.urlHelper = url;
+        this.promiseHelper = q;
     },
 
     handleRequest:function (req, res, next) {
@@ -195,12 +195,13 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 error: error
             };
 
-            Object.defineProperty(serviceInstance, "executionContext", {
+            /*Object.defineProperty(serviceInstance, "executionContext", {
                 value:executionContext,
                 enumerable:false,
                 writable:false,
                 configurable:false
-            });
+            });*/
+            this.executionContext = executionContext;
             
             var result = member.apply(executionContext, args);
 
