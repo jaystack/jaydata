@@ -86,6 +86,28 @@ function knockoutTests(providerConfig) {
         equal(article.Title, koArticle.Title(), 'string property ko change equal failed');
     });
 
+    test("knockout observable entity update", 11, function () {
+        var article = new $news.Types.Article({ Title: 'a', Body: 'b', Lead: 'c' });
+        var koArticle = article.asKoObservable();
+        koArticle.Title('hello world');
+        equal(article.Title, 'hello world', 'string property equal failed');
+        equal(article.changedProperties.length, 1, 'changedProperties.length equal failed');
+        equal(article.changedProperties[0].name, 'Title', 'changedProperty name equal failed');
+        koArticle.updateEntity({ Title: 'newTitle' });
+        equal(article.Title, 'newTitle', 'string property equal failed');
+        equal(article.changedProperties.length, 0, 'changedProperties.length equal failed');
+
+        koArticle.Title('hello world');
+        koArticle.Body('hello world');
+        equal(article.changedProperties.length, 2, 'changedProperties.length equal failed');
+        equal(article.changedProperties[0].name, 'Title', 'changedProperty1 name equal failed');
+        equal(article.changedProperties[1].name, 'Body', 'changedProperty2 name equal failed');
+        koArticle.updateEntity({ Title: 'newTitle' });
+        equal(article.Title, 'newTitle', 'string property equal failed');
+        equal(article.changedProperties.length, 1, 'changedProperties.length equal failed');
+        equal(article.changedProperties[0].name, 'Body', 'changedProperty0 name equal failed');
+    });
+
     test("knockout observable entity property changing datetime", 3, function () {
         var article = new $news.Types.Article();
         var koArticle = article.asKoObservable();

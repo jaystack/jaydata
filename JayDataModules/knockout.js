@@ -316,10 +316,32 @@
                     innerInstance = new wrappedType(innerData);
                 }
 
+                this._wrappedType = wrappedType;
                 this.innerInstance = innerInstance;
             },
             getEntity: function () {
                 return this.innerInstance;
+            },
+            updateEntity: function (entity) {
+                var data;
+                if (entity instanceof this._wrappedType)
+                    data = entity;
+                else if (entity && !(entity instanceof $data.Entity) && entity instanceof $data.Object)
+                    data = entity;
+                else
+                    Guard.raise('entity is an invalid object');
+
+                var members = this._wrappedType.memberDefinitions.getPublicMappedProperties();
+                for (var i = 0; i < members.length; i++) {
+                    var memDef = members[i];
+                    if (data[memDef.name] !== undefined) {
+                        this[memDef.name](data[memDef.name]);
+                        var idx = this.innerInstance.changedProperties.indexOf(memDef);
+                        if (idx >= 0)
+                            this.innerInstance.changedProperties.splice(idx, 1);
+                    }
+                }
+
             }
         });
 
