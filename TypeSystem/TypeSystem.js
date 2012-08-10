@@ -528,7 +528,7 @@
             		}
 				}
 			}
-            classFunction.baseTypes = baseClass.baseTypes || [];
+			classFunction.baseTypes = baseClass.baseTypes ? [].concat(baseClass.baseTypes) : [];
             for (var i = 0; i < baseClasses.length; i++){
                 classFunction.baseTypes.push(baseClasses[i].type);
             }
