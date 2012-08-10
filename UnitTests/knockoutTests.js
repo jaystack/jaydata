@@ -86,7 +86,7 @@ function knockoutTests(providerConfig) {
         equal(article.Title, koArticle.Title(), 'string property ko change equal failed');
     });
 
-    test("knockout observable entity update", 11, function () {
+    test("knockout observable entity update", 14, function () {
         var article = new $news.Types.Article({ Title: 'a', Body: 'b', Lead: 'c' });
         var koArticle = article.asKoObservable();
         koArticle.Title('hello world');
@@ -94,6 +94,14 @@ function knockoutTests(providerConfig) {
         equal(article.changedProperties.length, 1, 'changedProperties.length equal failed');
         equal(article.changedProperties[0].name, 'Title', 'changedProperty name equal failed');
         koArticle.updateEntity({ Title: 'newTitle' });
+        equal(article.Title, 'newTitle', 'string property equal failed');
+        equal(article.changedProperties.length, 0, 'changedProperties.length equal failed');
+
+        var article2 = new $news.Types.Article({ Title: 'newTitle', Body: 'b', Lead: 'c' });
+        article.Title = 'a';
+        article.Body = 'a';
+        equal(article.changedProperties.length, 2, 'changedProperties.length equal failed');
+        koArticle.updateEntity(article2);
         equal(article.Title, 'newTitle', 'string property equal failed');
         equal(article.changedProperties.length, 0, 'changedProperties.length equal failed');
 
