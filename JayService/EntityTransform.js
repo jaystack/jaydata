@@ -197,7 +197,7 @@
                     if (o === undefined) {
                         return o;
                     }
-                    return '/Date(' + o.valueOf() + ')/';
+                    return o ? '/Date(' + o.valueOf() + ')/' : null;
                 },
                 '$data.String': function (o) {
                     //if (o === undefined) {
