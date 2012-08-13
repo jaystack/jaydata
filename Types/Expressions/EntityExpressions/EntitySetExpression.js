@@ -24,7 +24,8 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
         this.source = source;
         this.selector = selector;
         this.params = params;
-        this.instance = instance;
+        Object.defineProperty(this, "instance", { value: instance, enumerable: false, writable: true });
+        //this.instance = instance;
 
         function findContext() {
             //TODO: use source from function parameter and return a value at the end of the function
