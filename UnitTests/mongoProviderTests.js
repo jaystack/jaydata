@@ -191,7 +191,7 @@ exports.testUpdateComplex = function(test){
     });
 };
 
-/*exports.testLength = function(test){
+exports.testLength = function(test){
     test.expect(2);
     $test.Context.init(function(db){
         db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
@@ -307,7 +307,7 @@ exports.testMap = function(test){
             });
         });
     });
-};*/
+};
 
 exports.testMapComplex = function(test){
     test.expect(4);
