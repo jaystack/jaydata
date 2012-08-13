@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="build/jaydata.js"></script>
+    <script>
+
+          $(function() {
+              $data.Entity.extend("My.Entity", {
+                  id: { type: "int", key: true, computed: true },
+                  name: { type: "string" }
+              });
+
+              $data.EntityContext.extend("My.Context", {
+                  Entities: { type: $data.EntitySet, elementType: My.Entity }
+              });
+              var c = new My.Context({name: "sqLite", databaseName: "new items"});
+
+              c.onReady( function() {
+                  c.Entities.add(new My.Entity({name: Math.random()}));
+                  c.saveChanges(function() {
+                      $('#output').append($('<div>new item saved</div>'));
+
+                      c.Entities.forEach( function(e) {
+                          $('#output').append($('<div></div>').text('Id:' + e.id + ',name:' + e.name));
+                      })
+                  })
+              });
+          });
+    </script>
+    <title></title>
+</head>
+<body>
+    <div id="output">
+
+    </div>
+</body>
+</html>
