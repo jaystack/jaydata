@@ -6,7 +6,6 @@ $C('$data.Expressions.EntityContextExpression', $data.Expressions.ExpressionNode
         //this.storage_type = {};
         //this.typeName = this.type.name;
     },
-    //instance: { enumerable: false, value: undefined },
     nodeType : { value: $data.Expressions.ExpressionType.EntityContext, enumerable: true }
 
 });

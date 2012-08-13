@@ -16,7 +16,7 @@ $data.Class.define('$data.Queryable', null, null,
 
         var context = source instanceof $data.EntityContext ? source : source.entityContext;
         this.defaultType = source instanceof $data.EntityContext ? null : source.defaultType;
-        Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
+        this.entityContext = context;
         this.expression = rootExpression;
     },
 

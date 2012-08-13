@@ -128,6 +128,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }
         }
 
+
+		if (result instanceof $data.Entity)
+		    result.changedProperties = undefined;
         return result;
     }
 });

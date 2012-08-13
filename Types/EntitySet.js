@@ -24,12 +24,10 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
         this.createNew = this[elementType.name] = elementType;
         this.stateManager = new $data.EntityStateManager(this);
+
         this.elementType = elementType;
         this.collectionName = collectionName;
         this.roles = roles;
-        /*Object.defineProperty(this, "elementType", { value: elementType, enumerable: true });
-        Object.defineProperty(this, "collectionName", { value: collectionName, enumerable: true });
-        Object.defineProperty(this, "roles", { value: roles, enumerable: true });*/
         
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];

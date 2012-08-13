@@ -9,11 +9,11 @@ $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionN
         Guard.requireType("source", source, [$data.Expressions.EntityContextExpression]);
         Guard.requireType("selector", source, [$data.Expressions.MemberInfoExpression]);
 
-        Object.defineProperty(this, "source", { value: source, enumerable: true, writable: true });
-        Object.defineProperty(this, "selector", { value: selector, enumerable: true, writable: true });
-        Object.defineProperty(this, "params", { value: params, enumerable: true, writable: true });
-        Object.defineProperty(this, "cfg", { value: cfg, enumerable: false, writable: true });
-        
+        this.source = source;
+        this.selector = selector
+        this.params = params
+        this.cfg = cfg;
+
         function findContext() {
             //TODO: use source from function parameter and return a value at the end of the function
             var r = source;

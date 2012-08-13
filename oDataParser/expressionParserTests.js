@@ -1,5 +1,16 @@
 ﻿
 $(document).ready(function () {
+
+    function parseQuery(params) {
+        var paramParts = params.split('&');
+        var obj = {};
+        for (var i = 0; i < paramParts.length; i++) {
+            var parts = paramParts[i].split('=');
+            var name = parts[0].substr(1);
+            obj[name] = parts[1];
+        }
+        return obj;
+    }
     function builderTest(name, queryable, context, isCount, hasInclude) {
         test(name, 2, function () {
 
@@ -11,13 +22,8 @@ $(document).ready(function () {
             }
 
             var queryParts = q.queryText.split('?');
-            var paramParts = queryParts[1].split('&');
-            var obj = {};
-            for (var i = 0; i < paramParts.length; i++) {
-                var parts = paramParts[i].split('=');
-                var name = parts[0].substr(1);
-                obj[name] = parts[1];
-            }
+            var obj = parseQuery(queryParts[1]);
+
             if (!hasInclude)
                 obj.expand = '';
 
@@ -27,30 +33,6 @@ $(document).ready(function () {
 
             equal(expression.getType(), q.expression.getType(), name + 'expression frame failed');
             equal(JSON.stringify(expression.source), JSON.stringify(q.expression.source), name + ' builder test failed');
-        });
-    }
-
-    function selectTest(name, queryable, context, selectedFields, includes) {
-        test(name, 3, function () {
-            var q = queryable.toTraceString();
-
-            var queryParts = q.queryText.split('?');
-            var paramParts = queryParts[1].split('&');
-            var obj = {};
-            for (var i = 0; i < paramParts.length; i++) {
-                var parts = paramParts[i].split('=');
-                var name = parts[0].substr(1);
-                obj[name] = parts[1];
-            }
-
-            obj.count = queryParts[0].indexOf('$count') > 0;
-            var builder = new $data.oDataParser.ODataEntityExpressionBuilder(context, queryParts[0].split('/')[1]);
-            var parsed = builder.parse(obj);
-
-            notEqual(JSON.stringify(parsed.expression.source), JSON.stringify(q.expression.source), name + ' builder test failed');
-
-            equal(JSON.stringify(parsed.selectedFields), JSON.stringify(selectedFields), name + ' selectedFields test failed');
-            equal(JSON.stringify(parsed.includes), JSON.stringify(includes), name + ' includes test failed');
         });
     }
 
@@ -68,7 +50,7 @@ $(document).ready(function () {
     builderTest('orderBy', c.Articles.orderBy(function (it) { return it.Title; }), c);
     builderTest('orderBy orderBy add', c.Articles.orderBy(function (it) { return it.Title + it.Body; }), c);
     builderTest('orderBy orderBy', c.Articles.orderBy(function (it) { return it.Title; }).orderBy(function (it) { return it.Body; }), c);
-    builderTest('orderBy orderBy.call', c.Articles.orderBy(function (it) { return it.Title; }).orderBy(function (it) { return it.Body.substr(1,2); }), c);
+    builderTest('orderBy orderBy.call', c.Articles.orderBy(function (it) { return it.Title; }).orderBy(function (it) { return it.Body.substr(1, 2); }), c);
     builderTest('field compare, order by', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title'), c);
     builderTest('field compare, order by / $count', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title'), c, true);
     builderTest('skip', c.Articles.skip(5), c);
@@ -85,6 +67,99 @@ $(document).ready(function () {
     builderTest('include multiple 1', c.Articles.include('Category').include('Author'), c, false, true);
     builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author.Articles'), c, false, true);
 
+
+    function selectTest(name, queryable, context, selectedFields, includes) {
+        test(name, 3, function () {
+            var q = queryable.toTraceString();
+
+            var queryParts = q.queryText.split('?');
+            var obj = parseQuery(queryParts[1]);
+
+            obj.count = queryParts[0].indexOf('$count') > 0;
+            var builder = new $data.oDataParser.ODataEntityExpressionBuilder(context, queryParts[0].split('/')[1]);
+            var parsed = builder.parse(obj);
+
+            notEqual(JSON.stringify(parsed.expression.source), JSON.stringify(q.expression.source), name + ' builder test failed');
+
+            equal(JSON.stringify(parsed.selectedFields), JSON.stringify(selectedFields), name + ' selectedFields test failed');
+            equal(JSON.stringify(parsed.includes), JSON.stringify(includes), name + ' includes test failed');
+        });
+    }
+
     selectTest('selectTest map', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body }; }), c, ['Title', 'Body'], []);
     selectTest('selectTest map 2', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body, Author: it.Author }; }), c, ['Title', 'Body', 'Author'], ['Author']);
+
+
+    function compareTest(name, queryable, refQueryable, context, isEqual) {
+        test(name, 3, function () {
+            var q = queryable.toTraceString();
+            var q2 = refQueryable.toTraceString();
+
+            window[isEqual ? 'equal' : 'notEqual'](q.queryText, q2.queryText, 'queryText equality failed');
+
+            var queryParts = q.queryText.split('?');
+            var obj = parseQuery(queryParts[1]);
+
+            //obj.count = queryParts[0].indexOf('$count') > 0;
+            var builder = new $data.oDataParser.ODataEntityExpressionBuilder(context, queryParts[0].split('/')[1]);
+            var parsed = builder.parse(obj);
+
+            var queryParts2 = q2.queryText.split('?');
+            var obj2 = parseQuery(queryParts2[1]);
+
+            var builder2 = new $data.oDataParser.ODataEntityExpressionBuilder(context, queryParts2[0].split('/')[1]);
+            var parsed2 = builder.parse(obj2);
+
+            equal(JSON.stringify(parsed.expression.source), JSON.stringify(parsed2.expression.source), name + ' expression compare test failed');
+
+            var q11 = new $data.Queryable(context[queryParts[0].split('/')[1]], parsed.expression.source).toTraceString();
+            var q21 = new $data.Queryable(context[queryParts2[0].split('/')[1]], parsed2.expression.source).toTraceString();
+
+            equal(q11.queryText, q21.queryText, 'queryText 2nd run notequality failed');
+        });
+    }
+    compareTest('compareTest map append key',
+        c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body, Author: it.Author }; }),
+        c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body, Author: it.Author, Id: it.Id }; }),
+        c, false);
+    compareTest('compareTest map append key 2',
+        c.Articles.map(function (it) { return { Id: it.Id, Title: it.Title, Body: it.Body, Author: it.Author }; }),
+        c.Articles.map(function (it) { return { Id: it.Id, Title: it.Title, Body: it.Body, Author: it.Author }; }),
+        c, true);
+
+    $data.Class.define('$test.A', $data.Entity, null, {
+        Id: { type: 'int', key: true },
+        Id2: { type: 'int', key: true },
+        Prop1: { type: 'int' },
+        Prop2: { type: 'string' },
+        Prop3: { type: 'string' }
+    });
+    
+    $data.Class.define('$test.TContext', $data.EntityContext, null, {
+        A: { type: $data.EntitySet, elementType: $test.A }
+    });
+
+    var tCont = new $test.TContext({ name: 'oData' });
+
+    compareTest('compareTest map append multiple key 1',
+        tCont.A.map(function (it) { return { Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3 }; }),
+        tCont.A.map(function (it) { return { Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3, Id: it.Id, Id2: it.Id2 }; }),
+        tCont, false);
+    compareTest('compareTest map append multiple key 1 v2',
+        tCont.A.map(function (it) { return { Prop1: it.Prop1, Prop3: it.Prop3 }; }),
+        tCont.A.map(function (it) { return { Prop1: it.Prop1, Prop3: it.Prop3, Id: it.Id, Id2: it.Id2 }; }),
+        tCont, false);
+    compareTest('compareTest map append multiple key 2',
+        tCont.A.map(function (it) { return { Id: it.Id, Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3 }; }),
+        tCont.A.map(function (it) { return { Id: it.Id, Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3, Id2: it.Id2 }; }),
+        tCont, false);
+    compareTest('compareTest map append multiple key 2 v1',
+        tCont.A.map(function (it) { return { Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3, Id: it.Id }; }),
+        tCont.A.map(function (it) { return { Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3, Id: it.Id, Id2: it.Id2 }; }),
+        tCont, false);
+
+    compareTest('compareTest map append multiple key 2',
+        tCont.A.map(function (it) { return { Id: it.Id, Id2: it.Id2, Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3 }; }),
+        tCont.A.map(function (it) { return { Id: it.Id, Id2: it.Id2, Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3 }; }),
+        tCont, true);
 });

@@ -1,6 +1,6 @@
 function DefaultArgumentBinder(name, options, request){
     var result = request.query[name];
-    console.log(name, options, request.query[name], new (options.type)(request.query[name]));
+    //console.log(name, options, request.query[name], new (options.type)(request.query[name]));
     return result;
 }
 
@@ -14,37 +14,6 @@ Function.prototype.curry = function () {
         return self.apply(null, args);
     }
 };
-
-﻿(function ($data, q) {
-
-    $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
-        constructor: function () {
-            this.deferred = new q.defer();
-        },
-        deferred: {},
-        createCallback: function (callBack) {
-            callBack = $data.typeSystem.createCallbackSetting(callBack);
-            var self = this;
-
-            return cbWrapper = {
-                success: function () {
-                    callBack.success.apply(this, arguments);
-                    self.deferred.resolve.apply(this, arguments);
-                },
-                error: function () {
-                    callBack.error.apply(this, arguments);
-                    self.deferred.reject.apply(this, arguments);
-                }
-            };
-        },
-        getPromise: function () {
-            return this.deferred.promise;
-        }
-    }, null);
-
-    $data.PromiseHandler = $data.Deferred;
-
-})($data, require('q'));
 
 $data.Class.define("$data.JSObjectAdapter", null, null, {
     constructor:function (type, instanceFactory) {
@@ -61,12 +30,13 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             route = type;
         }
         
-        Object.defineProperty(this, "type", { value:type, enumerable:true, writable:false, configurable:false });
-        Object.defineProperty(this, "route", { value:route, enumerable:true, writable:false, configurable:false });
-        Object.defineProperty(this, "instanceFactory", { value:instanceFactory, enumerable:true, writable:false, configurable:false });
-        Object.defineProperty(this, 'urlHelper', {value: url, enumerable:true, writable:false, configurable:false});
-        Object.defineProperty(this, 'promiseHelper', {value: q, enumerable:true, writable:false, configurable:false});
+        this.type = type;
+        this.route = route;
+        this.instanceFactory = instanceFactory;
+        this.urlHelper = url;
+        this.promiseHelper = q;
     },
+
     handleRequest:function (req, res, next) {
         var self = this;
         
@@ -136,8 +106,17 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     }else{
                         value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
                     }
-                }else{
-                    value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
+                } else {
+                    oDataBuidlerCfg = {
+                        version: 'V2',
+                        context: self.type,
+                        baseUrl: 'http://localhost:3000/contextapi.svc',
+                        methodConfig: member,
+                        methodName: memberName
+
+                    };
+                    value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
+                    //value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
                 }
             }
 
@@ -154,6 +133,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         var pathElements = parsedUrl.pathname.split('/').slice(1);
         return pathElements[0];
     },
+
     resolveMember:function (request, memberName) {
         var prefixedMemberName = request.method + "_" + memberName;
         if (prefixedMemberName in this.route) {
@@ -162,6 +142,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             return this.type.prototype[this.route[memberName]];
         }
     },
+
     resolveEntitySet: function(request, memberName, serviceInstance){
         return serviceInstance[this.route[memberName]];
     },
@@ -214,20 +195,21 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 error: error
             };
 
-            Object.defineProperty(serviceInstance, "executionContext", {
+            /*Object.defineProperty(serviceInstance, "executionContext", {
                 value:executionContext,
                 enumerable:false,
                 writable:false,
                 configurable:false
-            });
+            });*/
+            this.executionContext = executionContext;
             
             var result = member.apply(executionContext, args);
 
-            if (typeof result === 'function'){
+            if (typeof result === 'function') {
                 result.call(executionContext);
-            }else if (self.promiseHelper.isPromise(result)){
+            } else if (self.promiseHelper.isPromise(result)) {
                 return result;
-            }else{
+            } else {
                 return self.promiseHelper.fcall(function () {
                     return result;
                 });

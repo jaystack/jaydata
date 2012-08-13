@@ -10,7 +10,7 @@ function getBuilderConfig(context, ext) {
     var builderConfig = {
         version: 'V1',
         context: context,
-        baseUrl: 'http://exampe.com',
+        baseUrl: 'http://example.com',
         CountRequest: false,
     }
 
@@ -1219,7 +1219,7 @@ exports['entityContext'] = {
                 new $news.Types.Article({ Id: 3, Title: "Article3", Lead: "Lead3", Body: "Body3", CreateDate: new Date() }),
                 new $news.Types.Article({ Id: 4, Title: "Article4", Lead: "Lead4", Body: "Body4", CreateDate: new Date() }),
                 new $news.Types.Article({ Id: 5, Title: "Article5", Lead: "Lead5", Body: "Body5", CreateDate: new Date() })
-            ]; 
+            ];
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(entities);
             test.equal(response.d instanceof $data.Array, true, 'object convert failed');
@@ -1367,5 +1367,91 @@ exports['entityContext'] = {
 
             test.done();
         }
+    },
+    'entitySet - map no key selected': function (test) {
+        test.expect(22 + 5 * 5);
+
+        var builderConfig = getBuilderConfig($news.Types.NewsContext, {
+            version: 'V2',
+            collectionName: 'Articles',
+            selectedFields: ['Title', 'Lead']
+        });
+
+        var entities = [
+            { Id: 1, Title: "Article1", Lead: "Lead1", Body: "Body1", CreateDate: new Date() },
+            { Id: 2, Title: "Article2", Lead: "Lead2", Body: "Body2", CreateDate: new Date() },
+            { Id: 3, Title: "Article3", Lead: "Lead3", Body: "Body3", CreateDate: new Date() },
+            { Id: 4, Title: "Article4", Lead: "Lead4", Body: "Body4", CreateDate: new Date() },
+            { Id: 5, Title: "Article5", Lead: "Lead5", Body: "Body5", CreateDate: new Date() }
+        ];
+        var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
+        var response = builder.convertToResponse(entities);
+        test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
+        test.equal(response.d.__count, 5, 'object count failed');
+
+        for (var i = 0; i < response.d.__count; i++) {
+            var item = response.d.results[i];
+
+            test.equal(item.hasOwnProperty('__metadata'), true, '__metadata property failed');
+            test.equal(item.hasOwnProperty('Title'), true, 'Title property failed');
+            test.equal(item.hasOwnProperty('Lead'), true, 'Lead property failed');
+            test.equal(item.hasOwnProperty('Body'), false, 'Body property failed');
+
+            test.deepEqual(item.__metadata, {
+                type: '$news.Types.Article',
+                id: 'http://example.com/Articles(' + (i + 1) + ')',
+                uri: 'http://example.com/Articles(' + (i + 1) + ')'
+            }, '__metadata property value failed');
+            test.equal(item.Title, 'Article' + (i + 1), 'Title property value failed');
+            test.equal(item.Lead, 'Lead' + (i + 1), 'Lead property value failed');
+            test.equal(item.Id, undefined, 'Body property value failed');
+            test.equal(item.Body, undefined, 'Body property value failed');
+
+        }
+
+        test.done();
+    },
+    'entitySet - map key selected': function (test) {
+        test.expect(22 + 5 * 5);
+
+        var builderConfig = getBuilderConfig($news.Types.NewsContext, {
+            version: 'V2',
+            collectionName: 'Articles',
+            selectedFields: ['Id', 'Title', 'Lead']
+        });
+
+        var entities = [
+            { Id: 1, Title: "Article1", Lead: "Lead1", Body: "Body1", CreateDate: new Date() },
+            { Id: 2, Title: "Article2", Lead: "Lead2", Body: "Body2", CreateDate: new Date() },
+            { Id: 3, Title: "Article3", Lead: "Lead3", Body: "Body3", CreateDate: new Date() },
+            { Id: 4, Title: "Article4", Lead: "Lead4", Body: "Body4", CreateDate: new Date() },
+            { Id: 5, Title: "Article5", Lead: "Lead5", Body: "Body5", CreateDate: new Date() }
+        ];
+        var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
+        var response = builder.convertToResponse(entities);
+        test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
+        test.equal(response.d.__count, 5, 'object count failed');
+
+        for (var i = 0; i < response.d.__count; i++) {
+            var item = response.d.results[i];
+
+            test.equal(item.hasOwnProperty('__metadata'), true, '__metadata property failed');
+            test.equal(item.hasOwnProperty('Title'), true, 'Title property failed');
+            test.equal(item.hasOwnProperty('Lead'), true, 'Lead property failed');
+            test.equal(item.hasOwnProperty('Body'), false, 'Body property failed');
+
+            test.deepEqual(item.__metadata, {
+                type: '$news.Types.Article',
+                id: 'http://example.com/Articles(' + (i + 1) + ')',
+                uri: 'http://example.com/Articles(' + (i + 1) + ')'
+            }, '__metadata property value failed');
+            test.equal(item.Title, 'Article' + (i + 1), 'Title property value failed');
+            test.equal(item.Lead, 'Lead' + (i + 1), 'Lead property value failed');
+            test.equal(item.Id, (i + 1), 'Body property value failed');
+            test.equal(item.Body, undefined, 'Body property value failed');
+
+        }
+
+        test.done();
     }
 }

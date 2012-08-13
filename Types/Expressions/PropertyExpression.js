@@ -5,8 +5,10 @@ $C('$data.Expressions.PropertyExpression', $data.Expressions.ExpressionNode, nul
         ///<param name="member" type="$data.Expressions.ConstantExpression">The member descriptor</param>
         ///<field name="expression" type="$data.Expressions.ExpressionNode">The expression for the property owner object</field>
         ///<field name="member" type="$data.Expression.ConstantExpression">The member descriptor</field>
-        Object.defineProperty(this, "expression", { value: expression, enumerable: true });
-        Object.defineProperty(this, "member", { value: member, enumerable: true });
+
+        this.expression = expression;
+        this.member = member;
+
         this.type = member.dataType;
     },
 

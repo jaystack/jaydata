@@ -39,7 +39,8 @@ $data.Class.define("$data.JayService", null, null, {
     },
     createAdapter:function (type, instanceFactory) {
         return function (req, res, next) {
-            var adapter = new $data.JSObjectAdapter(type, instanceFactory);
+            var factory = instanceFactory || function() { return new type; };
+            var adapter = new $data.JSObjectAdapter(type, factory);
             adapter.handleRequest(req, res, next);
         }
     },

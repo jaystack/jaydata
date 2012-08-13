@@ -30,7 +30,7 @@ $C("$data.Expressions.LambdaParameterProcessor", $data.Expressions.ParameterProc
             var result = Container.createParameterExpression(paramExpression.name,
                 lambdaParamType,
                 $data.Expressions.ExpressionType.LambdaParameter);
-            Object.defineProperty(result, "owningFunction", { value: paramExpression.owningFunction, enumerable: false });
+            result.owningFunction = paramExpression.owningFunction;
             return result;
         };
     }

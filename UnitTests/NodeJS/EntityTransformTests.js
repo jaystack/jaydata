@@ -74,16 +74,16 @@ exports.Tests = {
         test.expect(6);
 
         var entity = new $news.Types.Article({ Id: 1, Title: 'title', Body: 'body' });
-        var res = transform.convertToResponse(entity);
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity])[0];
+        test.deepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
-        var res = transform.convertToResponse(entity, 'Articles');
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity], 'Articles')[0];
+        test.notDeepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
-        var res = transform.convertToResponse(entity, $news.Types.Article);
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity], $news.Types.Article)[0];
+        test.notDeepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
         test.done();
@@ -249,7 +249,7 @@ exports.Tests = {
             test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
             test.notEqual(item.__metadata, undefined, '__metadata is undefined');
 
-            test.equal(JSON.stringify(item.Birthday), JSON.stringify(new Date('2000/05/0' + (i + 1))), 'result[i].Birthday Data failed');
+            test.equal(item.Birthday, '/Date(' + new Date('2000/05/0' + (i + 1)).valueOf() + ')/', 'result[i].Birthday Data failed');
 
             var meta = {
                 type: '$news.Types.UserProfile',
@@ -410,9 +410,8 @@ exports.Tests = {
             new $news.Types.Article({ Id: 1, Title: 'title1', Body: 'body1', Lead: 'lead1' }),
             new $news.Types.Article({ Id: 2, Title: 'title2', Body: 'body2', Lead: 'lead2' })
         ];
-        var res = transform.convertToResponse(entityArray);
 
-        res = transform.convertToResponse(entityArray, 'Articles', ['Title', 'Body', 'Author']);
+        var res = transform.convertToResponse(entityArray, 'Articles', ['Title', 'Body', 'Author']);
         for (var i = 0; i < res.length; i++) {
             var item = res[i];
 
@@ -441,6 +440,51 @@ exports.Tests = {
 
         test.done();
     },
+    'select fields from entity miltipleKeys': function (test) {
+        test.expect(3 * 8);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string' },
+            Prop3: { type: 'string' }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0' }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1' }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2' })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A', ['Prop1', 'Prop3']);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, undefined, 'result.Id Data failed');
+            test.equal(item.Id2, undefined, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Lead failed');
+            test.equal(item.Prop3, 'lead' + i, 'result.Prop3 Data failed');
+        }
+
+        test.done();
+    }
     /*'select fields from entities with complex type': function (test) {
         test.expect(6 + 4 * 6 + 3 * 5 + 2 + 1);
 
