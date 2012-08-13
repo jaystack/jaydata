@@ -710,8 +710,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (c.updateAll && c.updateAll.length){
                         updateFn(client, c, collection);
                     }else{
-                        callBack.success(successItems);
-                        client.close();
+                        esFn(client, successItems);
                     }
                 }
             });
@@ -736,7 +735,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (!p.computed) {
                         if (typeof u.entity[p.name] === 'undefined') continue;
                         set[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
-                        if (typeof set[p.name] === 'undefined') delete set[p.name];
                     }
                 }
                 
@@ -745,8 +743,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     
                     successItems++;
                     counterFn(function(){
-                        callBack.success(successItems);
-                        client.close();
+                        esFn(client, successItems);
                     });
                 });
             }
@@ -782,18 +779,21 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     counterFn(function(){
                         if (c.updateAll && c.updateAll.length){
                             updateFn(client, c, collection);
-                        }else{
-                            callBack.success(successItems);
-                            client.close();
-                        }
+                        }else esFn(client, successItems);
                     });
                 });
             }
         };
         
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-            if (error) callBack.error(error);
-            for (var es in collections){
+        var keys = Object.keys(collections);
+        var readyFn = function(client, value){
+            callBack.success(value);
+            client.close();
+        };
+        
+        var esFn = function(client, value){
+            if (keys.length){
+                var es = keys.pop();
                 if (collections.hasOwnProperty(es)){
                     var c = collections[es];
                     var collection = new self.driver.Collection(client, es);
@@ -806,13 +806,17 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             if (c.updateAll && c.updateAll.length){
                                 updateFn(client, c, collection);
                             }else{
-                                callBack.success(0);
-                                client.close();
+                                readyFn(client, 0);
                             }
                         }
                     }
                 }
-            }
+            }else readyFn(client, value);
+        };
+        
+        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+            if (error) callBack.error(error);
+            esFn(client);
         });
     },
     saveChanges: function(callBack, changedItems){

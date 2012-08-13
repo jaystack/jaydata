@@ -60,7 +60,7 @@
                         <a data-bind="click: function(){ $root.selectEntity($data.elementType) }, text: '[' + $data.elementType.fullName + ']'"></a>
                         <span data-bind="text: '(' + ($data.tableName || $data.name) + ')'"></span>
                         <div class="controls">
-                            <button class="btn remove" data-bind="click: $root.editEntity($data)">Remove</button>
+                            <button class="btn remove" data-bind="click: function(){ $root.editEntity($data) }">Remove</button>
                         </div>
                     </div>
                 </div>

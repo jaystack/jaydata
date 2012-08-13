@@ -107,3 +107,4 @@ $data.Base.extend('$data.ContextAPI.FunctionImport', {
 });
 
 $data.Class.defineEx('$data.ContextAPI.API', [$data.ContextAPI.Context, $data.ContextAPI.FunctionImport]);
+$data.ContextAPI.API.context = new $data.ContextAPI.API({ name: 'oData', oDataServiceHost: 'http://localhost:3000/contextapi.svc' });
