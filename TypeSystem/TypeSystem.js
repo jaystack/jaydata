@@ -10,10 +10,6 @@
         }
     }
 
-    $data.classTimers = {
-        __count: {}
-    }
-
     function MemberDefinition(memberDefinitionData, definedClass) {
         
         ///<field name="name" type="String">*</field>
@@ -479,11 +475,6 @@
     },
     classFunctionBuilder: function (name, base, classDefinition, instanceDefinition) {
         var body = this.bodyBuilder(base, classDefinition, instanceDefinition);
-        if ($data.classTimers) {
-            $data.classTimers[name] = 0;
-            $data.classTimers.__count[name] = 0;
-        }
-
         return new Function('base', 'classDefinition', 'instanceDefinition', 'name', 'return function ' + name + ' (){ ' +
             body + ' \n}; ')(base, classDefinition, instanceDefinition, name);
     },
@@ -491,50 +482,12 @@
         var mixin = '';
         var body = '';
         var propagation = '';
-        var suffix = '';
-        var prefix = '';
-        if ($data.classTimers) {
-            suffix = '\n    var startDate = new Date().valueOf();';
-            prefix = '\n    $data.classTimers[name] += new Date().valueOf() - startDate; $data.classTimers.__count[name]++; ';
-        }
-
 
         for (var i = 0, l = bases.length; i < l; i++) {
             var base = bases[i];
             var index = i;
             if (index == 0) { //ctor func
-                if (base && base.type && base.type) {
-                    body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
-                    body += '    ' + base.type.fullName + '.apply(this, baseArguments); \n';
-                }
-            } else {
-                if (base && base.type && base.propagateTo) {
-                    //propagation
-                    propagation += '    ' + (!propagation ? 'var ' : '' + '') + 'propagationArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
-                    propagation += '    this["' + base.propagateTo + '"] =  Object.create(' + base.type.fullName + '.prototype); \n' +
-                                   '    ' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], propagationArguments); \n';
-                }
-                else if (base && base.type && base.type.memberDefinitions && base.type.memberDefinitions.$constructor && !base.propagateTo) {
-                        //mixin
-                    mixin += '    ' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
-                }
-            }
-        }
-        if (instanceDefinition && instanceDefinition.constructor != Object)
-            body += "    instanceDefinition.constructor.apply(this, arguments); \n";
-
-        return suffix+ '\n    //mixins \n' + mixin + '\n    //construction \n' + body + '\n    //propagations \n' + propagation + prefix;
-    },
-    bodyBuilder_orig: function (bases, classDefinition, instanceDefinition) {
-        var mixin = '';
-        var body = '';
-        var propagation = '';
-
-        for (var i = 0, l = bases.length; i < l; i++) {
-            var base = bases[i];
-            var index = i;
-            if (index == 0) { //ctor func
-                if (base && base.type) {
+                if (base && base.type && base.type !== $data.Base) {
                     body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
                     body += '    ' + base.type.fullName + '.apply(this, baseArguments); \n';
                 }
@@ -555,59 +508,6 @@
             body += "    instanceDefinition.constructor.apply(this, arguments); \n";
 
         return '\n    //mixins \n' + mixin + '\n    //construction \n' + body + '\n    //propagations \n' + propagation;
-    },
-    bodyBuilder1: function (bases, classDefinition, instanceDefinition) {
-        var body = '\n    var baseArguments0 = arguments; \n';
-
-        body += this.buildBaseCall(bases, 0);
-
-        if (instanceDefinition && instanceDefinition.constructor != Object) {
-            body += "\n    instanceDefinition.constructor.apply(this, baseArguments0);";
-        }
-
-        return body;
-    },
-    buildBaseCall: function (bases, depth, parent) {
-        var body = '';
-
-        var baseClass = bases[0];
-        if (baseClass && baseClass.type && baseClass.type !== $data.Base && baseClass.type.baseTypes && baseClass.type.baseTypes.config) {
-            var params = 'base[0].params';
-            if (depth > 0) {
-                params = parent.fullName + '.baseTypes.config[0].params';
-            }
-
-            body += '    var baseArguments' + (depth + 1) + ' = $data.typeSystem.createCtorParams(baseArguments' + (depth) + ', ' + params +', this); \n';
-            body += this.buildBaseCall(baseClass.type.baseTypes.config, ++depth, baseClass.type);
-        } else { body += '\n' }
-
-        for (var i = 1; i < bases.length; i++) {
-            var base = bases[i];
-            if (!base || !base.type || base.type == $data.Base)
-                continue;
-            
-            if (base.propagateTo) {
-                //propagation
-                var propArg = 'propagationArguments' + depth.toString() + i.toString();
-                body += '    var ' + propArg + ' = $data.typeSystem.createCtorParams(arguments, baseArguments' + (depth) + ', this); \n';
-                body += '    this["' + base.propagateTo + '"] =  Object.create(' + base.type.fullName + '.prototype); \n' +
-                                '    ' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], ' + propArg + '); \n';
-            }
-            /*else if (base && base.type && base.type.memberDefinitions && base.type.memberDefinitions.$constructor && !base.propagateTo) {
-                    //mixin
-                mixin += '    ' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
-            }*/
-
-        }
-
-        if (baseClass && baseClass.type && baseClass.type !== $data.Base) {
-            var ctor = baseClass.type.memberDefinitions.getMember('constructor');
-            if (ctor) {
-                body += '    ' + baseClass.type.fullName + '.memberDefinitions.getMember("constructor").method.apply(this, baseArguments' + (depth) + '); \n';
-            }
-        }
-
-        return body;
     },
 
     buildType: function (classFunction, baseClasses, instanceDefinition, classDefinition) {
@@ -632,7 +532,6 @@
             for (var i = 0; i < baseClasses.length; i++){
                 classFunction.baseTypes.push(baseClasses[i].type);
             }
-            classFunction.baseTypes.config = baseClasses;
             //classFunction.baseTypes = (baseClass.baseTypes || []).concat(baseClasses.map(function (base) { return base.type; }));
             if (!classFunction.isAssignableTo) {
                 Object.defineProperty(classFunction, "isAssignableTo", {
