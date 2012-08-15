@@ -1,5 +1,5 @@
 $data.Entity.extend('$data.ContextAPI.Entity', {
-    EntityID: { type: 'id', key: true, computed: true },
+    EntityID: { type: 'string', key: true, computed: true },
     Name: { type: 'string', required: true },
     FullName: { type: 'string', required: true },
     Namespace: { type: 'string' }/*,
@@ -8,8 +8,8 @@ $data.Entity.extend('$data.ContextAPI.Entity', {
 });
 
 $data.Entity.extend('$data.ContextAPI.EntityField', {
-    EntityFieldID: { type: 'id', key: true, computed: true },
-    EntityID: { type: 'id', required: true },
+    EntityFieldID: { type: 'string', key: true, computed: true },
+    EntityID: { type: 'string', required: true },
     Name: { type: 'string', required: true },
     Type: { type: 'string', required: true },
     ElementType: { type: 'string' },
@@ -34,7 +34,7 @@ $data.Entity.extend('$data.ContextAPI.ServiceOperationReturnType', {
 });
 
 $data.Entity.extend('$data.ContextAPI.ServiceOperationParameter', {
-    ParameterID: { type: 'id', key: true, computed: true },
+    ParameterID: { type: 'string', key: true, computed: true },
     Rank: { type: 'int', required: true },
     Name: { type: 'string', required: true },
     Type: { type: 'string', required: true }/*,
@@ -42,7 +42,7 @@ $data.Entity.extend('$data.ContextAPI.ServiceOperationParameter', {
 });
 
 $data.Entity.extend('$data.ContextAPI.ServiceOperation', {
-    ServiceOperationID: { type: 'id', key: true, computed: true },
+    ServiceOperationID: { type: 'string', key: true, computed: true },
     Name: { type: 'string', required: true },
     //Parameters: { type: 'Array', elementType: '$data.ContextAPI.ServiceOperationParameter' },
     Method: { type: 'string' },
@@ -52,29 +52,26 @@ $data.Entity.extend('$data.ContextAPI.ServiceOperation', {
 });
 
 $data.Entity.extend('$data.ContextAPI.EventHandler', {
-    EventHandlerID: { type: 'id', key: true, computed: true },
+    EventHandlerID: { type: 'string', key: true, computed: true },
     Type: { type: 'string', required: true },
     Handler: { type: 'string', required: true }/*,
     EntitySet: { type: '$data.ContextAPI.EntitySet', inverseProperty: 'EventHandlers', required: true }*/
 });
 
 $data.Entity.extend('$data.ContextAPI.EntitySet', {
-    EntitySetID: { type: 'id', key: true, computed: true },
+    EntitySetID: { type: 'string', key: true, computed: true },
     Name: { type: 'string', required: true },
     ElementType: { type: 'string', required: true },
-    ElementTypeID: { type: 'id', required: true },
+    ElementTypeID: { type: 'string', required: true },
     TableName: { type: 'string' },
     //EventHandlers: { type: 'Array', elementType: '$data.ContextAPI.EventHandler' },
     //ElementType: { type: '$data.ContextAPI.Entity', required: true },
     Publish: { type: 'bool' }
 });
 
-/*$data.Entity.extend('$data.ContextAPI.EntityContext', {
-    EntityContextID: { type: 'id', key: true, computed: true },
-    FullName: { type: 'string' },
-    EntitySetID: { type: 'id' },
-    EntitySet: { type: 'string' }
-})*/
+$data.Entity.extend('$data.ContextAPI.Test', {
+    Mock: { type: 'string' }
+});
 
 $data.EntityContext.extend('$data.ContextAPI.Context', {
     Entities: { type: $data.EntitySet, elementType: $data.ContextAPI.Entity },

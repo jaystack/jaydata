@@ -1,3 +1,16 @@
+// JayData 1.1.1
+// Dual licensed under MIT and GPL v2
+// Copyright JayStack Technologies (http://jaydata.org/licensing)
+//
+// JayData is a standards-based, cross-platform Javascript library and a set of
+// practices to access and manipulate data from various online and offline sources.
+//
+// Credits:
+//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
+//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
+//     Zoltán Gyebrovszki
+//
+// More info: http://jaydata.org
 $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.ModelBinderConfigCompiler, null, {
     _addPropertyToModelBinderConfig: function (elementType, builder) {
         var storageModel = this._query.context._storageModel.getStorageModel(elementType);
@@ -29,30 +42,11 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 }
             }, this);
         } else {
-            builder._binderConfig.$item = { };
+            builder._binderConfig.$item = {};
             builder.modelBinderConfig = builder._binderConfig.$item;
         }
         if (storageModel) {
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);
-        }
-    },
-    VisitComplexTypeExpression: function (expression, builder) {
-        this.Visit(expression.source, builder);
-        this.Visit(expression.selector, builder);
-        
-        if (('$selector' in builder.modelBinderConfig) && (builder.modelBinderConfig.$selector.length > 0)) {
-            if (builder.modelBinderConfig.$selector instanceof $data.Array) {
-                var temp = builder.modelBinderConfig.$selector[1];
-                builder.modelBinderConfig.$selector[0] = temp + '.' + expression.selector.memberName + '.results';
-                builder.modelBinderConfig.$selector[1] = temp + '.' + expression.selector.memberName;
-            } else {
-                builder.modelBinderConfig.$selector += '.' + expression.selector.memberName;
-            }
-
-        } else {
-            //builder.modelBinderConfig['$selector'] = 'json:' + expression.selector.memberName;
-            builder.modelBinderConfig.$type = expression.selector.memberDefinition.type;
-            builder.modelBinderConfig.$source = expression.selector.memberName;
         }
     },
     VisitMemberInfoExpression: function (expression, builder) {
@@ -71,8 +65,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
 
     compile: function (expression, context) {
         this.Visit(expression, context);
-        delete context.current;
-        delete context.complexType;
     },
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.selector, context);
@@ -94,7 +86,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
     VisitComplexTypeExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
-        context.complexType = context.current;
     },
     
     VisitEntityFieldExpression: function (expression, context) {
@@ -116,14 +107,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
     },
     VisitMemberInfoExpression: function (expression, context) {
         if (!context.options.fields) context.options.fields = { _id: 1 };
-        context.current = expression.memberName;
-        if (context.complexType){
-            delete context.options.fields[context.complexType];
-            //if (typeof context.options.fields[context.complexType] !== 'object') context.options.fields[context.complexType] = {};
-            context.options.fields[context.complexType + '.' + context.current] = 1;
-            delete context.complexType;
-        }else if (!context.options.fields[expression.memberName]) context.options.fields[expression.memberName] = 1;
-        //console.log('complexType =>', context.current, context.complexType);
+        if (!context.options.fields[expression.memberName]) context.options.fields[expression.memberName] = 1;
     },
     VisitConstantExpression: function (expression, context) {
     }
@@ -188,15 +172,15 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
                 context.queryField = context.field;
-                if (!context.complexType && context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
                     delete context.query[context.field];
                     context.queryField = '_id';
                 }
                 var v = context.value;
-                if (context.entityType && context.entityType.memberDefinitions)
-                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.complexType ? context.lastField : context.field).type))](v);
+                if (context.entityType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
                 else if (context.valueType)
-                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.valueType))](v);
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
                 context.value = v;
                 if (context.cursor instanceof Array){
                     var o = {};
@@ -208,37 +192,28 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
                 context.queryField = context.field;
-                if (!context.complexType && context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
                     delete context.query[context.field];
                     context.queryField = '_id';
                 }
                 var v = context.value;
                 if (v instanceof Array){
                     for (var i = 0; i < v.length; i++){
-                        if (context.entityType && context.entityType.memberDefinitions)
-                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.complexType ? context.lastField : context.field).type))](v[i]);
+                        if (context.entityType)
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v[i]);
                         else if (context.valueType)
-                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.valueType))](v[i]);
+                            v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v[i]);
                     }
                 }
                 context.value = v;
                 if (context.cursor instanceof Array){
                     var o = {};
                     o[context.queryField] = {};
-                    if (context.entityType && context.entityType === $data.Array){
-                        o[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $not: context.value } : context.value;
-                    }else{
-                        o[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
-                    }
+                    o[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
                     context.cursor.push(o);
                 }else{
                     context.cursor[context.queryField] = {};
-                    if (context.entityType && context.entityType === $data.Array){
-                        context.cursor[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $not: context.value } : context.value;
-                    }else{
-                        context.cursor[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
-                    }
-                    //context.cursor[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
+                    context.cursor[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
                 }
                 if (context.unary === $data.Expressions.ExpressionType.Not) context.unary = undefined;
                 break;
@@ -246,15 +221,15 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
                 context.queryField = context.field;
-                if (!context.complexType && context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
+                if (context.entityType && context.entityType.memberDefinitions.getMember(context.field).computed){
                     delete context.query[context.field];
                     context.queryField = '_id';
                 }
                 var v = context.value;
-                if (context.entityType && context.entityType.memberDefinitions)
-                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.complexType ? context.lastField : context.field).type))](v);
+                if (context.entityType)
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.field).type))](v);
                 else if (context.valueType)
-                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.valueType))](v);
+                    v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](v);
                 context.value = v;
                 if (context.cursor instanceof Array){
                     var o = {};
@@ -267,10 +242,6 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 break;
         }
-        
-        delete context.complexType;
-        delete context.field;
-        delete context.value;
         
         /*if (expression.nodeType == $data.Expressions.ExpressionType.Or) context.or = true;
         else if (expression.nodeType == $data.Expressions.ExpressionType.And) context.and = true;
@@ -383,16 +354,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
 
     VisitMemberInfoExpression: function (expression, context) {
         //if (!context.query[expression.memberName]) context.query[expression.memberName] = null;
-        context.field = context.complexType && context.field ? context.field + '.' + expression.memberName : expression.memberName;
-        if (context.complexType) context.lastField = expression.memberName;
-    },
-    
-    VisitComplexTypeExpression: function(expression, context){
-        context.complexType = true;
-        this.Visit(expression.source, context);
-        this.Visit(expression.selector, context);
-        context.entityType = expression.entityType;
-        //delete context.complexType;
+        context.field = expression.memberName;
     },
 
     VisitQueryParameterExpression: function (expression, context) {
@@ -520,7 +482,6 @@ $C('$data.storageProviders.mongoDB.mongoDBOrderCompiler', $data.storageProviders
     },
     VisitComplexTypeExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        if (context.data) context.data += '.';
         this.Visit(expression.selector, context);
     },
     VisitEntitySetExpression: function (expression, context) {
@@ -649,51 +610,32 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             case $data.storageProviders.DbCreationType.DropAllExistingTables:
                 var server = this._getServer();
                 new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
+                    if (error) callBack.error(error);
                     
-                    var fn = function(error, client){
-                        var cnt = 0;
-                        var collectionCount = 0;
-                        var readyFn = function(client){
-                            if (--cnt == 0){
-                                callBack.success(self.context);
-                                client.close();
-                            }
-                        };
-                        
-                        for (var i in self.context._entitySetReferences){
-                            if (self.context._entitySetReferences.hasOwnProperty(i))
-                                cnt++;
-                        }
-                        
-                        collectionCount = cnt;
-                        
-                        for (var i in self.context._entitySetReferences){
-                            if (self.context._entitySetReferences.hasOwnProperty(i)){
-                                
-                                client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
-                                    readyFn(client);
-                                });
-                            }
+                    var cnt = 0;
+                    var collectionCount = 0;
+                    var readyFn = function(client){
+                        if (--cnt == 0){
+                            callBack.success(self.context);
+                            client.close();
                         }
                     };
                     
-                    if (self.providerConfiguration.username){
-                        client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password || '', function(error, result){
-                            if (error){
-                                callBack.error(error);
-                                return;
-                            }
+                    for (var i in self.context._entitySetReferences){
+                        if (self.context._entitySetReferences.hasOwnProperty(i))
+                            cnt++;
+                    }
+                    
+                    collectionCount = cnt;
+                    
+                    for (var i in self.context._entitySetReferences){
+                        if (self.context._entitySetReferences.hasOwnProperty(i)){
                             
-                            if (result){
-                                fn(error, client);
-                                return;
-                            }
-                        });
-                    }else fn(error, client);
+                            client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
+                                readyFn(client);
+                            });
+                        }
+                    }
                 });
                 break;
             default:
@@ -703,6 +645,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
     },
     executeQuery: function(query, callBack){
         var self = this;
+        
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         this.entitySet = query.context.getEntitySetFromElementType(query.defaultType);
@@ -710,48 +653,28 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-            if (error) {
-                callBack.error(error);
-                return;
-            }
+            if (error) callBack.error(error);
             
             var collection = new self.driver.Collection(client, self.entitySet.tableName);
             var find = query.find;
-
+            
             var cb = function(error, results){
-                if (error){
-                    callBack.error(error);
-                    return;
-                }
+                if (error) callBack.error(error);
                 
                 query.rawDataList = results instanceof Array ? results : [{ cnt: results }];
                 query.context = self.context;
-
+                
                 callBack.success(query);
                 client.close();
             };
-            
-            var fn = function(){
-                switch (query.expression.nodeType){
-                    case $data.Expressions.ExpressionType.Count:
-                        collection.find(find.query, find.options).count(cb);
-                        break;
-                    default:
-                        collection.find(find.query, find.options).toArray(cb);
-                        break;
-                }
-            };
-            
-            if (self.providerConfiguration.username){
-                client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password, function(error, result){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
-                    
-                    if (result) fn();
-                });
-            }else fn();
+            switch (query.expression.nodeType){
+                case $data.Expressions.ExpressionType.Count:
+                    collection.find(find.query, find.options).count(cb);
+                    break;
+                default:
+                    collection.find(find.query, find.options).toArray(cb);
+                    break;
+            }
         });
     },
     _saveCollections: function(callBack, collections){
@@ -772,8 +695,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
                     if (!p.computed){
-                        d.data[p.name] = Container.typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
-                        if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
+                        d.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
                     }
                 }
 
@@ -781,10 +703,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }
         
             collection.insert(docs, { safe: true }, function(error, result){
-                if (error){
-                    callBack.error(error);
-                    return;
-                }
+                if (error) callBack.error(error);
                 
                 for (var k = 0; k < result.length; k++){
                     var it = result[k];
@@ -792,7 +711,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
                     for (var j = 0; j < props.length; j++){
                         var p = props[j];
-                        d.entity[p.name] = Container.typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb) //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
+                        d.entity[p.name] = self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
                     }
                 }
                 
@@ -804,7 +723,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (c.updateAll && c.updateAll.length){
                         updateFn(client, c, collection);
                     }else{
-                        esFn(client, successItems);
+                        callBack.success(successItems);
+                        client.close();
                     }
                 }
             });
@@ -826,21 +746,18 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed) {
-                        if (typeof u.entity[p.name] === 'undefined') continue;
-                        set[p.name] = Container.typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
+                    if (!p.computed){
+                        set[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
                     }
                 }
                 
                 collection.update(where, { $set: set }, { safe: true }, function(error, result){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
+                    if (error) callBack.error(error);
                     
                     successItems++;
                     counterFn(function(){
-                        esFn(client, successItems);
+                        callBack.success(successItems);
+                        client.close();
                     });
                 });
             }
@@ -862,38 +779,28 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var p = props[j];
                     if (!p.computed){
                         r.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](r.data[p.name]);
-                        if (typeof r.data[p.name] === 'undefined') delete r.data[p.name];
                     }
-
-                    //todo
-                    delete r.data[p.name];
                 }
                 
                 collection.remove(r.data, { safe: true }, function(error, cnt){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
+                    if (error) callBack.error(error);
                     
                     successItems += cnt;
                     counterFn(function(){
                         if (c.updateAll && c.updateAll.length){
                             updateFn(client, c, collection);
-                        }else esFn(client, successItems);
+                        }else{
+                            callBack.success(successItems);
+                            client.close();
+                        }
                     });
                 });
             }
         };
         
-        var keys = Object.keys(collections);
-        var readyFn = function(client, value){
-            callBack.success(value);
-            client.close();
-        };
-        
-        var esFn = function(client, value){
-            if (keys.length){
-                var es = keys.pop();
+        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+            if (error) callBack.error(error);
+            for (var es in collections){
                 if (collections.hasOwnProperty(es)){
                     var c = collections[es];
                     var collection = new self.driver.Collection(client, es);
@@ -906,30 +813,13 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             if (c.updateAll && c.updateAll.length){
                                 updateFn(client, c, collection);
                             }else{
-                                readyFn(client, 0);
+                                callBack.success(0);
+                                client.close();
                             }
                         }
                     }
                 }
-            }else readyFn(client, value);
-        };
-        
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-            if (error){
-                callBack.error(error);
-                return;
             }
-            
-            if (self.providerConfiguration.username){
-                client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password, function(error, result){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
-                    
-                    if (result) esFn(client);
-                });
-            }else esFn(client);
         });
     },
     saveChanges: function(callBack, changedItems){
@@ -1169,8 +1059,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
+                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
                 '$data.ObjectID': function(id){ return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; }
             },
             toDb: {
@@ -1178,22 +1068,10 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (date) { return date; },
                 '$data.String': function (text) { return text; },
-                '$data.Boolean': function (bool) {
-                    if (typeof bool === 'string') {
-                        switch (bool) {
-                            case 'true': case 'true': case 'TRUE':
-                            case 'yes': case 'Yes': case 'YES':
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                    //return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool;
-                    return bool === null || bool === undefined ? null : !!bool;
-                },
+                '$data.Boolean': function (bool) { return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Object': function (o) { return o; },
-                '$data.Array': function (o) { return o; },
+                '$data.Object': function (o) { return JSON.stringify(o); },
+                '$data.Array': function (o) { return JSON.stringify(o); },
                 '$data.ObjectID': function(id){ return id && typeof id === 'string' ? new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii')) : id; }
             }
         }

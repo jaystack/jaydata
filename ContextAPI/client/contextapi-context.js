@@ -69,13 +69,6 @@ $data.Entity.extend('$data.ContextAPI.EntitySet', {
     Publish: { type: 'bool' }
 });
 
-/*$data.Entity.extend('$data.ContextAPI.EntityContext', {
-    EntityContextID: { type: 'id', key: true, computed: true },
-    FullName: { type: 'string' },
-    EntitySetID: { type: 'id' },
-    EntitySet: { type: 'string' }
-})*/
-
 $data.EntityContext.extend('$data.ContextAPI.Context', {
     Entities: { type: $data.EntitySet, elementType: $data.ContextAPI.Entity },
     EntityFields: { type: $data.EntitySet, elementType: $data.ContextAPI.EntityField },

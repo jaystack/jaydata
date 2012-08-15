@@ -26,6 +26,11 @@ function ContextModel(context){
     
     self.entitySetCollection = ko.observableArray(self.context() ? self.context().memberDefinitions.getPublicMappedProperties() : []);
     self.entityCollection = ko.observableArray(self.context() ? self.entitySetCollection().map(function(it){ return it.elementType; }) : []);
+    self.entityFieldCollections = {};
+    for (var i = 0, l = self.entityCollection().length; i < l; i++){
+        var e = self.entityCollection()[i];
+        self.entityFieldCollections[e.fullName] = ko.observableArray(e.memberDefinitions.getPublicMappedProperties());
+    }
     
     self.selectedEntitySet = ko.observable(self.entitySetCollection()[0]);
     self.selectedEntity = ko.observable(self.entityCollection()[0]);
@@ -37,12 +42,15 @@ function ContextModel(context){
     };
     
     self.selectEntitySet = function(entitySet){
+        self.edit(false);
         self.selectedEntitySet(entitySet);
         if (entitySet.elementType) self.selectEntity(entitySet.elementType);
     };
     
     self.selectEntity = function(entity){
+        self.edit(false);
         self.selectedEntity(entity);
+        return false;
     };
     
     self.addEntityValidator = function(data, event){
@@ -55,11 +63,11 @@ function ContextModel(context){
     };
     
     self.editEntity = function(entity){
-        
+        self.edit(!self.edit());
     };
     
     self.insertAsEntitySet = function(entity){
-        alert(entity.name);
+        alert(entity.name.pluralize());
     };
     
     self.removeEntitySet = function(entitySet){
@@ -72,5 +80,7 @@ function ContextModel(context){
 }
 
 window.addEventListener('load', function(){
-    ko.applyBindings(new ContextModel(Northwind.NorthwindContainer));
+    //TODO: dynamic load of context
+    var context = $data.ContextAPI.Context;
+    ko.applyBindings(new ContextModel(context));
 }, false);
