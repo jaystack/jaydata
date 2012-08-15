@@ -14,26 +14,55 @@ $data.Entity.extend('$test.ComplexValue', {
     Rank: { type: 'int' }
 });
 
+/*$data.Entity.extend('$test.MoreComplexValue', {
+    Value: { type: 'string' },
+    Rank: { type: 'int' },
+    Child: { type: '$test.ComplexValue' }
+});*/
+
 $data.Entity.extend('$test.ComplexItem', {
     Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: '$test.ComplexValue' }
 });
 
+/*$data.Entity.extend('$test.MoreComplexItem', {
+    Id: { type: 'id', computed: true, key: true },
+    Key: { type: 'string' },
+    Value: { type: '$test.MoreComplexValue' },
+    ValueChild: { type: '$test.ComplexValue' }
+});*/
+
+$data.Entity.extend('$test.ObjectItem', {
+    Id: { type: 'id', computed: true, key: true },
+    Key: { type: 'string' },
+    Value: { type: 'Object' }
+});
+
+$data.Entity.extend('$test.ArrayItem', {
+    Id: { type: 'id', computed: true, key: true },
+    Key: { type: 'string' },
+    Values: { type: 'Array', elementType: 'string' },
+    Rank: { type: 'int' }
+});
+
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
-    ComplexItems: { type: $data.EntitySet, elementType: $test.ComplexItem }
+    ComplexItems: { type: $data.EntitySet, elementType: $test.ComplexItem },
+    //MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
+    ObjectItems: { type: $data.EntitySet, elementType: $test.ObjectItem },
+    ArrayItems: { type: $data.EntitySet, elementType: $test.ArrayItem }
 });
 
 $test.Context.init = function(callback){
-    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
+    $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', username: 'admin', password: '***', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     $test.context.onReady(function(db){
         callback(db);
     });
 }
 
 exports.testAdd = function(test){
-    test.expect(1);
+    test.expect(3);
     $test.Context.init(function(db){
         db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
         db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
@@ -42,13 +71,17 @@ exports.testAdd = function(test){
         db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
         db.saveChanges(function(cnt){
             test.equal(cnt, 5, 'Not 5 items added to collection');
-            test.done();
+            db.Items.toArray(function(r){
+                test.equal(r.length, 5, 'Not 5 items selected from collection');
+                test.ok(r[0] instanceof $test.Item, 'Entity is not an Item');
+                test.done();
+            });
         });
     });
 };
 
 exports.testAddEntity = function(test){
-    test.expect(1);
+    test.expect(7);
     $test.Context.init(function(db){
         var add1 = new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 });
         var add2 = new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 });
@@ -64,13 +97,23 @@ exports.testAddEntity = function(test){
         
         db.saveChanges(function(cnt){
             test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.toArray(function(r){
+                test.equal(r.length, 5, 'Not 5 items added to collection');
+                test.ok(r[0] instanceof $test.Item, 'Entity is not an Item');
             
-            var add6 = new $test.Item({ Key: 'aaa6', Value: 'bbb-1', Rank: 6 });
-            db.Items.add(add6);
-            db.Items.remove(add1);
-            
-            db.saveChanges(function(cnt){
-                test.done();
+                var add6 = new $test.Item({ Key: 'aaa6', Value: 'bbb-1', Rank: 6 });
+                db.Items.add(add6);
+                db.Items.remove(add1);
+                
+                db.saveChanges(function(cnt){
+                    test.equal(cnt, 2, 'Not 2 items saved to collection');
+                    db.Items.toArray(function(r){
+                        test.equal(r.length, 5, 'Not 5 items added to collection');
+                        test.ok(r[0] instanceof $test.Item, 'Entity is not an Item');
+                        test.equal(r[0].Value, 'bbb7', 'First entity value is not "bbb7"');
+                        test.done();
+                    });
+                });
             });
         });
     });
@@ -88,6 +131,63 @@ exports.testAddComplex = function(test){
             test.equal(cnt, 5, 'Not 5 items added to collection');
             db.ComplexItems.toArray(function(r){
                 test.ok(r[0].Value instanceof $test.ComplexValue, 'Value is not complex');
+                test.done();
+            });
+        });
+    });
+};
+
+/*exports.testAddMoreComplex = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa1', Value: new $test.MoreComplexValue({ Value: 'bbb6', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa2', Value: new $test.MoreComplexValue({ Value: 'bbb7', Rank: 2, Child: new $test.ComplexValue({ Value: 'child2', Rank: 102 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'bbb3', Value: new $test.MoreComplexValue({ Value: 'bbb8', Rank: 3, Child: new $test.ComplexValue({ Value: 'child3', Rank: 103 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa4', Value: new $test.MoreComplexValue({ Value: 'bbb9', Rank: 4, Child: new $test.ComplexValue({ Value: 'child4', Rank: 104 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa5', Value: new $test.MoreComplexValue({ Value: 'bbb0', Rank: 5, Child: new $test.ComplexValue({ Value: 'child5', Rank: 105 }) }) }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.MoreComplexItems.toArray(function(r){
+                test.ok(r[0] instanceof $test.MoreComplexItem, 'Item is not MoreComplexItem');
+                test.ok(r[0].Value instanceof $test.MoreComplexValue, 'Value is not MoreComplexValue');
+                test.ok(r[0].Value.Child instanceof $test.ComplexValue, 'Value.Child is not ComplexValue');
+                test.done();
+            });
+        });
+    });
+};*/
+
+exports.testAddObject = function(test){
+    test.expect(2);
+    $test.Context.init(function(db){
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa1', Value: { Value: 'bbb6', Rank: 1 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa2', Value: { Value: 'bbb7', Rank: 2 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'bbb3', Value: { Value: 'bbb8', Rank: 3 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa4', Value: { Value: 'bbb9', Rank: 4 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa5', Value: { Value: 'bbb0', Rank: 5 } }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ObjectItems.toArray(function(r){
+                test.ok(typeof r[0].Value === 'object', 'Value is not object');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testAddArray = function(test){
+    test.expect(3);
+    $test.Context.init(function(db){
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa1', Values: ['bbb6'], Rank: 1 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa2', Values: ['bbb7', 'bbb6'], Rank: 2 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'bbb3', Values: ['bbb8', 'bbb7', 'bbb6'], Rank: 3 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa4', Values: ['bbb9', 'bbb8', 'bbb7', 'bbb6'], Rank: 4 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa5', Values: ['bbb0', 'bbb9', 'bbb8', 'bbb7', 'bbb6'], Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ArrayItems.toArray(function(r){
+                test.ok(r[0].Values instanceof Array, 'Values is not array');
+                test.equal(r[4].Values.length, 5, 'Values length is not 5');
                 test.done();
             });
         });
@@ -329,6 +429,48 @@ exports.testMapComplex = function(test){
     });
 };
 
+/*exports.testMapMoreComplex = function(test){
+    test.expect(2);
+    $test.Context.init(function(db){
+        console.log(db._storageModel.getStorageModel('$test.MoreComplexItem').ComplexTypes, db._storageModel.getStorageModel('$test.MoreComplexItem').ComplexTypes.length);
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa1', Value: new $test.MoreComplexValue({ Value: 'bbb6', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa2', Value: new $test.MoreComplexValue({ Value: 'bbb7', Rank: 2, Child: new $test.ComplexValue({ Value: 'child2', Rank: 102 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'bbb3', Value: new $test.MoreComplexValue({ Value: 'bbb8', Rank: 3, Child: new $test.ComplexValue({ Value: 'child3', Rank: 103 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa4', Value: new $test.MoreComplexValue({ Value: 'bbb9', Rank: 4, Child: new $test.ComplexValue({ Value: 'child4', Rank: 104 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa5', Value: new $test.MoreComplexValue({ Value: 'bbb0', Rank: 5, Child: new $test.ComplexValue({ Value: 'child5', Rank: 105 }) }) }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.MoreComplexItems.map(function(it){ return it.Value.Child.Value; }).toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items selected from collection');
+                console.log(data.map(function(it){ return it.initData; }));
+                //test.ok(data[0] instanceof Object, 'Entity is not an anonymous Object');
+                //test.deepEqual(data[0].initData, { Value: 'child1', Rank: 101 }, 'Object is not as expected');
+                test.done();
+            });
+        });
+    });
+};*/
+
+exports.testMapArray = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa1', Values: ['bbb6'], Rank: 1 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa2', Values: ['bbb7'], Rank: 2 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'bbb3', Values: ['bbb8'], Rank: 3 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa4', Values: ['bbb9'], Rank: 4 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa5', Values: ['bbb0'], Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ArrayItems.map(function(it){ return it.Values; }).toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items selected from collection');
+                test.ok(data[0] instanceof Array, 'Entity is not an Array');
+                test.deepEqual(data[0][0], 'bbb6', 'Array is not as expected');
+                test.done();
+            });
+        });
+    });
+};
+
 exports.testFilterComplex = function(test){
     test.expect(3);
     $test.Context.init(function(db){
@@ -347,6 +489,29 @@ exports.testFilterComplex = function(test){
         });
     });
 };
+
+/*exports.testFilterObject = function(test){
+    test.expect(2);
+    $test.Context.init(function(db){
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa1', Value: { Value: 'bbb6', Rank: 1 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa2', Value: { Value: 'bbb7', Rank: 2 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'bbb3', Value: { Value: 'bbb8', Rank: 3 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa4', Value: { Value: 'bbb9', Rank: 4 } }));
+        db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa5', Value: { Value: 'bbb0', Rank: 5 } }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            try{
+                db.ObjectItems.filter(function(it){ return it.Value.Value == this.value; }, { value: 'bbb6' }).map(function(it){ return it.Value; }).toArray(function(r){
+                    test.ok(typeof r[0].Value === 'string', 'Value is not string');
+                    test.done();
+                });
+            }catch(err){
+                test.ok(false, 'Filter Object unsupported');
+                test.done();
+            }
+        });
+    });
+};*/
 
 exports.testOrderByDescendingComplex = function(test){
     test.expect(3);
@@ -623,6 +788,26 @@ exports.testFilterInComputed = function(test){
                     test.equal(data.length, 3, 'Not 3 items filtered by "in" operator');
                     test.done();
                 });
+            });
+        });
+    });
+};
+
+exports.testFilterInArray = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa1', Values: ['bbb6'], Rank: 1 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa2', Values: ['bbb7', 'bbb6'], Rank: 2 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'bbb3', Values: ['bbb8'], Rank: 3 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa4', Values: ['bbb9'], Rank: 4 }));
+        db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa5', Values: ['bbb0'], Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ArrayItems.filter(function(it){ return this.value in it.Values; }, { value: 'bbb6' }).toArray(function(data){
+                test.equal(data.length, 2, 'Not only 1 item filtered from collection');
+                test.equal(data[0].Values[0], 'bbb6', 'First value of the first entity is not "bbb6"');
+                test.equal(data[1].Values[1], 'bbb6', 'Second value of the second entity is not "bbb6"');
+                test.done();
             });
         });
     });
