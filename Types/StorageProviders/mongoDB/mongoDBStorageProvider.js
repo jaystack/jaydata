@@ -23,18 +23,45 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                         if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
                         } else {
-                            builder.modelBinderConfig[prop.name] = prop.computed ? '_id' : prop.name;
+                            var dt = Container.resolveType(prop.dataType);
+                            if (dt === $data.Array || dt === $data.Object){
+                                builder.modelBinderConfig[prop.name] = {
+                                    $type: dt,
+                                    $source: prop.name
+                                };
+                            }else builder.modelBinderConfig[prop.name] = prop.computed ? '_id' : prop.name;
                         }
                     }
                 }
             }, this);
         } else {
-            builder._binderConfig.$item = { };
+            builder._binderConfig.$item = builder._binderConfig.$item || {};
             builder.modelBinderConfig = builder._binderConfig.$item;
         }
         if (storageModel) {
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);
         }
+    },
+    _addComplexTypeProperties: function (complexTypes, builder) {
+        complexTypes.forEach(function (ct) {
+            if (ct.ToType !== $data.Array){
+                builder.selectModelBinderProperty(ct.FromPropertyName);
+                builder.modelBinderConfig['$type'] = ct.ToType;
+                if (this._isoDataProvider) {
+                    builder.modelBinderConfig['$selector'] = ['json:' + ct.FromPropertyName + '.results', 'json:' + ct.FromPropertyName];
+                } else {
+                    builder.modelBinderConfig['$selector'] = 'json:' + ct.FromPropertyName;
+                }
+                this._addPropertyToModelBinderConfig(ct.ToType, builder);
+
+                builder.popModelBinderProperty();
+            }else{
+                builder.modelBinderConfig[ct.FromPropertyName] = {
+                    $type: ct.ToType,
+                    $source: ct.FromPropertyName
+                };
+            }
+        }, this);
     },
     VisitComplexTypeExpression: function (expression, builder) {
         this.Visit(expression.source, builder);
@@ -754,6 +781,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }else fn();
         });
     },
+    _typeFactory: function(type, value, converter){
+        var type = Container.resolveName(type);
+        var converterFn = converter ? converter[type] : undefined;
+        return converter && converter[type] ? converter[type](value) : new (Container.resolveType(type))(value);
+    },
     _saveCollections: function(callBack, collections){
         var self = this;
         var successItems = 0;
@@ -772,7 +804,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
                     if (!p.computed){
-                        d.data[p.name] = Container.typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
+                        d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
                         if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
                     }
                 }
@@ -792,7 +824,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
                     for (var j = 0; j < props.length; j++){
                         var p = props[j];
-                        d.entity[p.name] = Container.typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb) //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
+                        d.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb) //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
                     }
                 }
                 
@@ -828,7 +860,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var p = props[j];
                     if (!p.computed) {
                         if (typeof u.entity[p.name] === 'undefined') continue;
-                        set[p.name] = Container.typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
+                        set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
                     }
                 }
                 
