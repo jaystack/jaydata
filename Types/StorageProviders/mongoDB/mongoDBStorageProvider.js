@@ -640,7 +640,10 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-            if (error) callBack.error(error);
+            if (error) {
+                callBack.error(error);
+                return;
+            }
             
             var collection = new self.driver.Collection(client, self.entitySet.tableName);
             var find = query.find;

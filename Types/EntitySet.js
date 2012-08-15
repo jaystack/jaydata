@@ -22,18 +22,15 @@ $data.Class.defineEx('$data.EntitySet',
         ///     <param name="context" type="$data.EntityContext">Context of the EntitySet</param>
         ///     <param name="collectionName" type="String">Name of the EntitySet</param>
         /// </signature>
-        this.createNew = this[elementType.name] = elementType;
+        this.createNew = this[elementType.name] = this.elementType = this.defaultType = elementType;
         this.stateManager = new $data.EntityStateManager(this);
 
-        this.elementType = elementType;
         this.collectionName = collectionName;
         this.roles = roles;
         
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
         }
-        
-        this._checkRootExpression();
     },
     executeQuery: function (expression, on_ready) {
         //var compiledQuery = this.entityContext
@@ -210,7 +207,14 @@ $data.Class.defineEx('$data.EntitySet',
             data = new this.createNew(entity);
         }
 
-        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(data); }).pop();
+        var existsItem;
+        var trackedEnt = this.entityContext.stateManager.trackedEntities;
+        for (var i = 0; i < trackedEnt.length; i++) {
+            if (trackedEnt[i].data.equals(data))
+                existsItem = trackedEnt[i];
+        }
+
+        //var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(data); }).pop();
         if (existsItem) {
             var idx = this.entityContext.stateManager.trackedEntities.indexOf(existsItem);
             entity.entityState = $data.EntityState.Detached;
@@ -253,7 +257,13 @@ $data.Class.defineEx('$data.EntitySet',
             data = new this.createNew(entity);
         }
 
-        var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(data); }).pop();
+        var existsItem;
+        var trackedEnt = this.entityContext.stateManager.trackedEntities;
+        for (var i = 0; i < trackedEnt.length; i++) {
+            if (trackedEnt[i].data.equals(data))
+                existsItem = trackedEnt[i];
+        }
+        //var existsItem = this.entityContext.stateManager.trackedEntities.filter(function (i) { return i.data.equals(data); }).pop();
         if (existsItem) {
             return existsItem.data;
         }
@@ -325,18 +335,23 @@ $data.Class.defineEx('$data.EntitySet',
 
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
     },
-    _checkRootExpression: function () {
-        if (!this.expression) {
-            //var ec = new $data.Expressions.EntityContextExpression(this.entityContext);
-            var ec = Container.createEntityContextExpression(this.entityContext);
-            //var name = entitySet.collectionName;
-            //var entitySet = this.entityContext[entitySetName];
-            var memberdef = this.entityContext.getType().getMemberDefinition(this.collectionName);
-            var es = Container.createEntitySetExpression(ec,
-                Container.createMemberInfoExpression(memberdef), null,
-                this);
-            this.expression = es;
-            this.defaultType = this.elementType;
+    expression: {
+        get: function () {
+            if (!this._expression) {
+                var ec = Container.createEntityContextExpression(this.entityContext);
+                //var name = entitySet.collectionName;
+                //var entitySet = this.entityContext[entitySetName];
+                var memberdef = this.entityContext.getType().getMemberDefinition(this.collectionName);
+                var es = Container.createEntitySetExpression(ec,
+                    Container.createMemberInfoExpression(memberdef), null,
+                    this);
+                this._expression = es;
+            }
+
+            return this._expression;
+        },
+        set: function (value) {
+            this._expression = value;
         }
     }
 }, null);
