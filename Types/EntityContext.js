@@ -875,7 +875,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
                 //}, this);
             }
-            if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
+            if ((entity.data.entityState === $data.EntityState.Added || entity.data.entityState === $data.EntityState.Modified)
                 && !entity.data.isValid()) {
                 errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
             }
