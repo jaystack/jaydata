@@ -1,0 +1,29 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="../../Scripts/datajs-1.0.3.min.js"></script>
+    <script src="../../build/jaydata.min.js"></script>
+    <script src="../../JayDataModules/deferred.js"></script>
+    <script src="../JaySvcUtil.js"></script>
+    <script>
+        $(function () {
+            $data.MetadataLoader.xsltRepoUrl = '../';
+            $data.MetadataLoader.debugMode = true;
+            $data.MetadataLoader.load({
+                url: 'http://192.168.1.119:3000/myservice/$metadata',
+                ContextInstanceName: 'context'
+            }, function (ctx, text) {
+                alert(text);
+                document.getElementById('asd').value = text;
+            });
+
+
+        })
+    </script>
+    <title></title>
+</head>
+<body>
+    <textarea id="asd" rows="50" cols="200"></textarea>
+</body>
+</html>

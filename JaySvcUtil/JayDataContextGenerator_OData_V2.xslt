@@ -13,12 +13,19 @@
   <xsl:param name="contextNamespace" />
 
   <xsl:param name="SerivceUri" />
-  <xsl:variable name="EntityBaseClass">$data.Entity</xsl:variable>
+  <xsl:param name="EntityBaseClass"/>
+  <xsl:param name="ContextBaseClass"/>
+  <xsl:param name="AutoCreateContext"/>
+  <xsl:param name="ContextInstanceName"/>
+  <xsl:param name="EntitySetBaseClass"/>
+  <xsl:param name="CollectionBaseClass"/>
+
+  <!--<xsl:variable name="EntityBaseClass">$data.Entity</xsl:variable>
   <xsl:variable name="ContextBaseClass">$data.EntityContext</xsl:variable>
   <xsl:variable name="AutoCreateContext">true</xsl:variable>
   <xsl:variable name="ContextInstanceName">context</xsl:variable>
   <xsl:variable name="EntitySetBaseClass">$data.EntitySet</xsl:variable>
-  <xsl:variable name="CollectionBaseClass">Array</xsl:variable>
+  <xsl:variable name="CollectionBaseClass">Array</xsl:variable>-->
 
     <xsl:template match="/">
 
@@ -99,6 +106,8 @@
 <xsl:if test="$AutoCreateContext = 'true'">
   /*Context Instance*/
   <xsl:value-of select="../@Namespace"/>.<xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(../@Namespace, '.', @Name)" />( { name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />' });
+  $data.generatedContexts = $data.generatedContexts || [];
+  $data.generatedContexts.push(<xsl:value-of select="../@Namespace"/>.<xsl:value-of select="$ContextInstanceName" />);
 </xsl:if>
 
 </xsl:for-each>
@@ -181,7 +190,19 @@
   </xsl:template>
 
   <xsl:template match="@FixedLength | @Unicode | @Precision | @Scale" mode="render-field">
-    
+  </xsl:template>
+  <xsl:template match="@*" mode="render-field">
+    <xsl:variable name="nameProp">
+      <xsl:choose>
+        <xsl:when test="substring-after(name(), ':') != ''">
+          <xsl:value-of select="substring-after(name(), ':')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="name()"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:element name="{$nameProp}">'<xsl:value-of select="."/>'</xsl:element>
   </xsl:template>
 
   <xsl:template match="@Relationship" mode="render-field">
@@ -234,7 +255,7 @@
 
   <xsl:template match="@FromRole | @ToRole" mode="render-field"></xsl:template>
 
-  <xsl:template match="* | @*" mode="render-field">
+  <xsl:template match="*" mode="render-field">
     <!--<unprocessed>!!<xsl:value-of select="name()"/>!!</unprocessed>-->
     <xsl:message terminate="no">  Warning: <xsl:value-of select="../../@Name"/>.<xsl:value-of select="../@Name"/>:<xsl:value-of select="name()"/> is an unknown/unprocessed attribued</xsl:message>
   </xsl:template>
