@@ -902,7 +902,7 @@
 			switch (t){
 				case $data.Number: return 0.0;
 				case $data.Integer: return 0;
-				case $data.String: return '';
+				case $data.String: return null;
 				case $data.Boolean: return false;
 				default: return null;
 			}

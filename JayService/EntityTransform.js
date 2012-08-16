@@ -66,32 +66,44 @@
             if (type === $data.Array) {
                 //Collecion
                 var elementType = Container.resolveType(memDef.elementType);
-                if (includes.indexOf(step) >= 0) {
-                    config[memDef.name] = {
-                        $type: $data.Array,
-                        $selector: ['json:' + memDef.name],
-                        $item: {
-                            $type: $data.Object,
-                            __metadata: {
+                var isEntity = elementType.isAssignableTo && elementType.isAssignableTo($data.Entity);
+                var hasEntitySet = isEntity ? self._getEntitySetDefByType(elementType) : false;
+                if (includes.indexOf(step) >= 0 || !hasEntitySet) {
+                    if (isEntity && hasEntitySet){
+                        config[memDef.name] = {
+                            $type: $data.Array,
+                            $selector: ['json:' + memDef.name],
+                            $item: {
                                 $type: $data.Object,
-                                $value: function (meta, data) {
-                                    var setDef = self._getEntitySetDefByType(data.getType());
-                                    var uri = self.generateUri(data, setDef);
-                                    if (setDef) {
-                                        var result = {
-                                            id: uri,
-                                            uri: uri,
-                                            type: data.getType().fullName
-
-                                        };
-                                        data.uri = result.uri;
-                                        return result;
+                                __metadata: {
+                                    $type: $data.Object,
+                                    $value: function (meta, data) {
+                                        var setDef = self._getEntitySetDefByType(data.getType());
+                                        var uri = self.generateUri(data, setDef);
+                                        if (setDef) {
+                                            var result = {
+                                                id: uri,
+                                                uri: uri,
+                                                type: data.getType().fullName
+                                            };
+                                            data.uri = result.uri;
+                                            return result;
+                                        }else{
+                                            return {
+                                                type: data.getType().fullName
+                                            };
+                                        }
                                     }
                                 }
                             }
                         }
+                        this.addMemberConfigs(elementType.memberDefinitions.getPublicMappedProperties(), config[memDef.name].$item, includes, step);
+                    }else{
+                        config[memDef.name] = {
+                            $type: $data.Array,
+                            $source: memDef.name
+                        };
                     }
-                    this.addMemberConfigs(elementType.memberDefinitions.getPublicMappedProperties(), config[memDef.name].$item, includes, step);
                 } else {
                     config[memDef.name] = {
                         $type: $data.Object,

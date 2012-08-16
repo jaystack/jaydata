@@ -56,10 +56,27 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
 
                 builder.popModelBinderProperty();
             }else{
-                builder.modelBinderConfig[ct.FromPropertyName] = {
-                    $type: ct.ToType,
-                    $source: ct.FromPropertyName
-                };
+                var dt = ct.ToType;
+                var et = Container.resolveType(ct.FromType.memberDefinitions.getMember(ct.FromPropertyName).elementType);
+                if (dt === $data.Array && et && et.isAssignableTo && et.isAssignableTo($data.Entity)){
+                    config = {
+                        $type: $data.Array,
+                        $selector: 'json:' + ct.FromPropertyName,
+                        $item: {
+                            $type: et
+                        }
+                    };
+                    var md = et.memberDefinitions.getPublicMappedProperties();
+                    for (var i = 0; i < md.length; i++){
+                        config.$item[md[i].name] = { $type: md[i].type, $source: md[i].name };
+                    }
+                    builder.modelBinderConfig[ct.FromPropertyName] = config;
+                }else{
+                    builder.modelBinderConfig[ct.FromPropertyName] = {
+                        $type: ct.ToType,
+                        $source: ct.FromPropertyName
+                    };
+                }
             }
         }, this);
     },
@@ -1012,7 +1029,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                serializableObject[memdef.computed ? '_id' : memdef.name] = item.physicalData[memdef.name];
+                if (Container.resolveType(memdef.type) === $data.Array && memdef.kind === $data.MemberTypes.property && item.physicalData[memdef.name]){
+                    serializableObject[memdef.name] = JSON.parse(JSON.stringify(item.physicalData[memdef.name]));
+                }else{
+                    serializableObject[memdef.computed ? '_id' : memdef.name] = item.physicalData[memdef.name];
+                }
             }
         }, this);
         return serializableObject;
