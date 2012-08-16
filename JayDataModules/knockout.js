@@ -342,6 +342,23 @@
                     }
                 }
 
+            },
+            
+            getProperties: function() {
+                //todo cache!
+                var self = this;
+                var props = this.innerInstance.getType().memberDefinitions.getPublicMappedProperties();
+                //todo remove map
+                var koData = props.map( function(memberInfo) {
+                    return {
+                        type: memberInfo.type,
+                        name: memberInfo.name,
+                        owner: self,
+                        metadata: memberInfo,
+                        value: self[memberInfo.name]
+                    }
+                });
+                return koData;
             }
         });
 
