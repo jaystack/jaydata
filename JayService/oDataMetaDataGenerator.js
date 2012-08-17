@@ -406,6 +406,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         keys.forEach(function (prop) {
             this._buildPropertyAttribute(xml, prop, memDef[prop], memDef);
         }, this);
+
         xml.endElement();
     },
     _buildPropertyAttribute: function (xml, name, value, memDef) {

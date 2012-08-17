@@ -155,6 +155,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
     },
 
     compile: function (expression, context) {
+        //console.log(JSON.stringify(expression, null, '    '));
         this.Visit(expression, context);
         delete context.current;
         delete context.complexType;
@@ -795,7 +796,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-            if (error) {
+            if (error){
                 callBack.error(error);
                 return;
             }

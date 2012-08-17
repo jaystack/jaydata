@@ -10,6 +10,7 @@
         }
     }
 
+
     function MemberDefinition(memberDefinitionData, definedClass) {
         
         ///<field name="name" type="String">*</field>

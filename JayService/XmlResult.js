@@ -9,6 +9,10 @@ $data.Class.define('$data.ServiceResult', null, null, {
     }
 });
 
+$data.ServiceResult.extend('$data.JavaScriptResult', {
+    contentType: { value: 'text/javascript' }
+});
+
 $data.ServiceResult.extend('$data.JSONResult', {
     contentType: { value: 'application/json' },
     toString: function(){
