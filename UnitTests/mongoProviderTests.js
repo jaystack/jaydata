@@ -399,6 +399,26 @@ exports.testMapComplex = function(test){
     });
 };
 
+exports.testMapComplexField = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.ComplexItems.add(new $test.ComplexItem({ Key: 'aaa1', Value: new $test.ComplexValue({ Value: 'bbb6', Rank: 1 }) }));
+        db.ComplexItems.add(new $test.ComplexItem({ Key: 'aaa2', Value: new $test.ComplexValue({ Value: 'bbb7', Rank: 2 }) }));
+        db.ComplexItems.add(new $test.ComplexItem({ Key: 'bbb3', Value: new $test.ComplexValue({ Value: 'bbb8', Rank: 3 }) }));
+        db.ComplexItems.add(new $test.ComplexItem({ Key: 'aaa4', Value: new $test.ComplexValue({ Value: 'bbb9', Rank: 4 }) }));
+        db.ComplexItems.add(new $test.ComplexItem({ Key: 'aaa5', Value: new $test.ComplexValue({ Value: 'bbb0', Rank: 5 }) }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ComplexItems.map(function(it){ return it.Value.Rank; }).toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items selected from collection');
+                test.equal(typeof data[0], 'number', 'Item is not a number');
+                test.equal(data[0], 1, 'First rank is not 1');
+                test.done();
+            });
+        });
+    });
+};
+
 /*exports.testMapMoreComplex = function(test){
     test.expect(2);
     $test.Context.init(function(db){
@@ -435,6 +455,27 @@ exports.testMapArray = function(test){
                 test.equal(data.length, 5, 'Not 5 items selected from collection');
                 test.ok(data[0] instanceof Array, 'Entity is not an Array');
                 test.deepEqual(data[0][0], 'bbb6', 'Array is not as expected');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testMapArrayComplex = function(test){
+    test.expect(5);
+    $test.Context.init(function(db){
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa1', Values: [new $test.ComplexValue({ Value: 'complex1', Rank: 1 })], Rank: 1 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa2', Values: [new $test.ComplexValue({ Value: 'complex1', Rank: 1 }), new $test.ComplexValue({ Value: 'complex2', Rank: 2 })], Rank: 2 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'bbb3', Values: [new $test.ComplexValue({ Value: 'complex3', Rank: 4 })], Rank: 3 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa4', Values: [new $test.ComplexValue({ Value: 'complex4', Rank: 8 })], Rank: 4 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa5', Values: [new $test.ComplexValue({ Value: 'complex8', Rank: 16 })], Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ArrayComplexItems.map(function(it){ return it.Values; }).toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items in collection');
+                test.equal(data[1].length, 2, 'Second entity has not 2 items in array type');
+                test.ok(data[0][0] instanceof $test.ComplexValue, 'Complex type is not typed');
+                test.equal(data[1][1].Rank, 2, 'Rank of item is not 2');
                 test.done();
             });
         });

@@ -42,42 +42,49 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);
         }
     },
-    _addComplexTypeProperties: function (complexTypes, builder) {
-        complexTypes.forEach(function (ct) {
-            if (ct.ToType !== $data.Array){
-                builder.selectModelBinderProperty(ct.FromPropertyName);
-                builder.modelBinderConfig['$type'] = ct.ToType;
-                if (this._isoDataProvider) {
-                    builder.modelBinderConfig['$selector'] = ['json:' + ct.FromPropertyName + '.results', 'json:' + ct.FromPropertyName];
-                } else {
-                    builder.modelBinderConfig['$selector'] = 'json:' + ct.FromPropertyName;
-                }
-                this._addPropertyToModelBinderConfig(ct.ToType, builder);
-
-                builder.popModelBinderProperty();
-            }else{
-                var dt = ct.ToType;
-                var et = Container.resolveType(ct.FromType.memberDefinitions.getMember(ct.FromPropertyName).elementType);
-                if (dt === $data.Array && et && et.isAssignableTo && et.isAssignableTo($data.Entity)){
-                    config = {
-                        $type: $data.Array,
-                        $selector: 'json:' + ct.FromPropertyName,
-                        $item: {
-                            $type: et
-                        }
-                    };
-                    var md = et.memberDefinitions.getPublicMappedProperties();
-                    for (var i = 0; i < md.length; i++){
-                        config.$item[md[i].name] = { $type: md[i].type, $source: md[i].name };
-                    }
-                    builder.modelBinderConfig[ct.FromPropertyName] = config;
-                }else{
-                    builder.modelBinderConfig[ct.FromPropertyName] = {
-                        $type: ct.ToType,
-                        $source: ct.FromPropertyName
-                    };
-                }
+    _addComplexType: function(ct, builder){
+        if (ct.ToType !== $data.Array){
+            builder.modelBinderConfig['$type'] = ct.ToType;
+            if (this._isoDataProvider) {
+                builder.modelBinderConfig['$selector'] = ['json:' + ct.FromPropertyName + '.results', 'json:' + ct.FromPropertyName];
+            } else {
+                builder.modelBinderConfig['$selector'] = 'json:' + ct.FromPropertyName;
             }
+            this._addPropertyToModelBinderConfig(ct.ToType, builder);
+        }else{
+            var dt = ct.ToType;
+            var et = Container.resolveType(ct.FromType.memberDefinitions.getMember(ct.FromPropertyName).elementType);
+            if (dt === $data.Array && et && et.isAssignableTo && et.isAssignableTo($data.Entity)){
+                config = {
+                    $type: $data.Array,
+                    $selector: 'json:' + ct.FromPropertyName,
+                    $item: {
+                        $type: et
+                    }
+                };
+                var md = et.memberDefinitions.getPublicMappedProperties();
+                for (var i = 0; i < md.length; i++){
+                    config.$item[md[i].name] = { $type: md[i].type, $source: md[i].name };
+                }
+                $data.typeSystem.extend(builder.modelBinderConfig, config);
+                //builder.modelBinderConfig[ct.FromPropertyName] = config;
+            }else{
+                /*builder.modelBinderConfig[ct.FromPropertyName] = {};
+                builder.modelBinderConfig[ct.FromPropertyName].$type = ct.ToType;
+                builder.modelBinderConfig[ct.FromPropertyName].$source = ct.FromPropertyName;*/
+                $data.typeSystem.extend(builder.modelBinderConfig, {
+                    $type: ct.ToType,
+                    $source: ct.FromPropertyName
+                });
+            }
+        }
+    },
+    _addComplexTypeProperties: function (complexTypes, builder) {
+        var self = this;
+        complexTypes.forEach(function (ct) {
+            builder.selectModelBinderProperty(ct.FromPropertyName);
+            self._addComplexType(ct, builder);
+            builder.popModelBinderProperty();
         }, this);
     },
     VisitComplexTypeExpression: function (expression, builder) {
@@ -95,16 +102,41 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
 
         } else {
             //builder.modelBinderConfig['$selector'] = 'json:' + expression.selector.memberName;
-            builder.modelBinderConfig.$type = expression.selector.memberDefinition.type;
-            builder.modelBinderConfig.$source = expression.selector.memberName;
+            var type = Container.resolveType(expression.selector.memberDefinition.type);
+            var elementType = type === $data.Array && expression.selector.memberDefinition.elementType ? Container.resolveType(expression.selector.memberDefinition.elementType) : undefined;
+            if (type === $data.Array && elementType && elementType.isAssignableTo && elementType.isAssignableTo($data.Entity)){
+                this._addComplexType(expression.selector.memberDefinition.storageModel.ComplexTypes[expression.selector.memberDefinition.name], builder);
+            }else{
+                //builder.modelBinderConfig.$type = Container.resolveType(expression.selector.memberDefinition.type);
+                builder.modelBinderConfig.$source = expression.selector.memberName;
+                
+                if (type !== $data.Array){// && (type.isAssignableTo ? !type.isAssignableTo($data.Entity) : true)){
+                    //console.log(type, type.isAssignableTo($data.Entity));
+                    builder.modelBinderConfig.$selector = 'json:' + expression.selector.memberDefinition.name;
+                }
+            }
         }
     },
     VisitMemberInfoExpression: function (expression, builder) {
-        builder.modelBinderConfig['$type'] = expression.memberDefinition.type;
-        if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
-            this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
-        } else {
-            builder.modelBinderConfig['$source'] = expression.memberDefinition.computed ? '_id' : expression.memberName;
+        var type = Container.resolveType(expression.memberDefinition.type);
+        var elementType = type === $data.Array && expression.memberDefinition.elementType ? Container.resolveType(expression.memberDefinition.elementType) : undefined;
+        builder.modelBinderConfig['$type'] = type;
+        if (type === $data.Array && elementType && elementType.isAssignableTo && elementType.isAssignableTo($data.Entity)){
+            this._addComplexType(expression.memberDefinition.storageModel.ComplexTypes[expression.memberName], builder);
+        }else{
+            if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
+                this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
+            } else {
+                if (builder._binderConfig.$item === builder.modelBinderConfig){
+                    builder._binderConfig.$item = {
+                        $type: builder.modelBinderConfig.$type,
+                        $selector: builder.modelBinderConfig.$selector,
+                        $source: expression.memberDefinition.computed ? '_id' : expression.memberName
+                    };
+                }else{
+                    builder.modelBinderConfig['$source'] = expression.memberDefinition.computed ? '_id' : expression.memberName;
+                }
+            }
         }
     }
 });
