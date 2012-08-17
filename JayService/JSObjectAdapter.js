@@ -213,16 +213,32 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             });*/
             this.executionContext = executionContext;
             
-            var result = member.apply(executionContext, args);
-
-            if (typeof result === 'function') {
-                result.call(executionContext);
-            } else if (self.promiseHelper.isPromise(result)) {
-                return result;
-            } else {
-                return self.promiseHelper.fcall(function () {
-                    return result;
+            if (typeof serviceInstance.onReady === 'function'){
+                serviceInstance.onReady(function(){
+                    var result = member.apply(executionContext, args);
+                    
+                    if (typeof result === 'function') {
+                        result.call(executionContext);
+                    } else if (self.promiseHelper.isPromise(result)) {
+                        self.promiseHelper.when(result).then(function(){
+                            defer.resolve(result.valueOf());
+                        });
+                    } else {
+                        defer.resolve(result);
+                    }
                 });
+            }else{
+                var result = member.apply(executionContext, args);
+                    
+                if (typeof result === 'function') {
+                    result.call(executionContext);
+                } else if (self.promiseHelper.isPromise(result)) {
+                    return result;
+                } else {
+                    return self.promiseHelper.fcall(function () {
+                        return result;
+                    });
+                }
             }
             
             return defer.promise;

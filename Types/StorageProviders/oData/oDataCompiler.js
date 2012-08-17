@@ -24,7 +24,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var queryText = queryFragments.urlText;
         var addAmp = false;
         for (var name in queryFragments) {
-            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && queryFragments[name] != "") {
+            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && queryFragments[name] != "") {
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
                 if(name != "$urlParams"){
@@ -38,6 +38,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         
         return {
             queryText: queryText,
+            method: queryFragments.method || 'GET',
             params: []
         };
     },
@@ -113,6 +114,11 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
                 this.Visit(expression.params[i], context);
             }
         }
+    },
+    VisitBatchDeleteExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+        context.urlText += '/$batchDelete';
+        context.method = 'DELETE';
     },
 
     VisitConstantExpression: function (expression, context) {

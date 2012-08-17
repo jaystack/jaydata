@@ -60,12 +60,17 @@ $data.Event = Event = $data.Class.define("$data.Event", null, null, {
         };
         this.fire = function (eventData, snder) {
             var snd = snder || sender || this;
-            eventData.eventName = name;
+            //eventData.eventName = name;
             ///<value name="subscriberList type="Array" />
             if (subscriberList) {
                 subscriberList.forEach(function (subscriber) {
                     ///<param name="subscriber" type="EventSubscriber" />
-                    subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state);
+                    try {
+                        subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state);
+                    } catch(ex) {
+                        console.log("unhandled exception in event handler. exception suppressed");
+                        console.dir(ex);
+                    }
                 });
             }
         };

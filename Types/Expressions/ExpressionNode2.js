@@ -62,6 +62,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Some: "Some",
     Every: "Every",
     ToArray: "ToArray",
+    BatchDelete: "BatchDelete",
     ForEach: "ForEach",
     Projection: "Projection",
     EntityMember: "EntityMember",

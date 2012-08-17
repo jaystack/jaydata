@@ -96,6 +96,32 @@ $data.Class.define('$data.EntityContext', null, null,
                 callBack.error('Provider fallback failed!');
             }
         });
+
+
+
+        this.addEventListener = function(eventName, fn) {
+            var delegateName = "on" + eventName;
+            if (!(delegateName in this)) {
+                this[delegateName] = new $data.Event(eventName, this);
+            }
+            this[delegateName].attach(fn);
+        };
+
+        this.removeEventListener = function(eventName, fn) {
+            var delegateName = "on" + eventName;
+            if (!(delegateName in this)) {
+                return;
+            }
+            this[delegateName].attach(fn);
+        };
+
+        this.raiseEvent = function(eventName, data) {
+            var delegateName = "on" + eventName;
+            if (!(delegateName in this)) {
+                return;
+            }
+            this[delegateName].fire(data);
+        };
         /*
         while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
         if (providerType){
@@ -875,7 +901,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
                 //}, this);
             }
-            if ((entity.data.entityState != $data.EntityState.Added || entity.data.entityState != $data.EntityState.Modified)
+            if ((entity.data.entityState === $data.EntityState.Added || entity.data.entityState === $data.EntityState.Modified)
                 && !entity.data.isValid()) {
                 errors.push({ item: entity.data, errors: entity.data.ValidationErrors });
             }
@@ -1024,6 +1050,24 @@ $data.Class.define('$data.EntityContext', null, null,
             
             var n = entity.entitySet.elementType.name;
             var es = ctx._entitySetReferences[n];
+
+
+            var eventName = undefined;
+            switch (oes) {
+                case $data.EntityState.Added:
+                    eventName  = 'added';
+                    break;
+                case $data.EntityState.Deleted:
+                    eventName  = 'deleted';
+                    break;
+                case $data.EntityState.Modified:
+                    eventName  = 'updated';
+                    break;
+            }
+            if (eventName) {
+                this.raiseEvent(eventName, entity);
+            }
+
             if (es.afterCreate || es.afterUpdate || es.afterDelete){
                 if (!eventData[n]) eventData[n] = {};
                     

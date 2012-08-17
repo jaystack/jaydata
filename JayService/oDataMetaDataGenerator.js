@@ -86,6 +86,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
             xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
 
+            customPropertyNS: 'http://jaydata.org/extendedproperties',
+            customPropertyNSName: 'Jay',
 
             contextNamespace: this.context.namespace || 'System'
 
@@ -212,14 +214,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }, this);
 
     },
-    _buildComplexTypes: function(xml){
+    _buildComplexTypes: function (xml) {
         if (this.cfg.extended && this.UnknownTypes.length > 0) {
             this.complexTypes = this.complexTypes.concat(this.UnknownTypes);
         }
 
         //recursive complex types
-        while (this.complexTypes.length > 0)
-        {
+        while (this.complexTypes.length > 0) {
             var complexTypes = [].concat(this.complexTypes);
             this.complexTypes = [];
             complexTypes.forEach(function (complexType) {
@@ -386,6 +387,10 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 this._buildProperty(xml, memDef);
 
                 var memDef_type = Container.resolveType(memDef.type);
+                if (memDef_type === $data.Array && memDef.elementType) {
+                    memDef_type = Container.resolveType(memDef.elementType);
+                }
+
                 if (memDef_type.isAssignableTo && memDef_type.isAssignableTo($data.Entity)) {
                     this.complexTypes.push(memDef_type)
                 }
@@ -401,23 +406,34 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         keys.forEach(function (prop) {
             this._buildPropertyAttribute(xml, prop, memDef[prop], memDef);
         }, this);
-
         xml.endElement();
     },
     _buildPropertyAttribute: function (xml, name, value, memDef) {
         var resolvedConfig = this._supportedPropertyAttributes[name];
-        if (typeof resolvedConfig === 'object' && (!resolvedConfig.cancelRender || !resolvedConfig.cancelRender.call(this, name, memDef))) {
-            var attr;
-            if (resolvedConfig.namespaceName) {
-                var ns = xml.declareNamespace(resolvedConfig.namespace, resolvedConfig.namespaceName)
-                attr = xml.declareAttribute(ns, resolvedConfig.name);
-            } else {
-                attr = xml.declareAttribute(resolvedConfig.name);
-            }
+        var attr;
+        if (typeof resolvedConfig === 'object') {
+            if (!resolvedConfig.cancelRender || !resolvedConfig.cancelRender.call(this, name, memDef)) {
+                if (resolvedConfig.namespaceName) {
+                    var ns = xml.declareNamespace(resolvedConfig.namespace, resolvedConfig.namespaceName)
+                    attr = xml.declareAttribute(ns, resolvedConfig.name);
+                } else {
+                    attr = xml.declareAttribute(resolvedConfig.name);
+                }
 
-            var value = resolvedConfig.converter ? resolvedConfig.converter.call(this, name, value, memDef) : value;
-            xml.addAttribute(attr, value.toString());
+                var value = resolvedConfig.converter ? resolvedConfig.converter.call(this, name, value, memDef) : value;
+                xml.addAttribute(attr, value.toString());
+            }
+        } else {
+            if (name.indexOf('$') === 0) {
+                var val = value.toString();
+                if (typeof val === 'string') {
+                    var customNs = xml.declareNamespace(this.cfg.customPropertyNS, this.cfg.customPropertyNSName);
+                    attr = xml.declareAttribute(customNs, name.slice(1));
+                    xml.addAttribute(attr, value.toString());
+                }
+            }
         }
+
     },
     _buildNavigationProperty: function (xml, classType, memDef) {
         var navProperty = xml.declareElement('NavigationProperty');
@@ -546,8 +562,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             type: {
                 name: 'Type',
                 converter: function (name, value, memDef) {
-                    return this._resolveTypeName(value);
-                    /*Container.getName(Container.getType(value));*/
+                    var type = Container.resolveType(value);
+                    if (type === $data.Array && memDef.elementType) {
+                        type = Container.resolveType(memDef.elementType);
+                        return 'Collection(' + this._resolveTypeName(type) + ')';
+                    }
+                        
+                    return this._resolveTypeName(type);
                 },
                 cancelRender: function (name, memdef) {
                     return memdef.type === undefined
@@ -631,21 +652,21 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         for (var i = 0; i < allMembers.length; i++) {
             var member = allMembers[i];
 
-            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/){
+            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
                 continue;
             }
 
             var parsedInfo = serviceDefParser.parseFromMethod(member.method);
             var vMember = {};
-            
+
             mMember = member.method || member;
-            for (var prop in mMember){
-                if (mMember.hasOwnProperty(prop)){
+            for (var prop in mMember) {
+                if (mMember.hasOwnProperty(prop)) {
                     vMember[prop] = mMember[prop];
                 }
             }
-            
-            vMember = $data.typeSystem.extend({ serviceOpName: member.name, method:"GET" }, parsedInfo, vMember);
+
+            vMember = $data.typeSystem.extend({ serviceOpName: member.name, method: "GET" }, parsedInfo, vMember);
 
             if (vMember.returnType && this._isExtendedType(vMember.returnType)) {
                 var uType = Container.resolveType(vMember.returnType);
