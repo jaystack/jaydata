@@ -11,10 +11,9 @@
             $data.MetadataLoader.xsltRepoUrl = '../';
             $data.MetadataLoader.debugMode = true;
             $data.MetadataLoader.load({
-                url: 'http://192.168.1.119:3000/myservice/$metadata',
+                url: 'http://192.168.1.119:3000/myservice',
                 ContextInstanceName: 'context'
             }, function (ctx, text) {
-                alert(text);
                 document.getElementById('asd').value = text;
             });
 

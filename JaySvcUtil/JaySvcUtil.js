@@ -19,15 +19,20 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             password: undefined
         }, metadataUri);
 
-
+        var metadataUri;
         if (this.config.url) {
             this.config.SerivceUri = this.config.url.replace('/$metadata', '');
+            if (this.config.url.indexOf('/$metadata') === -1) {
+                metadataUri = this.config.url.replace(/\/+$/, '') + '/$metadata';
+            } else {
+                metadataUri = this.config.url;
+            }
         } else {
             callBack.error('metadata url is missing');
         }
 
         var self = this;
-        self._loadXMLDoc(this.config.url, this.config.username, this.config.password, function (xml) {
+        self._loadXMLDoc(metadataUri, this.config.username, this.config.password, function (xml) {
             var codeText = self._processResults(self.config.url, xml);
             eval(codeText);
             var ctx = $data.generatedContexts.pop();
