@@ -14,7 +14,7 @@ $data.Class.define('$example.Person', $data.Entity, null, {
 
 $data.Class.define('$example.Order', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
-    Value: { type: 'int', custom:'almafa' },
+    Value: { type: 'int', $custom:'almafa' },
     Date: { type: 'date' },
     Completed: { type: 'bool' },
     //Person: { type: '$example.Person', inverseProperty: 'Orders' }

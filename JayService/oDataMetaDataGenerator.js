@@ -420,11 +420,11 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 xml.addAttribute(attr, value.toString());
             }
         } else {
-            if (this._notSupportedPropertyAttributes.indexOf(name) === -1) {
+            if (name.indexOf('$') === 0) {
                 var val = value.toString();
                 if (typeof val === 'string') {
                     var customNs = xml.declareNamespace(this.cfg.customPropertyNS, this.cfg.customPropertyNSName);
-                    attr = xml.declareAttribute(customNs, name);
+                    attr = xml.declareAttribute(customNs, name.slice(1));
                     xml.addAttribute(attr, value.toString());
                 }
             }
@@ -606,11 +606,6 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             }
 
         }
-    },
-    _notSupportedPropertyAttributes: {
-        value: [
-            'kind', 'enumerable', 'configurable', 'key', 'dataType', 'responseType'
-        ]
     },
     _edmTypeMapping: {
         value: {
