@@ -188,7 +188,7 @@ $data.executable = true;
 
 function jsonify(obj) { return JSON.stringify(obj, null, "\t"); }
 
-$C('$data.Expressions.ExpressionNode', $data.Entity, null, {
+$C('$data.Expressions.ExpressionNode', null, null, {
     constructor: function () {
         ///<summary>Provides a base class for all Expressions.</summary>
         ///<field name="nodeType" type="string">Represents the expression type of the node&#10;

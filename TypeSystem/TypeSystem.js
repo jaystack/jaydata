@@ -10,7 +10,6 @@
         }
     }
 
-
     function MemberDefinition(memberDefinitionData, definedClass) {
         
         ///<field name="name" type="String">*</field>
@@ -475,8 +474,9 @@
         return classFunction;
     },
     classFunctionBuilder: function (name, base, classDefinition, instanceDefinition) {
-        return new Function('base', 'classDefinition', 'instanceDefinition', 'return function ' + name + ' (){ ' + 
-            this.bodyBuilder(base, classDefinition, instanceDefinition) + ' \n}; ')(base, classDefinition, instanceDefinition);
+        var body = this.bodyBuilder(base, classDefinition, instanceDefinition);
+        return new Function('base', 'classDefinition', 'instanceDefinition', 'name', 'return function ' + name + ' (){ ' +
+            body + ' \n}; ')(base, classDefinition, instanceDefinition, name);
     },
     bodyBuilder: function (bases, classDefinition, instanceDefinition) {
         var mixin = '';
@@ -487,7 +487,7 @@
             var base = bases[i];
             var index = i;
             if (index == 0) { //ctor func
-                if (base && base.type) {
+                if (base && base.type && base.type !== $data.Base) {
                     body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
                     body += '    ' + base.type.fullName + '.apply(this, baseArguments); \n';
                 }
@@ -754,7 +754,17 @@
             if (itemName !== 'constructor' && !classFunction.memberDefinitions.getMember(itemName)) {
                 this.buildMember(classFunction, memberDefs[i]);
             }
+        }
+
+        if (typeObj.type.staticDefinitions) {
+            var staticDefs = typeObj.type.staticDefinitions.asArray();
+            for (var i = 0, l = staticDefs.length; i < l; i++) {
+                var itemName = staticDefs[i].name;
+                if (itemName !== 'constructor' && !classFunction.memberDefinitions.getMember(itemName)) {
+                    this.buildMember(classFunction, staticDefs[i], undefined, 'staticDefinitions');
+                }
             }
+        }
     },
     buildInstancePropagation: function (classFunction, typeObj) {
         ///<param name="classFunction" type="Function">The class constructor whose prototype will be extended</param>

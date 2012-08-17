@@ -6,7 +6,7 @@ $data.storageProviders = {
     }
 }
 
-$data.ConcurrencyMode = { Fixed: 'fixed', None: 'nonde' };
+$data.ConcurrencyMode = { Fixed: 'fixed', None: 'none' };
 $data.Class.define('$data.StorageProviderBase', null, null,
 {
     constructor: function (schemaConfiguration) {
