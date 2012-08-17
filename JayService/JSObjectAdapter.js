@@ -63,38 +63,48 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         }else{
             if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
             member = this.resolveEntitySet(req, memberName, serviceInstance);
-            if (member){
-                var pHandler = new $data.PromiseHandler();
-                var cbWrapper = pHandler.createCallback();
+            if (member) {
+                var esProc = new $data.JayService.OData.EntitySetProcessor(req, serviceInstance);
 
-                //try {
-                    var builder = new $data.oDataParser.ODataEntityExpressionBuilder(serviceInstance, memberName);
-                    var result = builder.parse({
-                        count: false,
-                        filter: req.query.$filter || '',
-                        orderby: req.query.$orderby || '',
-                        select: req.query.$select || '',
-                        skip: req.query.$skip || '',
-                        top: req.query.$top || '',
-                        expand: req.query.$expand || ''
-                    });
-                    
-                    serviceInstance.executeQuery(new $data.Queryable(member, result.expression), cbWrapper);
-                /*} catch (e) {
-                    cbWrapper.error(e);
-                }*/
-
-                _v = pHandler.getPromise();
-                
                 oDataBuidlerCfg = {
                     version: 'V2',
-                    baseUrl: 'http://localhost:3000/contextapi.svc',
-                    context: self.type,
-                    countRequest: false,
-                    collectionName: memberName,
-                    selectedFields: result.selectedFields,
-                    includes: result.includes
-                };
+                    baseUrl: 'http://localhost:3000/contextapi.svc'
+                }
+
+                _v = esProc.process(memberName, member, oDataBuidlerCfg);
+
+
+                //var pHandler = new $data.PromiseHandler();
+                //var cbWrapper = pHandler.createCallback();
+
+                ////try {
+                //    var builder = new $data.oDataParser.ODataEntityExpressionBuilder(serviceInstance, memberName);
+                //    var result = builder.parse({
+                //        count: false,
+                //        filter: req.query.$filter || '',
+                //        orderby: req.query.$orderby || '',
+                //        select: req.query.$select || '',
+                //        skip: req.query.$skip || '',
+                //        top: req.query.$top || '',
+                //        expand: req.query.$expand || ''
+                //    });
+                    
+                //    serviceInstance.executeQuery(new $data.Queryable(member, result.expression), cbWrapper);
+                ///*} catch (e) {
+                //    cbWrapper.error(e);
+                //}*/
+
+                //_v = pHandler.getPromise();
+                
+                //oDataBuidlerCfg = {
+                //    version: 'V2',
+                //    baseUrl: 'http://localhost:3000/contextapi.svc',
+                //    context: self.type,
+                //    countRequest: false,
+                //    collectionName: memberName,
+                //    selectedFields: result.selectedFields,
+                //    includes: result.includes
+                //};
             }
         }
 
