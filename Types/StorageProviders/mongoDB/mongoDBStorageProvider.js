@@ -97,7 +97,10 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 builder.modelBinderConfig.$selector[0] = temp + '.' + expression.selector.memberName + '.results';
                 builder.modelBinderConfig.$selector[1] = temp + '.' + expression.selector.memberName;
             } else {
-                builder.modelBinderConfig.$selector += '.' + expression.selector.memberName;
+                var type = Container.resolveType(expression.selector.memberDefinition.type);
+                var elementType = type === $data.Array && expression.selector.memberDefinition.elementType ? Container.resolveType(expression.selector.memberDefinition.elementType) : type;
+                if (elementType.memberDefinitions.getMember(expression.selector.memberName))
+                    builder.modelBinderConfig.$selector += '.' + expression.selector.memberName;
             }
 
         } else {
@@ -111,8 +114,14 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 builder.modelBinderConfig.$source = expression.selector.memberName;
                 
                 if (type !== $data.Array){// && (type.isAssignableTo ? !type.isAssignableTo($data.Entity) : true)){
-                    //console.log(type, type.isAssignableTo($data.Entity));
                     builder.modelBinderConfig.$selector = 'json:' + expression.selector.memberDefinition.name;
+                }
+                
+                if (builder._binderConfig.$item === builder.modelBinderConfig &&
+                    expression.selector.memberDefinition.storageModel &&
+                    expression.selector.memberDefinition.storageModel.ComplexTypes[expression.selector.memberDefinition.name]){
+                    builder.modelBinderConfig.$selectorMemberInfo = builder.modelBinderConfig.$selector;
+                    delete builder.modelBinderConfig.$selector;
                 }
             }
         }
@@ -130,7 +139,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 if (builder._binderConfig.$item === builder.modelBinderConfig){
                     builder._binderConfig.$item = {
                         $type: builder.modelBinderConfig.$type,
-                        $selector: builder.modelBinderConfig.$selector,
+                        $selector: builder.modelBinderConfig.$selectorMemberInfo,
                         $source: expression.memberDefinition.computed ? '_id' : expression.memberName
                     };
                 }else{
@@ -170,7 +179,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
     VisitComplexTypeExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
-        context.complexType = context.current;
+        //context.complexType = context.current;
     },
     
     VisitEntityFieldExpression: function (expression, context) {
