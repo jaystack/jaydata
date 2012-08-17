@@ -482,6 +482,28 @@ exports.testMapArrayComplex = function(test){
     });
 };
 
+exports.testMapArrayComplexMulti = function(test){
+    test.expect(6);
+    $test.Context.init(function(db){
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa1', Values: [new $test.ComplexValue({ Value: 'complex1', Rank: 1 })], Rank: 1 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa2', Values: [new $test.ComplexValue({ Value: 'complex1', Rank: 1 }), new $test.ComplexValue({ Value: 'complex2', Rank: 2 })], Rank: 2 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'bbb3', Values: [new $test.ComplexValue({ Value: 'complex3', Rank: 4 })], Rank: 3 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa4', Values: [new $test.ComplexValue({ Value: 'complex4', Rank: 8 })], Rank: 4 }));
+        db.ArrayComplexItems.add(new $test.ArrayComplexItem({ Key: 'aaa5', Values: [new $test.ComplexValue({ Value: 'complex8', Rank: 16 })], Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ArrayComplexItems.map(function(it){ return { k: it.Key, v: it.Values }; }).toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items in collection');
+                test.equal(data[0].k, 'aaa1', 'Key of the first entity is not "aaa1"');
+                test.equal(data[1].v.length, 2, 'Second entity has not 2 items in array type');
+                test.ok(data[0].v[0] instanceof $test.ComplexValue, 'Complex type is not typed');
+                test.equal(data[1].v[1].Rank, 2, 'Rank of item is not 2');
+                test.done();
+            });
+        });
+    });
+};
+
 exports.testFilterComplex = function(test){
     test.expect(3);
     $test.Context.init(function(db){
