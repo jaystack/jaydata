@@ -133,12 +133,10 @@
     <xsl:variable name="memberDefinition">
       <xsl:if test="parent::edm:EntityType/edm:Key/edm:PropertyRef[@Name = current()/@Name]"><attribute name="key">true</attribute></xsl:if>
       <xsl:apply-templates select="@*[local-name() != 'Name']" mode="render-field" />
-    </xsl:variable>'<xsl:value-of select="@Name"/>': { <xsl:choose><xsl:when test="function-available('msxsl:node-set')"><xsl:for-each select="msxsl:node-set($memberDefinition)/*">
-      <xsl:if test="@extended = 'true'">$</xsl:if><xsl:value-of select="@name"/>:<xsl:value-of select="."/>
+    </xsl:variable>'<xsl:value-of select="@Name"/>': { <xsl:choose><xsl:when test="function-available('msxsl:node-set')"><xsl:for-each select="msxsl:node-set($memberDefinition)/*">'<xsl:if test="@extended = 'true'">$</xsl:if><xsl:value-of select="@name"/>':<xsl:value-of select="."/>
       <xsl:if test="position() != last()">,<xsl:text> </xsl:text>
     </xsl:if> </xsl:for-each></xsl:when>
-  <xsl:otherwise><xsl:for-each select="exsl:node-set($memberDefinition)/*">
-    <xsl:if test="@extended = 'true'">$</xsl:if><xsl:value-of select="@name"/>:<xsl:value-of select="."/>
+  <xsl:otherwise><xsl:for-each select="exsl:node-set($memberDefinition)/*">'<xsl:if test="@extended = 'true'">$</xsl:if><xsl:value-of select="@name"/>':<xsl:value-of select="."/>
       <xsl:if test="position() != last()">,<xsl:text> </xsl:text>
     </xsl:if> </xsl:for-each></xsl:otherwise>
     </xsl:choose> }</property>
@@ -148,7 +146,16 @@
   </xsl:template>
 
   <xsl:template match="@Type" mode="render-field">
-    <attribute name="type">'<xsl:value-of select="."/>'</attribute>
+    <xsl:choose>
+      <xsl:when test="starts-with(., 'Collection')">
+        <attribute name="type">'Array'</attribute>
+        <xsl:variable name="len" select="string-length(.)-12"/>
+        <attribute name="elementType">'<xsl:value-of select="substring(.,12,$len)" />'</attribute>
+      </xsl:when>
+      <xsl:otherwise>
+        <attribute name="type">'<xsl:value-of select="."/>'</attribute>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="@ConcurrencyMode" mode="render-field">

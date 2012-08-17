@@ -387,6 +387,10 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 this._buildProperty(xml, memDef);
 
                 var memDef_type = Container.resolveType(memDef.type);
+                if (memDef_type === $data.Array && memDef.elementType) {
+                    memDef_type = Container.resolveType(memDef.elementType);
+                }
+
                 if (memDef_type.isAssignableTo && memDef_type.isAssignableTo($data.Entity)) {
                     this.complexTypes.push(memDef_type)
                 }
@@ -558,8 +562,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             type: {
                 name: 'Type',
                 converter: function (name, value, memDef) {
-                    return this._resolveTypeName(value);
-                    /*Container.getName(Container.getType(value));*/
+                    var type = Container.resolveType(value);
+                    if (type === $data.Array && memDef.elementType) {
+                        type = Container.resolveType(memDef.elementType);
+                        return 'Collection(' + this._resolveTypeName(type) + ')';
+                    }
+                        
+                    return this._resolveTypeName(type);
                 },
                 cancelRender: function (name, memdef) {
                     return memdef.type === undefined
