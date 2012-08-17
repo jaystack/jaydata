@@ -60,12 +60,17 @@ $data.Event = Event = $data.Class.define("$data.Event", null, null, {
         };
         this.fire = function (eventData, snder) {
             var snd = snder || sender || this;
-            eventData.eventName = name;
+            //eventData.eventName = name;
             ///<value name="subscriberList type="Array" />
             if (subscriberList) {
                 subscriberList.forEach(function (subscriber) {
                     ///<param name="subscriber" type="EventSubscriber" />
-                    subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state);
+                    try {
+                        subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state);
+                    } catch(ex) {
+                        console.log("unhandled exception in event handler. exception suppressed");
+                        console.dir(ex);
+                    }
                 });
             }
         };
@@ -140,16 +145,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         if (arguments.length == 1 && typeof initData === "object") {
             var typeMemDefs = this.getType().memberDefinitions;
             var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
-//            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
-//                this.initData = initData;
-//            }
+            //            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
+            //                this.initData = initData;
+            //            }
             this.initData = {};
-            for (var i in initData){
-                if (memDefNames.indexOf(i) > -1){
+            for (var i in initData) {
+                if (memDefNames.indexOf(i) > -1) {
                     this.initData[i] = Container.resolveType(typeMemDefs.getMember(i).type) === $data.Date && typeof initData[i] === 'string' ? new Date(initData[i]) : initData[i];
                 }
             }
-            
+
             this.changedProperties = undefined;
             this.entityState = undefined;
         }
@@ -192,53 +197,32 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     propertyChanging: {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
-            var member = 'propertyChanging';
-            var memDef = this.getType().memberDefinitions.getMember(member);
+            if (!this._propertyChanging)
+                this._propertyChanging = new Event('propertyChanging', this);
 
-            if (memDef) {
-                delete this[member];
-                delete memDef.get;
-                delete memDef.set;
-                Object.defineProperty(this, member, memDef.createPropertyDescriptor());
-                this[member] = new Event(member, this);
-                return this[member];
-            }
+            return this._propertyChanging;
         },
-        set: function () { }
+        set: function (value) { this._propertyChanging = value; }
     },
     propertyChanged: {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
-            var member = 'propertyChanged';
-            var memDef = this.getType().memberDefinitions.getMember(member);
+            if (!this._propertyChanged)
+                this._propertyChanged = new Event('propertyChanged', this);
 
-            if (memDef) {
-                delete this[member];
-                delete memDef.get;
-                delete memDef.set;
-                Object.defineProperty(this, member, memDef.createPropertyDescriptor());
-                this[member] = new Event(member, this);
-                return this[member];
-            }
+            return this._propertyChanged;
         },
-        set: function () { }
+        set: function (value) { this._propertyChanged = value; }
     },
     propertyValidationError: {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
-            var member = 'propertyValidationError';
-            var memDef = this.getType().memberDefinitions.getMember(member);
+            if (!this._propertyValidationError)
+                this._propertyValidationError = new Event('propertyValidationError', this);
 
-            if (memDef) {
-                delete this[member];
-                delete memDef.get;
-                delete memDef.set;
-                Object.defineProperty(this, member, memDef.createPropertyDescriptor());
-                this[member] = new Event(member, this);
-                return this[member];
-            }
+            return this._propertyValidationError;
         },
-        set: function () { }
+        set: function (value) { this._propertyValidationError = value; }
     },
 
     // protected
