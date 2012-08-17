@@ -239,22 +239,53 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
                             elementType: r.ElementType
                         };
                         if (r.TableName) ret[r.Name].tableName = r.TableName;
-                        entities.push(r.ElementType);
+                        //entities.push(r.ElementType);
                     }
                     context[name] = ret;
+                    //console.log(entities);
                 },
                 error: self.error
             }).then(function(){
-                self.context.Entities.filter(function(it){ return it.FullName in this.entities; }, { entities: entities }).toArray({
+                self.context.Entities/*.filter(function(it){ return it.FullName in this.entities; }, { entities: entities })*/.toArray({
                     success: function(result){
-                        entities = result;
+                        //entities = result;
                         for (var i = 0; i < result.length; i++){
                             var r = result[i];
-                            entityIds.push(r.EntityID);
+                            //entityIds.push(r.EntityID);
                             context[r.FullName] = {};
+                            
+                            for (var j = 0; j < r.Fields.length; j++){
+                                var rf = r.Fields[j];
+                                var f = {};
+                                        
+                                f.type = rf.Type;
+                                if (rf.ElementType) f.elementType = rf.ElementType;
+                                if (rf.InverseProperty) f.inverseProperty = rf.InverseProperty;
+                                if (rf.Key) f.key = true;
+                                if (rf.Computed) f.computed = true;
+                                if (rf.Nullable !== undefined && r.Nullable !== null) f.nullable = !!rf.Nullable;
+                                if (rf.Required) f.required = true;
+                                if (rf.CustomValidator) f.customValidator = rf.CustomValidator;
+                                if (rf.MinValue !== undefined && rf.MinValue !== null) f.minValue = rf.MinValue;
+                                if (rf.MaxValue !== undefined && rf.MaxValue !== null) f.maxValue = rf.MaxValue;
+                                if (rf.MinLength !== undefined && rf.MinLength !== null) f.minLength = rf.MinLength;
+                                if (rf.MaxLength !== undefined && rf.MaxLength !== null) f.maxLength = rf.MaxLength;
+                                if (rf.Length !== undefined && rf.Length !== null) f.length = rf.Length;
+                                if (rf.RegExp) f.regex = rf.RegExp;
+                                if (rf.ExtensionAttributes && rf.ExtensionAttributes.length){
+                                    for (var k = 0; k < rf.ExtensionAttributes.length; k++){
+                                        var kv = rf.ExtensionAttributes[k];
+                                        f[kv.Key] = kv.Value;
+                                    }
+                                }
+                                
+                                context[r.FullName][rf.Name] = f;
+                            }
                         }
                         
-                        self.context.EntityFields.filter(function(it){ return it.EntityID in this.entityid; }, { entityid: entityIds }).toArray({
+                        self.success(context);
+                        
+                        /*self.context.EntityFields.filter(function(it){ return it.EntityID in this.entityid; }, { entityid: entityIds }).toArray({
                             success: function(result){
                                 for (var i = 0; i < result.length; i++){
                                     var r = result[i];
@@ -283,14 +314,14 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
                                 self.success(context);
                             },
                             error: self.error
-                        });
+                        });*/
                     },
                     error: self.error
                 });
             })
         };
     }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns($data.Object),
-    getContextJS: function(name){
+    getContextJS: (function(name){
         return function(success, error){
             var self = this;
             var builder = this.context.getContext.asFunction(name);
@@ -330,10 +361,11 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
                     var lio = js.lastIndexOf(',');
                     js = js.substring(0, lio);
                     js += '\n});';
+                    console.log(js);
                     self.success(js);
                 },
                 error: this.error
             }, success, error);
-        };
-    }
+        }
+    }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns('string')
 });

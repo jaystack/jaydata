@@ -2,14 +2,15 @@ $data.Entity.extend('$data.ContextAPI.Entity', {
     EntityID: { type: 'id', key: true, computed: true },
     Name: { type: 'string', required: true },
     FullName: { type: 'string', required: true },
-    Namespace: { type: 'string' }/*,
+    Namespace: { type: 'string' },
+    Fields: { type: 'Array', elementType: '$data.ContextAPI.EntityField' }/*,
     Fields: { type: 'Array', elementType: '$data.ContextAPI.EntityField' },
     EntitySets: { type: 'Array', elementType: '$data.ContextAPI.EntitySet', inverseProperty: 'ElementType' }*/
 });
 
 $data.Entity.extend('$data.ContextAPI.EntityField', {
-    EntityFieldID: { type: 'id', key: true, computed: true },
-    EntityID: { type: 'id', required: true },
+    //EntityFieldID: { type: 'id', key: true, computed: true },
+    //EntityID: { type: 'id', required: true },
     Name: { type: 'string', required: true },
     Type: { type: 'string', required: true },
     ElementType: { type: 'string' },
@@ -24,8 +25,14 @@ $data.Entity.extend('$data.ContextAPI.EntityField', {
     MinLength: { type: 'int' },
     MaxLength: { type: 'int' },
     Length: { type: 'int' },
-    RegExp: { type: 'string' }/*,
+    RegExp: { type: 'string' },
+    ExtensionAttributes: { type: 'Array', elementType: '$data.ContextAPI.KeyValuePair' }/*,
     Entity: { type: '$data.ContextAPI.Entity', required: true, inverseProperty: 'Fields' }*/
+});
+
+$data.Entity.extend('$data.ContextAPI.KeyValuePair', {
+    Key: { type: 'string' },
+    Value: { type: 'string' }
 });
 
 $data.Entity.extend('$data.ContextAPI.ServiceOperationReturnType', {
@@ -62,7 +69,7 @@ $data.Entity.extend('$data.ContextAPI.EntitySet', {
     EntitySetID: { type: 'id', key: true, computed: true },
     Name: { type: 'string', required: true },
     ElementType: { type: 'string', required: true },
-    ElementTypeID: { type: 'id', required: true },
+    //ElementTypeID: { type: 'id', required: true },
     TableName: { type: 'string' },
     //EventHandlers: { type: 'Array', elementType: '$data.ContextAPI.EventHandler' },
     //ElementType: { type: '$data.ContextAPI.Entity', required: true },
@@ -78,7 +85,7 @@ $data.Entity.extend('$data.ContextAPI.EntitySet', {
 
 $data.EntityContext.extend('$data.ContextAPI.Context', {
     Entities: { type: $data.EntitySet, elementType: $data.ContextAPI.Entity },
-    EntityFields: { type: $data.EntitySet, elementType: $data.ContextAPI.EntityField },
+    //EntityFields: { type: $data.EntitySet, elementType: $data.ContextAPI.EntityField },
     EventHandlers: { type: $data.EntitySet, elementType: $data.ContextAPI.EventHandler },
     EntitySets: { type: $data.EntitySet, elementType: $data.ContextAPI.EntitySet },
     ServiceParameters: { type: $data.EntitySet, elementType: $data.ContextAPI.ServiceOperationParameter },
