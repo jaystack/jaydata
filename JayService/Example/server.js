@@ -17,7 +17,15 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Value: { type: 'int', $custom:'almafa' },
     Date: { type: 'date' },
     Completed: { type: 'bool' },
+    //Details: { type: 'Array', elementType: '$example.Complex' }
     //Person: { type: '$example.Person', inverseProperty: 'Orders' }
+});
+
+$data.Class.define('$example.Complex', $data.Entity, null, {
+    Location: { type: 'string' },
+    Count: { type: 'int' },
+    Date: { type: 'date' },
+    //Orders: { type: 'Array', elementType: '$example.Order', inverseProperty: 'Person' }
 });
 
 $data.Class.defineEx('$example.Context', [$data.EntityContext, $data.ServiceBase], null, {
