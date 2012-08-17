@@ -95,3 +95,14 @@ $C('$data.Expressions.EveryExpression', $data.Expressions.FrameOperator, null, {
     },
     nodeType: { value: $data.Expressions.ExpressionType.Every, enumerable: true }
 });
+
+$C('$data.Expressions.BatchDeleteExpression', $data.Expressions.FrameOperator, null, {
+    constructor: function (source) {
+        ///<signature>
+        ///<param name="source" type="$data.Expressions.EntitySetExpression" />
+        ///</signature>
+        this.source = source;
+        this.resultType = $data.Integer;
+    },
+    nodeType: { value: $data.Expressions.ExpressionType.BatchDelete, enumerable: true }
+});

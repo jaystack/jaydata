@@ -623,6 +623,61 @@ $data.Class.define('$data.Queryable', null, null,
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
     },
+    batchDelete: function (filterPredicate, thisArg, onResult) {
+        ///	<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///	<param name="onResult_items" type="Function">A callback function</param>
+        ///	<returns type="$data.Promise" />
+        ///	<signature>
+        ///		<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///		<param name="filterPredicate" type="string">
+        ///			Same as in filter.
+        ///		</param>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result, same as in toArray.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///	</signature>
+        ///	<signature>
+        ///		<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
+        ///		<param name="filterPredicate" type="Function">
+        ///			Same as in filter.
+        ///		</param>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result, same as in toArray.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///		<example>
+        ///			Get "George" from the Person entity set. &#10;
+        ///			Persons.single( function( person ) { return person.FirstName == this.name; }, { name: "George" }, {&#10;
+        ///				success: function ( result ){ ... },&#10;
+        ///				error: function () { ... }
+        ///			});
+        ///		</example>
+        ///	</signature>
+
+        this._checkOperation('batchDelete');
+        var q = this;
+        if (filterPredicate) {
+            q = this.filter(filterPredicate, thisArg);
+        }
+
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult);
+
+        var batchDeleteExpression = Container.createBatchDeleteExpression(q.expression);
+        var preparator = Container.createQueryExpressionCreator(q.entityContext);
+        try {
+            var expression = preparator.Visit(batchDeleteExpression);
+            this.entityContext.log({ event: "EntityExpression", data: expression });
+
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
+
 
     _runQuery: function (onResult_items) {
         var pHandler = new $data.PromiseHandler();

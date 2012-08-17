@@ -14,6 +14,9 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
+    VisitBatchDeleteExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
     VisitSomeExpression: function (expression) {
         this._defaultModelBinder(expression);
     },

@@ -122,6 +122,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var requestData = [
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
+                method: sql.method,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 }
@@ -444,7 +445,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             orderBy: {},
             orderByDescending: {},
             first: {},
-            include: {}
+            include: {},
+            batchDelete: {}
         },
         enumerable: true,
         writable: true
