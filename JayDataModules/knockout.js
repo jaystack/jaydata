@@ -370,6 +370,11 @@
             }
             var observableType = Container.resolveType(observableTypeName);
 
+            if(observableType.isAssignableTo && !observableType.isAssignableTo(type)){
+                ObservableFactory(type, observableTypeName);
+                observableType = Container.resolveType(observableTypeName);
+            }
+
             return new observableType(this);
         };
 
