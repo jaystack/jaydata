@@ -623,7 +623,7 @@ $data.Class.define('$data.Queryable', null, null,
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
     },
-    batchDelete: function (filterPredicate, thisArg, onResult) {
+    removeAll: function (filterPredicate, thisArg, onResult) {
         ///	<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
         ///	<param name="onResult_items" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
