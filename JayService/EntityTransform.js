@@ -244,7 +244,7 @@
             },
             toDb: {
                 '$data.ObjectID': function (id) {
-                    return id;
+                    return "'" + id.toString() + "'";
                 },
                 '$data.Integer': function (number) {
                     return number;
