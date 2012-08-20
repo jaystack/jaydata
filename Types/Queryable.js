@@ -477,6 +477,19 @@ $data.Class.define('$data.Queryable', null, null,
         return Container.createQueryable(this, takeExp);
     },
 
+    order: function(selector) {
+       if (selector === '' || selector === undefined || selector === null) {
+           return this;
+       }
+       if(selector[0] === "-") {
+           var orderString = "it." + selector.replace("-","");
+           return this.orderByDescending(orderString);
+       } else {
+           return this.orderBy("it." + selector);
+       }
+
+    },
+
     orderBy: function (selector, thisArg) {
 		///<summary>Order a set of entities using an expression.</summary>
         ///<param name="selector" type="Function">An order expression</param>

@@ -343,7 +343,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         dataType: Array,
         elementType: $data.Validation.ValidationError,
         storeOnObject: true,
-        monitorChanges: false,
+        monitorChanges: true,
         notMapped: true,
         enumerable: false
     },

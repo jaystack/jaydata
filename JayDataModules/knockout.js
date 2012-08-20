@@ -40,6 +40,9 @@
             instanceDefinition[propName] = {
                 type: ko.observable
             };
+            instanceDefinition["ValidationErrors"] = {
+                type: ko.observable
+            };
         }
 
         $data.Class.defineEx(
