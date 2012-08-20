@@ -454,7 +454,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     fieldConverter: {
         value: {
             fromDb: {
-                '$data.Integer': function (number) { return number; },
+                '$data.Integer': function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : undefined; },
                 '$data.String': function (text) { return text; },
