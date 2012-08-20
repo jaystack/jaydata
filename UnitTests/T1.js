@@ -1,6 +1,50 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('EntityField == null or null == EntityField filter', 6, function () {
+        stop(6);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            try {
+                start(1);
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start(1);
+                    db.Articles.toArray(function (a) {
+                        start(1);
+                        var article = a[0];
+                        db.Articles.attach(article);
+                        article.Body = null;
+                        db.saveChanges(function () {
+                            start(1);
+                            db.Articles.filter(function (a) { return a.Body == null; }).toArray(function (a1) {
+                                start(1);
+                                equal(a1.length, 1, 'result count failed');
+                                equal(a1[0] instanceof $news.Types.Article, true, 'result type failed');
+                                equal(a1[0].Body, null, 'result type failed');
+
+
+                            });
+                            db.Articles.filter(function (a) { return null == a.Body; }).toArray(function (a1) {
+                                start(1);
+                                equal(a1.length, 1, 'result count failed');
+                                equal(a1[0] instanceof $news.Types.Article, true, 'result type failed');
+                                equal(a1[0].Body, null, 'result type failed');
+
+
+                            });
+                        });
+
+                    });
+                });
+
+            } catch (ex) {
+                start(4);
+                ok(false, "Unhandled exception occured");
+                console.log("--=== EntityField == null or null == EntityField filter filter: ");
+                console.dir(ex);
+                console.log(" ===--");
+            }
+        });
+    });
     test('1003_even if a simple field is projected an Article is returned', 2, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
