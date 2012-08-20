@@ -45,9 +45,10 @@ $example.Context.generateTestData = function (ctx, callback) {
         ctx.saveChanges(callback);
     });
 };
+
 $example.Context.generateTestData.itemsInTables = 10;
 $example.Context.getContext = function () {
-    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: "http://127.0.0.1:3000/testservice" });
+    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: "http://127.0.0.1:3001/testservice" });
     return ctx;
 };
 

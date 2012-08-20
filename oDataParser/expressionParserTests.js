@@ -27,7 +27,7 @@ $(document).ready(function () {
             if (!hasInclude)
                 obj.expand = '';
 
-            obj.count = queryParts[0].indexOf('$count') > 0;
+            obj.frame = queryParts[0].indexOf('$count') > 0 ? 'Count' : undefined;
             var builder = new $data.oDataParser.EntityExpressionBuilder(context, queryParts[0].split('/')[1]);
             var expression = builder.parse(obj).expression;
 
@@ -75,7 +75,7 @@ $(document).ready(function () {
             var queryParts = q.queryText.split('?');
             var obj = parseQuery(queryParts[1]);
 
-            obj.count = queryParts[0].indexOf('$count') > 0;
+            obj.frame = queryParts[0].indexOf('$count') > 0 ? 'Count' : undefined;
             var builder = new $data.oDataParser.ODataEntityExpressionBuilder(context, queryParts[0].split('/')[1]);
             var parsed = builder.parse(obj);
 
