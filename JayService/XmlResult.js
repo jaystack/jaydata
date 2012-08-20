@@ -39,3 +39,11 @@ $data.JSONResult.extend('$data.oDataJSONResult', {
         this.data = builder.convertToResponse(data);
     }
 });
+
+$data.ServiceResult.extend('$data.EmptyServiceResult', {
+    constructor: function () {
+    },
+    contentType: { value: '' },
+    toString: function () {
+    }
+});
