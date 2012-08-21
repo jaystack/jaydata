@@ -1,7 +1,8 @@
 ﻿$data.Class.define('$data.JayService.OData.EntitySetProcessor', null, null, {
-    constructor: function (memberName, context) {
+    constructor: function (memberName, context, restrictions) {
         this.memberName = memberName;
         this.context = context;
+        this.restrictions = restrictions;
 
         this.member = {
             validated: false
@@ -78,7 +79,7 @@
 
     ReadFromEntitySet: function (req, config, callback) {
         var builder = new $data.oDataParser.ODataEntityExpressionBuilder(this.context, this.entitySet.name);
-        var frameType = 'ToArray';
+        var frameType = $data.Expressions.ExpressionType.ToArray;
 
         var idFilter = [];
         if (this.member.idObject) {
@@ -86,14 +87,14 @@
             for (var name in this.member.idObject) {
                 idFilter.push(name + ' eq ' + this.member.idObject[name]);
             }
-            frameType = "Single";
+            frameType = $data.Expressions.ExpressionType.Single;
             config.singleResult = true;
         }
 
         if (config.simpleResult === true)
-            frameType = 'Count';
+            frameType = $data.Expressions.ExpressionType.Count;
 
-        var result = builder.parse({
+        var result = builder.parse(this._applyRestrictions({
             frame: frameType,
             filter: idFilter.length > 0 ? idFilter.join(' and ') : (req.query.$filter || ''),
             orderby: req.query.$orderby || '',
@@ -101,7 +102,7 @@
             skip: req.query.$skip || '',
             top: req.query.$top || '',
             expand: this.member.selectedField || req.query.$expand || ''
-        });
+        }));
 
         config.collectionName = this.entitySet.name;
         config.selectedFields = result.selectedFields;
@@ -119,10 +120,19 @@
             }
         });
     },
+    _applyRestrictions: function (data) {
+        if (this.restrictions) {
+            if (data.frame === $data.Expressions.ExpressionType.ToArray && this.restrictions.top && this.restrictions.top > 0 && (!data.top || data.top > this.restrictions.top)) {
+                data.top = this.restrictions.top.toString();
+            }
+        }
+        return data;
+    },
+
     BatchDeleteFromEntitySet: function (req, config, callback) {
         var builder = new $data.oDataParser.ODataEntityExpressionBuilder(this.context, this.entitySet.name);
         var result = builder.parse({
-            frame: 'BatchDelete',
+            frame: $data.Expressions.ExpressionType.BatchDelete,
             filter: req.query.$filter || '',
             orderby: req.query.$orderby || '',
             //select: req.query.$select || '',

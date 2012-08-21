@@ -17,10 +17,13 @@ $data.Class.define('$example.Order', $data.Entity, null, {
 
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
-    Orders: { type: $data.EntitySet, elementType: $example.Order }
+    Orders: { type: $data.EntitySet, elementType: $example.Order },
+    Delete: $data.EntityContext.generateServiceOperation({ serviceName: 'Delete', returnType: 'string', params: [] })
 });
 
 $example.Context.deleteData = function (ctx, callback) {
+    callback = $data.typeSystem.createCallbackSetting(callback);
+
     ctx.onReady(function () {
         ctx.People.toArray(function (p) {
             ctx.Orders.toArray(function (o) {
@@ -30,7 +33,13 @@ $example.Context.deleteData = function (ctx, callback) {
                 for (var i = 0; i < o.length; i++) {
                     ctx.Orders.remove(o[i]);
                 }
-                ctx.saveChanges(callback);
+                ctx.saveChanges(function () {
+                    if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables) {
+                        $example.Context.deleteData(ctx, callback);
+                    } else {
+                        callback.success();
+                    }
+                });
             });
         });
     });
@@ -49,7 +58,7 @@ $example.Context.generateTestData = function (ctx, callback) {
 $example.Context.generateTestData.serviceurl = 'http://192.168.1.119:3001/testservice';
 $example.Context.generateTestData.itemsInTables = 10;
 $example.Context.getContext = function () {
-    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl });
+    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl, serviceUrl: $example.Context.generateTestData.serviceurl });
     return ctx;
 };
 
@@ -71,6 +80,32 @@ test("REST - GET types", 6, function () {
             start();
         });
     });
+});
+
+test("REST - GET responseLimit", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    var testNum = $example.Context.generateTestData.itemsInTables;
+    $example.Context.generateTestData.itemsInTables = 50;
+
+    //$example.Context.deleteData(context, function () {
+        $example.Context.generateTestData(context, function () {
+            context.People.toArray(function (items) {
+                context.People.length(function (count) {
+                    equal(items.length, 30, 'items result count failed');
+
+                    equal(count, 50, 'count result failed');
+                    equal(typeof count, 'number', 'count result type failed');
+
+
+                    $example.Context.generateTestData.itemsInTables = testNum;
+                    start();
+                });
+            });
+        });
+    //});
+
 });
 
 test("REST - GET $Count", 2, function () {

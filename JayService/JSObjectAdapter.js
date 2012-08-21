@@ -1,4 +1,4 @@
-function DefaultArgumentBinder(name, options, request){
+function DefaultArgumentBinder(name, options, request) {
     var result = request.query[name];
     //console.log(name, options, request.query[name], new (options.type)(request.query[name]));
     return result;
@@ -16,28 +16,30 @@ Function.prototype.curry = function () {
 };
 
 $data.Class.define("$data.JSObjectAdapter", null, null, {
-    constructor:function (type, instanceFactory) {
+    constructor: function (type, instanceFactory) {
         var url = require('url');
         var q = require('q');
         var route = {};
-        if (type.memberDefinitions){
+        if (type.memberDefinitions) {
             var memDefs = type.memberDefinitions.getPublicMappedProperties().concat(type.memberDefinitions.getPublicMappedMethods());
-            for (var i = 0; i < memDefs.length; i++){
+            for (var i = 0; i < memDefs.length; i++) {
                 var m = memDefs[i];
                 route[m.method && m.method.hasOwnProperty('serviceName') ? m.method.serviceName || m.name : m.name] = m.name;
             }
-        }else{
+        } else {
             route = type;
         }
-        
+
         this.type = type;
         this.route = route;
         this.instanceFactory = instanceFactory;
         this.urlHelper = url;
         this.promiseHelper = q;
+
+        this.defaultResponseLimit = 100;
     },
 
-    handleRequest:function (req, res, next) {
+    handleRequest: function (req, res, next) {
         var self = this;
 
         var serviceInstance = this.instanceFactory();
@@ -46,13 +48,13 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         var member = this.resolveMember(req, memberName);
         var _v;
         var oDataBuidlerCfg;
-        if (member){
+        if (member) {
             var memberInfo = this.createMemberContext(member, serviceInstance);
             var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
 
             //this will be something much more dynamic
             _v = memberInfo.invoke(methodArgs, req, res);
-            
+
             oDataBuidlerCfg = {
                 version: 'V2',
                 baseUrl: req.fullRoute,
@@ -64,7 +66,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
             member = this.resolveEntitySet(req, memberName, serviceInstance);
             if (member) {
-                var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance);
+                var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || self.defaultResponseLimit });
 
                 oDataBuidlerCfg = {
                     version: 'V2',
@@ -80,9 +82,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         }
 
         this.promiseHelper.when(_v).then(function (value) {
-            if (!(value instanceof $data.ServiceResult)){
-                if (typeof member === 'object'){
-                    if (member.hasOwnProperty('resultType') && member.resultType instanceof $data.ServiceResult){
+            if (!(value instanceof $data.ServiceResult)) {
+                if (typeof member === 'object') {
+                    if (member.hasOwnProperty('resultType') && member.resultType instanceof $data.ServiceResult) {
                         value = new member.resultType(value, member.resultCfg);
                     } else {
                         value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
@@ -107,19 +109,19 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             } else {
                 res.end();
             }
-        }).fail(function(err){
+        }).fail(function (err) {
             res.end(err.toString());
         });
     },
 
-    resolveMemberName:function (request, serviceInstance) {
+    resolveMemberName: function (request, serviceInstance) {
         var parsedUrl = this.urlHelper.parse(request.url);
         //there will always be a leading '/'
         var pathElements = parsedUrl.pathname.split('/').slice(1);
         return pathElements[0];
     },
 
-    resolveMember:function (request, memberName) {
+    resolveMember: function (request, memberName) {
         var prefixedMemberName = request.method + "_" + memberName;
         if (prefixedMemberName in this.route) {
             return this.type.prototype[this.route[prefixedMemberName]];
@@ -128,23 +130,23 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         }
     },
 
-    resolveEntitySet: function(request, memberName, serviceInstance){
+    resolveEntitySet: function (request, memberName, serviceInstance) {
         return serviceInstance[this.route[memberName]];
     },
-    createMemberContext:function (member, serviceInstance) {
+    createMemberContext: function (member, serviceInstance) {
         var self = this;
 
         var memberContext = {
             method: 'GET'
         };
-        for (var i in member){
-            if (member.hasOwnProperty(i)){
+        for (var i in member) {
+            if (member.hasOwnProperty(i)) {
                 memberContext[i] = member[i];
             }
         }
 
         var params = memberContext.params;
-        if (!params && typeof member === 'function' && member.length){
+        if (!params && typeof member === 'function' && member.length) {
             var paramsMatch = member.toString().match(/^function.*\(\s*(.*)\s*\)/);
             var paramsString;
             if (paramsMatch && typeof paramsMatch[1] === 'string') paramsString = paramsMatch[1].replace(/ /gi, '');
@@ -152,10 +154,10 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             if (member.prototype.params) member.params(params);
             else member.params = params;
         }
-        
-        if (params){
+
+        if (params) {
             memberContext.paramBinders = [];
-            for (var i = 0; i < params.length; i++){
+            for (var i = 0; i < params.length; i++) {
                 var param = params[i];
                 memberContext.paramBinders.push(DefaultArgumentBinder.curry(null, param.name || param, { type: param.type ? Container.resolveType(param.type) : undefined }));
             }
@@ -171,7 +173,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             function error(r) {
                 defer.reject(r);
             }
-            
+
             var executionContext = {
                 request: request,
                 response: response,
@@ -187,24 +189,24 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 configurable:false
             });*/
             this.executionContext = executionContext;
-            
-            if (typeof serviceInstance.onReady === 'function'){
-                serviceInstance.onReady(function(){
+
+            if (typeof serviceInstance.onReady === 'function') {
+                serviceInstance.onReady(function () {
                     var result = member.apply(executionContext, args);
-                    
+
                     if (typeof result === 'function') {
                         result.call(executionContext);
                     } else if (self.promiseHelper.isPromise(result)) {
-                        self.promiseHelper.when(result).then(function(){
+                        self.promiseHelper.when(result).then(function () {
                             defer.resolve(result.valueOf());
                         });
                     } else {
                         defer.resolve(result);
                     }
                 });
-            }else{
+            } else {
                 var result = member.apply(executionContext, args);
-                    
+
                 if (typeof result === 'function') {
                     result.call(executionContext);
                 } else if (self.promiseHelper.isPromise(result)) {
@@ -215,23 +217,23 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     });
                 }
             }
-            
+
             return defer.promise;
         }
 
         return memberContext;
     },
-    resolveArguments:function (request, serviceInstance, memberContext){
+    resolveArguments: function (request, serviceInstance, memberContext) {
         if (!memberContext.paramBinders) return;
-        
+
         var paramBinders = memberContext.paramBinders;
         var paramValues = [];
-        for (var i = 0; i < paramBinders.length; i++){
+        for (var i = 0; i < paramBinders.length; i++) {
             var binder = paramBinders[i];
             var result = binder(request);
             paramValues.push(result);
         }
-        
+
         return paramValues;
     }
 }, null);

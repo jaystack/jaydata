@@ -40,7 +40,7 @@ app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 
 app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
-    return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb' });
+    return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
 
 app.listen(3001);
