@@ -104,24 +104,26 @@ function initializeService(callback){
     $data.MetadataLoader.debugMode = true;
     $data.MetadataLoader.load(apiUrl, function (factory, ctxType, text) {
         var context = factory();
+        //console.log(text);
         //var context = new $data.JayStormAPI.API({ name: 'oData', oDataServiceHost: apiUrl });
         //console.log(text);
         
-        Q.all([context.Entities.toArray(), context.EntitySets.toArray(), context.getContext(), context.getContextJS()])
+        /*Q.all([context.Entities.toArray(), context.EntitySets.toArray(), context.getContext('NewsReader'), context.getContextJS('NewsReader')])
         .then(function(value){
             var result = {
                 entities: value[0],
                 entitySets: value[1],
                 ctx: value[2],
                 js: value[3]
-            };
+            };*/
+        context.getContextJS('NewsReader', function(js){
             //console.log('data =>', JSON.prittify(result));
             console.log('\nStarting new context server:\n----------------------------\n');
-            result.js = result.js.replace("'$news.Types.Context'", '$news.Types.Context');
-            console.log(result.js);
+            js = js.replace("'$news.Types.Context'", '$news.Types.Context');
+            console.log(js);
             
             console.log('\nBuilding context');
-            eval(result.js);
+            eval(js);
             
             $data.Class.defineEx('$news.Types.Service', [$news.Types.Context, $data.ServiceBase]);
             

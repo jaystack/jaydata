@@ -239,7 +239,7 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                             var r = result[i];
                             ret[r.Name] = {
                                 type: '$data.EntitySet',
-                                elementType: r.ElementType
+                                elementType: db.Namespace + '.' + r.ElementType
                             };
                             if (r.TableName) ret[r.Name].tableName = r.TableName;
                             //entities.push(r.ElementType);
@@ -333,7 +333,6 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
     getContextJS: (function(db){
         return function(success, error){
             var self = this;
-            console.log(db);
             this.context.getContext.asFunction(db).apply({
                 context: this.context,
                 success: function(context){

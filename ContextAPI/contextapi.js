@@ -3,7 +3,7 @@ require('jaydata');
 require('./contextapi-context.js');
 require('./contextapi-api.js');
 
-$data.Class.defineEx('$data.ContextAPI.API', [$data.ContextAPI.Context, $data.ContextAPI.FunctionImport]);
+$data.Class.defineEx('$data.JayStormAPI.API', [$data.JayStormAPI.Context, $data.JayStormAPI.FunctionImport]);
 
 $data.Entity.extend('$test.Item', {
     Id: { type: 'id', computed: true, key: true },
@@ -72,19 +72,30 @@ $data.Class.defineEx('$test.Context', [$test.EntityContext, $data.ServiceBase]);
 var connect = require('connect');
 var app = connect();
 
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, MERGE');
+    if (req.method === 'OPTIONS') {
+        res.end();
+    } else {
+        next();
+    }
+});
+
 app.use(connect.query());
 //app.use(connect.bodyParser());
 app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 app.use("/client", connect.static('/home/lazarv/project/jaydata'));
-//var context = new $data.ContextAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
+//var context = new $data.JayStormAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
 app.use("/test.svc", $data.JayService.createAdapter($test.Context, function(){
     //return context;
     return new $test.Context({ name: 'mongoDB', databaseName: 'test', username: 'admin', password: '***' });
 }));
 
-app.use("/contextapi.svc", $data.JayService.createAdapter($data.ContextAPI.API, function(){
+app.use("/contextapi.svc", $data.JayService.createAdapter($data.JayStormAPI.API, function(){
     //return context;
-    return new $data.ContextAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
+    return new $data.JayStormAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
 }));
 
 app.listen(3000);
