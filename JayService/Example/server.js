@@ -14,7 +14,7 @@ $data.Class.define('$example.Person', $data.Entity, null, {
 
 $data.Class.define('$example.Order', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
-    Value: { type: 'int', $custom:'almafa' },
+    Value: { type: 'int', $custom: 'almafa' },
     Date: { type: 'date' },
     Completed: { type: 'bool' },
     //Details: { type: 'Array', elementType: '$example.Complex' }
@@ -36,7 +36,7 @@ $data.Class.defineEx('$example.Context', [$data.EntityContext, $data.ServiceBase
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, MERGE');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, MERGE, DELETE');
     if (req.method === 'OPTIONS') {
         res.end();
     } else {
@@ -45,6 +45,7 @@ app.use(function (req, res, next) {
 });
 
 app.use(connect.query());
+app.use(connect.bodyParser());
 app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 
 app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));

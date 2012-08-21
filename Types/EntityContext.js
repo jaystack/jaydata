@@ -197,31 +197,31 @@ $data.Class.define('$data.EntityContext', null, null,
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeCreate = item.beforeCreate;
                     }
-                    if (item.beforeCreate) {
+                    if (item.beforeRead) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeRead = item.beforeRead;
                     }
-                    if (item.beforeCreate) {
+                    if (item.beforeUpdate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeUpdate = item.beforeUpdate;
                     }
-                    if (item.beforeCreate) {
+                    if (item.beforeDelete) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeDelete = item.beforeDelete;
                     }
-                    if (item.beforeCreate) {
+                    if (item.afterCreate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.afterCreate = item.afterCreate;
                     }
-                    if (item.beforeCreate) {
+                    if (item.afterRead) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.afterRead = item.afterRead;
                     }
-                    if (item.beforeCreate) {
+                    if (item.afterUpdate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.afterUpdate = item.afterUpdate;
                     }
-                    if (item.beforeCreate) {
+                    if (item.afterDelete) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.afterDelete = item.afterDelete;
                     }

@@ -23,16 +23,24 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv }
 });
 
-
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, MERGE, DELETE');
+    if (req.method === 'OPTIONS') {
+        res.end();
+    } else {
+        next();
+    }
+});
 
 app.use(connect.query());
+app.use(connect.bodyParser());
 app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 
 app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
-    return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb' });
+    return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
 
-app.listen(3000);
-
-
+app.listen(3001);

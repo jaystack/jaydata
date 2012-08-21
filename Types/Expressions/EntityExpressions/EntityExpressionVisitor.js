@@ -77,6 +77,14 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         return expression;
     },
 
+    VisitBatchDeleteExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        if (source !== expression.source) {
+            return Container.createBatchDeleteExpression(source);
+        }
+        return expression;
+    },
+
     VisitObjectLiteralExpression: function (expression, context) {
         var newValues = expression.members.map(function (ofe) {
             return this.Visit(ofe, context);

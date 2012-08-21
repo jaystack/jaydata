@@ -11,7 +11,7 @@ function getBuilderConfig(context, ext) {
         version: 'V1',
         context: context,
         baseUrl: 'http://example.com',
-        CountRequest: false,
+        simpleResult: false,
     }
 
     return $data.typeSystem.extend(builderConfig, ext);

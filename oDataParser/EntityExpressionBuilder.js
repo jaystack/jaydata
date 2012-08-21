@@ -13,8 +13,7 @@
             { name: 'orderby', expType: $data.Expressions.OrderExpression },
             { name: 'skip', expType: $data.Expressions.PagingExpression },
             { name: 'top', expType: $data.Expressions.PagingExpression },
-            { name: 'select', expType: $data.Expressions.ProjectionExpression },
-            { name: 'count', expType: $data.Expressions.CountExpression }
+            { name: 'select', expType: $data.Expressions.ProjectionExpression }
         ]
     },
     parse: function (queryParams) {
@@ -40,10 +39,11 @@
             }
         }
 
-        if (req.count === true) {
-            expression = new $data.Expressions.CountExpression(expression);
+
+        if (req.frame) {
+            expression = Container['create' + req.frame + 'Expression'](expression);
         } else {
-            expression = new $data.Expressions.ToArrayExpression(expression);
+            expression = Container.createToArrayExpression(expression);
         }
 
         return expression;
