@@ -14,9 +14,6 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
-    VisitBatchDeleteExpression: function (expression) {
-        this._defaultModelBinder(expression);
-    },
     VisitSomeExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
@@ -50,6 +47,16 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         }
     },
     VisitCountExpression: function (expression) {
+        var builder = Container.createqueryBuilder();
+
+        builder.modelBinderConfig['$type'] = $data.Array;
+        builder.selectModelBinderProperty('$item');
+        builder.modelBinderConfig['$type'] = $data.Integer;
+        builder.modelBinderConfig['$source'] = 'cnt';
+        builder.resetModelBinderProperty();
+        this._query.modelBinderConfig = builder.modelBinderConfig;
+    },
+    VisitBatchDeleteExpression: function (expression) {
         var builder = Container.createqueryBuilder();
 
         builder.modelBinderConfig['$type'] = $data.Array;

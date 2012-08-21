@@ -285,3 +285,39 @@ test("REST - DELETE", 2, function () {
         });
     });
 });
+
+test("REST - DELETE batch", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.length(function (count) {
+            equal(count, 10, 'result failed');
+            context.People.removeAll(undefined, undefined, function (cnt) {
+                equal(cnt, 10, 'result failed');
+                context.People.length(function (count2) {
+                    equal(count2, 0, 'result failed');
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("REST - DELETE batch filter", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.length(function (count) {
+            equal(count, 10, 'result failed');
+            context.People.removeAll(function (p) { return p.Age < 15 }, undefined, function (cnt) {
+                equal(cnt, 5, 'result failed');
+                context.People.length(function (count2) {
+                    equal(count2, 5, 'result failed');
+                    start();
+                });
+            });
+        });
+    });
+});
