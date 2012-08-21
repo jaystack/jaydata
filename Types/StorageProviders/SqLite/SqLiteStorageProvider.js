@@ -124,8 +124,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
     supportedBinaryOperators: {
         value: {
-            equal: { mapTo: '=', dataType: "boolean" },
-            notEqual: { mapTo: '!=', dataType: "boolean" },
+            equal: { mapTo: '=', dataType: "boolean", nullMap: ' is null' },
+            notEqual: { mapTo: '!=', dataType: "boolean", nullMap: ' is not null' },
             equalTyped: { mapTo: '=', dataType: "boolean" },
             notEqualTyped: { mapTo: '!=', dataType: "boolean" },
             greaterThan: { mapTo: '>', dataType: "boolean" },

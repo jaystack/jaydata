@@ -25,10 +25,10 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
             //check null filter
             if (expression.left instanceof $data.Expressions.EntityFieldExpression && expression.right instanceof $data.Expressions.ConstantExpression && expression.right.value === null) {
                 this.Visit(expression.left, sqlBuilder);
-                sqlBuilder.addText(" is null");
+                sqlBuilder.addText(expression.resolution.nullMap);
             } else if (expression.right instanceof $data.Expressions.EntityFieldExpression && expression.left instanceof $data.Expressions.ConstantExpression && expression.left.value === null) {
                 this.Visit(expression.right, sqlBuilder);
-                sqlBuilder.addText(" is null");
+                sqlBuilder.addText(expression.resolution.nullMap);
             } else {
                 this.Visit(expression.left, sqlBuilder);
                 sqlBuilder.addText(" " + expression.resolution.mapTo + " ");
