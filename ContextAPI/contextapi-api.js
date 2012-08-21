@@ -1,11 +1,11 @@
-$data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
+$data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
     /*addEntity: (function(name, fullname, namespace){
         return function(success, error){
             var self = this;
             this.context.Entities.filter(function(it){ return it.FullName === this.fullname; }, { fullname: fullname }).length(function(cnt){
                 if (cnt) self.error('Entity type already exists.');
                 else{
-                    self.context.Entities.add(new $data.ContextAPI.Entity({
+                    self.context.Entities.add(new $data.JayStormAPI.Entity({
                         Name: name,
                         FullName: fullname,
                         Namespace: namespace
@@ -75,25 +75,25 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
     }).toServiceOperation().params([{ name: 'fullname', type: 'string' }]).returns('int'),
     getAllEntities: (function(){
         return this.context.Entities.toArray(this);
-    }).toServiceOperation().returns($data.Array, $data.ContextAPI.Entity),
+    }).toServiceOperation().returns($data.Array, $data.JayStormAPI.Entity),
     getEntityByID: (function(id){
         return this.context.Entities.single(function(it){ return it.EntityID === this.id; }, { id: id }, this);
-    }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.ContextAPI.Entity),
+    }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.JayStormAPI.Entity),
     getEntityByName: (function(name){
         return this.context.Entities.single(function(it){ return it.Name === this.name; }, { name: name }, this);
-    }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns($data.ContextAPI.Entity),
+    }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns($data.JayStormAPI.Entity),
     getEntityByFullName: (function(fullname){
         return this.context.Entities.single(function(it){ return it.FullName === this.fullname; }, { fullname: fullname }, this);
-    }).toServiceOperation().params([{ name: 'fullname', type: 'string' }]).returns($data.ContextAPI.Entity),
+    }).toServiceOperation().params([{ name: 'fullname', type: 'string' }]).returns($data.JayStormAPI.Entity),
     getEntityByNamespace: (function(namespace){
         return this.context.Entities.single(function(it){ return it.Namespace === this.namespace; }, { namespace: namespace }, this);
-    }).toServiceOperation().params([{ name: 'namespace', type: 'string' }]).returns($data.ContextAPI.Entity),
+    }).toServiceOperation().params([{ name: 'namespace', type: 'string' }]).returns($data.JayStormAPI.Entity),
     addFieldToEntity: (function(entity, name, type, elementType, inverseProperty, key, computed, nullable, required, customValidator, minValue, maxValue, minLength, maxLength, length, regex){
         return function(success, error){
             var self = this;
             this.context.Entities.single(function(it){ return it.Name === this.entity || it.FullName === this.entity; }, { entity: entity }, {
                 success: function(result){
-                    self.context.EntityFields.add(new $data.ContextAPI.EntityField({
+                    self.context.EntityFields.add(new $data.JayStormAPI.EntityField({
                         EntityID: result.EntityID,
                         Name: name,
                         Type: type,
@@ -165,10 +165,10 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
     }).toServiceOperation().params([{ name: 'entityid', type: 'id' }]).returns('int'),
     getAllFields: (function(){
         return this.context.EntityFields.toArray(this);
-    }).toServiceOperation().returns($data.Array, $data.ContextAPI.EntityField),
+    }).toServiceOperation().returns($data.Array, $data.JayStormAPI.EntityField),
     getAllFieldsByEntityID: (function(entityid){
         return this.context.EntityFields.filter(function(it){ return it.EntityID === this.entityid; }, { entityid: entityid }).toArray(this);
-    }).toServiceOperation().params([{ name: 'entityid', type: 'id' }]).returns($data.Array, $data.ContextAPI.EntityField),
+    }).toServiceOperation().params([{ name: 'entityid', type: 'id' }]).returns($data.Array, $data.JayStormAPI.EntityField),
     addEntitySet: (function(name, elementType, tableName, publish){
         return function(success, error){
             var self = this;
@@ -178,7 +178,7 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
                     self.context.EntitySets.filter(function(it){ return it.Name === this.name; }, { name: name }).length(function(cnt){
                         if (cnt) self.error('EntitySet already exists.');
                         else{
-                            self.context.EntitySets.add(new $data.ContextAPI.EntitySet({
+                            self.context.EntitySets.add(new $data.JayStormAPI.EntitySet({
                                 Name: name,
                                 ElementType: elementType,
                                 ElementTypeID: result.EntityID,
@@ -212,16 +212,16 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
     }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns('int'),
     getAllEntitySets: (function(){
         return this.context.EntitySets.toArray(this);
-    }).toServiceOperation().returns($data.Array, $data.ContextAPI.EntitySet),
+    }).toServiceOperation().returns($data.Array, $data.JayStormAPI.EntitySet),
     getEntitySetByID: (function(id){
         return this.context.EntitySets.single(function(it){ return it.EntitySetID === this.id; }, { id: id }, this);
-    }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.ContextAPI.EntitySet),
+    }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.JayStormAPI.EntitySet),
     getEntitySetByName: (function(name){
         return this.context.EntitySets.single(function(it){ return it.Name === this.name; }, { name: name }, this);
-    }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns($data.ContextAPI.EntitySet),
+    }).toServiceOperation().params([{ name: 'name', type: 'string' }]).returns($data.JayStormAPI.EntitySet),
     getEntitySetByEntityID: (function(id){
         return this.context.EntitySets.single(function(it){ return it.EntitySetID === this.id; }, { id: id }, this);
-    }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.ContextAPI.EntitySet),*/
+    }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.JayStormAPI.EntitySet),*/
     getContext: (function(db){
         return function(success, error){
             var self = this;
@@ -333,7 +333,6 @@ $data.ServiceBase.extend('$data.ContextAPI.FunctionImport', {
     getContextJS: (function(db){
         return function(success, error){
             var self = this;
-            //db = db.replace(/'/ig, '');
             console.log(db);
             this.context.getContext.asFunction(db).apply({
                 context: this.context,
