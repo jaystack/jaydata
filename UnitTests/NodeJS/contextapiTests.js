@@ -29,7 +29,7 @@ app.use(function (req, res, next) {
 app.use(connect.query());
 app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 
-app.use('/restart', function(req, res){
+app.use('/refresh', function(req, res){
     initializeService(function(){
         console.log('Service ready.');
         console.log('Redirecting to "/' + serviceName + '/$metadata"');
@@ -45,66 +45,55 @@ app.use('/start', function(req, res){
     $data.MetadataLoader.load(apiUrl, function (factory, ctxType, text) {
         var context = new $data.ContextAPI.API({ name: 'oData', oDataServiceHost: apiUrl });
         //console.log(text);
+        var db = { Name: 'NewsReader', Namespace: '$news.Types' };
+        var database = new $data.ContextAPI.Database(db);
+        context.Databases.add(database);
         
-        var category = new $data.ContextAPI.Entity({
-            Name: 'Category',
-            FullName: '$news.Types.Category',
-            Namespace: '$news.Types',
-            Fields: [
-                new $data.ContextAPI.EntityField({ Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }),
-                new $data.ContextAPI.EntityField({ Name: 'Title', Type: 'string' }),
-                new $data.ContextAPI.EntityField({ Name: 'Articles', Type: 'Array', ElementType: 'id' })
-            ]
-        });
-        var article = new $data.ContextAPI.Entity({
-            Name: 'Article',
-            FullName: '$news.Types.Article',
-            Namespace: '$news.Types',
-            Fields: [
-                new $data.ContextAPI.EntityField({ Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }),
-                new $data.ContextAPI.EntityField({ Name: 'Title', Type: 'string' }),
-                new $data.ContextAPI.EntityField({ Name: 'Lead', Type: 'string' }),
-                new $data.ContextAPI.EntityField({ Name: 'Body', Type: 'string' }),
-                new $data.ContextAPI.EntityField({ Name: 'CreateDate', Type: 'datetime' }),
-                new $data.ContextAPI.EntityField({ Name: 'Thumbnail_LowRes', Type: 'blob' }),
-                new $data.ContextAPI.EntityField({ Name: 'Thumbnail_HighRes', Type: 'blob' }),
-                new $data.ContextAPI.EntityField({ Name: 'Category', Type: 'id' }),
-                new $data.ContextAPI.EntityField({ Name: 'Tags', Type: 'Array', ElementType: '$news.Types.Tag' })
-            ]
-        });
-        var tag = new $data.ContextAPI.Entity({
-            Name: 'Tag',
-            FullName: '$news.Types.Tag',
-            Namespace: '$news.Types',
-            Fields: [
-                new $data.ContextAPI.EntityField({ Name: 'Title', Type: 'string' }),
-                new $data.ContextAPI.EntityField({
-                    Name: 'Articles',
-                    Type: 'Array',
-                    ElementType: 'id',
-                    ExtensionAttributes: [
-                        new $data.ContextAPI.KeyValuePair({ Key: 'source', Value: 'Groups'})
-                    ]
-                })
-            ]
-        });
-        
-        context.Entities.add(category);
-        context.Entities.add(article);
-        context.Entities.add(tag);
-        
-        var categories = new $data.ContextAPI.EntitySet({ Name: 'Categories', ElementType: '$news.Types.Category' });
-        var articles = new $data.ContextAPI.EntitySet({ Name: 'Articles', ElementType: '$news.Types.Article' });
-        
-        context.EntitySets.add(categories);
-        context.EntitySets.add(articles);
-        
-        context.saveChanges(function(cnt){
-            console.log('Saved', cnt);
-            res.end('ContextAPI ready.');
-            /*initializeService(function(){
-                console.log('Service ready.');
-            });*/
+        context.saveChanges(function(){
+            var category = new $data.ContextAPI.Entity({
+                DatabaseID: database.DatabaseID,
+                Name: 'Category',
+                FullName: '$news.Types.Category',
+                Namespace: '$news.Types'
+            });
+            var article = new $data.ContextAPI.Entity({
+                DatabaseID: database.DatabaseID,
+                Name: 'Article',
+                FullName: '$news.Types.Article',
+                Namespace: '$news.Types'
+            });
+            
+            context.Entities.add(category);
+            context.Entities.add(article);
+            
+            var categories = new $data.ContextAPI.EntitySet({ DatabaseID: database.DatabaseID, Name: 'Categories', ElementType: db.Namespace + '.' + category.Name });
+            var articles = new $data.ContextAPI.EntitySet({ DatabaseID: database.DatabaseID, Name: 'Articles', ElementType: db.Namespace + '.' + article.Name });
+            
+            context.EntitySets.add(categories);
+            context.EntitySets.add(articles);
+            
+            context.saveChanges(function(){
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Title', Type: 'string' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Articles', Type: 'Array', ElementType: 'id' }));
+                
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Title', Type: 'string' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Lead', Type: 'string' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Body', Type: 'string' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'CreateDate', Type: 'datetime' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Thumbnail_LowRes', Type: 'blob' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Thumbnail_HighRes', Type: 'blob' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Category', Type: 'id' }));
+                context.EntityFields.add(new $data.ContextAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Tags', Type: 'Array', ElementType: 'string' }));
+                
+                context.saveChanges(function(){
+                    res.end('ContextAPI ready.');
+                    /*initializeService(function(){
+                        console.log('Service ready.');
+                    });*/
+                });
+            });
         });
     });
 });
@@ -118,7 +107,7 @@ function initializeService(callback){
         //var context = new $data.ContextAPI.API({ name: 'oData', oDataServiceHost: apiUrl });
         //console.log(text);
         
-        Q.all([context.Entities.toArray(), context.EntitySets.toArray(), context.getContext('$app'), context.getContextJS('$app')])
+        Q.all([context.Entities.toArray(), context.EntitySets.toArray(), context.getContext(), context.getContextJS()])
         .then(function(value){
             var result = {
                 entities: value[0],
@@ -128,18 +117,18 @@ function initializeService(callback){
             };
             //console.log('data =>', JSON.prittify(result));
             console.log('\nStarting new context server:\n----------------------------\n');
-            result.js = result.js.replace("'$app'", '$app');
+            result.js = result.js.replace("'$news.Types.Context'", '$news.Types.Context');
             console.log(result.js);
             
             console.log('\nBuilding context');
             eval(result.js);
             
-            $data.Class.defineEx('$service', [$app, $data.ServiceBase]);
+            $data.Class.defineEx('$news.Types.Service', [$news.Types.Context, $data.ServiceBase]);
             
             console.log('Publish service as "/' + serviceName + '"');
             
-            app.use('/' + serviceName, $data.JayService.createAdapter($service, function(){
-                return new $service({ name: 'mongoDB', databaseName: dbName });
+            app.use('/' + serviceName, $data.JayService.createAdapter($news.Types.Service, function(){
+                return new $news.Types.Service({ name: 'mongoDB', databaseName: dbName });
             }));
             
             callback();

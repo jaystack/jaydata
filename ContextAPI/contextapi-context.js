@@ -1,16 +1,18 @@
 $data.Entity.extend('$data.ContextAPI.Entity', {
+    DatabaseID: { type: 'id', required: true },
     EntityID: { type: 'id', key: true, computed: true },
     Name: { type: 'string', required: true },
     FullName: { type: 'string', required: true },
-    Namespace: { type: 'string' },
-    Fields: { type: 'Array', elementType: '$data.ContextAPI.EntityField' }/*,
+    Namespace: { type: 'string' }/*,
+    Fields: { type: 'Array', elementType: '$data.ContextAPI.EntityField' },
     Fields: { type: 'Array', elementType: '$data.ContextAPI.EntityField' },
     EntitySets: { type: 'Array', elementType: '$data.ContextAPI.EntitySet', inverseProperty: 'ElementType' }*/
 });
 
 $data.Entity.extend('$data.ContextAPI.EntityField', {
-    //EntityFieldID: { type: 'id', key: true, computed: true },
-    //EntityID: { type: 'id', required: true },
+    DatabaseID: { type: 'id', required: true },
+    EntityFieldID: { type: 'id', key: true, computed: true },
+    EntityID: { type: 'id', required: true },
     Name: { type: 'string', required: true },
     Type: { type: 'string', required: true },
     ElementType: { type: 'string' },
@@ -29,6 +31,8 @@ $data.Entity.extend('$data.ContextAPI.EntityField', {
     ExtensionAttributes: { type: 'Array', elementType: '$data.ContextAPI.KeyValuePair' }/*,
     Entity: { type: '$data.ContextAPI.Entity', required: true, inverseProperty: 'Fields' }*/
 });
+
+$data.ContextAPI.Entity.extend('$data.ContextAPI.ComplexType');
 
 $data.Entity.extend('$data.ContextAPI.KeyValuePair', {
     Key: { type: 'string' },
@@ -66,6 +70,7 @@ $data.Entity.extend('$data.ContextAPI.EventHandler', {
 });
 
 $data.Entity.extend('$data.ContextAPI.EntitySet', {
+    DatabaseID: { type: 'id', required: true },
     EntitySetID: { type: 'id', key: true, computed: true },
     Name: { type: 'string', required: true },
     ElementType: { type: 'string', required: true },
@@ -83,9 +88,17 @@ $data.Entity.extend('$data.ContextAPI.EntitySet', {
     EntitySet: { type: 'string' }
 })*/
 
+$data.Entity.extend('$data.ContextAPI.Database', {
+    DatabaseID: { type: 'id', key: true, computed: true },
+    Name: { type: 'string', required: true },
+    Namespace: { type: 'string', required: true }
+})
+
 $data.EntityContext.extend('$data.ContextAPI.Context', {
+    Databases: { type: $data.EntitySet, elementType: $data.ContextAPI.Database },
     Entities: { type: $data.EntitySet, elementType: $data.ContextAPI.Entity },
-    //EntityFields: { type: $data.EntitySet, elementType: $data.ContextAPI.EntityField },
+    ComplexTypes: { type: $data.EntitySet, elementType: $data.ContextAPI.ComplexType },
+    EntityFields: { type: $data.EntitySet, elementType: $data.ContextAPI.EntityField },
     EventHandlers: { type: $data.EntitySet, elementType: $data.ContextAPI.EventHandler },
     EntitySets: { type: $data.EntitySet, elementType: $data.ContextAPI.EntitySet },
     ServiceParameters: { type: $data.EntitySet, elementType: $data.ContextAPI.ServiceOperationParameter },
