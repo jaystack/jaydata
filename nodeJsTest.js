@@ -10,4 +10,6 @@ exports['oDataMetaDataGenerator'] = require('./UnitTests/NodeJS/oDataMetaDataGen
 exports['oDataResponseDataBuilder'] = require('./UnitTests/NodeJS/oDataResponseDataBuilderTests.js');
 exports['oDataBatchTest'] = require('./UnitTests/NodeJS/oDataBatchTests.js');
 
+//exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js');
+
 reporter.run(exports);
