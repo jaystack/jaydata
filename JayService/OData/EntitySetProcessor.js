@@ -134,11 +134,11 @@
         var result = builder.parse({
             frame: $data.Expressions.ExpressionType.BatchDelete,
             filter: req.query.$filter || '',
-            orderby: req.query.$orderby || '',
+            //orderby: req.query.$orderby || '',
             //select: req.query.$select || '',
-            skip: req.query.$skip || '',
-            top: req.query.$top || '',
-            expand: req.query.$expand || ''
+            //skip: req.query.$skip || '',
+            //top: req.query.$top || '',
+            //expand: req.query.$expand || ''
         });
 
         //config.collectionName = this.entitySet.name;
@@ -198,7 +198,7 @@
     },
     _supportedMethods: {
         value: {
-            'POST': { _isAllowed: true, $batchdelete: true },
+            'POST': true,
             'GET': {
                 _isAllowed: true, $count: true,
                 _onNotSupported: function (parts) {
@@ -212,7 +212,7 @@
                 }
             },
             'MERGE': true,
-            'DELETE': true
+            'DELETE': { _isAllowed: true, $batchDelete: true }
 
         }
     },
