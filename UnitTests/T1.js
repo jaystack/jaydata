@@ -45,6 +45,42 @@
             }
         });
     });
+    test('EntityField != null or null != EntityField filter', 2, function () {
+        stop(6);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            try {
+                start(1);
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start(1);
+                    db.Articles.toArray(function (a) {
+                        start(1);
+                        var article = a[0];
+                        db.Articles.attach(article);
+                        article.Body = null;
+                        db.saveChanges(function () {
+                            start(1);
+                            db.Articles.filter(function (a) { return a.Body != null; }).toArray(function (a1) {
+                                start(1);
+                                equal(a1.length, a.length - 1, 'result count failed');;
+                            });
+                            db.Articles.filter(function (a) { return null != a.Body; }).toArray(function (a1) {
+                                start(1);
+                                equal(a1.length, a.length - 1, 'result count failed');
+                            });
+                        });
+
+                    });
+                });
+
+            } catch (ex) {
+                start(4);
+                ok(false, "Unhandled exception occured");
+                console.log("--=== EntityField == null or null == EntityField filter filter: ");
+                console.dir(ex);
+                console.log(" ===--");
+            }
+        });
+    });
     test('1003_even if a simple field is projected an Article is returned', 2, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
