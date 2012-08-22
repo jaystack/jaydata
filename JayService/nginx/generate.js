@@ -1,3 +1,4 @@
+#!/usr/bin/node
 
 var handlebars = require('handlebars');
 var fs = require('fs');

@@ -221,14 +221,17 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     }
 
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                        if (memDef.computed) {
+                        //TODO: is this correct?
+                        //if (memDef.computed) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 item[memDef.name] = result[i].headers.ETag;
                             } else {
                                 item[memDef.name] = result[i].data[memDef.name];
                             }
-                        }
+                        //}
                     }, this);
+                    
+                    item.changedProperties = undefined;
                 }
                 if (callBack.success) {
                     callBack.success(convertedItem.length);

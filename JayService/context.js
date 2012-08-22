@@ -24,10 +24,7 @@ $data.Entity.extend("$news.Types.Article", {
 });
 
 $data.EntityContext.extend("$news.Types.Context", {
-    Categories: { type: $data.EntitySet, elementType: $news.Types.Category, beforeCreate: function(data){
-        data[0].Title = data[0].Title.toUpperCase();
-    }
-    },
+    Categories: { type: $data.EntitySet, elementType: $news.Types.Category },
     Articles: { type: $data.EntitySet, elementType: $news.Types.Article }
 });
 
