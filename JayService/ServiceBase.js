@@ -11,7 +11,7 @@ $data.Class.define("$data.ServiceBase", null, null, {
     $batch: function () {
         ///<responseType type="multipart/mixed" />
 
-        var processor = new $data.JayService.OData.BatchProcessor(this, this.request.fullRoute);
+        var processor = new $data.JayService.OData.BatchProcessor(this, this.executionContext.request.fullRoute);
         return processor.process(this.executionContext.request, this.executionContext.response);
     }
 }, {
