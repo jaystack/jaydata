@@ -1,4 +1,5 @@
 ﻿require('jaydata');
+require('../../JayService/EntityTransform.js');
 
 var connect = require('connect');
 var app = connect();
@@ -15,7 +16,8 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
     Value: { type: 'int' },
     Date: { type: 'date' },
-    Completed: { type: 'bool' }
+    Completed: { type: 'bool' },
+    Data: { type: 'object' }
 });
 
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {

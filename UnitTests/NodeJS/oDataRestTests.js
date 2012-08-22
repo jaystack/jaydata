@@ -12,13 +12,13 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Id: { type: 'string', key: true, computed: true },
     Value: { type: 'int' },
     Date: { type: 'date' },
-    Completed: { type: 'bool' }
+    Completed: { type: 'bool' },
+    Data: { type: 'object' }
 });
 
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
-    Orders: { type: $data.EntitySet, elementType: $example.Order },
-    Delete: $data.EntityContext.generateServiceOperation({ serviceName: 'Delete', returnType: 'string', params: [] })
+    Orders: { type: $data.EntitySet, elementType: $example.Order }
 });
 
 $example.Context.deleteData = function (ctx, callback) {
@@ -48,7 +48,7 @@ $example.Context.generateTestData = function (ctx, callback) {
     $example.Context.deleteData(ctx, function () {
         for (var i = 0; i < $example.Context.generateTestData.itemsInTables; i++) {
             ctx.People.add({ Name: 'Person' + i, Description: 'desc' + i, Age: 10 + i });
-            ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2 });
+            ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2, Data: { a: 5, b: i } });
         }
 
         ctx.saveChanges(callback);
@@ -62,7 +62,7 @@ $example.Context.getContext = function () {
     return ctx;
 };
 
-test("REST - GET types", 6, function () {
+test("REST - GET types", 9, function () {
     stop();
 
     var context = $example.Context.getContext();
@@ -77,11 +77,14 @@ test("REST - GET types", 6, function () {
             equal(typeof order.Id, 'string', 'id result failed');
             notEqual(order.Id.indexOf("'"), 0, 'id result failed');
 
+            equal(typeof order.Data, 'object', 'Data result failed');
+            equal(typeof order.Data.a, 'number', 'Data.a result failed');
+            equal(typeof order.Data.b, 'number', 'Data.b result failed');
+
             start();
         });
     });
 });
-
 test("REST - GET responseLimit", 3, function () {
     stop();
 
@@ -90,24 +93,23 @@ test("REST - GET responseLimit", 3, function () {
     $example.Context.generateTestData.itemsInTables = 50;
 
     //$example.Context.deleteData(context, function () {
-        $example.Context.generateTestData(context, function () {
-            context.People.toArray(function (items) {
-                context.People.length(function (count) {
-                    equal(items.length, 30, 'items result count failed');
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (items) {
+            context.People.length(function (count) {
+                equal(items.length, 30, 'items result count failed');
 
-                    equal(count, 50, 'count result failed');
-                    equal(typeof count, 'number', 'count result type failed');
+                equal(count, 50, 'count result failed');
+                equal(typeof count, 'number', 'count result type failed');
 
 
-                    $example.Context.generateTestData.itemsInTables = testNum;
-                    start();
-                });
+                $example.Context.generateTestData.itemsInTables = testNum;
+                start();
             });
         });
+    });
     //});
 
 });
-
 test("REST - GET $Count", 2, function () {
     stop();
 
@@ -120,7 +122,6 @@ test("REST - GET $Count", 2, function () {
         });
     });
 });
-
 test("REST - GET ById", 4, function () {
     stop();
 
@@ -148,7 +149,6 @@ test("REST - GET ById", 4, function () {
         });
     });
 });
-
 test("REST - GET ById / Property", 4, function () {
     stop();
 
@@ -282,6 +282,110 @@ test("REST - DELETE", 2, function () {
                 console.log(JSON.stringify(arguments));
             });
 
+        });
+    });
+});
+test("REST - DELETE batch", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.length(function (count) {
+            equal(count, 10, 'result failed');
+            context.People.removeAll(undefined, undefined, function (cnt) {
+                equal(cnt, 10, 'result failed');
+                context.People.length(function (count2) {
+                    equal(count2, 0, 'result failed');
+                    start();
+                });
+            });
+        });
+    });
+});
+test("REST - DELETE batch filter", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.length(function (count) {
+            equal(count, 10, 'result failed');
+            context.People.removeAll(function (p) { return p.Age < 15 }, undefined, function (cnt) {
+                equal(cnt, 5, 'result failed');
+                context.People.length(function (count2) {
+                    equal(count2, 5, 'result failed');
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("OData - Object type save", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+
+        var objForSave = { test: 'value', example: 'object', d: { complex: 'deepObject' } };
+        var order = new $example.Order({ Value: 226, Data: objForSave });
+        context.Orders.add(order);
+        context.saveChanges(function () {
+            context.Orders.filter('it.Value == 226').toArray(function (orders) {
+                var o = orders[0];
+                equal(typeof o.Id, 'string', 'Id exists');
+                equal(o.Value, 226, 'Value field failed');
+                deepEqual(o.Data, objForSave, 'Value field failed');
+                start();
+            });
+        });
+    });
+});
+test("OData - Object type modify", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Orders.toArray(function (orders) {
+            var order = orders[0];
+            context.Orders.attach(order);
+
+            var objForSave = { test: 'value', example: 'object', d: { complex: 'deepObject' } };
+            order.Data = objForSave;
+            order.Value = 226;
+
+            context.saveChanges(function () {
+                context.Orders.filter('it.Value == 226').toArray(function (orders) {
+                    var o = orders[0];
+                    equal(typeof o.Id, 'string', 'Id exists');
+                    equal(o.Value, 226, 'Value field failed');
+                    deepEqual(o.Data, objForSave, 'Value field failed');
+                    start();
+                });
+            });
+        });
+    });
+});
+test("OData - Object type modify to null", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Orders.toArray(function (orders) {
+            var order = orders[0];
+            context.Orders.attach(order);
+
+            order.Data = null;
+            order.Value = 226;
+
+            context.saveChanges(function () {
+                context.Orders.filter('it.Value == 226').toArray(function (orders) {
+                    var o = orders[0];
+                    equal(typeof o.Id, 'string', 'Id exists');
+                    equal(o.Value, 226, 'Value field failed');
+                    deepEqual(o.Data, null, 'Value field failed');
+                    start();
+                });
+            });
         });
     });
 });

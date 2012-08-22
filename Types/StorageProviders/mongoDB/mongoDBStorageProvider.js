@@ -809,7 +809,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     callBack.error(error);
                     return;
                 }
-                
+
                 query.rawDataList = results instanceof Array ? results : [{ cnt: results }];
                 query.context = self.context;
 
@@ -821,6 +821,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 switch (query.expression.nodeType){
                     case $data.Expressions.ExpressionType.Count:
                         collection.find(find.query, find.options).count(cb);
+                        break;
+                    case $data.Expressions.ExpressionType.BatchDelete:
+                        collection.remove(find.query, { safe: true }, cb);
                         break;
                     default:
                         collection.find(find.query, find.options).toArray(cb);

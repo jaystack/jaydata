@@ -605,6 +605,7 @@ $data.Class.define('$data.EntityContext', null, null,
             
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Count ||
+                query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Some ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Every) {
                 if (query.result.length !== 1) {
