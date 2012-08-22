@@ -49,6 +49,9 @@ exports = module.exports = {
             for (var i = 0; i < config.services.length; i++){
                 var s = config.services[i];
                 file += 'var app' + s.port + ' = connect();\n';
+                file += 'app' + s.port + '.use(connect.query());\n';
+                file += 'app' + s.port + '.use(connect.bodyParser());\n';
+                file += 'app' + s.port + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
                 if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                 else file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
                 file += 'app' + s.port + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(){\n    return new ' + s.serviceName + '(' + (s.database ? '{ name: "mongoDB", databaseName: "' + s.database + '" }' : '') + ');\n}));\n\n';
