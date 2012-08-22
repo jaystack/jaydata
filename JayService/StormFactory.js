@@ -14,6 +14,7 @@ exports = module.exports = {
                 var file = '(function(){\n\n';
                 file += 'var contextTypes = {};\n\n';
                 var builder = function(db){
+                    console.log('Build context', db);
                     context.getContextJS(db, function(js){
                         file += (js + '\n\n');
                         var ctxName = js.match(/\$data.EntityContext.extend\(\"(.*)\",/)[1];

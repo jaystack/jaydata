@@ -1,6 +1,7 @@
 function DefaultArgumentBinder(name, options, request) {
     var result = request.query[name];
     //console.log(name, options, request.query[name], new (options.type)(request.query[name]));
+    if (result.indexOf("'") === 0) result = result.slice(1, result.length - 1);
     return result;
 }
 
@@ -42,7 +43,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
     handleRequest: function (req, res, next) {
         var self = this;
 
-        var serviceInstance = this.instanceFactory();
+        var serviceInstance = this.instanceFactory(req, res);
 
         var memberName = this.resolveMemberName(req, serviceInstance);
         var member = this.resolveMember(req, memberName);
@@ -174,7 +175,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 defer.reject(r);
             }
 
-            var executionContext = {
+            var executionContext = request.executionContext || {
                 request: request,
                 response: response,
                 context: serviceInstance,
@@ -182,17 +183,17 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 error: error
             };
 
-            /*Object.defineProperty(serviceInstance, "executionContext", {
+            Object.defineProperty(serviceInstance, "executionContext", {
                 value:executionContext,
                 enumerable:false,
                 writable:false,
                 configurable:false
-            });*/
-            this.executionContext = executionContext;
+            });
+            //this.executionContext = executionContext;
 
             if (typeof serviceInstance.onReady === 'function') {
                 serviceInstance.onReady(function () {
-                    var result = member.apply(executionContext, args);
+                    var result = member.apply(serviceInstance, args);
 
                     if (typeof result === 'function') {
                         result.call(executionContext);
@@ -205,7 +206,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     }
                 });
             } else {
-                var result = member.apply(executionContext, args);
+                var result = member.apply(serviceInstance, args);
 
                 if (typeof result === 'function') {
                     result.call(executionContext);
