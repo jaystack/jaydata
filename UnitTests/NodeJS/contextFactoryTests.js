@@ -12,6 +12,13 @@ app.use(storm.contextFactory({
     filename: './context.js'
 }));
 
+require('../../Types/StorageProviders/mongoDB/ClientObjectID.js');
+$data.ServiceBase.extend('ObjectIDFactory', {
+    newObjectID: (function(){
+        return new $data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID().valueOf();
+    }).toServiceOperation().returns('string')
+})
+
 app.use(storm.serviceFactory({
     services: [{
         serviceName: 'newsreader',
@@ -19,6 +26,7 @@ app.use(storm.serviceFactory({
         port: 53999
     }, {
         serviceName: 'newsreader2',
+        extend: 'ObjectIDFactory',
         database: 'NewsReader',
         port: 53999
     }],

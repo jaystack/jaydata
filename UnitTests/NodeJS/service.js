@@ -16,7 +16,7 @@ app53999.use("/newsreader", $data.JayService.createAdapter(newsreader, function(
     return new newsreader({ name: "mongoDB", databaseName: "NewsReader" });
 }));
 
-$data.Class.defineEx("newsreader2", [contextTypes["NewsReader"], $data.ServiceBase]);
+$data.Class.defineEx("newsreader2", [contextTypes["NewsReader"], ObjectIDFactory]);
 app53999.use("/newsreader2", $data.JayService.createAdapter(newsreader2, function(){
     return new newsreader2({ name: "mongoDB", databaseName: "NewsReader" });
 }));
