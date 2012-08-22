@@ -17,6 +17,10 @@ app.use(storm.serviceFactory({
         serviceName: 'newsreader',
         database: 'NewsReader',
         port: 53999
+    }, {
+        serviceName: 'newsreader2',
+        database: 'NewsReader',
+        port: 53999
     }],
     context: './context.js',
     filename: './service.js'
