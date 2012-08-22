@@ -223,13 +223,13 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
         return this.context.EntitySets.single(function(it){ return it.EntitySetID === this.id; }, { id: id }, this);
     }).toServiceOperation().params([{ name: 'id', type: 'id' }]).returns($data.JayStormAPI.EntitySet),*/
     getContext: (function(db){
-        return function(success, error){
+        return (function(success, error){
             var self = this;
             var nsContext;
             var context = {};
             var entities = [];
             var entityIds = [];
-            this.context.Databases.single(function(it){ return it.Name == this.db; }, { db: db }, function(db){
+            this.Databases.single(function(it){ return it.Name == this.db; }, { db: db }, function(db){
                 nsContext = db.Namespace + '.Context';
                 context.ContextName = nsContext;
                 self.context.EntitySets.filter(function(it){ return it.Publish && it.DatabaseID == this.db; }, { db: db.DatabaseID }).toArray({
@@ -328,7 +328,7 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                     });
                 });
             });
-        };
+        }).bind(this);
     }).toServiceOperation().params([{ name: 'db', type: 'string' }]).returns($data.Object),
     getContextJS: (function(db){
         return function(success, error){

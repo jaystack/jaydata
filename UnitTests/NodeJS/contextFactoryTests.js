@@ -17,7 +17,9 @@ app.use(storm.contextFactory({
 require('../../Types/StorageProviders/mongoDB/ClientObjectID.js');
 $data.ServiceBase.extend('ObjectIDFactory', {
     newObjectID: (function(){
-        return new $data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID().valueOf();
+        var id = new $data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID().toString();
+        var ret = new Buffer(id, 'ascii').toString('base64');
+        return ret;
     }).toServiceOperation().returns('string')
 });
 
