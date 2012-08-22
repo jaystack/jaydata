@@ -1,10 +1,12 @@
 require('jaydata');
+var fs = require('fs');
 require('../../JaySvcUtil/JaySvcUtil.js');
 
 var connect = require('connect');
 var app = connect();
 
 var storm = require('../../JayService/StormFactory.js');
+fs.exists('./service.js', function(exists){ if (exists) require('./service.js'); });
 
 app.use(storm.contextFactory({
     apiUrl: 'http://localhost:3000/contextapi.svc',
@@ -17,7 +19,7 @@ $data.ServiceBase.extend('ObjectIDFactory', {
     newObjectID: (function(){
         return new $data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID().valueOf();
     }).toServiceOperation().returns('string')
-})
+});
 
 app.use(storm.serviceFactory({
     services: [{
@@ -28,6 +30,9 @@ app.use(storm.serviceFactory({
         serviceName: 'newsreader2',
         extend: 'ObjectIDFactory',
         database: 'NewsReader',
+        port: 53999
+    }, {
+        serviceName: 'ObjectIDFactory',
         port: 53999
     }],
     context: './context.js',

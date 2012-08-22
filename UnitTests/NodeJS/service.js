@@ -13,13 +13,17 @@ app53999.use(connect.query());
 app53999.use(connect.bodyParser());
 app53999.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 $data.Class.defineEx("newsreader", [contextTypes["NewsReader"], $data.ServiceBase]);
-app53999.use("/newsreader", $data.JayService.createAdapter(newsreader, function(){
-    return new newsreader({ name: "mongoDB", databaseName: "NewsReader" });
+app53999.use("/newsreader", $data.JayService.createAdapter(newsreader, function(req, res){
+    return new newsreader({ name: "mongoDB", databaseName: req.headers["X-AppId"] + "_NewsReader" });
 }));
 
 $data.Class.defineEx("newsreader2", [contextTypes["NewsReader"], ObjectIDFactory]);
-app53999.use("/newsreader2", $data.JayService.createAdapter(newsreader2, function(){
-    return new newsreader2({ name: "mongoDB", databaseName: "NewsReader" });
+app53999.use("/newsreader2", $data.JayService.createAdapter(newsreader2, function(req, res){
+    return new newsreader2({ name: "mongoDB", databaseName: req.headers["X-AppId"] + "_NewsReader" });
+}));
+
+app53999.use("/ObjectIDFactory", $data.JayService.createAdapter(ObjectIDFactory, function(req, res){
+    return new ObjectIDFactory();
 }));
 
 app53999.listen(53999);

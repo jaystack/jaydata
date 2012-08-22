@@ -62,8 +62,8 @@ exports = module.exports = {
                     listen.push(s.port);
                 }
                 if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
-                else file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
-                file += 'app' + s.port + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(){\n    return new ' + s.serviceName + '(' + (s.database ? '{ name: "mongoDB", databaseName: "' + s.database + '" }' : '') + ');\n}));\n\n';
+                else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
+                file += 'app' + s.port + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return new ' + s.serviceName + '(' + (s.database ? '{ name: "mongoDB", databaseName: req.headers["X-AppId"] + "_' + s.database + '" }' : '') + ');\n}));\n\n';
             }
             for (var i = 0; i < listen.length; i++){
                 file += 'app' + listen[i] + '.listen(' + listen[i] + ');\n';
