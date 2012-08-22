@@ -50,6 +50,12 @@ exports = module.exports = {
                 var s = config.services[i];
                 if (listen.indexOf(s.port) < 0){
                     file += 'var app' + s.port + ' = connect();\n';
+                    file += 'app' + s.port + '.use(function (req, res, next){\n';
+                    file += '    res.setHeader("Access-Control-Allow-Origin", "*");\n';
+                    file += '    res.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion");\n';
+                    file += '    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, MERGE");';
+                    file += '    if (req.method === "OPTIONS") res.end(); else next();\n';
+                    file += '});\n';
                     file += 'app' + s.port + '.use(connect.query());\n';
                     file += 'app' + s.port + '.use(connect.bodyParser());\n';
                     file += 'app' + s.port + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';

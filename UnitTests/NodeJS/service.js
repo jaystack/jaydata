@@ -3,6 +3,11 @@
 var connect = require("connect");
 
 var app53999 = connect();
+app53999.use(function (req, res, next){
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion");
+    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, MERGE");    if (req.method === "OPTIONS") res.end(); else next();
+});
 app53999.use(connect.query());
 app53999.use(connect.bodyParser());
 app53999.use($data.JayService.OData.BatchProcessor.connectBodyReader);
