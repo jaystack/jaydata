@@ -165,6 +165,7 @@ InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
 	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
 
 MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
+	$(TYPES_DIR)/StorageProviders/mongoDB/ClientObjectID.js\
 
 StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 

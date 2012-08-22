@@ -865,6 +865,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (!p.computed){
                         d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
                         if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
+                    }else if (typeof d.data[p.name] === 'string'){
+                        d.data['_id'] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
                     }
                 }
 
@@ -1081,7 +1083,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         return serializableObject;
     },
     
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object], writable: false },
     
     supportedBinaryOperators: {
         value: {

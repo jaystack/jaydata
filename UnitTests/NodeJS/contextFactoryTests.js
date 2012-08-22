@@ -9,9 +9,9 @@ require('../../Types/StorageProviders/mongoDB/ClientObjectID.js');
 $data.ServiceBase.extend('ObjectIDFactory', {
     newObjectID: (function(){
         var id = new $data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID().toString();
-        var ret = new Buffer(id, 'ascii').toString('base64');
+        //var ret = new Buffer(id, 'ascii').toString('base64');
         //console.log(new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(ret, 'base64').toString('ascii')));
-        return ret;
+        return id;
     }).toServiceOperation().returns('string')
 });
 
