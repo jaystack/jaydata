@@ -653,7 +653,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         for (var i = 0; i < allMembers.length; i++) {
             var member = allMembers[i];
 
-            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
+            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.ServiceBase || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
                 continue;
             }
 
@@ -667,7 +667,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 }
             }
 
-            vMember = $data.typeSystem.extend({ serviceOpName: member.name, method: "GET" }, parsedInfo, vMember);
+            vMember = $data.typeSystem.extend({ serviceOpName: member.name, method: vMember.returnType ? 'GET' : 'POST' }, parsedInfo, vMember);
 
             if (vMember.returnType && this._isExtendedType(vMember.returnType)) {
                 var uType = Container.resolveType(vMember.returnType);

@@ -7,7 +7,7 @@ $data.Class.define("$data.ServiceBase", null, null, {
         }
         return new $data.XmlResult(contextType.__metadataCache);
 
-    }).toServiceOperation(),
+    }).toServiceOperation().webGet(),
     $batch: function () {
         ///<responseType type="multipart/mixed" />
 

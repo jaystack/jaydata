@@ -12,7 +12,10 @@ $data.ServiceBase.extend('ObjectIDFactory', {
         //var ret = new Buffer(id, 'ascii').toString('base64');
         //console.log(new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(ret, 'base64').toString('ascii')));
         return id;
-    }).toServiceOperation().returns('string')
+    }).toServiceOperation().returns('string'),
+    resetSeed: (function(){
+        $data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID.idSeed = 1;
+    }).toServiceOperation()
 });
 
 var storm = require('../../JayService/StormFactory.js');

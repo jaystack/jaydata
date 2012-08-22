@@ -53,16 +53,20 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             var memberInfo = this.createMemberContext(member, serviceInstance);
             var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
 
-            //this will be something much more dynamic
-            _v = memberInfo.invoke(methodArgs, req, res);
+            if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
+                //this will be something much more dynamic
+                _v = memberInfo.invoke(methodArgs, req, res);
 
-            oDataBuidlerCfg = {
-                version: 'V2',
-                baseUrl: req.fullRoute,
-                context: self.type,
-                methodConfig: member,
-                methodName: memberName
-            };
+                oDataBuidlerCfg = {
+                    version: 'V2',
+                    baseUrl: req.fullRoute,
+                    context: self.type,
+                    methodConfig: member,
+                    methodName: memberName
+                };
+            }else{
+                throw 'Invoke Error: Illegal method.';
+            }
         } else {
             if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
             member = this.resolveEntitySet(req, memberName, serviceInstance);
@@ -138,7 +142,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         var self = this;
 
         var memberContext = {
-            method: 'GET'
+            method: member.returnType ? 'GET' : 'POST'
         };
         for (var i in member) {
             if (member.hasOwnProperty(i)) {
