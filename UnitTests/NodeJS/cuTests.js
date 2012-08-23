@@ -37,15 +37,28 @@ req.write(JSON.stringify({
             computeUnits: [{
                 awsInstanceID: 'spot1',
                 type: 'compute-unit',
-                publicAddress: 'ip-address',
-                internalAddress: 'ip-address'
-            }]
+                publicAddress: '127.0.0.1',
+                internalAddress: '127.0.0.1'
+            }]  
         },
         dataLayer: {
-            dbServer: '127.0.0.1',
+            dbServer: [{
+                address: '127',
+                port: 27017
+            }],
             databases: [{
                 type: 'database',
                 name: 'NewsReader'
+            }, {
+                type: 'database',
+                name: 'ReplicaSet',
+                dbServer: [{
+                    address: '127',
+                    port: 27017
+                }, {
+                    address: '',
+                    port: 27018
+                }]
             }]
         }
     }
