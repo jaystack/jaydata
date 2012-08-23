@@ -110,7 +110,6 @@ require('../JaySvcUtil/JaySvcUtil.js');
                     child.on('message', function(msg){
                         fs.unlink(tmp, function(err){
                             if (err) throw err;
-                            res.write('eval ok.');
                             res.write(JSON.stringify(msg));
                             res.end();
                         });

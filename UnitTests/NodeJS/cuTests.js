@@ -15,7 +15,7 @@ function send(options, data){
     req.end();
 }
 
-/*send({
+send({
     host: 'localhost',
     port: 9999,
     path: '/make',
@@ -74,7 +74,7 @@ function send(options, data){
             }]
         }
     }
-}));*/
+}));
 
 require('fs').readFile('./cuJavaScriptTest.js', 'utf8', function(err, content){
     send({
