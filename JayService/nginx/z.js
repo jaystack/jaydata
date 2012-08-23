@@ -36,7 +36,7 @@ z = {
                     {
                         type: "allow",
                         address: "*",
-                        method: ["GET","POST","HEAD"]
+                        method: ["GET"]
                     }
 
                 ]
@@ -48,20 +48,22 @@ z = {
                     type:"service",
                     serviceName: "Database1Service",
                     database: "Database1",
-                    port: "80",
-                    publish: false
+                    port: 80,
+                    internalPort: 60080,
+                    publish: false,
+                    ssl: true
                 },
                 {
                     type:"service",
                     serviceName: "CustomService",
-                    port: "8080"
+                    port: 8080
                 },
                 {
                     type:"service",
                     serviceName: "CustomService2",
                     extends: "Database1Service",
                     database: "Database3",
-                    port: "8080"
+                    port: 8080
                 }
             ]
         },

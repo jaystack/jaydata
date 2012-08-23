@@ -8,8 +8,7 @@ app53999.use($data.JayService.Middleware.currentDatabase());
 app53999.use($data.JayService.Middleware.databaseConnections({
     "NewsReader": [
         {
-            "address": "127.0.0.1",
-            "port": "27017"
+            "address": "192.168.1.111"
         }
     ]
 }));

@@ -46,7 +46,8 @@ req.write(JSON.stringify({
             dbServer: '127.0.0.1:27017',
             databases: [{
                 type: 'database',
-                name: 'NewsReader'
+                name: 'NewsReader',
+                dbServer: '192.168.1.111'
             }]
         }
     }
