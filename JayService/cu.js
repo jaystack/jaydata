@@ -11,6 +11,7 @@ require('../JaySvcUtil/JaySvcUtil.js');
         serviceFile: './service.js',
         localIP: require('os').networkInterfaces()['eth0'][0].address
     };
+    
     var handlebars = require('handlebars');
     var fs = require('fs');
     var connect = require('connect');
@@ -44,7 +45,7 @@ require('../JaySvcUtil/JaySvcUtil.js');
         app.use(connect.query());
         app.use(connect.bodyParser());
         
-        app.use('/make', function(req, res){
+        app.use('/make', function(req, res, next){
             var jsonConf = req.body;
             jsonConf.ip = config.localIP;
             var nginxConf = nginxTemplate(jsonConf);
@@ -52,22 +53,24 @@ require('../JaySvcUtil/JaySvcUtil.js');
             
             fs.writeFile(config.nginxConf, nginxConf, function(err){
                 if (err) throw err;
-                
-                $data.JayService.Middleware.contextFactory({
-                    apiUrl: config.schemaAPI,
-                    cu: jsonConf,
-                    filename: config.contextFile
-                })(req, res, function(){
-                    $data.JayService.Middleware.serviceFactory({
-                        apiUrl: config.serviceAPI,
-                        cu: jsonConf,
-                        context: config.contextFile,
-                        filename: config.serviceFile
-                    })(req, res, function(){
-                        res.end();
-                    });
-                });
+                next();
             });
+        });
+        
+        app.use('/make', $data.JayService.Middleware.contextFactory({
+            apiUrl: config.schemaAPI,
+            filename: config.contextFile
+        }));
+        
+        app.use('/make', $data.JayService.Middleware.serviceFactory({
+            apiUrl: config.serviceAPI,
+            context: config.contextFile,
+            filename: config.serviceFile
+        }));
+        
+        app.use('/make', function(req, res){
+            console.log('CU ready.');
+            res.end();
         });
         
         app.listen(9999);
