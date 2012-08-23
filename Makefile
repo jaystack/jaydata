@@ -107,10 +107,11 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 
 JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\
+	$(JSERVICE_DIR)/JayService.js\
 	$(JSERVICE_DIR)/oDataMetaDataGenerator.js\
 	$(JSERVICE_DIR)/XmlResult.js\
+	$(JSERVICE_DIR)/ArgumentBinder.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
-	$(JSERVICE_DIR)/JayService.js\
 	$(JSERVICE_DIR)/ServiceBase.js\
 	$(JSERVICE_DIR)/EntityTransform.js\
 	$(JSERVICE_DIR)/Middleware.js\

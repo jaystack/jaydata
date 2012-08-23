@@ -1,5 +1,4 @@
 ﻿require('jaydata');
-require('../../JayService/EntityTransform.js');
 
 var connect = require('connect');
 var app = connect();
@@ -22,7 +21,15 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
 
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
-    Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv }
+    Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
+    FuncStrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'string' }]).returns('string'),
+    FuncIntParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'int' }]).returns('int'),
+    FuncNumParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'number' }]).returns('number'),
+    FuncObjParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'object' }]).returns('object'),
+    FuncArrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'array' }]).returns('object'),
+    FuncBoolParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'bool' }]).returns('bool'),
+    FuncDateParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'date' }]).returns('date'),
+    //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),
 });
 
 app.use(function (req, res, next) {
