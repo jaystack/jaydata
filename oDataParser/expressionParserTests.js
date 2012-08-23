@@ -32,7 +32,7 @@ $(document).ready(function () {
             var expression = builder.parse(obj).expression;
 
             equal(expression.getType(), q.expression.getType(), name + 'expression frame failed');
-            equal(JSON.stringify(expression.source), JSON.stringify(q.expression.source), name + ' builder test failed');
+            equal(JSON.stringify(expression.source, null, '    '), JSON.stringify(q.expression.source, null, '    '), name + ' builder test failed');
         });
     }
 
@@ -66,6 +66,8 @@ $(document).ready(function () {
     builderTest('include deep 3', c.Articles.include('Author.Articles.Reviewer'), c, false, true);
     builderTest('include multiple 1', c.Articles.include('Category').include('Author'), c, false, true);
     builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author.Articles'), c, false, true);
+
+    builderTest('map - take', c.Articles.map(function (it) { return { Id: it.Id, Title: it.Title } }).take(6), c);
 
 
     function selectTest(name, queryable, context, selectedFields, includes) {
