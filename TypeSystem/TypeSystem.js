@@ -250,6 +250,16 @@
     MemberTypes.field = "field";
 
     $data.MemberTypes = MemberTypes;
+    
+    function ClassToJSON(){
+        var ret = {};
+        for (var i in this){
+            if (this.hasOwnProperty(i)){
+                ret[i] = this[i];
+            }
+        }
+        return ret;
+    }
 
     function TypeCreator() {
 
@@ -468,6 +478,7 @@
         }
 
         root[shortClassName] = this.classNames[className] = classFunction;
+        classFunction.toJSON = ClassToJSON;
 
         //classFunction.prototype.constructor = instanceDefinition.constructor;
         //classFunction.constructor = instanceDefinition.constructor;

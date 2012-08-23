@@ -14,6 +14,10 @@ require('../JaySvcUtil/JaySvcUtil.js');
     
     var handlebars = require('handlebars');
     var fs = require('fs');
+    var vm = require('vm');
+    var uuid = require('node-uuid');
+    var child_process = require('child_process');
+    
     var connect = require('connect');
     var app = connect();
     
@@ -48,6 +52,14 @@ require('../JaySvcUtil/JaySvcUtil.js');
         app.use('/make', function(req, res, next){
             var jsonConf = req.body;
             jsonConf.ip = config.localIP;
+            
+            var limitedcors = true;
+            for (var x in jsonConf.application.firewall.outgress.allows) {
+                var address = jsonConf.application.firewall.outgress.allows[x].address;
+                if (address == "*") limitedcors = false;
+            }
+            jsonConf.limitedcors = limitedcors;
+            
             var nginxConf = nginxTemplate(jsonConf);
             console.log(nginxConf);
             
@@ -71,6 +83,45 @@ require('../JaySvcUtil/JaySvcUtil.js');
         app.use('/make', function(req, res){
             console.log('CU ready.');
             res.end();
+        });
+        
+        app.use('/eval', function(req, res){
+            var js = '';
+            js += 'process.on("uncaughtException", function(err){\n';
+            js += '    process.send(err.toString());\n';
+            js += '    process.exit(0);\n';
+            js += '});\n\n';
+            
+            js += req.body.js;
+            
+            js += '\n\n';
+            js += 'process.on("message", function(msg){\n';
+            js += '    process.send({ serviceTypes: exports.serviceTypes });\n';
+            js += '    process.exit(0);\n';
+            js += '});\n';
+            
+            try{
+                var script = vm.createScript(js);
+                var tmp = __dirname + '/tmp-' + uuid.v4() + '.js';
+                fs.writeFile(tmp, js, 'utf8', function(err){
+                    if (err) throw err;
+                    var child = child_process.fork(tmp);
+                    
+                    child.on('message', function(msg){
+                        fs.unlink(tmp, function(err){
+                            if (err) throw err;
+                            res.write('eval ok.');
+                            res.write(JSON.stringify(msg));
+                            res.end();
+                        });
+                    });
+                    
+                    child.send({});
+                });
+            }catch(err){
+                res.write(JSON.stringify(err.toString()));
+                res.end();
+            }
         });
         
         app.listen(9999);

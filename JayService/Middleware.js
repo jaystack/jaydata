@@ -71,6 +71,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         }
 
         return function contextFactory(req, res, next){
+            config.cu = req.body;
+            
             $data.MetadataLoader.debug = true;
             $data.MetadataLoader.load(config.apiUrl, function (factory, ctxType, text) {
                 var context = factory();
@@ -108,6 +110,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         }
         
         return function serviceFactory(req, res, next){
+            config.cu = req.body;
+            
             var file = '';
             var fn = function(){
                 file += '(function(contextTypes){\n\n';
@@ -124,25 +128,25 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 var listen = [];
                 for (var i = 0; i < config.cu.application.serviceLayer.services.length; i++){
                     var s = config.cu.application.serviceLayer.services[i];
-                    if (listen.indexOf(s.port) < 0){
-                        file += 'var app' + s.port + ' = connect();\n';
-                        file += 'app' + s.port + '.use($data.JayService.Middleware.appID());\n';
-                        file += 'app' + s.port + '.use($data.JayService.Middleware.currentDatabase());\n';
-                        file += 'app' + s.port + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
-                        file += 'app' + s.port + '.use(function (req, res, next){\n';
+                    if (listen.indexOf(s.internalPort || s.port) < 0){
+                        file += 'var app' + (s.internalPort || s.port) + ' = connect();\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.appID());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.currentDatabase());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(function (req, res, next){\n';
                         file += '    res.setHeader("Access-Control-Allow-Origin", "*");\n';
                         file += '    res.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion");\n';
                         file += '    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, MERGE");\n';
                         file += '    if (req.method === "OPTIONS") res.end(); else next();\n';
                         file += '});\n';
-                        file += 'app' + s.port + '.use(connect.query());\n';
-                        file += 'app' + s.port + '.use(connect.bodyParser());\n';
-                        file += 'app' + s.port + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
-                        listen.push(s.port);
+                        file += 'app' + (s.internalPort || s.port) + '.use(connect.query());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(connect.bodyParser());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
+                        listen.push((s.internalPort || s.port));
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
-                    file += 'app' + s.port + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return new ' + s.serviceName + '(' + (s.database ? '$data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_' + s.database + '" }, req.getCurrentDatabase())' : '') + ');\n}));\n\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return new ' + s.serviceName + '(' + (s.database ? '$data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_' + s.database + '" }, req.getCurrentDatabase())' : '') + ');\n}));\n\n';
                 }
                 for (var i = 0; i < listen.length; i++){
                     file += 'app' + listen[i] + '.listen(' + listen[i] + ', "127.0.0.1");\n';
