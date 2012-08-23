@@ -3,6 +3,16 @@
 var connect = require("connect");
 
 var app53999 = connect();
+app53999.use($data.JayService.Middleware.appID());
+app53999.use($data.JayService.Middleware.currentDatabase());
+app53999.use($data.JayService.Middleware.databaseConnections({
+    "NewsReader": [
+        {
+            "address": "127.0.0.1",
+            "port": "27017"
+        }
+    ]
+}));
 app53999.use(function (req, res, next){
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion");
@@ -14,9 +24,9 @@ app53999.use(connect.bodyParser());
 app53999.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 $data.Class.defineEx("newsreader", [contextTypes["NewsReader"], $data.ServiceBase]);
 app53999.use("/newsreader", $data.JayService.createAdapter(newsreader, function(req, res){
-    return new newsreader({ name: "mongoDB", databaseName: req.headers["X-AppId"] + "_NewsReader" });
+    return new newsreader($data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_NewsReader" }, req.getCurrentDatabase()));
 }));
 
-app53999.listen(53999);
+app53999.listen(53999, "127.0.0.1");
 
 })(require("./context.js").contextTypes);

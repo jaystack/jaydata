@@ -29,7 +29,8 @@ req.write(JSON.stringify({
             services: [{
                 serviceName: 'newsreader',
                 database: 'NewsReader',
-                port: 53999
+                port: 53999,
+                authenticate: false
             }]
         },
         applicationLayer: {
@@ -42,23 +43,10 @@ req.write(JSON.stringify({
             }]  
         },
         dataLayer: {
-            dbServer: [{
-                address: '127',
-                port: 27017
-            }],
+            dbServer: '127.0.0.1:27017',
             databases: [{
                 type: 'database',
                 name: 'NewsReader'
-            }, {
-                type: 'database',
-                name: 'ReplicaSet',
-                dbServer: [{
-                    address: '127',
-                    port: 27017
-                }, {
-                    address: '',
-                    port: 27018
-                }]
             }]
         }
     }
