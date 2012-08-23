@@ -8,7 +8,8 @@ require('../JaySvcUtil/JaySvcUtil.js');
         schemaAPI: 'http://localhost:3000/contextapi.svc',
         serviceAPI: 'http://localhost:3000/contextapi.svc',
         contextFile: './context.js',
-        serviceFile: './service.js'
+        serviceFile: './service.js',
+        localIP: require('os').networkInterfaces()['eth0'][0].address
     };
     var handlebars = require('handlebars');
     var fs = require('fs');
@@ -19,22 +20,25 @@ require('../JaySvcUtil/JaySvcUtil.js');
         if (err) throw err;
         var nginxTemplate = handlebars.compile(contents);
         
-        handlebars.registerHelper("unique", function(array, fn, elseFn) {
-          var ports = {};
-          if (array && array.length > 0) {
-            var buffer = "";
-            for (var i = 0, j = array.length; i < j; i++) {
-              var item = array[i];
-              if (ports[item.port] == undefined) {
-                ports[item.port] = true;
-                buffer += fn.fn(item);
-              }
+        handlebars.registerHelper('unique', function(array, fn, elseFn) {
+            var ports = {};
+            if (array && array.length > 0){
+                var buffer = '';
+                for (var i = 0, j = array.length; i < j; i++){
+                    var item = array[i];
+                    if (ports[item.port] == undefined) {
+                        ports[item.port] = true;
+                        buffer += fn.fn(item);
+                    }
+                }
+                return buffer;
+            }else{
+                return elseFn();
             }
-            return buffer;
-          }
-          else {
-            return elseFn();
-          }
+        });
+        
+        handlebars.registerHelper('json', function(context) {
+            return new handlebars.SafeString(JSON.stringify(context));
         });
         
         app.use(connect.query());
@@ -42,6 +46,7 @@ require('../JaySvcUtil/JaySvcUtil.js');
         
         app.use('/make', function(req, res){
             var jsonConf = req.body;
+            jsonConf.ip = config.localIP;
             var nginxConf = nginxTemplate(jsonConf);
             console.log(nginxConf);
             

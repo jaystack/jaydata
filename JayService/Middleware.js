@@ -17,7 +17,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
     currentDatabase: function(){
         return function(req, res, next){
             var db = {
-                server: req.headers['x-db-server'],
+                server: JSON.parse(req.headers['x-db-server']),
                 username: req.headers['x-db-user'],
                 password: req.headers['x-db-password']
             };
