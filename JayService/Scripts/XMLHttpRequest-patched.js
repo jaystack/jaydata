@@ -262,6 +262,7 @@ exports.XMLHttpRequest = function() {
 
 
     var url = Url.parse(settings.url);
+    url.pathname = unescape(url.pathname);
 
     // Determine the server
     switch (url.protocol) {
