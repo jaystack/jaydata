@@ -22,6 +22,7 @@
             //methodName
 
         }, cfg);
+        this.transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
     },
     convertToResponse: function (data) {
         if (this.config.simpleResult)
@@ -49,8 +50,9 @@
         if (Container.resolveType(methodCfg.returnType) === $data.Array && methodCfg.elementType) {
             return this._buildVersionPath(data);
         } else {
+            var converter = this.transform.converter.fromDb[Container.getName(methodCfg.returnType)];
             var result = { d: {} };
-            result.d[methodCfg.serviceOpName || this.config.methodName] = data;
+            result.d[methodCfg.serviceOpName || this.config.methodName] = converter ? converter(data) : data;
             return result;
         }
     },
@@ -83,17 +85,18 @@
             if (typeof rType.isAssignableTo === 'function' && rType.isAssignableTo($data.Entity))
                 data = this._convertData(data, rType, false, true);
 
+            var converter = this.transform.converter.fromDb[Container.getName(rType)];
             var result = { d: {} };
-            result.d[methodCfg.serviceOpName || this.config.methodName] = data;
+            result.d[methodCfg.serviceOpName || this.config.methodName] = converter ? converter(data) : data;
             return result;
         }
     },
     _convertData: function (data, elementType, versionSelector, isSingleData) {
-        var transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
+        //var transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
         if (isSingleData)
             data = [data];
 
-        var result = transform.convertToResponse(
+        var result = this.transform.convertToResponse(
             data,
             elementType || this.config.collectionName,
             this.config.selectedFields,

@@ -1,8 +1,8 @@
-function DefaultArgumentBinder(name, options, request) {
-    var result = request.query[name];
-    //console.log(name, options, request.query[name], new (options.type)(request.query[name]));
-    return result;
-}
+//function DefaultArgumentBinder(name, options, request) {
+//    var result = request.query[name];
+//    //console.log(name, options, request.query[name], new (options.type)(request.query[name]));
+//    return result;
+//}
 
 Function.prototype.curry = function () {
     var self = this;
@@ -159,7 +159,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             memberContext.paramBinders = [];
             for (var i = 0; i < params.length; i++) {
                 var param = params[i];
-                memberContext.paramBinders.push(DefaultArgumentBinder.curry(null, param.name || param, { type: param.type ? Container.resolveType(param.type) : undefined }));
+                memberContext.paramBinders.push($data.JayService.ArgumentBinder.defaultBinder.curry(null, param.name || param, { type: param.type ? Container.resolveType(param.type) : undefined }));
             }
         }
 
