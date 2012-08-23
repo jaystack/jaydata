@@ -34,6 +34,12 @@ Handlebars.registerHelper('json', function(context) {
 });
 
 z.ip=ip;
+var limitedcors = true;
+for (var x in z.application.firewall.outgress.allows) {
+  var address = z.application.firewall.outgress.allows[x].address;
+  if (address == "*") limitedcors = false;
+}
+z.limitedcors = limitedcors;
 console.log(template(z));
 });
 

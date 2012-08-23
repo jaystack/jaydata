@@ -26,6 +26,7 @@
                         var entity = new this.entitySet.createNew(req.body);
                         this.entitySet.add(entity);
                         this.context.saveChanges(function () {
+                            res.statusCode = 201;
                             cbWrapper.success(entity);
                         });
                     } else {
@@ -44,6 +45,7 @@
                         this.entitySet.attach(entity);
                         entity.entityState = $data.EntityState.Modified;
                         this.context.saveChanges(function () {
+                            res.statusCode = 204;
                             cbWrapper.success(new $data.EmptyServiceResult());
                         });
                     } else {
@@ -59,6 +61,7 @@
                             this.entitySet.remove(this.member.idObject);
                             this.context.saveChanges(function () {
                                 //return with no content
+                                res.statusCode = 204;
                                 cbWrapper.success(new $data.EmptyServiceResult());
                             });
                         } else {

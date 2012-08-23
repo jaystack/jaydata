@@ -164,6 +164,90 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     },
     saveInternal: function (independentBlocks, index2, callBack) {
+        if (independentBlocks.length > 1 || (independentBlocks.length == 1 && independentBlocks[0].length > 1))
+            this._saveBatch(independentBlocks, index2, callBack);
+        else
+            this._saveRest(independentBlocks, index2, callBack);
+    },
+    _saveRest: function (independentBlocks, index2, callBack) {
+        batchRequests = [];
+        convertedItem = [];
+        var request;
+        for (var index = 0; index < independentBlocks.length; index++) {
+            for (var i = 0; i < independentBlocks[index].length; i++) {
+                convertedItem.push(independentBlocks[index][i].data);
+                request = {
+                    requestUri: this.providerConfiguration.oDataServiceHost + '/',
+                    headers: {}
+                };
+                //request.headers = { "Content-Id": convertedItem.length };
+                switch (independentBlocks[index][i].data.entityState) {
+                    case $data.EntityState.Unchanged: continue; break;
+                    case $data.EntityState.Added:
+                        request.method = "POST";
+                        request.requestUri += independentBlocks[index][i].entitySet.name;
+                        request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
+                        break;
+                    case $data.EntityState.Modified:
+                        request.method = "MERGE";
+                        request.requestUri += independentBlocks[index][i].entitySet.name;
+                        request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
+                        this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
+                        request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
+                        break;
+                    case $data.EntityState.Deleted:
+                        request.method = "DELETE";
+                        request.requestUri += independentBlocks[index][i].entitySet.name;
+                        request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
+                        this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
+                        break;
+                    default: Guard.raise(new Exception("Not supported Entity state"));
+                }
+                //batchRequests.push(request);
+            }
+        }
+        var that = this;
+
+        var requestData = [request, function (data, response) {
+            if (response.statusCode > 200 && response.statusCode < 300) {
+                var item = convertedItem.pop();
+                if (response.statusCode == 204) {
+                    if (response.headers.ETag) {
+                        var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
+                        if (property && property[0]) {
+                            item[property[0].name] = response.headers.ETag;
+                        }
+                    }
+                } else {
+
+                    item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+                        if (memDef.computed) {
+                            if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                                item[memDef.name] = response.headers.ETag;
+                            } else {
+                                item[memDef.name] = data[memDef.name];
+                            }
+                        }
+                    }, this);
+                }
+                if (callBack.success) {
+                    callBack.success(convertedItem.length);
+                }
+            } else {
+                callBack.error(response);
+            }
+
+        }, callBack.error];
+
+        if (this.providerConfiguration.user) {
+            requestData[0].user = this.providerConfiguration.user;
+            requestData[0].password = this.providerConfiguration.password || "";
+        }
+
+        this.context.prepareRequest.call(this, requestData);
+        OData.request.apply(this, requestData);
+    },
+    _saveBatch: function (independentBlocks, index2, callBack) {
         batchRequests = [];
         convertedItem = [];
         for (var index = 0; index < independentBlocks.length; index++) {
@@ -207,7 +291,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }, function (data, response) {
             if (response.statusCode == 202) {
                 var result = data.__batchResponses[0].__changeResponses;
-                var resultEntities = [];
                 for (var i = 0; i < result.length; i++) {
                     var item = convertedItem[i];
                     if (result[i].statusCode == 204) {
@@ -467,7 +550,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); }
             },
             toDb: {
-                '$data.Entity': function(e) { return "'" + JSON.stringify(e.initData) + "'"},
+                '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
                 '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
