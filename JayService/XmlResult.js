@@ -33,10 +33,33 @@ $data.ServiceResult.extend('$data.MultiPartMixedResult', {
     }
 });
 
-$data.JSONResult.extend('$data.oDataJSONResult', {
+/*$data.JSONResult.extend('$data.oDataJSONResult', {
     constructor: function(data, builderCfg){
         var builder = new $data.oDataServer.oDataResponseDataBuilder(builderCfg);
         this.data = builder.convertToResponse(data);
+    }
+});*/
+
+$data.ServiceResult.extend('$data.oDataResult', {
+    constructor: function (data, builderCfg, request) {
+        var acceptHeader = request.headers['Accept'] || request.headers['accept'] || '';
+        var version = builderCfg.version;
+
+        if ((version === 'V3' && acceptHeader.indexOf('application/json;odata=verbose') >= 0) || (version !== 'V3' && acceptHeader.indexOf('application/json') >= 0) ||
+            //method xml result not implemented
+            builderCfg.methodConfig) {
+            this.contentType = 'application/json';
+            var builder = new $data.oDataServer.oDataResponseDataBuilder(builderCfg);
+            this.data = builder.convertToResponse(data);
+        } else {
+            this.contentType = 'text/xml';
+            builderCfg.headers = request.headers;
+            var transf = new $data.oDataServer.EntityXmlTransform(builderCfg.context, builderCfg.baseUrl, builderCfg);
+            this.data = transf.convertToResponse(data, builderCfg.collectionName, builderCfg.selectedFields, builderCfg.includes);
+        }
+    },
+    toString: function () {
+        return typeof this.data === 'string' ? this.data : JSON.stringify(this.data);
     }
 });
 

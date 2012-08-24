@@ -114,7 +114,9 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
 	$(JSERVICE_DIR)/ServiceBase.js\
 	$(JSERVICE_DIR)/EntityTransform.js\
+	$(JSERVICE_DIR)/EntityXmlTransform.js\
 	$(JSERVICE_DIR)/oDataResponseDataBuilder.js\
+	$(JSERVICE_DIR)/OData/ServiceDefinitionXml.js\
 	$(JSERVICE_DIR)/OData/BatchProcessor.js\
 	$(JSERVICE_DIR)/OData/EntitySetProcessor.js\
 	$(ODATAPARSER_DIR)/RequestExpressionBuilder.js\
