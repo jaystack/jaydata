@@ -11,9 +11,9 @@
             { name: 'expand', expType: $data.Expressions.IncludeExpression },
             { name: 'filter', expType: $data.Expressions.FilterExpression },
             { name: 'orderby', expType: $data.Expressions.OrderExpression },
+            { name: 'select', expType: $data.Expressions.ProjectionExpression },
             { name: 'skip', expType: $data.Expressions.PagingExpression },
-            { name: 'top', expType: $data.Expressions.PagingExpression },
-            { name: 'select', expType: $data.Expressions.ProjectionExpression }
+            { name: 'top', expType: $data.Expressions.PagingExpression }
         ]
     },
     parse: function (queryParams) {
@@ -95,8 +95,8 @@
         var expression = new $data.Expressions.ProjectionExpression(rootExpr, pqExp);
         return expression;
     },
-    findMemberPathBaseName: function(expr){
-        if(expr.expression instanceof $data.Expressions.PropertyExpression)
+    findMemberPathBaseName: function (expr) {
+        if (expr.expression instanceof $data.Expressions.PropertyExpression)
             return this.findMemberPathBaseName(expr.expression);
         else
             return expr.member.value;
