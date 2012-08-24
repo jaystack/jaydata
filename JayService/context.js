@@ -17,10 +17,7 @@ $data.Entity.extend("$news.Types.Article", {
     Thumbnail_LowRes: { type: "blob" },
     Thumbnail_HighRes: { type: "blob" },
     Category: { type: "id" },
-    Tags: { type: "Array", elementType: "string" },
-    Comment: { type: "string" },
-    Foobar: { type: "string" },
-    Google: { type: "number" }
+    Tags: { type: "Array", elementType: "string" }
 });
 
 $data.EntityContext.extend("$news.Types.Context", {

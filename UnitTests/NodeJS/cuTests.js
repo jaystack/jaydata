@@ -1,10 +1,14 @@
 var http = require('http');
 
-function send(options, data){
+function send(options, data, callback){
     var req = http.request(options, function(res){
         res.setEncoding('utf8');
+        var data = '';
         res.on('data', function(chunk){
-            console.log(chunk);
+            data += chunk;
+        });
+        res.on('end', function(){
+            (callback || console.log)(data);
         });
     });
 
@@ -49,11 +53,11 @@ send({
         },
         serviceLayer: {
             services: [{
-                serviceName: 'newsreader',
+                serviceName: 'news',
                 database: 'NewsReader',
                 port: 53999,
-                authenticate: false,
-                ssl: true
+                authenticate: false/*,
+                ssl: true*/
             }]
         },
         applicationLayer: {
@@ -66,11 +70,10 @@ send({
             }]  
         },
         dataLayer: {
-            dbServer: '127.0.0.1:27017',
+            dbServer: [{ address: '127.0.0.1', port: 27017 }],
             databases: [{
                 type: 'database',
-                name: 'NewsReader',
-                dbServer: '192.168.1.111'
+                name: 'NewsReader'
             }]
         }
     }
@@ -83,5 +86,7 @@ require('fs').readFile('./cuJavaScriptTest.js', 'utf8', function(err, content){
         path: '/eval',
         method: 'POST',
         headers: { 'content-type': 'application/json' }
-    }, JSON.stringify({ js: content }));
+    }, JSON.stringify({ js: content }), function(data){
+        console.log(JSON.stringify(JSON.parse(data), null, '    '));
+    });
 });

@@ -85,7 +85,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             }
         }
 
-        this.promiseHelper.when(_v).then(function (value) {
+        this.promiseHelper.when(_v).fail(function(err){
+            next(err);
+        }).then(function (value) {
             if (!(value instanceof $data.ServiceResult)) {
                 if (typeof member === 'object') {
                     if (member.hasOwnProperty('resultType') && member.resultType instanceof $data.ServiceResult) {
@@ -113,8 +115,6 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             } else {
                 res.end();
             }
-        }).fail(function (err) {
-            res.end(err.toString());
         });
     },
 

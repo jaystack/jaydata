@@ -1,2 +1,2 @@
 require('jaydata');
-require('./service.js');
+require(__dirname + '/service.js');

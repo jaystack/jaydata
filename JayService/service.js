@@ -8,7 +8,8 @@ app53999.use($data.JayService.Middleware.currentDatabase());
 app53999.use($data.JayService.Middleware.databaseConnections({
     "NewsReader": [
         {
-            "address": "192.168.1.111"
+            "address": "127.0.0.1",
+            "port": 27017
         }
     ]
 }));
@@ -21,11 +22,12 @@ app53999.use(function (req, res, next){
 app53999.use(connect.query());
 app53999.use(connect.bodyParser());
 app53999.use($data.JayService.OData.BatchProcessor.connectBodyReader);
-$data.Class.defineEx("newsreader", [contextTypes["NewsReader"], $data.ServiceBase]);
-app53999.use("/newsreader", $data.JayService.createAdapter(newsreader, function(req, res){
-    return new newsreader($data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_NewsReader" }, req.getCurrentDatabase()));
+$data.Class.defineEx("news", [contextTypes["NewsReader"], $data.ServiceBase]);
+app53999.use("/news", $data.JayService.createAdapter(news, function(req, res){
+    return new news($data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_NewsReader" }, req.getCurrentDatabase()));
 }));
 
+app53999.use(connect.errorHandler());
 app53999.listen(53999, "127.0.0.1");
 
-})(require("./context.js").contextTypes);
+})(require("/home/lazarv/project/jaydata/JayService/context.js").contextTypes);

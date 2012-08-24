@@ -3,15 +3,17 @@ require('../JaySvcUtil/JaySvcUtil.js');
 
 (function(){
     var config = {
-        nginxTemplate: './nginx/nginx-host.conf',
+        nginxTemplate: __dirname + '/nginx/nginx-host.conf',
         nginxConf: '/etc/nginx/sites-enabled/cu.conf',
         schemaAPI: 'http://localhost:3000/contextapi.svc',
         serviceAPI: 'http://localhost:3000/contextapi.svc',
-        contextFile: './context.js',
-        serviceFile: './service.js',
-        localIP: require('os').networkInterfaces()['eth0'][0].address
+        contextFile: __dirname + '/context.js',
+        serviceFile: __dirname + '/service.js',
+        localIP: require('os').networkInterfaces()['eth0'][0].address,
+        subscriberPath: '/home/lazarv'
     };
     
+    var forever = require('forever');
     var handlebars = require('handlebars');
     var fs = require('fs');
     var vm = require('vm');
@@ -80,9 +82,21 @@ require('../JaySvcUtil/JaySvcUtil.js');
             filename: config.serviceFile
         }));
         
-        app.use('/make', function(req, res){
-            console.log('CU ready.');
-            res.end();
+        app.use('/make', function(req, res, next){
+            console.log('Restart NGINX service.');
+            child_process.exec('service nginx restart', function(err, stdout, stderr){
+                if (err) throw err;
+                if (stdout) console.log(stdout);
+                if (stderr) console.log(stderr);
+                
+                process.env.HOME = config.subscriberPath;
+                forever.restartAll().on('error', function(err){
+                    next(err);
+                });
+                
+                console.log('CU ready.');
+                res.end();
+            });
         });
         
         app.use('/eval', function(req, res){
@@ -122,6 +136,8 @@ require('../JaySvcUtil/JaySvcUtil.js');
                 res.end();
             }
         });
+        
+        app.use(connect.errorHandler());
         
         app.listen(9999);
     });

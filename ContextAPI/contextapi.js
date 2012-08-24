@@ -98,6 +98,11 @@ app.use("/contextapi.svc", $data.JayService.createAdapter($data.JayStormAPI.API,
     return new $data.JayStormAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
 }));
 
+app.use("/ApplicationDB", $data.JayService.createAdapter($data.JayStormAPI.API, function(){
+    //return context;
+    return new $data.JayStormAPI.API({ name: 'mongoDB', databaseName: 'ApplicationDB' });
+}));
+
 app.listen(3000);
 /*var connect = require('connect');
 var app = connect();

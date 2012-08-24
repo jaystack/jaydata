@@ -135,7 +135,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 }
             },
             function (jqXHR, textStatus, errorThrow) {
-                callBack.error(errorThrow);
+                callBack.error(errorThrow || new Exception('Request failed', 'RequestError', arguments));
             }
         ];
 

@@ -146,7 +146,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
-                    file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return new ' + s.serviceName + '(' + (s.database ? '$data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_' + s.database + '" }, req.getCurrentDatabase())' : '') + ');\n}));\n\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return new ' + s.serviceName + '(' + (s.database ? '$data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_' + s.database + '" }, req.getCurrentDatabase())' : '') + ');\n}));\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use(connect.errorHandler());\n\n';
                 }
                 for (var i = 0; i < listen.length; i++){
                     file += 'app' + listen[i] + '.listen(' + listen[i] + ', "127.0.0.1");\n';

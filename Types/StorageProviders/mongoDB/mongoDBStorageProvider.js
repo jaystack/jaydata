@@ -722,12 +722,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             if (typeof this.providerConfiguration.server === 'string') this.providerConfiguration.server = [{ address: this.providerConfiguration.server.split(':')[0] || '127.0.0.1', port: this.providerConfiguration.server.split(':')[1] || 27017 }];
             if (!(this.providerConfiguration.server instanceof Array)) this.providerConfiguration.server = [this.providerConfiguration.server];
             if (this.providerConfiguration.server.length == 1){
-                this.providerConfiguration.address = this.providerConfiguration.server.address || '127.0.0.1';
-                this.providerConfiguration.port = this.providerConfiguration.server.port || 27017;
+                this.providerConfiguration.address = this.providerConfiguration.server[0].address || '127.0.0.1';
+                this.providerConfiguration.port = this.providerConfiguration.server[0].port || 27017;
                 delete this.providerConfiguration.server;
             }
         }
-        console.log(this.providerConfiguration);
     },
     _getServer: function(){
         if (this.providerConfiguration.server){
