@@ -771,6 +771,11 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
                 attrValue: 'type',
                 fieldName: 'returnType'
             },
+            resultType: {
+                single: true,
+                attrValue: 'type',
+                fieldName: 'resultType'
+            },
             entitySet: {
                 single: true,
                 attrValue: 'name',

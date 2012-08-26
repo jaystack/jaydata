@@ -877,7 +877,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed){
+                    if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
+                        d.data[p.name] = 0;
+                    }else if (!p.computed){
                         d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
                         if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
                     }else if (typeof d.data[p.name] === 'string'){
@@ -887,7 +889,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
 
                 docs.push(d.data);
             }
-        
+            
             collection.insert(docs, { safe: true }, function(error, result){
                 if (error){
                     callBack.error(error);
@@ -900,7 +902,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
                     for (var j = 0; j < props.length; j++){
                         var p = props[j];
-                        d.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb) //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
+                        d.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb); //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
                     }
                 }
                 
@@ -934,23 +936,58 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed) {
+                    if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
+                        where[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb);
+                        if (!set.$inc) set.$inc = {};
+                        set.$inc[p.name] = 1;
+                    }else if (!p.computed){
                         if (typeof u.entity[p.name] === 'undefined') continue;
                         set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
                     }
                 }
                 
-                collection.update(where, { $set: set }, { safe: true }, function(error, result){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
-                    
-                    successItems++;
-                    counterFn(function(){
-                        esFn(client, successItems);
+                var fn = function(u){
+                    collection.update(where, { $set: set }, { safe: true }, function(error, result){
+                        if (error){
+                            callBack.error(error);
+                            return;
+                        }
+                        
+                        if (result){
+                            successItems++;
+                            var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
+                            for (var j = 0; j < props.length; j++){
+                                var p = props[j];
+                                if (p.concurrencyMode === $data.ConcurrencyMode.Fixed) u.entity[p.name]++;
+                            }
+                            
+                            counterFn(function(){
+                                esFn(client, successItems);
+                            });
+                        }else{
+                            counterState--;
+                            collection.find({ _id: where._id }, {}).toArray(function(error, result){
+                                if (error){
+                                    callBack.error(error);
+                                    return;
+                                }
+                                
+                                var it = result[0];
+                                var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
+                                for (var j = 0; j < props.length; j++){
+                                    var p = props[j];
+                                    u.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb);
+                                }
+                                
+                                counterFn(function(){
+                                    esFn(client, successItems);
+                                });
+                            });
+                        }
                     });
-                });
+                };
+                
+                fn(u);
             }
         };
         
@@ -973,17 +1010,19 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         if (typeof r.data[p.name] === 'undefined') delete r.data[p.name];
                     }
 
-                    //todo
-                    delete r.data[p.name];
+                    //TODO:
+                    if (!p.concurrencyMode === $data.ConcurrencyMode.Fixed) delete r.data[p.name];
                 }
                 
-                collection.remove(r.data, { safe: true }, function(error, cnt){
+                collection.remove(r.data, { safe: true }, function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
                     
-                    successItems += cnt;
+                    if (result) successItems++;
+                    else counterState--;
+                    
                     counterFn(function(){
                         if (c.updateAll && c.updateAll.length){
                             updateFn(client, c, collection);

@@ -51,8 +51,7 @@ require('../JaySvcUtil/JaySvcUtil.js');
         app.use(connect.query());
         app.use(connect.bodyParser());
         
-        app.use('/make', function(req, res, next){
-            var jsonConf = req.body;
+        function makeNginxConf(jsonConf, callback){
             jsonConf.ip = config.localIP;
             
             var limitedcors = true;
@@ -63,12 +62,40 @@ require('../JaySvcUtil/JaySvcUtil.js');
             jsonConf.limitedcors = limitedcors;
             
             var nginxConf = nginxTemplate(jsonConf);
-            console.log(nginxConf);
             
             fs.writeFile(config.nginxConf, nginxConf, function(err){
-                if (err) throw err;
-                next();
+                if (err) callback(err); else callback();
             });
+        }
+        
+        function restartNginx(callback){
+            console.log('Restart NGINX service.');
+            child_process.exec('service nginx restart', function(err, stdout, stderr){
+                if (err){
+                    callback(err);
+                }else{
+                    if (stdout) console.log(stdout);
+                    if (stderr) console.log(stderr);
+                    
+                    callback();
+                }
+            });
+        }
+        
+        app.use('/nginx/conf', function(req, res, next){
+            makeNginxConf(req.body, function(){
+                restartNginx(function(err){
+                    if (err) next(err);
+                    else{
+                        console.log('NGINX ready.');
+                        res.end();
+                    }
+                });
+            });
+        });
+        
+        app.use('/make', function(req, res, next){
+            makeNginxConf(req.body, next);
         });
         
         app.use('/make', $data.JayService.Middleware.contextFactory({

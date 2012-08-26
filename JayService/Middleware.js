@@ -25,10 +25,9 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             delete req.headers['x-db-user'];
             delete req.headers['x-db-password'];
             
-            console.log(db);
             Object.defineProperty(req, 'getCurrentDatabase', {
-                value: function(){
-                    return db;
+                value: function(type, name){
+                    return new type({ name: 'mongoDB', databaseName: req.getAppId() + '_' + name, server: db.server, username: db.username, password: db.password });
                 },
                 enumerable: true
             });
@@ -146,7 +145,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
-                    file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return new ' + s.serviceName + '(' + (s.database ? '$data.typeSystem.extend({ name: "mongoDB", databaseName: req.getAppId() + "_' + s.database + '" }, req.getCurrentDatabase())' : '') + ');\n}));\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return ' + (s.database ? 'req.getCurrentDatabase(' + s.serviceName + ', "' + s.database + '")' : 'new ' + s.serviceName + '()') + ';\n}));\n';
                     file += 'app' + (s.internalPort || s.port) + '.use(connect.errorHandler());\n\n';
                 }
                 for (var i = 0; i < listen.length; i++){

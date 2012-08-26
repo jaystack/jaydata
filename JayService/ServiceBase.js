@@ -1,14 +1,18 @@
 $data.Class.define("$data.ServiceBase", null, null, {
-    $metadata: (function () {
+    $metadata: function () {
+        ///<method type="GET" />
+        ///<resultType type="$data.XmlResult" />
+        
         var contextType = this.getType();
         if (!contextType.__metadataCache) {
             var meta = new $data.oDataServer.MetaDataGenerator({}, this.getType());
             contextType.__metadataCache = meta.generateMetadataXml();
         }
-        return new $data.XmlResult(contextType.__metadataCache);
-
-    }).toServiceOperation().webGet(),
+        
+        return contextType.__metadataCache;
+    },
     $batch: function () {
+        ///<method type="POST" />
         ///<responseType type="multipart/mixed" />
 
         var processor = new $data.JayService.OData.BatchProcessor(this, this.executionContext.request.fullRoute);
@@ -18,5 +22,4 @@ $data.Class.define("$data.ServiceBase", null, null, {
     __metadataCache: { type: 'string', value: null }
 });
 
-
-
+$data.ServiceBase.annotateFromVSDoc();

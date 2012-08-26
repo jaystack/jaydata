@@ -53,7 +53,7 @@ send({
         },
         serviceLayer: {
             services: [{
-                serviceName: 'news',
+                serviceName: 'newsreader',
                 database: 'NewsReader',
                 port: 53999,
                 authenticate: false/*,
