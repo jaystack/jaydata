@@ -88,7 +88,7 @@ $example.Context.generateTestData = function (ctx, callback) {
 $example.Context.generateTestData.serviceurl = 'http://192.168.1.119:3001/testservice';
 $example.Context.generateTestData.itemsInTables = 10;
 $example.Context.getContext = function () {
-    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl, serviceUrl: $example.Context.generateTestData.serviceurl });
+    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl, serviceUrl: $example.Context.generateTestData.serviceurl, user: 'asd', password: 'asd' });
     return ctx;
 };
 
@@ -163,7 +163,9 @@ test("REST - GET ById", 4, function () {
             OData.request({
                 requestUri: $example.Context.generateTestData.serviceurl + "/People('" + person.Id + "')",
                 method: 'GET',
-                data: undefined
+                data: undefined,
+                user: 'asd',
+                password: 'asd'
             }, function (data) {
 
                 equal(data.Id, person.Id, 'Id field failed');

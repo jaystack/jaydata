@@ -57,7 +57,7 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion');
+    res.setHeader('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, MERGE, DELETE');
     if (req.method === 'OPTIONS') {
         res.end();
@@ -65,6 +65,10 @@ app.use(function (req, res, next) {
         next();
     }
 });
+
+/*app.use(connect.basicAuth(function (user, pass) {
+    return 'asd' == user & 'asd' == pass;
+}));*/
 
 app.use(connect.query());
 app.use(connect.bodyParser());
