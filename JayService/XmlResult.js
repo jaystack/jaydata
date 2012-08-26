@@ -46,6 +46,7 @@ $data.ServiceResult.extend('$data.oDataResult', {
         var version = builderCfg.version;
 
         if ((version === 'V3' && acceptHeader.indexOf('application/json;odata=verbose') >= 0) || (version !== 'V3' && acceptHeader.indexOf('application/json') >= 0) ||
+            (request.query && this.jsonFormats.indexOf(request.query.$format) >= 0) ||
             //method xml result not implemented
             builderCfg.methodConfig) {
             this.contentType = 'application/json';
@@ -60,6 +61,13 @@ $data.ServiceResult.extend('$data.oDataResult', {
     },
     toString: function () {
         return typeof this.data === 'string' ? this.data : JSON.stringify(this.data);
+    },
+    jsonFormats: {
+        value: [
+            'json',
+            'verbose',
+            'lightweight'
+        ]
     }
 });
 

@@ -431,4 +431,93 @@ exports.Test = {
 
         test.done();
     },
+    'Feed ComplexEntity Pivot': function (test) {
+        var context = $example.Context.getContext();
+        var items = [
+            new $example.ATable({
+                Id: 'idString',
+                ComplexData: new $example.Complex1({ Field1: 111, Field2: 'hello world2' }),
+                ComplexArray: [new $example.Complex2({ Field3: 13, Field4: 'hello world4' }), new $example.Complex2({ Field3: 13, Field4: 'hello world4' })],
+                ComplexArrayPrim: ['hello', 'world', 'jaydata'],
+                ComplexEntity: new $example.Order({ Value: 5, Completed: true, Data: null }),
+                ComplexEntityArray: [new $example.Order({ Value: 6, Completed: true, Data: {} }), new $example.Order({ Value: 7, Completed: true, Data: { a: 5, b: 'prop' } })]
+            })
+        ]
+
+        var oDataBuidlerCfg = {
+            version: 'V2',
+            baseUrl: 'http://Example.com/testservice',
+            context: context.getType(),
+            simpleResult: false,
+            singleResult: false,
+            collectionName: 'ATables',
+            selectedFields: undefined,
+            includes: undefined
+        };
+        reqPoc.headers = {
+            "user-agent": "PowerPivot"
+        };
+
+        var result = new $data.oDataResult(items, oDataBuidlerCfg, reqPoc);
+
+        var resultData = result.toString();
+        var strResult = '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/ATables\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
+                '<id>' +
+                    'http://Example.com/testservice/ATables' +
+                '</id>' +
+                '<title type="text">ATables</title>' +
+                '' + //<updated>2012-08-24T13:05:48Z</updated>
+                '<link href="ATables" rel="self" title="ATables"></link>' +
+                "<entry>" +
+                    "<id>" +
+                        "http://Example.com/testservice/ATables('idString')" +
+                    "</id>" +
+                    "<category scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\" term=\"$example.ATable\"></category>" +
+                    "<link href=\"ATables('idString')\" rel=\"edit\" title=\"ATable\"></link>" +
+                    "<title></title>" +
+                    "" + //<updated>2012-08-24T14:03:56.084Z</updated>
+                    "<author>" +
+                        "<name></name>" +
+                    "</author>" +
+                    "<content type=\"application/xml\">" +
+                        "<m:properties>" +
+                            "<d:Id>idString</d:Id>" +
+                            "<d:ComplexData m:type=\"$example.Complex1\">" +
+                                "<d:Field1 m:type=\"Edm.Int32\">111</d:Field1>" +
+                                "<d:Field2>hello world2</d:Field2>" +
+                            "</d:ComplexData>" +
+                            "<d:ComplexEntity m:type=\"$example.Order\">" +
+                                "<d:Id m:null=\"true\"></d:Id>" +
+                                "<d:Value m:type=\"Edm.Int32\">5</d:Value>" +
+                                "<d:Date m:null=\"true\" m:type=\"Edm.DateTime\"></d:Date>" +
+                                "<d:Completed m:type=\"Edm.Boolean\">true</d:Completed>" +
+                            "</d:ComplexEntity>" +
+                        "</m:properties>" +
+                    "</content>" +
+                "</entry>" +
+            "</feed>"
+
+
+        var matches = resultData.split('><');
+        var strMatches = strResult.split('><');
+
+        test.expect(matches.length + 2);
+        test.equal(result.contentType, 'text/xml', 'content type failed');
+
+        for (var i = 0; i < matches.length; i++) {
+            if (matches[i].slice(0, 8) === 'updated>') {
+                var cut = matches.splice(i, 1);
+                i--;
+            }
+            test.equal('<' + matches[i] + '>', '<' + strMatches[i] + '>', 'xml line ' + i + ' result failed');
+        }
+
+        resultData = matches.join('><');
+        strResult = strMatches.join('><');
+
+        test.equal(resultData, strResult, 'xml result failed');
+
+        test.done();
+    },
 }

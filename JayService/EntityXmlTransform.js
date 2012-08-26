@@ -243,20 +243,24 @@
 
     },
     _buildProperty: function (data, memDef, m, d) {
-        var memberType = this.xml.declareAttribute(m, 'type');
-        var prop = this.xml.declareElement(d, memDef.name);
-
-        this.xml.startElement(prop);
-
+        var resolvedUserAgent = this.supports[this._getUserAgent()];
         var typeName = this._resolveEdmType(memDef);
-        if (typeName !== 'Edm.String')
-            this.xml.addAttribute(memberType, typeName);
+        var type = Container.resolveType(memDef.type);
 
-        var value = data[memDef.name];
-        if (value !== null && value !== undefined) {
-            var type = Container.resolveType(memDef.type);
-            if (type === $data.Array) {
-                if (this._getUserAgent() !== this.cfg.excelUserAgent) {
+        if (!resolvedUserAgent || (resolvedUserAgent && resolvedUserAgent.indexOf(typeName) >= 0) || (type.isAssignableTo && type.isAssignableTo($data.Entity))) {
+
+            var memberType = this.xml.declareAttribute(m, 'type');
+            var prop = this.xml.declareElement(d, memDef.name);
+
+            this.xml.startElement(prop);
+
+            if (typeName !== 'Edm.String')
+                this.xml.addAttribute(memberType, typeName);
+
+            var value = data[memDef.name];
+            if (value !== null && value !== undefined) {
+
+                if (type === $data.Array) {
                     type = Container.resolveType(memDef.elementType);
                     if (type.isAssignableTo && type.isAssignableTo($data.Entity)) {
                         var subEntitySet = this._getEntitySetDefByType(type);
@@ -277,22 +281,21 @@
                             this._buildComplexArray(data[memDef.name], type, m, d);
                         }
                     }
+                } else if (type.isAssignableTo && type.isAssignableTo($data.Entity)) {
+                        //complexType
+                    this._buildProperties(data[memDef.name], undefined, type);
+                } else {
+                    //primitive types
+                    var typeName = Container.resolveName(type);
+                    this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName](value) : value.toString());
                 }
-            } else if (type.isAssignableTo && type.isAssignableTo($data.Entity)) {
-                    //complexType
-                this._buildProperties(data[memDef.name], undefined, type);
-
             } else {
-                //primitive types
-                var typeName = Container.resolveName(type);
-                this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName](value) : value.toString());
+                var nullValue = this.xml.declareAttribute(m, 'null');
+                this.xml.addAttribute(nullValue, 'true');
             }
-        } else {
-            var nullValue = this.xml.declareAttribute(m, 'null');
-            this.xml.addAttribute(nullValue, 'true');
-        }
 
-        this.xml.endElement();
+            this.xml.endElement();
+        }
     },
     _buildComplexArray: function (data, type, m, d) {
         var item = this.xml.declareElement(m, 'item');
@@ -350,6 +353,18 @@
             '$data.String': function (v) { return v; },
             '$data.ObjectID': function (v) { return v.toString(); },
             '$data.Object': function (v) { return JSON.stringify(v); },
+        }
+    },
+    supports: {
+        value: {
+            'PowerPivot': [
+                'Edm.Boolean',
+                'Edm.Binary',
+                'Edm.DateTime',
+                'Edm.Decimal',
+                'Edm.Int32',
+                'Edm.String'
+            ]
         }
     },
     _getUserAgent: function () {
