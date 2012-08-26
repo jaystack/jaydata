@@ -3,7 +3,8 @@ var express = require('express')
   , http = require('http');
 
 var mongoose = module.exports.mongoose = require('mongoose');
-mongoose.connect('mongodb://admin:admin@db1.storm.jaystack.com:8888/admin');
+mongoose.connect('mongodb://localhost/admin');
+//mongoose.connect('mongodb://admin:admin@db1.storm.jaystack.com:8888/admin');
 
 
 var tokensrv = module.exports.tokensrv = require('./lib/tokensrv');
@@ -42,6 +43,13 @@ require('./lib/appowner');
 require('./lib/app');
 require('./lib/appitem');
 
+var provision = require('./provision');
+
+provision.init();
+provision.provision('1','1','');
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
+
+
