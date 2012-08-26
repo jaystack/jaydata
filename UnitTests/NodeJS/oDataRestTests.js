@@ -322,7 +322,7 @@ test("REST - DELETE batch", 3, function () {
     $example.Context.generateTestData(context, function () {
         context.People.length(function (count) {
             equal(count, 10, 'result failed');
-            context.People.removeAll(undefined, undefined, function (cnt) {
+            context.People.removeAll(function (cnt) {
                 equal(cnt, 10, 'result failed');
                 context.People.length(function (count2) {
                     equal(count2, 0, 'result failed');
@@ -339,7 +339,7 @@ test("REST - DELETE batch filter", 3, function () {
     $example.Context.generateTestData(context, function () {
         context.People.length(function (count) {
             equal(count, 10, 'result failed');
-            context.People.removeAll(function (p) { return p.Age < 15 }, undefined, function (cnt) {
+            context.People.filter(function (p) { return p.Age < 15 }).removeAll(function (cnt) {
                 equal(cnt, 5, 'result failed');
                 context.People.length(function (count2) {
                     equal(count2, 5, 'result failed');

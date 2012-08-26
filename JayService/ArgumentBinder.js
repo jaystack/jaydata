@@ -21,17 +21,16 @@
         return value;
     },
 
-    '__eval': function (config, value) { return eval(value); },
-
     '$data.String': function (config, value) {
-        if (typeof value === 'string' && value.indexOf("'") === 0 && value.lastIndexOf("'") === value.length - 1)
-            return this.__eval(config, value);
-        else
+        if (typeof value === 'string' && value.indexOf("'") === 0 && value.lastIndexOf("'") === value.length - 1) {
+            return value.slice(1, value.length - 1);
+        } else {
             return value;
+        }
     },
-    '$data.Integer': function (config, value) { return this.__eval(config, value); },
-    '$data.Number': function (config, value) { return this.__eval(config, value); },
-    '$data.Boolean': function (config, value) { return this.__eval(config, value); },
+    '$data.Integer': function (config, value) { return JSON.parse(value); },
+    '$data.Number': function (config, value) { return JSON.parse(value); },
+    '$data.Boolean': function (config, value) { return JSON.parse(value); },
     '$data.Object': function (config, value) { return JSON.parse(value) },
 
     '$data.Blob': function (config, value) { return value; },

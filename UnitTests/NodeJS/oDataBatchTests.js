@@ -193,7 +193,7 @@ exports.Tests = {
                             }
                         });
                     }, error: function () {
-                        test.ok(false, 'test failed: ' + e)
+                        test.ok(false, 'test save failed: ' + e)
                         test.done();
                     }
                 });

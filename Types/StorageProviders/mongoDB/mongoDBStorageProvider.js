@@ -919,7 +919,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed) {
+                    if (!p.computed && (p.name != '_id') ) {
                         if (typeof u.entity[p.name] === 'undefined') continue;
                         set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
                     }
@@ -1232,6 +1232,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             length: {},
             forEach: {},
             toArray: {},
+            batchDelete: {},
             single: {},
             /*some: {
                 invokable: false,
