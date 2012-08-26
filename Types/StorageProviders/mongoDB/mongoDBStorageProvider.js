@@ -1232,6 +1232,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             length: {},
             forEach: {},
             toArray: {},
+            batchDelete: {},
             single: {},
             /*some: {
                 invokable: false,
