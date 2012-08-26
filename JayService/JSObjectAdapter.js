@@ -44,41 +44,49 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 
         var serviceInstance = this.instanceFactory();
 
-        var memberName = this.resolveMemberName(req, serviceInstance);
-        var member = this.resolveMember(req, memberName);
         var _v;
-        var oDataBuidlerCfg;
-        if (member) {
-            var memberInfo = this.createMemberContext(member, serviceInstance);
-            var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
+        var memberName = this.resolveMemberName(req, serviceInstance);
+        if (memberName) {
 
-            //this will be something much more dynamic
-            _v = memberInfo.invoke(methodArgs, req, res);
-
-            oDataBuidlerCfg = {
-                version: 'V2',
-                baseUrl: req.fullRoute,
-                context: self.type,
-                methodConfig: member,
-                methodName: memberName
-            };
-        } else {
-            if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
-            member = this.resolveEntitySet(req, memberName, serviceInstance);
+            var member = this.resolveMember(req, memberName);
+            var oDataBuidlerCfg;
             if (member) {
-                var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || self.defaultResponseLimit });
+                var memberInfo = this.createMemberContext(member, serviceInstance);
+                var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
+
+                //this will be something much more dynamic
+                _v = memberInfo.invoke(methodArgs, req, res);
 
                 oDataBuidlerCfg = {
                     version: 'V2',
-                    baseUrl: req.fullRoute
-                }
+                    baseUrl: req.fullRoute,
+                    context: self.type,
+                    methodConfig: member,
+                    methodName: memberName
+                };
+            } else {
+                if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
+                member = this.resolveEntitySet(req, memberName, serviceInstance);
+                if (member) {
+                    var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || self.defaultResponseLimit });
 
-                if (esProc.isSupported(req)) {
-                    _v = esProc.invoke(oDataBuidlerCfg, req, res);
-                } else {
-                    //404
+                    oDataBuidlerCfg = {
+                        version: 'V2',
+                        baseUrl: req.fullRoute
+                    }
+
+                    if (esProc.isSupported(req)) {
+                        _v = esProc.invoke(oDataBuidlerCfg, req, res);
+                    } else {
+                        //404
+                    }
                 }
             }
+        } else {
+            _v = this.promiseHelper.fcall(function () {
+                var serviceDef = new $data.JayStorm.ServiceDefinitionXml();
+                return new $data.XmlResult(serviceDef.convertToResponse(serviceInstance, req.fullRoute));
+            });
         }
 
         this.promiseHelper.when(_v).then(function (value) {
@@ -87,7 +95,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     if (member.hasOwnProperty('resultType') && member.resultType instanceof $data.ServiceResult) {
                         value = new member.resultType(value, member.resultCfg);
                     } else {
-                        value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
+                        value = new $data.oDataResult(value, oDataBuidlerCfg, req);
                     }
                 } else {
                     oDataBuidlerCfg = {
@@ -98,7 +106,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                         methodName: memberName
 
                     };
-                    value = new $data.oDataJSONResult(value, oDataBuidlerCfg);
+                    value = new $data.oDataResult(value, oDataBuidlerCfg, req);
                     //value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
                 }
             }
