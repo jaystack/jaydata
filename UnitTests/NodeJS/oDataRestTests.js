@@ -30,7 +30,7 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     ATables: {
         type: $data.EntitySet,
         elementType: $data.Entity.extend('$example.ATable', {
-            Id: { type: 'string' },
+            Id: { type: 'string', key: true, computed: true },
             ComplexData: {
                 type: $data.Entity.extend('$example.Complex1', {
                     Field1: { type: 'int' },

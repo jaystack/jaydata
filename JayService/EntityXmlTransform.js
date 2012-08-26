@@ -310,8 +310,9 @@
                 var typeName = Container.resolveName(type);
                 var edmTypeName = this._edmTypeMapping[typeName] ? this._edmTypeMapping[typeName] : typeName;
 
-                this.xml.startElement(item)
-                    .addAttribute(itemType, edmTypeName);
+                this.xml.startElement(item);
+                if (edmTypeName !== 'Edm.String')
+                    this.xml.addAttribute(itemType, edmTypeName);
                 this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName](data[i]) : data[i].toString());
                 this.xml.endElement();
             }

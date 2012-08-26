@@ -1,8 +1,4 @@
 ﻿require('jaydata');
-require('../../JayService/EntityXmlTransform.js');
-require('../../JayService/EntityTransform.js');
-require('../../JayService/OData/ServiceDefinitionXml.js');
-require('../../JayService/JSObjectAdapter.js');
 
 var connect = require('connect');
 var app = connect();
@@ -38,7 +34,7 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     ATables: {
         type: $data.EntitySet,
         elementType: $data.Entity.extend('$exampleSrv.ATableSrv', {
-            Id: { type: 'id' },
+            Id: { type: 'id', key: true, computed: true },
             ComplexData: {
                 type: $data.Entity.extend('$exampleSrv.Complex1', {
                     Field1: { type: 'int' },
@@ -76,7 +72,7 @@ app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 
 app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
-    return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: -1 });
+    return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
 
 app.listen(3001);
