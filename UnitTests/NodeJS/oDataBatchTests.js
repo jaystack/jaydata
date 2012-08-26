@@ -524,7 +524,7 @@ exports.Tests = {
         var context = $example.Context.getContext();
         $example.Context.generateTestData(context, function () {
             context.People.toArray(function (res) {
-                context.Orders.toArray(function (ores) {
+                context.Orders.filter('it.Completed == true').toArray(function (ores) {
                     var dkey = res[0].Id
                     context.People.remove(res[0]);
 
