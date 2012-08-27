@@ -17,10 +17,11 @@ exports.Test = {
             singleResult: true,
             collectionName: 'People',
             selectedFields: undefined,
-            includes: undefined
+            includes: undefined,
+            request: reqPoc
         }
 
-        var result = new $data.oDataResult(person, oDataBuidlerCfg, reqPoc);
+        var result = new $data.oDataResult(person, oDataBuidlerCfg);
 
         test.equal(result.contentType, 'text/xml', 'content type failed');
         var resultData = result.toString();
@@ -74,10 +75,11 @@ exports.Test = {
             singleResult: false,
             collectionName: 'People',
             selectedFields: undefined,
-            includes: undefined
+            includes: undefined,
+            request: reqPoc
         }
 
-        var result = new $data.oDataResult(persons, oDataBuidlerCfg, reqPoc);
+        var result = new $data.oDataResult(persons, oDataBuidlerCfg);
 
         test.equal(result.contentType, 'text/xml', 'content type failed');
         var resultData = result.toString();
@@ -160,10 +162,11 @@ exports.Test = {
             singleResult: false,
             collectionName: 'People',
             selectedFields: ['Id', 'Name'],
-            includes: undefined
+            includes: undefined,
+            request: reqPoc
         }
 
-        var result = new $data.oDataResult(persons, oDataBuidlerCfg, reqPoc);
+        var result = new $data.oDataResult(persons, oDataBuidlerCfg);
 
         test.equal(result.contentType, 'text/xml', 'content type failed');
         var resultData = result.toString();
@@ -242,10 +245,11 @@ exports.Test = {
             singleResult: false,
             collectionName: 'People',
             selectedFields: undefined,
-            includes: undefined
+            includes: undefined,
+            request: reqPoc
         }
 
-        var result = new $data.oDataResult(persons, oDataBuidlerCfg, reqPoc);
+        var result = new $data.oDataResult(persons, oDataBuidlerCfg);
 
         test.equal(result.contentType, 'text/xml', 'content type failed');
         var resultData = result.toString();
@@ -332,10 +336,11 @@ exports.Test = {
             singleResult: false,
             collectionName: 'ATables',
             selectedFields: undefined,
-            includes: undefined
+            includes: undefined,
+            request: reqPoc
         }
 
-        var result = new $data.oDataResult(items, oDataBuidlerCfg, reqPoc);
+        var result = new $data.oDataResult(items, oDataBuidlerCfg);
 
         var resultData = result.toString();
         var strResult = '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
@@ -452,13 +457,14 @@ exports.Test = {
             singleResult: false,
             collectionName: 'ATables',
             selectedFields: undefined,
-            includes: undefined
+            includes: undefined,
+            request: reqPoc
         };
         reqPoc.headers = {
             "user-agent": "PowerPivot"
         };
 
-        var result = new $data.oDataResult(items, oDataBuidlerCfg, reqPoc);
+        var result = new $data.oDataResult(items, oDataBuidlerCfg);
 
         var resultData = result.toString();
         var strResult = '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +

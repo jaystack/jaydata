@@ -21,11 +21,11 @@ Guard.requireType = function (name, value, typeOrTypes) {
 
 Guard.raise = function(exception){
 	if (typeof intellisense === 'undefined') {
-		if (exception instanceof Exception){
+		/*if (exception instanceof Exception){
 			console.error(exception.name + ':', exception.message + '\n', exception);
 		}else{
 			console.error(exception);
-		}
+		}*/
 		throw exception;
 	}
 };

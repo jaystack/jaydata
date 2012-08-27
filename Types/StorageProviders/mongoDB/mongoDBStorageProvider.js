@@ -155,6 +155,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
     },
 
     compile: function (expression, context) {
+        //console.log(JSON.stringify(expression, null, '    '));
         this.Visit(expression, context);
         delete context.current;
         delete context.complexType;
@@ -717,13 +718,25 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             serverOptions: {},
             databaseName: 'test'
         }, cfg);
+        if (this.providerConfiguration.server){
+            if (typeof this.providerConfiguration.server === 'string') this.providerConfiguration.server = [{ address: this.providerConfiguration.server.split(':')[0] || '127.0.0.1', port: this.providerConfiguration.server.split(':')[1] || 27017 }];
+            if (!(this.providerConfiguration.server instanceof Array)) this.providerConfiguration.server = [this.providerConfiguration.server];
+            if (this.providerConfiguration.server.length == 1){
+                this.providerConfiguration.address = this.providerConfiguration.server[0].address || '127.0.0.1';
+                this.providerConfiguration.port = this.providerConfiguration.server[0].port || 27017;
+                delete this.providerConfiguration.server;
+            }
+        }
     },
     _getServer: function(){
-        if (this.providerConfiguration.slave && this.providerConfiguration.slave.address && this.providerConfiguration.slave.port){
-            return new this.driver.ReplSetServers([
-                new this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions),
-                new this.driver.Server(this.providerConfiguration.slave.address, this.providerConfiguration.slave.port, this.providerConfiguration.slave.serverOptions || {})
-            ]);
+        if (this.providerConfiguration.server){
+            var replSet = [];
+            for (var i = 0; i < this.providerConfiguration.server.length; i++){
+                var s = this.providerConfiguration.server[i];
+                replSet.push(new this.driver.Server(s.address, s.port, s.serverOptions));
+            }
+            
+            return new this.driver.ReplSetServers(replSet);
         }else return this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
     },
     initializeStore: function(callBack){
@@ -795,7 +808,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
-            if (error) {
+            if (error){
                 callBack.error(error);
                 return;
             }
@@ -864,15 +877,19 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed){
+                    if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
+                        d.data[p.name] = 0;
+                    }else if (!p.computed){
                         d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
                         if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
+                    }else if (typeof d.data[p.name] === 'string'){
+                        d.data['_id'] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
                     }
                 }
 
                 docs.push(d.data);
             }
-        
+            
             collection.insert(docs, { safe: true }, function(error, result){
                 if (error){
                     callBack.error(error);
@@ -885,7 +902,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var props = Container.resolveType(d.type).memberDefinitions.getPublicMappedProperties();
                     for (var j = 0; j < props.length; j++){
                         var p = props[j];
-                        d.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb) //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
+                        d.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb); //self.fieldConverter.fromDb[Container.resolveName(Container.resolveType(p.type))](it[p.computed ? '_id' : p.name]);
                     }
                 }
                 
@@ -919,23 +936,58 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed && (p.name != '_id') ) {
+                    if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
+                        where[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb);
+                        if (!set.$inc) set.$inc = {};
+                        set.$inc[p.name] = 1;
+                    }else if (!p.computed){
                         if (typeof u.entity[p.name] === 'undefined') continue;
                         set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
                     }
                 }
                 
-                collection.update(where, { $set: set }, { safe: true }, function(error, result){
-                    if (error){
-                        callBack.error(error);
-                        return;
-                    }
-                    
-                    successItems++;
-                    counterFn(function(){
-                        esFn(client, successItems);
+                var fn = function(u){
+                    collection.update(where, { $set: set }, { safe: true }, function(error, result){
+                        if (error){
+                            callBack.error(error);
+                            return;
+                        }
+                        
+                        if (result){
+                            successItems++;
+                            var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
+                            for (var j = 0; j < props.length; j++){
+                                var p = props[j];
+                                if (p.concurrencyMode === $data.ConcurrencyMode.Fixed) u.entity[p.name]++;
+                            }
+                            
+                            counterFn(function(){
+                                esFn(client, successItems);
+                            });
+                        }else{
+                            counterState--;
+                            collection.find({ _id: where._id }, {}).toArray(function(error, result){
+                                if (error){
+                                    callBack.error(error);
+                                    return;
+                                }
+                                
+                                var it = result[0];
+                                var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
+                                for (var j = 0; j < props.length; j++){
+                                    var p = props[j];
+                                    u.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb);
+                                }
+                                
+                                counterFn(function(){
+                                    esFn(client, successItems);
+                                });
+                            });
+                        }
                     });
-                });
+                };
+                
+                fn(u);
             }
         };
         
@@ -958,17 +1010,19 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         if (typeof r.data[p.name] === 'undefined') delete r.data[p.name];
                     }
 
-                    //todo
-                    delete r.data[p.name];
+                    //TODO:
+                    if (!(p.concurrencyMode === $data.ConcurrencyMode.Fixed)) delete r.data[p.name];
                 }
                 
-                collection.remove(r.data, { safe: true }, function(error, cnt){
+                collection.remove(r.data, { safe: true }, function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
                     
-                    successItems += cnt;
+                    if (result) successItems++;
+                    else counterState--;
+                    
                     counterFn(function(){
                         if (c.updateAll && c.updateAll.length){
                             updateFn(client, c, collection);

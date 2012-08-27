@@ -10,6 +10,7 @@
         }
     }
 
+
     function MemberDefinition(memberDefinitionData, definedClass) {
         
         ///<field name="name" type="String">*</field>
@@ -249,6 +250,18 @@
     MemberTypes.field = "field";
 
     $data.MemberTypes = MemberTypes;
+    
+    function classToJSON(){
+        var ret = {};
+        for (var i in this){
+            if (this.hasOwnProperty(i)){
+                ret[i] = this[i];
+            }
+        }
+        return ret;
+    }
+    
+    $data.Base.toJSON = classToJSON;
 
     function TypeCreator() {
 
@@ -467,6 +480,7 @@
         }
 
         root[shortClassName] = this.classNames[className] = classFunction;
+        //classFunction.toJSON = classToJSON;
 
         //classFunction.prototype.constructor = instanceDefinition.constructor;
         //classFunction.constructor = instanceDefinition.constructor;
@@ -1087,8 +1101,8 @@ $data.defaultErrorCallback = function () {
         console.log(arguments);*/
     Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
 };
-$data.defaultSuccessCallback = function () { console.log('DEFAULT SUCCES CALLBACK'); };
-$data.defaultNotifyCallback = function () { console.log('DEFAULT NOTIFY CALLBACK'); };
+$data.defaultSuccessCallback = function () { /*console.log('DEFAULT SUCCES CALLBACK');*/ };
+$data.defaultNotifyCallback = function () { /*console.log('DEFAULT NOTIFY CALLBACK');*/ };
 
 $data.typeSystem = {
     __namespace: true,

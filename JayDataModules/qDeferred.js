@@ -26,8 +26,29 @@
                     self.deferred.resolve.apply(self.deferred, arguments);
                 },
                 error: function () {
-                    callBack.error.apply(self.deferred, arguments);
-                    self.deferred.reject.apply(self.deferred, arguments);
+                    /*callBack.error.apply(self.deferred, arguments);
+                    self.deferred.reject.apply(self.deferred, arguments);*/
+                    var finalErr;
+                    
+                    try{
+                        callBack.error.apply(self.deferred, arguments);
+                        try{
+                            self.deferred.reject.apply(self.deferred, arguments);
+                        }catch(err){
+                            finalErr = err;
+                        }
+                    }catch(err){
+                        finalErr = arguments[0];
+                        try{
+                            self.deferred.reject.apply(self.deferred, arguments);
+                        }catch(err){
+                            finalErr = err;
+                        }
+                    }
+                    
+                    if (finalErr){
+                        throw finalErr;
+                    }
                 }
             };
         },

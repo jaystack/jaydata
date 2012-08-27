@@ -958,7 +958,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     },
                     error: clbWrapper.error
                 }, changedEntities);
-            }else clbWrapper.success(0);
+            }else clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
             
             /*else if (cancelEvent) clbWrapper.error(new $data.Exception('saveChanges cancelled from event [' + cancelEvent + ']'));
             else Guard.raise('No changed entities');*/
@@ -978,6 +978,9 @@ $data.Class.define('$data.EntityContext', null, null,
             if (cancel){
                 cancelEvent = 'async';
                 changedEntities.length = 0;
+                
+                readyFn(cancel);
+                return;
             }
         
             var es = ctx._entitySetReferences[ies[i]];

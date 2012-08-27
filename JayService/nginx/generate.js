@@ -1,3 +1,4 @@
+#!/usr/bin/node
 
 var os=require('os');
 var ifaces=os.networkInterfaces();

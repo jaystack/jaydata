@@ -42,41 +42,50 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
     handleRequest: function (req, res, next) {
         var self = this;
 
-        var serviceInstance = this.instanceFactory();
+        var serviceInstance = this.instanceFactory(req, res);
 
         var _v;
         var memberName = this.resolveMemberName(req, serviceInstance);
         if (memberName) {
 
             var member = this.resolveMember(req, memberName);
-            var oDataBuidlerCfg;
+            var oDataBuilderCfg;
             if (member) {
+
                 var memberInfo = this.createMemberContext(member, serviceInstance);
                 var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
 
-                //this will be something much more dynamic
-                _v = memberInfo.invoke(methodArgs, req, res);
+                if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
+		            //this will be something much more dynamic
+                    _v = memberInfo.invoke(methodArgs, req, res);
 
-                oDataBuidlerCfg = {
-                    version: 'V2',
-                    baseUrl: req.fullRoute,
-                    context: self.type,
-                    methodConfig: member,
-                    methodName: memberName
-                };
+		            oDataBuilderCfg = {
+		                version: 'V2',
+		                baseUrl: req.fullRoute,
+		                context: self.type,
+		                methodConfig: member,
+		                methodName: memberName,
+		                request: req,
+		                response: res
+		            };
+		        }else{
+		            throw 'Invoke Error: Illegal method.';
+		        }
             } else {
                 if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
                 member = this.resolveEntitySet(req, memberName, serviceInstance);
                 if (member) {
                     var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || self.defaultResponseLimit });
 
-                    oDataBuidlerCfg = {
-                        version: 'V2',
-                        baseUrl: req.fullRoute
-                    }
+                    oDataBuilderCfg = {
+		                version: 'V2',
+		                baseUrl: req.fullRoute,
+		                request: req,
+		                response: res
+		            };
 
                     if (esProc.isSupported(req)) {
-                        _v = esProc.invoke(oDataBuidlerCfg, req, res);
+                        _v = esProc.invoke(oDataBuilderCfg, req, res);
                     } else {
                         //404
                     }
@@ -89,36 +98,26 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             });
         }
 
-        this.promiseHelper.when(_v).then(function (value) {
+        this.promiseHelper.when(_v).fail(function (err) {
+            next(err);
+        }).then(function (value) {
             if (!(value instanceof $data.ServiceResult)) {
-                if (typeof member === 'object') {
-                    if (member.hasOwnProperty('resultType') && member.resultType instanceof $data.ServiceResult) {
-                        value = new member.resultType(value, member.resultCfg);
-                    } else {
-                        value = new $data.oDataResult(value, oDataBuidlerCfg, req);
-                    }
+                if (member.hasOwnProperty('resultType')){
+                    if (typeof member.resultType === 'string') member.resultType = Container.resolveType(member.resultType);
+                    value = new member.resultType(value, member.resultCfg || oDataBuilderCfg);
                 } else {
-                    oDataBuidlerCfg = {
-                        version: 'V2',
-                        context: self.type,
-                        baseUrl: req.fullRoute,
-                        methodConfig: member,
-                        methodName: memberName
-
-                    };
-                    value = new $data.oDataResult(value, oDataBuidlerCfg, req);
-                    //value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
+                    value = new $data.oDataResult(value, oDataBuilderCfg);
                 }
             }
 
             if (!(value instanceof $data.EmptyServiceResult)) {
-                res.setHeader('Content-Type', value.contentType || 'text/plain');
+                res.setHeader('content-type', res.getHeader('content-type') || value.contentType || 'text/plain');
                 res.end(value.toString());
             } else {
                 res.end();
             }
         }).fail(function (err) {
-            res.end(err.toString());
+            next(err);
         });
     },
 
@@ -145,7 +144,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         var self = this;
 
         var memberContext = {
-            method: 'GET'
+            method: ['GET', 'POST']
         };
         for (var i in member) {
             if (member.hasOwnProperty(i)) {
@@ -182,7 +181,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 defer.reject(r);
             }
 
-            var executionContext = {
+            var executionContext = request.executionContext || {
                 request: request,
                 response: response,
                 context: serviceInstance,
@@ -190,17 +189,17 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 error: error
             };
 
-            /*Object.defineProperty(serviceInstance, "executionContext", {
+            Object.defineProperty(serviceInstance, "executionContext", {
                 value:executionContext,
                 enumerable:false,
                 writable:false,
                 configurable:false
-            });*/
-            this.executionContext = executionContext;
+            });
+            //this.executionContext = executionContext;
 
             if (typeof serviceInstance.onReady === 'function') {
                 serviceInstance.onReady(function () {
-                    var result = member.apply(executionContext, args);
+                    var result = member.apply(serviceInstance, args);
 
                     if (typeof result === 'function') {
                         result.call(executionContext);
@@ -213,7 +212,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     }
                 });
             } else {
-                var result = member.apply(executionContext, args);
+                var result = member.apply(serviceInstance, args);
 
                 if (typeof result === 'function') {
                     result.call(executionContext);
