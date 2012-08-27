@@ -1,11 +1,12 @@
 
+var q = require('q')
+
 var express = require('express')
   , http = require('http');
 
 var mongoose = module.exports.mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/admin');
 //mongoose.connect('mongodb://admin:admin@db1.storm.jaystack.com:8888/admin');
-
 
 var tokensrv = module.exports.tokensrv = require('./lib/tokensrv');
 
@@ -39,17 +40,31 @@ app.get('/gettokenstatus/:tokenid', function(req, res) {
     }
 });
 
-require('./lib/appowner');
-require('./lib/app');
-require('./lib/appitem');
+//require('./lib/appowner');
+//require('./lib/app');
+//require('./lib/appitem');
 
 var provision = require('./provision');
 
 provision.init();
-provision.provision('1','1','');
+var appid = provision.provision('app1','1','');
+q.when(appid)
+    .then(function(appid) {
+        console.log('provisioning ok');
+        var promise = provision.launch(appid);
+        q.when(promise) // TODO ez mehet egybe
+            .then(function(result) {
+                console.log('launch ok: ' + result);
+            })
+            .fail(function(reason) {
+                console.log('launch failed: '+ reason);
+            })
+    })
+    .fail(function(reason) {
+        console.log('provisioninig failed: '+ reason);
+    });
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
-
 
