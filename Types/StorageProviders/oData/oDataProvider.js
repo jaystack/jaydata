@@ -210,7 +210,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         var requestData = [request, function (data, response) {
             if (response.statusCode > 200 && response.statusCode < 300) {
-                var item = convertedItem.pop();
+                var item = convertedItem[0];
                 if (response.statusCode == 204) {
                     if (response.headers.ETag) {
                         var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
@@ -230,6 +230,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         }
                     }, this);
                 }
+                
                 if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }

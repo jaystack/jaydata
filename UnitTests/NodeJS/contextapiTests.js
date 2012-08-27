@@ -9,7 +9,6 @@ JSON.prittify = function(o){
     return JSON.stringify(o, null, '    ');
 };
 
-require('../../JayDataModules/qDeferred.js');
 require('../../JaySvcUtil/JaySvcUtil.js');
 
 var connect = require('connect');
@@ -49,7 +48,7 @@ app.use('/start', function(req, res){
         var database = new $data.JayStormAPI.Database(db);
         context.Databases.add(database);
         
-        context.saveChanges(function(){
+        context.saveChanges(function(cnt){
             var category = new $data.JayStormAPI.Entity({
                 DatabaseID: database.DatabaseID,
                 Name: 'Category',
@@ -66,32 +65,37 @@ app.use('/start', function(req, res){
             context.Entities.add(category);
             context.Entities.add(article);
             
-            var categories = new $data.JayStormAPI.EntitySet({ DatabaseID: database.DatabaseID, Name: 'Categories', ElementType: db.Namespace + '.' + category.Name });
-            var articles = new $data.JayStormAPI.EntitySet({ DatabaseID: database.DatabaseID, Name: 'Articles', ElementType: db.Namespace + '.' + article.Name });
-            
-            context.EntitySets.add(categories);
-            context.EntitySets.add(articles);
-            
             context.saveChanges(function(){
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Title', Type: 'string' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Articles', Type: 'Array', ElementType: 'id' }));
+                var categories = new $data.JayStormAPI.EntitySet({ DatabaseID: database.DatabaseID, Name: 'Categories', ElementType: category.Name, ElementTypeID: category.EntityID });
+                var articles = new $data.JayStormAPI.EntitySet({ DatabaseID: database.DatabaseID, Name: 'Articles', ElementType: article.Name, ElementTypeID: article.EntityID });
                 
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Title', Type: 'string' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Lead', Type: 'string' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Body', Type: 'string' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'CreateDate', Type: 'datetime' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Thumbnail_LowRes', Type: 'blob' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Thumbnail_HighRes', Type: 'blob' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Category', Type: 'id' }));
-                context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Tags', Type: 'Array', ElementType: 'string' }));
+                context.EntitySets.add(categories);
+                context.EntitySets.add(articles);
                 
                 context.saveChanges(function(){
-                    res.end('ContextAPI ready.');
-                    /*initializeService(function(){
-                        console.log('Service ready.');
-                    });*/
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Title', Type: 'string' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: category.EntityID, Name: 'Articles', Type: 'Array', ElementType: 'id' }));
+                    
+                    context.EventHandlers.add(new $data.JayStormAPI.EventHandler({ DatabaseID: database.DatabaseID, EntitySetID: categories.EntitySetID, Type: 'afterCreate', Handler: 'function(data){ console.log("Created categories:", data); }' }));
+                    context.EventHandlers.add(new $data.JayStormAPI.EventHandler({ DatabaseID: database.DatabaseID, EntitySetID: categories.EntitySetID, Type: 'afterRead', Handler: 'function(data){ console.log("Read from categories:", data); }' }));
+                    
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Id', Type: 'id', Required: true, Key: true, Computed: true }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Title', Type: 'string' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Lead', Type: 'string' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Body', Type: 'string' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'CreateDate', Type: 'datetime' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Thumbnail_LowRes', Type: 'blob' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Thumbnail_HighRes', Type: 'blob' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Category', Type: 'id' }));
+                    context.EntityFields.add(new $data.JayStormAPI.EntityField({ DatabaseID: database.DatabaseID, EntityID: article.EntityID, Name: 'Tags', Type: 'Array', ElementType: 'string' }));
+                    
+                    context.saveChanges(function(){
+                        res.end('ContextAPI ready.');
+                        /*initializeService(function(){
+                            console.log('Service ready.');
+                        });*/
+                    });
                 });
             });
         });

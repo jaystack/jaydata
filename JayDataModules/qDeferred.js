@@ -26,6 +26,8 @@
                     self.deferred.resolve.apply(self.deferred, arguments);
                 },
                 error: function () {
+                    /*callBack.error.apply(self.deferred, arguments);
+                    self.deferred.reject.apply(self.deferred, arguments);*/
                     var finalErr;
                     
                     try{

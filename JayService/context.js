@@ -21,7 +21,9 @@ $data.Entity.extend("$news.Types.Article", {
 });
 
 $data.EntityContext.extend("$news.Types.Context", {
-    Categories: { type: $data.EntitySet, elementType: $news.Types.Category },
+    Categories: { type: $data.EntitySet, elementType: $news.Types.Category,
+        afterCreate: function(data){ console.log("Created categories:", data); },
+        afterRead: function(data){ console.log("Read from categories:", data); } },
     Articles: { type: $data.EntitySet, elementType: $news.Types.Article }
 });
 

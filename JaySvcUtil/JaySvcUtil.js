@@ -68,6 +68,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
     _transform: function (callBack, versionInfo, xml, xsl) {
         var self = this;
         var codeText = self._processResults(self.config.url, versionInfo, xml, xsl);
+        console.log(codeText);
         eval(codeText);
         var ctxType = $data.generatedContexts.pop();
         if (self.debugMode)

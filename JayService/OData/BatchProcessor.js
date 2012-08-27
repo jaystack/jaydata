@@ -13,7 +13,7 @@
         }
         OData.batchServerHandler.read(reqWrapper, {});
 
-        var idx = 0;
+        var idx = -1;
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback();
 
@@ -24,12 +24,12 @@
             var saveSuccess = function (result) {
                 if (result) batchResult.push(result);
 
+                idx++;
                 if (idx < batchRequests.length) {
                     self._processBatch(batchRequests[idx].__changeRequests, { success: saveSuccess, error: function () { cbWrapper.error(batchResult) } });
                 } else {
                     cbWrapper.success(batchResult);
                 }
-                idx++;
             }
             saveSuccess();
 

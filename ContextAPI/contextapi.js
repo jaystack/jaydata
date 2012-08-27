@@ -84,7 +84,7 @@ app.use(function (req, res, next) {
 });
 
 app.use(connect.query());
-//app.use(connect.bodyParser());
+app.use(connect.bodyParser());
 app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 app.use("/client", connect.static('/home/lazarv/project/jaydata'));
 //var context = new $data.JayStormAPI.API({ name: 'mongoDB', databaseName: 'contextapi' });
@@ -102,6 +102,8 @@ app.use("/ApplicationDB", $data.JayService.createAdapter($data.JayStormAPI.API, 
     //return context;
     return new $data.JayStormAPI.API({ name: 'mongoDB', databaseName: 'ApplicationDB' });
 }));
+
+app.use(connect.errorHandler());
 
 app.listen(3000);
 /*var connect = require('connect');

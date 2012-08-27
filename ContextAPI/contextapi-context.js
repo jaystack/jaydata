@@ -65,7 +65,9 @@ $data.Entity.extend('$data.JayStormAPI.ServiceOperation', {
 $data.Entity.extend('$data.JayStormAPI.EventHandler', {
     EventHandlerID: { type: 'id', key: true, computed: true },
     Type: { type: 'string', required: true },
-    Handler: { type: 'string', required: true }/*,
+    Handler: { type: 'string', required: true },
+    EntitySetID: { type: 'id', required: true },
+    DatabaseID: { type: 'id', required: true }/*,
     EntitySet: { type: '$data.JayStormAPI.EntitySet', inverseProperty: 'EventHandlers', required: true }*/
 });
 
@@ -74,7 +76,7 @@ $data.Entity.extend('$data.JayStormAPI.EntitySet', {
     EntitySetID: { type: 'id', key: true, computed: true },
     Name: { type: 'string', required: true },
     ElementType: { type: 'string', required: true },
-    //ElementTypeID: { type: 'id', required: true },
+    ElementTypeID: { type: 'id', required: true },
     TableName: { type: 'string' },
     //EventHandlers: { type: 'Array', elementType: '$data.JayStormAPI.EventHandler' },
     //ElementType: { type: '$data.JayStormAPI.Entity', required: true },

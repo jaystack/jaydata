@@ -229,6 +229,7 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
             var context = {};
             var entities = [];
             var entityIds = [];
+            var entitySets = {};
             this.context.Databases.single(function(it){ return it.Name == this.db; }, { db: db }, function(db){
                 nsContext = db.Namespace + '.Context';
                 context.ContextName = nsContext;
@@ -242,6 +243,7 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                                 elementType: db.Namespace + '.' + r.ElementType
                             };
                             if (r.TableName) ret[r.Name].tableName = r.TableName;
+                            entitySets[r.EntitySetID] = ret[r.Name];
                             //entities.push(r.ElementType);
                         }
                         context[nsContext] = ret;
@@ -291,7 +293,7 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                                 
                                 self.success(context);*/
                                 
-                                self.context.EntityFields.filter(function(it){ return it.EntityID in this.entityid && it.DatabaseID == this.db; }, { db:db.DatabaseID, entityid: entityIds }).toArray({
+                                self.context.EntityFields.filter(function(it){ return it.EntityID in this.entityid && it.DatabaseID == this.db; }, { db: db.DatabaseID, entityid: entityIds }).toArray({
                                     success: function(result){
                                         for (var i = 0; i < result.length; i++){
                                             var r = result[i];
@@ -318,7 +320,16 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                                             context[e.FullName || ((e.Namespace || db.Namespace) + e.Name)][r.Name] = f;
                                         }
                                         
-                                        self.success(context);
+                                        self.context.EventHandlers.filter(function(it){ return it.DatabaseID == this.db; }, { db: db.DatabaseID }).toArray({
+                                            success: function(result){
+                                                for (var i = 0; i < result.length; i++){
+                                                    var r = result[i];
+                                                    entitySets[r.EntitySetID][r.Type] = r.Handler;
+                                                }
+                                                self.success(context);
+                                            },
+                                            error: self.error
+                                        });
                                     },
                                     error: self.error
                                 });
@@ -337,6 +348,16 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                 context: this.context,
                 success: function(context){
                     var js = '';
+                    var events = {
+                        afterCreate: true,
+                        afterRead: true,
+                        afterUpdate: true,
+                        afterDelete: true,
+                        beforeCreate: true,
+                        beforeRead: true,
+                        beforeUpdate: true,
+                        beforeDelete: true
+                    };
                     for (var i in context){
                         var c = context[i];
                         if (i != context.ContextName && i != 'ContextName'){
@@ -364,7 +385,12 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                     js += '$data.EntityContext.extend("' + context.ContextName + '", {\n';
                     for (var i in c){
                         var es = c[i];
-                        js += '    ' + i + ': { type: $data.EntitySet, elementType: ' + es.elementType + (es.tableName ? ', tableName: "' + es.tableName + '" ' : '') + ' },\n';
+                        js += '    ' + i + ': { type: $data.EntitySet, elementType: ' + es.elementType + (es.tableName ? ', tableName: "' + es.tableName + '" ' : '');
+                        for (var e in events){
+                            console.log(i, e, es[e]);
+                            if (es[e]) js += (',\n        ' + e + ': ' + es[e]);
+                        }
+                        js += ' },\n';
                     }
                     var lio = js.lastIndexOf(',');
                     js = js.substring(0, lio);
