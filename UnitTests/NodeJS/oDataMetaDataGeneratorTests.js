@@ -1045,7 +1045,7 @@ exports['entityContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                         '<EntityContainer Name="contextFI" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1071,9 +1071,9 @@ exports['entityContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                         '<EntityContainer Name="contextFIMultiple" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
-                            '<FunctionImport Name="webMethod2" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod2" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1100,7 +1100,7 @@ exports['entityContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                         '<EntityContainer Name="contextFIserviceOpName" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="newWebMethodName" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="newWebMethodName" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1117,6 +1117,8 @@ exports['entityContext'] = {
                 ///<returns type="string" />
             }
         });
+
+        $test.contextFIreturnsString.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnsString);
         var xmlStr = generator.generateMetadataXml();
@@ -1144,6 +1146,7 @@ exports['entityContext'] = {
                 ///<returns type="int" />
             }
         });
+        $test.contextFIreturnsInt.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnsInt);
         var xmlStr = generator.generateMetadataXml();
@@ -1171,6 +1174,7 @@ exports['entityContext'] = {
                 ///<returns type="bool" />
             }
         });
+        $test.contextFIreturnBool.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnBool);
         var xmlStr = generator.generateMetadataXml();
@@ -1198,6 +1202,7 @@ exports['entityContext'] = {
                 ///<returns type="blob" />
             }
         });
+        $test.contextFIreturnBlob.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnBlob);
         var xmlStr = generator.generateMetadataXml();
@@ -1225,6 +1230,7 @@ exports['entityContext'] = {
                 ///<returns type="number" />
             }
         });
+        $test.contextFIreturnNumber.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnNumber);
         var xmlStr = generator.generateMetadataXml();
@@ -1252,6 +1258,7 @@ exports['entityContext'] = {
                 ///<returns type="date" />
             }
         });
+        $test.contextFIreturnDate.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnDate);
         var xmlStr = generator.generateMetadataXml();
@@ -1279,6 +1286,7 @@ exports['entityContext'] = {
                 ///<method type="GET" />
             }
         });
+        $test.contextFImethodGET.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFImethodGET);
         var xmlStr = generator.generateMetadataXml();
@@ -1306,6 +1314,7 @@ exports['entityContext'] = {
                 ///<method type="POST" />
             }
         });
+        $test.contextFImethodPOST.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFImethodPOST);
         var xmlStr = generator.generateMetadataXml();
@@ -1333,6 +1342,7 @@ exports['entityContext'] = {
                 ///<returns type="Array" elementType="string"/>
             }
         });
+        $test.contextFIelementTypeString.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIelementTypeString);
         var xmlStr = generator.generateMetadataXml();
@@ -1360,6 +1370,7 @@ exports['entityContext'] = {
                 ///<returns type="Array" elementType="int"/>
             }
         });
+        $test.contextFIelementTypeInt.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIelementTypeInt);
         var xmlStr = generator.generateMetadataXml();
@@ -1388,6 +1399,7 @@ exports['entityContext'] = {
                 ///<param name="a" type="string" />
             }
         });
+        $test.contextFIparameter.annotateFromVSDoc();
 
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIparameter);
@@ -1420,6 +1432,7 @@ exports['entityContext'] = {
                 ///<param name="c" type="$data.Date" />
             }
         });
+        $test.contextFIparameters.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIparameters);
         var xmlStr = generator.generateMetadataXml();
@@ -1451,6 +1464,7 @@ exports['entityContext'] = {
                     ///<returns type="object"/>
                 }
             });
+            $test.contextFIreturnObject.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnObject);
             var xmlStr = generator.generateMetadataXml();
@@ -1478,6 +1492,7 @@ exports['entityContext'] = {
                     ///<returns type="Array" elementType="object"/>
                 }
             });
+            $test.contextFIreturnObjectArray.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnObjectArray);
             var xmlStr = generator.generateMetadataXml();
@@ -1505,6 +1520,7 @@ exports['entityContext'] = {
                     ///<returns type="$test.exampleClass1"/>
                 }
             });
+            $test.contextFIreturnComplexType.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnComplexType);
             var xmlStr = generator.generateMetadataXml();
@@ -1538,6 +1554,7 @@ exports['entityContext'] = {
                     ///<returns type="$test.exampleClass1withKey"/>
                 }
             });
+            $test.contextFIreturnComplexTypeWithKey.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnComplexTypeWithKey);
             var xmlStr = generator.generateMetadataXml();
@@ -1571,6 +1588,7 @@ exports['entityContext'] = {
                     ///<returns type="$test.complextTypeClass1"/>
                 }
             });
+            $test.contextFIreturnComplexTypeInComplexType.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnComplexTypeInComplexType);
             var xmlStr = generator.generateMetadataXml();
@@ -1614,6 +1632,7 @@ exports['entityContext'] = {
                     ///<returns type="Array" elementType="$test.exampleClass1"/>
                 }
             });
+            $test.contextFIreturnComplexTypeArray.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIreturnComplexTypeArray);
             var xmlStr = generator.generateMetadataXml();
@@ -1648,6 +1667,7 @@ exports['entityContext'] = {
                     ///<param name="a" type="$test.exampleClass1" />
                 }
             });
+            $test.contextFIparamTypeComplexType.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIparamTypeComplexType);
             var xmlStr = generator.generateMetadataXml();
@@ -1684,6 +1704,7 @@ exports['entityContext'] = {
                     ///<param name="b" type="$test.exampleClass1withKey" />
                 }
             });
+            $test.contextFIparamTypesComplexType.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIparamTypesComplexType);
             var xmlStr = generator.generateMetadataXml();
@@ -1726,6 +1747,7 @@ exports['entityContext'] = {
                     ///<param name="a" type="$test.complextTypeClass1" />
                 }
             });
+            $test.contextFIparamTypeComplexTypeInComplexType.annotateFromVSDoc();
 
             var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIparamTypeComplexTypeInComplexType);
             var xmlStr = generator.generateMetadataXml();
@@ -2091,6 +2113,7 @@ exports['entityContext'] = {
                 ///<returns type="$data.Queryable" elementType="$test.exampleClass1withKey" />
             }
         });
+        $test.contextFIES.annotateFromVSDoc();
 
         var generator = new $data.oDataServer.MetaDataGenerator({}, $test.contextFIES);
         var xmlStr = generator.generateMetadataXml();
