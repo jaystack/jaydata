@@ -1,46 +1,58 @@
 ﻿
 $data.Class.define('$data.MetadataLoaderClass', null, null, {
-    load: function (metadataUri, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+    load: function (metadataUri, callBack, config) {
 
-        if (typeof metadataUri === 'string') {
-            metadataUri = {
-                url: metadataUri
-            };
-        }
-        this.config = $data.typeSystem.extend({
+        var cnf = {
             EntityBaseClass: '$data.Entity',
             ContextBaseClass: '$data.EntityContext',
             AutoCreateContext: true,
             ContextInstanceName: 'context',
             EntitySetBaseClass: '$data.EntitySet',
             CollectionBaseClass: 'Array',
+            url: metadataUri,
             user: undefined,
             password: undefined
-        }, metadataUri);
+        };
+
+        $data.typeSystem.extend( cnf, config || {});
+
+
+        this.factoryCache = this.factoryCache || {};
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+
+        if (metadataUri in this.factoryCache) {
+
+            console.log("served from cache");
+            console.dir(this.factoryCache[metadataUri]);
+            callBack.success.apply({}, this.factoryCache[metadataUri]);
+            return;
+        }
+
+
+
 
         var metadataUri;
-        if (this.config.url) {
-            this.config.SerivceUri = this.config.url.replace('/$metadata', '');
-            if (this.config.url.indexOf('/$metadata') === -1) {
-                metadataUri = this.config.url.replace(/\/+$/, '') + '/$metadata';
+        if (cnf.url) {
+            cnf.SerivceUri = cnf.url.replace('/$metadata', '');
+            if (cnf.url.indexOf('/$metadata') === -1) {
+                cnf.metadataUri = cnf.url.replace(/\/+$/, '') + '/$metadata';
             } else {
-                metadataUri = this.config.url;
+                cnf.metadataUri = cnf.url;
             }
         } else {
             callBack.error('metadata url is missing');
         }
 
         var self = this;
-        self._loadXMLDoc(metadataUri, this.config.user, this.config.password, function (xml) {
+        self._loadXMLDoc(cnf, function (xml) {
             var versionInfo = self._findVersion(xml);
             if (self.xsltRepoUrl) {
                 console.log('XSLT: ' + self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version])
                 self._loadXMLDoc(self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version], undefined, undefined, function (xsl) {
-                    self._transform(callBack, versionInfo, xml, xsl);
+                    self._transform(callBack, versionInfo, xml, xsl, cnf.metadataUri);
                 });
             } else {
-                self._transform(callBack, versionInfo, xml);
+                self._transform(callBack, versionInfo, xml, undefined, cnf);
             }
 
         });
@@ -48,16 +60,16 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
     debugMode: { type: 'bool', value: false },
     xsltRepoUrl: { type: 'string', value: '' },
 
-    createFactoryFunc: function (ctxType) {
+    createFactoryFunc: function (ctxType, cnf) {
         var self = this;
         return function () {
             if (ctxType) {
                 return new ctxType({
                     name: 'oData',
-                    oDataServiceHost: self.config.SerivceUri,
+                    oDataServiceHost: cnf.SerivceUri,
                     //maxDataServiceVersion: '',
-                    user: self.config.user,
-                    password: self.config.password
+                    user: cnf.user,
+                    password: cnf.password
                 });
             } else {
                 return null;
@@ -65,28 +77,30 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         }
     },
 
-    _transform: function (callBack, versionInfo, xml, xsl) {
+    _transform: function (callBack, versionInfo, xml, xsl, cnf) {
         var self = this;
-        var codeText = self._processResults(self.config.url, versionInfo, xml, xsl);
-        console.log(codeText);
+        var codeText = self._processResults(cnf.url, versionInfo, xml, xsl, cnf);
         eval(codeText);
         var ctxType = $data.generatedContexts.pop();
+        var factoryFn = self.createFactoryFunc(ctxType, cnf);
+        this.factoryCache[cnf.url] = [factoryFn, ctxType];
+
         if (self.debugMode)
-            callBack.success(self.createFactoryFunc(ctxType), ctxType, codeText);
+            callBack.success(factoryFn, ctxType, codeText);
         else
-            callBack.success(self.createFactoryFunc(ctxType), ctxType);
+            callBack.success(factoryFn, ctxType);
     },
-    _loadXMLDoc: function (dname, u, p, callback) {
+    _loadXMLDoc: function (cnf, callback) {
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", dname, true, u, p);
+        xhttp.open("GET", cnf.metadataUri, true, cnf.user, cnf.password);
         xhttp.onreadystatechange = function () {
             if (xhttp.readyState === 4) {
-                callback(xhttp.responseXML || xhttp.responseText);
+                callback(xhttp.responseXML);
             }
         };
         xhttp.send("");
     },
-    _processResults: function (metadataUri, versionInfo, metadata, xsl) {
+    _processResults: function (metadataUri, versionInfo, metadata, xsl, cnf) {
         var transformXslt = this.getCurrentXSLTVersion(versionInfo, metadata);
 
         if (window.ActiveXObject) {
@@ -111,13 +125,14 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     xslproc = xslt.createProcessor();
                     xslproc.input = xmldoc;
 
-                    xslproc.addParameter('SerivceUri', this.config.SerivceUri);
-                    xslproc.addParameter('EntityBaseClass', this.config.EntityBaseClass);
-                    xslproc.addParameter('ContextBaseClass', this.config.ContextBaseClass);
-                    xslproc.addParameter('AutoCreateContext', this.config.AutoCreateContext);
-                    xslproc.addParameter('ContextInstanceName', this.config.ContextInstanceName);
-                    xslproc.addParameter('EntitySetBaseClass', this.config.EntitySetBaseClass);
-                    xslproc.addParameter('CollectionBaseClass', this.config.CollectionBaseClass);
+                    xslproc.addParameter('SerivceUri', cnf.SerivceUri);
+                    xslproc.addParameter('EntityBaseClass', cnf.EntityBaseClass);
+                    xslproc.addParameter('ContextBaseClass', cnf.ContextBaseClass);
+                    xslproc.addParameter('AutoCreateContext', cnf.AutoCreateContext);
+                    xslproc.addParameter('ContextInstanceName', cnf.ContextInstanceName);
+                    xslproc.addParameter('EntitySetBaseClass', cnf.EntitySetBaseClass);
+                    xslproc.addParameter('CollectionBaseClass', cnf.CollectionBaseClass);
+
 
                     xslproc.transform();
                     return xslproc.output;
@@ -135,13 +150,13 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
             var xsltProcessor = new XSLTProcessor();
             xsltProcessor.importStylesheet(xsltStylesheet);
-            xsltProcessor.setParameter(null, 'SerivceUri', this.config.SerivceUri);
-            xsltProcessor.setParameter(null, 'EntityBaseClass', this.config.EntityBaseClass);
-            xsltProcessor.setParameter(null, 'ContextBaseClass', this.config.ContextBaseClass);
-            xsltProcessor.setParameter(null, 'AutoCreateContext', this.config.AutoCreateContext);
-            xsltProcessor.setParameter(null, 'ContextInstanceName', this.config.ContextInstanceName);
-            xsltProcessor.setParameter(null, 'EntitySetBaseClass', this.config.EntitySetBaseClass);
-            xsltProcessor.setParameter(null, 'CollectionBaseClass', this.config.CollectionBaseClass);
+            xsltProcessor.setParameter(null, 'SerivceUri', cnf.SerivceUri);
+            xsltProcessor.setParameter(null, 'EntityBaseClass', cnf.EntityBaseClass);
+            xsltProcessor.setParameter(null, 'ContextBaseClass', cnf.ContextBaseClass);
+            xsltProcessor.setParameter(null, 'AutoCreateContext', cnf.AutoCreateContext);
+            xsltProcessor.setParameter(null, 'ContextInstanceName', cnf.ContextInstanceName);
+            xsltProcessor.setParameter(null, 'EntitySetBaseClass', cnf.EntitySetBaseClass);
+            xsltProcessor.setParameter(null, 'CollectionBaseClass', cnf.CollectionBaseClass);
             resultDocument = xsltProcessor.transformToFragment(metadata, document);
 
             return resultDocument.textContent;
@@ -150,13 +165,13 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             var libxml = require('libxmljs');
 
             return xslt.transform(xslt.readXsltString(transformXslt), xslt.readXmlString(metadata), [
-                'SerivceUri', "'" + this.config.SerivceUri + "'",
-                'EntityBaseClass', "'" + this.config.EntityBaseClass + "'",
-                'ContextBaseClass', "'" + this.config.ContextBaseClass + "'",
-                'AutoCreateContext', "'" + this.config.AutoCreateContext + "'",
-                'ContextInstanceName', "'" + this.config.ContextInstanceName + "'",
-                'EntitySetBaseClass', "'" + this.config.EntitySetBaseClass + "'",
-                'CollectionBaseClass', "'" + this.config.CollectionBaseClass + "'"
+                'SerivceUri', "'" + cnf.SerivceUri + "'",
+                'EntityBaseClass', "'" + cnf.EntityBaseClass + "'",
+                'ContextBaseClass', "'" + cnf.ContextBaseClass + "'",
+                'AutoCreateContext', "'" + cnf.AutoCreateContext + "'",
+                'ContextInstanceName', "'" + cnf.ContextInstanceName + "'",
+                'EntitySetBaseClass', "'" + cnf.EntitySetBaseClass + "'",
+                'CollectionBaseClass', "'" + cnf.CollectionBaseClass + "'"
             ]);
         }
     },
@@ -467,3 +482,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 });
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
+$data.service = function(serviceUri, cb, config) {
+    $data.MetadataLoader.load(serviceUri, cb, config);
+}
