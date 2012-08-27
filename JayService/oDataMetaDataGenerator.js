@@ -23,6 +23,10 @@ $data.Class.define('$data.GenxXMLCreator', null, null, {
         return this.writer.addAttribute.apply(this.writer, arguments);
     },
 
+    addText: function () {
+        return this.writer.addText.apply(this.writer, arguments);
+    },
+
     declareNamespace: function (schema, schemaName) {
         return this.writer.declareNamespace.apply(this.writer, arguments);
     },
@@ -145,6 +149,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             .addAttribute(xmlns, this.cfg['ns' + this.cfg.version])
             .addAttribute(namespace, this.cfg.contextNamespace);
 
+        this.registredTypes = [];
         this.complexTypes = [];
         this.entitySetDefinitions = [];
         this.associations = [];
@@ -238,7 +243,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
     },
 
     _buildType: function (xml, type, xmlElementName, buildKey) {
-        if (typeof type.isAssignableTo === 'function' && type.isAssignableTo($data.Entity)) {
+        if (typeof type.isAssignableTo === 'function' && type.isAssignableTo($data.Entity) && this.registredTypes.indexOf(type) === -1) {
+            this.registredTypes.push(type);
 
             var rootElement = xml.declareElement(xmlElementName);
             var name = xml.declareAttribute('Name');
