@@ -105,7 +105,7 @@ exports.testAddComplex = function(test){
 };*/
 
 exports.testAddObject = function(test){
-    test.expect(2);
+    test.expect(3);
     $test.Context.init(function(db){
         db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa1', Value: { Value: 'bbb6', Rank: 1 } }));
         db.ObjectItems.add(new $test.ObjectItem({ Key: 'aaa2', Value: { Value: 'bbb7', Rank: 2 } }));
@@ -116,6 +116,7 @@ exports.testAddObject = function(test){
             test.equal(cnt, 5, 'Not 5 items added to collection');
             db.ObjectItems.toArray(function(r){
                 test.ok(typeof r[0].Value === 'object', 'Value is not object');
+                test.equal(r[0].Value.Value, 'bbb6', 'Value in first object is not "bbb6"');
                 test.done();
             });
         });

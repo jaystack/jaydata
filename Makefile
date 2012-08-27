@@ -114,7 +114,10 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
 	$(JSERVICE_DIR)/ServiceBase.js\
 	$(JSERVICE_DIR)/EntityTransform.js\
+	$(JSERVICE_DIR)/Middleware.js\
+	$(JSERVICE_DIR)/EntityXmlTransform.js\
 	$(JSERVICE_DIR)/oDataResponseDataBuilder.js\
+	$(JSERVICE_DIR)/OData/ServiceDefinitionXml.js\
 	$(JSERVICE_DIR)/OData/BatchProcessor.js\
 	$(JSERVICE_DIR)/OData/EntitySetProcessor.js\
 	$(ODATAPARSER_DIR)/RequestExpressionBuilder.js\
@@ -166,6 +169,7 @@ InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
 	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
 
 MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
+	$(TYPES_DIR)/StorageProviders/mongoDB/ClientObjectID.js\
 
 StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 

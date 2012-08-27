@@ -135,7 +135,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 }
             },
             function (jqXHR, textStatus, errorThrow) {
-                callBack.error(errorThrow);
+                callBack.error(errorThrow || new Exception('Request failed', 'RequestError', arguments));
             }
         ];
 
@@ -210,7 +210,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         var requestData = [request, function (data, response) {
             if (response.statusCode > 200 && response.statusCode < 300) {
-                var item = convertedItem.pop();
+                var item = convertedItem[0];
                 if (response.statusCode == 204) {
                     if (response.headers.ETag) {
                         var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
@@ -230,6 +230,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         }
                     }, this);
                 }
+                
                 if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
@@ -304,14 +305,17 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     }
 
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                        if (memDef.computed) {
+                        //TODO: is this correct?
+                        //if (memDef.computed) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 item[memDef.name] = result[i].headers.ETag;
                             } else {
                                 item[memDef.name] = result[i].data[memDef.name];
                             }
-                        }
+                        //}
                     }, this);
+                    
+                    item.changedProperties = undefined;
                 }
                 if (callBack.success) {
                     callBack.success(convertedItem.length);

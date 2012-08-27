@@ -129,10 +129,10 @@ $data.FunctionImport.prototype = {
         });
     },
     webGet: function(){
-        return this.method('GET');
+        return this.httpMethod('GET');
     },
     webInvoke: function(){
-        return this.method('POST');
+        return this.httpMethod('POST');
     },
     authorize: function(roles, callback){
         var r = {};

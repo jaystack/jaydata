@@ -68,6 +68,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
     _transform: function (callBack, versionInfo, xml, xsl) {
         var self = this;
         var codeText = self._processResults(self.config.url, versionInfo, xml, xsl);
+        console.log(codeText);
         eval(codeText);
         var ctxType = $data.generatedContexts.pop();
         if (self.debugMode)
@@ -80,7 +81,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         xhttp.open("GET", dname, true, u, p);
         xhttp.onreadystatechange = function () {
             if (xhttp.readyState === 4) {
-                callback(xhttp.responseXML);
+                callback(xhttp.responseXML || xhttp.responseText);
             }
         };
         xhttp.send("");
@@ -123,7 +124,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 }
             }
             return '';
-        } else if (document.implementation && document.implementation.createDocument) {
+        } else if (typeof document !== 'undefined' && document.implementation && document.implementation.createDocument) {
             var xsltStylesheet;
             if (xsl) {
                 xsltStylesheet = xsl;
@@ -144,25 +145,62 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             resultDocument = xsltProcessor.transformToFragment(metadata, document);
 
             return resultDocument.textContent;
+        } else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
+            var xslt = require('node_xslt');
+            var libxml = require('libxmljs');
+            
+            return xslt.transform(xslt.readXsltString(transformXslt), xslt.readXmlString(metadata), [
+                'SerivceUri', "'" + this.config.SerivceUri + "'",
+                'EntityBaseClass', "'" + this.config.EntityBaseClass + "'",
+                'ContextBaseClass', "'" + this.config.ContextBaseClass + "'",
+                'AutoCreateContext', "'" + this.config.AutoCreateContext + "'",
+                'ContextInstanceName', "'" + this.config.ContextInstanceName + "'",
+                'EntitySetBaseClass', "'" + this.config.EntitySetBaseClass + "'",
+                'CollectionBaseClass', "'" + this.config.CollectionBaseClass + "'"
+            ]);
         }
     },
     _findVersion: function (metadata) {
-        var version = 'http://schemas.microsoft.com/ado/2008/09/edm';
-        var item = metadata.getElementsByTagName('Schema');
-        if (item)
-            item = item[0];
-        if (item)
-            item = item.attributes;
-        if (item)
-            item = item.getNamedItem('xmlns');
-        if (item)
-            version = item.value;
+        if (metadata.getElementsByTagName){
+            var version = 'http://schemas.microsoft.com/ado/2008/09/edm';
+            var item = metadata.getElementsByTagName('Schema');
+            if (item)
+                item = item[0];
+            if (item)
+                item = item.attributes;
+            if (item)
+                item = item.getNamedItem('xmlns');
+            if (item)
+                version = item.value;
 
-        var versionNum = this._supportedODataVersions[version];
-        return {
-            ns: version,
-            version: versionNum || 'unknown'
-        };
+            var versionNum = this._supportedODataVersions[version];
+            return {
+                ns: version,
+                version: versionNum || 'unknown'
+            };
+        }else if (typeof module !== 'undefined' && typeof require !== 'undefined'){
+            var xslt = require('node_xslt');
+            var libxml = require('libxmljs');
+            
+            var schemaXml = metadata;
+            var schemaNamespace = 'http://schemas.microsoft.com/ado/2008/09/edm';
+
+            /*var parserEvents = {
+                startElementNS: function() {
+                    if ('Schema' === arguments[0]){
+                        schemaNamespace = arguments[3];
+                    }
+                }
+            };
+
+            var parser = new libxml.SaxParser(parserEvents);
+            parser.parseString(schemaXml);*/
+            
+            return {
+                ns: schemaNamespace,
+                version: 'nodejs'
+            }
+        }
     },
     _supportedODataVersions: {
         value: {

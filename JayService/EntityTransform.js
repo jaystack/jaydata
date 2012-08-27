@@ -244,7 +244,7 @@
             },
             toDb: {
                 '$data.ObjectID': function (id) {
-                    return "'" + id.toString() + "'";
+                    return "'" + (id || '').toString() + "'";
                 },
                 '$data.Integer': function (number) {
                     return number;
@@ -276,6 +276,8 @@
     //helpers
     generateUri: function (entity, entitySetDef) {
         var urlBase = this.requesUrl + '/' + entitySetDef.name;
+        if (!entity)
+            return urlBase;
 
         var type = Container.resolveType(entitySetDef.elementType);
         var keys = type.memberDefinitions.getKeyProperties();

@@ -12,7 +12,8 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Id: { type: 'string', key: true, computed: true },
     Value: { type: 'int' },
     Date: { type: 'date' },
-    Completed: { type: 'bool' }
+    Completed: { type: 'bool' },
+    Data: { type: 'object' }
 });
 
 $data.Class.define('$example.Context', $data.EntityContext, null, {
@@ -25,7 +26,29 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     FuncArrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncArrParam', returnType: $data.Object, params: [{ a: $data.Array }] }),
     FuncArrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncArrParam', returnType: $data.Object, params: [{ a: $data.Array }] }),
     FuncBoolParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncBoolParam', returnType: $data.Boolean, params: [{ a: $data.Boolean }] }),
-    FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] })
+    FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] }),
+    ATables: {
+        type: $data.EntitySet,
+        elementType: $data.Entity.extend('$example.ATable', {
+            Id: { type: 'string', key: true, computed: true },
+            ComplexData: {
+                type: $data.Entity.extend('$example.Complex1', {
+                    Field1: { type: 'int' },
+                    Field2: { type: 'string' }
+                })
+            },
+            ComplexArray: {
+                type: 'Array',
+                elementType: $data.Entity.extend('$example.Complex2', {
+                    Field3: { type: 'int' },
+                    Field4: { type: 'string' }
+                })
+            },
+            ComplexArrayPrim: { type: 'Array', elementType: 'string' },
+            ComplexEntity: { type: $example.Order },
+            ComplexEntityArray: { type: 'Array', elementType: $example.Order }
+        })
+    }
 });
 
 $example.Context.deleteData = function (ctx, callback) {
@@ -501,7 +524,7 @@ exports.Tests = {
         var context = $example.Context.getContext();
         $example.Context.generateTestData(context, function () {
             context.People.toArray(function (res) {
-                context.Orders.toArray(function (ores) {
+                context.Orders.filter('it.Completed == true').toArray(function (ores) {
                     var dkey = res[0].Id
                     context.People.remove(res[0]);
 
