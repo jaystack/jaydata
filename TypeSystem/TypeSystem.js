@@ -480,7 +480,7 @@
         }
 
         root[shortClassName] = this.classNames[className] = classFunction;
-        classFunction.toJSON = classToJSON;
+        //classFunction.toJSON = classToJSON;
 
         //classFunction.prototype.constructor = instanceDefinition.constructor;
         //classFunction.constructor = instanceDefinition.constructor;

@@ -75,4 +75,6 @@ app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, func
     return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
 
+app.use(connect.errorHandler());
+
 app.listen(3001);

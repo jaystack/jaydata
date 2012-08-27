@@ -51,19 +51,22 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             var member = this.resolveMember(req, memberName);
             var oDataBuilderCfg;
             if (member) {
+
                 var memberInfo = this.createMemberContext(member, serviceInstance);
                 var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
 
                 if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
 		            //this will be something much more dynamic
-		            _v = memberInfo.invoke(methodArgs, req, res);
+                    _v = memberInfo.invoke(methodArgs, req, res);
 
 		            oDataBuilderCfg = {
 		                version: 'V2',
 		                baseUrl: req.fullRoute,
 		                context: self.type,
 		                methodConfig: member,
-		                methodName: memberName
+		                methodName: memberName,
+		                request: req,
+		                response: res
 		            };
 		        }else{
 		            throw 'Invoke Error: Illegal method.';
@@ -95,7 +98,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             });
         }
 
-        this.promiseHelper.when(_v).fail(function(err){
+        this.promiseHelper.when(_v).fail(function (err) {
             next(err);
         }).then(function (value) {
             if (!(value instanceof $data.ServiceResult)) {
@@ -103,8 +106,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     if (typeof member.resultType === 'string') member.resultType = Container.resolveType(member.resultType);
                     value = new member.resultType(value, member.resultCfg || oDataBuilderCfg);
                 } else {
-                    if (member.asFunction) value = new $data.oDataJSONResult(value, oDataBuilderCfg);
-                    else value = typeof value === 'object' ? new $data.JSONResult(value) : new $data.ServiceResult(value);
+                    value = new $data.oDataResult(value, oDataBuilderCfg);
                 }
             }
 
@@ -114,7 +116,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             } else {
                 res.end();
             }
-        }).fail(function(err){
+        }).fail(function (err) {
             next(err);
         });
     },

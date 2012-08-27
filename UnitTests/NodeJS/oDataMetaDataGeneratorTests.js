@@ -123,7 +123,7 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="System">' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -148,9 +148,9 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="System">' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
-                            '<FunctionImport Name="webMethod2" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod2" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -175,7 +175,7 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="System">' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="newWebMethodName" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="newWebMethodName" m:HttpMethod="POST">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +

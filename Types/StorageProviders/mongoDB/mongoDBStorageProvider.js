@@ -1011,7 +1011,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     }
 
                     //TODO:
-                    if (!p.concurrencyMode === $data.ConcurrencyMode.Fixed) delete r.data[p.name];
+                    if (!(p.concurrencyMode === $data.ConcurrencyMode.Fixed)) delete r.data[p.name];
                 }
                 
                 collection.remove(r.data, { safe: true }, function(error, result){
