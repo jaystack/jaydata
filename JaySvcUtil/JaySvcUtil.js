@@ -44,12 +44,12 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         }
 
         var self = this;
-        self._loadXMLDoc(cnf, function (xml) {
+        self._loadXMLDoc(cnf.metadataUri, cnf, function (xml) {
             var versionInfo = self._findVersion(xml);
             if (self.xsltRepoUrl) {
                 console.log('XSLT: ' + self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version])
-                self._loadXMLDoc(self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version], undefined, undefined, function (xsl) {
-                    self._transform(callBack, versionInfo, xml, xsl, cnf.metadataUri);
+                self._loadXMLDoc(self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version], cnf, function (xsl) {
+                    self._transform(callBack, versionInfo, xml, xsl, cnf);
                 });
             } else {
                 self._transform(callBack, versionInfo, xml, undefined, cnf);
@@ -90,9 +90,9 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         else
             callBack.success(factoryFn, ctxType);
     },
-    _loadXMLDoc: function (cnf, callback) {
+    _loadXMLDoc: function (uri, cnf, callback) {
         var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", cnf.metadataUri, true, cnf.user, cnf.password);
+        xhttp.open("GET", uri, true, cnf.user, cnf.password);
         xhttp.onreadystatechange = function () {
             if (xhttp.readyState === 4) {
                 callback(xhttp.responseXML);
@@ -432,9 +432,9 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 "    <xsl:choose>\r\n" +
                 "      <xsl:when test=\"$m = '*'\">\r\n" +
                 "        <attribute name=\"type\">'<xsl:value-of select=\"$CollectionBaseClass\"/>'</attribute>\r\n" +
-                "        <attribute name=\"elementType\">'\"<xsl:value-of select=\"$relation/@Type\"/>'</attribute>\r\n" +
+                "        <attribute name=\"elementType\">'<xsl:value-of select=\"$relation/@Type\"/>'</attribute>\r\n" +
                 "        <xsl:if test=\"not($otherProp/@Name)\">\r\n" +
-                "          <attribute name=\"inverseProperty\">'$$unbound'\"</attribute></xsl:if>\r\n" +
+                "          <attribute name=\"inverseProperty\">'$$unbound'</attribute></xsl:if>\r\n" +
                 "        <xsl:if test=\"$otherProp/@Name\">\r\n" +
                 "          <attribute name=\"inverseProperty\">'<xsl:value-of select=\"$otherProp/@Name\"/>'</attribute></xsl:if>\r\n" +
                 "      </xsl:when>\r\n" +
@@ -453,7 +453,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 "      </xsl:when>\r\n" +
                 "      <xsl:when test=\"$m = '1'\">\r\n" +
                 "        <attribute name=\"type\">'<xsl:value-of select=\"$relation/@Type\"/>'</attribute>\r\n" +
-                "        <attribute name=\"required\">true\"</attribute>\r\n" +
+                "        <attribute name=\"required\">true</attribute>\r\n" +
                 "        <xsl:choose>\r\n" +
                 "          <xsl:when test=\"$otherProp\">\r\n" +
                 "            <attribute name=\"inverseProperty\">'<xsl:value-of select=\"$otherProp/@Name\"/>'</attribute>\r\n" +

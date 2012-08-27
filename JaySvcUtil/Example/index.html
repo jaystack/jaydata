@@ -10,11 +10,7 @@
         $(function () {
             //$data.MetadataLoader.xsltRepoUrl = '../';
             $data.MetadataLoader.debugMode = true;
-            $data.MetadataLoader.load({
-                url: 'http://192.168.1.119:3000/myservice',
-                ContextInstanceName: 'context',
-                AutoCreateContext: false
-            }, function (factory, ctxType, text) {
+            $data.MetadataLoader.load('../../Services/emptyNewsReader.svc', function (factory, ctxType, text) {
                 c = factory();
                 document.getElementById('asd').value = text;
             });
