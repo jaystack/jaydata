@@ -49,7 +49,8 @@ $data.ServiceResult.extend('$data.MultiPartMixedResult', {
 });*/
 
 $data.ServiceResult.extend('$data.oDataResult', {
-    constructor: function (data, builderCfg, request) {
+    constructor: function (data, builderCfg) {
+        var request = builderCfg.request;
         var acceptHeader = request.headers['Accept'] || request.headers['accept'] || '';
         var version = builderCfg.version;
 

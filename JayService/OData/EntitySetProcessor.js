@@ -115,7 +115,7 @@
                 if (config.simpleResult) {
                     callback.success(new $data.ServiceResult(contextResult));
                 } else {
-                    callback.success(new $data.oDataJSONResult(contextResult, config));
+                    callback.success(new $data.oDataResult(contextResult, config));
                 }
             },
             error: function (err) {

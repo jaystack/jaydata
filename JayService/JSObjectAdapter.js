@@ -49,7 +49,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         if (memberName) {
 
             var member = this.resolveMember(req, memberName);
-            var oDataBuidlerCfg;
+            var oDataBuilderCfg;
             if (member) {
                 var memberInfo = this.createMemberContext(member, serviceInstance);
                 var methodArgs = this.resolveArguments(req, serviceInstance, memberInfo);
@@ -74,13 +74,15 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 if (member) {
                     var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || self.defaultResponseLimit });
 
-                    oDataBuidlerCfg = {
-                        version: 'V2',
-                        baseUrl: req.fullRoute
-                    }
+                    oDataBuilderCfg = {
+		                version: 'V2',
+		                baseUrl: req.fullRoute,
+		                request: req,
+		                response: res
+		            };
 
                     if (esProc.isSupported(req)) {
-                        _v = esProc.invoke(oDataBuidlerCfg, req, res);
+                        _v = esProc.invoke(oDataBuilderCfg, req, res);
                     } else {
                         //404
                     }
