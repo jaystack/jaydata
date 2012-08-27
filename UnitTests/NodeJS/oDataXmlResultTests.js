@@ -23,7 +23,7 @@ exports.Test = {
 
         var result = new $data.oDataResult(person, oDataBuidlerCfg);
 
-        test.equal(result.contentType, 'text/xml', 'content type failed');
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
         var resultData = result.toString();
 
         var matches = resultData.split('><');
@@ -81,7 +81,7 @@ exports.Test = {
 
         var result = new $data.oDataResult(persons, oDataBuidlerCfg);
 
-        test.equal(result.contentType, 'text/xml', 'content type failed');
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
         var resultData = result.toString();
 
         var matches = resultData.split('><');
@@ -168,7 +168,7 @@ exports.Test = {
 
         var result = new $data.oDataResult(persons, oDataBuidlerCfg);
 
-        test.equal(result.contentType, 'text/xml', 'content type failed');
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
         var resultData = result.toString();
 
         var matches = resultData.split('><');
@@ -251,7 +251,7 @@ exports.Test = {
 
         var result = new $data.oDataResult(persons, oDataBuidlerCfg);
 
-        test.equal(result.contentType, 'text/xml', 'content type failed');
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
         var resultData = result.toString();
 
         var matches = resultData.split('><');
@@ -419,7 +419,7 @@ exports.Test = {
         var strMatches = strResult.split('><');
 
         test.expect(matches.length + 2);
-        test.equal(result.contentType, 'text/xml', 'content type failed');
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
 
         for (var i = 0; i < matches.length; i++) {
             if (matches[i].slice(0, 8) === 'updated>') {
@@ -509,7 +509,7 @@ exports.Test = {
         var strMatches = strResult.split('><');
 
         test.expect(matches.length + 2);
-        test.equal(result.contentType, 'text/xml', 'content type failed');
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
 
         for (var i = 0; i < matches.length; i++) {
             if (matches[i].slice(0, 8) === 'updated>') {

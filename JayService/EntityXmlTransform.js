@@ -105,6 +105,14 @@
             this._buildEntry(data[i], esDef, elementType, selectedFields, includes);
         }
 
+        if (data.length === 0) {
+            var author = this.xml.declareElement('author');
+            var name = this.xml.declareElement('name');
+            this.xml.startElement(author)
+                .startElement(name).endElement()
+                .endElement();
+        }
+
         this.xml.endElement();
     },
     _buildEntry: function (data, esDef, elementType, selectedFields, includes, isRoot) {

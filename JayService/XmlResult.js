@@ -62,7 +62,7 @@ $data.ServiceResult.extend('$data.oDataResult', {
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderCfg);
             this.data = builder.convertToResponse(data);
         } else {
-            this.contentType = 'text/xml';
+            this.contentType = 'application/atom+xml';
             builderCfg.headers = request.headers;
             var transf = new $data.oDataServer.EntityXmlTransform(builderCfg.context, builderCfg.baseUrl, builderCfg);
             this.data = transf.convertToResponse(data, builderCfg.collectionName, builderCfg.selectedFields, builderCfg.includes);

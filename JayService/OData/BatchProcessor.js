@@ -26,7 +26,7 @@
 
                 idx++;
                 if (idx < batchRequests.length) {
-                    self._processBatch(batchRequests[idx].__changeRequests, { success: saveSuccess, error: function () { cbWrapper.error(batchResult) } });
+                    self._processBatch(batchRequests[idx].__changeRequests, request, { success: saveSuccess, error: function () { cbWrapper.error(batchResult) } });
                 } else {
                     cbWrapper.success(batchResult);
                 }
@@ -77,17 +77,17 @@
         }
     },
 
-    _processBatch: function (changeRequests, callback) {
+    _processBatch: function (changeRequests, request, callback) {
         var referenceData = {};
 
         for (var j = 0, l2 = changeRequests.length; j < l2; j++) {
             var changeRequest = changeRequests[j];
 
             //Refactor
-            var setInfo = this.parseUrlPart(changeRequest.urlPart);
+            var setInfo = this.parseUrlPart(changeRequest.urlPart.replace(request.fullRoute, ''));
             var itemType = setInfo.set.elementType;
 
-            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || getRandom(itemType.name);
+            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || this.getRandom(itemType.name);
             referenceData[refId] = { requestObject: changeRequest };
 
             switch (changeRequest.method) {
@@ -161,6 +161,8 @@
         return prefix + Math.random() + Math.random();
     },
     parseUrlPart: function (urlPart) {
+        if (urlPart.indexOf('/') === 0)
+            urlPart = urlPart.slice(1);
 
         var p = urlPart.split('(');
         var ids;
@@ -180,7 +182,6 @@
                 ids = pIds[0];
             }
         }
-
         var eSet = this.context[p[0]];
         return result = {
             set: eSet,
