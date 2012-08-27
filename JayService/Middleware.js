@@ -27,7 +27,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             
             Object.defineProperty(req, 'getCurrentDatabase', {
                 value: function(type, name){
-                    return new type({ name: 'mongoDB', databaseName: req.getAppId() + '_' + name, server: db.server, username: db.username, password: db.password });
+                    return new type({ name: 'mongoDB', databaseName: req.getAppId() + '_' + name, server: db.server, username: db.username, password: db.password, user: req.getUser ? req.getUser() : undefined });
                 },
                 enumerable: true
             });
@@ -62,6 +62,47 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             Object.defineProperty(req, 'dbConnections', { value: dbs, enumerable: true });
             next();
         }
+    },
+    cache: function(config){
+        var cache = {};
+        
+        return function(req, res, next){
+            Object.defineProperty(process, 'getCache', {
+                value: function(){
+                    
+                },
+                enumerable: true
+            });
+            next();
+        };
+    },
+    authentication: function(config){
+        var user = {
+            UserID: 1,
+            Login: 'admin',
+            Age: 42,
+            FirstName: 'aaa',
+            LastName: 'bbb',
+            Enabled: true,
+            Password: '***',
+            Groups: ['g1']
+        };
+        return function(req, res, next){
+            Object.defineProperty(req, 'getUser', {
+                value: function(){
+                    return user;
+                },
+                enumerable: true
+            });
+            next();
+        };
+    },
+    authorization: function(config){
+        return function(req, res, next){
+            if (req.getUser && req.getUser()){
+                next();
+            }else next();
+        };
     },
     contextFactory: function(config){
         if (!config){

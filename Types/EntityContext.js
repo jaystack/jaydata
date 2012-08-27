@@ -9,7 +9,6 @@ $data.Class.define('$data.StorageModel', null, null, {
     PhysicalType: {},
     PhysicalTypeName: {},
     EventHandlers: {},
-    Roles: {},
     TableName: {},
     ComplexTypes: {},
     Associations: {},
@@ -164,7 +163,7 @@ $data.Class.define('$data.EntityContext', null, null,
         //this._storageModel.forEach(function (storageModel) {
         for (var i = 0, l = this._storageModel.length; i < l; i++){
             var storageModel = this._storageModel[i];
-            this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers, storageModel.Roles);
+            this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers);
             var sm = this[storageModel.ItemName];
             sm.name = storageModel.ItemName;
             sm.tableName = storageModel.TableName;
@@ -225,14 +224,6 @@ $data.Class.define('$data.EntityContext', null, null,
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.afterDelete = item.afterDelete;
                     }
-                    var roles = item.roles;
-                    var r = {};
-                    if (roles instanceof Array) {
-                        for (var i = 0; i < roles.length; i++) {
-                            if (typeof roles[i] === 'string') r[roles[i]] = true;
-                        }
-                    } else r = roles;
-                    storageModel.Roles = r;
                     this._storageModel.push(storageModel);
                 }
             }
@@ -654,43 +645,50 @@ $data.Class.define('$data.EntityContext', null, null,
         clbWrapper.error = callBack.error;
         var sets = query.getEntitySets();
         
-        var ex = true;
-        var wait = false;
-        var ctx = this;
-        
-        var readyFn = function(cancel){
-            if (cancel === false) ex = false;
+        var authorizedFn = function(){
+            var ex = true;
+            var wait = false;
+            var ctx = that;
             
-            if (ex) ctx.storageProvider.executeQuery(query, clbWrapper);
-            else{
-                query.rawDataList = [];
-                query.result = [];
-                clbWrapper.success(query);
-            }
-        };
-        
-        var i = 0;
-        var callbackFn = function(cancel){
-            if (cancel === false) ex = false;
-            
-            var es = sets[i];
-            if (es.beforeRead){
-                i++;
-                var r = es.beforeRead.call(this, sets, query);
-                if (typeof r === 'function'){
-                    r.call(this, (i < sets.length && ex) ? callbackFn : readyFn, sets, query);
-                }else{
-                    if (r === false) ex = false;
-                    
-                    if (i < sets.length && ex){
-                        callbackFn();
-                    }else readyFn();
+            var readyFn = function(cancel){
+                if (cancel === false) ex = false;
+                
+                if (ex) ctx.storageProvider.executeQuery(query, clbWrapper);
+                else{
+                    query.rawDataList = [];
+                    query.result = [];
+                    clbWrapper.success(query);
                 }
-            }else readyFn();
+            };
+            
+            var i = 0;
+            var callbackFn = function(cancel){
+                if (cancel === false) ex = false;
+                
+                var es = sets[i];
+                if (es.beforeRead){
+                    i++;
+                    var r = es.beforeRead.call(this, sets, query);
+                    if (typeof r === 'function'){
+                        r.call(this, (i < sets.length && ex) ? callbackFn : readyFn, sets, query);
+                    }else{
+                        if (r === false) ex = false;
+                        
+                        if (i < sets.length && ex){
+                            callbackFn();
+                        }else readyFn();
+                    }
+                }else readyFn();
+            };
+            
+            if (sets.length) callbackFn();
+            else readyFn();
         };
         
-        if (sets.length) callbackFn();
-        else readyFn();
+        $data.Access.isAuthorized(query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ? $data.Access.DeleteBatch : $data.Access.Read, this._user, sets, {
+            success: authorizedFn,
+            error: clbWrapper.error
+        });
     },
     saveChanges: function (callback) {
         /// <signature>
@@ -913,28 +911,33 @@ $data.Class.define('$data.EntityContext', null, null,
             return pHandlerResult;
         }
         
+        var access = $data.Access.None;
+        
         var eventData = {};
         for (var i = 0; i < changedEntities.length; i++){
             var it = changedEntities[i];
             var n = it.entitySet.elementType.name;
             var es = this._entitySetReferences[n];
-            if (es.beforeCreate || es.beforeUpdate || es.beforeDelete){
+            if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || this._user){
                 if (!eventData[n]) eventData[n] = {};
                 
                 switch (it.data.entityState){
                     case $data.EntityState.Added:
+                        access |= $data.Access.Create;
                         if (es.beforeCreate){
                             if (!eventData[n].createAll) eventData[n].createAll = [];
                             eventData[n].createAll.push(it);
                         }
                         break;
                     case $data.EntityState.Modified:
+                        access |= $data.Access.Update;
                         if (es.beforeUpdate){
                             if (!eventData[n].modifyAll) eventData[n].modifyAll = [];
                             eventData[n].modifyAll.push(it);
                         }
                         break;
                     case $data.EntityState.Deleted:
+                        access |= $data.Access.Delete;
                         if (es.beforeDelete){
                             if (!eventData[n].deleteAll) eventData[n].deleteAll = [];
                             eventData[n].deleteAll.push(it);
@@ -1029,8 +1032,13 @@ $data.Class.define('$data.EntityContext', null, null,
             }
         };
         
-        if (i < ies.length) callbackFn();
-        else readyFn();
+        $data.Access.isAuthorized(access, this._user, ies, {
+            success: function(){
+                if (i < ies.length) callbackFn();
+                else readyFn();
+            },
+            error: clbWrapper.error
+        });
         
         return pHandlerResult;
     },

@@ -803,7 +803,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
-        this.entitySet = query.context.getEntitySetFromElementType(query.defaultType);
+        var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
         new $data.storageProviders.mongoDB.mongoDBCompiler().compile(query);
         
         var server = this._getServer();
@@ -813,7 +813,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 return;
             }
             
-            var collection = new self.driver.Collection(client, self.entitySet.tableName);
+            var collection = new self.driver.Collection(client, entitySet.tableName);
             var find = query.find;
 
             var cb = function(error, results){

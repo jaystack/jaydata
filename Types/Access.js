@@ -1,6 +1,14 @@
 $data.Class.define('$data.Access', null, null, {}, {
-    isAuthorized: function(access, user, roles, callback){
-        console.log('isAuthorized', arguments);
+    isAuthorized: function(access, user, sets, callback){
+        var pHandler = new $data.PromiseHandler();
+        var clbWrapper = pHandler.createCallback(callback);
+        var pHandlerResult = pHandler.getPromise();
+        
+        //clbWrapper.error('Authorization failed', 'Access authorization');
+        clbWrapper.success(true);
+        
+        return pHandlerResult;
+        
         var error;
         
         if (!access) error = 'Access undefined';
@@ -82,10 +90,11 @@ $data.Class.define('$data.Access', null, null, {}, {
         
         return pHandlerResult;
     },
-    None: 0,
-    Create: 1,
-    Read: 2,
-    Update: 4,
-    Delete: 8,
-    Execute: 16
+    None: { value: 0 },
+    Create: { value: 1 },
+    Read: { value: 2 },
+    Update: { value: 4 },
+    Delete: { value: 8 },
+    DeleteBatch: { value: 16 },
+    Execute: { value: 32 }
 });
