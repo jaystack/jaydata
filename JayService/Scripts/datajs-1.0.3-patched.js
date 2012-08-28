@@ -7241,7 +7241,6 @@
             var cType = getContentType(part);
             for (var i = 0; i < pHandlers.length; i++) {
                 if (handlerAccepts(pHandlers[i], cType) && handlerDataValidator(part)) {
-                    console.log('selected: ', i)
                     return pHandlers[i];
                 }
             }
@@ -7492,8 +7491,6 @@
 
     var atomReadHandler = handler(atomParser, textSerialize, atomAcceptTypes.join(","), MAX_DATA_SERVICE_VERSION);
     atomReadHandler.dataValidator = function (part) {
-        console.log('data validate: ', typeof part.data === 'string', part)
-
         return typeof part.data === 'string';
     };
 

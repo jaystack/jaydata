@@ -63,9 +63,9 @@
                         __changeRequests: changeRequests
                     });
                 }
-                console.log(JSON.stringify(responseData, null, '    '));
+
                 OData.batchServerHandler.write(responseData, {});
-                console.log('response done')
+
                 //writeheaders
                 for (var name in responseData.headers) {
                     if (name.toLowerCase() !== 'content-type') {

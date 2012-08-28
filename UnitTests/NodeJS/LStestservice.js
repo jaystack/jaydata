@@ -76,7 +76,6 @@ app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
 
 app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter(exampleSrv.Context, function () {
-    console.log('request');
     return new exampleSrv.Context({ name: 'mongoDB', databaseName: 'LSTestDb', responseLimit: -1 });
 }));
 
