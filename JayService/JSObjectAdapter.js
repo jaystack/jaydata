@@ -112,8 +112,8 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 
             if (!(value instanceof $data.EmptyServiceResult)) {
                 var resultText = value.toString();
-                res.setHeader('Content-Length', resultText.length);
-                res.setHeader('content-type', res.getHeader('content-type') || value.contentType || 'text/plain');
+                res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
+                res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=utf8');
                 res.end(resultText);
             } else {
                 res.end();

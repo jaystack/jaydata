@@ -3,6 +3,10 @@
         this.context = context;
         this.baseUrl = baseUrl;
         this.Q = require('q');
+
+        this.jsonContentType = 'application/json;odata=verbose;charset=utf-8';
+        this.xmlContentType = 'application/atom+xml';
+        this.multipartContentType = 'multipart/mixed';
     },
     process: function (request, response) {
         //processRequest
@@ -40,10 +44,9 @@
         //processResponse
         return function () {
             var async = this;
-            var transform = new $data.oDataServer.EntityTransform(self.context.getType(), self.baseUrl);
             var responseData = {
                 headers: {
-                    'Content-Type': 'multipart/mixed'
+                    'Content-Type': self.multipartContentType
                 },
                 data: {
                     __batchRequests: []
@@ -55,14 +58,14 @@
                 for (var i = 0; i < batchRes.length; i++) {
                     var refData = batchRes[i];
 
-                    var changeRequests = self._prepareBatch(refData, transform);
+                    var changeRequests = self._prepareBatch(refData, request);
                     responseData.data.__batchRequests.push({
                         __changeRequests: changeRequests
                     });
                 }
-
+                console.log(JSON.stringify(responseData, null, '    '));
                 OData.batchServerHandler.write(responseData, {});
-
+                console.log('response done')
                 //writeheaders
                 for (var name in responseData.headers) {
                     if (name.toLowerCase() !== 'content-type') {
@@ -87,14 +90,13 @@
             var setInfo = this.parseUrlPart(changeRequest.urlPart.replace(request.fullRoute, ''));
             var itemType = setInfo.set.elementType;
 
-            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || this.getRandom(itemType.name);
+            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || changeRequest.headers['Content-ID'] || this.getRandom(itemType.name);
             referenceData[refId] = { requestObject: changeRequest };
 
             switch (changeRequest.method) {
                 case 'POST':
                     var entity = new itemType(changeRequest.data);
                     referenceData[refId].resultObject = entity;
-
                     //discover navigations (__metadata.uri: "$n")
                     setInfo.set.add(entity);
                     break;
@@ -123,8 +125,12 @@
             error: function () { callback.error(); }
         });
     },
-    _prepareBatch: function (changedElements, entityTransformer) {
+    _prepareBatch: function (changedElements, request) {
         var responseData = [];
+        var entityTransformer = new $data.oDataServer.EntityTransform(this.context.getType(), this.baseUrl);
+        var entityXmlTransformer = new $data.oDataServer.EntityXmlTransform(this.context.getType(), this.baseUrl, { headers: request.headers });
+
+
         for (var contentId in changedElements) {
             var resItem = changedElements[contentId];
 
@@ -139,9 +145,15 @@
                 case "POST":
                     response.statusName = 'Created';
                     response.statusCode = 201;
-                    response.data = { d: entityTransformer.convertToResponse([resItem.resultObject], resItem.resultObject.getType())[0] };
-                    response.headers['Content-Type'] = 'application/json;odata=verbose;charset=utf-8';
-                    response.headers['Location'] = response.data.d.__metadata.url;
+                    //response.data = { d: entityTransformer.convertToResponse([resItem.resultObject], resItem.resultObject.getType())[0] };
+                    //response.headers['Content-Type'] = this.jsonContentType;
+                    //response.headers['Location'] = response.data.d.__metadata.url;
+                    var requestContentType = this._getContentType(resItem.requestObject.headers);
+                    if (requestContentType.indexOf(this.xmlContentType) >= 0) {
+                        this._transformItem(entityXmlTransformer, response, resItem);
+                    } else {
+                        this._transformItem(entityTransformer, response, resItem);
+                    }
                     break;
                 case "MERGE":
                 case "DELETE":
@@ -156,7 +168,21 @@
         }
         return responseData;
     },
+    _transformItem: function (entityTransformer, responseObj, resItem) {
+        if (entityTransformer instanceof $data.oDataServer.EntityXmlTransform) {
+            responseObj.data = entityTransformer.convertToResponse(resItem.resultObject, resItem.resultObject.getType());
+            responseObj.headers['Content-Type'] = this.xmlContentType;
+            responseObj.headers['Location'] = entityTransformer.generateUri(resItem.resultObject, entityTransformer._getEntitySetDefByType(resItem.resultObject.getType()));
+        } else {
+            responseObj.data = { d: entityTransformer.convertToResponse([resItem.resultObject], resItem.resultObject.getType())[0] };
+            responseObj.headers['Content-Type'] = this.jsonContentType;
+            responseObj.headers['Location'] = responseObj.data.d.__metadata.url;
+        }
+    },
 
+    _getContentType: function (headers) {
+        return headers['Content-Type'] || headers['content-type'] || '';
+    },
     getRandom: function (prefix) {
         return prefix + Math.random() + Math.random();
     },

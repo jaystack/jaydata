@@ -1,4 +1,5 @@
 ﻿require('jaydata');
+window.DOMParser = require('xmldom').DOMParser;
 
 var connect = require('connect');
 var app = connect();
