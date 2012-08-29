@@ -41,7 +41,7 @@ $data.Class.define('$data.ComplexType', $data.Association, null, {}, null);
 
 $data.Class.define('$data.EntityContext', null, null,
 {
-    constructor: function (storageProviderCfg, user){
+    constructor: function (storageProviderCfg){
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
@@ -84,7 +84,8 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
 
                 ctx._initializeEntitySets(ctx.constructor);
-                ctx._user = (storageProviderCfg && storageProviderCfg.user) || user;
+                if (storageProviderCfg && storageProviderCfg.user) Object.defineProperty(ctx, 'user', { value: storageProviderCfg.user, enumerable: true });
+                if (storageProviderCfg && storageProviderCfg.checkPermission) Object.defineProperty(ctx, 'checkPermission', { value: storageProviderCfg.checkPermission, enumerable: true });
 
                 ctx._isOK = false;
                 if (ctx.storageProvider) {
@@ -685,10 +686,12 @@ $data.Class.define('$data.EntityContext', null, null,
             else readyFn();
         };
         
-        $data.Access.isAuthorized(query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ? $data.Access.DeleteBatch : $data.Access.Read, this._user, sets, {
-            success: authorizedFn,
-            error: clbWrapper.error
-        });
+        if (this.user && this.checkPermission){
+            this.checkPermission(query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ? $data.Access.DeleteBatch : $data.Access.Read, this.user, sets, {
+                success: authorizedFn,
+                error: clbWrapper.error
+            });
+        }else authorizedFn();
     },
     saveChanges: function (callback) {
         /// <signature>
@@ -918,7 +921,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var it = changedEntities[i];
             var n = it.entitySet.elementType.name;
             var es = this._entitySetReferences[n];
-            if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || this._user){
+            if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || (this.user && this.checkPermission)){
                 if (!eventData[n]) eventData[n] = {};
                 
                 switch (it.data.entityState){
@@ -1032,13 +1035,18 @@ $data.Class.define('$data.EntityContext', null, null,
             }
         };
         
-        $data.Access.isAuthorized(access, this._user, ies, {
-            success: function(){
-                if (i < ies.length) callbackFn();
-                else readyFn();
-            },
-            error: clbWrapper.error
-        });
+        if (this.user && this.checkPermission){
+            this.checkPermission(access, this.user, ies, {
+                success: function(){
+                    if (i < ies.length) callbackFn();
+                    else readyFn();
+                },
+                error: clbWrapper.error
+            });
+        }else{
+            if (i < ies.length) callbackFn();
+            else readyFn();
+        }
         
         return pHandlerResult;
     },

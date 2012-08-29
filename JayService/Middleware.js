@@ -1,7 +1,8 @@
 $data.Class.define('$data.JayService.Middleware', null, null, null, {
     appID: function(config){
+        if (!config) config = {};
         return function(req, res, next){
-            var appId = req.headers['x-appid'] || 'unknown';
+            var appId = req.headers['x-appid'] || config.appid;
             delete req.headers['x-appid'];
             
             Object.defineProperty(req, 'getAppId', {
@@ -27,7 +28,15 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             
             Object.defineProperty(req, 'getCurrentDatabase', {
                 value: function(type, name){
-                    return new type({ name: 'mongoDB', databaseName: req.getAppId() + '_' + name, server: db.server, username: db.username, password: db.password, user: req.getUser ? req.getUser() : undefined });
+                    return new type({
+                        name: 'mongoDB',
+                        databaseName: req.getAppId() + '_' + name,
+                        server: db.server,
+                        username: db.username,
+                        password: db.password,
+                        user: req.getUser ? req.getUser() : undefined,
+                        checkPermission: req.checkPermission
+                    });
                 },
                 enumerable: true
             });
@@ -40,14 +49,14 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         if (!$data.mongoDBDriver) throw 'mongoDB driver missing.';
         
         var connectionFactory = function(name, server){
-            return function(){
+            return function(appid){
                 if (server.length > 1){
                     var replSet = [];
                     for (var i = 0; i < server.length; i++){
                         replSet.push(new $data.mongoDBDriver.Server(server[i].address, server[i].port || 27017, {}));
                     }
-                    return new $data.mongoDBDriver.Db(req.getAppId() + '_' + name, new $data.mongoDBDriver.ReplSetServers(replSet), {});
-                }else return new $data.mongoDBDriver.Db(req.getAppId() + '_' + name, new $data.mongoDBDriver.Server(server[0].address, server[0].port || 27017, {}), {});
+                    return new $data.mongoDBDriver.Db((appid ? appid + '_' : '') + name, new $data.mongoDBDriver.ReplSetServers(replSet), {});
+                }else return new $data.mongoDBDriver.Db((appid ? appid + '_' : '') + name, new $data.mongoDBDriver.Server(server[0].address, server[0].port || 27017, {}), {});
             };
         };
         
@@ -64,44 +73,372 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         }
     },
     cache: function(config){
+        var Q = require('q');
         var cache = {};
+        var timer;
+        
+        var loadCollection = function(client, collection){
+            var defer = Q.defer();
+            
+            collection.find().toArray(function(err, result){
+                if (err){
+                    defer.reject(err);
+                    return;
+                }
+                
+                defer.resolve(result);
+            });
+            
+            return defer.promise;
+        };
+        
+        var refreshCache = function(req, res, next){
+            var db = req.dbConnections.ApplicationDB(req.getAppId());
+            
+            db.open(function(err, client){
+                if (err){
+                    if (next) next();
+                    return;
+                }
+                
+                Q.allResolved([
+                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Users')),
+                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Groups')),
+                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Databases')),
+                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'EntitySets')),
+                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Permissions'))
+                ]).fail(function(err){
+                    client.close();
+                    if (next) next(err);
+                    else throw err;
+                }).then(function(v){
+                    var result = {
+                        Users: v[0].valueOf(),
+                        Groups: v[1].valueOf(),
+                        Databases: v[2].valueOf(),
+                        EntitySets: v[3].valueOf(),
+                        Permissions: v[4].valueOf()
+                    };
+                    
+                    cache = {
+                        Users: {},
+                        Groups: {},
+                        EntitySets: {},
+                        Databases: {},
+                        Permissions: {},
+                        Access: {}
+                    };
+                    
+                    for (var i = 0; i < result.Groups.length; i++){
+                        var g = result.Groups[i];
+                        cache.Groups[g._id.toString()] = g;
+                    }
+                    
+                    for (var i = 0; i < result.Users.length; i++){
+                        var u = result.Users[i];
+                        if (u.Groups && u.Groups instanceof Array){
+                            var groups = [];
+                            for (var j = 0; j < u.Groups.length; j++){
+                                groups.push(cache.Groups[u.Groups[j].toString()].Name);
+                            }
+                            u.Groups = groups;
+                        }
+                        cache.Users[u.Login] = u;
+                    }
+                    
+                    for (var i = 0; i < result.EntitySets.length; i++){
+                        var es = result.EntitySets[i];
+                        cache.EntitySets[es._id.toString()] = es;
+                    }
+                    
+                    for (var i = 0; i < result.Databases.length; i++){
+                        var d = result.Databases[i];
+                        cache.Databases[d._id.toString()] = d;
+                    }
+                    
+                    for (var i = 0; i < result.Permissions.length; i++){
+                        var p = result.Permissions[i];
+                        cache.Permissions[p._id.toString()] = p;
+                        
+                        var access = $data.Access.getAccessBitmaskFromPermission(p);
+                        
+                        var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
+                        var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
+                        
+                        for (var d = 0; d < dbIds.length; d++){
+                            for (var e = 0; e < esIds.length; e++){
+                                var db = cache.Databases[dbIds[d].toString()].Name;
+                                var es = cache.EntitySets[esIds[e].toString()].Name;
+                                var g = cache.Groups[p.GroupID.toString()].Name;
+                                
+                                if (!cache.Access[db]) cache.Access[db] = {};
+                                if (!cache.Access[db][es]) cache.Access[db][es] = {};
+                                cache.Access[db][es][g] = access;
+                            }
+                        }
+                    }
+                    
+                    cache.Access.ApplicationDB = {
+                        Tests: { g2: 63 },
+                        Permissions: { g2: 63 },
+                        Databases: { g2: 63 },
+                        Entities: { g2: 63 },
+                        ComplexTypes: { g2: 63 },
+                        EventHandlers: { g2: 63 },
+                        EntityFields: { g2: 63 },
+                        EntitySets: { g2: 63 },
+                        EntitySetPublications: { g2: 63 },
+                        Services: { g2: 63 },
+                        ServiceOperations: { g2: 63 },
+                        TypeTemplates: { g2: 63 },
+                        Users: { g2: 63 },
+                        Groups: { g2: 63 }
+                    }
+                    
+                    client.close();
+                    if (next) next();
+                });
+            });
+        };
         
         return function(req, res, next){
-            Object.defineProperty(process, 'getCache', {
-                value: function(){
+            if (!process.getCache){
+                Object.defineProperty(process, 'getCache', {
+                    value: function(){
+                        return req.cache;
+                    }
+                });
+            }
+            
+            if (!process.refreshCache){
+                Object.defineProperty(process, 'refreshCache', {
+                    value: function(callback){
+                        refreshCache(req, res, callback);
+                    },
+                    enumerable: true
+                });
+            }
+            
+            if (!timer){
+                refreshCache(req, res, function(){
+                    Object.defineProperty(req, 'cache', {
+                        value: cache,
+                        enumerable: true
+                    });
                     
-                },
-                enumerable: true
-            });
-            next();
+                    timer = setInterval(function(){
+                        refreshCache(req, res);
+                    }, 60000);
+                    
+                    next();
+                });
+            }else{
+                Object.defineProperty(req, 'cache', {
+                    value: cache,
+                    enumerable: true
+                });
+                
+                next();
+            }
         };
     },
     authentication: function(config){
-        var user = {
-            UserID: 1,
-            Login: 'admin',
-            Age: 42,
-            FirstName: 'aaa',
-            LastName: 'bbb',
-            Enabled: true,
-            Password: '***',
-            Groups: ['g1']
-        };
-        return function(req, res, next){
-            Object.defineProperty(req, 'getUser', {
-                value: function(){
-                    return user;
-                },
-                enumerable: true
+        var q = require('q');
+        var bcrypt = require('bcrypt');
+        
+        var cache;
+        
+        function mongoAuthenticate(username, password, strategy) {
+            var defer = q.defer();
+            
+            var doc = cache.Users[username];
+            if (!doc) { defer.reject('No such user'); return; }
+            else bcrypt.compare(password, doc.Password, function(err, ok) {
+                if (err) { defer.reject(err); return; }
+                if (!ok) { defer.reject('Invalid password'); return; }
+                doc.loginStrategy = strategy;
+                defer.resolve(doc);
             });
-            next();
+            
+            /*db.open(function(err, client){
+                if (err) { defer.reject(err); return; }
+                var collection = $data.mongoDBDriver.Collection(client, 'Users');
+                collection.findOne({ Login: username }, {}, function(err, doc){
+                    if (err) { defer.reject(err); return; }
+                    if (!doc) { defer.reject('No such user'); return; }
+                    else bcrypt.compare(password, doc.Password, function(err, ok) {
+                        if (err) { defer.reject(err); return; }
+                        if (!ok) { defer.reject('Invalid password'); return; }
+                        doc.loginStrategy = strategy;
+                        defer.resolve(doc);
+                        client.close();
+                    });
+                });
+            });*/
+            
+            return defer.promise;
+        }
+        
+        var passport = require('passport'),
+            BasicStrategy = require('passport-http').BasicStrategy,
+            AnonymousStrategy = require('passport-anonymous').Strategy,
+            LocalStrategy = require('passport-local').Strategy;
+        
+        passport.use(new LocalStrategy(
+            function(username, password, done){
+                var promise = mongoAuthenticate(username, password, 'local');
+                q.when(promise)
+                .then( function(result) {
+                    done(null, promise.valueOf());
+                })
+                .fail( function(reason) {
+                    done(reason);
+                });
+            }
+        ));
+        
+        passport.use(new BasicStrategy(
+            function(username, password, done) {
+                var promise = mongoAuthenticate(username, password, 'basic');
+                q.when(promise)
+                .then( function(result) {
+                    done(null, promise.valueOf());
+                })
+                .fail( function(reason) {
+                    done(reason);
+                });
+            }
+        ));
+        
+        passport.use(new AnonymousStrategy());
+        
+        passport.serializeUser(function(user, done) {
+            done(null, user);
+        });
+
+        passport.deserializeUser(function(user, done) {
+            done(null, user);
+        });
+        
+        return function(req, res, next){
+            if (!req.getUser){
+                Object.defineProperty(req, 'getUser', {
+                    value: function(){
+                        if (!req.user){
+                            Object.defineProperty(req, 'user', {
+                                value: { anonymous: true },
+                                enumerable: true
+                            });
+                        }
+                        return req.user;
+                    },
+                    enumerable: true
+                });
+            }
+            
+            cache = req.cache;
+            
+            //passport.initialize()(req, res, function() {
+                passport.session()(req, res, function() {
+                    if (req.isAuthenticated()) { next(); return; }
+                    passport.authenticate(['local', 'basic', 'anonymous'], { session: true })(req, res, next);
+                });
+            //});
+        };
+    },
+    authenticationErrorHandler: function(err, req, res, next) {
+        res.statusCode = err.status || 500;
+        next(err);
+    },
+    ensureAuthenticated: function(config){
+        if (!config) config = {};
+        if (!config.message) config.message = 'myrealm';
+        
+        return function(req, res, next) {
+            if (req.isAuthenticated() && req.getUser) { next(); return; }
+            res.statusCode = 401;
+            res.setHeader('WWW-Authenticate', 'Basic realm="' + config.message + '"');
+            next('Unauthorized');
         };
     },
     authorization: function(config){
+        if (!config) config = {};
         return function(req, res, next){
-            if (req.getUser && req.getUser()){
+            //if (req.getUser && req.getUser()){
+                Object.defineProperty(req, 'checkPermission', {
+                    value: function(access, user, entitysets, callback){
+                        var pHandler = new $data.PromiseHandler();
+                        var clbWrapper = pHandler.createCallback(callback);
+                        var pHandlerResult = pHandler.getPromise();
+                        
+                        var currentDbAccess = req.cache.Access[config.databaseName];
+                        if (!(entitysets instanceof Array)) entitysets = [entitysets];
+                        if (typeof entitysets[0] === 'object') entitysets = entitysets.map(function(it){ return it.name; });
+                        
+                        var readyFn = function(result){
+                            if (result) clbWrapper.success(result);
+                            else clbWrapper.error('Authorization failed');
+                        };
+                        
+                        for (var i = 0; i < entitysets.length; i++){
+                            var es = currentDbAccess[entitysets[i]];
+                            for (var j = 0; j < user.Groups.length; j++){
+                                var g = user.Groups[j];
+                                var esg = es[g];
+                                if (!(esg & access)){
+                                    clbWrapper.error('Authorization failed');
+                                    return pHandlerResult;
+                                }
+                            }
+                        }
+                        
+                        clbWrapper.success(true);
+                        return pHandlerResult;
+                        
+                        /*var i = 0;
+                        
+                        var callbackFn = function(result){
+                            if (result) readyFn(result);
+                        
+                            if (typeof roles[rolesKeys[i]] === 'boolean' && roles[rolesKeys[i]]){
+                                if (user.roles[rolesKeys[i]]) readyFn(true);
+                                else{
+                                    i++;
+                                    if (i < rolesKeys.length) callbackFn();
+                                    else readyFn(false);
+                                }
+                            }else if (typeof roles[rolesKeys[i]] === 'function'){
+                                var r = roles[rolesKeys[i]].call(user);
+                                
+                                if (typeof r === 'function') r.call(user, (i < rolesKeys.length ? callbackFn : readyFn));
+                                else{
+                                    if (r) readyFn(true);
+                                    else{
+                                        i++;
+                                        if (i < rolesKeys.length) callbackFn();
+                                        else readyFn(false);
+                                    }
+                                }
+                            }else if (typeof roles[rolesKeys[i]] === 'number'){
+                                if (((typeof user.roles[rolesKeys[i]] === 'number' && (user.roles[rolesKeys[i]] & access)) ||
+                                    (typeof user.roles[rolesKeys[i]] !== 'number' && user.roles[rolesKeys[i]])) &&
+                                    (roles[rolesKeys[i]] & access)) user.roles[rolesKeys[i]] &&  readyFn(true);
+                                else{
+                                    i++;
+                                    if (i < rolesKeys.length) callbackFn();
+                                    else readyFn(false);
+                                }
+                            }
+                        };
+                        
+                        callbackFn();*/
+                        
+                        return pHandlerResult;
+                    }
+                });
+                
                 next();
-            }else next();
+            //}else next();
         };
     },
     contextFactory: function(config){
