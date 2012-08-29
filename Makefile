@@ -7,6 +7,7 @@ NPM_DIR = $(TARGET_DIR)/npm
 NPM_BASE_DIR = ./npm
 TYPESYSTEM_DIR = ./TypeSystem
 TYPES_DIR = ./Types
+JAYSVCUTIL_DIR = ./JaySvcUtil
 JSERVICE_DIR = ./JayService
 BASEMODULE_DIR = ./JayDataModules
 ODATAPARSER_DIR = ./oDataParser
@@ -104,6 +105,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/Anonymous.js\
 	$(TYPES_DIR)/Authentication/FacebookAuth.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
+	$(JAYSVCUTIL_DIR)/JaySvcUtil.js\
 
 JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\

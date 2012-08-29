@@ -71,6 +71,12 @@ $data.Entity.extend('$data.JayStormAPI.EventHandler', {
     EntitySet: { type: '$data.JayStormAPI.EntitySet', inverseProperty: 'EventHandlers', required: true }*/
 });
 
+$data.Entity.extend('$data.JayStormAPI.Role', {
+    RoleID: { type: 'id', key: true, computed: true },
+    Role: { type: 'string', required: true },
+    Access: { type: 'int' }
+});
+
 $data.Entity.extend('$data.JayStormAPI.EntitySet', {
     DatabaseID: { type: 'id', required: true },
     EntitySetID: { type: 'id', key: true, computed: true },

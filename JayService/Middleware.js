@@ -1,7 +1,8 @@
 $data.Class.define('$data.JayService.Middleware', null, null, null, {
     appID: function(config){
+        if (!config) config = {};
         return function(req, res, next){
-            var appId = req.headers['x-appid'] || 'unknown';
+            var appId = req.headers['x-appid'] || config.appid;
             delete req.headers['x-appid'];
             
             Object.defineProperty(req, 'getAppId', {
@@ -27,7 +28,15 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             
             Object.defineProperty(req, 'getCurrentDatabase', {
                 value: function(type, name){
-                    return new type({ name: 'mongoDB', databaseName: req.getAppId() + '_' + name, server: db.server, username: db.username, password: db.password });
+                    return new type({
+                        name: 'mongoDB',
+                        databaseName: req.getAppId() + '_' + name,
+                        server: db.server,
+                        username: db.username,
+                        password: db.password,
+                        user: req.getUser ? req.getUser() : undefined,
+                        checkPermission: req.checkPermission
+                    });
                 },
                 enumerable: true
             });
@@ -40,14 +49,14 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         if (!$data.mongoDBDriver) throw 'mongoDB driver missing.';
         
         var connectionFactory = function(name, server){
-            return function(){
+            return function(appid){
                 if (server.length > 1){
                     var replSet = [];
                     for (var i = 0; i < server.length; i++){
                         replSet.push(new $data.mongoDBDriver.Server(server[i].address, server[i].port || 27017, {}));
                     }
-                    return new $data.mongoDBDriver.Db(req.getAppId() + '_' + name, new $data.mongoDBDriver.ReplSetServers(replSet), {});
-                }else return new $data.mongoDBDriver.Db(req.getAppId() + '_' + name, new $data.mongoDBDriver.Server(server[0].address, server[0].port || 27017, {}), {});
+                    return new $data.mongoDBDriver.Db((appid ? appid + '_' : '') + name, new $data.mongoDBDriver.ReplSetServers(replSet), {});
+                }else return new $data.mongoDBDriver.Db((appid ? appid + '_' : '') + name, new $data.mongoDBDriver.Server(server[0].address, server[0].port || 27017, {}), {});
             };
         };
         
@@ -62,6 +71,384 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             Object.defineProperty(req, 'dbConnections', { value: dbs, enumerable: true });
             next();
         }
+    },
+    cache: function(config){
+        var Q = require('q');
+        var cache = {
+            Users: {},
+            Groups: {},
+            EntitySets: {},
+            Databases: {},
+            Permissions: {},
+            Access: {}
+        };
+        var timer;
+        
+        var loadCollection = function(client, collection){
+            var defer = Q.defer();
+            
+            collection.find().toArray(function(err, result){
+                if (err){
+                    defer.reject(err);
+                    return;
+                }
+                
+                defer.resolve(result);
+            });
+            
+            return defer.promise;
+        };
+        
+        var refreshCache = function(req, res, next){
+            if (req.dbConnections.ApplicationDB){
+                var db = req.dbConnections.ApplicationDB(req.getAppId());
+                
+                db.open(function(err, client){
+                    if (err){
+                        if (next) next();
+                        return;
+                    }
+                    
+                    Q.allResolved([
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Users')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Groups')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Databases')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'EntitySets')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Permissions'))
+                    ]).fail(function(err){
+                        client.close();
+                        if (next) next(err);
+                        else throw err;
+                    }).then(function(v){
+                        var result = {
+                            Users: v[0].valueOf(),
+                            Groups: v[1].valueOf(),
+                            Databases: v[2].valueOf(),
+                            EntitySets: v[3].valueOf(),
+                            Permissions: v[4].valueOf()
+                        };
+                        
+                        cache = {
+                            Users: {},
+                            Groups: {},
+                            EntitySets: {},
+                            Databases: {},
+                            Permissions: {},
+                            Access: {}
+                        };
+                        
+                        for (var i = 0; i < result.Groups.length; i++){
+                            var g = result.Groups[i];
+                            cache.Groups[g._id.toString()] = g;
+                        }
+                        
+                        for (var i = 0; i < result.Users.length; i++){
+                            var u = result.Users[i];
+                            if (u.Groups && u.Groups instanceof Array){
+                                var groups = [];
+                                for (var j = 0; j < u.Groups.length; j++){
+                                    groups.push(cache.Groups[u.Groups[j].toString()].Name);
+                                }
+                                u.Groups = groups;
+                            }
+                            cache.Users[u.Login] = u;
+                        }
+                        
+                        for (var i = 0; i < result.EntitySets.length; i++){
+                            var es = result.EntitySets[i];
+                            cache.EntitySets[es._id.toString()] = es;
+                        }
+                        
+                        for (var i = 0; i < result.Databases.length; i++){
+                            var d = result.Databases[i];
+                            cache.Databases[d._id.toString()] = d;
+                        }
+                        
+                        for (var i = 0; i < result.Permissions.length; i++){
+                            var p = result.Permissions[i];
+                            cache.Permissions[p._id.toString()] = p;
+                            
+                            var access = $data.Access.getAccessBitmaskFromPermission(p);
+                            
+                            var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
+                            var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
+                            
+                            for (var d = 0; d < dbIds.length; d++){
+                                for (var e = 0; e < esIds.length; e++){
+                                    var db = cache.Databases[dbIds[d].toString()].Name;
+                                    var es = cache.EntitySets[esIds[e].toString()].Name;
+                                    var g = cache.Groups[p.GroupID.toString()].Name;
+                                    
+                                    if (!cache.Access[db]) cache.Access[db] = {};
+                                    if (!cache.Access[db][es]) cache.Access[db][es] = {};
+                                    cache.Access[db][es][g] = access;
+                                }
+                            }
+                        }
+                        
+                        cache.Access.ApplicationDB = {
+                            Tests: { admin: 63 },
+                            Permissions: { admin: 63 },
+                            Databases: { admin: 63 },
+                            Entities: { admin: 63 },
+                            ComplexTypes: { admin: 63 },
+                            EventHandlers: { admin: 63 },
+                            EntityFields: { admin: 63 },
+                            EntitySets: { admin: 63 },
+                            EntitySetPublications: { admin: 63 },
+                            Services: { admin: 63 },
+                            ServiceOperations: { admin: 63 },
+                            TypeTemplates: { admin: 63 },
+                            Users: { admin: 63 },
+                            Groups: { admin: 63 }
+                        }
+                        
+                        client.close();
+                        if (next) next();
+                    });
+                });
+            }else next();
+        };
+        
+        return function(req, res, next){
+            if (!process.getCache){
+                Object.defineProperty(process, 'getCache', {
+                    value: function(){
+                        return req.cache;
+                    }
+                });
+            }
+            
+            if (!process.refreshCache){
+                Object.defineProperty(process, 'refreshCache', {
+                    value: function(callback){
+                        refreshCache(req, res, callback);
+                    },
+                    enumerable: true
+                });
+            }
+            
+            if (!timer){
+                refreshCache(req, res, function(){
+                    Object.defineProperty(req, 'cache', {
+                        value: cache,
+                        enumerable: true
+                    });
+                    
+                    timer = setInterval(function(){
+                        refreshCache(req, res);
+                    }, 60000);
+                    
+                    next();
+                });
+            }else{
+                Object.defineProperty(req, 'cache', {
+                    value: cache,
+                    enumerable: true
+                });
+                
+                next();
+            }
+        };
+    },
+    authentication: function(config){
+        var q = require('q');
+        var bcrypt = require('bcrypt');
+        
+        var cache;
+        
+        function mongoAuthenticate(username, password, strategy) {
+            var defer = q.defer();
+            
+            var doc = cache.Users[username];
+            if (!doc) { defer.reject('No such user'); return; }
+            else bcrypt.compare(password, doc.Password, function(err, ok) {
+                if (err) { defer.reject(err); return; }
+                if (!ok) { defer.reject('Invalid password'); return; }
+                doc.loginStrategy = strategy;
+                defer.resolve(doc);
+            });
+            
+            /*db.open(function(err, client){
+                if (err) { defer.reject(err); return; }
+                var collection = $data.mongoDBDriver.Collection(client, 'Users');
+                collection.findOne({ Login: username }, {}, function(err, doc){
+                    if (err) { defer.reject(err); return; }
+                    if (!doc) { defer.reject('No such user'); return; }
+                    else bcrypt.compare(password, doc.Password, function(err, ok) {
+                        if (err) { defer.reject(err); return; }
+                        if (!ok) { defer.reject('Invalid password'); return; }
+                        doc.loginStrategy = strategy;
+                        defer.resolve(doc);
+                        client.close();
+                    });
+                });
+            });*/
+            
+            return defer.promise;
+        }
+        
+        var passport = require('passport'),
+            BasicStrategy = require('passport-http').BasicStrategy,
+            AnonymousStrategy = require('passport-anonymous').Strategy,
+            LocalStrategy = require('passport-local').Strategy;
+        
+        passport.use(new LocalStrategy(
+            function(username, password, done){
+                var promise = mongoAuthenticate(username, password, 'local');
+                q.when(promise)
+                .then( function(result) {
+                    done(null, promise.valueOf());
+                })
+                .fail( function(reason) {
+                    done(reason);
+                });
+            }
+        ));
+        
+        passport.use(new BasicStrategy(
+            function(username, password, done) {
+                var promise = mongoAuthenticate(username, password, 'basic');
+                q.when(promise)
+                .then( function(result) {
+                    done(null, promise.valueOf());
+                })
+                .fail( function(reason) {
+                    done(reason);
+                });
+            }
+        ));
+        
+        passport.use(new AnonymousStrategy());
+        
+        passport.serializeUser(function(user, done) {
+            done(null, user);
+        });
+
+        passport.deserializeUser(function(user, done) {
+            done(null, user);
+        });
+        
+        return function(req, res, next){
+            if (!req.getUser){
+                Object.defineProperty(req, 'getUser', {
+                    value: function(){
+                        if (!req.user){
+                            Object.defineProperty(req, 'user', {
+                                value: { anonymous: true },
+                                enumerable: true
+                            });
+                        }
+                        return req.user;
+                    },
+                    enumerable: true
+                });
+            }
+            
+            cache = req.cache;
+            
+            //passport.initialize()(req, res, function() {
+                passport.session()(req, res, function() {
+                    if (req.isAuthenticated()) { next(); return; }
+                    passport.authenticate(['local', 'basic', 'anonymous'], { session: true })(req, res, next);
+                });
+            //});
+        };
+    },
+    authenticationErrorHandler: function(err, req, res, next) {
+        res.statusCode = err.status || 500;
+        next(err);
+    },
+    ensureAuthenticated: function(config){
+        if (!config) config = {};
+        if (!config.message) config.message = 'myrealm';
+        
+        return function(req, res, next) {
+            if (req.isAuthenticated() && req.getUser) { next(); return; }
+            res.statusCode = 401;
+            res.setHeader('WWW-Authenticate', 'Basic realm="' + config.message + '"');
+            next('Unauthorized');
+        };
+    },
+    authorization: function(config){
+        if (!config) config = {};
+        return function(req, res, next){
+            //if (req.getUser && req.getUser()){
+                Object.defineProperty(req, 'checkPermission', {
+                    value: function(access, user, entitysets, callback){
+                        var pHandler = new $data.PromiseHandler();
+                        var clbWrapper = pHandler.createCallback(callback);
+                        var pHandlerResult = pHandler.getPromise();
+                        
+                        var currentDbAccess = req.cache.Access[config.databaseName];
+                        if (!(entitysets instanceof Array)) entitysets = [entitysets];
+                        if (typeof entitysets[0] === 'object') entitysets = entitysets.map(function(it){ return it.name; });
+                        
+                        var readyFn = function(result){
+                            if (result) clbWrapper.success(result);
+                            else clbWrapper.error('Authorization failed');
+                        };
+                        
+                        for (var i = 0; i < entitysets.length; i++){
+                            var es = currentDbAccess[entitysets[i]];
+                            for (var j = 0; j < user.Groups.length; j++){
+                                var g = user.Groups[j];
+                                var esg = es[g];
+                                if (!(esg & access)){
+                                    clbWrapper.error('Authorization failed');
+                                    return pHandlerResult;
+                                }
+                            }
+                        }
+                        
+                        clbWrapper.success(true);
+                        return pHandlerResult;
+                        
+                        /*var i = 0;
+                        
+                        var callbackFn = function(result){
+                            if (result) readyFn(result);
+                        
+                            if (typeof roles[rolesKeys[i]] === 'boolean' && roles[rolesKeys[i]]){
+                                if (user.roles[rolesKeys[i]]) readyFn(true);
+                                else{
+                                    i++;
+                                    if (i < rolesKeys.length) callbackFn();
+                                    else readyFn(false);
+                                }
+                            }else if (typeof roles[rolesKeys[i]] === 'function'){
+                                var r = roles[rolesKeys[i]].call(user);
+                                
+                                if (typeof r === 'function') r.call(user, (i < rolesKeys.length ? callbackFn : readyFn));
+                                else{
+                                    if (r) readyFn(true);
+                                    else{
+                                        i++;
+                                        if (i < rolesKeys.length) callbackFn();
+                                        else readyFn(false);
+                                    }
+                                }
+                            }else if (typeof roles[rolesKeys[i]] === 'number'){
+                                if (((typeof user.roles[rolesKeys[i]] === 'number' && (user.roles[rolesKeys[i]] & access)) ||
+                                    (typeof user.roles[rolesKeys[i]] !== 'number' && user.roles[rolesKeys[i]])) &&
+                                    (roles[rolesKeys[i]] & access)) user.roles[rolesKeys[i]] &&  readyFn(true);
+                                else{
+                                    i++;
+                                    if (i < rolesKeys.length) callbackFn();
+                                    else readyFn(false);
+                                }
+                            }
+                        };
+                        
+                        callbackFn();*/
+                        
+                        return pHandlerResult;
+                    }
+                });
+                
+                next();
+            //}else next();
+        };
     },
     contextFactory: function(config){
         if (!config){
@@ -114,7 +501,11 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             var file = '';
             var fn = function(){
                 file += '(function(contextTypes){\n\n';
-                file += 'var connect = require("connect");\n\n';
+                file += 'var windowBackup = window;\n';
+                file += 'window = undefined;\n';
+                file += 'var express = require("express");\n';
+                file += 'var passport = require("passport");\n';
+                file += 'window = windowBackup;\n\n';
                 
                 var dbConf = {};
                 for (var i = 0; i < config.cu.application.dataLayer.databases.length; i++){
@@ -128,7 +519,10 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 for (var i = 0; i < config.cu.application.serviceLayer.services.length; i++){
                     var s = config.cu.application.serviceLayer.services[i];
                     if (listen.indexOf(s.internalPort || s.port) < 0){
-                        file += 'var app' + (s.internalPort || s.port) + ' = connect();\n';
+                        file += 'var app' + (s.internalPort || s.port) + ' = express();\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.cookieParser());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.methodOverride());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.session({ secret: "keyboard cat" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.appID());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.currentDatabase());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
@@ -138,15 +532,31 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += '    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, MERGE");\n';
                         file += '    if (req.method === "OPTIONS") res.end(); else next();\n';
                         file += '});\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use(connect.query());\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use(connect.bodyParser());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.cache());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(passport.initialize());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '/logout", function(req, res){\n';
+                        file += '    if (req.logOut){\n';
+                        file += '        req.logOut();\n';
+                        file += '        res.statusCode = 401;\n';
+                        file += '        res.setHeader("WWW-Authenticate", "Basic realm=\\"' + s.serviceName + '\\"");\n';
+                        file += '        res.write("Logout was successful.");';
+                        file += '    }else res.write("Logout failed.");\n';
+                        file += '    res.end();\n';
+                        file += '});\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authentication());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authenticationErrorHandler);\n';
+                        if (!s.allowAnonymous) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.ensureAuthenticated({ message: "' + s.serviceName + '" }));\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.query());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.bodyParser());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
                         listen.push((s.internalPort || s.port));
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
                     file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return ' + (s.database ? 'req.getCurrentDatabase(' + s.serviceName + ', "' + s.database + '")' : 'new ' + s.serviceName + '()') + ';\n}));\n';
-                    file += 'app' + (s.internalPort || s.port) + '.use(connect.errorHandler());\n\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use(express.errorHandler());\n\n';
+                    file += 'express.errorHandler.title = "JayStorm API";\n';
                 }
                 for (var i = 0; i < listen.length; i++){
                     file += 'app' + listen[i] + '.listen(' + listen[i] + ', "127.0.0.1");\n';

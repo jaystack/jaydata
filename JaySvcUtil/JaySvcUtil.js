@@ -95,7 +95,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         xhttp.open("GET", uri, true, cnf.user, cnf.password);
         xhttp.onreadystatechange = function () {
             if (xhttp.readyState === 4) {
-                callback(xhttp.responseXML);
+                callback(xhttp.responseXML || xhttp.responseText);
             }
         };
         xhttp.send("");
