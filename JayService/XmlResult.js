@@ -6,6 +6,9 @@ $data.Class.define('$data.ServiceResult', null, null, {
     contentType: { value: 'text/plain' },
     toString: function(){
         return this.data.toString();
+    },
+    getData: function () {
+        return this.data;
     }
 });
 

@@ -7495,6 +7495,6 @@
     };
 
     //odata.batchServerHandler.partHandler = odata.serverJsonHandler;
-    odata.batchServerHandler.partHandler = [odata.serverJsonHandler, atomReadHandler, odata.atomHandler];
+    odata.batchServerHandler.partHandler = [odata.serverJsonHandler, atomReadHandler, odata.atomHandler, odata.defaultHandler];
 
 })(window);

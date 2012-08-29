@@ -421,3 +421,444 @@ test("OData - Object type modify to null", 3, function () {
         });
     });
 });
+
+test("REST - Batch GET JSON", 8, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/$batch",
+                method: 'POST',
+                data: {
+                    __batchRequests: [{
+                        method: 'GET',
+                        requestUri: 'People',
+                        headers: {
+                        }
+                    }]
+                }
+            }, function (data) {
+                console.log(data);
+                notEqual(data, undefined, 'data failed');
+
+                var batch = data.__batchResponses[0];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+
+                equal(batch.headers['Content-Type'], "application/json;odata=verbose;charset=utf-8", 'result content type failed');
+                equal(batch.data.results.length, 10, 'result length failed');
+
+                equal(typeof batch.data.results[0].__metadata, 'object', 'metadata is object');
+                delete batch.data.results[0].__metadata;
+
+                equal(typeof batch.data.results[0].Id, 'string', 'Id is string');
+                delete batch.data.results[0].Id;
+
+                deepEqual(batch.data.results[0], {
+                    Age: 10,
+                    Description: "desc0",
+                    Name: "Person0"
+                }, 'item data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            },
+            OData.batchHandler);
+
+        });
+    });
+});
+
+
+test("REST - XML - GET", 6, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + '/People',
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/atom+xml'
+                }
+            }, function (data) {
+                console.log(data); 
+                notEqual(data, undefined, 'data failed');
+                equal(typeof data.__metadata, 'object', 'data failed, __metadata is exists on xml result');
+
+                equal(data.results.length, 10, 'result length failed');
+
+                equal(typeof data.results[0].__metadata, 'object', 'metadata is object');
+                delete data.results[0].__metadata;
+
+                equal(typeof data.results[0].Id, 'string', 'Id is string');
+                delete data.results[0].Id;
+
+                deepEqual(data.results[0], {
+                    Age: 10,
+                    Description: "desc0",
+                    Name: "Person0"
+                }, 'item data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            });
+
+        });
+    });
+});
+test("REST - XML - GET ById", 5, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+            var person = p[0];
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/People('" + person.Id + "')",
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/atom+xml'
+                },
+                data: undefined
+            }, function (data) {
+                equal(typeof data.__metadata, 'object', 'data failed, __metadata is exists on xml result');
+
+                equal(data.Id, person.Id, 'Id field failed');
+                equal(data.Name, person.Name, 'Name field failed');
+                equal(data.Description, person.Description, 'Description field failed');
+                equal(data.Age, person.Age, 'Age field failed');
+
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            });
+
+        });
+    });
+});
+test("REST - XML - GET ById / Property", 4, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+            var person = p[0];
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/People('" + person.Id + "')/Name",
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/atom+xml'
+                },
+                data: undefined
+            }, function (data) {
+
+                equal(data.Id, undefined, 'Id field failed');
+                equal(data.Name, person.Name, 'Name field failed');
+                equal(data.Description, undefined, 'Description field failed');
+                equal(data.Age, undefined, 'Age field failed');
+
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            });
+
+        });
+    });
+});
+
+//test("REST - XML - POST", 8, function () {
+//    stop();
+
+//    var context = $example.Context.getContext();
+//    $example.Context.deleteData(context, function () {
+//        OData.request({
+//            requestUri: $example.Context.generateTestData.serviceurl + "/People",
+//            method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/atom+xml'
+//            },
+//            data: {
+//                Name: 'JayData',
+//                Description: 'Desc',
+//                Age: 27
+//            }
+//        }, function (data) {
+
+//            notEqual(data.Id, undefined, 'Id field failed');
+//            equal(data.Name, 'JayData', 'Name field failed');
+//            equal(data.Description, 'Desc', 'Description field failed');
+//            equal(data.Age, 27, 'Age field failed');
+
+//            context.People.toArray(function (p) {
+//                var person = p[0];
+
+//                notEqual(person.Id, undefined, 'Id field failed');
+//                equal(person.Name, 'JayData', 'Name field failed');
+//                equal(person.Description, 'Desc', 'Description field failed');
+//                equal(person.Age, 27, 'Age field failed');
+
+//                start();
+//            });
+//        }, function () {
+//            console.log(JSON.stringify(arguments));
+//            stop();
+//        });
+
+//    });
+//}); //??
+
+//test("REST - XML - MERGE", 6, function () {
+//    stop();
+
+//    var context = $example.Context.getContext();
+//    $example.Context.generateTestData(context, function () {
+//        context.People.toArray(function (p) {
+//            var person = p[0];
+
+//            OData.request({
+//                requestUri: $example.Context.generateTestData.serviceurl + "/People('" + person.Id + "')",
+//                method: 'MERGE',
+//                headers: {
+//                    'Content-Type': 'application/atom+xml'
+//                },
+//                data: {
+//                    Id: person.Id,
+//                    Name: 'UpdatedName',
+//                    Age: 300,
+//                }
+//            }, function (data) {
+//                equal(typeof data.__metadata, 'object', 'data failed, __metadata is exists on xml result');
+
+//                equal(data, undefined, 'data failed');
+
+//                context.People.filter(function (p) { p.Name == 'UpdatedName' }).toArray(function (p2) {
+//                    var person2 = p2[0];
+
+//                    equal(person2.Id, person.Id, 'Id field failed');
+//                    equal(person2.Name, 'UpdatedName', 'Name field failed');
+//                    equal(person2.Description, person.Description, 'Description field failed');
+//                    equal(person2.Age, 300, 'Age field failed');
+
+//                    start();
+//                });
+
+//            }, function () {
+//                console.log(JSON.stringify(arguments));
+//            });
+
+//        });
+//    });
+//}); //??
+
+test("REST - XML - Batch GET", 8, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/$batch",
+                method: 'POST',
+                data: {
+                    __batchRequests: [{
+                        method: 'GET',
+                        requestUri: 'People',
+                        headers: {
+                            'Accept': 'application/atom+xml'
+                        }
+                    }]
+                }
+            }, function (data) {
+                console.log(data);
+                notEqual(data, undefined, 'data failed');
+
+                var batch = data.__batchResponses[0];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+
+                equal(batch.headers['Content-Type'], "application/atom+xml", 'result content type failed');
+                equal(batch.data.results.length, 10, 'result length failed');
+
+                equal(typeof batch.data.results[0].__metadata, 'object', 'metadata is object');
+                delete batch.data.results[0].__metadata;
+
+                equal(typeof batch.data.results[0].Id, 'string', 'Id is string');
+                delete batch.data.results[0].Id;
+
+                deepEqual(batch.data.results[0], {
+                    Age: 10,
+                    Description: "desc0",
+                    Name: "Person0"
+                }, 'item data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            },
+            OData.batchHandler);
+
+        });
+    });
+});
+
+test("REST - Batch GET / $count", 5, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/$batch",
+                method: 'POST',
+                data: {
+                    __batchRequests: [{
+                        method: 'GET',
+                        requestUri: 'People/$count',
+                        headers: {
+                            'Accept': 'text/plain'
+                        }
+                    }]
+                }
+            }, function (data) {
+                console.log(data);
+                notEqual(data, undefined, 'data failed');
+
+                var batch = data.__batchResponses[0];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+                equal(batch.headers['Content-Type'], "text/plain", 'result content type failed');
+                equal(batch.data, "10", 'result data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            },
+            OData.batchHandler);
+
+        });
+    });
+});
+
+test("REST - Batch GET / query params", 8, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/$batch",
+                method: 'POST',
+                data: {
+                    __batchRequests: [{
+                        method: 'GET',
+                        requestUri: 'People?$filter=(Age ge 15)&$order=Age'
+                    }]
+                }
+            }, function (data) {
+                console.log(data);
+                notEqual(data, undefined, 'data failed');
+
+                var batch = data.__batchResponses[0];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+
+                equal(batch.headers['Content-Type'], "application/json;odata=verbose;charset=utf-8", 'result content type failed');
+                equal(batch.data.results.length, 5, 'result length failed');
+
+                equal(typeof batch.data.results[0].__metadata, 'object', 'metadata is object');
+                delete batch.data.results[0].__metadata;
+
+                equal(typeof batch.data.results[0].Id, 'string', 'Id is string');
+                delete batch.data.results[0].Id;
+
+                deepEqual(batch.data.results[0], {
+                    Age: 15,
+                    Description: "desc5",
+                    Name: "Person5"
+                }, 'item data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            },
+            OData.batchHandler);
+
+        });
+    });
+});
+
+test("REST - XML - Batch GET / query params", 8, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/$batch",
+                method: 'POST',
+                data: {
+                    __batchRequests: [{
+                        method: 'GET',
+                        requestUri: 'People?$filter=(Age ge 15)&$order=Age',
+                        headers: {
+                            'Accept': 'application/atom+xml'
+                        }
+                    }]
+                }
+            }, function (data) {
+                console.log(data);
+                notEqual(data, undefined, 'data failed');
+
+                var batch = data.__batchResponses[0];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+
+                equal(batch.headers['Content-Type'], "application/atom+xml", 'result content type failed');
+                equal(batch.data.results.length, 5, 'result length failed');
+
+                equal(typeof batch.data.results[0].__metadata, 'object', 'metadata is object');
+                delete batch.data.results[0].__metadata;
+
+                equal(typeof batch.data.results[0].Id, 'string', 'Id is string');
+                delete batch.data.results[0].Id;
+
+                deepEqual(batch.data.results[0], {
+                    Age: 15,
+                    Description: "desc5",
+                    Name: "Person5"
+                }, 'item data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            },
+            OData.batchHandler);
+
+        });
+    });
+});
