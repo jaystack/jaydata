@@ -1,13 +1,6 @@
 ﻿require('jaydata');
 window.DOMParser = require('xmldom').DOMParser;
 
-require('../../JayService/OData/BatchProcessor.js');
-require('../../JayService/OData/EntitySetProcessor.js');
-require('../../JayService/JSObjectAdapter.js');
-require('../../JayService/XmlResult.js');
-require('../../JayService/EntityXmlTransform.js');
-require('../../JayService/Scripts/datajs-1.0.3-patched.js');
-
 var connect = require('connect');
 var app = connect();
 
