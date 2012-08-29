@@ -54,18 +54,18 @@ $data.ServiceResult.extend('$data.MultiPartMixedResult', {
 $data.ServiceResult.extend('$data.oDataResult', {
     constructor: function (data, builderCfg) {
         var request = builderCfg.request;
-        var acceptHeader = request.headers['Accept'] || request.headers['accept'] || '';
+        var acceptHeader = $data.JayService.OData.Utils.getHeaderValue(request.headers, 'Accept');
         var version = builderCfg.version;
 
-        if ((version === 'V3' && acceptHeader.indexOf('application/json;odata=verbose') >= 0) || (version !== 'V3' && acceptHeader.indexOf('application/json') >= 0) ||
+        if ((version === 'V3' && acceptHeader.indexOf($data.JayService.OData.Defaults.jsonV3ContentType) >= 0) || (version !== 'V3' && acceptHeader.indexOf($data.JayService.OData.Defaults.jsonContentType) >= 0) ||
             (request.query && this.jsonFormats.indexOf(request.query.$format) >= 0) ||
             //method xml result not implemented
             builderCfg.methodConfig) {
-            this.contentType = 'application/json';
+            this.contentType = $data.JayService.OData.Defaults.jsonReturnContentType;
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderCfg);
             this.data = builder.convertToResponse(data);
         } else {
-            this.contentType = 'application/atom+xml';
+            this.contentType = $data.JayService.OData.Defaults.xmlContentType;
             builderCfg.headers = request.headers;
             var transf = new $data.oDataServer.EntityXmlTransform(builderCfg.context, builderCfg.baseUrl, builderCfg);
             this.data = transf.convertToResponse(data, builderCfg.collectionName, builderCfg.selectedFields, builderCfg.includes);

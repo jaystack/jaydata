@@ -579,89 +579,87 @@ test("REST - XML - GET ById / Property", 4, function () {
     });
 });
 
-//test("REST - XML - POST", 8, function () {
-//    stop();
+test("REST - XML - POST", 8, function () {
+    stop();
 
-//    var context = $example.Context.getContext();
-//    $example.Context.deleteData(context, function () {
-//        OData.request({
-//            requestUri: $example.Context.generateTestData.serviceurl + "/People",
-//            method: 'POST',
-//            headers: {
-//                'Content-Type': 'application/atom+xml'
-//            },
-//            data: {
-//                Name: 'JayData',
-//                Description: 'Desc',
-//                Age: 27
-//            }
-//        }, function (data) {
+    var context = $example.Context.getContext();
+    $example.Context.deleteData(context, function () {
+        OData.request({
+            requestUri: $example.Context.generateTestData.serviceurl + "/People",
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/atom+xml'
+            },
+            data: {
+                Name: 'JayData',
+                Description: 'Desc',
+                Age: 27
+            }
+        }, function (data) {
 
-//            notEqual(data.Id, undefined, 'Id field failed');
-//            equal(data.Name, 'JayData', 'Name field failed');
-//            equal(data.Description, 'Desc', 'Description field failed');
-//            equal(data.Age, 27, 'Age field failed');
+            notEqual(data.Id, undefined, 'Id field failed');
+            equal(data.Name, 'JayData', 'Name field failed');
+            equal(data.Description, 'Desc', 'Description field failed');
+            equal(data.Age, 27, 'Age field failed');
 
-//            context.People.toArray(function (p) {
-//                var person = p[0];
+            context.People.toArray(function (p) {
+                var person = p[0];
 
-//                notEqual(person.Id, undefined, 'Id field failed');
-//                equal(person.Name, 'JayData', 'Name field failed');
-//                equal(person.Description, 'Desc', 'Description field failed');
-//                equal(person.Age, 27, 'Age field failed');
+                notEqual(person.Id, undefined, 'Id field failed');
+                equal(person.Name, 'JayData', 'Name field failed');
+                equal(person.Description, 'Desc', 'Description field failed');
+                equal(person.Age, 27, 'Age field failed');
 
-//                start();
-//            });
-//        }, function () {
-//            console.log(JSON.stringify(arguments));
-//            stop();
-//        });
+                start();
+            });
+        }, function () {
+            console.log(JSON.stringify(arguments));
+            stop();
+        });
 
-//    });
-//}); //??
+    });
+});
 
-//test("REST - XML - MERGE", 6, function () {
-//    stop();
+test("REST - XML - MERGE", 5, function () {
+    stop();
 
-//    var context = $example.Context.getContext();
-//    $example.Context.generateTestData(context, function () {
-//        context.People.toArray(function (p) {
-//            var person = p[0];
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+            var person = p[0];
 
-//            OData.request({
-//                requestUri: $example.Context.generateTestData.serviceurl + "/People('" + person.Id + "')",
-//                method: 'MERGE',
-//                headers: {
-//                    'Content-Type': 'application/atom+xml'
-//                },
-//                data: {
-//                    Id: person.Id,
-//                    Name: 'UpdatedName',
-//                    Age: 300,
-//                }
-//            }, function (data) {
-//                equal(typeof data.__metadata, 'object', 'data failed, __metadata is exists on xml result');
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/People('" + person.Id + "')",
+                method: 'MERGE',
+                headers: {
+                    'Content-Type': 'application/atom+xml'
+                },
+                data: {
+                    Id: person.Id,
+                    Name: 'UpdatedName',
+                    Age: 300,
+                }
+            }, function (data) {
+                equal(data, undefined, 'data failed');
 
-//                equal(data, undefined, 'data failed');
+                context.People.filter(function (p) { p.Name == 'UpdatedName' }).toArray(function (p2) {
+                    var person2 = p2[0];
 
-//                context.People.filter(function (p) { p.Name == 'UpdatedName' }).toArray(function (p2) {
-//                    var person2 = p2[0];
+                    equal(person2.Id, person.Id, 'Id field failed');
+                    equal(person2.Name, 'UpdatedName', 'Name field failed');
+                    equal(person2.Description, person.Description, 'Description field failed');
+                    equal(person2.Age, 300, 'Age field failed');
 
-//                    equal(person2.Id, person.Id, 'Id field failed');
-//                    equal(person2.Name, 'UpdatedName', 'Name field failed');
-//                    equal(person2.Description, person.Description, 'Description field failed');
-//                    equal(person2.Age, 300, 'Age field failed');
+                    start();
+                });
 
-//                    start();
-//                });
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            });
 
-//            }, function () {
-//                console.log(JSON.stringify(arguments));
-//            });
-
-//        });
-//    });
-//}); //??
+        });
+    });
+});
 
 test("REST - XML - Batch GET", 8, function () {
     stop();

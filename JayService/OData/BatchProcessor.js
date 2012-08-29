@@ -4,13 +4,6 @@
         this.baseUrl = baseUrl;
         this.Q = require('q');
         this.queryHelper = require('qs');
-
-        this.jsonReturnContentType = 'application/json;odata=verbose;charset=utf-8';
-        this.jsonContentType = 'application/json';
-        this.xmlContentType = 'application/atom+xml';
-        this.multipartContentType = 'multipart/mixed';
-
-        this.defaultResponseLimit = 100;
     },
     process: function (request, response) {
         //processRequest
@@ -69,7 +62,7 @@
             var async = this;
             var responseData = {
                 headers: {
-                    'Content-Type': self.multipartContentType
+                    'Content-Type': $data.JayService.OData.Defaults.multipartContentType
                 },
                 data: {
                     __batchRequests: []
@@ -112,10 +105,10 @@
             var changeRequest = changeRequests[j];
 
             //Refactor
-            var setInfo = this.parseUrlPart(changeRequest.urlPart.replace(request.fullRoute, ''));
+            var setInfo = $data.JayService.OData.Utils.parseUrlPart(changeRequest.urlPart.replace(request.fullRoute, ''), this.context);
             var itemType = setInfo.set.elementType;
 
-            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || changeRequest.headers['Content-ID'] || this.getRandom(itemType.name);
+            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || changeRequest.headers['Content-ID'] || $data.JayService.OData.Utils.getRandom(itemType.name);
             referenceData[refId] = { requestObject: changeRequest };
 
             switch (changeRequest.method) {
@@ -151,7 +144,7 @@
         });
     },
     _processBatchRead: function (getBatchrequests, req, res, callback) {
-        var getProcessor = new $data.JayService.OData.EntitySetProcessor('', this.context, { top: this.context.storageProvider.providerConfiguration.responseLimit || this.defaultResponseLimit });
+        var getProcessor = new $data.JayService.OData.EntitySetProcessor('', this.context, { top: this.context.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
         var reqPromises = [];
 
         getBatchrequests.forEach(function (getBatchrequest) {
@@ -238,8 +231,8 @@
                 case "POST":
                     response.statusName = 'Created';
                     response.statusCode = 201;
-                    var requestContentType = this._getHeaderValue(resItem.requestObject.headers, 'Accept') || this._getHeaderValue(resItem.requestObject.headers, 'Content-Type');
-                    if (requestContentType.indexOf(this.xmlContentType) >= 0) {
+                    var requestContentType = $data.JayService.OData.Utils.getHeaderValue(resItem.requestObject.headers, 'Accept') || $data.JayService.OData.Utils.getHeaderValue(resItem.requestObject.headers, 'Content-Type');
+                    if (requestContentType.indexOf($data.JayService.OData.Defaults.xmlContentType) >= 0) {
                         this._transformItem(entityXmlTransformer, response, resItem, resItem.resultObject.getType());
                     } else {
                         this._transformItem(entityTransformer, response, resItem, resItem.resultObject.getType());
@@ -276,8 +269,8 @@
             response.headers['Content-Type'] = data.resultObject.contentType;
             response.data = data.resultObject.getData();
         } else {
-            var requestContentType = this._getHeaderValue(data.requestObject.headers, 'Accept') || this._getHeaderValue(data.requestObject.headers, 'Content-Type');
-            if (requestContentType.indexOf(this.jsonContentType) >= 0) {
+            var requestContentType = $data.JayService.OData.Utils.getHeaderValue(data.requestObject.headers, 'Accept') || $data.JayService.OData.Utils.getHeaderValue(data.requestObject.headers, 'Content-Type');
+            if (requestContentType.indexOf($data.JayService.OData.Defaults.jsonContentType) >= 0) {
                 this._transformItem(entityTransformer, response, data, data.elementType);
             } else {
                 this._transformItem(entityXmlTransformer, response, data, data.elementType);
@@ -292,7 +285,7 @@
 
         if (entityTransformer instanceof $data.oDataServer.EntityXmlTransform) {
             responseObj.data = entityTransformer.convertToResponse(resItem.resultObject, elementType);
-            responseObj.headers['Content-Type'] = this.xmlContentType;
+            responseObj.headers['Content-Type'] = $data.JayService.OData.Defaults.xmlContentType;
             if (isSingle)
                 responseObj.headers['Location'] = entityTransformer.generateUri(resItem.resultObject, entityTransformer._getEntitySetDefByType(elementType));
         } else {
@@ -302,87 +295,12 @@
             } else {
                 responseObj.data = { d: entityTransformer.convertToResponse(resItem.resultObject, elementType) };
             }
-            responseObj.headers['Content-Type'] = this.jsonReturnContentType;
+            responseObj.headers['Content-Type'] = $data.JayService.OData.Defaults.jsonReturnContentType;
         }
-    },
-
-    _getContentType: function (headers) {
-        return headers['Content-Type'] || headers['content-type'] || '';
-    },
-    _getHeaderValue: function (headers, name) {
-        for (var key in headers) {
-            if (key.toLowerCase() === name.toLowerCase())
-                return headers[key];
-        }
-        return '';
-    },
-    getRandom: function (prefix) {
-        return prefix + Math.random() + Math.random();
-    },
-    parseUrlPart: function (urlPart) {
-        if (urlPart.indexOf('/') === 0)
-            urlPart = urlPart.slice(1);
-
-        var p = urlPart.split('(');
-        var ids;
-        if (p.length > 1) {
-            var p2 = p[1].split(')');
-            p.splice(1, 1, p2[0], p2[1]);
-
-            var pIds = p2[0].split(',');
-            if (pIds.length > 1) {
-                ids = {};
-                for (var i = 0; i < pIds.length; i++) {
-                    var idPart = pIds[i].split('=');
-                    ids[idPart[0]] = idPart[1];
-                }
-
-            } else {
-                ids = pIds[0];
-            }
-        }
-        var eSet = this.context[p[0]];
-        return result = {
-            set: eSet,
-            idObj: this.paramMapping(ids, eSet)
-        };
-    },
-    paramMapping: function (values, set) {
-        if (!values)
-            return;
-
-        var keyProps = set.elementType.memberDefinitions.getKeyProperties();
-        result = {};
-
-        for (var i = 0; i < keyProps.length; i++) {
-            var memDef = keyProps[i];
-
-            if (keyProps.length === 1) {
-                var value = values;
-            } else {
-                var value = values[memDef.name];
-            }
-
-            //TODO converter
-            var resolvedType = Container.resolveType(memDef.type);
-            result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
-        }
-
-        return result;
     }
 }, {
     connectBodyReader: function (req, res, next) {
-        var contentType = req.headers['content-type'];
-        if (contentType && contentType.indexOf('multipart/mixed') >= 0) {
-            req.body = '';
-            req.on('data', function (chunk) {
-                req.body += chunk.toString();
-            });
-            req.on('end', function (chunk) {
-                next();
-            });
-        } else {
-            next();
-        }
+        console.log("OBSOLATE: do not use '$data.JayService.OData.BatchProcessor.connectBodyReader' as connect middleware\r\nUse: '$data.JayService.OData.Utils.simpleBodyReader()'");
+        $data.JayService.OData.Utils.simpleBodyReader()(req, res, next);
     }
 });

@@ -135,11 +135,11 @@
                         "--batch_bf746ec7-9c95-4542-9718-0b11dc0a5108--"
 
             var reqWrapper = {
-                body: s3,
+                body: s,
                 headers: {
-                    //'Content-Type': 'multipart/mixed; boundary=batch_8899452e-b757-4db5-ba02-f59d543d3eaf'
+                    'Content-Type': 'multipart/mixed; boundary=batch_8899452e-b757-4db5-ba02-f59d543d3eaf'
                     //'Content-Type': 'multipart/mixed; boundary=batch_04cf-ab35-2b70'
-                    'Content-Type': 'multipart/mixed; boundary=batch_bf746ec7-9c95-4542-9718-0b11dc0a5108'
+                    //'Content-Type': 'multipart/mixed; boundary=batch_bf746ec7-9c95-4542-9718-0b11dc0a5108'
                 }
             }
             //OData.batchServerAtomHandler.read(reqWrapper, {});
