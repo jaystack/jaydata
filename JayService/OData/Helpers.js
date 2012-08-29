@@ -23,6 +23,8 @@ $data.Class.define('$data.JayService.OData.Utils', null, null, null, {
         return prefix + Math.random() + Math.random();
     },
     parseUrlPart: function (urlPart, context, withoutConvert) {
+        if (urlPart.indexOf('/') === 0)
+            urlPart = urlPart.slice(1);
 
         var p = urlPart.split('(');
         var ids;

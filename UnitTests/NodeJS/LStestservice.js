@@ -72,7 +72,7 @@ app.use(function (req, res, next) {
 
 app.use(connect.query());
 app.use(connect.bodyParser());
-app.use($data.JayService.OData.BatchProcessor.connectBodyReader);
+app.use($data.JayService.OData.Utils.simpleBodyReader());
 
 app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter(exampleSrv.Context, function () {
