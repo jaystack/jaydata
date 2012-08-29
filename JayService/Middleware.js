@@ -74,7 +74,14 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
     },
     cache: function(config){
         var Q = require('q');
-        var cache = {};
+        var cache = {
+            Users: {},
+            Groups: {},
+            EntitySets: {},
+            Databases: {},
+            Permissions: {},
+            Access: {}
+        };
         var timer;
         
         var loadCollection = function(client, collection){
@@ -93,112 +100,114 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         };
         
         var refreshCache = function(req, res, next){
-            var db = req.dbConnections.ApplicationDB(req.getAppId());
-            
-            db.open(function(err, client){
-                if (err){
-                    if (next) next();
-                    return;
-                }
+            if (req.dbConnections.ApplicationDB){
+                var db = req.dbConnections.ApplicationDB(req.getAppId());
                 
-                Q.allResolved([
-                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Users')),
-                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Groups')),
-                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Databases')),
-                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'EntitySets')),
-                    loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Permissions'))
-                ]).fail(function(err){
-                    client.close();
-                    if (next) next(err);
-                    else throw err;
-                }).then(function(v){
-                    var result = {
-                        Users: v[0].valueOf(),
-                        Groups: v[1].valueOf(),
-                        Databases: v[2].valueOf(),
-                        EntitySets: v[3].valueOf(),
-                        Permissions: v[4].valueOf()
-                    };
-                    
-                    cache = {
-                        Users: {},
-                        Groups: {},
-                        EntitySets: {},
-                        Databases: {},
-                        Permissions: {},
-                        Access: {}
-                    };
-                    
-                    for (var i = 0; i < result.Groups.length; i++){
-                        var g = result.Groups[i];
-                        cache.Groups[g._id.toString()] = g;
+                db.open(function(err, client){
+                    if (err){
+                        if (next) next();
+                        return;
                     }
                     
-                    for (var i = 0; i < result.Users.length; i++){
-                        var u = result.Users[i];
-                        if (u.Groups && u.Groups instanceof Array){
-                            var groups = [];
-                            for (var j = 0; j < u.Groups.length; j++){
-                                groups.push(cache.Groups[u.Groups[j].toString()].Name);
-                            }
-                            u.Groups = groups;
+                    Q.allResolved([
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Users')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Groups')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Databases')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'EntitySets')),
+                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Permissions'))
+                    ]).fail(function(err){
+                        client.close();
+                        if (next) next(err);
+                        else throw err;
+                    }).then(function(v){
+                        var result = {
+                            Users: v[0].valueOf(),
+                            Groups: v[1].valueOf(),
+                            Databases: v[2].valueOf(),
+                            EntitySets: v[3].valueOf(),
+                            Permissions: v[4].valueOf()
+                        };
+                        
+                        cache = {
+                            Users: {},
+                            Groups: {},
+                            EntitySets: {},
+                            Databases: {},
+                            Permissions: {},
+                            Access: {}
+                        };
+                        
+                        for (var i = 0; i < result.Groups.length; i++){
+                            var g = result.Groups[i];
+                            cache.Groups[g._id.toString()] = g;
                         }
-                        cache.Users[u.Login] = u;
-                    }
-                    
-                    for (var i = 0; i < result.EntitySets.length; i++){
-                        var es = result.EntitySets[i];
-                        cache.EntitySets[es._id.toString()] = es;
-                    }
-                    
-                    for (var i = 0; i < result.Databases.length; i++){
-                        var d = result.Databases[i];
-                        cache.Databases[d._id.toString()] = d;
-                    }
-                    
-                    for (var i = 0; i < result.Permissions.length; i++){
-                        var p = result.Permissions[i];
-                        cache.Permissions[p._id.toString()] = p;
                         
-                        var access = $data.Access.getAccessBitmaskFromPermission(p);
+                        for (var i = 0; i < result.Users.length; i++){
+                            var u = result.Users[i];
+                            if (u.Groups && u.Groups instanceof Array){
+                                var groups = [];
+                                for (var j = 0; j < u.Groups.length; j++){
+                                    groups.push(cache.Groups[u.Groups[j].toString()].Name);
+                                }
+                                u.Groups = groups;
+                            }
+                            cache.Users[u.Login] = u;
+                        }
                         
-                        var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
-                        var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
+                        for (var i = 0; i < result.EntitySets.length; i++){
+                            var es = result.EntitySets[i];
+                            cache.EntitySets[es._id.toString()] = es;
+                        }
                         
-                        for (var d = 0; d < dbIds.length; d++){
-                            for (var e = 0; e < esIds.length; e++){
-                                var db = cache.Databases[dbIds[d].toString()].Name;
-                                var es = cache.EntitySets[esIds[e].toString()].Name;
-                                var g = cache.Groups[p.GroupID.toString()].Name;
-                                
-                                if (!cache.Access[db]) cache.Access[db] = {};
-                                if (!cache.Access[db][es]) cache.Access[db][es] = {};
-                                cache.Access[db][es][g] = access;
+                        for (var i = 0; i < result.Databases.length; i++){
+                            var d = result.Databases[i];
+                            cache.Databases[d._id.toString()] = d;
+                        }
+                        
+                        for (var i = 0; i < result.Permissions.length; i++){
+                            var p = result.Permissions[i];
+                            cache.Permissions[p._id.toString()] = p;
+                            
+                            var access = $data.Access.getAccessBitmaskFromPermission(p);
+                            
+                            var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
+                            var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
+                            
+                            for (var d = 0; d < dbIds.length; d++){
+                                for (var e = 0; e < esIds.length; e++){
+                                    var db = cache.Databases[dbIds[d].toString()].Name;
+                                    var es = cache.EntitySets[esIds[e].toString()].Name;
+                                    var g = cache.Groups[p.GroupID.toString()].Name;
+                                    
+                                    if (!cache.Access[db]) cache.Access[db] = {};
+                                    if (!cache.Access[db][es]) cache.Access[db][es] = {};
+                                    cache.Access[db][es][g] = access;
+                                }
                             }
                         }
-                    }
-                    
-                    cache.Access.ApplicationDB = {
-                        Tests: { g2: 63 },
-                        Permissions: { g2: 63 },
-                        Databases: { g2: 63 },
-                        Entities: { g2: 63 },
-                        ComplexTypes: { g2: 63 },
-                        EventHandlers: { g2: 63 },
-                        EntityFields: { g2: 63 },
-                        EntitySets: { g2: 63 },
-                        EntitySetPublications: { g2: 63 },
-                        Services: { g2: 63 },
-                        ServiceOperations: { g2: 63 },
-                        TypeTemplates: { g2: 63 },
-                        Users: { g2: 63 },
-                        Groups: { g2: 63 }
-                    }
-                    
-                    client.close();
-                    if (next) next();
+                        
+                        cache.Access.ApplicationDB = {
+                            Tests: { admin: 63 },
+                            Permissions: { admin: 63 },
+                            Databases: { admin: 63 },
+                            Entities: { admin: 63 },
+                            ComplexTypes: { admin: 63 },
+                            EventHandlers: { admin: 63 },
+                            EntityFields: { admin: 63 },
+                            EntitySets: { admin: 63 },
+                            EntitySetPublications: { admin: 63 },
+                            Services: { admin: 63 },
+                            ServiceOperations: { admin: 63 },
+                            TypeTemplates: { admin: 63 },
+                            Users: { admin: 63 },
+                            Groups: { admin: 63 }
+                        }
+                        
+                        client.close();
+                        if (next) next();
+                    });
                 });
-            });
+            }else next();
         };
         
         return function(req, res, next){
@@ -492,8 +501,11 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             var file = '';
             var fn = function(){
                 file += '(function(contextTypes){\n\n';
-                file += 'var express = require("express");\n\n';
-                file += 'var passport = require("passport");\n\n';
+                file += 'var windowBackup = window;\n';
+                file += 'window = undefined;\n';
+                file += 'var express = require("express");\n';
+                file += 'var passport = require("passport");\n';
+                file += 'window = windowBackup;\n\n';
                 
                 var dbConf = {};
                 for (var i = 0; i < config.cu.application.dataLayer.databases.length; i++){
@@ -526,15 +538,15 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += '    if (req.logOut){\n';
                         file += '        req.logOut();\n';
                         file += '        res.statusCode = 401;\n';
-                        file += '        res.setHeader("WWW-Authenticate", "Basic realm=\"' + s.serviceName + '\");\n';
+                        file += '        res.setHeader("WWW-Authenticate", "Basic realm=\\"' + s.serviceName + '\\"");\n';
                         file += '        res.write("Logout was successful.");';
                         file += '    }else res.write("Logout failed.");\n';
                         file += '    res.end();\n';
                         file += '});\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authentication());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authenticationErrorHandler);\n';
-                        if (s.authenticate) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.ensureAuthenticated({ message: "' + s.serviceName + '" }));\n';
-                        if (s.authorize) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
+                        if (!s.allowAnonymous) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.ensureAuthenticated({ message: "' + s.serviceName + '" }));\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.query());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.bodyParser());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
