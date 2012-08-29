@@ -9,7 +9,7 @@ $data.Class.define('$data.Access', null, null, {}, {
         
         return pHandlerResult;
         
-        var error;
+        /*var error;
         
         if (!access) error = 'Access undefined';
         if (typeof access !== 'number') error = 'Invalid access type';
@@ -88,7 +88,19 @@ $data.Class.define('$data.Access', null, null, {}, {
         
         callbackFn();
         
-        return pHandlerResult;
+        return pHandlerResult;*/
+    },
+    getAccessBitmaskFromPermission: function(p){
+        var access = $data.Access.None;
+
+        if (p.Create) access |= $data.Access.Create;
+        if (p.Read) access |= $data.Access.Read;
+        if (p.Update) access |= $data.Access.Update;
+        if (p.Delete) access |= $data.Access.Delete;
+        if (p.DeleteBatch) access |= $data.Access.DeleteBatch;
+        if (p.Execute) access |= $data.Access.Execute;
+        
+        return access;
     },
     None: { value: 0 },
     Create: { value: 1 },

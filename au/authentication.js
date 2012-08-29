@@ -26,24 +26,24 @@ servers[0] = server1;
 var replStat = new ReplSetServers(servers);
 //var usersdb = new Db(config.application.id + '-Users', replStat, {native_parser:false});
 //var usersdb = new Db('Users', replStat, {native_parser:false});
-var usersdb = new Db('Users', new Server(host1, port, {}), {native_parser:false});
+var usersdb = new Db('ApplicationDB', new Server(host1, port, {}), {native_parser:false});
 usersdb.open(function(err, db) {
   console.log('users database opened');
 });
 
 function mongoAuthenticate(username, password) {
     var defer = q.defer();
-    usersdb.collection('users', function(err, collection) {
+    usersdb.collection('Users', function(err, collection) {
       if (err) defer.reject(err);
-      collection.find({username:username}, function(err, cursor) {
+      collection.find({Login:username}, function(err, cursor) {
         cursor.toArray(function(err, users) {
           if (err) defer.reject(err);
           if (users.length == 0) defer.reject('No such user');
           else if (users.length > 1) defer.reject('Duplicate user');
-          else bcrypt.compare(password, users[0].hash, function(err, ok) {
+          else bcrypt.compare(password, users[0].Password, function(err, ok) {
             if (err) defer.reject(err);
             if (!ok) defer.reject('Invalid password');
-            defer.resolve({ username: username, roles: users[0].roles });
+            defer.resolve(users[0]);
           });
         });
       });
