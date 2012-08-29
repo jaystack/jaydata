@@ -492,7 +492,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             var file = '';
             var fn = function(){
                 file += '(function(contextTypes){\n\n';
-                file += 'var connect = require("connect");\n\n';
+                file += 'var express = require("express");\n\n';
+                file += 'var passport = require("passport");\n\n';
                 
                 var dbConf = {};
                 for (var i = 0; i < config.cu.application.dataLayer.databases.length; i++){
@@ -506,7 +507,10 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 for (var i = 0; i < config.cu.application.serviceLayer.services.length; i++){
                     var s = config.cu.application.serviceLayer.services[i];
                     if (listen.indexOf(s.internalPort || s.port) < 0){
-                        file += 'var app' + (s.internalPort || s.port) + ' = connect();\n';
+                        file += 'var app' + (s.internalPort || s.port) + ' = express();\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.cookieParser());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.methodOverride());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.session({ secret: "keyboard cat" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.appID());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.currentDatabase());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
@@ -516,15 +520,31 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += '    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, MERGE");\n';
                         file += '    if (req.method === "OPTIONS") res.end(); else next();\n';
                         file += '});\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use(connect.query());\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use(connect.bodyParser());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.cache());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(passport.initialize());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '/logout", function(req, res){\n';
+                        file += '    if (req.logOut){\n';
+                        file += '        req.logOut();\n';
+                        file += '        res.statusCode = 401;\n';
+                        file += '        res.setHeader("WWW-Authenticate", "Basic realm=\"' + s.serviceName + '\");\n';
+                        file += '        res.write("Logout was successful.");';
+                        file += '    }else res.write("Logout failed.");\n';
+                        file += '    res.end();\n';
+                        file += '});\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authentication());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authenticationErrorHandler);\n';
+                        if (s.authenticate) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.ensureAuthenticated({ message: "' + s.serviceName + '" }));\n';
+                        if (s.authorize) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.query());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use(express.bodyParser());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
                         listen.push((s.internalPort || s.port));
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
                     file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return ' + (s.database ? 'req.getCurrentDatabase(' + s.serviceName + ', "' + s.database + '")' : 'new ' + s.serviceName + '()') + ';\n}));\n';
-                    file += 'app' + (s.internalPort || s.port) + '.use(connect.errorHandler());\n\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use(express.errorHandler());\n\n';
+                    file += 'express.errorHandler.title = "JayStorm API";\n';
                 }
                 for (var i = 0; i < listen.length; i++){
                     file += 'app' + listen[i] + '.listen(' + listen[i] + ', "127.0.0.1");\n';

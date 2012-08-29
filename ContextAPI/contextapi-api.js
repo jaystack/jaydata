@@ -401,5 +401,5 @@ $data.ServiceBase.extend('$data.JayStormAPI.FunctionImport', {
                 error: this.error
             }, success, error);
         };
-    }).toServiceOperation().params([{ name: 'db', type: 'string' }]).returns('string').asResult($data.JavaScriptResult)
+    }).toServiceOperation().params([{ name: 'db', type: 'string' }]).returns('string')//.asResult($data.JavaScriptResult)
 });
