@@ -55,9 +55,7 @@ send({
             services: [{
                 serviceName: 'newsreader',
                 database: 'NewsReader',
-                port: 53999,
-                authenticate: false/*,
-                ssl: true*/
+                port: 53999
             }]
         },
         applicationLayer: {

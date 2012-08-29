@@ -1,5 +1,4 @@
 require('jaydata');
-require('../JaySvcUtil/JaySvcUtil.js');
 
 (function(){
     var config = {
