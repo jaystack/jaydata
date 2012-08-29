@@ -44,6 +44,13 @@ $data.Entity.extend('$test.ArrayItem', {
     Rank: { type: 'int' }
 });
 
+$data.Entity.extend('$test.ArrayID', {
+    Id: { type: 'id', computed: true, key: true },
+    Key: { type: 'string' },
+    Values: { type: 'Array', elementType: 'id' },
+    Rank: { type: 'int' }
+});
+
 $data.Entity.extend('$test.ArrayComplexItem', {
     Id: { type: 'string', computed: true, key: true },
     Key: { type: 'string' },
@@ -57,5 +64,6 @@ $data.EntityContext.extend('$test.Context', {
     //MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
     ObjectItems: { type: $data.EntitySet, elementType: $test.ObjectItem },
     ArrayItems: { type: $data.EntitySet, elementType: $test.ArrayItem },
+    ArrayIDs: { type: $data.EntitySet, elementType: $test.ArrayID },
     ArrayComplexItems: { type: $data.EntitySet, elementType: $test.ArrayComplexItem }
 });

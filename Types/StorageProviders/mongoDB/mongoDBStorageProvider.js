@@ -880,7 +880,17 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
                         d.data[p.name] = 0;
                     }else if (!p.computed){
-                        d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
+                        if (Container.resolveType(p.type) === $data.Array && p.elementType && Container.resolveType(p.elementType) === $data.ObjectID){
+                            d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
+                            var arr = d.data[p.name];
+                            if (arr){
+                                for (var k = 0; k < arr.length; k++){
+                                    arr[k] = self._typeFactory(p.elementType, arr[k], self.fieldConverter.toDb);
+                                }
+                            }
+                        }else{
+                            d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
+                        }
                         if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
                     }else if (typeof d.data[p.name] === 'string'){
                         d.data['_id'] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
@@ -942,7 +952,17 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         set.$inc[p.name] = 1;
                     }else if (!p.computed){
                         if (typeof u.entity[p.name] === 'undefined') continue;
-                        set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
+                        if (Container.resolveType(p.type) === $data.Array && p.elementType && Container.resolveType(p.elementType) === $data.ObjectID){
+                            set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb);
+                            var arr = set[p.name];
+                            if (arr){
+                                for (var k = 0; k < arr.length; k++){
+                                    arr[k] = self._typeFactory(p.elementType, arr[k], self.fieldConverter.toDb);
+                                }
+                            }
+                        }else{
+                            set[p.name] = self._typeFactory(p.type, u.entity[p.name], self.fieldConverter.toDb); //self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](u.entity[p.name]);
+                        }
                     }
                 }
                 
