@@ -1,23 +1,14 @@
 ﻿$data.Class.define('$data.oDataServer.EntityXmlTransform', $data.oDataServer.EntityTransform, null, {
     constructor: function (context, requesUrl, config) {
         this.cfg = $data.typeSystem.extend({
-            version: 'V2',
-
-            edmx: 'http://schemas.microsoft.com/ado/2007/06/edmx',
             m: 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
             d: 'http://schemas.microsoft.com/ado/2007/08/dataservices',
-            namespace: 'http://schemas.microsoft.com/ado/2008/09/edm',
 
             xmlns: 'http://www.w3.org/2005/Atom',
             scheme: 'http://schemas.microsoft.com/ado/2007/08/dataservices/scheme',
             related: 'http://schemas.microsoft.com/ado/2007/08/dataservices/related',
 
             xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
-
-            customPropertyNS: 'http://jaydata.org/extendedproperties',
-            customPropertyNSName: 'Jay',
-
-            contextNamespace: this.context.namespace || 'System',
 
             headers: [],
             excelUserAgent: 'PowerPivot'
@@ -27,7 +18,7 @@
     },
     convertToResponse: function (results, collectionNameOrElementType, selectedFields, includes) {
         if (!collectionNameOrElementType)
-            return '<error />'
+            return '<error />';
 
         if (!selectedFields) selectedFields = [];
         if (!includes) includes = [];
@@ -63,7 +54,6 @@
             this._buildEntry(results, entitySetDef, defaultType, memDefs, includes, true);
         }
         this.xml.endDocument();
-
         return xmlResult.replace('xml__base', 'xml:base');
     },
 
@@ -103,6 +93,14 @@
 
         for (var i = 0; i < data.length; i++) {
             this._buildEntry(data[i], esDef, elementType, selectedFields, includes);
+        }
+
+        if (data.length === 0) {
+            var author = this.xml.declareElement('author');
+            var name = this.xml.declareElement('name');
+            this.xml.startElement(author)
+                .startElement(name).endElement()
+                .endElement();
         }
 
         this.xml.endElement();
@@ -215,7 +213,7 @@
                 var link = this.xml.declareElement('link');
                 var typeName = elementType.name;
                 this.xml.startElement(link)
-                    .addAttribute(rel, related + '/' + linkEsDef.name)
+                    .addAttribute(rel, this.cfg.related + '/' + linkEsDef.name)
                     .addAttribute(atype, 'application/atom+xml;type=' + linkType)
                     .addAttribute(href, itemUrl.slice(this.requesUrl.length + 1) + '/' + memDef.name);
 

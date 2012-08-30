@@ -35,8 +35,6 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         this.instanceFactory = instanceFactory;
         this.urlHelper = url;
         this.promiseHelper = q;
-
-        this.defaultResponseLimit = 100;
     },
 
     handleRequest: function (req, res, next) {
@@ -75,7 +73,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
                 member = this.resolveEntitySet(req, memberName, serviceInstance);
                 if (member) {
-                    var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || self.defaultResponseLimit });
+                    var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
 
                     oDataBuilderCfg = {
 		                version: 'V2',
@@ -111,8 +109,10 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             }
 
             if (!(value instanceof $data.EmptyServiceResult)) {
-                res.setHeader('content-type', res.getHeader('content-type') || value.contentType || 'text/plain');
-                res.end(value.toString());
+                var resultText = value.toString();
+                res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
+                res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=utf8');
+                res.end(resultText);
             } else {
                 res.end();
             }

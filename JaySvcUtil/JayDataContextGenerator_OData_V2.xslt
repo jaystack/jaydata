@@ -214,9 +214,9 @@
     <xsl:choose>
       <xsl:when test="$m = '*'">
         <attribute name="type">'<xsl:value-of select="$CollectionBaseClass"/>'</attribute>
-        <attribute name="elementType">'"<xsl:value-of select="$relation/@Type"/>'</attribute>
+        <attribute name="elementType">'<xsl:value-of select="$relation/@Type"/>'</attribute>
         <xsl:if test="not($otherProp/@Name)">
-          <attribute name="inverseProperty">'$$unbound'"</attribute></xsl:if>
+          <attribute name="inverseProperty">'$$unbound'</attribute></xsl:if>
         <xsl:if test="$otherProp/@Name">
           <attribute name="inverseProperty">'<xsl:value-of select="$otherProp/@Name"/>'</attribute></xsl:if>
       </xsl:when>
@@ -235,7 +235,7 @@
       </xsl:when>
       <xsl:when test="$m = '1'">
         <attribute name="type">'<xsl:value-of select="$relation/@Type"/>'</attribute>
-        <attribute name="required">true"</attribute>
+        <attribute name="required">true</attribute>
         <xsl:choose>
           <xsl:when test="$otherProp">
             <attribute name="inverseProperty">'<xsl:value-of select="$otherProp/@Name"/>'</attribute>

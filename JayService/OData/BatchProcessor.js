@@ -3,6 +3,7 @@
         this.context = context;
         this.baseUrl = baseUrl;
         this.Q = require('q');
+        this.queryHelper = require('qs');
     },
     process: function (request, response) {
         //processRequest
@@ -12,7 +13,6 @@
             headers: request.headers
         }
         OData.batchServerHandler.read(reqWrapper, {});
-
         var idx = -1;
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback();
@@ -21,12 +21,30 @@
             var batchRequests = reqWrapper.data.__batchRequests;
             var batchResult = [];
 
-            var saveSuccess = function (result) {
-                if (result) batchResult.push(result);
+            var saveSuccess = function () {
 
                 idx++;
                 if (idx < batchRequests.length) {
-                    self._processBatch(batchRequests[idx].__changeRequests, { success: saveSuccess, error: function () { cbWrapper.error(batchResult) } });
+                    if (batchRequests[idx].__changeRequests) {
+
+                        self._processBatch(batchRequests[idx].__changeRequests, request, {
+                            success: function (result) {
+                                if (result) batchResult.push({ __changeRequests: result });
+                                saveSuccess();
+                            },
+                            error: function () { cbWrapper.error(batchResult) }
+                        });
+
+                    } else {
+                        self._processBatchRead(batchRequests[idx], request, response, {
+                            success: function (result) {
+                                if (result) batchResult.push(result);
+                                saveSuccess();
+                            },
+                            error: function () { cbWrapper.error(batchResult) }
+                        });
+
+                    }
                 } else {
                     cbWrapper.success(batchResult);
                 }
@@ -40,10 +58,9 @@
         //processResponse
         return function () {
             var async = this;
-            var transform = new $data.oDataServer.EntityTransform(self.context.getType(), self.baseUrl);
             var responseData = {
                 headers: {
-                    'Content-Type': 'multipart/mixed'
+                    'Content-Type': $data.JayService.OData.Defaults.multipartContentType
                 },
                 data: {
                     __batchRequests: []
@@ -55,10 +72,11 @@
                 for (var i = 0; i < batchRes.length; i++) {
                     var refData = batchRes[i];
 
-                    var changeRequests = self._prepareBatch(refData, transform);
-                    responseData.data.__batchRequests.push({
-                        __changeRequests: changeRequests
-                    });
+                    if (refData.__changeRequests) {
+                        responseData.data.__batchRequests.push({ __changeRequests: self._prepareBatch(refData.__changeRequests, request) });
+                    } else {
+                        responseData.data.__batchRequests.push(self._prepareBatchRead(refData, request));
+                    }
                 }
 
                 OData.batchServerHandler.write(responseData, {});
@@ -69,7 +87,6 @@
                         response.setHeader(name, responseData.headers[name]);
                     }
                 }
-
                 response.statusCode = 202;
                 var res = new $data.MultiPartMixedResult(responseData.body, responseData.batchBoundary);
                 async.success(res);
@@ -77,24 +94,23 @@
         }
     },
 
-    _processBatch: function (changeRequests, callback) {
+    _processBatch: function (changeRequests, request, callback) {
         var referenceData = {};
 
         for (var j = 0, l2 = changeRequests.length; j < l2; j++) {
             var changeRequest = changeRequests[j];
 
             //Refactor
-            var setInfo = this.parseUrlPart(changeRequest.urlPart);
+            var setInfo = $data.JayService.OData.Utils.parseUrlPart(changeRequest.urlPart.replace(request.fullRoute, ''), this.context);
             var itemType = setInfo.set.elementType;
 
-            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || getRandom(itemType.name);
+            var refId = changeRequest.headers['Content-Id'] || changeRequest.headers['content-id'] || changeRequest.headers['Content-ID'] || $data.JayService.OData.Utils.getRandom(itemType.name);
             referenceData[refId] = { requestObject: changeRequest };
 
             switch (changeRequest.method) {
                 case 'POST':
                     var entity = new itemType(changeRequest.data);
                     referenceData[refId].resultObject = entity;
-
                     //discover navigations (__metadata.uri: "$n")
                     setInfo.set.add(entity);
                     break;
@@ -123,8 +139,57 @@
             error: function () { callback.error(); }
         });
     },
-    _prepareBatch: function (changedElements, entityTransformer) {
+    _processBatchRead: function (getBatchrequest, req, res, callback) {
+        var getProcessor = new $data.JayService.OData.EntitySetProcessor('', this.context, { top: this.context.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
+
+        var batchUrl = getBatchrequest.urlPart.replace(req.fullRoute, '');
+        var subReq = {
+            url: batchUrl,
+            method: 'GET',
+            query: this._getQueryObject(batchUrl),
+            headers: getBatchrequest.headers
+        };
+
+        var config = {
+            version: 'V2',
+            baseUrl: req.fullRoute,
+            request: subReq,
+            response: res,
+            context: this.context.getType(),
+            simpleResult: batchUrl.toLowerCase().indexOf('/$count') > 0
+        };
+
+        if (getProcessor.isSupported(subReq)) {
+
+            getProcessor.ReadFromEntitySet(subReq, config, {
+                success: function (result) {
+                    callback.success({
+                        requestObject: getBatchrequest,
+                        resultObject: result,
+                        elementType: getProcessor.entitySet.elementType
+                    });
+                },
+                error: callback.error
+            });
+
+        } else {
+            callback.error();
+        }
+    },
+    _getQueryObject: function (url) {
+        var paramIdx;
+        if ((paramIdx = url.indexOf('?')) >= 0) {
+            return this.queryHelper.parse(url.slice(paramIdx + 1));
+        } else {
+            return {};
+        }
+    },
+
+    _prepareBatch: function (changedElements, request) {
         var responseData = [];
+        var entityTransformer = new $data.oDataServer.EntityTransform(this.context.getType(), this.baseUrl);
+        var entityXmlTransformer = new $data.oDataServer.EntityXmlTransform(this.context.getType(), this.baseUrl, { headers: request.headers });
+
         for (var contentId in changedElements) {
             var resItem = changedElements[contentId];
 
@@ -135,13 +200,17 @@
                     'Cache-Control': 'no-cache'
                 }
             };
+
             switch (resItem.requestObject.method) {
                 case "POST":
                     response.statusName = 'Created';
                     response.statusCode = 201;
-                    response.data = { d: entityTransformer.convertToResponse([resItem.resultObject], resItem.resultObject.getType())[0] };
-                    response.headers['Content-Type'] = 'application/json;odata=verbose;charset=utf-8';
-                    response.headers['Location'] = response.data.d.__metadata.url;
+                    var requestContentType = $data.JayService.OData.Utils.getHeaderValue(resItem.requestObject.headers, 'Accept') || $data.JayService.OData.Utils.getHeaderValue(resItem.requestObject.headers, 'Content-Type');
+                    if (requestContentType.indexOf($data.JayService.OData.Defaults.xmlContentType) >= 0) {
+                        this._transformItem(entityXmlTransformer, response, resItem, resItem.resultObject.getType());
+                    } else {
+                        this._transformItem(entityTransformer, response, resItem, resItem.resultObject.getType());
+                    }
                     break;
                 case "MERGE":
                 case "DELETE":
@@ -156,73 +225,55 @@
         }
         return responseData;
     },
+    _prepareBatchRead: function (data, request) {
+        var entityTransformer = new $data.oDataServer.EntityTransform(this.context.getType(), this.baseUrl);
+        var entityXmlTransformer = new $data.oDataServer.EntityXmlTransform(this.context.getType(), this.baseUrl, { headers: request.headers });
 
-    getRandom: function (prefix) {
-        return prefix + Math.random() + Math.random();
-    },
-    parseUrlPart: function (urlPart) {
+        var response = {
+            headers: {
+                'X-Content-Type-Options': 'nosniff',
+                'Cache-Control': 'no-cache'
+            },
+            statusName: 'Ok',
+            statusCode: 200
+        }
 
-        var p = urlPart.split('(');
-        var ids;
-        if (p.length > 1) {
-            var p2 = p[1].split(')');
-            p.splice(1, 1, p2[0], p2[1]);
-
-            var pIds = p2[0].split(',');
-            if (pIds.length > 1) {
-                ids = {};
-                for (var i = 0; i < pIds.length; i++) {
-                    var idPart = pIds[i].split('=');
-                    ids[idPart[0]] = idPart[1];
-                }
-
+        if (data.resultObject instanceof $data.ServiceResult) {
+            response.headers['Content-Type'] = data.resultObject.contentType;
+            response.data = data.resultObject.getData();
+        } else {
+            var requestContentType = $data.JayService.OData.Utils.getHeaderValue(data.requestObject.headers, 'Accept') || $data.JayService.OData.Utils.getHeaderValue(data.requestObject.headers, 'Content-Type');
+            if (requestContentType.indexOf($data.JayService.OData.Defaults.jsonContentType) >= 0) {
+                this._transformItem(entityTransformer, response, data, data.elementType);
             } else {
-                ids = pIds[0];
+                this._transformItem(entityXmlTransformer, response, data, data.elementType);
             }
         }
 
-        var eSet = this.context[p[0]];
-        return result = {
-            set: eSet,
-            idObj: this.paramMapping(ids, eSet)
-        };
+        return response;
     },
-    paramMapping: function (values, set) {
-        if (!values)
-            return;
 
-        var keyProps = set.elementType.memberDefinitions.getKeyProperties();
-        result = {};
+    _transformItem: function (entityTransformer, responseObj, resItem, elementType) {
+        var isSingle = !Array.isArray(resItem.resultObject);
 
-        for (var i = 0; i < keyProps.length; i++) {
-            var memDef = keyProps[i];
-
-            if (keyProps.length === 1) {
-                var value = values;
+        if (entityTransformer instanceof $data.oDataServer.EntityXmlTransform) {
+            responseObj.data = entityTransformer.convertToResponse(resItem.resultObject, elementType);
+            responseObj.headers['Content-Type'] = $data.JayService.OData.Defaults.xmlContentType;
+            if (isSingle)
+                responseObj.headers['Location'] = entityTransformer.generateUri(resItem.resultObject, entityTransformer._getEntitySetDefByType(elementType));
+        } else {
+            if (isSingle) {
+                responseObj.data = { d: entityTransformer.convertToResponse([resItem.resultObject], elementType)[0] };
+                responseObj.headers['Location'] = responseObj.data.d.__metadata.url;
             } else {
-                var value = values[memDef.name];
+                responseObj.data = { d: entityTransformer.convertToResponse(resItem.resultObject, elementType) };
             }
-
-            //TODO converter
-            var resolvedType = Container.resolveType(memDef.type);
-            result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
+            responseObj.headers['Content-Type'] = $data.JayService.OData.Defaults.jsonReturnContentType;
         }
-
-        return result;
     }
 }, {
     connectBodyReader: function (req, res, next) {
-        var contentType = req.headers['content-type'];
-        if (contentType && contentType.indexOf('multipart/mixed') >= 0) {
-            req.body = '';
-            req.on('data', function (chunk) {
-                req.body += chunk.toString();
-            });
-            req.on('end', function (chunk) {
-                next();
-            });
-        } else {
-            next();
-        }
+        console.log("OBSOLATE: do not use '$data.JayService.OData.BatchProcessor.connectBodyReader' as connect middleware\r\nUse: '$data.JayService.OData.Utils.simpleBodyReader()'");
+        $data.JayService.OData.Utils.simpleBodyReader()(req, res, next);
     }
 });

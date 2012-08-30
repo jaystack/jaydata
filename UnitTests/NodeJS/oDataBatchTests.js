@@ -107,12 +107,18 @@ exports.Tests = {
         var context = $example.Context.getContext();
         $example.Context.deleteData(context, function () {
             var p = new $example.Person({ Name: 'John', Description: 'Desc', Age: 42 });
+            var p1 = new $example.Person({ Name: 'John1', Description: 'Desc1', Age: 42 });
             context.People.add(p);
+            context.People.add(p1);
             context.saveChanges({
                 success: function () {
                     context.People.toArray(function (res) {
-                        test.equal(res.length, 1, 'result count failed');
-                        test.deepEqual(res[0].initData, p.initData, 'full entity save failed');
+                        test.equal(res.length, 2, 'result count failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            if(res[i].Name === 'John')
+                                test.deepEqual(res[i].initData, p.initData, 'full entity save failed');
+                        }
                         test.done();
                     });
                 },

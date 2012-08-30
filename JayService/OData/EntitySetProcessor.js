@@ -10,7 +10,6 @@
     },
     invoke: function (config, req, res) {
         var self = this;
-
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback();
 
@@ -19,11 +18,17 @@
             switch (req.method) {
                 case 'POST': //C
                     if (req.body) {
+                        var bodyData = req.body;
+                        var bodyContentType = $data.JayService.OData.Utils.getHeaderValue(req.headers, 'Content-Type');
+                        if (bodyContentType.indexOf($data.JayService.OData.Defaults.jsonContentType) === -1) {
+                            bodyData = this._readXmlBody(bodyData, req.headers);
+                        }
+
                         config.collectionName = this.entitySet.name;
                         config.context = self.context.getType();
                         config.singleResult = true;
 
-                        var entity = new this.entitySet.createNew(req.body);
+                        var entity = new this.entitySet.createNew(bodyData);
                         this.entitySet.add(entity);
                         this.context.saveChanges(function () {
                             res.statusCode = 201;
@@ -41,7 +46,13 @@
                     break;
                 case 'MERGE': //U
                     if (req.body) {
-                        var entity = new this.entitySet.createNew(req.body);
+                        var bodyData = req.body;
+                        var bodyContentType = $data.JayService.OData.Utils.getHeaderValue(req.headers, 'Content-Type');
+                        if (bodyContentType.indexOf($data.JayService.OData.Defaults.jsonContentType) === -1) {
+                            bodyData = this._readXmlBody(bodyData, req.headers);
+                        }
+
+                        var entity = new this.entitySet.createNew(bodyData);
                         this.entitySet.attach(entity);
                         entity.entityState = $data.EntityState.Modified;
                         this.context.saveChanges(function () {
@@ -115,7 +126,7 @@
                 if (config.simpleResult) {
                     callback.success(new $data.ServiceResult(contextResult));
                 } else {
-                    callback.success(new $data.oDataResult(contextResult, config));
+                    callback.success(contextResult, config);
                 }
             },
             error: function (err) {
@@ -130,6 +141,11 @@
             }
         }
         return data;
+    },
+    _readXmlBody: function (body, headers) {
+        var reqWrapper = { body: body, headers: headers }
+        OData.atomHandler.read(reqWrapper);
+        return reqWrapper.data;
     },
 
     BatchDeleteFromEntitySet: function (req, config, callback) {
@@ -166,7 +182,7 @@
         }
         var resolvedMethod = this._supportedMethods[req.method];
         if (resolvedMethod) {
-            var requestInfo = this.parseUrlPart(parts[0], req.method === 'GET');
+            var requestInfo = $data.JayService.OData.Utils.parseUrlPart(parts[0], this.context, req.method === 'GET');
             if (requestInfo) {
                 this.entitySet = requestInfo.set;
                 this.member.idObject = requestInfo.idObj;
@@ -218,61 +234,5 @@
             'DELETE': { _isAllowed: true, $batchDelete: true }
 
         }
-    },
-
-    //helper
-    parseUrlPart: function (urlPart, withoutConvert) {
-
-        var p = urlPart.split('(');
-        var ids;
-        if (p.length > 1) {
-            var p2 = p[1].split(')');
-            p.splice(1, 1, p2[0], p2[1]);
-
-            var pIds = p2[0].split(',');
-            if (pIds.length > 1) {
-                ids = {};
-                for (var i = 0; i < pIds.length; i++) {
-                    var idPart = pIds[i].split('=');
-                    ids[idPart[0]] = idPart[1];
-                }
-
-            } else {
-                ids = pIds[0];
-            }
-        }
-
-        var eSet = this.context[p[0]];
-        if (!eSet) return null;
-        return result = {
-            set: eSet,
-            idObj: ids ? this.paramMapping(ids, eSet, withoutConvert) : undefined
-        };
-    },
-    paramMapping: function (values, set, withoutConvert) {
-        if (!values)
-            return;
-
-        var keyProps = set.elementType.memberDefinitions.getKeyProperties();
-        result = {};
-
-        for (var i = 0; i < keyProps.length; i++) {
-            var memDef = keyProps[i];
-
-            if (keyProps.length === 1) {
-                var value = values;
-            } else {
-                var value = values[memDef.name];
-            }
-
-            //TODO converter
-            var resolvedType = Container.resolveType(memDef.type);
-            if (withoutConvert)
-                result[memDef.name] = value;
-            else
-                result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
-        }
-
-        return result;
     }
 });
