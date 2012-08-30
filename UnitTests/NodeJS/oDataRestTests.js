@@ -474,7 +474,87 @@ test("REST - Batch GET JSON", 8, function () {
         });
     });
 });
+test("REST - Batch GET multiple JSON", 15, function () {
+    stop();
 
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.People.toArray(function (p) {
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/$batch",
+                method: 'POST',
+                data: {
+                    __batchRequests: [{
+                        method: 'GET',
+                        requestUri: 'People',
+                    },
+                    {
+                        method: 'GET',
+                        requestUri: 'Orders',
+                    }]
+                }
+            }, function (data) {
+                console.log(data);
+                notEqual(typeof data, 'undefined', 'data failed');
+
+                //People
+                var batch = data.__batchResponses[0];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+
+                equal(batch.headers['Content-Type'], "application/json;odata=verbose;charset=utf-8", 'result content type failed');
+                equal(batch.data.results.length, 10, 'result length failed');
+
+                equal(typeof batch.data.results[0].__metadata, 'object', 'metadata is object');
+                delete batch.data.results[0].__metadata;
+
+                equal(typeof batch.data.results[0].Id, 'string', 'Id is string');
+                delete batch.data.results[0].Id;
+
+                deepEqual(batch.data.results[0], {
+                    Age: 10,
+                    Description: "desc0",
+                    Name: "Person0"
+                }, 'item data failed');
+
+
+                //Orders
+                var batch = data.__batchResponses[1];
+                equal(batch.statusCode, 200, 'statusCode failed');
+                equal(batch.statusText, 'Ok', 'statusText failed');
+
+
+                equal(batch.headers['Content-Type'], "application/json;odata=verbose;charset=utf-8", 'result content type failed');
+                equal(batch.data.results.length, 10, 'result length failed');
+
+                equal(typeof batch.data.results[0].__metadata, 'object', 'metadata is object');
+                delete batch.data.results[0].__metadata;
+
+                equal(typeof batch.data.results[0].Id, 'string', 'Id is string');
+                delete batch.data.results[0].Id;
+
+                deepEqual(batch.data.results[0], {
+                    Completed: false,
+                    Data: {
+                        a: 5,
+                        b: 0
+                    },
+                    Date: "/Date(946681200000)/",
+                    Value: 0,
+                }, 'item data failed');
+
+                start();
+
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            },
+            OData.batchHandler);
+
+        });
+    });
+});
 
 test("REST - XML - GET", 6, function () {
     stop();
@@ -490,7 +570,7 @@ test("REST - XML - GET", 6, function () {
                     'Accept': 'application/atom+xml'
                 }
             }, function (data) {
-                console.log(data); 
+                console.log(data);
                 notEqual(data, undefined, 'data failed');
                 equal(typeof data.__metadata, 'object', 'data failed, __metadata is exists on xml result');
 

@@ -13,7 +13,6 @@
             headers: request.headers
         }
         OData.batchServerHandler.read(reqWrapper, {});
-
         var idx = -1;
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback();
@@ -37,8 +36,7 @@
                         });
 
                     } else {
-
-                        self._processBatchRead(batchRequests, request, response, {
+                        self._processBatchRead(batchRequests[idx], request, response, {
                             success: function (result) {
                                 if (result) batchResult.push(result);
                                 saveSuccess();
@@ -77,9 +75,7 @@
                     if (refData.__changeRequests) {
                         responseData.data.__batchRequests.push({ __changeRequests: self._prepareBatch(refData.__changeRequests, request) });
                     } else {
-                        for (var j = 0; j < refData.length; j++) {
-                            responseData.data.__batchRequests.push(self._prepareBatchRead(refData[j], request));
-                        }
+                        responseData.data.__batchRequests.push(self._prepareBatchRead(refData, request));
                     }
                 }
 
@@ -143,63 +139,41 @@
             error: function () { callback.error(); }
         });
     },
-    _processBatchRead: function (getBatchrequests, req, res, callback) {
+    _processBatchRead: function (getBatchrequest, req, res, callback) {
         var getProcessor = new $data.JayService.OData.EntitySetProcessor('', this.context, { top: this.context.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
-        var reqPromises = [];
 
-        getBatchrequests.forEach(function (getBatchrequest) {
-            //for (var i = 0; i < getBatchrequests.length; i++) {
-            //    var getBatchrequest = getBatchrequests[i];
+        var batchUrl = getBatchrequest.urlPart.replace(req.fullRoute, '');
+        var subReq = {
+            url: batchUrl,
+            method: 'GET',
+            query: this._getQueryObject(batchUrl),
+            headers: getBatchrequest.headers
+        };
 
-            var batchUrl = getBatchrequest.urlPart.replace(req.fullRoute, '');
-            var subReq = {
-                url: batchUrl,
-                method: 'GET',
-                query: this._getQueryObject(batchUrl),
-                headers: getBatchrequest.headers
-            };
+        var config = {
+            version: 'V2',
+            baseUrl: req.fullRoute,
+            request: subReq,
+            response: res,
+            context: this.context.getType(),
+            simpleResult: batchUrl.toLowerCase().indexOf('/$count') > 0
+        };
 
-            var config = {
-                version: 'V2',
-                baseUrl: req.fullRoute,
-                request: subReq,
-                response: res,
-                context: this.context.getType(),
-                simpleResult: batchUrl.toLowerCase().indexOf('/$count') > 0
-            };
+        if (getProcessor.isSupported(subReq)) {
 
-            if (getProcessor.isSupported(subReq)) {
-                var pHandler = new $data.PromiseHandler();
-                var cbWrapper = pHandler.createCallback({ error: callback.error });
-
-                getProcessor.ReadFromEntitySet(subReq, config, {
-                    success: function (result) {
-                        cbWrapper.success({
-                            requestObject: getBatchrequest,
-                            resultObject: result,
-                            elementType: getProcessor.entitySet.elementType
-                        });
-                    },
-                    error: cbWrapper.error
-                });
-                reqPromises.push(pHandler.getPromise());
-
-            } else {
-                callback.error();
-            }
-        }, this);
-
-
-        if (reqPromises.length > 0) {
-            this.Q.allResolved(reqPromises).then(function (data) {
-                var promiseData = [];
-                for (var i = 0; i < reqPromises.length; i++) {
-                    promiseData.push(reqPromises[i].valueOf());
-                }
-                callback.success(promiseData);
+            getProcessor.ReadFromEntitySet(subReq, config, {
+                success: function (result) {
+                    callback.success({
+                        requestObject: getBatchrequest,
+                        resultObject: result,
+                        elementType: getProcessor.entitySet.elementType
+                    });
+                },
+                error: callback.error
             });
+
         } else {
-            callback.success();
+            callback.error();
         }
     },
     _getQueryObject: function (url) {
@@ -254,7 +228,6 @@
     _prepareBatchRead: function (data, request) {
         var entityTransformer = new $data.oDataServer.EntityTransform(this.context.getType(), this.baseUrl);
         var entityXmlTransformer = new $data.oDataServer.EntityXmlTransform(this.context.getType(), this.baseUrl, { headers: request.headers });
-
 
         var response = {
             headers: {
