@@ -164,26 +164,30 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             cache.Databases[d._id.toString()] = d;
                         }
                         
-                        for (var i = 0; i < result.Permissions.length; i++){
-                            var p = result.Permissions[i];
-                            cache.Permissions[p._id.toString()] = p;
-                            
-                            var access = $data.Access.getAccessBitmaskFromPermission(p);
-                            
-                            var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
-                            var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
-                            
-                            for (var d = 0; d < dbIds.length; d++){
-                                for (var e = 0; e < esIds.length; e++){
-                                    var db = cache.Databases[dbIds[d].toString()].Name;
-                                    var es = cache.EntitySets[esIds[e].toString()].Name;
-                                    var g = cache.Groups[p.GroupID.toString()].Name;
-                                    
-                                    if (!cache.Access[db]) cache.Access[db] = {};
-                                    if (!cache.Access[db][es]) cache.Access[db][es] = {};
-                                    cache.Access[db][es][g] = access;
+                        try{
+                            for (var i = 0; i < result.Permissions.length; i++){
+                                var p = result.Permissions[i];
+                                cache.Permissions[p._id.toString()] = p;
+                                
+                                var access = $data.Access.getAccessBitmaskFromPermission(p);
+                                
+                                var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
+                                var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
+                                
+                                for (var d = 0; d < dbIds.length; d++){
+                                    for (var e = 0; e < esIds.length; e++){
+                                        var db = cache.Databases[dbIds[d].toString()].Name;
+                                        var es = cache.EntitySets[esIds[e].toString()].Name;
+                                        var g = cache.Groups[p.GroupID.toString()].Name;
+                                        
+                                        if (!cache.Access[db]) cache.Access[db] = {};
+                                        if (!cache.Access[db][es]) cache.Access[db][es] = {};
+                                        cache.Access[db][es][g] = access;
+                                    }
                                 }
                             }
+                        }catch(err){
+                            next(err);
                         }
                         
                         if (!cache.Access.ApplicationDB) cache.Access.ApplicationDB = {};
