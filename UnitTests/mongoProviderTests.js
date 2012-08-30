@@ -848,7 +848,7 @@ exports.testFilterInArray = function(test){
 };
 
 exports.testAddArrayID = function(test){
-    test.expect(3);
+    test.expect(4);
     $test.Context.init(function(db){
         db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
         db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
@@ -863,8 +863,8 @@ exports.testAddArrayID = function(test){
                 db.ArrayIDs.add(new $test.ArrayID({ Key: 'ids', Values: [r[0].Id, r[1].Id], Rank: 999 }));
                 db.saveChanges(function(cnt){
                     test.equal(cnt, 1, 'Item not added to collection');
+                    test.done();
                 });
-                test.done();
             });
         });
     });
