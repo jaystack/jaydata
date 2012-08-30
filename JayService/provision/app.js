@@ -1,12 +1,10 @@
 
-var q = require('q')
+var q = require('q');
+
+var $data = require('jaydata');
 
 var express = require('express')
   , http = require('http');
-
-var mongoose = module.exports.mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/admin');
-//mongoose.connect('mongodb://admin:admin@db1.storm.jaystack.com:8888/admin');
 
 var tokensrv = module.exports.tokensrv = require('./lib/tokensrv');
 
@@ -44,25 +42,47 @@ app.get('/gettokenstatus/:tokenid', function(req, res) {
 //require('./lib/app');
 //require('./lib/appitem');
 
+var launch = require('./launch');
 var provision = require('./provision');
 
-provision.init();
-var appid = provision.provision('app1','1','');
-q.when(appid)
+q.when(provision.init())
+    .then(function(x) {
+        console.log('init ok'); return x;
+    })
+    .fail(function(reason) {
+        console.log('init failed: ', reason);
+    })
+    .then(function(x) {
+        return provision.provision('app1','1',{
+            'dbname': {
+                coll1: { x: 1 },
+                coll2: { y :1 }
+            },
+            'dbname2': {
+                coll3: { x: 1 },
+                coll4: { y :1 }
+            }
+        });
+    })
     .then(function(appid) {
         console.log('provisioning ok');
-        var promise = provision.launch(appid);
-        q.when(promise) // TODO ez mehet egybe
-            .then(function(result) {
-                console.log('launch ok: ' + result);
-            })
-            .fail(function(reason) {
-                console.log('launch failed: '+ reason);
-            })
+        return appid;
     })
     .fail(function(reason) {
         console.log('provisioninig failed: '+ reason);
-    });
+    })
+    //.then(function(appid) {
+        //return launch.launch('app1');
+    //})
+    //.then(function(result) {
+        //console.log('launch ok: ', result);
+        //console.log(result);
+    //})
+    //.fail(function(reason) {
+        //console.log('launch failed: '+ reason);
+    //});
+    ;
+
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
