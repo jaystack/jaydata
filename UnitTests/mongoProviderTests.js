@@ -846,3 +846,57 @@ exports.testFilterInArray = function(test){
         });
     });
 };
+
+exports.testAddArrayID = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.toArray(function(r){
+                test.equal(r.length, 5, 'Not 5 items selected from collection');
+                test.ok(r[0] instanceof $test.Item, 'Entity is not an Item');
+                db.ArrayIDs.add(new $test.ArrayID({ Key: 'ids', Values: [r[0].Id, r[1].Id], Rank: 999 }));
+                db.saveChanges(function(cnt){
+                    test.equal(cnt, 1, 'Item not added to collection');
+                    test.done();
+                });
+            });
+        });
+    });
+};
+
+exports.testUpdateArrayID = function(test){
+    test.expect(6);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.toArray(function(r){
+                test.equal(r.length, 5, 'Not 5 items selected from collection');
+                test.ok(r[0] instanceof $test.Item, 'Entity is not an Item');
+                db.ArrayIDs.add(new $test.ArrayID({ Key: 'ids', Values: [r[0].Id, r[1].Id], Rank: 999 }));
+                db.saveChanges(function(cnt){
+                    test.equal(cnt, 1, 'Item not added to collection');
+                    db.ArrayIDs.toArray(function(r2){
+                        test.equal(r2.length, 1, 'Item not added to collection');
+                        db.ArrayIDs.attach(r2[0]);
+                        r2[0].Values = [r[2].Id, r[3].Id];
+                        db.saveChanges(function(cnt){
+                            test.equal(cnt, 1, 'Item not added to collection');
+                            test.done();
+                        });
+                    })
+                });
+            });
+        });
+    });
+};
