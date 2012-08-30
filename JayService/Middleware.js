@@ -186,22 +186,35 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             }
                         }
                         
-                        cache.Access.ApplicationDB = {
-                            Tests: { admin: 63 },
-                            Permissions: { admin: 63 },
-                            Databases: { admin: 63 },
-                            Entities: { admin: 63 },
-                            ComplexTypes: { admin: 63 },
-                            EventHandlers: { admin: 63 },
-                            EntityFields: { admin: 63 },
-                            EntitySets: { admin: 63 },
-                            EntitySetPublications: { admin: 63 },
-                            Services: { admin: 63 },
-                            ServiceOperations: { admin: 63 },
-                            TypeTemplates: { admin: 63 },
-                            Users: { admin: 63 },
-                            Groups: { admin: 63 }
-                        }
+                        if (!cache.Access.ApplicationDB) cache.Access.ApplicationDB = {};
+                        if (!cache.Access.ApplicationDB.Tests) cache.Access.ApplicationDB.Tests = {};
+                        cache.Access.ApplicationDB.Tests.admin = 63;
+                        if (!cache.Access.ApplicationDB.Permissions) cache.Access.ApplicationDB.Permissions = {};
+                        cache.Access.ApplicationDB.Permissions.admin = 63;
+                        if (!cache.Access.ApplicationDB.Databases) cache.Access.ApplicationDB.Databases = {};
+                        cache.Access.ApplicationDB.Databases.admin = 63;
+                        if (!cache.Access.ApplicationDB.Entities) cache.Access.ApplicationDB.Entities = {};
+                        cache.Access.ApplicationDB.Entities.admin = 63;
+                        if (!cache.Access.ApplicationDB.ComplexTypes) cache.Access.ApplicationDB.ComplexTypes = {};
+                        cache.Access.ApplicationDB.ComplexTypes.admin = 63;
+                        if (!cache.Access.ApplicationDB.EventHandlers) cache.Access.ApplicationDB.EventHandlers = {};
+                        cache.Access.ApplicationDB.EventHandlers.admin = 63;
+                        if (!cache.Access.ApplicationDB.EntityFields) cache.Access.ApplicationDB.EntityFields = {};
+                        cache.Access.ApplicationDB.EntityFields.admin = 63;
+                        if (!cache.Access.ApplicationDB.EntitySets) cache.Access.ApplicationDB.EntitySets = {};
+                        cache.Access.ApplicationDB.EntitySets.admin = 63;
+                        if (!cache.Access.ApplicationDB.EntitySetPublications) cache.Access.ApplicationDB.EntitySetPublications = {};
+                        cache.Access.ApplicationDB.EntitySetPublications.admin = 63;
+                        if (!cache.Access.ApplicationDB.Services) cache.Access.ApplicationDB.Services = {};
+                        cache.Access.ApplicationDB.Services.admin = 63;
+                        if (!cache.Access.ApplicationDB.ServiceOperations) cache.Access.ApplicationDB.ServiceOperations = {};
+                        cache.Access.ApplicationDB.ServiceOperations.admin = 63;
+                        if (!cache.Access.ApplicationDB.TypeTemplates) cache.Access.ApplicationDB.TypeTemplates = {};
+                        cache.Access.ApplicationDB.TypeTemplates.admin = 63;
+                        if (!cache.Access.ApplicationDB.Users) cache.Access.ApplicationDB.Users = {};
+                        cache.Access.ApplicationDB.Users.admin = 63;
+                        if (!cache.Access.ApplicationDB.Groups) cache.Access.ApplicationDB.Groups = {};
+                        cache.Access.ApplicationDB.Groups.admin = 63;
                         
                         client.close();
                         if (next) next();
