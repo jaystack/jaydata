@@ -151,7 +151,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             this.initData = {};
             for (var i in initData) {
                 if (memDefNames.indexOf(i) > -1) {
-                    this.initData[i] = Container.resolveType(typeMemDefs.getMember(i).type) === $data.Date && typeof initData[i] === 'string' ? new Date(initData[i]) : initData[i];
+                    var type = Container.resolveType(typeMemDefs.getMember(i).type);
+                    if (type === $data.Date && typeof initData[i] === 'string')
+                        this.initData[i] = new Date(initData[i]);
+                    else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
+                        this.initData[i] = new $data.Geography(initData[i]);
+                    else {
+                        this.initData[i] = initData[i];
+
+                    }
                 }
             }
 

@@ -20,7 +20,7 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
     Data: { type: 'object' }
 });
 
-$data.Class.define('$exampleSrv.PlacesSrv', $data.Entity, null, {
+$data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
     Name: { type: 'string' },
     Location: { type: 'geo' }
@@ -29,7 +29,7 @@ $data.Class.define('$exampleSrv.PlacesSrv', $data.Entity, null, {
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
-    Places: { type: $data.EntitySet, elementType: $exampleSrv.PlacesSrv },
+    Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
     FuncStrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'string' }]).returns('string'),
     FuncIntParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'int' }]).returns('int'),
     FuncNumParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'number' }]).returns('number'),
