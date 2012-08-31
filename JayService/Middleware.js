@@ -566,7 +566,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.query());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.bodyParser());\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.Utils.simpleBodyReader());\n';
                         listen.push((s.internalPort || s.port));
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';

@@ -871,7 +871,7 @@ exports.testAddArrayID = function(test){
 };
 
 exports.testUpdateArrayID = function(test){
-    test.expect(6);
+    test.expect(8);
     $test.Context.init(function(db){
         db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
         db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
@@ -892,7 +892,11 @@ exports.testUpdateArrayID = function(test){
                         r2[0].Values = [r[2].Id, r[3].Id];
                         db.saveChanges(function(cnt){
                             test.equal(cnt, 1, 'Item not added to collection');
-                            test.done();
+                            db.ArrayIDs.toArray(function(r3){
+                                test.equal(cnt, 1, 'Item not added to collection');
+                                test.equal(r3[0].Values[0], r[2].Id, 'Id mismatch');
+                                test.done();
+                            });
                         });
                     })
                 });
