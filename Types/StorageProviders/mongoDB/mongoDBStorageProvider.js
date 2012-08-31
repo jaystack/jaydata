@@ -9,6 +9,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                         //complex type
                         builder.selectModelBinderProperty(prop.name);
                         builder.modelBinderConfig['$type'] = Container.resolveType(prop.dataType);
+                        
                         if (this._isoDataProvider) {
                             builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
                         } else {
@@ -72,10 +73,27 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 /*builder.modelBinderConfig[ct.FromPropertyName] = {};
                 builder.modelBinderConfig[ct.FromPropertyName].$type = ct.ToType;
                 builder.modelBinderConfig[ct.FromPropertyName].$source = ct.FromPropertyName;*/
-                $data.typeSystem.extend(builder.modelBinderConfig, {
-                    $type: ct.ToType,
-                    $source: ct.FromPropertyName
-                });
+                if (dt === $data.Array && et === $data.ObjectID){
+                    $data.typeSystem.extend(builder.modelBinderConfig, {
+                        $type: $data.Array,
+                        $selector: 'json:' + ct.FromPropertyName,
+                        $item: {
+                            $type: $data.ObjectID,
+                            $value: function(meta, data){
+                                var type = Container.resolveName(meta.$type);
+                                var converter = this.context.storageProvider.fieldConverter.fromDb;
+                                var converterFn = converter ? converter[type] : undefined;
+                                
+                                return converter && converter[type] ? converter[type](data) : new (Container.resolveType(type))(data);
+                            }
+                        }
+                    });
+                }else{
+                    $data.typeSystem.extend(builder.modelBinderConfig, {
+                        $type: ct.ToType,
+                        $source: ct.FromPropertyName
+                    });
+                }
             }
         }
     },
@@ -130,6 +148,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
         var type = Container.resolveType(expression.memberDefinition.type);
         var elementType = type === $data.Array && expression.memberDefinition.elementType ? Container.resolveType(expression.memberDefinition.elementType) : undefined;
         builder.modelBinderConfig['$type'] = type;
+        
         if (type === $data.Array && elementType && elementType.isAssignableTo && elementType.isAssignableTo($data.Entity)){
             this._addComplexType(expression.memberDefinition.storageModel.ComplexTypes[expression.memberName], builder);
         }else{

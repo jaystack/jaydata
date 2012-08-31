@@ -886,7 +886,11 @@ $data.Class.define('$data.EntityContext', null, null,
         //});
         skipItems = null;
         var ctx = this;
-        if (changedEntities.length == 0) { clbWrapper.success(0); return pHandlerResult; }
+        if (changedEntities.length == 0) {
+            this.stateManager.trackedEntities.length = 0;
+            clbWrapper.success(0);
+            return pHandlerResult;
+        }
 
         //validate entities
         var errors = [];
@@ -964,7 +968,9 @@ $data.Class.define('$data.EntityContext', null, null,
                     },
                     error: clbWrapper.error
                 }, changedEntities);
-            }else clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
+            }else if (cancelEvent){
+                clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
+            }else clbWrapper.success(0);
             
             /*else if (cancelEvent) clbWrapper.error(new $data.Exception('saveChanges cancelled from event [' + cancelEvent + ']'));
             else Guard.raise('No changed entities');*/

@@ -164,44 +164,61 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             cache.Databases[d._id.toString()] = d;
                         }
                         
-                        for (var i = 0; i < result.Permissions.length; i++){
-                            var p = result.Permissions[i];
-                            cache.Permissions[p._id.toString()] = p;
-                            
-                            var access = $data.Access.getAccessBitmaskFromPermission(p);
-                            
-                            var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
-                            var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
-                            
-                            for (var d = 0; d < dbIds.length; d++){
-                                for (var e = 0; e < esIds.length; e++){
-                                    var db = cache.Databases[dbIds[d].toString()].Name;
-                                    var es = cache.EntitySets[esIds[e].toString()].Name;
-                                    var g = cache.Groups[p.GroupID.toString()].Name;
-                                    
-                                    if (!cache.Access[db]) cache.Access[db] = {};
-                                    if (!cache.Access[db][es]) cache.Access[db][es] = {};
-                                    cache.Access[db][es][g] = access;
+                        try{
+                            for (var i = 0; i < result.Permissions.length; i++){
+                                var p = result.Permissions[i];
+                                cache.Permissions[p._id.toString()] = p;
+                                
+                                var access = $data.Access.getAccessBitmaskFromPermission(p);
+                                
+                                var dbIds = p.DatabaseID ? [p.DatabaseID] : result.Databases.map(function(it){ return it.DatabaseID; });
+                                var esIds = p.EntitySetID ? [p.EntitySetID] : result.EntitySets.filter(function(it){ return dbIds.indexOf(it.DatabaseID) >= 0; }).map(function(it){ return it.EntitySetID; });
+                                
+                                for (var d = 0; d < dbIds.length; d++){
+                                    for (var e = 0; e < esIds.length; e++){
+                                        var db = cache.Databases[dbIds[d].toString()].Name;
+                                        var es = cache.EntitySets[esIds[e].toString()].Name;
+                                        var g = cache.Groups[p.GroupID.toString()].Name;
+                                        
+                                        if (!cache.Access[db]) cache.Access[db] = {};
+                                        if (!cache.Access[db][es]) cache.Access[db][es] = {};
+                                        cache.Access[db][es][g] = access;
+                                    }
                                 }
                             }
+                        }catch(err){
+                            next(err);
                         }
                         
-                        cache.Access.ApplicationDB = {
-                            Tests: { admin: 63 },
-                            Permissions: { admin: 63 },
-                            Databases: { admin: 63 },
-                            Entities: { admin: 63 },
-                            ComplexTypes: { admin: 63 },
-                            EventHandlers: { admin: 63 },
-                            EntityFields: { admin: 63 },
-                            EntitySets: { admin: 63 },
-                            EntitySetPublications: { admin: 63 },
-                            Services: { admin: 63 },
-                            ServiceOperations: { admin: 63 },
-                            TypeTemplates: { admin: 63 },
-                            Users: { admin: 63 },
-                            Groups: { admin: 63 }
-                        }
+                        if (!cache.Access.ApplicationDB) cache.Access.ApplicationDB = {};
+                        if (!cache.Access.ApplicationDB.Tests) cache.Access.ApplicationDB.Tests = {};
+                        cache.Access.ApplicationDB.Tests.admin = 63;
+                        if (!cache.Access.ApplicationDB.Permissions) cache.Access.ApplicationDB.Permissions = {};
+                        cache.Access.ApplicationDB.Permissions.admin = 63;
+                        if (!cache.Access.ApplicationDB.Databases) cache.Access.ApplicationDB.Databases = {};
+                        cache.Access.ApplicationDB.Databases.admin = 63;
+                        if (!cache.Access.ApplicationDB.Entities) cache.Access.ApplicationDB.Entities = {};
+                        cache.Access.ApplicationDB.Entities.admin = 63;
+                        if (!cache.Access.ApplicationDB.ComplexTypes) cache.Access.ApplicationDB.ComplexTypes = {};
+                        cache.Access.ApplicationDB.ComplexTypes.admin = 63;
+                        if (!cache.Access.ApplicationDB.EventHandlers) cache.Access.ApplicationDB.EventHandlers = {};
+                        cache.Access.ApplicationDB.EventHandlers.admin = 63;
+                        if (!cache.Access.ApplicationDB.EntityFields) cache.Access.ApplicationDB.EntityFields = {};
+                        cache.Access.ApplicationDB.EntityFields.admin = 63;
+                        if (!cache.Access.ApplicationDB.EntitySets) cache.Access.ApplicationDB.EntitySets = {};
+                        cache.Access.ApplicationDB.EntitySets.admin = 63;
+                        if (!cache.Access.ApplicationDB.EntitySetPublications) cache.Access.ApplicationDB.EntitySetPublications = {};
+                        cache.Access.ApplicationDB.EntitySetPublications.admin = 63;
+                        if (!cache.Access.ApplicationDB.Services) cache.Access.ApplicationDB.Services = {};
+                        cache.Access.ApplicationDB.Services.admin = 63;
+                        if (!cache.Access.ApplicationDB.ServiceOperations) cache.Access.ApplicationDB.ServiceOperations = {};
+                        cache.Access.ApplicationDB.ServiceOperations.admin = 63;
+                        if (!cache.Access.ApplicationDB.TypeTemplates) cache.Access.ApplicationDB.TypeTemplates = {};
+                        cache.Access.ApplicationDB.TypeTemplates.admin = 63;
+                        if (!cache.Access.ApplicationDB.Users) cache.Access.ApplicationDB.Users = {};
+                        cache.Access.ApplicationDB.Users.admin = 63;
+                        if (!cache.Access.ApplicationDB.Groups) cache.Access.ApplicationDB.Groups = {};
+                        cache.Access.ApplicationDB.Groups.admin = 63;
                         
                         client.close();
                         if (next) next();
@@ -549,7 +566,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.query());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.bodyParser());\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.BatchProcessor.connectBodyReader);\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.OData.Utils.simpleBodyReader());\n';
                         listen.push((s.internalPort || s.port));
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';

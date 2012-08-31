@@ -1,6 +1,8 @@
 
 var q = require('q')
-    , model = require('./model');
+    , model = module.parent.exports.model || require('./model');
+
+var app = module.parent.exports.app;
 
 function reserve(app, callback) { // TODO ide majd kell optimistic locking
     var instances = [];

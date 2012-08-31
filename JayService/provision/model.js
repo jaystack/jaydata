@@ -1,25 +1,25 @@
 ﻿
 $data.Class.define("$provision.Types.AppOwner", $data.Entity, null, {
-    Id: { type: "id", key: true, computed: true },
+    Id: { type: "string", key: true },
     Name: { type: "string" },
     AppIds: { type: "Array", elementType: "id" }
 }, null);
 $data.Class.define("$provision.Types.App", $data.Entity, null, {
-    Id: { type: "id", key: true, computed: true },
+    Id: { type: "string", key: true },
     Name: { type: "string" },
-    AppOwnerId: { type: "id" },
-    ItemIds: { type: "Array", elementType: "id" },
+    AppOwnerId: { type: "string" },
+    ItemIds: { type: "Array", elementType: "string" },
     InstanceIds: { type: "Array", elementType: "id" }
 }, null);
 $data.Class.define("$provision.Types.AppItem", $data.Entity, null, {
-    Id: { type: "id", key: true, computed: true },
-    AppId: { type: "id" },
+    Id: { type: "string", key: true },
+    AppId: { type: "string" },
     Type: { type: "string" },
     Data: { type: "object" }
 }, null);
 $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
-    AppId: { type: "id" },
+    AppId: { type: "string" },
     Username: { type: "string" },
     Password: { type: "string" }
 }, null);
@@ -49,10 +49,20 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
     DbInventories: { type: $data.EntitySet, elementType: $provision.Types.DbInventory },
 
 
+    findAppOwnerById: function(appownerid) { return this.AppOwners.single(function(a) { return a.Id == this.appownerid; }, { appownerid: appownerid }); },
     findAppOwnerByName: function(appownername) { return this.AppOwners.single(function(a) { return a.Name == this.appownername; }, { appownername: appownername }); },
     findAppOwnerByApp: function(app) { return this.AppOwners.single(function(a) { return a.Id == app.AppOwnerId; }); },
     findAppByName: function(appname) { return this.Apps.single(function(a) { return a.Name == this.appname; }, { appname: appname }); },
-    findDbs: function(app) { return this.AppItems.filter(function(item){return item.AppId = app.Id && item.type == 'qdb'; }) },
+    findAppById: function(appid) { return this.Apps.single(function(a) { return a.Id == this.appid; }, { appid: appid }); },
+
+
+
+
+    findDbs: function(id) { return this.AppItems.filter(function(item){return item.AppId == this.id && item.Type == 'qdb'; },{id:id}).toArray(); },
+
+
+
+
     checkProvisionId: function(app, provisionid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'provisionableapp' && i.Data.provisionId == this.provisionid); }, { items: app.items, provisionId: provisionid }); },
     checkDb: function(app, dbid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'qdb' && i.Data.DbId == this.dbid); }, { items: app.items, dbid: dbid }); },
     checkCu: function(app, cuid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'cu' && i.Data.CuId == this.cuid); }, { items: app.items, cuid: cuid }); },
@@ -68,15 +78,20 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
     // only needed for init
     checkInventory: function(id) { return this.CuInventories.single(function(a) { return a.InstanceId == this.id; }, { id: id }); },
 
+    addappowner: function(owner) {
+	this.AppOwners.add(owner);
+	return this.saveChanges()
+    },
+
     addapp: function(app, owner, username, password) {
 	var self = this;
 	this.Apps.add(app);
 	return this.saveChanges()
-		.then(function(c) {
-		    self.AppOwners.attach(owner);
-		    owner.AppIds = owner.AppIds.concat(app.Id);
-		    return self.saveChanges();
-		})
+		//.then(function(c) {
+		    //self.AppOwners.attach(owner);
+		    //owner.AppIds = owner.AppIds.concat(app.Id);
+		    //return self.saveChanges();
+		//})
 		.then(function(c) {
 			// TODO use createinstance but beware of this/self
 		    var instance = new $provision.Types.Instance();
@@ -89,7 +104,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 		.then(function(instance) {
 		    self.Apps.attach(app);
 		    app.InstanceIds = app.InstanceIds.concat(instance.Id);
-		    return self.saveChanges();
+		    return self.saveChanges().then(function(x){return instance;});
 		});
     },
 
@@ -117,13 +132,16 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	dbinstance.Data = db.Data;
 	// TODO el kellene tenni forditva is, vagyis az instance tudjon a db-irol
 	this.DbInventories.add(dbinstance);
-	return this.saveChanges();
+	return this.saveChanges().then(function(c){return dbinstance;});
     },
 
     additem: function(item, app) {
 	var self = this;
-	// TODO move here but it can be an array
-	// this.AppItems.add(item);
+        if (Array.isArray(item))
+          item.forEach(function(item) {
+             this.AppItems.add(item);
+          });
+	else this.AppItems.add(item);
 	return this.saveChanges()
 	     .then(function(c) {
 		self.Apps.attach(app);
