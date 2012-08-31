@@ -1,14 +1,14 @@
 
-var q = require('q');
+var q = require('q')
+    , express = require('express')
+    , http = require('http')
+    , tokensrv = module.exports.tokensrv = require('./lib/tokensrv')
+    , $data = require('jaydata');
 
-var $data = require('jaydata');
-
-var express = require('express')
-  , http = require('http');
-
-var tokensrv = module.exports.tokensrv = require('./lib/tokensrv');
-
+var model = module.exports.model = require('./model');
+var ctx = module.exports.ctx = new $provision.Types.ProvisionContext({name: 'mongoDB', databaseName: 'admin', address:'db1.storm.jaystack.com', port:8888, username:'admin', password: 'admin' });
 var app = module.exports.app = express();
+var provision = module.exports.provision = require('./lib/provision');
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -26,6 +26,19 @@ app.get('/check', function(req, res) {
   res.end("ok");
 });
 
+module.exports.tokenizedFunction = function(req, res, func) {
+console.log(req.body);
+    var promise = func(req, res);
+    q.when(promise)
+        .then(function(result) {
+            tokensrv.set(req.token, { status: 'Done', result: 'Succeeded' });
+        })
+        .fail(function(reason) {
+            tokensrv.set(req.token, { status: 'Done', result: 'Failed', reason: reason });
+        })
+    res.end(JSON.stringify(tokensrv.get(req.token)));
+};
+
 app.get('/gettokenstatus/:tokenid', function(req, res) {
     var token = tokensrv.get(req.params.tokenid);
     console.log(req.params.tokenid);
@@ -38,51 +51,11 @@ app.get('/gettokenstatus/:tokenid', function(req, res) {
     }
 });
 
-//require('./lib/appowner');
-//require('./lib/app');
-//require('./lib/appitem');
-
-var launch = require('./launch');
-var provision = require('./provision');
-
-q.when(provision.init())
-    .then(function(x) {
-        console.log('init ok'); return x;
-    })
-    .fail(function(reason) {
-        console.log('init failed: ', reason);
-    })
-    .then(function(x) {
-        return provision.provision('app1','1',{
-            'dbname': {
-                coll1: { x: 1 },
-                coll2: { y :1 }
-            },
-            'dbname2': {
-                coll3: { x: 1 },
-                coll4: { y :1 }
-            }
-        });
-    })
-    .then(function(appid) {
-        console.log('provisioning ok');
-        return appid;
-    })
-    .fail(function(reason) {
-        console.log('provisioninig failed: '+ reason);
-    })
-    //.then(function(appid) {
-        //return launch.launch('app1');
-    //})
-    //.then(function(result) {
-        //console.log('launch ok: ', result);
-        //console.log(result);
-    //})
-    //.fail(function(reason) {
-        //console.log('launch failed: '+ reason);
-    //});
-    ;
-
+require('./lib/appowner');
+require('./lib/app');
+require('./lib/appitem');
+require('./lib/allocate');
+require('./lib/launch');
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
