@@ -1100,7 +1100,7 @@ $data.defaultErrorCallback = function () {
     else
         console.log(arguments);*/
     if (arguments[arguments.length - 1] && typeof arguments[arguments.length - 1].reject === 'function'){
-        arguments[arguments.length - 1].reject.apply(arguments[arguments.length - 1], new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
+        arguments[arguments.length - 1].reject.apply(arguments[arguments.length - 1], arguments);
     }else Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
 };
 $data.defaultSuccessCallback = function () { /*console.log('DEFAULT SUCCES CALLBACK');*/ };
