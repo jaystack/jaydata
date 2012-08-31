@@ -25,8 +25,8 @@ $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
 }, null);
 $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
-    InstanceId: { type: "id" },
-    AppItemId: { type: "id" },
+    InstanceId: { type: "string" },
+    AWSId: { type: "string" },
     Size: { type: "string" }, // micro
     Type: { type: "string" }, // reserved, ondemand, spot
     Used: { type: "boolean" },

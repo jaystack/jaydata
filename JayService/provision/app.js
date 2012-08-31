@@ -54,8 +54,9 @@ app.get('/gettokenstatus/:tokenid', function(req, res) {
 require('./lib/appowner');
 require('./lib/app');
 require('./lib/appitem');
-require('./lib/allocate');
+require('./lib/reserve');
 require('./lib/launch');
+require('./lib/notready');
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
