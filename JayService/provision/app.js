@@ -6,7 +6,9 @@ var q = require('q')
     , $data = require('jaydata');
 
 var model = module.exports.model = require('./model');
-var ctx = module.exports.ctx = new $provision.Types.ProvisionContext({name: 'mongoDB', databaseName: 'admin', address:'db1.storm.jaystack.com', port:8888, username:'admin', password: 'admin' });
+
+//removed, context is in req.ctx
+//var ctx = module.exports.ctx = new $provision.Types.ProvisionContext({name: 'mongoDB', databaseName: 'admin', address:'db1.storm.jaystack.com', port:8888, username:'admin', password: 'admin' });
 var app = module.exports.app = express();
 var provision = module.exports.provision = require('./lib/provision');
 
@@ -16,6 +18,14 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(tokensrv.parseToken());
+
+  app.use(function (req, res, next) {
+      req.ctx = new $provision.Types.ProvisionContext({ name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' });
+      req.ctx.onReady(function () {
+          next();
+      })
+
+  });
 });
 
 app.configure('development', function(){

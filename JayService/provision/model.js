@@ -15,13 +15,18 @@ $data.Class.define("$provision.Types.AppItem", $data.Entity, null, {
     Id: { type: "string", key: true },
     AppId: { type: "string" },
     Type: { type: "string" },
-    Data: { type: "object" }
+    Data: { type: "object" },
+    CreationDate: { type: 'date' }
 }, null);
 $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
     AppId: { type: "string" },
     Username: { type: "string" },
-    Password: { type: "string" }
+    Password: { type: "string" },
+    StartDate: { type: 'date' },
+    StopDate: { type: 'date' },
+    IsProvision: { type: 'boolean' },
+    ProvisionId: { type: 'string' }
 }, null);
 $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },

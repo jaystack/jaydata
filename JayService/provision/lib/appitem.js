@@ -1,9 +1,9 @@
 
 var app = module.parent.exports.app;
-var ctx = module.parent.exports.ctx;
+//var ctx = module.parent.exports.ctx;
 
 function createAppItem(req, res) {
-  return ctx.findAppById(req.body.appid)
+  return req.ctx.findAppById(req.body.appid)
   .then(function(app) {
     var appitem = new $provision.Types.AppItem({Id: req.body._id, AppId: req.body.appid, Type: req.body.type});
     delete req.body._id;
@@ -12,7 +12,7 @@ function createAppItem(req, res) {
     delete req.body.token;
     delete req.body.method;
     appitem.Data = req.body;
-    return ctx.additem(appitem, app);
+    return req.ctx.additem(appitem, app);
    });
 }
 function changeAppItem(req, res) { return true; }
