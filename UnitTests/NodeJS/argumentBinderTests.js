@@ -148,6 +148,24 @@ exports.Test = {
             });
         });
     },
+    'geography binder': function (test) {
+        test.expect(5);
+
+        var geography = new $data.Geography(-123.156, - 46.364);
+        var result = $data.JayService.ArgumentBinder.defaultBinder('a', { type: $data.Geography }, { query: { a: 'POINT(-123.156 -46.364)' } });
+        test.equal(result.longitude, geography.longitude, 'Geography longitude resolve failed1');
+        test.equal(result.latitude, geography.latitude, 'Geography latitude resolve failed1');
+
+        var context = $example.Context.getContext();
+        context.onReady(function () {
+            context.FuncGeographyParam(geography, function (res) {
+                test.equal(res instanceof $data.Geography, true, 'Geography call resolve failed');
+                test.equal(res.longitude, geography.longitude, 'Geography longitude call resolve failed1');
+                test.equal(res.latitude, geography.latitude, 'Geography latitude call resolve failed1');
+                test.done();
+            });
+        });
+    },
     //'entity binder': function (test) {
     //    test.expect(2);
 

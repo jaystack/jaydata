@@ -16,9 +16,16 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Data: { type: 'object' }
 });
 
+$data.Class.define('$example.Places', $data.Entity, null, {
+    Id: { type: 'id', key: true, computed: true },
+    Name: { type: 'string' },
+    Location: { type: 'geo' }
+});
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
+    Places: { type: $data.EntitySet, elementType: $example.Places },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
@@ -27,6 +34,7 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     FuncArrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncArrParam', returnType: $data.Object, params: [{ a: $data.Array }] }),
     FuncBoolParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncBoolParam', returnType: $data.Boolean, params: [{ a: $data.Boolean }] }),
     FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] }),
+    FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.Geography, params: [{ a: $data.Geography }] }),
     ATables: {
         type: $data.EntitySet,
         elementType: $data.Entity.extend('$example.ATable', {
@@ -52,16 +60,29 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
 });
 
 $example.Context.deleteData = function (ctx, callback) {
+    callback = $data.typeSystem.createCallbackSetting(callback);
+
     ctx.onReady(function () {
         ctx.People.toArray(function (p) {
             ctx.Orders.toArray(function (o) {
-                for (var i = 0; i < p.length; i++) {
-                    ctx.People.remove(p[i]);
-                }
-                for (var i = 0; i < o.length; i++) {
-                    ctx.Orders.remove(o[i]);
-                }
-                ctx.saveChanges(callback);
+                ctx.Places.toArray(function (pl) {
+                    for (var i = 0; i < p.length; i++) {
+                        ctx.People.remove(p[i]);
+                    }
+                    for (var i = 0; i < o.length; i++) {
+                        ctx.Orders.remove(o[i]);
+                    }
+                    for (var i = 0; i < pl.length; i++) {
+                        ctx.Places.remove(pl[i]);
+                    }
+                    ctx.saveChanges(function () {
+                        if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables) {
+                            $example.Context.deleteData(ctx, callback);
+                        } else {
+                            callback.success();
+                        }
+                    });
+                });
             });
         });
     });

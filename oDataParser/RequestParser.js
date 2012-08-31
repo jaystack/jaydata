@@ -36,12 +36,12 @@
             ///<param name="req" type="$data.oDataParser.QueryRequest" />
 
             this.req = req;
-            if (req.filter.length > 0)  this.parseFilterExpr();
+            if (req.filter.length > 0) this.parseFilterExpr();
             if (req.orderby.length > 0) this.parseOrderByExpr();
-            if (req.skip.length > 0)    this.parseSkipExpr();
-            if (req.top.length > 0)     this.parseTopExpr();
-            if (req.select.length > 0)  this.parseSelectExpr();
-            if (req.expand.length>0)     this.parseExpandExpr();
+            if (req.skip.length > 0) this.parseSkipExpr();
+            if (req.top.length > 0) this.parseTopExpr();
+            if (req.select.length > 0) this.parseSelectExpr();
+            if (req.expand.length > 0) this.parseExpandExpr();
             //if(req.format.length>0)      this.parseFormatExpr();
             //if(req.inlinecount.length>0) this.parseInlineCountExpr();
         },
@@ -66,7 +66,7 @@
         parseSkipExpr: function () {
             this.lexer = new $data.oDataParser.RequestLexer(this.req.skip);
             var token = this.lexer.token;
-            if(this.lexer.token.tokenType != TokenType.DIGITS)
+            if (this.lexer.token.tokenType != TokenType.DIGITS)
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid expression in $skip: '" + token.value + "'.", "parseSkipExpr");
             var expr = this.parseNumberLiteral();
             token = this.lexer.token;
@@ -77,7 +77,7 @@
         parseTopExpr: function () {
             this.lexer = new $data.oDataParser.RequestLexer(this.req.top);
             var token = this.lexer.token;
-            if(this.lexer.token.tokenType != TokenType.DIGITS)
+            if (this.lexer.token.tokenType != TokenType.DIGITS)
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid expression in $top: '" + token.value + "'.", "parseTopExpr");
             var expr = this.parseNumberLiteral();
             token = this.lexer.token;
@@ -103,7 +103,7 @@
 
             this.req.select = expressions;
         },
-        parseExpandExpr: function() {
+        parseExpandExpr: function () {
             this.lexer = new $data.oDataParser.RequestLexer(this.req.expand);
             this.req.expand = this.parseExpand();
             var token = this.lexer.token;
@@ -161,7 +161,7 @@
             if (this.lexer.token.value == "or") {
                 this.lexer.nextToken();
                 var right = this.parseOrExpr();
-                if(!right)
+                if (!right)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseOrExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, "or", "or");
             }
@@ -173,7 +173,7 @@
             if (this.lexer.token.value == "and") {
                 this.lexer.nextToken();
                 var right = this.parseAndExpr();
-                if(!right)
+                if (!right)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseAndExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, "and", "and");
             }
@@ -186,7 +186,7 @@
             if (token.value == "eq" || token.value == "ne") {
                 this.lexer.nextToken();
                 var right = this.parseEqualityExpr();
-                if(!right)
+                if (!right)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseEqualityExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
@@ -199,7 +199,7 @@
             if (token.value == "lt" || token.value == "gt" || token.value == "le" || token.value == "ge") {
                 this.lexer.nextToken();
                 var right = this.parseRelationalExpr();
-                if(!right)
+                if (!right)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "RelationalExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
@@ -212,7 +212,7 @@
             if (token.value == "add" || token.value == "sub") {
                 this.lexer.nextToken();
                 var right = this.parseAdditiveExpr();
-                if(!right)
+                if (!right)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "AdditiveExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
@@ -225,7 +225,7 @@
             if (token.value == "mul" || token.value == "div" || token.value == "mod") {
                 this.lexer.nextToken();
                 var right = this.parseMultiplicativeExpr();
-                if(!right)
+                if (!right)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "MultiplicativeExpr");
                 expr = this.builder.buildSimpleBinary(expr, right, token.value, token.value);
             }
@@ -240,26 +240,26 @@
             if (token.value == ASCII.MINUS) {
                 this.lexer.nextToken();
                 expr = this.parseUnaryExpr();
-                if(!expr)
+                if (!expr)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseUnaryExpr");
                 return this.builder.buildUnary(expr, "minus")
             }
             if (token.value == ASCII.PLUS) {
                 this.lexer.nextToken();
                 expr = this.parseUnaryExpr();
-                if(!expr)
+                if (!expr)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseUnaryExpr");
                 return this.builder.buildUnary(expr, "plus")
             }
             if (token.value == "not") {
                 this.lexer.nextToken();
                 expr = this.parseUnaryExpr();
-                if(!expr)
+                if (!expr)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: Expr.", "parseUnaryExpr");
                 return this.builder.buildUnary(expr, "not")
             }
         },
-       parsePrimaryExpr: function () {
+        parsePrimaryExpr: function () {
             //bnf: PrimaryExpr        : ParenExpr | LiteralExpr | FunctionCall | MemberPath
             var expr;
             if (expr = this.parseNULLLiteral()) return expr;
@@ -270,9 +270,9 @@
             return null;
         },
         parseNULLLiteral: function () {
-	//TODO: validate by gyeby
+            //TODO: validate by gyeby
             var v = this.lexer.token.value;
-            if (v == "NULL" || v=="null") {
+            if (v == "NULL" || v == "null") {
                 this.lexer.nextToken();
                 return this.builder.buildConstant(null, typeof null);
             }
@@ -296,6 +296,7 @@
             if (expr = this.parseStringLiteral()) return expr;
             if (expr = this.parseBoolLiteral()) return expr;
             if (expr = this.parseNumberLiteral()) return expr;
+            if (expr = this.parseGeographyLiteral()) return expr;
             return null;
         },
         parseDatetimeLiteral: function () {
@@ -391,6 +392,39 @@
             var n = isInteger ? parseInt(v) : parseFloat(v);
             return this.builder.buildConstant(n, "number");
         },
+        parseGeographyLiteral: function () {
+            if (this.lexer.token.value != "POINT")
+                return null;
+
+            this.lexer.nextToken();
+            if (this.lexer.token.value != ASCII.LPAREN)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected '('.", "parseGeographyLiteral");
+
+            this.lexer.nextToken();
+            var long = this.parseGeographyArg();
+            var lati = this.parseGeographyArg();
+
+            if (this.lexer.token.value != ASCII.RPAREN)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected ')'.", "parseGeographyLiteral");
+
+            this.lexer.nextToken()
+            return this.builder.buildConstant(new $data.Geography(long.value, lati.value), "geography");
+        },
+        parseGeographyArg: function () {
+            var exp = this.parseExpr();
+            if (!exp)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: expression", "parseGeographyLiteral");
+            else {
+                if (exp instanceof $data.Expressions.UnaryExpression && exp.operand instanceof $data.Expressions.ConstantExpression && exp.operand.type === 'number') {
+                    return this.builder.buildConstant(exp.operator.implementation(exp.operand.value), "number");
+                } else if (exp instanceof $data.Expressions.ConstantExpression && exp.type === 'number') {
+                    return exp;
+                } else {
+                    $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected expression number", "parseGeographyLiteral");
+                }
+            }
+        },
+
         parseSign: function () { // returns "+", "-" or null
             //bnf: Sign          : "+" | "-"
             var token = this.lexer.token;
@@ -458,7 +492,7 @@
             //bnf: NavigationProperty : NAME
             //bnf: Field              : NAME
             //short: MemberPath         : [ Name *("." Name) "/" ] *(Name "/") Name
-            if(this.lexer.token.value == "not")
+            if (this.lexer.token.value == "not")
                 return null;
             var name = this.parseName();
             var token = this.lexer.token;

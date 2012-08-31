@@ -240,6 +240,12 @@
                         return new $data.Array();
                     }
                     return o;
+                },
+                '$data.Geography': function (o) {
+                    if (o === undefined) {
+                        return new $data.Geography();
+                    }
+                    return o;
                 }
             },
             toDb: {
@@ -269,6 +275,9 @@
                 },
                 '$data.Array': function (o) {
                     return JSON.stringify(o);
+                },
+                '$data.Geography': function (g) {
+                    return g;
                 }
             }
         }

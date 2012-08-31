@@ -40,6 +40,7 @@ $(document).ready(function () {
 
     module('EntityExpressionBuilder');
     builderTest('field compare int', c.Articles.filter(function (it) { return it.Id <= 500; }), c);
+    builderTest('field compare minus int', c.TestTable.filter(function (it) { return it.i0 == -15; }), c);
     builderTest('field compare int', c.Articles.filter(function (it) { return it.Id <= 500; }), c, true);
     builderTest('field compare string / $count', c.Articles.filter(function (it) { return it.Title == 'Article1'; }), c);
     //builderTest('field multipleFilter', c.Articles.filter(function (it) { return it.Title == 'Article1'; }).filter(function (it) { return it.Body.contains('Body1'); }), c);

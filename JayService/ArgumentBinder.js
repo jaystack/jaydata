@@ -63,7 +63,14 @@
         }
         return value;
     },
-    '$data.Entity': function (config, value) { return new config.type(JSON.parse(value)); }
+    '$data.Entity': function (config, value) { return new config.type(JSON.parse(value)); },
+    '$data.Geography': function (config, value) {
+        if (/^POINT\(/.test(value)) {
+            var data = value.slice(6, value.length - 1).split(' ');
+            return new $data.Geography(data[0], data[1]);
+        }
+        return value;
+    }
 
 
 }, {

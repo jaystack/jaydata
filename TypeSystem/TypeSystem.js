@@ -848,7 +848,8 @@
         this.isPrimitiveType = function(type) {
             var t = this.resolveType(type);
             return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
-                t === $data.Number || t === $data.String || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object;
+                t === $data.Number || t === $data.String || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
+                t === $data.Geography;
         };
 
         this.resolveType = function (typeOrName) {
@@ -883,6 +884,7 @@
                     if (value instanceof Array) return '$data.Array';
                     if (value.getType) return value.getType().fullName;
                     if (value instanceof Date) return '$data.Date';
+                    if (value instanceof $data.Geography) return '$data.Geography';
                     //if(value instanceof "number") return
                 default:
                     return typeof value;

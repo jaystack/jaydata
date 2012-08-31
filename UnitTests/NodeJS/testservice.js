@@ -20,9 +20,16 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
     Data: { type: 'object' }
 });
 
+$data.Class.define('$exampleSrv.PlacesSrv', $data.Entity, null, {
+    Id: { type: 'id', key: true, computed: true },
+    Name: { type: 'string' },
+    Location: { type: 'geo' }
+});
+
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
+    Places: { type: $data.EntitySet, elementType: $exampleSrv.PlacesSrv },
     FuncStrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'string' }]).returns('string'),
     FuncIntParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'int' }]).returns('int'),
     FuncNumParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'number' }]).returns('number'),
@@ -30,6 +37,7 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     FuncArrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'array' }]).returns('object'),
     FuncBoolParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'bool' }]).returns('bool'),
     FuncDateParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'date' }]).returns('date'),
+    FuncGeographyParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'geo' }]).returns('geo'),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),
 
     ATables: {

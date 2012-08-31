@@ -232,7 +232,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         }
                     }, this);
                 }
-                
+
                 if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
@@ -317,7 +317,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             }
                         }
                     }, this);
-                    
+
                 }
                 if (callBack.success) {
                     callBack.success(convertedItem.length);
@@ -362,7 +362,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var sqlText = this._compile(queryable);
         return queryable;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography], writable: false },
 
     supportedBinaryOperators: {
         value: {
@@ -551,7 +551,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); }
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
+                '$data.Geography': function (geo) {
+                    if (typeof geo === 'object' && Array.isArray(geo.coordinates)) {
+                        return new $data.Geography(geo.coordinates[0], geo.coordinates[1]);
+                    }
+                    return geo;
+                }
             },
             toDb: {
                 '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
@@ -562,7 +568,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); }
+                '$data.Array': function (o) { return JSON.stringify(o); },
+                '$data.Geography': function (geo) {
+                    /*POINT(-127.89734578345 45.234534534)*/
+                    if (geo instanceof $data.Geography)
+                        return 'POINT(' + geo.longitude + ' ' + geo.latitude + ')';
+                    return geo;
+                }
             }
         }
     },
@@ -646,7 +658,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     }
     */
-    appendBasicAuth: function(request, user, password){
+    appendBasicAuth: function (request, user, password) {
         request.headers = request.headers || {};
         if (!request.headers.Authorization && user && password) {
             request.headers.Authorization = "Basic " + this.__encodeBase64(user + ":" + password);

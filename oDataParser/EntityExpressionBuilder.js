@@ -58,28 +58,20 @@
         return es;
     },
     filterConverter: function (expr, rootExpr) {
-        var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
-        var entityExpressionTree = converter.Visit(expr, { queryParameters: undefined, lambdaParameters: this.lambdaTypes, frameType: $data.Expressions.FilterExpression });
-
-        var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
+        var pqExp = this._buildParametricQueryExpression(expr, $data.Expressions.FilterExpression);
         var expression = new $data.Expressions.FilterExpression(rootExpr, pqExp);
         return expression;
     },
     orderbyConverter: function (exprObjArray, rootExpr) {
-        var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
-
         for (var i = 0; i < exprObjArray.length; i++) {
             var expConf = exprObjArray[i];
-            var entityExpressionTree = converter.Visit(expConf.expression, { queryParameters: undefined, lambdaParameters: this.lambdaTypes, frameType: $data.Expressions.OrderExpression });
 
-            var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
+            var pqExp = this._buildParametricQueryExpression(expConf.expression, $data.Expressions.OrderExpression);
             rootExpr = new $data.Expressions.OrderExpression(rootExpr, pqExp, $data.Expressions.ExpressionType[expConf.nodeType]);
         }
         return rootExpr;
     },
     selectConverter: function (exprObjArray, rootExpr) {
-        var converter = new $data.Expressions.CodeToEntityConverter(this.scopeContext);
-
         var objectFields = [];
         for (var i = 0; i < exprObjArray.length; i++) {
             var expr = exprObjArray[i];
@@ -89,9 +81,7 @@
 
         var objectLiteralExpr = new $data.Expressions.ObjectLiteralExpression(objectFields);
 
-        var entityExpressionTree = converter.Visit(objectLiteralExpr, { queryParameters: undefined, lambdaParameters: this.lambdaTypes, frameType: $data.Expressions.ProjectionExpression });
-
-        var pqExp = Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
+        var pqExp = this._buildParametricQueryExpression(objectLiteralExpr, $data.Expressions.ProjectionExpression);
         var expression = new $data.Expressions.ProjectionExpression(rootExpr, pqExp);
         return expression;
     },
@@ -122,5 +112,19 @@
             return this._getMemberPath(expr.expression) + '.' + expr.member.value;
         else
             return expr.member.value;
+    },
+    _buildParametricQueryExpression: function (expression, frameType) {
+
+        var constantResolver = Container.createConstantValueResolver(undefined, window);
+        var parameterProcessor = Container.createParameterResolverVisitor();
+
+        var exp = parameterProcessor.Visit(expression, constantResolver);
+
+        var converter = Container.createCodeToEntityConverter(this.scopeContext);
+
+        var entityExpressionTree = converter.Visit(exp, { queryParameters: undefined, lambdaParameters: this.lambdaTypes, frameType: frameType });
+
+        return Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
+
     }
 });

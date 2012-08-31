@@ -42,7 +42,7 @@
     <map from="Edm.Int64" to="$data.Integer" />
     <map from="Edm.Byte" to="$data.Integer" />
     <map from="Edm.String" to="$data.String" />
-    <map from="Edm.GeographyPoint" to="$data.Blob" />
+    <map from="Edm.GeographyPoint" to="$data.Geography" />
   </xsl:variable>
 
   function registerEdmTypes() { <xsl:choose>

@@ -278,7 +278,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 "    <map from=\"Edm.Int64\" to=\"$data.Integer\" />\r\n" +
                 "    <map from=\"Edm.Byte\" to=\"$data.Integer\" />\r\n" +
                 "    <map from=\"Edm.String\" to=\"$data.String\" />\r\n" +
-                "    <map from=\"Edm.GeographyPoint\" to=\"$data.Blob\" />\r\n" +
+                "    <map from=\"Edm.GeographyPoint\" to=\"$data.Geography\" />\r\n" +
                 "  </xsl:variable>\r\n" +
                 "  function registerEdmTypes() { <xsl:choose>\r\n" +
                 "    <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
