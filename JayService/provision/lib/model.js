@@ -35,6 +35,7 @@ $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
     AppItemId: { type: "string" },
 //ex-awsid defalt ures, awsid ha kiesett
     AWSId: { type: "string" },
+    ExAWSId: { type: "string" },
     Size: { type: "string" }, // micro
     Type: { type: "string" }, // reserved, ondemand, spot
     Used: { type: "boolean" },

@@ -1,7 +1,7 @@
 
 var app = module.parent.exports.app;
 var provision = require('./provision');
-var initCreateDb = require('./fileload.js').LoadJson('./prov_createDatabase.js', {
+var initCreateDb = require('../fileload.js').LoadJson('./prov_createDatabase.js', {
     'ApplicationDB': {
         coll1: { x: 1 },
         coll2: { y: 1 }

@@ -38,13 +38,13 @@ app.post('/allocateappitem', function (req, res){
 
 app.post('/shutdown', function (req, res) {
     //req.body.awsid
-    req.ctx.CuInventories.single(function (cui) { return cui.AWSId == this.awsid && cui.ExAwsId == "" }, { awsid: req.body.awsid })
+    req.ctx.CuInventories.single(function (cui) { return cui.AWSId == this.awsid }, { awsid: req.body.awsid })
         .then(function (cu) {
             req.ctx.CuInventories.attach(cu);
-            cu.ExAwsId = cu.AWSId;
+            cu.ExAWSId = cu.AWSId;
             cu.AWSId = "";
             return req.ctx.saveChanges()
-                .then(function (num) { res.end(num); });
+                .then(function () { res.end(); });
         });
 
 });
@@ -52,7 +52,7 @@ app.post('/shutdown', function (req, res) {
 // satisfy
 app.post('/satisfy', function (req, res) {
     req.ctx.CuInventories
-        .filter(function (cui) { return cui.ExAwsId != "" })
+        .filter(function (cui) { return cui.AWSId == "" })
         .toArray()
     .then(function (stoppedCuInvs) {
         var result = {
@@ -62,9 +62,9 @@ app.post('/satisfy', function (req, res) {
 
         return stoppedCuInvs.reduce(function (prom, item) {
             return prom.then(function () {
-                return reserve(req.ctx, item.ExAWSId, undefined /*???*/, undefined /*???*/)
-                    .then(function () { result.error.push({ "Succeeded": true, "item": item }); })
-                    .fail(function (ex) { result.error.push({ "Succeeded": false, "reason": ex, "item": item }); });
+                return reserve(req.ctx, item.AppItemId, undefined /*???*/, undefined /*???*/)
+                    .then(function () { result.success.push({ "Succeeded": true, "item": item }); })
+                    .fail(function (ex) { result.error.push({ "Succeeded": false, "reason": ex.message, "item": item }); });
             });
         }, q.resolve()).then(function () {
             for (var i = 0; i < result.success.length; i++) {
@@ -75,8 +75,7 @@ app.post('/satisfy', function (req, res) {
                 if (obj.reason.message === 'instance runs on multiple cus')
                     req.ctx.CuInventories.remove(obj.item);
             }
-
-            return req.ctx.CuInventories.saveChanges().then(function () { res.end(JSON.stringify(result)); });
+            return req.ctx.saveChanges().then(function () { res.end(JSON.stringify(result)); });
         });
     })
     

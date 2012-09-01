@@ -42,7 +42,7 @@ app.post('/provision', function (req, res){
   req.ctx.findAppByName(req.body.appid)
     // TODO put back .then(function(app) { return q.ncall(model.checkProvisionId, model, app, provisionid).then(function(x){ return app;}); })
     .then(function(app) { return ctx.createinstance(app, provisionid); })
-    .then(function(instance) { return provisionDbImpl(instance,initdata); });
+    .then(function(instance) { return provisionDbImpl(instance,initdata); })
     .then(function(x) { res.end(x); });
 });
 
