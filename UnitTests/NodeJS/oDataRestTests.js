@@ -16,8 +16,8 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Data: { type: 'object' }
 });
 
-$data.Class.define('$exampleSrv.PlacesSrv', $data.Entity, null, {
-    Id: { type: 'id', key: true, computed: true },
+$data.Class.define('$example.Place', $data.Entity, null, {
+    Id: { type: 'string', key: true, computed: true },
     Name: { type: 'string' },
     Location: { type: 'geo' }
 });
@@ -25,7 +25,7 @@ $data.Class.define('$exampleSrv.PlacesSrv', $data.Entity, null, {
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
-    Places: { type: $data.EntitySet, elementType: $exampleSrv.PlacesSrv },
+    Places: { type: $data.EntitySet, elementType: $example.Place },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
@@ -92,7 +92,7 @@ $example.Context.generateTestData = function (ctx, callback) {
         for (var i = 0; i < $example.Context.generateTestData.itemsInTables; i++) {
             ctx.People.add({ Name: 'Person' + i, Description: 'desc' + i, Age: 10 + i });
             ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2, Data: { a: 5, b: i } });
-            //ctx.Places.add({ Name: 'Places' + i, Location: new $data.Geography(123.15697, i) });
+            ctx.Places.add({ Name: 'Places' + i, Location: new $data.Geography(123.15697, i) });
         }
 
         ctx.saveChanges(callback);
@@ -951,6 +951,101 @@ test("REST - XML - Batch GET / query params", 8, function () {
             },
             OData.batchHandler);
 
+        });
+    });
+
+});
+
+test("Save Geography", 5, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.deleteData(context, function () {
+        var place = new $example.Place({ Name: 'Headquarter', Location: new $data.Geography(-44.001536, 44.35433) });
+
+        context.Places.add(place);
+
+        context.saveChanges({
+            success: function () {
+
+                context.Places.toArray(function (places) {
+
+                    equal(places.length, 1, 'result length failed');
+                    equal(places[0].Id, place.Id, 'loaded Id failed');
+
+                    equal(places[0].Location instanceof $data.Geography, true, 'Geo type type failed');
+                    equal(places[0].Location.longitude, -44.001536, 'Geo type longitude failed');
+                    equal(places[0].Location.latitude, 44.35433, 'Geo type longitude failed');
+
+                    start();
+                });
+            },
+            error: function (ex) {
+                ok(false, 'save error occured: ' + ex);
+                start();
+            }
+        })
+
+    });
+});
+
+test("Modify Geography", 4, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Places.toArray(function (places) {
+            var place = places[0];
+            
+            context.attach(place);
+            place.Location = new $data.Geography(23.153, -16.138135);
+            place.Name = 'Jay location';
+
+            context.saveChanges(function () {
+                context.Places.filter('it.Name == "Jay location"').single(null, null, function (placeRes) {
+
+                    equal(placeRes.Id, place.Id, 'loaded Id failed');
+
+                    equal(placeRes.Location instanceof $data.Geography, true, 'Geo type type failed');
+                    equal(placeRes.Location.longitude, 23.153, 'Geo type longitude failed');
+                    equal(placeRes.Location.latitude, -16.138135, 'Geo type longitude failed');
+
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("Filter Geography equal", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Places.filter(function (p) { return p.Location == this.geo }, { geo: new $data.Geography(123.15697, 1) }).toArray(function (places) {
+            equal(places.length, 1, 'filter for Geography ?!');
+            equal(places[0].Location.longitude, 123.15697, 'Location.longitude failed');
+            equal(places[0].Location.latitude, 1, 'Location.latitude failed');
+
+            start();
+        });
+    });
+});
+
+test("Filter Geography not equal", 19, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Places.filter(function (p) { return p.Location != this.geo }, { geo: new $data.Geography(123.15697, 1) }).toArray(function (places) {
+            equal(places.length, 9, 'not filter for Geography ?!');
+            for (var i = 0; i < 9; i++) {
+                equal(places[i].Location.longitude, 123.15697, 'Location.longitude failed');
+                notEqual(places[i].Location.latitude, 1, 'Location.latitude failed');
+            }
+            
+
+            start();
         });
     });
 });

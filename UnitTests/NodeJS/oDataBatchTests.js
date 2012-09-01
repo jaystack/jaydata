@@ -16,8 +16,8 @@ $data.Class.define('$example.Order', $data.Entity, null, {
     Data: { type: 'object' }
 });
 
-$data.Class.define('$example.Places', $data.Entity, null, {
-    Id: { type: 'id', key: true, computed: true },
+$data.Class.define('$example.Place', $data.Entity, null, {
+    Id: { type: 'string', key: true, computed: true },
     Name: { type: 'string' },
     Location: { type: 'geo' }
 });
@@ -25,7 +25,7 @@ $data.Class.define('$example.Places', $data.Entity, null, {
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
-    Places: { type: $data.EntitySet, elementType: $example.Places },
+    Places: { type: $data.EntitySet, elementType: $example.Place },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),

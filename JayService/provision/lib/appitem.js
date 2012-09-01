@@ -1,9 +1,8 @@
 
 var app = module.parent.exports.app;
-var ctx = module.parent.exports.ctx;
 
 function createAppItem(req, res) {
-  return ctx.findAppById(req.body.appid)
+  return req.ctx.findAppById(req.body.appid)
   .then(function(app) {
     var appitem = new $provision.Types.AppItem({Id: req.body._id, AppId: req.body.appid, Type: req.body.type});
     delete req.body._id;
@@ -12,8 +11,16 @@ function createAppItem(req, res) {
     delete req.body.token;
     delete req.body.method;
     appitem.Data = req.body;
-    return ctx.additem(appitem, app);
-   });
+    return req.ctx.additem(appitem, app).then(function(x){return [req.ctx, appitem, app];});
+   })
+   .spread(function(ctx, appitem, app) {
+      return ctx.Instances
+	.single(function(i){return i.AppId == this.Id && i.IsProvision == false;},{Id: app.Id})
+	.then(function(instance) { return ctx.DbInventories.single(function(d){return d.InstanceId == this.Id && d.DbName == this.dbname;},{Id: instance.Id, dbname: instance.Id + '_ApplicationDB'}).then(function(appdb){return [instance,appdb];}) })
+	.spread(function(instance, appdb) {
+      		return new $provision.Types.ProvisionContext({ name: 'mongoDB', databaseName: appdb.DbName, address: 'db1.storm.jaystack.com', port: 8888, username: instance.Username, password: instance.Password }).onReady(); })
+        .then(function(ctx2){ ctx2.AppItems.add(appitem); return ctx2.saveChanges(); });
+    });
 }
 function changeAppItem(req, res) { return true; }
 function removeAppItem(req, res) { return true; }

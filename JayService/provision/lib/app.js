@@ -1,17 +1,30 @@
 
-var q = require('q');
-
-var tokensrv = module.parent.exports.tokensrv;
 var app = module.parent.exports.app;
-var ctx = module.parent.exports.ctx;
-var provision = module.parent.exports.provision;
+var provision = require('./provision');
+var initCreateDb = require('../fileload.js').LoadJson('./prov_createDatabase.js', {
+    'ApplicationDB': {
+        coll1: { x: 1 },
+        coll2: { y: 1 }
+    }
+});
+
+function addAppDb(ctx, instance) {
+  return provision.createDatabase(ctx, instance, {Data:{name:'ApplicationDB'}}, initCreateDb);
+}
+
+function addApp(req, appowner) {
+  var app = new $provision.Types.App({Id: req.body._id, AppOwnerId: req.body.appownerid, Name: req.body.name});
+  return req.ctx.addapp(app, appowner);
+}
 
 function createApp(req, res) {
-  return ctx.findAppOwnerById(req.body.appownerid)
-  .then(function(appowner) {
-    var app = new $provision.Types.App({Id: req.body._id, AppOwnerId: req.body.appownerid, Name: req.body.name});
-    return ctx.addapp(app, appowner, 'admin', 'admin');
-   });
+  return req.ctx.findAppOwnerById(req.body.appownerid)
+    .then(function(appowner){return addApp(req, appowner);})
+    .then(function(instance){return addAppDb(req.ctx, instance);});
+}
+
+function destroyApp(req, res) {
+  return 'ok';
 }
 
 app.post('/addapp', function (req, res){
@@ -19,8 +32,6 @@ app.post('/addapp', function (req, res){
 });
 
 app.post('/destroyapp', function (req, res){
-    tokensrv.set(req.token, { status: 'Done', result: 'Succeeded' });
-	// TODO implement it
-    res.end(JSON.stringify(tokensrv.get(req.token)));
+    module.parent.exports.tokenizedFunction(req, res, destroyApp);
 });
 

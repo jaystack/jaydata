@@ -1,67 +1,53 @@
 
 var q = require('q')
-    , model = module.parent.exports.model || require('./model')
     , uuid = require('node-uuid')
     , mongo = require('./mongo');
 
-var ctx = new $provision.Types.ProvisionContext({name: 'mongoDB', databaseName: 'admin', address:'localhost' });
-
 var app = module.parent.exports.app;
 
-function createDatabases(instance) {
+function createDatabaseImpl(ctx, instance, db, initdata) {
+  return ctx.createprovisioneddb(instance, db)
+    .then(function(dbinstance) { return q.ncall(mongo.createQueryableDB, mongo, dbinstance.DbName, instance.Username, instance.Password); })
+    .then(function(mongodb) { return q.ncall(mongo.initDatabase, mongo, {"db":mongodb,"suffix":db.Data.name}, initdata); });
+}
+
+function provisionDbImpl(instance, initdata) {
     var defer = q.defer();
-    var dbz = [];
     ctx.findDbs(instance.AppId)
 	.then(function(dbs) {
     	    var promise = q.resolve(1); // ?
 	    dbs.forEach(function(db) {
-		promise = promise
-		.then(function(x){ return ctx.createprovisioneddb(instance, db); })
-		.then(function(dbinstance) { return q.ncall(mongo.createQueryableDB, mongo, dbinstance.DbName, instance.username, instance.password); })
-		.then(function(newdb) { dbz.push({db:newdb, suffix:db.Data.name}); return newdb;});
+		promise = promise.then(function(x){return createDatabaseImpl(instance, db, initdata); });
 	    });
-	    promise.then(function(x){defer.resolve(dbz);})
+	    promise.then(function(x){defer.resolve(1);})
 		   .fail(function(reason){defer.reject(reason);});
 	});
-    return defer.promise;
-}
-
-function provisionDbImpl(instance, initdata) {
-  return createDatabases(instance)
-     .then(function(dbz) { return q.ncall(mongo.initDatabase, mongo, dbz, initdata); })
-}
-
-function provisionImpl(appid, provisionid, initdata, username, password) {
-    var defer = q.defer();
-    ctx.findAppByName(appid)
-        // TODO put back .then(function(app) { return q.ncall(model.checkProvisionId, model, app, provisionid).then(function(x){ return app;}); })
-        .then(function(app) {
-	    return ctx.createinstance(app, username, password);
-	})
-	.then(function(instance) { return provisionDbImpl(instance,initdata); })
-        .then(function(x) { defer.resolve(x); })
-        .fail(function(reason) { console.log(reason); defer.reject(reason); });
     return defer.promise;
 }
 
 module.exports = {
 
     // reserve es launch is egyben ??
+    // kitenni h figyelhen requestre
+    // reserve is kellene
     provision: function(appid, provisionid, initdata) {
-        var newappid = uuid.v4();
-        var username = uuid.v4();
-        var password = uuid.v4();
-        return provisionImpl(appid, provisionid, initdata, username, password);
     },
 
-    provisionDb: function(instance, initdata) {
-	return provisionDbImpl(instance, initdata);
+    createDatabase:function(ctx, instance, db, initdata) {
+    	return createDatabaseImpl(ctx, instance, db, initdata);
     }
-
 }
 
+app.post('/provision', function (req, res){
+  req.ctx.findAppByName(req.body.appid)
+    // TODO put back .then(function(app) { return q.ncall(model.checkProvisionId, model, app, provisionid).then(function(x){ return app;}); })
+    .then(function(app) { return ctx.createinstance(app, provisionid); })
+    .then(function(instance) { return provisionDbImpl(instance,initdata); })
+    .then(function(x) { res.end(x); });
+});
+
 // TODO hiba eseten takaritas ?
-// TODO beszolni Balazsnak ha tortent provisionalas
+// TODO beszolni Balazsnak ha tortent indulas/leallas
 // TODO giga json generalas
 // TODO allocate instance nem kell provision eseten
 

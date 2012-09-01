@@ -5,17 +5,23 @@ var q = require('q')
     , tokensrv = module.exports.tokensrv = require('./lib/tokensrv')
     , $data = require('jaydata');
 
-var model = module.exports.model = require('./model');
-var ctx = module.exports.ctx = new $provision.Types.ProvisionContext({name: 'mongoDB', databaseName: 'admin', address:'db1.storm.jaystack.com', port:8888, username:'admin', password: 'admin' });
-var app = module.exports.app = express();
-var provision = module.exports.provision = require('./lib/provision');
+require('./lib/model');
 
+var contextAuthData = require('./fileload.js').LoadJson('./amazon.pwd.js', { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' });
+
+var app = module.exports.app = express();
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(tokensrv.parseToken());
+  app.use(function (req, res, next) {
+      req.ctx = new $provision.Types.ProvisionContext(contextAuthData);
+      req.ctx.onReady(function () {
+          next();
+      })
+  });
 });
 
 app.configure('development', function(){
@@ -41,8 +47,6 @@ console.log(req.body);
 
 app.get('/gettokenstatus/:tokenid', function(req, res) {
     var token = tokensrv.get(req.params.tokenid);
-    console.log(req.params.tokenid);
-    console.log(token);
     if (typeof token !== 'undefined' && token != null) {
         res.end(JSON.stringify(token));
     } else {
@@ -51,11 +55,13 @@ app.get('/gettokenstatus/:tokenid', function(req, res) {
     }
 });
 
+require('./lib/provision');
 require('./lib/appowner');
 require('./lib/app');
 require('./lib/appitem');
-require('./lib/allocate');
+require('./lib/reserve');
 require('./lib/launch');
+require('./lib/notready');
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));

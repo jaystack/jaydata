@@ -1,6 +1,11 @@
 ﻿$data.Geography = function Geography(lon, lat) {
-    this.longitude = lon;
-    this.latitude = lat;
+    if (typeof lon === 'object' && Array.isArray(lon.coordinates)) {
+        this.longitude = lon.coordinates[0];
+        this.latitude = lon.coordinates[1];
+    } else {
+        this.longitude = lon;
+        this.latitude = lat;
+    }
 };
 $data.Container.registerType(['$data.Geography', 'Geography', 'geography', 'geo'], $data.Geography);
 
