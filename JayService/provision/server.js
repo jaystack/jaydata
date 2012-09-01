@@ -5,26 +5,21 @@ var q = require('q')
     , tokensrv = module.exports.tokensrv = require('./lib/tokensrv')
     , $data = require('jaydata');
 
-var model = module.exports.model = require('./model');
+require('./lib/model');
 
-//removed, context is in req.ctx
-//var ctx = module.exports.ctx = new $provision.Types.ProvisionContext({name: 'mongoDB', databaseName: 'admin', address:'db1.storm.jaystack.com', port:8888, username:'admin', password: 'admin' });
 var app = module.exports.app = express();
-var provision = module.exports.provision = require('./lib/provision');
-
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(tokensrv.parseToken());
-
   app.use(function (req, res, next) {
+// TODO ez jojjon vmi konfigbol
       req.ctx = new $provision.Types.ProvisionContext({ name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' });
       req.ctx.onReady(function () {
           next();
       })
-
   });
 });
 
@@ -51,8 +46,6 @@ console.log(req.body);
 
 app.get('/gettokenstatus/:tokenid', function(req, res) {
     var token = tokensrv.get(req.params.tokenid);
-    console.log(req.params.tokenid);
-    console.log(token);
     if (typeof token !== 'undefined' && token != null) {
         res.end(JSON.stringify(token));
     } else {
@@ -61,6 +54,7 @@ app.get('/gettokenstatus/:tokenid', function(req, res) {
     }
 });
 
+require('./lib/provision');
 require('./lib/appowner');
 require('./lib/app');
 require('./lib/appitem');

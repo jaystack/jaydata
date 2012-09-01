@@ -1,4 +1,6 @@
 ﻿
+var uuid = require('node-uuid');
+
 $data.Class.define("$provision.Types.AppOwner", $data.Entity, null, {
     Id: { type: "string", key: true },
     Name: { type: "string" },
@@ -40,7 +42,7 @@ $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
 $data.Class.define("$provision.Types.DbInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
     InstanceId: { type: "id" },
-    AppItemId: { type: "id" },
+    AppItemId: { type: "string" },
     DbName: { type: "string" },
     Data: { type: "object" }
 }, null);
@@ -88,7 +90,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	return this.saveChanges()
     },
 
-    addapp: function(app, owner, username, password) {
+    addapp: function(app, owner) {
 	var self = this;
 	this.Apps.add(app);
 	return this.saveChanges()
@@ -97,34 +99,25 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 		    //owner.AppIds = owner.AppIds.concat(app.Id);
 		    //return self.saveChanges();
 		//})
-		.then(function(c) {
-			// TODO use createinstance but beware of this/self
-		    var instance = new $provision.Types.Instance();
-		    instance.AppId = app.Id;
-		    instance.Username = username;
-		    instance.Password = password;
-		    self.Instances.add(instance);
-		    return self.saveChanges().then(function(c) { return instance; });
-		})
-		.then(function(instance) {
-		    self.Apps.attach(app);
-		    app.InstanceIds = app.InstanceIds.concat(instance.Id);
-		    return self.saveChanges().then(function(x){return instance;});
-		});
+		.then(function(c) { return self.createinstance(app, "");});
     },
 
-    createinstance: function(app, username, password) {
+    createinstance: function(app, provisionid) {
 	var self = this;
 	var instance = new $provision.Types.Instance();
 	instance.AppId = app.Id;
-	instance.Username = username;
-	instance.Password = password;
+	instance.Username = uuid.v4(); 
+	instance.Password = uuid.v4();
+        instance.ProvisionId = provisionid;
+        instance.StartDate = new Date();
+        //instance.isProvision = provisionid == "" : false : true;
+        instance.IsProvision = false;
 	this.Instances.add(instance);
 	return self.saveChanges()
 		.then(function(c) {
 		    self.Apps.attach(app);
 		    app.InstanceIds = app.InstanceIds.concat(instance.Id);
-		    return self.saveChanges().then(function(c){return instance;});
+		    return self.saveChanges().then(function(c){console.log('parent app saved'); return instance;});
 		});
     },
 
@@ -137,7 +130,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	dbinstance.Data = db.Data;
 	// TODO el kellene tenni forditva is, vagyis az instance tudjon a db-irol
 	this.DbInventories.add(dbinstance);
-	return this.saveChanges().then(function(c){return dbinstance;});
+	return this.saveChanges().then(function(c){ return dbinstance;});
     },
 
     additem: function(item, app) {
