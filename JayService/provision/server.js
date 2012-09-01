@@ -7,6 +7,8 @@ var q = require('q')
 
 require('./lib/model');
 
+var contextAuthData = require('./fileload.js').LoadJson('./amazon.pwd.js', { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' });
+
 var app = module.exports.app = express();
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -15,8 +17,7 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(tokensrv.parseToken());
   app.use(function (req, res, next) {
-// TODO ez jojjon vmi konfigbol
-      req.ctx = new $provision.Types.ProvisionContext({ name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' });
+      req.ctx = new $provision.Types.ProvisionContext(contextAuthData);
       req.ctx.onReady(function () {
           next();
       })

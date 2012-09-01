@@ -1,15 +1,15 @@
 
 var app = module.parent.exports.app;
 var provision = require('./provision');
+var initCreateDb = require('./fileload.js').LoadJson('./prov_createDatabase.js', {
+    'ApplicationDB': {
+        coll1: { x: 1 },
+        coll2: { y: 1 }
+    }
+});
 
 function addAppDb(ctx, instance) {
-  return provision.createDatabase(ctx, instance, {Data:{name:'ApplicationDB'}},
-	{
-	  'ApplicationDB':  {
-            coll1: { x: 1 },
-             coll2: { y :1 }
-           }
-	});
+  return provision.createDatabase(ctx, instance, {Data:{name:'ApplicationDB'}}, initCreateDb);
 }
 
 function addApp(req, appowner) {
