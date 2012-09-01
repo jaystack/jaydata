@@ -31,11 +31,6 @@ module.exports = {
     // kitenni h figyelhen requestre
     // reserve is kellene
     provision: function(appid, provisionid, initdata) {
-        return ctx.findAppByName(appid)
-          // TODO put back .then(function(app) { return q.ncall(model.checkProvisionId, model, app, provisionid).then(function(x){ return app;}); })
-
-	  .then(function(app) { return ctx.createinstance(app, provisionid); })
-	  .then(function(instance) { return provisionDbImpl(instance,initdata); });
     },
 
     createDatabase:function(ctx, instance, db, initdata) {
@@ -43,8 +38,16 @@ module.exports = {
     }
 }
 
+app.post('/provision', function (req, res){
+  req.ctx.findAppByName(req.body.appid)
+    // TODO put back .then(function(app) { return q.ncall(model.checkProvisionId, model, app, provisionid).then(function(x){ return app;}); })
+    .then(function(app) { return ctx.createinstance(app, provisionid); })
+    .then(function(instance) { return provisionDbImpl(instance,initdata); });
+    .then(function(x) { res.end(x); });
+});
+
 // TODO hiba eseten takaritas ?
-// TODO beszolni Balazsnak ha tortent provisionalas
+// TODO beszolni Balazsnak ha tortent indulas/leallas
 // TODO giga json generalas
 // TODO allocate instance nem kell provision eseten
 

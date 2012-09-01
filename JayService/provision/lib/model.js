@@ -32,7 +32,8 @@ $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
 }, null);
 $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
-    InstanceId: { type: "string" },
+    AppItemId: { type: "string" },
+//ex-awsid defalt ures, awsid ha kiesett
     AWSId: { type: "string" },
     Size: { type: "string" }, // micro
     Type: { type: "string" }, // reserved, ondemand, spot
@@ -83,7 +84,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
     },
 
     // only needed for init
-    checkInventory: function(id) { return this.CuInventories.single(function(a) { return a.InstanceId == this.id; }, { id: id }); },
+    checkInventory: function(id) { return this.CuInventories.single(function(a) { return a.AppItemId == this.id; }, { id: id }); },
 
     addappowner: function(owner) {
 	this.AppOwners.add(owner);
