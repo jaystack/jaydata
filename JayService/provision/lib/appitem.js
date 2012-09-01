@@ -17,9 +17,15 @@ function createAppItem(req, res) {
       return ctx.Instances
 	.single(function(i){return i.AppId == this.Id && i.IsProvision == false;},{Id: app.Id})
 	.then(function(instance) { return ctx.DbInventories.single(function(d){return d.InstanceId == this.Id && d.DbName == this.dbname;},{Id: instance.Id, dbname: instance.Id + '_ApplicationDB'}).then(function(appdb){return [instance,appdb];}) })
-	.spread(function(instance, appdb) {
-      		return new $provision.Types.ProvisionContext({ name: 'mongoDB', databaseName: appdb.DbName, address: 'db1.storm.jaystack.com', port: 8888, username: instance.Username, password: instance.Password }).onReady(); })
-        .then(function(ctx2){ ctx2.AppItems.add(appitem); return ctx2.saveChanges(); });
+	.spread(function (instance, appdb) {
+	    var contextAuthData = require('../fileload.js').LoadJson('./amazon.pwd.js', { data: { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' } }).data;
+	    contextAuthData.databaseName = appdb.DbName;
+	    contextAuthData.username = instance.Username;
+	    contextAuthData.password = instance.Password;
+      	
+	    return new $provision.Types.ProvisionContext(contextAuthData).onReady();
+	})
+    .then(function(ctx2){ ctx2.AppItems.add(appitem); return ctx2.saveChanges(); });
     });
 }
 function changeAppItem(req, res) { return true; }

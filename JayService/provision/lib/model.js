@@ -20,6 +20,11 @@ $data.Class.define("$provision.Types.AppItem", $data.Entity, null, {
     Data: { type: "object" },
     CreationDate: { type: 'date' }
 }, null);
+$data.Class.define("$provision.Types.AppHost", $data.Entity, null, {
+    Id: { type: "id", key: true },
+    AppId: { type: "string" },
+    Host: { type: "string" }
+}, null);
 $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
     AppId: { type: "string" },
@@ -32,6 +37,8 @@ $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
 }, null);
 $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
+    AppId: { type: "string" },
+    PublicAddress: { type: "string" },
     AppItemId: { type: "string" },
 //ex-awsid defalt ures, awsid ha kiesett
     AWSId: { type: "string" },
@@ -53,6 +60,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
     AppOwners: { type: $data.EntitySet, elementType: $provision.Types.AppOwner },
     Apps: { type: $data.EntitySet, elementType: $provision.Types.App },
     AppItems: { type: $data.EntitySet, elementType: $provision.Types.AppItem },
+    AppHosts: { type: $data.EntitySet, elementType: $provision.Types.AppHost },
     Instances: { type: $data.EntitySet, elementType: $provision.Types.Instance },
     CuInventories: { type: $data.EntitySet, elementType: $provision.Types.CuInventory },
     DbInventories: { type: $data.EntitySet, elementType: $provision.Types.DbInventory },
