@@ -36,9 +36,50 @@ app.post('/allocateappitem', function (req, res){
       .fail(function(x){ res.end(JSON.stringify({"Succeeded": false, "reason": x})); }) 
 });
 
-app.post('/shutdown', function (req, res){
-})
+app.post('/shutdown', function (req, res) {
+    //req.body.awsid
+    req.ctx.CuInventories.single(function (cui) { return cui.AWSId == this.awsid && cui.ExAwsId == "" }, { awsid: req.body.awsid })
+        .then(function (cu) {
+            req.ctx.CuInventories.attach(cu);
+            cu.ExAwsId = cu.AWSId;
+            cu.AWSId = "";
+            return req.ctx.saveChanges()
+                .then(function (num) { res.end(num); });
+        });
+
+});
 
 // satisfy
+app.post('/satisfy', function (req, res) {
+    req.ctx.CuInventories
+        .filter(function (cui) { return cui.ExAwsId != "" })
+        .toArray()
+    .then(function (stoppedCuInvs) {
+        var result = {
+            success: [],
+            error: []
+        }
+
+        return stoppedCuInvs.reduce(function (prom, item) {
+            return prom.then(function () {
+                return reserve(req.ctx, item.ExAWSId, undefined /*???*/, undefined /*???*/)
+                    .then(function () { result.error.push({ "Succeeded": true, "item": item }); })
+                    .fail(function (ex) { result.error.push({ "Succeeded": false, "reason": ex, "item": item }); });
+            });
+        }, q.resolve()).then(function () {
+            for (var i = 0; i < result.success.length; i++) {
+                req.ctx.CuInventories.remove(result.success[i].item);
+            }
+            for (var i = 0; i < result.error.length; i++) {
+                var obj = result.error[i];
+                if (obj.reason.message === 'instance runs on multiple cus')
+                    req.ctx.CuInventories.remove(obj.item);
+            }
+
+            return req.ctx.CuInventories.saveChanges().then(function () { res.end(JSON.stringify(result)); });
+        });
+    })
+    
+});
 
 
