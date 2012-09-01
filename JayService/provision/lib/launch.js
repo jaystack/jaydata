@@ -11,8 +11,6 @@ function genjson(app, instances) {
     json.application.type = 'application';
     json.application.appID = app.appid;
     json.application.hosts = [ app.appid+'.jaystack.net']; // FIXME
-    json.application.processLogin = ''; // FIXME
-    json.application.processPassword = ''; // FIXME
     return json;
 }
 
