@@ -51,12 +51,54 @@ send({
                 ]
             }
         },
-        serviceLayer: {
-            services: [{
-                serviceName: 'newsreader',
-                database: 'NewsReader',
-                port: 53999
-            }]
+        "serviceLayer": {
+            "services": [
+                {
+                "type": "service",
+                "allowAnonymous": true,
+                "serviceName": "dbService",
+                "allowedSubPathList": ["*"],
+                "internalPort": 60080,
+                "database": "db",
+                "sourceType": "script",
+                "source": "$data.ServiceBase.extend(\"dbService\", {\n ping: function(){\n /// <returnType type=\"string\"/>\n return 'ping';\n }\n});\n\ndbService.annotateFromVSDoc();",
+                "ingress": [
+                    {
+                    "type": "allow",
+                    "address": "*",
+                    "port": 80
+                    }
+                ],
+                "outgress": [
+                    {
+                    "type": "allow",
+                    "origin": "*"
+                    }
+                ]
+            },
+            {
+                "type": "service",
+                "allowAnonymous": true,
+                "serviceName": "bass",
+                "allowedSubPathList": ["*"],
+                "internalPort": 60080,
+                "sourceType": "script",
+                "source": "$data.ServiceBase.extend(\"dbService\", {\n ping: function(){\n /// <returnType type=\"string\"/>\n return 'ping';\n }\n});\n\ndbService.annotateFromVSDoc();",
+                "ingress": [
+                    {
+                    "type": "allow",
+                    "address": "*",
+                    "port": 80
+                    },
+                    {
+                    "type": "allow",
+                    "address": "*",
+                    "port": 443,
+                    "ssl": true
+                    }
+                ]
+            }
+        ]
         },
         applicationLayer: {
             type: ['micro', '|', 'small', '|', 'medium'],
@@ -69,15 +111,17 @@ send({
         },
         dataLayer: {
             dbServer: [{ address: '127.0.0.1', port: 27017 }],
+            dbUser: 'admin',
+            dbPwd: '***',
             databases: [{
                 type: 'database',
-                name: 'NewsReader'
+                name: 'db'
             }]
         }
     }
 }));
 
-require('fs').readFile('./cuJavaScriptTest.js', 'utf8', function(err, content){
+/*require('fs').readFile('./cuJavaScriptTest.js', 'utf8', function(err, content){
     send({
         host: 'localhost',
         port: 9999,
@@ -87,4 +131,4 @@ require('fs').readFile('./cuJavaScriptTest.js', 'utf8', function(err, content){
     }, JSON.stringify({ js: content }), function(data){
         console.log(JSON.stringify(JSON.parse(data), null, '    '));
     });
-});
+});*/

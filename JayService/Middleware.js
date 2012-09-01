@@ -6,9 +6,25 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             delete req.headers['x-appid'];
             
             Object.defineProperty(req, 'getAppId', {
-                value: function(){
+                value: (function(){
                     return appId;
-                },
+                }).bind(appId),
+                enumerable: true
+            });
+            
+            next();
+        };
+    },
+    superadmin: function(config){
+        if (!config) config = {};
+        return function(req, res, next){
+            var isAdmin = !!req.headers['x-admin'] || config.superadmin;
+            delete req.headers['x-admin'];
+            
+            Object.defineProperty(req, 'isAdmin', {
+                value: (function(){
+                    return isAdmin;
+                }).bind(isAdmin),
                 enumerable: true
             });
             
@@ -18,7 +34,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
     currentDatabase: function(){
         return function(req, res, next){
             var db = {
-                server: JSON.parse(req.headers['x-db-server']),
+                server: req.headers['x-db-server'] ? JSON.parse(req.headers['x-db-server']) : undefined,
                 username: req.headers['x-db-user'],
                 password: req.headers['x-db-password']
             };
@@ -27,7 +43,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             delete req.headers['x-db-password'];
             
             Object.defineProperty(req, 'getCurrentDatabase', {
-                value: function(type, name){
+                value: (function(type, name){
                     return new type({
                         name: 'mongoDB',
                         databaseName: req.getAppId() + '_' + name,
@@ -37,7 +53,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         user: req.getUser ? req.getUser() : undefined,
                         checkPermission: req.checkPermission
                     });
-                },
+                }).bind(db),
                 enumerable: true
             });
             
@@ -63,7 +79,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         var dbs = {};
         for (var i in config){
             if (config.hasOwnProperty(i)){
-                dbs[i] = connectionFactory(i, config[i]);
+                dbs[i] = connectionFactory(i, config[i]).bind(config);
             }
         }
         
@@ -188,6 +204,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             }
                         }catch(err){
                             next(err);
+                            return;
                         }
                         
                         if (!cache.Access.ApplicationDB) cache.Access.ApplicationDB = {};
@@ -230,17 +247,17 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         return function(req, res, next){
             if (!process.getCache){
                 Object.defineProperty(process, 'getCache', {
-                    value: function(){
+                    value: (function(){
                         return req.cache;
-                    }
+                    }).bind(req.cache)
                 });
             }
             
             if (!process.refreshCache){
                 Object.defineProperty(process, 'refreshCache', {
-                    value: function(callback){
+                    value: (function(callback){
                         refreshCache(req, res, callback);
-                    },
+                    }).bind(cache),
                     enumerable: true
                 });
             }
@@ -252,8 +269,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         enumerable: true
                     });
                     
-                    timer = setInterval(function(){
-                        refreshCache(req, res);
+                    timer = setTimeout(function(){
+                        timer = null;
                     }, 60000);
                     
                     next();
@@ -273,16 +290,26 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         var bcrypt = require('bcrypt');
         
         var cache;
+        var request;
         
         function mongoAuthenticate(username, password, strategy) {
             var defer = q.defer();
             
+            if (request.isAdmin && request.isAdmin()){
+                defer.resolve({
+                    superadmin: true,
+                    loginStrategy: strategy
+                });
+                
+                return defer.promise;
+            }
             var doc = cache.Users[username];
-            if (!doc) { defer.reject('No such user'); return; }
+            if (!doc) { defer.reject('No such user'); return defer.promise; }
             else bcrypt.compare(password, doc.Password, function(err, ok) {
-                if (err) { defer.reject(err); return; }
-                if (!ok) { defer.reject('Invalid password'); return; }
+                if (err) { defer.reject(err); return defer.promise; }
+                if (!ok) { defer.reject('Invalid password'); return defer.promise; }
                 doc.loginStrategy = strategy;
+                doc.superadmin = request.isAdmin ? request.isAdmin() : false;
                 defer.resolve(doc);
             });
             
@@ -349,7 +376,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         return function(req, res, next){
             if (!req.getUser){
                 Object.defineProperty(req, 'getUser', {
-                    value: function(){
+                    value: (function(){
                         if (!req.user){
                             Object.defineProperty(req, 'user', {
                                 value: { anonymous: true },
@@ -357,11 +384,12 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             });
                         }
                         return req.user;
-                    },
+                    }).bind(config),
                     enumerable: true
                 });
             }
             
+            request = req;
             cache = req.cache;
             
             //passport.initialize()(req, res, function() {
@@ -392,10 +420,15 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         return function(req, res, next){
             //if (req.getUser && req.getUser()){
                 Object.defineProperty(req, 'checkPermission', {
-                    value: function(access, user, entitysets, callback){
+                    value: (function(access, user, entitysets, callback){
                         var pHandler = new $data.PromiseHandler();
                         var clbWrapper = pHandler.createCallback(callback);
                         var pHandlerResult = pHandler.getPromise();
+                        
+                        if (user.superadmin){
+                            clbWrapper.success(true);
+                            return pHandlerResult;
+                        }
                         
                         var currentDbAccess = req.cache.Access[config.databaseName];
                         if (!(entitysets instanceof Array)) entitysets = [entitysets];
@@ -460,11 +493,301 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         callbackFn();*/
                         
                         return pHandlerResult;
-                    }
+                    }).bind(config)
                 });
                 
                 next();
             //}else next();
+        };
+    },
+    nginxFactory: function(config){
+        if (!config){
+            console.error('nginx configuration missing.');
+            return function(req, res, next){ next(); }
+        }
+        
+        var fs = require('fs');
+        
+        return function nginxFactory(req, res, next){
+            var json = req.body;
+            
+            var conf = '';
+            conf += 'proxy_cache_path /var/tmp/cache levels=1:2 keys_zone=STATIC:10m inactive=24h  max_size=1g;\n\n';
+            conf += 'server{ server_name _ ""; return 444; }\n\n';
+            conf += 'map $host $appid{\n';
+            conf += '    default ' + json.application.appID + ';\n';
+            
+            for (var i = 0; i < json.application.hosts.length; i++){
+                conf += '    ' + json.application.hosts[i] + ' ' + json.application.appID + ';\n';
+            }
+            
+            if (json.application.provision){
+                for (var i = 0; i < json.application.provision.applications.length; i++){
+                    var p = json.application.provision.applications[i];
+                    for (var j = 0; j < p.hosts.length; j++){
+                        conf += '    ' + p.hosts[j] + ' ' + p.appID + ';\n';
+                    }
+                }
+            }
+            
+            conf += '}\n\n';
+            conf += 'map $dbnamewithguid $dbserver{\n';
+            conf += '    default \'' + JSON.stringify(json.application.dataLayer.dbServer) + '\';\n';
+            
+            for (var i = 0; i < json.application.dataLayer.databases.length; i++){
+                var d = json.application.dataLayer.databases[i];
+                conf += '    ' + d.name + '-' + json.application.appID + ' \'' + JSON.stringify(d.dbServer || json.application.dataLayer.dbServer) + '\';\n';
+            }
+            
+            if (json.application.provision){
+                for (var i = 0; i < json.application.provision.applications.length; i++){
+                    var p = json.application.provision.applications[i];
+                    if (p.dataLayer.dbServer){
+                        conf += '    ~-' + p.appID + ' \'' + JSON.stringify(p.dataLayer.dbServer) + '\';\n';
+                    }
+                }
+            }
+            
+            conf += '    ~^nodatabase \'\';\n';
+            conf += '}\n\n';
+            
+            conf += 'map $servicename $dbname{\n';
+            
+            for (var i = 0; i < json.application.serviceLayer.services.length; i++){
+                var s = json.application.serviceLayer.services[i];
+                conf += '    ' + s.serviceName + ' ' + (s.database || '\'nodatabase\'') + ';\n';
+            }
+            
+            conf += '}\n\n';
+            
+            conf += 'map $appid $dbuser{\n';
+            conf += '    ' + json.application.appID + ' \'' + json.application.dataLayer.dbUser + '\';\n';
+            
+            if (json.application.provision){
+                for (var i = 0; i < json.application.provision.applications.length; i++){
+                    var p = json.application.provision.applications[i];
+                    if (p.dataLayer.dbUser){
+                        conf += '    ' + p.appID + ' \'' + p.dataLayer.dbUser + '\';\n';
+                    }
+                }
+            }
+            
+            conf += '}\n\n';
+            
+            conf += 'map $appid $dbpwd{\n';
+            conf += '    ' + json.application.appID + ' \'' + json.application.dataLayer.dbPwd + '\';\n';
+            
+            if (json.application.provision){
+                for (var i = 0; i < json.application.provision.applications.length; i++){
+                    var p = json.application.provision.applications[i];
+                    if (p.dataLayer.dbPwd){
+                        conf += '    ' + p.appID + ' \'' + p.dataLayer.dbPwd + '\';\n';
+                    }
+                }
+            }
+            
+            conf += '}\n\n';
+            
+            conf += 'map $serviceorigins $cors{\n';
+            conf += '    default "";\n';
+            
+            for (var i = 0; i < json.application.serviceLayer.services.length; i++){
+                var s = json.application.serviceLayer.services[i];
+                if (s.outgress && s.outgress.length && !s.outgress.filter(function(it){ return it.origin == '*'; }).length){
+                    for (var j = 0; j < s.outgress.length; j++){
+                        conf += '    ' + s.serviceName + '-' + s.outgress[j].origin + ' ' + s.outgress[j].origin + ';\n';
+                    }
+                }
+            }
+            
+            conf += '}\n';
+            
+            var servicesPort = {};
+            for (var i = 0; i < json.application.serviceLayer.services.length; i++){
+                var s = json.application.serviceLayer.services[i];
+                for (var j = 0; j < s.ingress.length; j++){
+                    if (!servicesPort[s.ingress[j].port + '_' + s.ingress[j].ssl]) servicesPort[s.ingress[j].port + '_' + s.ingress[j].ssl] = [];
+                    servicesPort[s.ingress[j].port + '_' + s.ingress[j].ssl].push(s);
+                }
+            }
+            
+            for (var i in servicesPort){
+                var sp = servicesPort[i];
+                conf += '\nserver{\n';
+                conf += '    set $domain storm.jaystack.com;\n';
+                conf += '    listen ' + require('os').networkInterfaces()['eth0'][0].address + ':' + i.split('_')[0] + ';\n';
+                conf += '    server_name ';
+                conf += json.application.appID + '.$domain';
+                for (var k = 0; k < json.application.hosts.length; k++){
+                    conf += ' ' + json.application.hosts[k];
+                }
+                conf += ';\n';
+                
+                if (i.split('_')[1] == 'true'){
+                    conf += '\n    ssl on;\n';
+                    conf += '    ssl_certificate ssl/star_jaystack_net.crt;\n';
+                    conf += '    ssl_certificate_key ssl/star_jaystack_net.key;\n';
+                    conf += '    ssl_session_timeout 5m;\n';
+                    conf += '    ssl_protocols SSLv3 TLSv1;\n';
+                    conf += '    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;\n';
+                    conf += '    ssl_prefer_server_ciphers on;\n';
+                }
+                
+                conf += '\n    location / {\n';
+                conf += '        proxy_pass http://admin.storm.jaystack.com/%appid%;\n';
+                conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
+                conf += '        proxy_cache STATIC;\n';
+                conf += '        proxy_cache_valid 200 1d;\n';
+                conf += '        proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;\n';
+                conf += '    }\n';
+                
+                for (var k = 0; k < sp.length; k++){
+                    var s = sp[k];
+                    
+                    conf += '\n    location /joker/' + s.serviceName + '{\n';
+                    conf += '        set $servicename ' + s.serviceName + ';\n';
+                    conf += '        set $dbnamewithguid $dbname-$appid;\n';
+                    conf += '        rewrite ^/joker(.*)$ $1 break;\n';
+                    conf += '        proxy_pass http://127.0.0.1:' + s.internalPort + ';\n';
+                    conf += '        proxy_set_header Host $host;\n';
+                    conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
+                    conf += '        proxy_set_header X-AppId $appid;\n';
+                    conf += '        proxy_set_header X-Db-Server $dbserver;\n';
+                    conf += '        proxy_set_header X-Db-User $dbuser;\n';
+                    conf += '        proxy_set_header X-Db-Password $dbpwd;\n';
+                    conf += '        more_set_headers \'Access-Control-Allow-Origin: *\';\n';
+                    conf += '    }\n';
+                    
+                    if (s.allowedSubPathList.length == 1 && s.allowedSubPathList[0] == '*'){
+                        conf += '\n    location /' + s.serviceName + '{\n';
+                        conf += '        set $servicename ' + s.serviceName + ';\n';
+                        conf += '        set $serviceorigins $servicename-$http_origin;\n';
+                        conf += '        set $dbnamewithguid $dbname-$appid;\n';
+                        conf += '        proxy_pass http://127.0.0.1:' + s.internalPort + ';\n';
+                        conf += '        proxy_set_header Host $host;\n';
+                        conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
+                        conf += '        proxy_set_header X-AppId $appid;\n';
+                        conf += '        proxy_set_header X-Db-Server $dbserver;\n';
+                        conf += '        proxy_set_header X-Db-User $dbuser;\n';
+                        conf += '        proxy_set_header X-Db-Password $dbpwd;\n';
+                        var ingressPort = s.ingress.filter(function(it){ return it.port.toString() == i.split('_')[0]; })[0];
+                        if (ingressPort.address instanceof Array && ingressPort.address.indexOf('*') < 0){
+                            conf += '        deny all;\n';
+                            for (var l = 0; l < ingressPort.address.length; l++){
+                                conf += '        allow ' + ingressPort.address[l] + ';\n';
+                            }
+                        }
+                        if (s.outgress && s.outgress.filter(function(it){ return it.origin == '*'; }).length){
+                            conf += '        more_set_headers \'Access-Control-Allow-Origin: *\';\n';
+                        }else if (s.outgress){
+                            conf += '        more_set_headers \'Access-Control-Allow-Origin: $cors\';\n';
+                        }
+                        conf += '    }\n';
+                    }else{
+                        for (var l = 0; l < s.allowedSubPathList.length; l++){
+                            conf += '\n    location /' + s.serviceName + '/' + s.allowedSubPathList[l] + '{\n';
+                            conf += '        set $servicename ' + s.serviceName + ';\n';
+                            conf += '        set $serviceorigins $servicename-$http_origin;\n';
+                            conf += '        set $dbnamewithguid $dbname-$appid;\n';
+                            conf += '        proxy_pass http://127.0.0.1:' + s.internalPort + ';\n';
+                            conf += '        proxy_set_header Host $host;\n';
+                            conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
+                            conf += '        proxy_set_header X-AppId $appid;\n';
+                            conf += '        proxy_set_header X-Db-Server $dbserver;\n';
+                            conf += '        proxy_set_header X-Db-User $dbuser;\n';
+                            conf += '        proxy_set_header X-Db-Password $dbpwd;\n';
+                            var ingressPort = s.ingress.filter(function(it){ return it.port.toString() == i.split('_')[0]; })[0];
+                            if (ingressPort.address instanceof Array && ingressPort.address.indexOf('*') < 0){
+                                conf += '        deny all;\n';
+                                for (var l = 0; l < ingressPort.address.length; l++){
+                                    conf += '        allow ' + ingressPort.address[l] + ';\n';
+                                }
+                            }
+                            if (s.outgress && s.outgress.filter(function(it){ return it.origin == '*'; }).length){
+                                conf += '        more_set_headers \'Access-Control-Allow-Origin: *\';\n';
+                            }else if (s.outgress){
+                                conf += '        more_set_headers \'Access-Control-Allow-Origin: $cors\';\n';
+                            }
+                            conf += '    }\n';
+                        }
+                    }
+                }
+                
+                conf += '}\n';
+            }
+            
+            fs.writeFile(config.filename, conf, function(err){
+                if (err) next(err); else next();
+            });
+        };
+    },
+    sourceFactory: function(config){
+        if (!config){
+            console.error('git clone configuration missing.');
+            return function(req, res, next){ next(); }
+        }
+        
+        var counter = 1;
+        var readyFn = function(next){
+            if (!(--counter)){
+                next();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        var fs = require('fs');
+        var cp = require('child_process');
+        
+        var loader = function(next){
+            counter = config.cu.application.serviceLayer.services.length;
+            for (var i = 0; i < config.cu.application.serviceLayer.services.length; i++){
+                var s = config.cu.application.serviceLayer.services[i];
+                
+                switch (s.sourceType){
+                    case 'script':
+                        fs.writeFile(config.path + '/' + s.serviceName + '/index.js', s.source, function(err){
+                            readyFn(next);
+                        });
+                        break;
+                    case 'git':
+                        cp.exec('git clone ' + s.source + ' ' + config.path + '/' + s.serviceName, function(err, stdout, stderr){
+                            if (err){
+                                next(err);
+                                return;
+                            }
+                            if (stdout) console.log(stdout);
+                            if (stderr) console.log(stderr);
+                            
+                            readyFn(next);
+                        });
+                        break;
+                    default:
+                        readyFn(next);
+                        break;
+                }
+            }
+        };
+        
+        return function sourceFactory(req, res, next){
+            config.cu = req.body;
+            console.log('Source factoy.');
+            fs.exists(config.path, function(exists){
+                if (exists){
+                    cp.exec('rm -rf ' + config.path, function(err, stdout, stderr){
+                        if (err){
+                            next(err);
+                            return;
+                        }
+                        if (stdout) console.log(stdout);
+                        if (stderr) console.log(stderr);
+                        
+                        loader(next);
+                    });
+                }
+                else loader(next);
+            });
         };
     },
     contextFactory: function(config){
@@ -475,8 +798,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
 
         return function contextFactory(req, res, next){
             config.cu = req.body;
-            
-            $data.MetadataLoader.debug = true;
+            $data.MetadataLoader.debugMode = true;
             $data.MetadataLoader.load(config.apiUrl, function (factory, ctxType, text) {
                 var context = factory();
                 var dbs = config.cu.application.dataLayer.databases.slice();
@@ -495,8 +817,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             file += 'exports = module.exports = { contextTypes: contextTypes };\n\n';
                             file += '})();';
                             require('fs').writeFile(config.filename, file, function(err){
-                                if (err) throw err;
-                                next();
+                                if (err) next(err);
+                                else next();
                             });
                         }
                     });
@@ -543,12 +865,12 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.appID());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.currentDatabase());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
-                        file += 'app' + (s.internalPort || s.port) + '.use(function (req, res, next){\n';
+                        /*file += 'app' + (s.internalPort || s.port) + '.use(function (req, res, next){\n';
                         file += '    res.setHeader("Access-Control-Allow-Origin", "*");\n';
                         file += '    res.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion");\n';
                         file += '    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, MERGE");\n';
                         file += '    if (req.method === "OPTIONS") res.end(); else next();\n';
-                        file += '});\n';
+                        file += '});\n';*/
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.cache());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(passport.initialize());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '/logout", function(req, res){\n';
@@ -556,7 +878,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += '        req.logOut();\n';
                         file += '        res.statusCode = 401;\n';
                         file += '        res.setHeader("WWW-Authenticate", "Basic realm=\\"' + s.serviceName + '\\"");\n';
-                        file += '        res.write("Logout was successful.");';
+                        file += '        res.write("Logout was successful.");\n';
                         file += '    }else res.write("Logout failed.");\n';
                         file += '    res.end();\n';
                         file += '});\n';
@@ -571,6 +893,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     }
                     if (s.extend) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"]' : s.serviceName) + ', ' + s.extend + ']);\n';
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
+                    file += 'if (typeof ' + s.serviceName + ' !== "function") $data.Class.defineEx("' + s.serviceName + '", [$data.ServiceBase]);\n';
+                    file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", express.static(__dirname + "/files/' + s.serviceName + '"));\n';
                     file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return ' + (s.database ? 'req.getCurrentDatabase(' + s.serviceName + ', "' + s.database + '")' : 'new ' + s.serviceName + '()') + ';\n}));\n';
                     file += 'app' + (s.internalPort || s.port) + '.use(express.errorHandler());\n\n';
                     file += 'express.errorHandler.title = "JayStorm API";\n';
