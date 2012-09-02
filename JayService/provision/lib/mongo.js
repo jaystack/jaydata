@@ -4,24 +4,29 @@ var q = require('q')
     , Db = mongodb.Db
     , Server = mongodb.Server;
 
+var contextAuthData = require('../fileload.js').LoadJson('./amazon.pwd.js', { data: { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' } }).data;
+
 module.exports = {
+
+    adduser: function(db, username, password, callback) {
+        db.admin(function(err, admindb) {
+            if (err) callback(err);
+            else admindb.authenticate('admin', 'admin', function(err, result) {
+                if (err) callback(err);
+                else db.addUser(username, password, function(err, result) {
+                    if (err) callback(err);
+                    else callback(null, newdb);
+                })
+            });
+        });
+    },
 
     createQueryableDB: function(dbname, username, password, callback) {
         console.log(arguments);
-        var contextAuthData = require('../fileload.js').LoadJson('./amazon.pwd.js', { data: { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' } }).data;
         var newdb = new Db(dbname, new Server(contextAuthData.address, contextAuthData.port, {}));
         newdb.open(function(err, db) {
             if (err) callback(err);
-            else db.admin(function(err, admindb) {
-                if (err) callback(err);
-                else admindb.authenticate('admin', 'admin', function(err, result) {
-                    if (err) callback(err);
-                    else db.addUser(username, password, function(err, result) {
-                        if (err) callback(err);
-                        else { console.log('created'); callback(null, newdb); }
-                    });
-                })
-            });
+            else adduser(db, username, password, callback);
         });
     },
 

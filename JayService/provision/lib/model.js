@@ -11,7 +11,7 @@ $data.Class.define("$provision.Types.App", $data.Entity, null, {
     Name: { type: "string" },
     AppOwnerId: { type: "string" },
     ItemIds: { type: "Array", elementType: "string" },
-    InstanceIds: { type: "Array", elementType: "id" }
+    InstanceIds: { type: "Array", elementType: "string" }
 }, null);
 $data.Class.define("$provision.Types.AppItem", $data.Entity, null, {
     Id: { type: "string", key: true },
@@ -26,7 +26,7 @@ $data.Class.define("$provision.Types.AppHost", $data.Entity, null, {
     Host: { type: "string" }
 }, null);
 $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
-    Id: { type: "id", key: true, computed: true },
+    Id: { type: "String", key: true },
     AppId: { type: "string" },
     Username: { type: "string" },
     Password: { type: "string" },
@@ -50,7 +50,7 @@ $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
 }, null);
 $data.Class.define("$provision.Types.DbInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
-    InstanceId: { type: "id" },
+    InstanceId: { type: "string" },
     AppItemId: { type: "string" },
     DbName: { type: "string" },
     Data: { type: "object" }
@@ -75,14 +75,14 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 
 
 
-    findDbs: function(id) { return this.AppItems.filter(function(item){return item.AppId == this.id && item.Type == 'qdb'; },{id:id}).toArray(); },
+    findDbs: function(id) { return this.AppItems.filter(function(item){return item.AppId == this.id && item.Type == 'QueryableDB'; },{id:id}).toArray(); },
 
 
 
 
     checkProvisionId: function(app, provisionid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'provisionableapp' && i.Data.provisionId == this.provisionid); }, { items: app.items, provisionId: provisionid }); },
-    checkDb: function(app, dbid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'qdb' && i.Data.DbId == this.dbid); }, { items: app.items, dbid: dbid }); },
-    checkCu: function(app, cuid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'cu' && i.Data.CuId == this.cuid); }, { items: app.items, cuid: cuid }); },
+    //checkDb: function(app, dbid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'QueryableDB' && i.Data.DbId == this.dbid); }, { items: app.items, dbid: dbid }); },
+    //checkCu: function(app, cuid) { return this.AppItems.single(function (i) { return (i.Id in this.items && i.type == 'cu' && i.Data.CuId == this.cuid); }, { items: app.items, cuid: cuid }); },
 
     // constructor
     // pre, post
@@ -109,7 +109,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 		    //owner.AppIds = owner.AppIds.concat(app.Id);
 		    //return self.saveChanges();
 		//})
-		.then(function(c) { return self.createinstance(app, "");});
+		.then(function(c) { return self.createinstance(app, undefined);});
     },
 
     createinstance: function(app, provisionid) {
@@ -120,8 +120,13 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	instance.Password = uuid.v4();
         instance.ProvisionId = provisionid;
         instance.StartDate = new Date();
-        //instance.isProvision = provisionid == "" : false : true;
-        instance.IsProvision = false;
+        if (provisionid)
+		instance.Id = uuid.v4();
+        	instance.isProvision = true;
+	} else {
+		instance.Id = app.Id;
+        	instance.isProvision = false;
+	}
 	this.Instances.add(instance);
 	return self.saveChanges()
 		.then(function(c) {
