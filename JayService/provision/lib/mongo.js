@@ -62,9 +62,7 @@ module.exports = {
             }
         );
 
-        return defer.then(function () {
-            //adduser;
-        });
+        return defer.promise;
     },
 }
 

@@ -12,7 +12,11 @@ function addAppDb(ctx, instance) {
         defaultDbServers: [{ address: '127.0.0.1', port: 1350, username: 'admin', password: 'admin' }],
         masterAppDbDumpPath: '',
     });
-    return mongo.restore(instance.Id + '_ApplicationDB', { AppDbDump: masterAppDbDumpPath, servers: connection.defaultDbServers });
+    var newDbName = instance.Id + '_ApplicationDB';
+
+    return mongo.restore(newDbName, { AppDbDump: masterAppDbDumpPath, servers: connection.defaultDbServers })
+        //Add user
+        .then(function () { return q.ncall(mongo.createQueryableDB, mongo, newDbName, instance.Username, instance.Password); });
 }
 
 function addApp(req, appowner) {
