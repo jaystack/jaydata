@@ -3,8 +3,8 @@ require('jaydata');
 (function(){
     var config = {
         nginxConf: '/etc/nginx/sites-enabled/cu.conf',
-        schemaAPI: 'http://localhost:8181/db',
-        serviceAPI: 'http://localhost:8181/db',
+        schemaAPI: 'http://localhost:8181/ApplicationDB',
+        serviceAPI: 'http://localhost:8181/ApplicationDB',
         contextFile: __dirname + '/context.js',
         serviceFile: __dirname + '/service.js',
         filePath: __dirname + '/files',

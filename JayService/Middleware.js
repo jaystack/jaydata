@@ -32,16 +32,22 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             next();
         };
     },
-    currentDatabase: function(){
+    currentDatabase: function(config){
+        if (!config) config = {};
         return function(req, res, next){
             var db = {
-                server: req.headers['x-db-server'] ? JSON.parse(req.headers['x-db-server']) : undefined,
-                username: req.headers['x-db-user'],
-                password: req.headers['x-db-password']
+                server: req.headers['x-db-server'] ? JSON.parse(req.headers['x-db-server']) : config.server,
+                username: req.headers['x-db-user'] || config.username,
+                password: req.headers['x-db-password'] || config.password
             };
             delete req.headers['x-db-server'];
             delete req.headers['x-db-user'];
             delete req.headers['x-db-password'];
+            
+            Object.defineProperty(req, 'currentDatabaseConfig', {
+                value: db,
+                enumerable: true
+            });
             
             Object.defineProperty(req, 'getCurrentDatabase', {
                 value: (function(type, name){
@@ -91,26 +97,31 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
     },
     cache: function(config){
         var Q = require('q');
-        var cache = {
-            Users: {},
-            Groups: {},
-            EntitySets: {},
-            Databases: {},
-            Permissions: {},
-            Access: {}
-        };
+        var cache = {};
         var timer;
         
-        var loadCollection = function(client, collection){
+        var loadCollection = function(req, client, collection){
             var defer = Q.defer();
             
-            collection.find().toArray(function(err, result){
+            client.authenticate(req.currentDatabaseConfig.username, req.currentDatabaseConfig.password, function(err, result){
                 if (err){
                     defer.reject(err);
                     return;
                 }
                 
-                defer.resolve(result);
+                if (!result){
+                    defer.reject('auth fails');
+                    return;
+                }
+                
+                collection.find().toArray(function(err, result){
+                    if (err){
+                        defer.reject(err);
+                        return;
+                    }
+                    
+                    defer.resolve(result);
+                });
             });
             
             return defer.promise;
@@ -118,7 +129,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         
         var refreshCache = function(req, res, next){
             if (req.dbConnections.ApplicationDB){
-                var db = req.dbConnections.ApplicationDB(req.getAppId());
+                var id = req.getAppId();
+                var db = req.dbConnections.ApplicationDB(id);
                 
                 db.open(function(err, client){
                     if (err){
@@ -127,12 +139,13 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     }
                     
                     Q.allResolved([
-                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Users')),
-                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Groups')),
-                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Databases')),
-                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'EntitySets')),
-                        loadCollection(client, new $data.mongoDBDriver.Collection(client, 'Permissions'))
+                        loadCollection(req, client, new $data.mongoDBDriver.Collection(client, 'Users')),
+                        loadCollection(req, client, new $data.mongoDBDriver.Collection(client, 'Groups')),
+                        loadCollection(req, client, new $data.mongoDBDriver.Collection(client, 'Databases')),
+                        loadCollection(req, client, new $data.mongoDBDriver.Collection(client, 'EntitySets')),
+                        loadCollection(req, client, new $data.mongoDBDriver.Collection(client, 'Permissions'))
                     ]).fail(function(err){
+                        console.log(err);
                         client.close();
                         if (next) next(err);
                         else throw err;
@@ -145,7 +158,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             Permissions: v[4].valueOf()
                         };
                         
-                        cache = {
+                        console.log('Loading cache =>', id);
+                        cache[id] = {
                             Users: {},
                             Groups: {},
                             EntitySets: {},
@@ -156,7 +170,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         
                         for (var i = 0; i < result.Groups.length; i++){
                             var g = result.Groups[i];
-                            cache.Groups[g._id.toString()] = g;
+                            cache[id].Groups[g._id.toString()] = g;
                         }
                         
                         for (var i = 0; i < result.Users.length; i++){
@@ -164,27 +178,27 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             if (u.Groups && u.Groups instanceof Array){
                                 var groups = [];
                                 for (var j = 0; j < u.Groups.length; j++){
-                                    groups.push(cache.Groups[u.Groups[j].toString()].Name);
+                                    groups.push(cache[id].Groups[u.Groups[j].toString()].Name);
                                 }
                                 u.Groups = groups;
                             }
-                            cache.Users[u.Login] = u;
+                            cache[id].Users[u.Login] = u;
                         }
                         
                         for (var i = 0; i < result.EntitySets.length; i++){
                             var es = result.EntitySets[i];
-                            cache.EntitySets[es._id.toString()] = es;
+                            cache[id].EntitySets[es._id.toString()] = es;
                         }
                         
                         for (var i = 0; i < result.Databases.length; i++){
                             var d = result.Databases[i];
-                            cache.Databases[d._id.toString()] = d;
+                            cache[id].Databases[d._id.toString()] = d;
                         }
                         
                         try{
                             for (var i = 0; i < result.Permissions.length; i++){
                                 var p = result.Permissions[i];
-                                cache.Permissions[p._id.toString()] = p;
+                                cache[id].Permissions[p._id.toString()] = p;
                                 
                                 var access = $data.Access.getAccessBitmaskFromPermission(p);
                                 
@@ -193,13 +207,13 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                                 
                                 for (var d = 0; d < dbIds.length; d++){
                                     for (var e = 0; e < esIds.length; e++){
-                                        var db = cache.Databases[dbIds[d].toString()].Name;
-                                        var es = cache.EntitySets[esIds[e].toString()].Name;
-                                        var g = cache.Groups[p.GroupID.toString()].Name;
+                                        var db = cache[id].Databases[dbIds[d].toString()].Name;
+                                        var es = cache[id].EntitySets[esIds[e].toString()].Name;
+                                        var g = cache[id].Groups[p.GroupID.toString()].Name;
                                         
-                                        if (!cache.Access[db]) cache.Access[db] = {};
-                                        if (!cache.Access[db][es]) cache.Access[db][es] = {};
-                                        cache.Access[db][es][g] = access;
+                                        if (!cache[id].Access[db]) cache[id].Access[db] = {};
+                                        if (!cache[id].Access[db][es]) cache[id].Access[db][es] = {};
+                                        cache[id].Access[db][es][g] = access;
                                     }
                                 }
                             }
@@ -208,44 +222,51 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             return;
                         }
                         
-                        if (!cache.Access.ApplicationDB) cache.Access.ApplicationDB = {};
-                        if (!cache.Access.ApplicationDB.Tests) cache.Access.ApplicationDB.Tests = {};
-                        cache.Access.ApplicationDB.Tests.admin = 63;
-                        if (!cache.Access.ApplicationDB.Permissions) cache.Access.ApplicationDB.Permissions = {};
-                        cache.Access.ApplicationDB.Permissions.admin = 63;
-                        if (!cache.Access.ApplicationDB.Databases) cache.Access.ApplicationDB.Databases = {};
-                        cache.Access.ApplicationDB.Databases.admin = 63;
-                        if (!cache.Access.ApplicationDB.Entities) cache.Access.ApplicationDB.Entities = {};
-                        cache.Access.ApplicationDB.Entities.admin = 63;
-                        if (!cache.Access.ApplicationDB.ComplexTypes) cache.Access.ApplicationDB.ComplexTypes = {};
-                        cache.Access.ApplicationDB.ComplexTypes.admin = 63;
-                        if (!cache.Access.ApplicationDB.EventHandlers) cache.Access.ApplicationDB.EventHandlers = {};
-                        cache.Access.ApplicationDB.EventHandlers.admin = 63;
-                        if (!cache.Access.ApplicationDB.EntityFields) cache.Access.ApplicationDB.EntityFields = {};
-                        cache.Access.ApplicationDB.EntityFields.admin = 63;
-                        if (!cache.Access.ApplicationDB.EntitySets) cache.Access.ApplicationDB.EntitySets = {};
-                        cache.Access.ApplicationDB.EntitySets.admin = 63;
-                        if (!cache.Access.ApplicationDB.EntitySetPublications) cache.Access.ApplicationDB.EntitySetPublications = {};
-                        cache.Access.ApplicationDB.EntitySetPublications.admin = 63;
-                        if (!cache.Access.ApplicationDB.Services) cache.Access.ApplicationDB.Services = {};
-                        cache.Access.ApplicationDB.Services.admin = 63;
-                        if (!cache.Access.ApplicationDB.ServiceOperations) cache.Access.ApplicationDB.ServiceOperations = {};
-                        cache.Access.ApplicationDB.ServiceOperations.admin = 63;
-                        if (!cache.Access.ApplicationDB.TypeTemplates) cache.Access.ApplicationDB.TypeTemplates = {};
-                        cache.Access.ApplicationDB.TypeTemplates.admin = 63;
-                        if (!cache.Access.ApplicationDB.Users) cache.Access.ApplicationDB.Users = {};
-                        cache.Access.ApplicationDB.Users.admin = 63;
-                        if (!cache.Access.ApplicationDB.Groups) cache.Access.ApplicationDB.Groups = {};
-                        cache.Access.ApplicationDB.Groups.admin = 63;
+                        if (!cache[id].Access.ApplicationDB) cache[id].Access.ApplicationDB = {};
+                        if (!cache[id].Access.ApplicationDB.Tests) cache[id].Access.ApplicationDB.Tests = {};
+                        cache[id].Access.ApplicationDB.Tests.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.Permissions) cache[id].Access.ApplicationDB.Permissions = {};
+                        cache[id].Access.ApplicationDB.Permissions.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.Databases) cache[id].Access.ApplicationDB.Databases = {};
+                        cache[id].Access.ApplicationDB.Databases.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.Entities) cache[id].Access.ApplicationDB.Entities = {};
+                        cache[id].Access.ApplicationDB.Entities.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.ComplexTypes) cache[id].Access.ApplicationDB.ComplexTypes = {};
+                        cache[id].Access.ApplicationDB.ComplexTypes.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.EventHandlers) cache[id].Access.ApplicationDB.EventHandlers = {};
+                        cache[id].Access.ApplicationDB.EventHandlers.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.EntityFields) cache[id].Access.ApplicationDB.EntityFields = {};
+                        cache[id].Access.ApplicationDB.EntityFields.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.EntitySets) cache[id].Access.ApplicationDB.EntitySets = {};
+                        cache[id].Access.ApplicationDB.EntitySets.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.EntitySetPublications) cache[id].Access.ApplicationDB.EntitySetPublications = {};
+                        cache[id].Access.ApplicationDB.EntitySetPublications.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.Services) cache[id].Access.ApplicationDB.Services = {};
+                        cache[id].Access.ApplicationDB.Services.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.ServiceOperations) cache[id].Access.ApplicationDB.ServiceOperations = {};
+                        cache[id].Access.ApplicationDB.ServiceOperations.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.TypeTemplates) cache[id].Access.ApplicationDB.TypeTemplates = {};
+                        cache[id].Access.ApplicationDB.TypeTemplates.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.Users) cache[id].Access.ApplicationDB.Users = {};
+                        cache[id].Access.ApplicationDB.Users.admin = 63;
+                        if (!cache[id].Access.ApplicationDB.Groups) cache[id].Access.ApplicationDB.Groups = {};
+                        cache[id].Access.ApplicationDB.Groups.admin = 63;
                         
                         client.close();
                         if (next) next();
+                    })
+                    .fail(function(err){
+                        console.log(err);
+                        client.close();
+                        if (next) next(err);
+                        else throw err;
                     });
                 });
             }else next();
         };
         
         return function(req, res, next){
+            var id = req.getAppId();
             if (!process.getCache){
                 Object.defineProperty(process, 'getCache', {
                     value: (function(){
@@ -266,7 +287,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             if (!timer){
                 refreshCache(req, res, function(){
                     Object.defineProperty(req, 'cache', {
-                        value: cache,
+                        value: cache[id],
                         enumerable: true
                     });
                     
@@ -278,7 +299,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 });
             }else{
                 Object.defineProperty(req, 'cache', {
-                    value: cache,
+                    value: cache[id],
                     enumerable: true
                 });
                 
@@ -387,7 +408,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 Object.defineProperty(req, 'getUser', {
                     value: (function(){
                         if (!req.user){
-                            console.log('Anonymouse user authenticated.');
+                            console.log('Anonymous user authenticated.');
                             Object.defineProperty(req, 'user', {
                                 value: { anonymous: true },
                                 enumerable: true
