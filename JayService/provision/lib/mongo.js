@@ -39,6 +39,27 @@ module.exports = {
         }
         promise.then(function() { callback(null, d); } )
             .fail(function(reason) { callback(reason); } );
-    }
+    },
+
+    restore: function (newDbName, config) {
+        var connection = config.servers;
+        var appDumpPath = config.AppDbDump;
+        var defer = q.defer();
+
+        var child_process = require('child_process'); //TODO replica set
+        child_process.exec('mongorestore -h ' + connection[0].address + ':' + connection[0].port + ' -u ' + connection[0].username + ' -p ' + connection[0].password + ' -d ' + newDbName + ' ' + appDumpPath,
+            function (err, stdout, stderr) {
+                if (err) {
+                    defer.reject(err);
+                } else {
+                    defer.resolve(stdout);
+                }
+            }
+        );
+
+        return defer.then(function () {
+            //adduser;
+        });
+    },
 }
 

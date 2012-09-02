@@ -1,15 +1,18 @@
 
-var app = module.parent.exports.app;
+var app = module.parent.exports.app
+    , mongo = require('./mongo');
 var provision = require('./provision');
-var initCreateDb = require('../fileload.js').LoadJson('./prov_createDatabase.js', {
-    'ApplicationDB': {
-        coll1: { x: 1 },
-        coll2: { y: 1 }
-    }
-});
 
 function addAppDb(ctx, instance) {
-  return provision.createDatabase(ctx, instance, {Data:{name:'ApplicationDB'}}, initCreateDb);
+    /*return provision.createDatabase(ctx, instance, { Data: { name: 'ApplicationDB' } }, {})
+    .then(function () {
+        return mongo.restore();
+    });*/
+    var connection = require('../fileload.js').LoadJson('./amazon.pwd.js', {
+        defaultDbServers: [{ address: '127.0.0.1', port: 1350, username: 'admin', password: 'admin' }],
+        masterAppDbDumpPath: '',
+    });
+    return mongo.restore(instance.Id + '_ApplicationDB', { AppDbDump: masterAppDbDumpPath, servers: connection.defaultDbServers });
 }
 
 function addApp(req, appowner) {
