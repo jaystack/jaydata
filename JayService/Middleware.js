@@ -512,7 +512,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             var json = req.body;
             
             var conf = '';
-            conf += 'proxy_cache_path /var/tmp/cache levels=1:2 keys_zone=STATIC:10m inactive=24h  max_size=1g;\n\n';
+            conf += 'proxy_cache_path /var/tmp/cache levels=1:2 keys_zone=STATIC:10m inactive=24h  max_size=1g;\n';
+            conf += 'map_hash_bucket_size 1024;\n\n';
             conf += 'server{ server_name _ ""; return 444; }\n\n';
             conf += 'map $host $appid{\n';
             conf += '    default ' + json.application.appID + ';\n';
@@ -807,7 +808,9 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 var file = '(function(){\n\n';
                 file += 'var contextTypes = {};\n\n';
                 var builder = function(db){
+                    console.log('Building context =>', db, config.apiUrl);
                     context.getContextJS(db, function(js){
+                        console.log('Context source =>', js);
                         file += (js + '\n\n');
                         var ctxName = js.match(/\$data.EntityContext.extend\(\"(.*)\",/)[1];
                         file += 'contextTypes["' + db + '"] = ' + ctxName + ';\n\n';
@@ -822,6 +825,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                                 else next();
                             });
                         }
+                    }).fail(function(err){
+                        console.log(err);
                     });
                 };
                 

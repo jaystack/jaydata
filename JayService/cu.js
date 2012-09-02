@@ -20,11 +20,11 @@ require('jaydata');
     var uuid = require('node-uuid');
     var child_process = require('child_process');
     
-    var connect = require('connect');
-    var app = connect();
+    var express = require('express');
+    var app = express();
     
-    app.use(connect.query());
-    app.use(connect.bodyParser());
+    app.use(express.query());
+    app.use(express.bodyParser());
     
     app.use('/nginx/conf', $data.JayService.Middleware.nginxFactory({ filename: config.nginxConf }));
     app.use('/nginx/conf', function(req, res, next){
@@ -42,7 +42,10 @@ require('jaydata');
         });
     });
     
-    app.use('/make', $data.JayService.Middleware.nginxFactory({ filename: config.nginxConf }));
+    app.use('/make', $data.JayService.Middleware.nginxFactory({
+        filename: config.nginxConf,
+        filestore: config.filestore
+    }));
     
     app.use('/make', $data.JayService.Middleware.contextFactory({
         apiUrl: config.schemaAPI,
@@ -114,7 +117,7 @@ require('jaydata');
         }
     });
     
-    app.use(connect.errorHandler());
+    app.use(express.errorHandler());
     
     app.listen(9999);
 })();
