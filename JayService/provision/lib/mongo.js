@@ -15,18 +15,19 @@ module.exports = {
                 if (err) callback(err);
                 else db.addUser(username, password, function(err, result) {
                     if (err) callback(err);
-                    else callback(null, newdb);
+                    else callback(null, db);
                 })
             });
         });
     },
 
     createQueryableDB: function(dbname, username, password, callback) {
+	var self = this;
         console.log(arguments);
         var newdb = new Db(dbname, new Server(contextAuthData.address, contextAuthData.port, {}));
         newdb.open(function(err, db) {
             if (err) callback(err);
-            else adduser(db, username, password, callback);
+            else self.adduser(db, username, password, callback);
         });
     },
 
@@ -52,9 +53,10 @@ module.exports = {
         var defer = q.defer();
 
         var child_process = require('child_process'); //TODO replica set
-        child_process.exec('mongorestore -h ' + connection[0].address + ':' + connection[0].port + ' -u ' + connection[0].username + ' -p ' + connection[0].password + ' -d ' + newDbName + ' ' + appDumpPath,
+        child_process.exec('mongorestore -h ' + connection.address + ':' + connection.port + ' -u ' + connection.username + ' -p ' + connection.password + ' -d ' + newDbName + ' ' + appDumpPath,
             function (err, stdout, stderr) {
                 if (err) {
+console.log(err);
                     defer.reject(err);
                 } else {
                     defer.resolve(stdout);

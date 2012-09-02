@@ -1,7 +1,8 @@
 
 var app = module.parent.exports.app
     , mongo = require('./mongo');
-var provision = require('./provision');
+//var provision = require('./provision');
+var q = require('q');
 
 function addAppDb(ctx, instance) {
     /*return provision.createDatabase(ctx, instance, { Data: { name: 'ApplicationDB' } }, {})
@@ -14,7 +15,7 @@ function addAppDb(ctx, instance) {
     });
     var newDbName = instance.Id + '_ApplicationDB';
 
-    return mongo.restore(newDbName, { AppDbDump: masterAppDbDumpPath, servers: connection.defaultDbServers })
+    return mongo.restore(newDbName, { AppDbDump: connection.masterAppDbDumpPath, servers: connection.data })
         //Add user
         .then(function () { return q.ncall(mongo.createQueryableDB, mongo, newDbName, instance.Username, instance.Password); });
 }

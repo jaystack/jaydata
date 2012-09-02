@@ -144,30 +144,6 @@ app.post('/launch', function (req, res) {
         });
 });
 
-// ez csak nem provisionalt app eseten fut le
-// provisionalas eseten a launch automatikus
-function launchImpl(appid) {
-    var defer = q.defer();
-    q.ncall(model.findApp, model, appid)
-//        .then(function(app) { console.log(JSON.stringify(app)); return app; })
-        .then(function(app) { return q.ncall(reserve, this, app); })
-//        .then(function(x) { console.log(x); return x; })
-        .spread(function(app, instances) { defer.resolve(instances); return [app, instances]; })
-        .fail(function (reason) { defer.reject(reason); throw reason; })
-        .spread(function(app, instances) {  return genjson(app, instances); })
-        .then(function(x) { console.log(JSON.stringify(x)); })
-    return defer.promise;
-}
-
-module.exports = {
-
-    // nem provisionalt alkalmazas eseten
-    launch: function(appid) {
-        return launchImpl(appid);
-    }
-
-}
-
 function genServiceLayer(json){
     var defer = q.defer();
     

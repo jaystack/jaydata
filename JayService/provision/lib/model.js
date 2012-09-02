@@ -26,7 +26,7 @@ $data.Class.define("$provision.Types.AppHost", $data.Entity, null, {
     Host: { type: "string" }
 }, null);
 $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
-    Id: { type: "String", key: true },
+    Id: { type: "string", key: true },
     AppId: { type: "string" },
     Username: { type: "string" },
     Password: { type: "string" },
@@ -141,7 +141,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	var dbinstance = new $provision.Types.DbInventory();
 	dbinstance.InstanceId = instance.Id;
 	dbinstance.AppItemId = instance.AppId;
-	dbinstance.DbName = db.Data.name;
+	dbinstance.DbName = db.Data.dbname;
 	dbinstance.Data = db.Data;
 	// TODO el kellene tenni forditva is, vagyis az instance tudjon a db-irol
 	this.DbInventories.add(dbinstance);

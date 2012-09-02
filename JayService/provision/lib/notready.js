@@ -1,14 +1,6 @@
 
 var app = module.parent.exports.app;
 
-//app.post('/allocateappitem', function (req, res){
-//res.end(JSON.stringify({ Succeeded : true }));
-//});
-
-app.get('/launch', function (req, res) {
-    res.end(JSON.stringify({ Succeeded: true }));
-});
-
 app.post('/getqueryabledatabases', function (req, res) {
     //req.body.appid
     var context = req.ctx;
