@@ -9,7 +9,8 @@ require('jaydata');
         serviceFile: __dirname + '/service.js',
         filePath: __dirname + '/files',
         localIP: require('os').networkInterfaces()['eth0'][0].address,
-        subscriberPath: '/home/lazarv'
+        subscriberPath: '/home/lazarv',
+        filestore: 'http://admin.storm.jaystack.com'
     };
     
     var forever = require('forever');

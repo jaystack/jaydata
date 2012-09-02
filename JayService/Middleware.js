@@ -634,7 +634,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 }
                 
                 conf += '\n    location / {\n';
-                conf += '        proxy_pass http://admin.storm.jaystack.com/%appid%;\n';
+                conf += '        proxy_pass ' + config.filestore + '/%appid%;\n';
                 conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
                 conf += '        proxy_cache STATIC;\n';
                 conf += '        proxy_cache_valid 200 1d;\n';
@@ -650,6 +650,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     conf += '        rewrite ^/joker(.*)$ $1 break;\n';
                     conf += '        proxy_pass http://127.0.0.1:' + s.internalPort + ';\n';
                     conf += '        proxy_set_header Host $host;\n';
+                    conf += '        proxy_set_header X-Admin \'superadmin\';\n';
                     conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
                     conf += '        proxy_set_header X-AppId $appid;\n';
                     conf += '        proxy_set_header X-Db-Server $dbserver;\n';
