@@ -104,6 +104,22 @@ function genjson(context, app) {
         return genServiceLayer(json)
             .then(function(serviceLayer){ json.application.serviceLayer = serviceLayer; });
     })
+    //script call
+    .then(function () {
+        var defer = q.defer();
+        var child_process = require('child_process'); //TODO replica set
+        child_process.exec('r53.sh ' + json.application.hosts[0] + ' ' + json.application.applicationLayer.computeUnits.map(function (cu) { return cu.publicAddress }).join(','),
+            function (err, stdout, stderr) {
+                if (err) {
+                    defer.reject(err);
+                } else {
+                    defer.resolve(stdout);
+                }
+            }
+        );
+
+        return q.promise;
+    })
     //CUs init
     .then(function(){
         var cus = json.application.applicationLayer.computeUnits;
