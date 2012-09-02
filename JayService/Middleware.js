@@ -874,17 +874,29 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
 
         return function contextFactory(req, res, next){
             config.cu = req.body;
-            console.log('Building context from =>', config.apiUrl);
+            var appdb = config.cu.application.dataLayer.databases.filter(function(it){ return it.name == 'ApplicationDB' })[0];
+            if (!appdb){
+                next('ApplicationDB missing from databases.');
+                return;
+            }
+            var context = new (config.api)({
+                name: 'mongoDB',
+                databaseName: config.cu.application.appID + '_ApplicationDB',
+                server: appdb.dbServer || config.cu.application.dataLayer.dbServer,
+                username: appdb.dbUser || config.cu.application.dataLayer.dbUser,
+                password: appdb.dbPwd || config.cu.application.dataLayer.dbPwd
+            });
+            /*console.log('Building context from =>', config.apiUrl);
             $data.MetadataLoader.debugMode = true;
             $data.MetadataLoader.load(config.apiUrl, function (factory, ctxType, text) {
-                var context = factory();
+                var context = factory();*/
                 var dbs = config.cu.application.dataLayer.databases.slice();
                 //var file = 'exports = module.exports = function(app){\n\n';
                 var file = '(function(){\n\n';
                 file += 'var contextTypes = {};\n\n';
                 var builder = function(db){
-                    console.log('Building context =>', db, config.apiUrl);
-                    context.getContextJS(db, function(js){
+                    console.log('Building context =>', db, config.api.fullName);
+                    context.getContextJS(db)(function(js){
                         console.log('Context source =>', js);
                         file += (js + '\n\n');
                         var ctxName = js.match(/\$data.EntityContext.extend\(\"(.*)\",/)[1];
@@ -907,13 +919,16 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                                 }
                             });
                         }
-                    }).fail(function(err){
-                        console.log('ERROR while trying to get context source =>', err);
+                    }, function(err){
+                        next(err);
                     });
+                    /*}).fail(function(err){
+                        console.log('ERROR while trying to get context source =>', err);
+                    });*/
                 };
                 
                 builder(dbs.shift().name);
-            });
+            //});
         };
     },
     serviceFactory: function(config){
