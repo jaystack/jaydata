@@ -3,14 +3,15 @@ require('jaydata');
 (function(){
     var config = {
         nginxConf: '/etc/nginx/sites-enabled/cu.conf',
-        schemaAPI: 'http://localhost:8181/db',
-        serviceAPI: 'http://localhost:8181/db',
+        schemaAPI: 'http://localhost:8181/ApplicationDB',
+        serviceAPI: 'http://localhost:8181/ApplicationDB',
         contextFile: __dirname + '/context.js',
         serviceFile: __dirname + '/service.js',
         filePath: __dirname + '/files',
         localIP: require('os').networkInterfaces()['eth0'][0].address,
         subscriberPath: '/home/lazarv',
-        filestore: 'http://admin.storm.jaystack.com'
+        filestore: 'http://admin.storm.jaystack.com',
+        samba: 'ip-10-229-59-222.eu-west-1.compute.internal'
     };
     
     var forever = require('forever');
@@ -38,6 +39,24 @@ require('jaydata');
                 
                 console.log('NGINX ready.');
                 res.end();
+            }
+        });
+    });
+    
+    app.use('/make', function(req, res, next){
+        var json = req.body;
+        console.log('Mounting SAMBA.');
+        child_process.exec('smbmount \\\\\\\\' + config.samba + '\\\\subscriber\\\\' + json.application.appID + '\\\\js /mnt -o user=subscriber', function(err, stdout, stderr){
+            if (err){
+                console.log('ERROR while mounting =>', config.samba);
+                //next(err);
+                next();
+            }else{
+                //if (stdout) console.log(stdout);
+                //if (stderr) console.log(stderr);
+                
+                console.log('SAMBA mount ready.');
+                next();
             }
         });
     });

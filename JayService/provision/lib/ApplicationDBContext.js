@@ -167,7 +167,7 @@ $data.Entity.extend('$data.JayStormAPI.KeyValuePair', {
     Value: { type: 'string' }
 });
 
-$data.Entity.extend('$data.JayStormAPI.ServiceOperationReturnType', {
+/*$data.Entity.extend('$data.JayStormAPI.ServiceOperationReturnType', {
     ReturnType: { type: 'string', required: true },
     ElementType: { type: 'string' }
 });
@@ -186,7 +186,7 @@ $data.Entity.extend('$data.JayStormAPI.ServiceOperation', {
     Returns: { type: '$data.JayStormAPI.ServiceOperationReturnType' },
     Promise: { type: 'bool' },
     Publish: { type: 'bool' }
-});
+});*/
 
 $data.Entity.extend('$data.JayStormAPI.EventHandler', {
     EventHandlerID: { type: 'id', key: true, computed: true },
@@ -273,7 +273,7 @@ $data.Class.defineEx('$data.JayStormAPI.Context', [$data.EntityContext, $data.Se
     IngressIPRules: { type: $data.EntitySet, elementType: $data.JayStormAPI.IngressIPRule },
     IngressOriginRules: { type: $data.EntitySet, elementType: $data.JayStormAPI.IngressOriginRule },
     Services: { type: $data.EntitySet, elementType: $data.JayStormAPI.Service },
-    ServiceOperations: { type: $data.EntitySet, elementType: $data.JayStormAPI.ServiceOperation },
+    //ServiceOperations: { type: $data.EntitySet, elementType: $data.JayStormAPI.ServiceOperation },
     TypeTemplates: { type: $data.EntitySet, elementType: $data.JayStormAPI.TypeTemplate },
     Users: { type: $data.EntitySet, elementType: $data.JayStormAPI.User },
     Groups: { type: $data.EntitySet, elementType: $data.JayStormAPI.Group },
