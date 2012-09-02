@@ -7,7 +7,7 @@ var q = require('q')
 
 require('./lib/model');
 
-var contextAuthData = require('./fileload.js').LoadJson('./amazon.pwd.js', { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' });
+var contextAuthData = require('./fileload.js').LoadJson('./amazon.pwd.js', { data: { name: 'mongoDB', databaseName: 'admin', address: 'db1.storm.jaystack.com', port: 8888, username: 'admin', password: 'admin' } }).data;
 
 var app = module.exports.app = express();
 app.configure(function(){
@@ -40,7 +40,7 @@ console.log(req.body);
             tokensrv.set(req.token, { status: 'Done', result: 'Succeeded' });
         })
         .fail(function(reason) {
-            tokensrv.set(req.token, { status: 'Done', result: 'Failed', reason: reason });
+            tokensrv.set(req.token, { status: 'Done', result: 'Failed', reason: reason.message });
         })
     res.end(JSON.stringify(tokensrv.get(req.token)));
 };

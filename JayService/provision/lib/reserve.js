@@ -8,14 +8,18 @@ function getinstance(ctx, AppItemId, type, cutype) { // TODO ide majd kell optim
         .orderBy("it.Size") // TODO not good...
         .orderBy("it.Type")
 	.toArray()
-	.then(function(items) {
-	    if (items.length == 0) throw new Error('no available');
-	    var item = items[0];
-	    ctx.attach(item);
-    	    item.AppItemId = AppItemId;
-	    item.Used=true;
-	    item.LastModified = new Date();
-	    return ctx.saveChanges().then(function(c){return item;});
+	.then(function (items) {
+	    return ctx.AppItems.single(function (appitem) { return appitem.Id == this.Id }, { Id: AppItemId }).then(function (AppItem) {
+
+	        if (items.length == 0) throw new Error('no available');
+	        var item = items[0];
+	        ctx.attach(item);
+	        item.AppItemId = AppItemId;
+	        item.AppId = AppItem.AppId;
+	        item.Used = true;
+	        item.LastModified = new Date();
+	        return ctx.saveChanges().then(function (c) { return item; });
+	    });
 	});
 }
 
@@ -33,7 +37,7 @@ function reserve(ctx, AppItemId, type, cutype) {
 app.post('/allocateappitem', function (req, res){
     reserve(req.ctx, req.body._id, req.body.type, req.body.computeunittype)
       .then(function(x){ res.end(JSON.stringify({"Succeeded": true, "AWSId": x.AWSId })); })
-      .fail(function(x){ res.end(JSON.stringify({"Succeeded": false, "reason": x})); }) 
+      .fail(function(x){ res.end(JSON.stringify({"Succeeded": false, "reason": x.message})); }) 
 });
 
 app.post('/shutdown', function (req, res) {
