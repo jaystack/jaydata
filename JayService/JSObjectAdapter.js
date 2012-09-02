@@ -202,7 +202,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     var result = member.apply(serviceInstance, args);
 
                     if (typeof result === 'function') {
-                        result.call(executionContext);
+                        result.call(executionContext, success, error);
                     } else if (self.promiseHelper.isPromise(result)) {
                         self.promiseHelper.when(result).then(function () {
                             defer.resolve(result.valueOf());
@@ -215,7 +215,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 var result = member.apply(serviceInstance, args);
 
                 if (typeof result === 'function') {
-                    result.call(executionContext);
+                    result.call(executionContext, success, error);
                 } else if (self.promiseHelper.isPromise(result)) {
                     return result;
                 } else {

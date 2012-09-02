@@ -1,17 +1,17 @@
 require('jaydata');
+require('./ApplicationDBContext.js');
 
 (function(){
     var config = {
         nginxConf: '/etc/nginx/sites-enabled/cu.conf',
-        schemaAPI: 'http://localhost:8181/ApplicationDB',
-        serviceAPI: 'http://localhost:8181/ApplicationDB',
         contextFile: __dirname + '/context.js',
         serviceFile: __dirname + '/service.js',
         filePath: __dirname + '/files',
         localIP: require('os').networkInterfaces()['eth0'][0].address,
         subscriberPath: '/home/lazarv',
         filestore: 'http://admin.storm.jaystack.com',
-        samba: 'ip-10-229-59-222.eu-west-1.compute.internal'
+        samba: 'ip-10-229-59-222.eu-west-1.compute.internal',
+        api: $data.JayStormAPI.Context
     };
     
     var forever = require('forever');
@@ -67,12 +67,12 @@ require('jaydata');
     }));
     
     app.use('/make', $data.JayService.Middleware.contextFactory({
-        apiUrl: config.schemaAPI,
+        api: config.api,
         filename: config.contextFile
     }));
     
     app.use('/make', $data.JayService.Middleware.serviceFactory({
-        apiUrl: config.serviceAPI,
+        api: config.api,
         context: config.contextFile,
         filename: config.serviceFile
     }));
