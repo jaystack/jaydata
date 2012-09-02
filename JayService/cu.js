@@ -48,12 +48,15 @@ require('jaydata');
         console.log('Mounting SAMBA.');
         child_process.exec('smbmount \\\\\\\\' + config.samba + '\\\\subscriber\\\\' + json.application.appID + '\\\\js /mnt -o user=subscriber', function(err, stdout, stderr){
             if (err){
-                next(err);
+                console.log('ERROR while mounting =>', config.samba);
+                //next(err);
+                next();
             }else{
-                if (stdout) console.log(stdout);
-                if (stderr) console.log(stderr);
+                //if (stdout) console.log(stdout);
+                //if (stderr) console.log(stderr);
                 
                 console.log('SAMBA mount ready.');
+                next();
             }
         });
     });

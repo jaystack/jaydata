@@ -26,7 +26,7 @@ $data.Class.define("$provision.Types.AppHost", $data.Entity, null, {
     Host: { type: "string" }
 }, null);
 $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
-    Id: { type: "String", key: true },
+    Id: { type: "string", key: true },
     AppId: { type: "string" },
     Username: { type: "string" },
     Password: { type: "string" },

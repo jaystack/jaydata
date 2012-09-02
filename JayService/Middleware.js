@@ -825,7 +825,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         
         return function sourceFactory(req, res, next){
             config.cu = req.body;
-            console.log('Source factoy.');
+            console.log('Source factory.');
             fs.exists(config.path, function(exists){
                 if (exists){
                     console.log('Removing directoy =>', config.path);
@@ -977,7 +977,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     file += 'app' + listen[i] + '.listen(' + listen[i] + ', "127.0.0.1");\n';
                 }
                 file += '\n})(require("' + config.context + '").contextTypes);';
-                coonsole.log('Writing service file to =>', config.filename, 'with content =>', file);
+                console.log('Writing service file to =>', config.filename, 'with content =>', file);
                 require('fs').writeFile(config.filename, file, function(err){
                     if (err){
                         console.log('ERROR while writing file to =>', config.filename, '=>', err);
