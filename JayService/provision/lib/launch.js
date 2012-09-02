@@ -5,7 +5,7 @@ require('./ApplicationDBContext.js');
 
 var app = module.parent.exports.app;
 var defaultJayStacHost = '.jaystack.net';
-var config = require('../fileload.js').LoadJson('./amazon.pwd.js', { defaultDbServers: [], defaultCUAdminPort: 9999 });
+var config = require('../fileload.js').LoadJson('./amazon.pwd.js', { defaultDbServers: [], defaultCUAdminPort: 9999, routeConf: {} });
 
 function genjson(context, app) {
     var json = {
@@ -103,6 +103,22 @@ function genjson(context, app) {
     .then(function(){
         return genServiceLayer(json)
             .then(function(serviceLayer){ json.application.serviceLayer = serviceLayer; });
+    })
+    //script call
+    .then(function () {
+        var defer = q.defer();
+        var child_process = require('child_process'); //TODO replica set
+        child_process.exec('r53.sh ' + config.routeConf.username + ' ' + config.routeConf.password + ' ' + json.application.hosts[0] + ' ' + json.application.applicationLayer.computeUnits.map(function (cu) { return cu.publicAddress }).join(','),
+            function (err, stdout, stderr) {
+                if (err) {
+                    defer.reject(err);
+                } else {
+                    defer.resolve(stdout);
+                }
+            }
+        );
+
+        return q.promise;
     })
     //CUs init
     .then(function(){
