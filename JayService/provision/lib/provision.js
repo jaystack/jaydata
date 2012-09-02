@@ -7,7 +7,7 @@ var app = module.parent.exports.app;
 
 function createDatabaseImpl(ctx, instance, db, initdata) {
   return ctx.createprovisioneddb(instance, db)
-    .then(function(dbinstance) { return q.ncall(mongo.createQueryableDB, mongo, dbinstance.DbName, instance.Username, instance.Password); })
+    .then(function (dbinstance) { return q.ncall(mongo.createQueryableDB, mongo, instance.Id + '_' + dbinstance.DbName, instance.Username, instance.Password); })
     .then(function(mongodb) { return q.ncall(mongo.initDatabase, mongo, {"db":mongodb,"suffix":db.Data.name}, initdata); });
 }
 
