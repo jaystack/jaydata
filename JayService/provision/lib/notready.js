@@ -11,7 +11,6 @@ app.get('/launch', function (req, res) {
 
 app.post('/getqueryabledatabases', function (req, res) {
     //req.body.appid
-
     var context = req.ctx;
     context.Instances
         .filter(function (inst) { return inst.Id == this.Id; }, { Id: req.body.appid })
@@ -20,7 +19,7 @@ app.post('/getqueryabledatabases', function (req, res) {
             return context.AppItems
                 .filter(function (app) { return app.AppId in this.appId && app.Type == this.type; }, {
                     appId: instances.map(function (inst) { return inst.AppId; }),
-                    type: 'qdb'
+                    type: 'QueryableDB'
                 }).toArray();
         })
         .then(function (apps) {
@@ -28,7 +27,7 @@ app.post('/getqueryabledatabases', function (req, res) {
                 list: apps.map(function (app) {
                     return {
                         _id: app.Id,
-                        name: app.Data.name,
+                        name: app.Data.dbname,
                         creationdate: app.CreationDate
                     }
                 }),
@@ -43,7 +42,6 @@ app.post('/getqueryabledatabases', function (req, res) {
 app.post('/getprovisionedapplications', function (req, res) {
     //req.body.appid
     //req.body.provisionid
-
     var context = req.ctx;
     context.Instances
         .filter(function (inst) { return inst.AppId == this.Id && inst.ProvisionId == this.ProvisionId && inst.IsProvision == true; }, { Id: req.body.appid, ProvisionId: req.body.provisionid })
