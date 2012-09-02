@@ -76,7 +76,7 @@ function genjson(context, app) {
 
                     var result = {
                         type: 'application',
-                        appId: instance.AppId,
+                        appId: instance.Id,
                         hosts: [instance.appID + defaultJayStacHost],
                         dataLayer: {
                             dbServer: []
