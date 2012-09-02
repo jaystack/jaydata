@@ -120,7 +120,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	instance.Password = uuid.v4();
         instance.ProvisionId = provisionid;
         instance.StartDate = new Date();
-        if (provisionid)
+        if (provisionid){
 		instance.Id = uuid.v4();
         	instance.isProvision = true;
 	} else {

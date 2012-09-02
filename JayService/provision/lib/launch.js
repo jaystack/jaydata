@@ -203,7 +203,7 @@ function genServiceLayer(json){
             }
             var rules = result.IngressRules.filter(function(it){ return it.ObjectID == r.ServiceID; });
             if (rules.length || r.UseDefaultPort || r.UseSSL) service.ingress = [];
-            if (r.AllowAllIPs){
+            if (r.AllowAllIPs || !rules.length){
                 var ports = rules.map(function(it){ return it.Port; });
                 var processedPorts = [];
                 if (r.UseDefaultPort){
@@ -251,7 +251,7 @@ function genServiceLayer(json){
                     }
                 }
             }
-            if (r.AllowAllOrigins){
+            if (r.AllowAllOrigins || !result.OutgressRules.length){
                 service.outgress = [{
                     type: 'allow',
                     origin: '*'

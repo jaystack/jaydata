@@ -10,7 +10,8 @@ require('jaydata');
         filePath: __dirname + '/files',
         localIP: require('os').networkInterfaces()['eth0'][0].address,
         subscriberPath: '/home/lazarv',
-        filestore: 'http://admin.storm.jaystack.com'
+        filestore: 'http://admin.storm.jaystack.com',
+        samba: 'ip-10-229-59-222.eu-west-1.compute.internal'
     };
     
     var forever = require('forever');
@@ -38,6 +39,21 @@ require('jaydata');
                 
                 console.log('NGINX ready.');
                 res.end();
+            }
+        });
+    });
+    
+    app.use('/make', function(req, res, next){
+        var json = req.body;
+        console.log('Mounting SAMBA.');
+        child_process.exec('smbmount \\\\\\\\' + config.samba + '\\\\subscriber\\\\' + json.application.appID + '\\\\js /mnt -o user=subscriber', function(err, stdout, stderr){
+            if (err){
+                next(err);
+            }else{
+                if (stdout) console.log(stdout);
+                if (stderr) console.log(stderr);
+                
+                console.log('SAMBA mount ready.');
             }
         });
     });

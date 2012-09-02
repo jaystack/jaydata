@@ -3,6 +3,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         if (!config) config = {};
         return function(req, res, next){
             var appId = req.headers['x-appid'] || config.appid;
+            if (!appId) console.warn('Application ID missing.');
             delete req.headers['x-appid'];
             
             Object.defineProperty(req, 'getAppId', {
@@ -303,7 +304,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 
                 return defer.promise;
             }
-            var doc = cache.Users[username];
+            /*var doc = cache.Users[username];
             if (!doc) { defer.reject('No such user'); return defer.promise; }
             else bcrypt.compare(password, doc.Password, function(err, ok) {
                 if (err) { defer.reject(err); return defer.promise; }
@@ -311,9 +312,9 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 doc.loginStrategy = strategy;
                 doc.superadmin = request.isAdmin ? request.isAdmin() : false;
                 defer.resolve(doc);
-            });
+            });*/
             
-            /*db.open(function(err, client){
+            db.open(function(err, client){
                 if (err) { defer.reject(err); return; }
                 var collection = $data.mongoDBDriver.Collection(client, 'Users');
                 collection.findOne({ Login: username }, {}, function(err, doc){
@@ -323,11 +324,19 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         if (err) { defer.reject(err); return; }
                         if (!ok) { defer.reject('Invalid password'); return; }
                         doc.loginStrategy = strategy;
+                        doc.superadmin = request.isAdmin ? request.isAdmin() : false;
+                        if (doc.Groups && doc.Groups instanceof Array){
+                            var groups = [];
+                            for (var j = 0; j < doc.Groups.length; j++){
+                                groups.push(cache.Groups[doc.Groups[j].toString()].Name);
+                            }
+                            doc.Groups = groups;
+                        }
                         defer.resolve(doc);
                         client.close();
                     });
                 });
-            });*/
+            });
             
             return defer.promise;
         }
@@ -378,6 +387,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 Object.defineProperty(req, 'getUser', {
                     value: (function(){
                         if (!req.user){
+                            console.log('Anonymouse user authenticated.');
                             Object.defineProperty(req, 'user', {
                                 value: { anonymous: true },
                                 enumerable: true
@@ -511,20 +521,25 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         return function nginxFactory(req, res, next){
             var json = req.body;
             
+            console.log('Building nginx configuration.');
             var conf = '';
             conf += 'proxy_cache_path /var/tmp/cache levels=1:2 keys_zone=STATIC:10m inactive=24h  max_size=1g;\n';
             conf += 'map_hash_bucket_size 1024;\n\n';
             conf += 'server{ server_name _ ""; return 444; }\n\n';
             conf += 'map $host $appid{\n';
+            console.log('Using application ID =>', json.application.appID);
             conf += '    default ' + json.application.appID + ';\n';
             
+            console.log('Using hosts =>', json.application.hosts);
             for (var i = 0; i < json.application.hosts.length; i++){
                 conf += '    ' + json.application.hosts[i] + ' ' + json.application.appID + ';\n';
             }
             
             if (json.application.provision){
+                console.log('Using provisions.');
                 for (var i = 0; i < json.application.provision.applications.length; i++){
                     var p = json.application.provision.applications[i];
+                    console.log('Provision ID =>', p.appID, 'using hosts =>', p.hosts);
                     for (var j = 0; j < p.hosts.length; j++){
                         conf += '    ' + p.hosts[j] + ' ' + p.appID + ';\n';
                     }
@@ -532,18 +547,22 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             }
             
             conf += '}\n\n';
+            console.log('Default database server =>', json.application.dataLayer.dbServer);
             conf += 'map $dbnamewithguid $dbserver{\n';
             conf += '    default \'' + JSON.stringify(json.application.dataLayer.dbServer) + '\';\n';
             
             for (var i = 0; i < json.application.dataLayer.databases.length; i++){
                 var d = json.application.dataLayer.databases[i];
+                console.log('Database server for', d.name, '=>', d.dbServer || json.application.dataLayer.dbServer);
                 conf += '    ' + d.name + '-' + json.application.appID + ' \'' + JSON.stringify(d.dbServer || json.application.dataLayer.dbServer) + '\';\n';
             }
             
             if (json.application.provision){
+                console.log('Provisioning database servers.');
                 for (var i = 0; i < json.application.provision.applications.length; i++){
                     var p = json.application.provision.applications[i];
                     if (p.dataLayer.dbServer){
+                        console.log('Provision ID =>', p.appID, ' with database server =>', p.dataLayer.dbServer);
                         conf += '    ~-' + p.appID + ' \'' + JSON.stringify(p.dataLayer.dbServer) + '\';\n';
                     }
                 }
@@ -556,18 +575,22 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             
             for (var i = 0; i < json.application.serviceLayer.services.length; i++){
                 var s = json.application.serviceLayer.services[i];
+                console.log('Service =>', s.serviceName, 'using database =>', (s.database || 'nodatabase'));
                 conf += '    ' + s.serviceName + ' ' + (s.database || '\'nodatabase\'') + ';\n';
             }
             
             conf += '}\n\n';
             
             conf += 'map $appid $dbuser{\n';
+            console.log('Application ID =>', json.application.appID, 'using database user =>', json.application.dataLayer.dbUser);
             conf += '    ' + json.application.appID + ' \'' + json.application.dataLayer.dbUser + '\';\n';
             
             if (json.application.provision){
+                console.log('Provisioning database users.');
                 for (var i = 0; i < json.application.provision.applications.length; i++){
                     var p = json.application.provision.applications[i];
                     if (p.dataLayer.dbUser){
+                        console.log('Provision ID =>', p.appID, 'using database user =>', p.dataLayer.dbUser);
                         conf += '    ' + p.appID + ' \'' + p.dataLayer.dbUser + '\';\n';
                     }
                 }
@@ -576,12 +599,15 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             conf += '}\n\n';
             
             conf += 'map $appid $dbpwd{\n';
+            console.log('Application ID =>', json.application.appID, 'using database password =>', json.application.dataLayer.dbPwd);
             conf += '    ' + json.application.appID + ' \'' + json.application.dataLayer.dbPwd + '\';\n';
             
             if (json.application.provision){
+                console.log('Provisioning database passwords.');
                 for (var i = 0; i < json.application.provision.applications.length; i++){
                     var p = json.application.provision.applications[i];
                     if (p.dataLayer.dbPwd){
+                        console.log('Provision ID =>', p.appID, 'using database password =>', p.dataLayer.dbPwd);
                         conf += '    ' + p.appID + ' \'' + p.dataLayer.dbPwd + '\';\n';
                     }
                 }
@@ -596,6 +622,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 var s = json.application.serviceLayer.services[i];
                 if (s.outgress && s.outgress.length && !s.outgress.filter(function(it){ return it.origin == '*'; }).length){
                     for (var j = 0; j < s.outgress.length; j++){
+                        console.log('Service =>', s.serviceName, 'using origin =>', s.outgress[j].origin);
                         conf += '    ' + s.serviceName + '-' + s.outgress[j].origin + ' ' + s.outgress[j].origin + ';\n';
                     }
                 }
@@ -616,6 +643,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 var sp = servicesPort[i];
                 conf += '\nserver{\n';
                 conf += '    set $domain storm.jaystack.com;\n';
+                console.log('Server listen on =>', require('os').networkInterfaces()['eth0'][0].address + ':' + i.split('_')[0]);
                 conf += '    listen ' + require('os').networkInterfaces()['eth0'][0].address + ':' + i.split('_')[0] + ';\n';
                 conf += '    server_name ';
                 conf += json.application.appID + '.$domain';
@@ -625,6 +653,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 conf += ';\n';
                 
                 if (i.split('_')[1] == 'true'){
+                    console.log('Server using SSL.');
                     conf += '\n    ssl on;\n';
                     conf += '    ssl_certificate ssl/star_jaystack_net.crt;\n';
                     conf += '    ssl_certificate_key ssl/star_jaystack_net.key;\n';
@@ -635,6 +664,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 }
                 
                 conf += '\n    location / {\n';
+                console.log('Server using static file store at =>', config.filestore);
                 conf += '        proxy_pass ' + config.filestore + '/%appid%;\n';
                 conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
                 conf += '        proxy_cache STATIC;\n';
@@ -645,6 +675,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 for (var k = 0; k < sp.length; k++){
                     var s = sp[k];
                     
+                    console.log('Server publishing service =>', s.serviceName, 'using internal port =>', s.internalPort);
                     conf += '\n    location /joker/' + s.serviceName + '{\n';
                     conf += '        set $servicename ' + s.serviceName + ';\n';
                     conf += '        set $dbnamewithguid $dbname-$appid;\n';
@@ -676,17 +707,21 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         if (ingressPort.address instanceof Array && ingressPort.address.indexOf('*') < 0){
                             conf += '        deny all;\n';
                             for (var l = 0; l < ingressPort.address.length; l++){
+                                console.log('Service restricted to =>', ingressPort.address[l]);
                                 conf += '        allow ' + ingressPort.address[l] + ';\n';
                             }
                         }
                         if (s.outgress && s.outgress.filter(function(it){ return it.origin == '*'; }).length){
+                            console.log('CORS enabled.');
                             conf += '        more_set_headers \'Access-Control-Allow-Origin: *\';\n';
                         }else if (s.outgress){
+                            console.log('CORS disabled.');
                             conf += '        more_set_headers \'Access-Control-Allow-Origin: $cors\';\n';
                         }
                         conf += '    }\n';
                     }else{
                         for (var l = 0; l < s.allowedSubPathList.length; l++){
+                            console.log('Service =>', s.serviceName, 'publishing entity set =>', s.allowedSubPathList[l], 'using internal port =>', s.internalPort);
                             conf += '\n    location /' + s.serviceName + '/' + s.allowedSubPathList[l] + '{\n';
                             conf += '        set $servicename ' + s.serviceName + ';\n';
                             conf += '        set $serviceorigins $servicename-$http_origin;\n';
@@ -701,13 +736,16 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             var ingressPort = s.ingress.filter(function(it){ return it.port.toString() == i.split('_')[0]; })[0];
                             if (ingressPort.address instanceof Array && ingressPort.address.indexOf('*') < 0){
                                 conf += '        deny all;\n';
-                                for (var l = 0; l < ingressPort.address.length; l++){
-                                    conf += '        allow ' + ingressPort.address[l] + ';\n';
+                                for (var m = 0; m < ingressPort.address.length; m++){
+                                    console.log('Service restricted to =>', ingressPort.address[m]);
+                                    conf += '        allow ' + ingressPort.address[m] + ';\n';
                                 }
                             }
                             if (s.outgress && s.outgress.filter(function(it){ return it.origin == '*'; }).length){
+                                console.log('CORS enabled.');
                                 conf += '        more_set_headers \'Access-Control-Allow-Origin: *\';\n';
                             }else if (s.outgress){
+                                console.log('CORS disabled.');
                                 conf += '        more_set_headers \'Access-Control-Allow-Origin: $cors\';\n';
                             }
                             conf += '    }\n';
@@ -718,8 +756,16 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 conf += '}\n';
             }
             
+            console.log('Writing nginx configuration file out to =>', config.filename);
+            console.log('Full configuration file =>', conf);
             fs.writeFile(config.filename, conf, function(err){
-                if (err) next(err); else next();
+                if (err){
+                    console.log('ERROR =>', err);
+                    next(err);
+                }else{
+                    console.log('ngingx configuration build succeeded.');
+                    next();
+                }
             });
         };
     },
@@ -747,15 +793,20 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             for (var i = 0; i < config.cu.application.serviceLayer.services.length; i++){
                 var s = config.cu.application.serviceLayer.services[i];
                 
+                console.log('Generating source file(s) for service =>', s.serviceName);
                 switch (s.sourceType){
                     case 'script':
+                        console.log('Creating source file =>', config.path + '/' + s.serviceName + '/index.js', 'with content =>', s.source);
                         fs.writeFile(config.path + '/' + s.serviceName + '/index.js', s.source, function(err){
+                            if (err) console.log('ERROR while creating source file =>', config.path + '/' + s.serviceName + '/index.js', '=>', err);
                             readyFn(next);
                         });
                         break;
                     case 'git':
+                        console.log('Get source files using git =>', s.source, 'to path =>', config.path + '/' + s.serviceName);
                         cp.exec('git clone ' + s.source + ' ' + config.path + '/' + s.serviceName, function(err, stdout, stderr){
                             if (err){
+                                console.log('ERROR while git clone =>', s.source);
                                 next(err);
                                 return;
                             }
@@ -777,8 +828,10 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             console.log('Source factoy.');
             fs.exists(config.path, function(exists){
                 if (exists){
+                    console.log('Removing directoy =>', config.path);
                     cp.exec('rm -rf ' + config.path, function(err, stdout, stderr){
                         if (err){
+                            console.log('ERROR while removing directory =>', config.path, '=>', err);
                             next(err);
                             return;
                         }
@@ -800,6 +853,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
 
         return function contextFactory(req, res, next){
             config.cu = req.body;
+            console.log('Building context from =>', config.apiUrl);
             $data.MetadataLoader.debugMode = true;
             $data.MetadataLoader.load(config.apiUrl, function (factory, ctxType, text) {
                 var context = factory();
@@ -820,13 +874,20 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             //file += '\n});';
                             file += 'exports = module.exports = { contextTypes: contextTypes };\n\n';
                             file += '})();';
+                            console.log('Context build completed.');
+                            console.log('Writing context file to =>', config.filename, 'with content =>', file);
                             require('fs').writeFile(config.filename, file, function(err){
-                                if (err) next(err);
-                                else next();
+                                if (err){
+                                    console.log('ERROR while writing file =>', config.filename, '=>', err);
+                                    next(err);
+                                }else{
+                                    console.log('Context ready.');
+                                    next();
+                                }
                             });
                         }
                     }).fail(function(err){
-                        console.log(err);
+                        console.log('ERROR while trying to get context source =>', err);
                     });
                 };
                 
@@ -843,6 +904,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         return function serviceFactory(req, res, next){
             config.cu = req.body;
             
+            console.log('Building service.');
             var file = '';
             var fn = function(){
                 file += '(function(contextTypes){\n\n';
@@ -863,6 +925,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 var listen = [];
                 for (var i = 0; i < config.cu.application.serviceLayer.services.length; i++){
                     var s = config.cu.application.serviceLayer.services[i];
+                    console.log('Service =>', s.serviceName, 'using internal port =>', s.internalPort);
                     if (listen.indexOf(s.internalPort || s.port) < 0){
                         file += 'var app' + (s.internalPort || s.port) + ' = express();\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.cookieParser());\n';
@@ -890,7 +953,10 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += '});\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authentication());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authenticationErrorHandler);\n';
-                        if (!s.allowAnonymous) file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.ensureAuthenticated({ message: "' + s.serviceName + '" }));\n';
+                        if (!s.allowAnonymous){
+                            console.log('Service =>', s.serviceName, 'ensuring authentication.');
+                            file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.ensureAuthenticated({ message: "' + s.serviceName + '" }));\n';
+                        }
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.authorization({ databaseName: "' + s.database + '" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.query());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.bodyParser());\n';
@@ -901,17 +967,25 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     else if (s.database) file += '$data.Class.defineEx("' + s.serviceName + '", [' + (s.database ? 'contextTypes["' + s.database + '"], $data.ServiceBase' : s.serviceName) + ']);\n';
                     file += 'if (typeof ' + s.serviceName + ' !== "function") $data.Class.defineEx("' + s.serviceName + '", [$data.ServiceBase]);\n';
                     file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", express.static(__dirname + "/files/' + s.serviceName + '"));\n';
+                    if (s.database) console.log('Service =>', s.serviceName, 'using database =>', s.database);
                     file += 'app' + (s.internalPort || s.port) + '.use("/' + s.serviceName + '", $data.JayService.createAdapter(' + s.serviceName + ', function(req, res){\n    return ' + (s.database ? 'req.getCurrentDatabase(' + s.serviceName + ', "' + s.database + '")' : 'new ' + s.serviceName + '()') + ';\n}));\n';
                     file += 'app' + (s.internalPort || s.port) + '.use(express.errorHandler());\n\n';
                     file += 'express.errorHandler.title = "JayStorm API";\n';
                 }
                 for (var i = 0; i < listen.length; i++){
+                    console.log('node.js listening on port =>', listen[i]);
                     file += 'app' + listen[i] + '.listen(' + listen[i] + ', "127.0.0.1");\n';
                 }
                 file += '\n})(require("' + config.context + '").contextTypes);';
+                coonsole.log('Writing service file to =>', config.filename, 'with content =>', file);
                 require('fs').writeFile(config.filename, file, function(err){
-                    if (err) throw err;
-                    next();
+                    if (err){
+                        console.log('ERROR while writing file to =>', config.filename, '=>', err);
+                        next(err);
+                    }else{
+                        console.log('Service ready.');
+                        next();
+                    }
                 });
             };
             
