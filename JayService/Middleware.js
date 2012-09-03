@@ -411,7 +411,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         if (!req.user){
                             console.log('Anonymous user authenticated.');
                             Object.defineProperty(req, 'user', {
-                                value: { anonymous: true },
+                                value: req.isAdmin && req.isAdmin() ? { superadmin: true, loginStrategy: 'anonymous' } : { anonymous: true },
                                 enumerable: true
                             });
                         }
@@ -442,6 +442,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         if (!config.message) config.message = 'myrealm';
         
         return function(req, res, next) {
+            if (req.isAdmin && req.isAdmin()){ next(); return; }
             if (req.isAuthenticated() && req.getUser) { next(); return; }
             res.statusCode = 401;
             res.setHeader('WWW-Authenticate', 'Basic realm="' + config.message + '"');
