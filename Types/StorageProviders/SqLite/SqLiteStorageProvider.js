@@ -59,7 +59,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 "$data.Date": function (date) { return date ? date.valueOf() : null; },
                 "$data.String": function (text) { return text; },
                 "$data.Boolean": function (b) { return b ? 1 : 0; },
-                "$data.Blob": function (blob) { return blob; }
+                "$data.Blob": function (blob) { return blob; },
+                "$data.Object": function(value){if(value === null){return null;} throw 'Not supported exception';}
             }
         }
     },
@@ -123,8 +124,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
     supportedBinaryOperators: {
         value: {
-            equal: { mapTo: '=', dataType: "boolean" },
-            notEqual: { mapTo: '!=', dataType: "boolean" },
+            equal: { mapTo: '=', dataType: "boolean", nullMap: ' is null' },
+            notEqual: { mapTo: '!=', dataType: "boolean", nullMap: ' is not null' },
             equalTyped: { mapTo: '=', dataType: "boolean" },
             notEqualTyped: { mapTo: '!=', dataType: "boolean" },
             greaterThan: { mapTo: '>', dataType: "boolean" },

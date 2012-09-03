@@ -4,8 +4,10 @@ $C('$data.Query', null, null,
         ///<param name="context" type="$data.EntityContext" />
         ///<field name="expression" type="$data.Expressions.ExpressionNode" />
         ///<field name="context" type="$data.EntityContext" />
-        Object.defineProperty(this, "expression", { value: expression, enumerable: true });
-        Object.defineProperty(this, "context", { value: context, enumerable: true });
+
+        this.expression = expression;
+        this.context = context;
+
         //TODO: expressions get as JSON string?!
         
         this.expressions = expression;

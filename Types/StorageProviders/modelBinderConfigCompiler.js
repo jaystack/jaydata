@@ -56,6 +56,16 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         builder.resetModelBinderProperty();
         this._query.modelBinderConfig = builder.modelBinderConfig;
     },
+    VisitBatchDeleteExpression: function (expression) {
+        var builder = Container.createqueryBuilder();
+
+        builder.modelBinderConfig['$type'] = $data.Array;
+        builder.selectModelBinderProperty('$item');
+        builder.modelBinderConfig['$type'] = $data.Integer;
+        builder.modelBinderConfig['$source'] = 'cnt';
+        builder.resetModelBinderProperty();
+        this._query.modelBinderConfig = builder.modelBinderConfig;
+    },
     VisitConstantExpression: function (expression, builder) {
         builder.modelBinderConfig['$type'] = expression.type;
         builder.modelBinderConfig['$value'] = expression.value;
@@ -123,7 +133,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     $value: function (meta, data) { return data; }
                 }
             }*/
-            builder._binderConfig.$item = { };
+            builder._binderConfig.$item = builder._binderConfig.$item || {};
             builder.modelBinderConfig = builder._binderConfig.$item;
 
 
@@ -135,17 +145,40 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     },
     _addComplexTypeProperties: function (complexTypes, builder) {
         complexTypes.forEach(function (ct) {
+            if (ct.ToType !== $data.Array){
+                builder.selectModelBinderProperty(ct.FromPropertyName);
+                builder.modelBinderConfig['$type'] = ct.ToType;
+                if (this._isoDataProvider) {
+                    builder.modelBinderConfig['$selector'] = ['json:' + ct.FromPropertyName + '.results', 'json:' + ct.FromPropertyName];
+                } else {
+                    builder.modelBinderConfig['$selector'] = 'json:' + ct.FromPropertyName;
+                }
+                this._addPropertyToModelBinderConfig(ct.ToType, builder);
 
-            builder.selectModelBinderProperty(ct.FromPropertyName);
-            builder.modelBinderConfig['$type'] = ct.ToType;
-            if (this._isoDataProvider) {
-                builder.modelBinderConfig['$selector'] = ['json:' + ct.FromPropertyName + '.results', 'json:' + ct.FromPropertyName];
-            } else {
-                builder.modelBinderConfig['$selector'] = 'json:' + ct.FromPropertyName;
+                builder.popModelBinderProperty();
+            }else{
+                var dt = ct.ToType;
+                var et = Container.resolveType(ct.FromType.memberDefinitions.getMember(ct.FromPropertyName).elementType);
+                if (dt === $data.Array && et && et.isAssignableTo && et.isAssignableTo($data.Entity)){
+                    config = {
+                        $type: $data.Array,
+                        $selector: 'json:' + ct.FromPropertyName,
+                        $item: {
+                            $type: et
+                        }
+                    };
+                    var md = et.memberDefinitions.getPublicMappedProperties();
+                    for (var i = 0; i < md.length; i++){
+                        config.$item[md[i].name] = { $type: md[i].type, $source: md[i].name };
+                    }
+                    builder.modelBinderConfig[ct.FromPropertyName] = config;
+                }else{
+                    builder.modelBinderConfig[ct.FromPropertyName] = {
+                        $type: ct.ToType,
+                        $source: ct.FromPropertyName
+                    };
+                }
             }
-            this._addPropertyToModelBinderConfig(ct.ToType, builder);
-
-            builder.popModelBinderProperty();
         }, this);
     },
     DefaultSelection: function (builder) {
@@ -214,8 +247,8 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
             this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
         } else {
-
-            builder.modelBinderConfig['$source'] = expression.memberName;
+            if (!(builder.modelBinderConfig.$type && Container.resolveType(builder.modelBinderConfig.$type).isAssignableTo && Container.resolveType(builder.modelBinderConfig.$type).isAssignableTo($data.Entity)))
+                builder.modelBinderConfig['$source'] = expression.memberName;
         }
     },
     VisitEntitySetExpression: function (expression, builder) {

@@ -1,14 +1,15 @@
 ﻿$data.Class.define('$data.oDataServer.oDataResponseDataBuilder', null, null, {
-    constructor:function (cfg) {
+    constructor: function (cfg) {
         this.config = $data.typeSystem.extend({
-            version:'V2'
+            version: 'V2'
             //context
             //baseUrl
-            //countRequest
+            //simpleResult
 
             //collectionName
             //selectedFields
             //includes
+            //singleResult
 
             //or
 
@@ -21,9 +22,10 @@
             //methodName
 
         }, cfg);
+        this.transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
     },
-    convertToResponse:function (data) {
-        if (this.config.countRequest)
+    convertToResponse: function (data) {
+        if (this.config.simpleResult)
             return data;
 
         if (this.config.methodConfig) {
@@ -36,20 +38,25 @@
                 return this._convertFunction(data);
             }
         } else if (this.config.collectionName) {
-            return this._convertData(data);
+            if (this.config.singleResult) {
+                return { d: this._convertData(data, undefined, false, true) };
+            } else {
+                return this._convertData(data);
+            }
         }
     },
-    _convertFunction:function (data) {
+    _convertFunction: function (data) {
         var methodCfg = this.config.methodConfig;
         if (Container.resolveType(methodCfg.returnType) === $data.Array && methodCfg.elementType) {
             return this._buildVersionPath(data);
         } else {
-            var result = { d:{} };
-            result.d[methodCfg.serviceOpName || this.config.methodName] = data;
+            var converter = this.transform.converter.fromDb[Container.getName(methodCfg.returnType)];
+            var result = { d: {} };
+            result.d[methodCfg.serviceOpName || this.config.methodName] = converter ? converter(data) : data;
             return result;
         }
     },
-    _convertJayDataFunction:function (data) {
+    _convertJayDataFunction: function (data) {
         var methodCfg = this.config.methodConfig;
         if (!methodCfg.returnType)
             return undefined;
@@ -76,25 +83,32 @@
             }
         } else {
             if (typeof rType.isAssignableTo === 'function' && rType.isAssignableTo($data.Entity))
-                data = this._convertData([data], rType, false)[0];
+                data = this._convertData(data, rType, false, true);
 
-            var result = { d:{} };
-            result.d[methodCfg.serviceOpName || this.config.methodName] = data;
+            var converter = this.transform.converter.fromDb[Container.getName(rType)];
+            var result = { d: {} };
+            result.d[methodCfg.serviceOpName || this.config.methodName] = converter ? converter(data) : data;
             return result;
         }
     },
-    _convertData:function (data, elementType, versionSelector) {
-        var transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
-        var result = transform.convertToResponse(
+    _convertData: function (data, elementType, versionSelector, isSingleData) {
+        //var transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
+        if (isSingleData)
+            data = [data];
+
+        var result = this.transform.convertToResponse(
             data,
             elementType || this.config.collectionName,
             this.config.selectedFields,
             this.config.includes);
 
+        if (isSingleData)
+            result = result[0];
+
         if (versionSelector || versionSelector === undefined) {
             return this._buildVersionPath(result);
         } else {
-            return result
+            return result;
         }
     },
     _buildVersionPath: function (result) {

@@ -24,7 +24,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var queryText = queryFragments.urlText;
         var addAmp = false;
         for (var name in queryFragments) {
-            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && queryFragments[name] != "") {
+            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && queryFragments[name] != "") {
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
                 if(name != "$urlParams"){
@@ -38,6 +38,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         
         return {
             queryText: queryText,
+            method: queryFragments.method || 'GET',
             params: []
         };
     },
@@ -114,12 +115,36 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             }
         }
     },
+    VisitBatchDeleteExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+        context.urlText += '/$batchDelete';
+        context.method = 'DELETE';
+    },
+
     VisitConstantExpression: function (expression, context) {
         if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
 
-        var valueType = Container.getTypeName(expression.value);
-        context['$urlParams'] += expression.name + '=' + this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        var value;
+        if (expression.value instanceof $data.Entity) {
+            value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
+        } else {
+            var valueType = Container.getTypeName(expression.value);
+            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        }
+        context['$urlParams'] += expression.name + '=' + value;
     },
+//    VisitConstantExpression: function (expression, context) {
+//        if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
+//
+//
+//        var valueType = Container.getTypeName(expression.value);
+//
+//
+//
+//        context['$urlParams'] += expression.name + '=' + this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+//    },
+
+
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
         context.urlText += '/$count';       

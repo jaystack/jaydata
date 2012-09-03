@@ -1,0 +1,23 @@
+﻿<!DOCTYPE html >
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="jaydata.js"></script>
+    <script type="text/javascript" src="../JaySvcUtil.js"></script>
+    <script type="text/javascript">
+
+        $data.MetadataLoader.debugMode = true;
+        $data.MetadataLoader.xsltRepoUrl = '../';
+        $data.MetadataLoader.load('netflix.xml', function () {
+            document.getElementsByTagName('textarea')[0].innerText = arguments[0];
+            document.getElementsByTagName('textarea')[0].value = arguments[0];
+        });
+
+    </script>
+</head>
+<body>
+    <textarea rows="40" cols="200"></textarea>
+</body>
+</html>
+
+

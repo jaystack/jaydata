@@ -85,11 +85,11 @@ $data.Class.define('$data.oDataParser.RequestExpressionBuilder', null, null, {
     buildUnary: function (operand, op, type) {
         var operator, nodeType, value;
         switch (op) {
-            case "not": type = "boolean"; nodeType = "not"; operator = "!"; value = "!"; break;
-            case "minus": type = "number"; nodeType = "minus"; operator = "-"; value = "-"; break;
-            case "plus": type = "number"; nodeType = "plus"; operator = "+"; value = "+"; break;
+            case "not": type = "boolean"; nodeType = "not"; operator = $data.unaryOperators.getOperator("!"); value = "!"; break;
+            case "minus": type = "number"; nodeType = "negative"; operator = $data.unaryOperators.getOperator("-"); value = "-"; break;
+            case "plus": type = "number"; nodeType = "positive"; operator = $data.unaryOperators.getOperator("+"); value = "+"; break;
             default: Guard.raise(new Exception("Not implemented operator in $data.oDataParser.RequestExpressionBuilder.buildConstant: " + op)); break;
         }
-        return new $data.Expressions.UnaryExpression(operand, nodeType, operator, type);
+        return new $data.Expressions.UnaryExpression(operand, operator, nodeType, type);
     }
 });

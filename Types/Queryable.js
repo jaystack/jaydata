@@ -16,7 +16,7 @@ $data.Class.define('$data.Queryable', null, null,
 
         var context = source instanceof $data.EntityContext ? source : source.entityContext;
         this.defaultType = source instanceof $data.EntityContext ? null : source.defaultType;
-        Object.defineProperty(this, "entityContext", { value: context, writable: false, enumerable: true });
+        this.entityContext = context;
         this.expression = rootExpression;
     },
 
@@ -477,6 +477,19 @@ $data.Class.define('$data.Queryable', null, null,
         return Container.createQueryable(this, takeExp);
     },
 
+    order: function(selector) {
+       if (selector === '' || selector === undefined || selector === null) {
+           return this;
+       }
+       if(selector[0] === "-") {
+           var orderString = "it." + selector.replace("-","");
+           return this.orderByDescending(orderString);
+       } else {
+           return this.orderBy("it." + selector);
+       }
+
+    },
+
     orderBy: function (selector, thisArg) {
 		///<summary>Order a set of entities using an expression.</summary>
         ///<param name="selector" type="Function">An order expression</param>
@@ -623,6 +636,25 @@ $data.Class.define('$data.Queryable', null, null,
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
     },
+    removeAll: function (onResult) {
+        this._checkOperation('batchDelete');
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult);
+
+        var batchDeleteExpression = Container.createBatchDeleteExpression(this.expression);
+        var preparator = Container.createQueryExpressionCreator(this.entityContext);
+        try {
+            var expression = preparator.Visit(batchDeleteExpression);
+            this.entityContext.log({ event: "EntityExpression", data: expression });
+
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
+
 
     _runQuery: function (onResult_items) {
         var pHandler = new $data.PromiseHandler();

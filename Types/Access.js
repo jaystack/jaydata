@@ -1,7 +1,15 @@
 $data.Class.define('$data.Access', null, null, {}, {
-    isAuthorized: function(access, user, roles, callback){
-        console.log('isAuthorized', arguments);
-        var error;
+    isAuthorized: function(access, user, sets, callback){
+        var pHandler = new $data.PromiseHandler();
+        var clbWrapper = pHandler.createCallback(callback);
+        var pHandlerResult = pHandler.getPromise();
+        
+        //clbWrapper.error('Authorization failed', 'Access authorization');
+        clbWrapper.success(true);
+        
+        return pHandlerResult;
+        
+        /*var error;
         
         if (!access) error = 'Access undefined';
         if (typeof access !== 'number') error = 'Invalid access type';
@@ -80,12 +88,25 @@ $data.Class.define('$data.Access', null, null, {}, {
         
         callbackFn();
         
-        return pHandlerResult;
+        return pHandlerResult;*/
     },
-    None: 0,
-    Create: 1,
-    Read: 2,
-    Update: 4,
-    Delete: 8,
-    Execute: 16
+    getAccessBitmaskFromPermission: function(p){
+        var access = $data.Access.None;
+
+        if (p.Create) access |= $data.Access.Create;
+        if (p.Read) access |= $data.Access.Read;
+        if (p.Update) access |= $data.Access.Update;
+        if (p.Delete) access |= $data.Access.Delete;
+        if (p.DeleteBatch) access |= $data.Access.DeleteBatch;
+        if (p.Execute) access |= $data.Access.Execute;
+        
+        return access;
+    },
+    None: { value: 0 },
+    Create: { value: 1 },
+    Read: { value: 2 },
+    Update: { value: 4 },
+    Delete: { value: 8 },
+    DeleteBatch: { value: 16 },
+    Execute: { value: 32 }
 });

@@ -21,29 +21,39 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
             this.Visit(expression.left, sqlBuilder);
         } else {
             sqlBuilder.addText(SqlStatementBlocks.beginGroup);
-            this.Visit(expression.left, sqlBuilder);
-            sqlBuilder.addText(" " + expression.resolution.mapTo + " ");
 
-            if (expression.nodeType == "in") {
-            //TODO: refactor and generalize
-                Guard.requireType("expression.right", expression.right, $data.Expressions.ConstantExpression);
-                var set = expression.right.value;
-                if (set instanceof Array) {
-                    sqlBuilder.addText(SqlStatementBlocks.beginGroup);
-                    set.forEach(function(item, i) {
-                        if (i > 0) sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
-                        var c = Container.createConstantExpression(item);
-                        self.Visit(c, sqlBuilder);
-                    });
-                    sqlBuilder.addText(SqlStatementBlocks.endGroup);
-                } else if (set instanceof $data.Queryable) {
-					sqlBuilder.addText("(SELECT d FROM (" + set.toTraceString().sqlText + "))");
-                    //Guard.raise("Not yet... but coming!");
-                } else {
-                    Guard.raise(new Exception("Only constant arrays and Queryables can be on the right side of 'in' operator", "UnsupportedType"));
-                };
-            } else {
+            //check null filter
+            if (expression.left instanceof $data.Expressions.EntityFieldExpression && expression.right instanceof $data.Expressions.ConstantExpression && expression.right.value === null) {
+                this.Visit(expression.left, sqlBuilder);
+                sqlBuilder.addText(expression.resolution.nullMap);
+            } else if (expression.right instanceof $data.Expressions.EntityFieldExpression && expression.left instanceof $data.Expressions.ConstantExpression && expression.left.value === null) {
                 this.Visit(expression.right, sqlBuilder);
+                sqlBuilder.addText(expression.resolution.nullMap);
+            } else {
+                this.Visit(expression.left, sqlBuilder);
+                sqlBuilder.addText(" " + expression.resolution.mapTo + " ");
+
+                if (expression.nodeType == "in") {
+                    //TODO: refactor and generalize
+                    Guard.requireType("expression.right", expression.right, $data.Expressions.ConstantExpression);
+                    var set = expression.right.value;
+                    if (set instanceof Array) {
+                        sqlBuilder.addText(SqlStatementBlocks.beginGroup);
+                        set.forEach(function (item, i) {
+                            if (i > 0) sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+                            var c = Container.createConstantExpression(item);
+                            self.Visit(c, sqlBuilder);
+                        });
+                        sqlBuilder.addText(SqlStatementBlocks.endGroup);
+                    } else if (set instanceof $data.Queryable) {
+                        sqlBuilder.addText("(SELECT d FROM (" + set.toTraceString().sqlText + "))");
+                        //Guard.raise("Not yet... but coming!");
+                    } else {
+                        Guard.raise(new Exception("Only constant arrays and Queryables can be on the right side of 'in' operator", "UnsupportedType"));
+                    };
+                } else {
+                    this.Visit(expression.right, sqlBuilder);
+                }
             }
             
             sqlBuilder.addText(SqlStatementBlocks.endGroup);

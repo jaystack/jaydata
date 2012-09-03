@@ -74,16 +74,16 @@ exports.Tests = {
         test.expect(6);
 
         var entity = new $news.Types.Article({ Id: 1, Title: 'title', Body: 'body' });
-        var res = transform.convertToResponse(entity);
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity])[0];
+        test.deepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
-        var res = transform.convertToResponse(entity, 'Articles');
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity], 'Articles')[0];
+        test.notDeepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
-        var res = transform.convertToResponse(entity, $news.Types.Article);
-        test.equal(res, entity, 'result Data failed');
+        var res = transform.convertToResponse([entity], $news.Types.Article)[0];
+        test.notDeepEqual(res, entity, 'result Data failed');
         test.equal(res.Title, 'title', 'result.Title Data failed');
 
         test.done();
@@ -249,7 +249,7 @@ exports.Tests = {
             test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
             test.notEqual(item.__metadata, undefined, '__metadata is undefined');
 
-            test.equal(JSON.stringify(item.Birthday), JSON.stringify(new Date('2000/05/0' + (i + 1))), 'result[i].Birthday Data failed');
+            test.equal(item.Birthday, '/Date(' + new Date('2000/05/0' + (i + 1)).valueOf() + ')/', 'result[i].Birthday Data failed');
 
             var meta = {
                 type: '$news.Types.UserProfile',

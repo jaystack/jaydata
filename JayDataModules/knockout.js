@@ -40,6 +40,9 @@
             instanceDefinition[propName] = {
                 type: ko.observable
             };
+            instanceDefinition["ValidationErrors"] = {
+                type: ko.observable
+            };
         }
 
         $data.Class.defineEx(
@@ -316,10 +319,49 @@
                     innerInstance = new wrappedType(innerData);
                 }
 
-                Object.defineProperty(this, 'innerInstance', { enumerable: false, configurable: true, writable: true, value: innerInstance });
+                this._wrappedType = wrappedType;
+                this.innerInstance = innerInstance;
             },
             getEntity: function () {
                 return this.innerInstance;
+            },
+            updateEntity: function (entity) {
+                var data;
+                if (entity instanceof this._wrappedType)
+                    data = entity;
+                else if (entity && !(entity instanceof $data.Entity) && entity instanceof $data.Object)
+                    data = entity;
+                else
+                    Guard.raise('entity is an invalid object');
+
+                var members = this._wrappedType.memberDefinitions.getPublicMappedProperties();
+                for (var i = 0; i < members.length; i++) {
+                    var memDef = members[i];
+                    if (data[memDef.name] !== undefined) {
+                        this[memDef.name](data[memDef.name]);
+                        var idx = this.innerInstance.changedProperties.indexOf(memDef);
+                        if (idx >= 0)
+                            this.innerInstance.changedProperties.splice(idx, 1);
+                    }
+                }
+
+            },
+            
+            getProperties: function() {
+                //todo cache!
+                var self = this;
+                var props = this.innerInstance.getType().memberDefinitions.getPublicMappedProperties();
+                //todo remove map
+                var koData = props.map( function(memberInfo) {
+                    return {
+                        type: memberInfo.type,
+                        name: memberInfo.name,
+                        owner: self,
+                        metadata: memberInfo,
+                        value: self[memberInfo.name]
+                    }
+                });
+                return koData;
             }
         });
 
@@ -330,6 +372,11 @@
                 ObservableFactory(type, observableTypeName);
             }
             var observableType = Container.resolveType(observableTypeName);
+
+            if(observableType.isAssignableTo && !observableType.isAssignableTo(type)){
+                ObservableFactory(type, observableTypeName);
+                observableType = Container.resolveType(observableTypeName);
+            }
 
             return new observableType(this);
         };

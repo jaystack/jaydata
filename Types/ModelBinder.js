@@ -69,7 +69,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 
 		if (meta.$value){
 			if (typeof meta.$value === 'function'){
-				result = meta.$value.call(meta, meta, data);
+				result = meta.$value.call(this, meta, data);
             }else if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
@@ -128,6 +128,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }
         }
 
+
+		if (result instanceof $data.Entity)
+		    result.changedProperties = undefined;
         return result;
     }
 });

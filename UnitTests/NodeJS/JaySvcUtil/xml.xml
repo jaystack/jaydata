@@ -1,0 +1,8 @@
+<s:root xmlns:s="http://rootns.com/">
+    <sub xmlns="http://subns.com">
+        <apple />
+        <banana />
+        <lemon />
+
+    </sub>
+</s:root>

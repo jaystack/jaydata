@@ -27,12 +27,12 @@ $(document).ready(function () {
             if (!hasInclude)
                 obj.expand = '';
 
-            obj.count = queryParts[0].indexOf('$count') > 0;
+            obj.frame = queryParts[0].indexOf('$count') > 0 ? 'Count' : undefined;
             var builder = new $data.oDataParser.EntityExpressionBuilder(context, queryParts[0].split('/')[1]);
             var expression = builder.parse(obj).expression;
 
             equal(expression.getType(), q.expression.getType(), name + 'expression frame failed');
-            equal(JSON.stringify(expression.source), JSON.stringify(q.expression.source), name + ' builder test failed');
+            equal(JSON.stringify(expression.source, null, '    '), JSON.stringify(q.expression.source, null, '    '), name + ' builder test failed');
         });
     }
 
@@ -40,6 +40,7 @@ $(document).ready(function () {
 
     module('EntityExpressionBuilder');
     builderTest('field compare int', c.Articles.filter(function (it) { return it.Id <= 500; }), c);
+    builderTest('field compare minus int', c.TestTable.filter(function (it) { return it.i0 == -15; }), c);
     builderTest('field compare int', c.Articles.filter(function (it) { return it.Id <= 500; }), c, true);
     builderTest('field compare string / $count', c.Articles.filter(function (it) { return it.Title == 'Article1'; }), c);
     //builderTest('field multipleFilter', c.Articles.filter(function (it) { return it.Title == 'Article1'; }).filter(function (it) { return it.Body.contains('Body1'); }), c);
@@ -67,6 +68,8 @@ $(document).ready(function () {
     builderTest('include multiple 1', c.Articles.include('Category').include('Author'), c, false, true);
     builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author.Articles'), c, false, true);
 
+    builderTest('map - take', c.Articles.map(function (it) { return { Id: it.Id, Title: it.Title } }).take(6), c);
+
 
     function selectTest(name, queryable, context, selectedFields, includes) {
         test(name, 3, function () {
@@ -75,7 +78,7 @@ $(document).ready(function () {
             var queryParts = q.queryText.split('?');
             var obj = parseQuery(queryParts[1]);
 
-            obj.count = queryParts[0].indexOf('$count') > 0;
+            obj.frame = queryParts[0].indexOf('$count') > 0 ? 'Count' : undefined;
             var builder = new $data.oDataParser.ODataEntityExpressionBuilder(context, queryParts[0].split('/')[1]);
             var parsed = builder.parse(obj);
 

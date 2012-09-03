@@ -11,7 +11,7 @@ function getBuilderConfig(context, ext) {
         version: 'V1',
         context: context,
         baseUrl: 'http://example.com',
-        CountRequest: false,
+        simpleResult: false,
     }
 
     return $data.typeSystem.extend(builderConfig, ext);
@@ -167,7 +167,7 @@ exports['functionContext'] = {
             var date = new Date('2000/05/05');
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(date);
-            test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+            test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
             test.done();
         },
@@ -183,7 +183,7 @@ exports['functionContext'] = {
             var date = new Date('2000/05/05');
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(date);
-            test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+            test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
             test.done();
         },
@@ -199,7 +199,7 @@ exports['functionContext'] = {
             var date = new Date('2000/05/05');
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(date);
-            test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+            test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
             test.done();
         }
@@ -485,7 +485,7 @@ exports['functionContext'] = {
                 var date = new Date('2000/05/05');
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(date);
-                test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+                test.deepEqual(response, { d: { 'sName': "/Date(" + new Date('2000/05/05').valueOf() + ")/" } }, 'datetime convert failed');
 
                 test.done();
             }
@@ -753,7 +753,7 @@ exports['entityContext'] = {
             var date = new Date('2000/05/05');
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(date);
-            test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+            test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
             test.done();
         },
@@ -769,7 +769,7 @@ exports['entityContext'] = {
             var date = new Date('2000/05/05');
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(date);
-            test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+            test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
             test.done();
         },
@@ -785,7 +785,7 @@ exports['entityContext'] = {
             var date = new Date('2000/05/05');
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(date);
-            test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+            test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
             test.done();
         }
@@ -1086,7 +1086,7 @@ exports['entityContext'] = {
                 var date = new Date('2000/05/05');
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(date);
-                test.deepEqual(response, { d: { 'sName': date } }, 'datetime convert failed');
+                test.deepEqual(response, { d: { 'sName': "/Date(" + date.valueOf() + ")/" } }, 'datetime convert failed');
 
                 test.done();
             }

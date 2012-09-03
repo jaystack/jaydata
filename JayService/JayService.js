@@ -37,14 +37,30 @@ $data.Class.define("$data.JayService", null, null, {
 
         return f;
     },
-    createAdapter:function (type, instanceFactory) {
+    createAdapter: function (type, instanceFactory) {
+        var self = this;
         return function (req, res, next) {
-            var adapter = new $data.JSObjectAdapter(type, instanceFactory);
+            
+            self.routeParser(this, req);
+
+            var factory = instanceFactory || function() { return new type; };
+            var adapter = new $data.JSObjectAdapter(type, factory);
             adapter.handleRequest(req, res, next);
         }
     },
     resultAsXml:function (data) {
         return new $data.XmlResult(data);
+    },
+    routeParser: function (app, req) {
+        var schema = 'http';
+        if (req && req.headers) {
+            if(req.headers['X-Forwarded-Protocol'] === 'https')
+                schema += 's';
+
+            if (req.headers.host) {
+                req.fullRoute = schema + '://' + req.headers.host + app.route;
+            }
+        }
     }
 });
 

@@ -438,7 +438,6 @@
                 ok(result.length > 0, "result length");
                 equal(result[0].getType, undefined, "Anonymous result");
             });
-
         });
 
         test("YQL query_data_full_live_Datauri", 3, function () {
@@ -504,7 +503,7 @@
             });
         });
 
-       test("YQL query_data_complexType_live", 25, function () {
+       test("YQL query_data_complexType_live", 29, function () {
             stop(1)
             context.Places.where(function (p) { return p.text == this.text && p.boundingBox.southWest.latitude == this.latitude; }, { text: "us", latitude: '50.864220' })
             .toArray(function (result) {
@@ -524,6 +523,17 @@
                 ok(result.length > 0, "result length");
                 equal(result[0].getType, undefined, "Anonymous result");
                 equal(result[0], '50.864220', "result item value");
+            });
+            
+            stop(1)
+            context.Places.where(function (p) { return p.text == this.text && p.boundingBox.southWest.latitude == this.latitude; }, { text: "us", latitude: '50.864220' })
+            .select(function (p) { return p.boundingBox.southWest; })
+            .toArray(function (result) {
+                start();
+                equal(result instanceof Array, true, "result is not array");
+                ok(result.length > 0, "result length");
+                equal(result[0].getType(), $data.Yahoo.types.Geo.centroidCf, "Anonymous result");
+                equal(result[0].latitude, '50.864220', "result item value");
             });
 
             stop(1)

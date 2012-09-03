@@ -250,6 +250,18 @@
     MemberTypes.field = "field";
 
     $data.MemberTypes = MemberTypes;
+    
+    function classToJSON(){
+        var ret = {};
+        for (var i in this){
+            if (this.hasOwnProperty(i)){
+                ret[i] = this[i];
+            }
+        }
+        return ret;
+    }
+    
+    $data.Base.toJSON = classToJSON;
 
     function TypeCreator() {
 
@@ -468,6 +480,7 @@
         }
 
         root[shortClassName] = this.classNames[className] = classFunction;
+        //classFunction.toJSON = classToJSON;
 
         //classFunction.prototype.constructor = instanceDefinition.constructor;
         //classFunction.constructor = instanceDefinition.constructor;
@@ -475,8 +488,9 @@
         return classFunction;
     },
     classFunctionBuilder: function (name, base, classDefinition, instanceDefinition) {
-        return new Function('base', 'classDefinition', 'instanceDefinition', 'return function ' + name + ' (){ ' + 
-            this.bodyBuilder(base, classDefinition, instanceDefinition) + ' \n}; ')(base, classDefinition, instanceDefinition);
+        var body = this.bodyBuilder(base, classDefinition, instanceDefinition);
+        return new Function('base', 'classDefinition', 'instanceDefinition', 'name', 'return function ' + name + ' (){ ' +
+            body + ' \n}; ')(base, classDefinition, instanceDefinition, name);
     },
     bodyBuilder: function (bases, classDefinition, instanceDefinition) {
         var mixin = '';
@@ -487,7 +501,7 @@
             var base = bases[i];
             var index = i;
             if (index == 0) { //ctor func
-                if (base && base.type) {
+                if (base && base.type && base.type !== $data.Base) {
                     body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
                     body += '    ' + base.type.fullName + '.apply(this, baseArguments); \n';
                 }
@@ -528,7 +542,7 @@
             		}
 				}
 			}
-            classFunction.baseTypes = baseClass.baseTypes || [];
+			classFunction.baseTypes = baseClass.baseTypes ? [].concat(baseClass.baseTypes) : [];
             for (var i = 0; i < baseClasses.length; i++){
                 classFunction.baseTypes.push(baseClasses[i].type);
             }
@@ -754,7 +768,17 @@
             if (itemName !== 'constructor' && !classFunction.memberDefinitions.getMember(itemName)) {
                 this.buildMember(classFunction, memberDefs[i]);
             }
+        }
+
+        if (typeObj.type.staticDefinitions) {
+            var staticDefs = typeObj.type.staticDefinitions.asArray();
+            for (var i = 0, l = staticDefs.length; i < l; i++) {
+                var itemName = staticDefs[i].name;
+                if (itemName !== 'constructor' && !classFunction.memberDefinitions.getMember(itemName)) {
+                    this.buildMember(classFunction, staticDefs[i], undefined, 'staticDefinitions');
+                }
             }
+        }
     },
     buildInstancePropagation: function (classFunction, typeObj) {
         ///<param name="classFunction" type="Function">The class constructor whose prototype will be extended</param>
@@ -824,7 +848,8 @@
         this.isPrimitiveType = function(type) {
             var t = this.resolveType(type);
             return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
-                t === $data.Number || t === $data.String || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object;
+                t === $data.Number || t === $data.String || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
+                t === $data.Geography;
         };
 
         this.resolveType = function (typeOrName) {
@@ -859,6 +884,7 @@
                     if (value instanceof Array) return '$data.Array';
                     if (value.getType) return value.getType().fullName;
                     if (value instanceof Date) return '$data.Date';
+                    if (value instanceof $data.Geography) return '$data.Geography';
                     //if(value instanceof "number") return
                 default:
                     return typeof value;
@@ -902,7 +928,7 @@
 			switch (t){
 				case $data.Number: return 0.0;
 				case $data.Integer: return 0;
-				case $data.String: return '';
+				case $data.String: return null;
 				case $data.Boolean: return false;
 				default: return null;
 			}
@@ -1075,10 +1101,12 @@ $data.defaultErrorCallback = function () {
         console.dir(arguments);
     else
         console.log(arguments);*/
-    Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
+    if (arguments[arguments.length - 1] && typeof arguments[arguments.length - 1].reject === 'function'){
+        arguments[arguments.length - 1].reject.apply(arguments[arguments.length - 1], arguments);
+    }else Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
 };
-$data.defaultSuccessCallback = function () { console.log('DEFAULT SUCCES CALLBACK'); };
-$data.defaultNotifyCallback = function () { console.log('DEFAULT NOTIFY CALLBACK'); };
+$data.defaultSuccessCallback = function () { /*console.log('DEFAULT SUCCES CALLBACK');*/ };
+$data.defaultNotifyCallback = function () { /*console.log('DEFAULT NOTIFY CALLBACK');*/ };
 
 $data.typeSystem = {
     __namespace: true,

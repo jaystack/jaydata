@@ -22,12 +22,12 @@ passport.use(new BasicStrategy(
 ));
 
 passport.serializeUser(function(userid, done) {
-  console.log("Serializing: " + userid);
+  console.log("Serializing: ", userid);
   done(null, userid);
 });
 
 passport.deserializeUser(function(userid, done) {
-  console.log("Deserializing: " + userid);
+  console.log("Deserializing: ", userid);
   done(null, userid);
 });
 
@@ -36,7 +36,7 @@ module.exports = {
   myauthentication: function(req, res, next) {
     passport.initialize()(req, res, function() {
       passport.session()(req, res, function() {
-        if (req.isAuthenticated()) { next(); }
+        if (req.isAuthenticated()) { next(); return; }
 	    if (req.header('authorization')) {
 	      passport.authenticate('basic', { session: true })(req, res, next);
         } else {
@@ -47,17 +47,18 @@ module.exports = {
   },
 
   handleError: function(err, req, res, next) {
-    res.status(err.status || 500);
+    res.statusCode = err.status || 500;
     next();
   },
 
 
   ensureAuthenticated: function(req, res, next) {
-    if (req.isAuthenticated() && req.user) { next(); }
+    if (req.isAuthenticated() && req.user) { next(); return; }
+    console.log(req);
     res.statusCode = 401;
     res.setHeader('WWW-Authenticate', 'Basic realm="' + "myrealm" + '"');
     res.end('Unauthorized');
-    next(); // ???
+    //next(); // ???
   }
 
 }

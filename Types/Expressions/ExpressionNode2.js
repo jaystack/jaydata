@@ -6,7 +6,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     MemberAccess: "memberAccess",    // { type:MEMBERACCESS, executable:true, expression:, member: }
     Call: "call",
 
-/* binary operators */
+    /* binary operators */
     Equal: "equal",
     NotEqual: "notEqual",
     EqualTyped: "equalTyped",
@@ -14,7 +14,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     GreaterThen: "greaterThan",
     LessThen: "lessThan",
     GreaterThenOrEqual: "greaterThanOrEqual",
-    LessThenOrEqual: "lessThenOrEqual", 
+    LessThenOrEqual: "lessThenOrEqual",
     Or: "or",
     OrBitwise: "orBitwise",
     And: "and",
@@ -30,7 +30,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Modulo: "modulo",
     ArrayIndex: "arrayIndex",
 
-/* unary operators */
+    /* unary operators */
     New: "new",
     Positive: "positive",
     Negative: "negative",
@@ -62,6 +62,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Some: "Some",
     Every: "Every",
     ToArray: "ToArray",
+    BatchDelete: "BatchDelete",
     ForEach: "ForEach",
     Projection: "Projection",
     EntityMember: "EntityMember",
@@ -73,7 +74,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     MemberInfo: "MemberInfo",
     QueryParameter: "QueryParameter",
     ComplexEntityField: "ComplexEntityField",
-    
+
     Take: "Take",
     Skip: "Skip",
     OrderBy: "OrderBy",
@@ -82,7 +83,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Count: "Count"
 });
 
-$data.BinaryOperator = function() {
+$data.BinaryOperator = function () {
     ///<field name="operator" type="string" />
     ///<field name="expressionType" type="$data.ExpressionType" />
     ///<field name="type" type="string" />
@@ -132,19 +133,19 @@ $data.binaryOperators.getOperator = function (operator) {
 
 
 $data.unaryOperators = [
-    { operator: "+", arity:"prefix", expressionType : $data.Expressions.ExpressionType.Positive, type: "number", implementation: function(operand) { return +operand; } },
-    { operator: "-", arity:"prefix", expressionType : $data.Expressions.ExpressionType.Negative, type: "number", implementation: function(operand) { return -operand; } },
-    { operator: "++", arity:"prefix", expressionType : $data.Expressions.ExpressionType.Increment, type: "number", implementation: function(operand) { return ++operand; } },
-    { operator: "--", arity:"prefix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return --operand; } },
+    { operator: "+", arity: "prefix", expressionType: $data.Expressions.ExpressionType.Positive, type: "number", implementation: function (operand) { return +operand; } },
+    { operator: "-", arity: "prefix", expressionType: $data.Expressions.ExpressionType.Negative, type: "number", implementation: function (operand) { return -operand; } },
+    { operator: "++", arity: "prefix", expressionType: $data.Expressions.ExpressionType.Increment, type: "number", implementation: function (operand) { return ++operand; } },
+    { operator: "--", arity: "prefix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return --operand; } },
     { operator: "++", arity: "suffix", expressionType: $data.Expressions.ExpressionType.Increment, type: "number", implementation: function (operand) { return operand++; } },
     { operator: "!", arity: "prefix", expressionType: $data.Expressions.ExpressionType.Not, type: "boolean", implementation: function (operand) { return !operand; } },
-    { operator: "--", arity:"suffix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return operand--; } }
-    
+    { operator: "--", arity: "suffix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return operand--; } }
+
     //{ operator: "new", expressionType : $data.Expressions.ExpressionType.New, type: "object", implementation: function(operand) { return new operand; }
 ];
 
 $data.unaryOperators.resolve = function (operator) {
-    var result = $data.unaryOperators.filter(function (item) { return item.operator == operator ; });
+    var result = $data.unaryOperators.filter(function (item) { return item.operator == operator; });
     if (result.length > 0)
         return operator;
     //Guard.raise("Unknown operator: " + operator);
@@ -163,7 +164,7 @@ $data.unaryOperators.getOperator = function (operator, arity) {
 };
 
 
-$data.timeIt = function(fn, iterations) {
+$data.timeIt = function (fn, iterations) {
     iterations = iterations || 1;
 
     console.time("!");
@@ -188,7 +189,7 @@ $data.executable = true;
 
 function jsonify(obj) { return JSON.stringify(obj, null, "\t"); }
 
-$C('$data.Expressions.ExpressionNode', $data.Entity, null, {
+$C('$data.Expressions.ExpressionNode', null, null, {
     constructor: function () {
         ///<summary>Provides a base class for all Expressions.</summary>
         ///<field name="nodeType" type="string">Represents the expression type of the node&#10;
@@ -207,7 +208,7 @@ $C('$data.Expressions.ExpressionNode', $data.Entity, null, {
     getJSON: function () { return jsonify(this); },
 
     //TOBLOG maybe
-    expressionType: {
+    /*expressionType: {
         value: undefined,
         ////OPTIMIZE
         set: function (value) {
@@ -234,8 +235,24 @@ $C('$data.Expressions.ExpressionNode', $data.Entity, null, {
         },
         get: function () { return undefined; },
         enumerable: true
-    },
+    },*/
+    expressionType: {
+        set: function (value) {
+            if (typeof value === 'string') {
+                value = Container.resolveType(value);
+            }
+            this._expressionType = value;
+        },
+        get: function (value) {
+            //IE ommits listing JSON.stringify in call chain
 
+            if (arguments.callee.caller == jsonify || arguments.callee.caller == JSON.stringify) {
+                return Container.resolveName(this._expressionType);
+            }
+            return this._expressionType;
+        },
+        enumerable: true
+    },
     ///toString: function () { },
     nodeType: { value: $data.Expressions.ExpressionType.Unknown, writable: false },
 
@@ -251,13 +268,13 @@ $C('$data.Expressions.ExpressionNode', $data.Entity, null, {
 
 $C('$data.Expressions.UnaryExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (operand, operator, nodeType, resolution) {
-    	/// <summary>
-    	/// Represents an operation with only one operand and an operator
-    	/// </summary>
-    	/// <param name="operand"></param>
-    	/// <param name="operator"></param>
-    	/// <param name="nodeType"></param>
-    	/// <param name="resolution"></param>
+        /// <summary>
+        /// Represents an operation with only one operand and an operator
+        /// </summary>
+        /// <param name="operand"></param>
+        /// <param name="operator"></param>
+        /// <param name="nodeType"></param>
+        /// <param name="resolution"></param>
         this.operand = operand;
         this.operator = operator;
         this.nodeType = nodeType;

@@ -20,6 +20,9 @@ $data.FunctionImport = function(fn, config){
 };
 
 $data.FunctionImport.prototype = {
+    toServiceOperation: function(config){
+        return new $data.FunctionImport(this.asFunction, config);
+    },
     extend: function(extend){
         for (var i in extend){
             this[i] = extend[i];
@@ -126,10 +129,10 @@ $data.FunctionImport.prototype = {
         });
     },
     webGet: function(){
-        return this.method('GET');
+        return this.httpMethod('GET');
     },
     webInvoke: function(){
-        return this.method('POST');
+        return this.httpMethod('POST');
     },
     authorize: function(roles, callback){
         var r = {};
@@ -232,4 +235,4 @@ $data.ServiceOperation = (function(){
         es.isTerminated = true;
         return q._runQuery(clb);
     }
-}).toServiceOperation();
+});

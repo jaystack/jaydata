@@ -132,6 +132,14 @@ $(document).ready(function () {
         expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123456789"));
         equal(current, JSON.stringify(expected));
     });
+    test("Filter: Geography", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "POINT(44.001 -33.123)";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = p.builder.buildConstant(new $data.Geography(44.001, -33.123));
+        equal(current, JSON.stringify(expected));
+    });
     test("Filter: '1 eq 2'", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "1 eq 2";
