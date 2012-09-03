@@ -461,6 +461,12 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                             return pHandlerResult;
                         }
                         
+                        if (!user.Groups || !user.Groups.length){
+                            //clbWrapper.success(true);
+                            clbWrapper.error('Authorization failed');
+                            return pHandlerResult;
+                        }
+                        
                         var currentDbAccess = req.cache.Access[config.databaseName];
                         if (!(entitysets instanceof Array)) entitysets = [entitysets];
                         if (typeof entitysets[0] === 'object') entitysets = entitysets.map(function(it){ return it.name; });
@@ -792,7 +798,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
     },
     sourceFactory: function(config){
         if (!config){
-            console.error('git clone configuration missing.');
+            console.error('Service source code configuration missing.');
             return function(req, res, next){ next(); }
         }
         
