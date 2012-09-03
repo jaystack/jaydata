@@ -11,6 +11,7 @@ require('./ApplicationDBContext.js');
         subscriberPath: '/home/lazarv',
         filestore: 'http://admin.storm.jaystack.com',
         samba: 'ip-10-229-59-222.eu-west-1.compute.internal',
+        auth: 'http://localhost',
         api: $data.JayStormAPI.Context
     };
     
@@ -63,7 +64,8 @@ require('./ApplicationDBContext.js');
     
     app.use('/make', $data.JayService.Middleware.nginxFactory({
         filename: config.nginxConf,
-        filestore: config.filestore
+        filestore: config.filestore,
+        auth: config.auth
     }));
     
     app.use('/make', $data.JayService.Middleware.contextFactory({
