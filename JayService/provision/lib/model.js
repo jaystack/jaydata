@@ -141,7 +141,7 @@ $data.Class.defineEx("$provision.Types.ProvisionContext", [$data.EntityContext,$
 	var dbinstance = new $provision.Types.DbInventory();
 	dbinstance.InstanceId = instance.Id;
 	dbinstance.AppItemId = instance.AppId;
-	dbinstance.DbName = db.Data.name;
+	dbinstance.DbName = db.Data.dbname;
 	dbinstance.Data = db.Data;
 	// TODO el kellene tenni forditva is, vagyis az instance tudjon a db-irol
 	this.DbInventories.add(dbinstance);
