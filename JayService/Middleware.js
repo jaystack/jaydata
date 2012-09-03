@@ -29,6 +29,28 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 enumerable: true
             });
             
+            Object.defineProperty(req, 'authSuperadmin', {
+                value: (function(req, res, defer){
+                    if (!req.headers['x-auth']){ defer.reject('Authentication failed'); return; }
+                    require('http').get({
+                        host: req.headers['x-auth'],
+                        headers: {
+                            Authorization: req.headers['authorization']
+                        }
+                    }, function(res){
+                        defer.resolve({
+                            superadmin: true,
+                            loginStrategy: 'auth'
+                        });
+                    }).on('error', function(err){
+                        res.statusCode = 401;
+                        res.setHeader('WWW-Authenticate', 'Basic realm="JayStack Auth"');
+                        
+                        defer.reject('Unauthorized');
+                    });
+                }).bind(config)
+            });
+            
             next();
         };
     },
@@ -313,27 +335,17 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         
         var cache;
         var request;
+        var response;
+        var db;
         
         function mongoAuthenticate(username, password, strategy) {
             var defer = q.defer();
             
-            if (request.isAdmin && request.isAdmin()){
-                defer.resolve({
-                    superadmin: true,
-                    loginStrategy: strategy
-                });
+            if (request.isAdmin && request.isAdmin() && request.authSuperadmin){
+                request.authSuperadmin(request, response, defer);
                 
                 return defer.promise;
             }
-            /*var doc = cache.Users[username];
-            if (!doc) { defer.reject('No such user'); return defer.promise; }
-            else bcrypt.compare(password, doc.Password, function(err, ok) {
-                if (err) { defer.reject(err); return defer.promise; }
-                if (!ok) { defer.reject('Invalid password'); return defer.promise; }
-                doc.loginStrategy = strategy;
-                doc.superadmin = request.isAdmin ? request.isAdmin() : false;
-                defer.resolve(doc);
-            });*/
             
             db.open(function(err, client){
                 if (err) { defer.reject(err); return; }
@@ -407,10 +419,10 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
             if (!req.getUser){
                 Object.defineProperty(req, 'getUser', {
                     value: (function(){
-                        if (!req.user){
+                        if (!req.user || (req.user && req.user.superadmin)){
                             console.log('Anonymous user authenticated.');
                             Object.defineProperty(req, 'user', {
-                                value: { anonymous: true },
+                                value: req.isAdmin && req.isAdmin() ? { superadmin: true, loginStrategy: 'anonymous' } : { anonymous: true },
                                 enumerable: true
                             });
                         }
@@ -420,7 +432,9 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 });
             }
             
+            db = req.dbConnections.ApplicationDB(req.getAppId());
             request = req;
+            response = res;
             cache = req.cache;
             
             //passport.initialize()(req, res, function() {
@@ -432,7 +446,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         };
     },
     authenticationErrorHandler: function(err, req, res, next) {
-        res.statusCode = err.status || 500;
+        res.statusCode = res.statusCode != 401 ? err.status || 500 : res.statusCode;
         next(err);
     },
     ensureAuthenticated: function(config){
@@ -458,6 +472,12 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         
                         if (user.superadmin){
                             clbWrapper.success(true);
+                            return pHandlerResult;
+                        }
+                        
+                        if (!user.Groups || !user.Groups.length){
+                            //clbWrapper.success(true);
+                            clbWrapper.error('Authorization failed');
                             return pHandlerResult;
                         }
                         
@@ -698,12 +718,15 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     
                     console.log('Server publishing service =>', s.serviceName, 'using internal port =>', s.internalPort);
                     conf += '\n    location /joker/' + s.serviceName + '{\n';
+                    conf += '        more_clear_headers \'X-Admin\';\n';
+                    conf += '        more_clear_headers \'X-Auth\';\n';
                     conf += '        set $servicename ' + s.serviceName + ';\n';
                     conf += '        set $dbnamewithguid $dbname-$appid;\n';
                     conf += '        rewrite ^/joker(.*)$ $1 break;\n';
                     conf += '        proxy_pass http://127.0.0.1:' + s.internalPort + ';\n';
                     conf += '        proxy_set_header Host $host;\n';
                     conf += '        proxy_set_header X-Admin \'superadmin\';\n';
+                    conf += '        proxy_set_header X-Auth \'' + config.auth + '\';\n';
                     conf += '        proxy_set_header X-Real-IP $remote_addr;\n';
                     conf += '        proxy_set_header X-AppId $appid;\n';
                     conf += '        proxy_set_header X-Db-Server $dbserver;\n';
@@ -714,6 +737,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                     
                     if (s.allowedSubPathList.length == 1 && s.allowedSubPathList[0] == '*'){
                         conf += '\n    location /' + s.serviceName + '{\n';
+                        conf += '        more_clear_headers \'X-Admin\';\n';
+                        conf += '        more_clear_headers \'X-Auth\';\n';
                         conf += '        set $servicename ' + s.serviceName + ';\n';
                         conf += '        set $serviceorigins $servicename-$http_origin;\n';
                         conf += '        set $dbnamewithguid $dbname-$appid;\n';
@@ -744,6 +769,8 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         for (var l = 0; l < s.allowedSubPathList.length; l++){
                             console.log('Service =>', s.serviceName, 'publishing entity set =>', s.allowedSubPathList[l], 'using internal port =>', s.internalPort);
                             conf += '\n    location /' + s.serviceName + '/' + s.allowedSubPathList[l] + '{\n';
+                            conf += '        more_clear_headers \'X-Admin\';\n';
+                            conf += '        more_clear_headers \'X-Auth\';\n';
                             conf += '        set $servicename ' + s.serviceName + ';\n';
                             conf += '        set $serviceorigins $servicename-$http_origin;\n';
                             conf += '        set $dbnamewithguid $dbname-$appid;\n';
@@ -792,7 +819,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
     },
     sourceFactory: function(config){
         if (!config){
-            console.error('git clone configuration missing.');
+            console.error('Service source code configuration missing.');
             return function(req, res, next){ next(); }
         }
         
@@ -968,6 +995,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += 'app' + (s.internalPort || s.port) + '.use(express.methodOverride());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.session({ secret: "keyboard cat" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.appID());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.superadmin());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.currentDatabase());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
                         /*file += 'app' + (s.internalPort || s.port) + '.use(function (req, res, next){\n';
