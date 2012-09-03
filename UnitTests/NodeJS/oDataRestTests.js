@@ -450,7 +450,7 @@ test("REST - Batch GET JSON", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People',
+                        requestUri: 'People?$orderby=Age',
                         headers: {
                         }
                     }]
@@ -502,11 +502,11 @@ test("REST - Batch GET multiple JSON", 15, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People',
+                        requestUri: 'People?$orderby=Age',
                     },
                     {
                         method: 'GET',
-                        requestUri: 'Orders',
+                        requestUri: 'Orders?$orderby=Value',
                     }]
                 }
             }, function (data) {
@@ -579,7 +579,7 @@ test("REST - XML - GET", 6, function () {
         context.People.toArray(function (p) {
 
             OData.request({
-                requestUri: $example.Context.generateTestData.serviceurl + '/People',
+                requestUri: $example.Context.generateTestData.serviceurl + '/People?$orderby=Age',
                 method: 'GET',
                 headers: {
                     'Accept': 'application/atom+xml'
@@ -769,7 +769,7 @@ test("REST - XML - Batch GET", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People',
+                        requestUri: 'People?$orderby=Age',
                         headers: {
                             'Accept': 'application/atom+xml'
                         }
@@ -864,7 +864,7 @@ test("REST - Batch GET / query params", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People?$filter=(Age ge 15)&$order=Age'
+                        requestUri: 'People?$filter=(Age ge 15)&$orderby=Age'
                     }]
                 }
             }, function (data) {
@@ -915,7 +915,7 @@ test("REST - XML - Batch GET / query params", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People?$filter=(Age ge 15)&$order=Age',
+                        requestUri: 'People?$filter=(Age ge 15)&$orderby=Age',
                         headers: {
                             'Accept': 'application/atom+xml'
                         }
