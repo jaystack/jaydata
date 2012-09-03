@@ -37,8 +37,9 @@ $data.Class.define("$provision.Types.Instance", $data.Entity, null, {
 }, null);
 $data.Class.define("$provision.Types.CuInventory", $data.Entity, null, {
     Id: { type: "id", key: true, computed: true },
-    AppId: { type: "string" },
+    //AppId: { type: "string" },
     PublicAddress: { type: "string" },
+    PrivateAddress: { type: "string" },
     AppItemId: { type: "string" },
 //ex-awsid defalt ures, awsid ha kiesett
     AWSId: { type: "string" },
