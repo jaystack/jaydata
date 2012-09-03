@@ -35,6 +35,7 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     FuncBoolParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncBoolParam', returnType: $data.Boolean, params: [{ a: $data.Boolean }] }),
     FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] }),
     FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.Geography, params: [{ a: $data.Geography }] }),
+
     ATables: {
         type: $data.EntitySet,
         elementType: $data.Entity.extend('$example.ATable', {
@@ -1045,6 +1046,30 @@ test("Filter Geography not equal", 19, function () {
             }
             
 
+            start();
+        });
+    });
+});
+
+test("FunctionImport without param str (null param)", 1, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.FuncStrParam(null, function (ret) {
+            equal(ret, 'null', 'result is null');
+            start();
+        });
+    });
+});
+
+test("FunctionImport without param int (null param)", 1, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.FuncNumParam(null, function (ret) {
+            equal(ret, null, 'result is null');
             start();
         });
     });
