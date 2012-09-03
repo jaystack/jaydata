@@ -313,6 +313,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
         
         var cache;
         var request;
+        var db;
         
         function mongoAuthenticate(username, password, strategy) {
             var defer = q.defer();
@@ -420,6 +421,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                 });
             }
             
+            db = req.dbConnections.ApplicationDB(req.getAppId());
             request = req;
             cache = req.cache;
             
@@ -974,6 +976,7 @@ $data.Class.define('$data.JayService.Middleware', null, null, null, {
                         file += 'app' + (s.internalPort || s.port) + '.use(express.methodOverride());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use(express.session({ secret: "keyboard cat" }));\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.appID());\n';
+                        file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.superadmin());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.currentDatabase());\n';
                         file += 'app' + (s.internalPort || s.port) + '.use($data.JayService.Middleware.databaseConnections(' + JSON.stringify(dbConf, null, '    ') + '));\n';
                         /*file += 'app' + (s.internalPort || s.port) + '.use(function (req, res, next){\n';

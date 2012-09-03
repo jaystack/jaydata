@@ -11,6 +11,7 @@ app60080.use(express.cookieParser());
 app60080.use(express.methodOverride());
 app60080.use(express.session({ secret: "keyboard cat" }));
 app60080.use($data.JayService.Middleware.appID());
+app60080.use($data.JayService.Middleware.superadmin());
 app60080.use($data.JayService.Middleware.currentDatabase());
 app60080.use($data.JayService.Middleware.databaseConnections({
     "ApplicationDB": [
@@ -33,6 +34,7 @@ app60080.use("/ApplicationDB/logout", function(req, res){
 });
 app60080.use($data.JayService.Middleware.authentication());
 app60080.use($data.JayService.Middleware.authenticationErrorHandler);
+app60080.use($data.JayService.Middleware.ensureAuthenticated({ message: 'JayStorm API' }));
 app60080.use($data.JayService.Middleware.authorization({ databaseName: "ApplicationDB" }));
 app60080.use(express.query());
 app60080.use(express.bodyParser());
