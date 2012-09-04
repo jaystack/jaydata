@@ -72,6 +72,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         this.cfg = $data.typeSystem.extend({
             version: 'V2',
             maxVersion: 'V2',
+            dsVersion: 'V1', //DataServiceVersion have to V1
             extended: true,
             edmTypeMapping: true,
 
@@ -93,7 +94,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             customPropertyNS: 'http://jaydata.org/extendedproperties',
             customPropertyNSName: 'Jay',
 
-            contextNamespace: this.context.namespace || 'System'
+            contextNamespace: this.context.namespace || 'MyContext'
 
         }, config);
     },
@@ -133,7 +134,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         var maxDataServiceVersion = xml.declareAttribute(m, 'MaxDataServiceVersion');
 
         xml.startElement(dataservice)
-            .addAttribute(dataServiceVersion, this.cfg[this.cfg.version])
+            .addAttribute(dataServiceVersion, this.cfg[this.cfg.dsVersion])
             .addAttribute(maxDataServiceVersion, this.cfg[this.cfg.maxVersion]);
 
         this._buildSchema(xml);
@@ -193,7 +194,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 xml.startElement(entitySet)
                     .addAttribute(name, memDef.name)
                     .addAttribute(entityType, this.cfg.contextNamespace + '.' + elementType.name)
-                    .endElement();
+                    .endElementInline();
             }, this);
         }
         //FunctionImports
@@ -281,13 +282,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 .addAttribute(type, assoc.source.typeName)
                 .addAttribute(role, assoc.name + '_Source')
                 .addAttribute(multiplicity, assoc.source.multiplicity)
-                .endElement();
+                .endElementInline();
 
             xml.startElement(end)
                 .addAttribute(type, assoc.target.typeName)
                 .addAttribute(role, assoc.name + '_Target')
                 .addAttribute(multiplicity, assoc.target.multiplicity)
-                .endElement();
+                .endElementInline();
 
             xml.endElement();
         }, this);
@@ -312,12 +313,12 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.startElement(end)
                 .addAttribute(role, assoc.name + '_Source')
                 .addAttribute(entitySet, assoc.source.entitySetName)
-                .endElement();
+                .endElementInline();
 
             xml.startElement(end)
                 .addAttribute(role, assoc.name + '_Target')
                 .addAttribute(entitySet, assoc.target.entitySetName)
-                .endElement();
+                .endElementInline();
 
             xml.endElement();
         }, this);
@@ -361,7 +362,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                     xml.startElement(parameter)
                         .addAttribute(name, param.name || param)
                         .addAttribute(type, this._resolveTypeName(param.type || 'string'))
-                        .endElement();
+                        .endElementInline();
                 }, this);
             }
 
@@ -380,7 +381,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             keys.forEach(function (memDef) {
                 xml.startElement(propRef)
                     .addAttribute(name, memDef.name)
-                    .endElement();
+                    .endElementInline();
             }, this);
             xml.endElement();
         }
