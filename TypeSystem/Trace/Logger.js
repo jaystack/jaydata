@@ -1,12 +1,15 @@
 ﻿$data.Class.define('$data.Logger', null, null, {
     log: function () {
-        console.log(this.getDateFormat(), arguments.length === 1 ? arguments[0] : arguments);
+        Array.prototype.unshift.call(arguments, this.getDateFormat());
+        console.log.apply(console, arguments);
     },
     warn: function () {
-        console.warn(this.getDateFormat(), arguments.length === 1 ? arguments[0] : arguments);
+        Array.prototype.unshift.call(arguments, this.getDateFormat());
+        console.warn.apply(console, arguments);
     },
     error: function () {
-        console.error(this.getDateFormat(), arguments.length === 1 ? arguments[0] : arguments);
+        Array.prototype.unshift.call(arguments, this.getDateFormat());
+        console.error.apply(console, arguments);
     },
 
     getDateFormat: function () {

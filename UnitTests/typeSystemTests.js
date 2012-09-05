@@ -556,12 +556,21 @@
         equal(target.a, 3, "Param 'a'");
     });
 
-    test("Trace tests", 3, function () {
+    test("Trace tests", 4, function () {
         equal(typeof $data.TraceBase, 'function', '$data.TraceBase exists failed');
 
         notEqual(typeof $data.Trace, 'undefined', '$data.Trace exists failed');
 
         equal(typeof $data.Logger, 'function', '$data.Logger exists failed');
+
+        try {
+            $data.Trace.log('hello', 'console', 42, { prop: 24 }, [1, 2, 3]);
+            $data.Trace = new $data.Logger();
+            $data.Trace.log('hello', 'console', 42, { prop: 24 }, [1, 2, 3]);
+            ok(true, '$data.Trace not throw exception');
+        } catch (e) {
+            ok(false, '$data.Trace failed: ' + e);
+        }
 
     });
 });
