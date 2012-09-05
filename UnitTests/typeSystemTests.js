@@ -555,4 +555,13 @@
         equals(Object.keys(target).length, 1, "Key count");
         equal(target.a, 3, "Param 'a'");
     });
+
+    test("Trace tests", 3, function () {
+        equal(typeof $data.TraceBase, 'function', '$data.TraceBase exists failed');
+
+        notEqual(typeof $data.Trace, 'undefined', '$data.Trace exists failed');
+
+        equal(typeof $data.Logger, 'function', '$data.Logger exists failed');
+
+    });
 });

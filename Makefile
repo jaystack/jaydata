@@ -24,6 +24,8 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
 	$(TYPESYSTEM_DIR)/JayLint.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
+	$(TYPESYSTEM_DIR)/Trace/Trace.js\
+	$(TYPESYSTEM_DIR)/Trace/Logger.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
 
 VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
