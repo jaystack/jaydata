@@ -22,5 +22,13 @@
 
             test.done();
         });
+    },
+    'Trace exists': function (test) {
+
+        test.equal(typeof $data.TraceBase, 'function', '$data.TraceBase exists failed');
+        test.notEqual(typeof $data.Trace, 'undefined', '$data.Trace exists failed');
+        test.equal(typeof $data.Logger, 'function', '$data.Logger exists failed');
+
+        test.done();
     }
 }
