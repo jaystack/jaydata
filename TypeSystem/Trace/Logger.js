@@ -1,4 +1,4 @@
-﻿$data.Class.define('$data.Logger', $data.TraceBase, null, {
+$data.Class.define('$data.Logger', $data.TraceBase, null, {
     log: function () {
         Array.prototype.unshift.call(arguments, this.getDateFormat());
         console.log.apply(console, arguments);
