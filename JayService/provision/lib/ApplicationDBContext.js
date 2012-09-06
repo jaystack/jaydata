@@ -629,7 +629,7 @@ $data.Class.defineEx('$data.JayStormAPI.Context', [$data.EntityContext, $data.Se
                 //self.success({});
             }).fail(function(err) { error(err); });
         };
-    },//).toServiceOperation().params([{ name: 'db', type: 'string' }]).returns($data.Object),
+    },
     getContextJS: function(db){
         ///<param name="db" type="string"/>
         ///<returns type="string"/>
@@ -674,24 +674,26 @@ $data.Class.defineEx('$data.JayStormAPI.Context', [$data.EntityContext, $data.Se
                     }
                     var c = context[context.ContextName];
                     js += '$data.EntityContext.extend("' + context.ContextName + '", {\n';
-                    for (var i in c){
-                        var es = c[i];
-                        js += '    ' + i + ': { type: $data.EntitySet, elementType: ' + es.elementType + (es.tableName ? ', tableName: "' + es.tableName + '" ' : '');
-                        for (var e in events){
-                            console.log(i, e, es[e]);
-                            if (es[e]) js += (',\n        ' + e + ': ' + es[e]);
+                    if (Object.keys(c).length){
+                        for (var i in c){
+                            var es = c[i];
+                            js += '    ' + i + ': { type: $data.EntitySet, elementType: ' + es.elementType + (es.tableName ? ', tableName: "' + es.tableName + '" ' : '');
+                            for (var e in events){
+                                console.log(i, e, es[e]);
+                                if (es[e]) js += (',\n        ' + e + ': ' + es[e]);
+                            }
+                            js += ' },\n';
                         }
-                        js += ' },\n';
+                        var lio = js.lastIndexOf(',');
+                        js = js.substring(0, lio);
                     }
-                    var lio = js.lastIndexOf(',');
-                    js = js.substring(0, lio);
                     js += '\n});';
                     console.log(js);
                     success(js);
                 },
                 error);
             };
-    }//).toServiceOperation().params([{ name: 'db', type: 'string' }]).returns('string')
+    }
 
 });
 

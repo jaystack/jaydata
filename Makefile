@@ -24,6 +24,8 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
 	$(TYPESYSTEM_DIR)/JayLint.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
+	$(TYPESYSTEM_DIR)/Trace/Trace.js\
+	$(TYPESYSTEM_DIR)/Trace/Logger.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
 
 VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
@@ -93,10 +95,10 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/EntityState.js\
 	$(TYPES_DIR)/EntityStateManager.js\
 	$(TYPES_DIR)/Exception.js\
-	$(TYPES_DIR)/ServiceOperation.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
 	$(TYPES_DIR)/EntityWrapper.js\
+	$(TYPES_DIR)/ServiceOperation.js\
 	$(TYPES_DIR)/Ajax/jQueryAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/WinJSAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/ExtJSAjaxWrapper.js\
@@ -118,7 +120,6 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
 	$(JSERVICE_DIR)/ServiceBase.js\
 	$(JSERVICE_DIR)/EntityTransform.js\
-	$(JSERVICE_DIR)/Middleware.js\
 	$(JSERVICE_DIR)/EntityXmlTransform.js\
 	$(JSERVICE_DIR)/oDataResponseDataBuilder.js\
 	$(JSERVICE_DIR)/OData/ServiceDefinitionXml.js\
