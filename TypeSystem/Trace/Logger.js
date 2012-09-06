@@ -1,4 +1,4 @@
-﻿$data.Class.define('$data.Logger', null, null, {
+$data.Class.define('$data.Logger', null, null, {
     log: function () {
         Array.prototype.unshift.call(arguments, this.getDateFormat());
         console.log.apply(console, arguments);
