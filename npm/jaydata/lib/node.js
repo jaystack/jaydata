@@ -25,3 +25,7 @@ try{
         };
     }
 }catch(e){}
+
+try{
+    window.DOMParser = require("xmldom").DOMParser;
+}catch(e){}

@@ -1,4 +1,4 @@
-﻿var genx = require('genx');
+﻿var genx = require('jaydata-genx');
 var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
 
 $data.Class.define('$data.GenxXMLCreator', null, null, {
