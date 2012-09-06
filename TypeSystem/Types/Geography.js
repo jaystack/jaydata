@@ -1,4 +1,4 @@
-﻿$data.Geography = function Geography(lon, lat) {
+$data.Geography = function Geography(lon, lat) {
     if (typeof lon === 'object' && Array.isArray(lon.coordinates)) {
         this.longitude = lon.coordinates[0];
         this.latitude = lon.coordinates[1];

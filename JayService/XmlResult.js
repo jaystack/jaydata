@@ -4,6 +4,7 @@ $data.Class.define('$data.ServiceResult', null, null, {
     },
     data: { },
     contentType: { value: 'text/plain' },
+    statusCode: { value: 200 },
     toString: function(){
         return this.data.toString();
     },
@@ -28,7 +29,7 @@ $data.ServiceResult.extend('$data.JSONResult', {
 });
 
 $data.ServiceResult.extend('$data.XmlResult', {
-    contentType: { value: 'text/xml' },
+    contentType: { value: 'application/xml' },
     toString: function(){
         return this.data.toString();
     }
@@ -84,7 +85,8 @@ $data.ServiceResult.extend('$data.oDataResult', {
 });
 
 $data.ServiceResult.extend('$data.EmptyServiceResult', {
-    constructor: function () {
+    constructor: function (statusCode) {
+        this.statusCode = statusCode;
     },
     contentType: { value: '' },
     toString: function () {

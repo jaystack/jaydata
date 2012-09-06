@@ -32,10 +32,13 @@
                         this.entitySet.add(entity);
                         this.context.saveChanges(function () {
                             res.statusCode = 201;
+                            //TODO refactor
+                            var transformHelper = new $data.oDataServer.EntityTransform(config.context, config.baseUrl);
+                            res.setHeader('location', transformHelper.generateUri(entity, transformHelper._getEntitySetDefByType(self.entitySet.elementType)));
                             cbWrapper.success(entity);
                         });
                     } else {
-                        cbWrapper.error(0);
+                        cbWrapper.error(new $data.EmptyServiceResult(500));
                     }
 
                     break;
@@ -56,11 +59,10 @@
                         this.entitySet.attach(entity);
                         entity.entityState = $data.EntityState.Modified;
                         this.context.saveChanges(function () {
-                            res.statusCode = 204;
-                            cbWrapper.success(new $data.EmptyServiceResult());
+                            cbWrapper.success(new $data.EmptyServiceResult(204));
                         });
                     } else {
-                        cbWrapper.error(0);
+                        cbWrapper.error(new $data.EmptyServiceResult(500));
                     }
                     break;
                 case 'DELETE': //D
@@ -72,16 +74,15 @@
                             this.entitySet.remove(this.member.idObject);
                             this.context.saveChanges(function () {
                                 //return with no content
-                                res.statusCode = 204;
-                                cbWrapper.success(new $data.EmptyServiceResult());
+                                cbWrapper.success(new $data.EmptyServiceResult(204));
                             });
                         } else {
-                            cbWrapper.error(0);
+                            cbWrapper.error(new $data.EmptyServiceResult(404));
                         }
                     }
                     break;
                 default:
-                    cbWrapper.error(0);
+                    cbWrapper.error(new $data.EmptyServiceResult(405));
                     break;
             }
         } else {
@@ -224,8 +225,10 @@
                     var entityType = this.entitySet.elementType;
                     if (parts.length === 1) {
                         var memDef = entityType.getMemberDefinition(parts[0]);
-                        this.member.selectedField = memDef.name;
-                        return !!memDef;
+                        if (memDef) {
+                            this.member.selectedField = memDef.name;
+                            return true;
+                        }
                     }
                     return false;
                 }

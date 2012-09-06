@@ -1,4 +1,4 @@
-﻿$data.Class.define('$data.TraceBase', null, null, {
+$data.Class.define('$data.TraceBase', null, null, {
     log: function () { },
     warn: function () { },
     error: function () { }
