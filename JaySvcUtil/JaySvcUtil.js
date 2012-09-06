@@ -17,7 +17,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
         $data.typeSystem.extend( cnf, config || {});
 
-        if (cnf.DefaultNamespace && cnf.DefaultNamespace.lastIndexOf('.') !== (cnf.DefaultNamespace - 1))
+        if (cnf.DefaultNamespace && cnf.DefaultNamespace.lastIndexOf('.') !== (cnf.DefaultNamespace.length - 1))
             cnf.DefaultNamespace += '.';
 
         this.factoryCache = this.factoryCache || {};
