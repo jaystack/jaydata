@@ -562,10 +562,10 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="MyContext.exampleClass1" m:HttpMethod="GET">' +
@@ -593,10 +593,10 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="MyContext.exampleClass1withKey" m:HttpMethod="GET">' +
@@ -624,20 +624,20 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="MyContext.exampleClass1"></Property>' +
-                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey"></Property>' +
+                                '<Property Name="complexType1" Type="MyContext.exampleClass1" />' +
+                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="MyContext.complextTypeClass1" m:HttpMethod="GET">' +
@@ -666,10 +666,10 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Collection(MyContext.exampleClass1)" m:HttpMethod="GET">' +
@@ -698,10 +698,10 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
@@ -731,16 +731,16 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
@@ -771,20 +771,20 @@ exports['functionContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="MyContext.exampleClass1"></Property>' +
-                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey"></Property>' +
+                                '<Property Name="complexType1" Type="MyContext.exampleClass1" />' +
+                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
@@ -821,10 +821,10 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                         '<ComplexType Name="exampleClass1">' +
-                            '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="prop2" Type="Edm.String"></Property>' +
-                            '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                            '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                            '<Property Name="prop1" Type="Edm.Int32" />' +
+                            '<Property Name="prop2" Type="Edm.String" />' +
+                            '<Property Name="prop3" Type="Edm.DateTime" />' +
+                            '<Property Name="prop4" Type="Edm.Boolean" />' +
                         '</ComplexType>' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                             '<FunctionImport Name="webMethodName" ReturnType="Collection(Edm.String)" m:HttpMethod="POST">' +
@@ -862,10 +862,10 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                         '<ComplexType Name="exampleClass1">' +
-                            '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="prop2" Type="Edm.String"></Property>' +
-                            '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                            '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                            '<Property Name="prop1" Type="Edm.Int32" />' +
+                            '<Property Name="prop2" Type="Edm.String" />' +
+                            '<Property Name="prop3" Type="Edm.DateTime" />' +
+                            '<Property Name="prop4" Type="Edm.Boolean" />' +
                         '</ComplexType>' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                             '<FunctionImport Name="webMethodName" ReturnType="Edm.Int32" m:HttpMethod="POST">' +
@@ -903,10 +903,10 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                         '<ComplexType Name="exampleClass1">' +
-                            '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="prop2" Type="Edm.String"></Property>' +
-                            '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                            '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                            '<Property Name="prop1" Type="Edm.Int32" />' +
+                            '<Property Name="prop2" Type="Edm.String" />' +
+                            '<Property Name="prop3" Type="Edm.DateTime" />' +
+                            '<Property Name="prop4" Type="Edm.Boolean" />' +
                         '</ComplexType>' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
                             '<FunctionImport Name="webMethodName" m:HttpMethod="POST">' +
@@ -1531,10 +1531,10 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIreturnComplexType" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="$test.exampleClass1" m:HttpMethod="GET">' +
@@ -1565,10 +1565,10 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIreturnComplexTypeWithKey" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="$test.exampleClass1withKey" m:HttpMethod="GET">' +
@@ -1599,20 +1599,20 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="$test.exampleClass1"></Property>' +
-                                '<Property Name="complexType2" Type="$test.exampleClass1withKey"></Property>' +
+                                '<Property Name="complexType1" Type="$test.exampleClass1" />' +
+                                '<Property Name="complexType2" Type="$test.exampleClass1withKey" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIreturnComplexTypeInComplexType" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="$test.complextTypeClass1" m:HttpMethod="GET">' +
@@ -1643,10 +1643,10 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIreturnComplexTypeArray" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Collection($test.exampleClass1)" m:HttpMethod="GET">' +
@@ -1678,10 +1678,10 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIparamTypeComplexType" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
@@ -1715,16 +1715,16 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIparamTypesComplexType" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
@@ -1758,20 +1758,20 @@ exports['entityContext'] = {
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="$test.exampleClass1"></Property>' +
-                                '<Property Name="complexType2" Type="$test.exampleClass1withKey"></Property>' +
+                                '<Property Name="complexType1" Type="$test.exampleClass1" />' +
+                                '<Property Name="complexType2" Type="$test.exampleClass1withKey" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                                '<Property Name="prop2" Type="Edm.String"></Property>' +
-                                '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                                '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                                '<Property Name="prop1" Type="Edm.Int32" />' +
+                                '<Property Name="prop2" Type="Edm.String" />' +
+                                '<Property Name="prop3" Type="Edm.DateTime" />' +
+                                '<Property Name="prop4" Type="Edm.Boolean" />' +
                             '</ComplexType>' +
                             '<EntityContainer Name="contextFIparamTypeComplexTypeInComplexType" m:IsDefaultEntityContainer="true">' +
                                 '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
@@ -1804,10 +1804,10 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="prop1" />' +
                             '</Key>' +
-                            '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="prop2" Type="Edm.String"></Property>' +
-                            '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                            '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                            '<Property Name="prop1" Type="Edm.Int32" />' +
+                            '<Property Name="prop2" Type="Edm.String" />' +
+                            '<Property Name="prop3" Type="Edm.DateTime" />' +
+                            '<Property Name="prop4" Type="Edm.Boolean" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextES" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
@@ -1844,18 +1844,18 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="prop1" />' +
                             '</Key>' +
-                            '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="prop2" Type="Edm.String"></Property>' +
-                            '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                            '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                            '<Property Name="prop1" Type="Edm.Int32" />' +
+                            '<Property Name="prop2" Type="Edm.String" />' +
+                            '<Property Name="prop3" Type="Edm.DateTime" />' +
+                            '<Property Name="prop4" Type="Edm.Boolean" />' +
                         '</EntityType>' +
                         '<EntityType Name="exampleClass2">' +
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="p2" Type="Edm.String"></Property>' +
-                            '<Property Name="p3" Type="Edm.Decimal"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p2" Type="Edm.String" />' +
+                            '<Property Name="p3" Type="Edm.Decimal" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESMultiple" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
@@ -1892,9 +1892,9 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Nullable="false" Type="Edm.Int32"></Property>' +
-                            '<Property Name="p2" Nullable="false" Type="Edm.String"></Property>' +
-                            '<Property Name="p3" Nullable="false" Type="Edm.Decimal"></Property>' +
+                            '<Property Name="p1" Nullable="false" Type="Edm.Int32" />' +
+                            '<Property Name="p2" Nullable="false" Type="Edm.String" />' +
+                            '<Property Name="p3" Nullable="false" Type="Edm.Decimal" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsReq" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassReq" Name="Es1" />' +
@@ -1930,9 +1930,9 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p1" Type="Edm.Int32" p6:StoreGeneratedPattern="Identity"></Property>' +
-                            '<Property Name="p2" Type="Edm.String"></Property>' +
-                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p3" Type="Edm.Decimal" p6:StoreGeneratedPattern="Computed"></Property>' +
+                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p1" Type="Edm.Int32" p6:StoreGeneratedPattern="Identity" />' +
+                            '<Property Name="p2" Type="Edm.String" />' +
+                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p3" Type="Edm.Decimal" p6:StoreGeneratedPattern="Computed" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsComp" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassComp" Name="Es1" />' +
@@ -1969,10 +1969,10 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="p2" Nullable="false" Type="Edm.String"></Property>' +
-                            '<Property Name="p3" Nullable="true" Type="Edm.Decimal"></Property>' +
-                            '<Property Name="p4" Nullable="true" Type="Edm.Decimal"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p2" Nullable="false" Type="Edm.String" />' +
+                            '<Property Name="p3" Nullable="true" Type="Edm.Decimal" />' +
+                            '<Property Name="p4" Nullable="true" Type="Edm.Decimal" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsNullable" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassNullable" Name="Es1" />' +
@@ -2008,9 +2008,9 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
-                            '<Property MaxLength="50" Name="p2" Type="Edm.String"></Property>' +
-                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property MaxLength="50" Name="p2" Type="Edm.String" />' +
+                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsMax" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassMax" Name="Es1" />' +
@@ -2047,10 +2047,10 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
-                            '<Property MaxLength="50" Name="p2" Type="Edm.String"></Property>' +
-                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String"></Property>' +
-                            '<Property ConcurrencyMode="Fixed" MaxLength="8" Name="RowVersion" Type="Edm.Binary"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property MaxLength="50" Name="p2" Type="Edm.String" />' +
+                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String" />' +
+                            '<Property ConcurrencyMode="Fixed" MaxLength="8" Name="RowVersion" Type="Edm.Binary" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsConc" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassConc" Name="Es1" />' +
@@ -2087,10 +2087,10 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
-                            '<Property FixedLength="true" MaxLength="50" Name="p2" Precision="true" Scale="false" Type="Edm.String" Unicode="false"></Property>' +
-                            '<Property FixedLength="false" MaxLength="MAX" Name="p3" Precision="false" Scale="false" Type="Edm.String" Unicode="false"></Property>' +
-                            '<Property FixedLength="true" MaxLength="8" Name="p4" Precision="true" Scale="true" Type="Edm.String" Unicode="true"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property FixedLength="true" MaxLength="50" Name="p2" Precision="true" Scale="false" Type="Edm.String" Unicode="false" />' +
+                            '<Property FixedLength="false" MaxLength="MAX" Name="p3" Precision="false" Scale="false" Type="Edm.String" Unicode="false" />' +
+                            '<Property FixedLength="true" MaxLength="8" Name="p4" Precision="true" Scale="true" Type="Edm.String" Unicode="true" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsCustom" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassCustom" Name="Es1" />' +
@@ -2127,10 +2127,10 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="prop1" />' +
                             '</Key>' +
-                            '<Property Name="prop1" Type="Edm.Int32"></Property>' +
-                            '<Property Name="prop2" Type="Edm.String"></Property>' +
-                            '<Property Name="prop3" Type="Edm.DateTime"></Property>' +
-                            '<Property Name="prop4" Type="Edm.Boolean"></Property>' +
+                            '<Property Name="prop1" Type="Edm.Int32" />' +
+                            '<Property Name="prop2" Type="Edm.String" />' +
+                            '<Property Name="prop3" Type="Edm.DateTime" />' +
+                            '<Property Name="prop4" Type="Edm.Boolean" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextFIES" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
@@ -2176,14 +2176,14 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES2_BSetItem_Target" Name="ASetItem" Relationship="$test.exampleES2_BSetItem" ToRole="exampleES2_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES2">' +
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES2_BSetItem_Source" Name="BSetItem" Relationship="$test.exampleES2_BSetItem" ToRole="exampleES2_BSetItem_Target"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES2_BSetItem">' +
@@ -2235,14 +2235,14 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES20_BSetItem_Target" Name="ASetItem" Relationship="$test.exampleES20_BSetItem" ToRole="exampleES20_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES20">' +
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES20_BSetItem_Source" Name="BSetItem" Relationship="$test.exampleES20_BSetItem" ToRole="exampleES20_BSetItem_Target"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES20_BSetItem">' +
@@ -2294,14 +2294,14 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES200_BSetItem_Target" Name="ASetItem" Relationship="$test.exampleES200_BSetItem" ToRole="exampleES200_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES200">' +
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES200_BSetItem_Source" Name="BSetItem" Relationship="$test.exampleES200_BSetItem" ToRole="exampleES200_BSetItem_Target"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES200_BSetItem">' +
@@ -2352,13 +2352,13 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES2000">' +
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES2000_BSetItem_Target" Name="BSetItem" Relationship="$test.exampleES2000_BSetItem" ToRole="exampleES2000_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES2000_BSetItem">' +
@@ -2409,13 +2409,13 @@ exports['entityContext'] = {
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES20000">' +
                             '<Key>' +
                                 '<PropertyRef Name="p1" />' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32"></Property>' +
+                            '<Property Name="p1" Type="Edm.Int32" />' +
                             '<NavigationProperty FromRole="exampleES20000_BSetItem_Target" Name="BSetItem" Relationship="$test.exampleES20000_BSetItem" ToRole="exampleES20000_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES20000_BSetItem">' +

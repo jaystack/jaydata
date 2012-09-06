@@ -18,6 +18,14 @@ $data.Class.define('$data.GenxXMLCreator', null, null, {
     endElement: function () {
         return this.writer.endElement.apply(this.writer, arguments);
     },
+    endElementInline: function () {
+        if (typeof this.writer.endElementInline === 'function') {
+            return this.writer.endElementInline.apply(this.writer, arguments);
+        } else {
+            return this.endElement();
+        }
+
+    },
 
     addAttribute: function () {
         return this.writer.addAttribute.apply(this.writer, arguments);
@@ -193,8 +201,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 var elementType = Container.resolveType(memDef.elementType);
                 xml.startElement(entitySet)
                     .addAttribute(name, memDef.name)
-                    .addAttribute(entityType, this.cfg.contextNamespace + '.' + elementType.name)
-                    .endElementInline();
+                    .addAttribute(entityType, this.cfg.contextNamespace + '.' + elementType.name);
+                xml.endElementInline();
             }, this);
         }
         //FunctionImports
@@ -282,13 +290,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 .addAttribute(type, assoc.source.typeName)
                 .addAttribute(role, assoc.name + '_Source')
                 .addAttribute(multiplicity, assoc.source.multiplicity)
-                .endElementInline();
+            xml.endElementInline();;
 
             xml.startElement(end)
                 .addAttribute(type, assoc.target.typeName)
                 .addAttribute(role, assoc.name + '_Target')
-                .addAttribute(multiplicity, assoc.target.multiplicity)
-                .endElementInline();
+                .addAttribute(multiplicity, assoc.target.multiplicity);
+            xml.endElementInline();
 
             xml.endElement();
         }, this);
@@ -312,13 +320,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
             xml.startElement(end)
                 .addAttribute(role, assoc.name + '_Source')
-                .addAttribute(entitySet, assoc.source.entitySetName)
-                .endElementInline();
+                .addAttribute(entitySet, assoc.source.entitySetName);
+            xml.endElementInline();
 
             xml.startElement(end)
                 .addAttribute(role, assoc.name + '_Target')
-                .addAttribute(entitySet, assoc.target.entitySetName)
-                .endElementInline();
+                .addAttribute(entitySet, assoc.target.entitySetName);
+            xml.endElementInline();
 
             xml.endElement();
         }, this);
@@ -361,8 +369,9 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 methodParameters.forEach(function (param) {
                     xml.startElement(parameter)
                         .addAttribute(name, param.name || param)
-                        .addAttribute(type, this._resolveTypeName(param.type || 'string'))
-                        .endElementInline();
+                        .addAttribute(type, this._resolveTypeName(param.type || 'string'));
+                    xml.endElementInline();
+
                 }, this);
             }
 
@@ -380,8 +389,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.startElement(key);
             keys.forEach(function (memDef) {
                 xml.startElement(propRef)
-                    .addAttribute(name, memDef.name)
-                    .endElementInline();
+                    .addAttribute(name, memDef.name);
+                xml.endElementInline();
             }, this);
             xml.endElement();
         }
@@ -414,7 +423,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             this._buildPropertyAttribute(xml, prop, memDef[prop], memDef);
         }, this);
 
-        xml.endElement();
+        xml.endElementInline();
     },
     _buildPropertyAttribute: function (xml, name, value, memDef) {
         var resolvedConfig = this._supportedPropertyAttributes[name];
