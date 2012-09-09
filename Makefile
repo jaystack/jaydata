@@ -27,6 +27,7 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/Trace/Trace.js\
 	$(TYPESYSTEM_DIR)/Trace/Logger.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
+	$(TYPESYSTEM_DIR)/Types/EdmTypes.js\
 
 VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
 
