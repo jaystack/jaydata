@@ -921,9 +921,11 @@ $data.Class.define('$data.EntityContext', null, null,
         var access = $data.Access.None;
         
         var eventData = {};
+        var sets = [];
         for (var i = 0; i < changedEntities.length; i++){
             var it = changedEntities[i];
             var n = it.entitySet.elementType.name;
+            sets.push(it.entitySet.name);
             var es = this._entitySetReferences[n];
             if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || (this.user && this.checkPermission)){
                 if (!eventData[n]) eventData[n] = {};
@@ -1042,7 +1044,7 @@ $data.Class.define('$data.EntityContext', null, null,
         };
         
         if (this.user && this.checkPermission){
-            this.checkPermission(access, this.user, ies, {
+            this.checkPermission(access, this.user, sets, {
                 success: function(){
                     if (i < ies.length) callbackFn();
                     else readyFn();
