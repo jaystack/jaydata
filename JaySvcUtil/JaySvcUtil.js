@@ -111,7 +111,10 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 callback(xhttp.responseXML || xhttp.responseText);
             }
         };
-        xhttp.setRequestHeader("Authorization", "Basic " + this.__encodeBase64(cnf.user + ":" + cnf.password));
+
+        if (cnf.user && cnf.password && (!cnf.httpHeaders || (cnf.httpHeaders && !cnf.httpHeaders['Authorization'])))
+            xhttp.setRequestHeader("Authorization", "Basic " + this.__encodeBase64(cnf.user + ":" + cnf.password));
+
         xhttp.send("");
     },
     _processResults: function (metadataUri, versionInfo, metadata, xsl, cnf) {
