@@ -28,44 +28,6 @@
 //////                             oData @@VERSION@@                                    /////////
 //////////////////////////////////////////////////////////////////////////////////////*/
 (function(global, $data, undefined) {
-  <xsl:variable name="EdmJayTypeMapping">
-    <map from="Edm.Boolean" to="$data.Boolean" />
-    <map from="Edm.Binary" to="$data.Blob" />
-    <map from="Edm.DateTime" to="$data.Date" />
-    <map from="Edm.DateTimeOffset" to="$data.Integer" />
-    <map from="Edm.Time" to="$data.Integer" />
-    <map from="Edm.Decimal" to="$data.Number" />
-    <map from="Edm.Single" to="$data.Number" />
-    <map from="Edm.Double" to="$data.Number" />
-    <map from="Edm.Guid" to="$data.String" />
-    <map from="Edm.Int16" to="$data.Integer" />
-    <map from="Edm.Int32" to="$data.Integer" />
-    <map from="Edm.Int64" to="$data.Integer" />
-    <map from="Edm.Byte" to="$data.Integer" />
-    <map from="Edm.String" to="$data.String" />
-    <map from="Edm.GeographyPoint" to="$data.Geography" />
-  </xsl:variable>
-
-  function registerEdmTypes() { <xsl:choose>
-    <xsl:when test="function-available('msxsl:node-set')">
-      <xsl:for-each select="msxsl:node-set($EdmJayTypeMapping)/*">
-        function <xsl:value-of select="translate(@from,'.','_')" />() { };
-        $data.Container.registerType('<xsl:value-of select="@from"/>', <xsl:value-of select="translate(@from,'.','_')"/>);
-        $data.Container.mapType(<xsl:value-of select="translate(@from,'.','_')" />, <xsl:value-of select="@to" />);
-      </xsl:for-each>
-    </xsl:when>
-    <xsl:otherwise>
-
-      <xsl:for-each select="exsl:node-set($EdmJayTypeMapping)/*">
-        function <xsl:value-of select="translate(@from,'.','_')" />() { };
-        $data.Container.registerType('<xsl:value-of select="@from"/>', <xsl:value-of select="translate(@from,'.','_')"/>);
-        $data.Container.mapType(<xsl:value-of select="translate(@from,'.','_')" />, <xsl:value-of select="@to" />);
-      </xsl:for-each>
-    </xsl:otherwise>
-  </xsl:choose>
-  };
-  registerEdmTypes();
-
 
 <xsl:for-each select="//edm:EntityType | //edm:ComplexType" xml:space="default">
   <xsl:message terminate="no">Info: generating type <xsl:value-of select="concat(../@Namespace, '.', @Name)"/>

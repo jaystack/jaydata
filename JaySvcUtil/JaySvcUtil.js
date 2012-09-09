@@ -5,7 +5,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         var cnf = {
             EntityBaseClass: '$data.Entity',
             ContextBaseClass: '$data.EntityContext',
-            AutoCreateContext: true,
+            AutoCreateContext: false,
             DefaultNamespace: ('ns' + Math.random()).replace('.', '') + metadataUri.replace(/[^\w]/g, "_"),
             ContextInstanceName: 'context',
             EntitySetBaseClass: '$data.EntitySet',
@@ -330,44 +330,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "//////                             oData @@VERSION@@                                    /////////\r\n" +
             "//////////////////////////////////////////////////////////////////////////////////////*/\r\n" +
             "(function(global, $data, undefined) {\r\n" +
-            "  <xsl:variable name=\"EdmJayTypeMapping\">\r\n" +
-            "    <map from=\"Edm.Boolean\" to=\"$data.Boolean\" />\r\n" +
-            "    <map from=\"Edm.Binary\" to=\"$data.Blob\" />\r\n" +
-            "    <map from=\"Edm.DateTime\" to=\"$data.Date\" />\r\n" +
-            "    <map from=\"Edm.DateTimeOffset\" to=\"$data.Integer\" />\r\n" +
-            "    <map from=\"Edm.Time\" to=\"$data.Integer\" />\r\n" +
-            "    <map from=\"Edm.Decimal\" to=\"$data.Number\" />\r\n" +
-            "    <map from=\"Edm.Single\" to=\"$data.Number\" />\r\n" +
-            "    <map from=\"Edm.Double\" to=\"$data.Number\" />\r\n" +
-            "    <map from=\"Edm.Guid\" to=\"$data.String\" />\r\n" +
-            "    <map from=\"Edm.Int16\" to=\"$data.Integer\" />\r\n" +
-            "    <map from=\"Edm.Int32\" to=\"$data.Integer\" />\r\n" +
-            "    <map from=\"Edm.Int64\" to=\"$data.Integer\" />\r\n" +
-            "    <map from=\"Edm.Byte\" to=\"$data.Integer\" />\r\n" +
-            "    <map from=\"Edm.String\" to=\"$data.String\" />\r\n" +
-            "    <map from=\"Edm.GeographyPoint\" to=\"$data.Geography\" />\r\n" +
-            "  </xsl:variable>\r\n" +
-            "\r\n" +
-            "  function registerEdmTypes() { <xsl:choose>\r\n" +
-            "    <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
-            "      <xsl:for-each select=\"msxsl:node-set($EdmJayTypeMapping)/*\">\r\n" +
-            "        function <xsl:value-of select=\"translate(@from,'.','_')\" />() { };\r\n" +
-            "        $data.Container.registerType('<xsl:value-of select=\"@from\"/>', <xsl:value-of select=\"translate(@from,'.','_')\"/>);\r\n" +
-            "        $data.Container.mapType(<xsl:value-of select=\"translate(@from,'.','_')\" />, <xsl:value-of select=\"@to\" />);\r\n" +
-            "      </xsl:for-each>\r\n" +
-            "    </xsl:when>\r\n" +
-            "    <xsl:otherwise>\r\n" +
-            "\r\n" +
-            "      <xsl:for-each select=\"exsl:node-set($EdmJayTypeMapping)/*\">\r\n" +
-            "        function <xsl:value-of select=\"translate(@from,'.','_')\" />() { };\r\n" +
-            "        $data.Container.registerType('<xsl:value-of select=\"@from\"/>', <xsl:value-of select=\"translate(@from,'.','_')\"/>);\r\n" +
-            "        $data.Container.mapType(<xsl:value-of select=\"translate(@from,'.','_')\" />, <xsl:value-of select=\"@to\" />);\r\n" +
-            "      </xsl:for-each>\r\n" +
-            "    </xsl:otherwise>\r\n" +
-            "  </xsl:choose>\r\n" +
-            "  };\r\n" +
-            "  registerEdmTypes();\r\n" +
-            "\r\n" +
             "\r\n" +
             "<xsl:for-each select=\"//edm:EntityType | //edm:ComplexType\" xml:space=\"default\">\r\n" +
             "  <xsl:message terminate=\"no\">Info: generating type <xsl:value-of select=\"concat(../@Namespace, '.', @Name)\"/>\r\n" +
