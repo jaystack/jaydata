@@ -70,14 +70,14 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
     createFactoryFunc: function (ctxType, cnf) {
         var self = this;
-        return function () {
+        return function (user, passw) {
             if (ctxType) {
                 return new ctxType({
                     name: 'oData',
                     oDataServiceHost: cnf.SerivceUri,
                     //maxDataServiceVersion: '',
-                    user: cnf.user,
-                    password: cnf.password
+                    user: user || cnf.user,
+                    password: passw || cnf.password
                 });
             } else {
                 return null;
