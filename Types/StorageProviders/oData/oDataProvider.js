@@ -553,7 +553,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
                 '$data.Geography': function (geo) {
-                    if (typeof geo === 'object' && Array.isArray(geo.coordinates)) {
+                    if (geo && typeof geo === 'object' && Array.isArray(geo.coordinates)) {
                         return new $data.Geography(geo.coordinates[0], geo.coordinates[1]);
                     }
                     return geo;

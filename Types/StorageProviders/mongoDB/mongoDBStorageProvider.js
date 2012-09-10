@@ -1363,7 +1363,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
-                '$data.Geography': function (g) { if (g === undefined) { return new $data.Geography(); } return new $data.Geography(g[0], g[1]); }
+                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
