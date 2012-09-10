@@ -47,7 +47,12 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         }
 
         var self = this;
-        self._loadXMLDoc(cnf, function (xml) {
+        self._loadXMLDoc(cnf, function (xml, response) {
+            if (response.statusCode < 200 || response.statusCode > 299) {
+                callBack.error(response);
+                return;
+            }
+
             var versionInfo = self._findVersion(xml);
             if (self.xsltRepoUrl) {
                 console.log('XSLT: ' + self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version])
@@ -56,7 +61,12 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     user: cnf.user,
                     password: cnf.password,
                     headers: cnf.headers
-                }, function (xsl) {
+                }, function (xsl, response) {
+                    if (response.statusCode < 200 || response.statusCode > 299) {
+                        callBack.error(response);
+                        return;
+                    }
+
                     self._transform(callBack, versionInfo, xml, xsl, cnf);
                 });
             } else {
@@ -108,7 +118,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         }
         xhttp.onreadystatechange = function () {
             if (xhttp.readyState === 4) {
-                callback(xhttp.responseXML || xhttp.responseText);
+                var response = { requestUri: cnf.metadataUri, statusCode: xhttp.status, statusText: xhttp.statusText };
+                callback(xhttp.responseXML || xhttp.responseText, response);
             }
         };
 
