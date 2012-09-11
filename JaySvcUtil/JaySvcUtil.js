@@ -80,15 +80,18 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
     createFactoryFunc: function (ctxType, cnf) {
         var self = this;
-        return function (user, passw) {
+        return function (config) {
             if (ctxType) {
-                return new ctxType({
+                var cfg = $data.typeSystem.extend({
                     name: 'oData',
                     oDataServiceHost: cnf.SerivceUri,
                     //maxDataServiceVersion: '',
-                    user: user || cnf.user,
-                    password: passw || cnf.password
-                });
+                    user: cnf.user,
+                    password: cnf.password
+                }, config)
+
+
+                return new ctxType(cfg);
             } else {
                 return null;
             }
