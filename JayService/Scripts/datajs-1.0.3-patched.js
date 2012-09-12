@@ -1065,6 +1065,10 @@
                     }
                 }
 
+                // Set withCredential 
+                if (request.withCredentials)
+                    xhr.withCredentials = true;
+
                 // Set the timeout if available.
                 if (request.timeoutMS) {
                     xhr.timeout = request.timeoutMS;

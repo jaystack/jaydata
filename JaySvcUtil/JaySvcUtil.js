@@ -12,7 +12,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             CollectionBaseClass: 'Array',
             url: metadataUri,
             user: undefined,
-            password: undefined
+            password: undefined,
+            withCredentials: undefined
         };
 
         $data.typeSystem.extend( cnf, config || {});
@@ -87,7 +88,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     oDataServiceHost: cnf.SerivceUri,
                     //maxDataServiceVersion: '',
                     user: cnf.user,
-                    password: cnf.password
+                    password: cnf.password,
+                    withCredentials: cnf.withCredentials
                 }, config)
 
 
