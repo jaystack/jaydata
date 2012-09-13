@@ -317,7 +317,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         type: 'string',
         value:
             "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" \r\n" +
-            "                xmlns:edm=\"http://schemas.microsoft.com/ado/2008/09/edm\" \r\n" +
+            "                xmlns:edm=\"@@VERSIONNS@@\" \r\n" +
             "                xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" \r\n" +
             "                xmlns:annot=\"http://schemas.microsoft.com/ado/2009/02/edm/annotation\" \r\n" +
             "                xmlns:exsl=\"http://exslt.org/common\" \r\n" +
