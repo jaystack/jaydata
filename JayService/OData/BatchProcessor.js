@@ -56,8 +56,7 @@
         }
 
         //processResponse
-        return function () {
-            var async = this;
+        return function (success, error) {
             var responseData = {
                 headers: {
                     'Content-Type': $data.JayService.OData.Defaults.multipartContentType
@@ -89,7 +88,7 @@
                 }
                 response.statusCode = 202;
                 var res = new $data.MultiPartMixedResult(responseData.body, responseData.batchBoundary);
-                async.success(res);
+                success(res);
             });
         }
     },
