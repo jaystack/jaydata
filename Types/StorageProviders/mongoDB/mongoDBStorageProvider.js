@@ -527,20 +527,35 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             this.Visit(arg, context);
         }, this);
         
-        if (!context.query[context.field]) context.query[context.field] = {};
-        
+        var opMapTo;
+        var opValue;
         switch (opName){
             case 'contains':
-                context.query[context.field].$regex = context.value;
+                opMapTo = '$regex';
+                opValue = context.value;
                 break;
             case 'startsWith':
-                context.query[context.field].$regex = '^' + context.value;
+                opMapTo = '$regex';
+                opValue = '^' + context.value;
                 break;
             case 'endsWith':
-                context.query[context.field].$regex = context.value + '$';
+                opMapTo = '$regex';
+                opValue = context.value + '$';
                 break;
             default:
                 break;
+        }
+        
+        if (opMapTo && opValue){
+            if (context.cursor instanceof Array){
+                var o = {};
+                o[context.field] = {};
+                o[context.field][opMapTo] = opValue;
+                context.cursor.push(o);
+            }else{
+                context.cursor[context.field] = {};
+                context.cursor[context.field][opMapTo] = opValue;
+            }
         }
     },
 
@@ -1363,7 +1378,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
-                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g }
+                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
@@ -1386,7 +1401,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return o; },
                 '$data.Array': function (o) { return o; },
-                '$data.ObjectID': function (id) { return id && typeof id === 'string' ? new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii')) : id; },
+                '$data.ObjectID': function (id) {
+                    if (id && typeof id === 'string'){
+                        return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii'));
+                    }else return id;
+                },
                 '$data.Geography': function (g) { return g ? [g.longitude, g.latitude] : g; }
             }
         }
