@@ -35,7 +35,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         requestUri: that.providerConfiguration.serviceUrl + "/Delete",
                         method: 'POST'
                     }, function (d) {
-                        console.log("RESET oData database");
+                        //console.log("RESET oData database");
                         callBack.success(that.context);
                     }, function (error) {
                         callBack.success(that.context);

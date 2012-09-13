@@ -314,12 +314,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                                 }
                             }
                             else {
-                                console.dir(regEx);
-                                console.dir(that.SqlCommands[i]);
+                                //console.dir(regEx);
+                                //console.dir(that.SqlCommands[i]);
                             }
                         }
                         that.SqlCommands = that.SqlCommands.concat(deleteCmd);
-                        console.log(deleteCmd);
+                        //console.log(deleteCmd);
                         break;
                     case $data.storageProviders.DbCreationType.DropAllExistingTables:
                         for (var objName in existObjectInDB) {
