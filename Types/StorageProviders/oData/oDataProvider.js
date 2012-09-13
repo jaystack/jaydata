@@ -343,7 +343,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                serializableObject[memdef.name] = item.physicalData[memdef.name];
+                if (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function(def){ return def.name === memdef.name; }))
+                    serializableObject[memdef.name] = item.physicalData[memdef.name];
             }
         }, this);
         return serializableObject;
