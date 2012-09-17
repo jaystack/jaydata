@@ -364,7 +364,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var sqlText = this._compile(queryable);
         return queryable;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography, $data.Guid], writable: false },
 
     supportedBinaryOperators: {
         value: {
@@ -559,7 +559,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         return new $data.Geography(geo.coordinates[0], geo.coordinates[1]);
                     }
                     return geo;
-                }
+                },
+                '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
             },
             toDb: {
                 '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
@@ -576,8 +577,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     if (geo instanceof $data.Geography)
                         return 'POINT(' + geo.longitude + ' ' + geo.latitude + ')';
                     return geo;
-                }
-            }
+                },
+                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
+}
         }
     },
     getEntityKeysValue: function (entity) {

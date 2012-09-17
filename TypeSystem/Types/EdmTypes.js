@@ -34,7 +34,7 @@
 
     function Edm_Guid() { };
     $data.Container.registerType('Edm.Guid', Edm_Guid);
-    $data.Container.mapType(Edm_Guid, $data.String);
+    $data.Container.mapType(Edm_Guid, $data.Guid);
 
     function Edm_Int16() { };
     $data.Container.registerType('Edm.Int16', Edm_Int16);

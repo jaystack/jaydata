@@ -1,6 +1,111 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('OData provider - Filter by GUID field should be supported', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(20);
+        stop(5);
+        $data.Class.define("$news.Types.TestItemExtended", $data.Entity, null, {
+            Id: { type: "int", key: true },
+            i0: { type: "int" },
+            b0: { type: "boolean" },
+            s0: { type: "string" },
+            blob: { type: "blob" },
+            n0: { type: "number" },
+            d0: { type: "date" },
+            g0: { type: "guid" },
+        }, null);
+
+        $data.Class.define("$news.Types.NewsContextPartial", $data.EntityContext, null, {
+            TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItemExtended }
+        });
+
+        (new $news.Types.NewsContextPartial(providerConfig)).onReady(function (db) {
+            var guid = new $data.Guid('ae22ffc7-8d96-488e-84f2-c04753242348');
+
+            var q = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: guid });
+            equal(q.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'ae22ffc7-8d96-488e-84f2-c04753242348')", 'param guid failed');
+
+            var q2 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: new $data.Guid('c22f0ecd-8cff-403c-89d7-8d18c457f1ef') });
+            equal(q2.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'c22f0ecd-8cff-403c-89d7-8d18c457f1ef')", 'inline guid failed');
+
+            var q3 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: new $data.Guid() });
+            equal(q3.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'00000000-0000-0000-0000-000000000000')", 'empty guid failed');
+
+            var q4 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: null });
+            equal(q4.toTraceString().queryText, "/TestTable?$filter=(g0 eq null)", 'null guid failed');
+
+            var item1 = new $news.Types.TestItemExtended({ Id: 42, g0: guid });
+            var item2 = new $news.Types.TestItemExtended({ Id: 43, g0: new $data.Guid('c22f0ecd-8cff-403c-89d7-8d18c457f1ef') });
+            var item3 = new $news.Types.TestItemExtended({ Id: 44, g0: new $data.Guid() });
+            var item4 = new $news.Types.TestItemExtended({ Id: 45, g0: null });
+            db.TestTable.add(item1);
+            db.TestTable.add(item2);
+            db.TestTable.add(item3);
+            db.TestTable.add(item4);
+            db.saveChanges(function () {
+                db.TestTable.toArray(function (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
+                        switch (item.Id) {
+                            case 42:
+                                equal(item.g0.valueOf(), 'ae22ffc7-8d96-488e-84f2-c04753242348', "Id:42, guid value failed");
+                                break;
+                            case 43:
+                                equal(item.g0.valueOf(), 'c22f0ecd-8cff-403c-89d7-8d18c457f1ef', "Id:43, guid value failed");
+                                break;
+                            case 44:
+                                equal(item.g0.valueOf(), '00000000-0000-0000-0000-000000000000', "Id:44, guid value failed");
+                                break;
+                            case 45:
+                                equal(item.g0, null, "Id:45, guid value failed");
+                                break;
+                            default:
+                        }
+                    }
+                    start();
+                });
+
+                q.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0.toString(), 'ae22ffc7-8d96-488e-84f2-c04753242348', "param guid value failed");
+                    start();
+                });
+                q2.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0.toString(), 'c22f0ecd-8cff-403c-89d7-8d18c457f1ef', "param inline value failed");
+                    start();
+                });
+                q3.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0.toString(), '00000000-0000-0000-0000-000000000000', "param empty value failed");
+                    start();
+                });
+                q4.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0, null, "param null value failed");
+                    start();
+                });
+
+                db.TestTable.map(function (t) { return t.g0; }).toArray(function (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i]) {
+                            equal(items[i] instanceof $data.Guid, true, 'guid map failed: ' + i);
+                        } else {
+                            equal(items[i], null, 'guid map failed: ' + i);
+                        }
+                    }
+                    start();
+                });
+
+            });
+            
+
+        });
+
+
+    });
     test('EntityField == null or null == EntityField filter', 6, function () {
         stop(6);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

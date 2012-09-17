@@ -44,7 +44,7 @@ namespace JayData.NewsReader
         public NewsReaderContext()
             : base("newsReader")
         {
-            
+
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -153,6 +153,8 @@ namespace JayData.NewsReader
         public DateTime? d0 { get; set; }
         public virtual List<Tag> Tags { get; set; }
         public virtual User User { get; set; }
+        public Guid? g0 { get; set; }
+
     }
     public class EntitiesContextInitializer : DropCreateDatabaseIfModelChanges<NewsReaderContext>
     {
