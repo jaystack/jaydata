@@ -1,6 +1,3 @@
-﻿require('./testservice.js');
-XMLHttpRequest = require('../../JayService/Scripts/XMLHttpRequest-patched.js').XMLHttpRequest;
-
 $data.Class.define('$example.Person', $data.Entity, null, {
     Id: { type: 'string', key: true, computed: true },
     Name: { type: 'string' },

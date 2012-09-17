@@ -6,7 +6,7 @@ $test.Context.init = function(callback){
     $test.context.onReady(function(db){
         callback(db);
     });
-}
+};
 
 exports.testAdd = function(test){
     test.expect(3);

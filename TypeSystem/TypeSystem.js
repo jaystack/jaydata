@@ -997,9 +997,9 @@
                     } else {
                         self["create" + item.shortName] = creatorFnc;
                     }
-                } else {
+                }/* else {
                     //if (console) { console.warn("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
-                };
+                };*/
 
                 var typePos = classTypes.indexOf(type);
                 if (typePos == -1) {
@@ -1009,9 +1009,9 @@
                     consolidatedClassNames[typePos] = item.fullName;
                 };
 
-                if (item.fullName in classNames) {
+                /*if (item.fullName in classNames) {
                     //console.warn("warning:!!! This typename has already been registered:" + item.fullName);
-                };
+                };*/
                 classNames[item.fullName] = typePos;
             }
 

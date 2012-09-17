@@ -16,7 +16,7 @@ try{
 }catch(e){}
 
 try{
-    window.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+    window.XMLHttpRequest = require('./JayService/Scripts/XMLHttpRequest-patched.js').XMLHttpRequest;
     
     if ($ && JQuery){
         $.support.cors = true;
