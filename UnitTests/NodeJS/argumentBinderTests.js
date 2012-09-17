@@ -133,11 +133,12 @@ exports.Test = {
     'date binder': function (test) {
         test.expect(3);
 
-        var result = $data.JayService.ArgumentBinder.defaultBinder('a', { type: $data.Date }, { query: { a: '/Date(1345672800000)/' } });
-        test.equal(result.valueOf(), new Date('2012-08-23 00:00').valueOf(), 'date resolve failed1');
+        var datetime = new Date();
+        var result = $data.JayService.ArgumentBinder.defaultBinder('a', { type: $data.Date }, { query: { a: '/Date(' + datetime.valueOf() + ')/' } });
+        test.equal(result.valueOf(), datetime.valueOf(), 'date resolve failed1');
 
-        result = $data.JayService.ArgumentBinder.defaultBinder('a', { type: $data.Date }, { query: { a: "datetime'2012-08-22T22:00:00.000Z'" } });
-        test.equal(result.valueOf(), new Date('2012-08-23 00:00').valueOf(), 'date resolve failed2');
+        result = $data.JayService.ArgumentBinder.defaultBinder('a', { type: $data.Date }, { query: { a: "datetime'" + datetime.toISOString() + "'" } });
+        test.equal(result.valueOf(), datetime.valueOf(), 'date resolve failed2');
 
         var context = $example.Context.getContext();
         context.onReady(function () {
