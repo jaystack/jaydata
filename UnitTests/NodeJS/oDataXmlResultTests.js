@@ -417,7 +417,7 @@ exports.Test = {
 
         var matches = resultData.split('><');
         var strMatches = strResult.split('><');
-
+        
         test.expect(matches.length + 2);
         test.equal(result.contentType, 'application/atom+xml', 'content type failed');
 
@@ -458,10 +458,11 @@ exports.Test = {
             collectionName: 'ATables',
             selectedFields: undefined,
             includes: undefined,
-            request: reqPoc
-        };
-        reqPoc.headers = {
-            "user-agent": "PowerPivot"
+            request: {
+                headers: {
+                    "user-agent": "PowerPivot"
+                }
+            }
         };
 
         var result = new $data.oDataResult(items, oDataBuidlerCfg);
