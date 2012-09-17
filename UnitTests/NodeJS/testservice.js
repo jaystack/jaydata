@@ -30,14 +30,45 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
     Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
-    FuncStrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'string' }]).returns('string'),
-    FuncIntParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'int' }]).returns('int'),
-    FuncNumParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'number' }]).returns('number'),
-    FuncObjParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'object' }]).returns('object'),
-    FuncArrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'array' }]).returns('object'),
-    FuncBoolParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'bool' }]).returns('bool'),
-    FuncDateParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'date' }]).returns('date'),
-    FuncGeographyParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'geo' }]).returns('geo'),
+    FuncStrParam: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="string"/>
+        return a;
+    }),
+    FuncIntParam: (function (a) {
+        ///<param name="a" type="int"/>
+        ///<returns type="int"/>
+        return a;
+    }),
+    FuncNumParam: (function (a) {
+        ///<param name="a" type="number"/>
+        ///<returns type="number"/>
+        return a;
+    }),
+    FuncObjParam: (function (a) {
+        ///<param name="a" type="object"/>
+        ///<returns type="object"/>
+        return a;
+    }),
+    FuncArrParam: (function (a) {
+        ///<param name="a" type="array"/>
+        ///<returns type="object"/>
+        return a;
+    }),
+    FuncBoolParam: (function (a) {
+        ///<param name="a" type="bool"/>
+        ///<returns type="bool"/>
+        return a;
+    }),
+    FuncDateParam: (function (a) {
+        ///<param name="a" type="date"/>
+        ///<returns type="date"/>
+        return a; }),
+    FuncGeographyParam: (function (a) {
+        ///<param name="a" type="geo"/>
+        ///<returns type="geo"/>
+        return a;
+    }),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),
 
     ATables: {
@@ -63,6 +94,8 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
         })
     }
 });
+
+$exampleSrv.Context.annotateFromVSDoc();
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');

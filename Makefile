@@ -99,7 +99,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
 	$(TYPES_DIR)/EntityWrapper.js\
-	$(TYPES_DIR)/ServiceOperation.js\
 	$(TYPES_DIR)/Ajax/jQueryAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/WinJSAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/ExtJSAjaxWrapper.js\
