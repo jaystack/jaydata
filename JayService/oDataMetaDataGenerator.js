@@ -564,6 +564,9 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                     return memDef.required !== undefined;
                 }
             },
+            regex: {
+                name: 'RegExp'
+            },
             maxLength: {
                 name: 'MaxLength',
                 converter: function (name, value) {
