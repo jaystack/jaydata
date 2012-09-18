@@ -173,8 +173,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             this._saveRest(independentBlocks, index2, callBack);
     },
     _saveRest: function (independentBlocks, index2, callBack) {
-        batchRequests = [];
-        convertedItem = [];
+        var batchRequests = [];
+        var convertedItem = [];
         var request;
         for (var index = 0; index < independentBlocks.length; index++) {
             for (var i = 0; i < independentBlocks[index].length; i++) {
@@ -253,8 +253,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         OData.request.apply(this, requestData);
     },
     _saveBatch: function (independentBlocks, index2, callBack) {
-        batchRequests = [];
-        convertedItem = [];
+        var batchRequests = [];
+        var convertedItem = [];
         for (var index = 0; index < independentBlocks.length; index++) {
             for (var i = 0; i < independentBlocks[index].length; i++) {
                 convertedItem.push(independentBlocks[index][i].data);
