@@ -17,8 +17,8 @@ if (!console.error) console.error = function () { };
     /// Collection of JayData services
     ///</summary>
     $data.__namespace = true;
-    $data.version = "JayData 1.1.0";
-    $data.versionNumber = "1.1.0";
+    $data.version = "JayData 1.2.0";
+    $data.versionNumber = "1.2.0";
     $data.root = {};
 
 })($data);
