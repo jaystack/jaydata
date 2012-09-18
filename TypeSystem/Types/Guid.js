@@ -16,3 +16,7 @@ $data.Guid.prototype.valueOf = function () {
 $data.Guid.prototype.toString = function () {
     return this.value;
 };
+
+$data.parseGuid = function (guid) {
+    return new $data.Guid(guid);
+};

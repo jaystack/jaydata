@@ -87,7 +87,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean1'; }).toTraceString();
-            equal(q.$filter.toString(), "function anonymous(o) {\nreturn (o.name == 'ocean1');\n}");
+            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.name == 'ocean1');\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.name == 'ocean1'; }).toArray(function (r) {
                 start();
@@ -182,7 +182,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toTraceString();
-            equal(q.$filter.toString(), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && (o.woeid == 1235));\n}");
+            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && (o.woeid == 1235));\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toArray(function (r) {
                 start();
@@ -205,7 +205,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.placeTypeName.code == '1'; }).toTraceString();
-            equal(q.$filter.toString(), "function anonymous(o) {\nreturn (o.placeTypeName.code == '1');\n}");
+            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn (o.placeTypeName.code == '1');\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.placeTypeName.code == '1'; }).toArray(function (r) {
                 start();
@@ -229,7 +229,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.woeid in [1235, 1236, 1237]; }).toTraceString();
-            equal(q.$filter.toString(), "function anonymous(o) {\nreturn ([1235,1236,1237].indexOf(o.woeid) > -1);\n}");
+            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ([1235,1236,1237].indexOf(o.woeid) > -1);\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.woeid in [1235, 1236, 1237]; }).toArray(function (r) {
                 start();
@@ -331,7 +331,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.orderBy(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString(), 'function anonymous(o) {\nreturn o.name;\n}', 'orderBy value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy value failed');
 
             memoryContext.Oceans.orderBy(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -341,7 +341,7 @@
             });
 
             var q = memoryContext.Oceans.orderByDescending(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString(), 'function anonymous(o) {\nreturn o.name;\n}', 'orderByDescending value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderByDescending value failed');
 
             memoryContext.Oceans.orderByDescending(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -351,8 +351,8 @@
             });
 
             var q = memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderBy(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString(), 'function anonymous(o) {\nreturn o.woeid;\n}', 'orderBy-orderBy value failed');
-            equal(q.$order[1].toString(), 'function anonymous(o) {\nreturn o.name;\n}', 'orderBy-orderBy value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.woeid;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderBy value failed');
+            equal(q.$order[1].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderBy value failed');
 
             memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderBy(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -366,8 +366,8 @@
             });
 
             var q = memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderByDescending(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString(), 'function anonymous(o) {\nreturn o.woeid;\n}', 'orderBy-orderByDescending value failed');
-            equal(q.$order[1].toString(), 'function anonymous(o) {\nreturn o.name;\n}', 'orderBy-orderByDescending value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.woeid;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderByDescending value failed');
+            equal(q.$order[1].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderByDescending value failed');
 
             memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderByDescending(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -391,7 +391,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.map(function (o) { return o.name; }).toTraceString();
-            equal(q.$map.toString(), "function anonymous(o) {\nreturn o.name;\n}");
+            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn o.name;\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -400,7 +400,7 @@
             });
 
             var q = memoryContext.Oceans.map(function (o) { return { n: o.name }; }).toTraceString();
-            equal(q.$map.toString(), "function anonymous(o) {\nreturn { n: o.name };\n}");
+            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn { n: o.name };\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return { n: o.name }; }).toArray(function (r) {
                 start();
@@ -409,7 +409,7 @@
             });
 
             var q = memoryContext.Oceans.map(function (o) { return { n: o.name, w: o.woeid }; }).toTraceString();
-            equal(q.$map.toString(), "function anonymous(o) {\nreturn { n: o.name, w: o.woeid };\n}");
+            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn { n: o.name, w: o.woeid };\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return { n: o.name, w: o.woeid }; }).toArray(function (r) {
                 start();
@@ -419,7 +419,7 @@
             });
 
             var q = memoryContext.Oceans.map(function (o) { return { n: o.name, a: { b: { w: o.woeid}} }; }).toTraceString();
-            equal(q.$map.toString(), "function anonymous(o) {\nreturn { n: o.name, a: { b: { w: o.woeid } } };\n}");
+            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn { n: o.name, a: { b: { w: o.woeid } } };\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return { n: o.name, a: { b: { w: o.woeid}} }; }).toArray(function (r) {
                 start();

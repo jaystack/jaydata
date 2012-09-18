@@ -5,7 +5,7 @@
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 
         expect(20);
-        stop(5);
+        stop(6);
         $data.Class.define("$news.Types.TestItemExtended", $data.Entity, null, {
             Id: { type: "int", key: true },
             i0: { type: "int" },

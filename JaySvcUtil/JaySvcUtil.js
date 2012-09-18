@@ -1,4 +1,4 @@
-﻿
+
 $data.Class.define('$data.MetadataLoaderClass', null, null, {
     load: function (metadataUri, callBack, config) {
         
