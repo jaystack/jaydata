@@ -957,7 +957,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         
         var readyFn = function(cancel){
-            if (cancel){
+            if (cancel === false){
                 cancelEvent = 'async';
                 changedEntities.length = 0;
             }
@@ -989,7 +989,7 @@ $data.Class.define('$data.EntityContext', null, null,
         };
         
         var callbackFn = function(cancel){
-            if (cancel){
+            if (cancel === false){
                 cancelEvent = 'async';
                 changedEntities.length = 0;
                 
