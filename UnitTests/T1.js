@@ -1,6 +1,73 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('concurrency test', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(8);
+        stop(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            try {
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    db.Articles.toArray(function (a) {
+                        db.Articles.toArray(function (a2) {
+                            var article = a[0];
+                            var article2 = a2[0];
+                            equal(article.Id, article2.Id, 'test items equal failed');
+                            equal(article.RowVersion, article2.RowVersion, 'test items RowVersion equal failed');
+
+                            db.Articles.attach(article);
+                            article.Body += 'Changed body';
+                            db.saveChanges(function () {
+                                equal(article.Id, article2.Id, 'test items equal');
+                                notEqual(article.RowVersion, article2.RowVersion, 'test items RowVersion notequal failed');
+
+                                db.Articles.attach(article2);
+                                article2.Body += 'Changed later';
+
+                                db.saveChanges({
+                                    success: function () {
+                                        start(1);
+                                        ok(false, 'save success on invalid element failed');
+                                    },
+                                    error: function () {
+                                        article2.RowVersion = '*';
+                                        db.saveChanges({
+                                            success: function () {
+
+                                                equal(article.Id, article2.Id, 'test items equal');
+                                                notEqual(article.RowVersion, article2.RowVersion, 'test items RowVersion notequal failed');
+
+                                                db.Articles.filter(function (art) { return art.Id == this.Id }, { Id: article2.Id }).toArray(function (a3) {
+                                                    start(1);
+
+                                                    equal(a3[0].Id, article2.Id, 'test items equal failed');
+                                                    equal(a3[0].RowVersion, article2.RowVersion, 'test items RowVersion equal failed');
+                                                });
+                                            },
+                                            error: function () {
+                                                start(1);
+                                                ok(false, 'save not success on valid element failed');
+                                            }
+                                        });
+                                    }
+                                })
+
+                            });
+                        });
+                    });
+                });
+
+
+            } catch (ex) {
+                start(1);
+                ok(false, "Unhandled exception occured");
+                console.log("--=== concurrency test: ");
+                console.dir(ex);
+                console.log(" ===--");
+            }
+        });
+    });
     test('OData provider - Filter by GUID field should be supported', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 

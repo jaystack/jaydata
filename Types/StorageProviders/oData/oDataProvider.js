@@ -343,7 +343,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                if (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function(def){ return def.name === memdef.name; }))
+                if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function(def){ return def.name === memdef.name; })))
                     serializableObject[memdef.name] = item.physicalData[memdef.name];
             }
         }, this);
@@ -353,12 +353,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var property = item.data.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
         if (property && property[0]) {
             headers['If-Match'] = item.data[property[0].name];
-            item.data[property[0].name] = "";
+            //item.data[property[0].name] = "";
         }
-        //if (item.data.RowVersion || item.data.RowVersion === 0) {
-        //    headers['If-Match'] = item.data.RowVersion.toString();
-        //    item.data.RowVersion = "";
-        //}
     },
     getTraceString: function (queryable) {
         var sqlText = this._compile(queryable);
