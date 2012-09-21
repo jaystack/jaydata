@@ -1,30 +1,77 @@
-
 $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctx) {
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
-            source: null
+            source: null,
+            persistentData:false,
+            localStoreName:'JayData_InMemory_Provider'
         }, cfg);
     },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
-        this.providerConfiguration.source = this.providerConfiguration.source || {};
-        var setKeys = Object.keys(this.context._entitySetReferences);
-        for (var i = 0; i < setKeys.length; i++) {
-            var set = this.context._entitySetReferences[setKeys[i]];
-            if (!this.providerConfiguration.source[set.name]) {
-                this.providerConfiguration.source[set.name] = [];
-            } else {
-                var sourceArray = this.providerConfiguration.source[set.name];
-                for (var j = 0; j < sourceArray.length; j++) {
-                    if (!(sourceArray[j] instanceof set.elementType))
-                        Guard.raise(new Exception('Invalid element in source: \'' + setKeys[i]));
+        var setKeys = [];
+        for(var i in this.context._entitySetReferences){
+            setKeys.push(this.context._entitySetReferences[i].collectionName);
+        }
+        var localStorageData = null;
+        if(this.providerConfiguration.persistentData && window.localStorage){
+            var localStoreName = this.providerConfiguration.localStoreName || "JayData_InMemory_Provider";
+            var that = this;
+            localStorageData = JSON.parse(window.localStorage.getItem(localStoreName),
+                function(key, value){
+                    if(setKeys.indexOf(key)>-1 && value.map){
+                        return value.map(function(item){return new that.context[key].createNew(item);});
+                    }
+                    return value;
+                });
+        }
+
+        var tempSource = localStorageData || this.providerConfiguration.source || {};
+
+        //check data and crate sequence table if needed
+        this.providerConfiguration.source = {'inmemory_sequence':{}};
+        for(var index = 0;index<this.context._storageModel.length;index++){
+            var storageModel = this.context._storageModel[index];
+            //Create store for EntitySet
+            this.providerConfiguration.source[storageModel.ItemName] = [];
+            //Check primary key
+            var keys = storageModel.LogicalType.memberDefinitions.getKeyProperties();
+            var computedKeys = keys.filter(function(key){return key.computed});
+            if(computedKeys.length>1){
+                Guard.raise(new Exception('More than one computed field not supported in '+storageModel.ItemName+' entity set.'));
+            }
+            var isIntegerPk = false;
+            if(computedKeys.length === 1){
+                var resolvedType = Container.resolveType(computedKeys[0].type);
+                if(resolvedType === $data.Integer){
+                    this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName] = 0;
+                    isIntegerPk = true;
+                }else if (resolvedType === $data.Guid){
+
+                }else{
+                    Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!'));
+                }
+            }
+            //validate init data
+            if(tempSource[storageModel.ItemName]){
+                for(var i=0;i<tempSource[storageModel.ItemName].length;i++){
+                    var entity = tempSource[storageModel.ItemName][i];
+                    if(entity instanceof storageModel.LogicalType){
+                        if(isIntegerPk){
+                            var keyValue = entity[computedKeys[0].name]
+                            if(keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName]){
+                                this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName] = keyValue;
+                            }
+                        }
+                        this.providerConfiguration.source[storageModel.ItemName].push(entity);
+                    }else{
+                        Guard.raise(new Exception('Invalid element in source: '+storageModel.ItemName));
+                    }
                 }
             }
         }
-
         callBack.success(this.context);
     },
     executeQuery: function (query, callBack) {
@@ -37,8 +84,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             callBack.error(e);
             return;
         }
-
-        var sourceName = query.context.getEntitySetFromElementType(query.defaultType).name;
+        var sourceName = query.context.getEntitySetFromElementType(query.defaultType).collectionName;
         var result = [].concat(this.providerConfiguration.source[sourceName] || []);
         if (sql.$filter && !sql.$every)
             result = result.filter(sql.$filter);
@@ -94,21 +140,73 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             var item = changedItems[i];
             switch (item.data.entityState) {
                 case $data.EntityState.Added:
-                    //todo: key, computedfields
-                    this.providerConfiguration.source[item.entitySet.name].push(item.data);
+                    this._save_add_processPk(item);
+                    this.providerConfiguration.source[item.entitySet.collectionName].push(item.data);
                     break;
                 case $data.EntityState.Deleted:
-                    var idx = this.providerConfiguration.source[item.entitySet.name].indexOf(item.data);
-                    this.providerConfiguration.source[item.entitySet.name].splice(idx, 1);
+                    var collection = this.providerConfiguration.source[item.entitySet.name];
+                    var entity = this._save_getEntity(item, collection);
+                    var idx = collection.indexOf(entity);
+                    collection.splice(idx, 1);
                     break;
                 case $data.EntityState.Modified:
-                    //todo: computedfields
+                    if(item.data.changedProperties && item.data.changedProperties.length>0){
+                        var collection = this.providerConfiguration.source[item.entitySet.name];
+                        var entity = this._save_getEntity(item, collection);
+                        for(var j=0;j<item.data.changedProperties.length;j++){
+                            var field = item.data.changedProperties[j];
+                            if(!field.key && item.entitySet.elementType.memberDefinitions.getPublicMappedPropertyNames().indexOf(field.name)>-1){
+                                entity[field.name] = item.data[field.name];
+                            }
+                        }
+                    }
                     break;
                 default:
                     break;
             }
         }
+        if(this.providerConfiguration.persistentData && window.localStorage){
+            var localStoreName = this.providerConfiguration.localStoreName || "JayData_InMemory_Provider";
+            localStorageData = window.localStorage.setItem(localStoreName, JSON.stringify(this.providerConfiguration.source));
+        }
         callBack.success();
+    },
+    _save_add_processPk:function(item){
+        var keys = item.entitySet.elementType.memberDefinitions.getKeyProperties();
+        if(keys.length === 1 && keys[0].computed){
+            var key = keys[0];
+            var keyResolveType = Container.resolveType(key.type);
+            if(keyResolveType === $data.Guid){
+                item.data[key.name] = $data.Guid.NewGuid();
+            } else if(keyResolveType === $data.Integer){
+                var sequenceValue = this.providerConfiguration.source['inmemory_sequence'][item.entitySet.collectionName];
+                item.data[key.name] = sequenceValue+1;
+                this.providerConfiguration.source['inmemory_sequence'][item.entitySet.collectionName] = sequenceValue+1;
+            }else{
+                Guard.raise(new Exception("Not supported data type!"))
+            }
+        }
+        else{
+            for(var j=0;j<keys.length;j++){
+                if(item.data[keys[j].name] === null || item.data[keys[j].name] === undefined){
+                    Guard.raise(new Exception('Key field must set value! Key field name without value: '+keys[j].name));
+                }
+            }
+        }
+    },
+    _save_getEntity:function(item, collection){
+        var keys = item.entitySet.elementType.memberDefinitions.getKeyProperties();
+        entities = collection.filter(function(entity){
+            var isEqual = true;
+            for(var i = 0;i<keys.length;i++){
+                isEqual = isEqual && entity[keys[i].name] === item.data[keys[i].name];
+            }
+            return isEqual;
+        });
+        if(entities>1){
+            Guard.raise(new Exception("Inconsistent storage!"));
+        }
+        return entities[0];
     },
     getTraceString: function (queryable) {
         var compiled = this._compile(queryable);
@@ -175,7 +273,8 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); }
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
+                '$data.Guid': function (guid) { return guid; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
@@ -185,10 +284,16 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                 '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); }
+                '$data.Array': function (o) { return JSON.stringify(o); },
+                '$data.Guid': function (guid) { return guid; }
             }
         }
     }
 }, null);
-
+$C('$data.storageProviders.InMemory.LocalStorageProvider', $data.storageProviders.InMemory.InMemoryProvider, null,{
+    constructor:function(cfg, ctx){
+        this.providerConfiguration.persistentData = true;
+    }
+}, null);
 $data.StorageProviderBase.registerProvider("InMemory", $data.storageProviders.InMemory.InMemoryProvider);
+$data.StorageProviderBase.registerProvider("LocalStore", $data.storageProviders.InMemory.LocalStorageProvider);
