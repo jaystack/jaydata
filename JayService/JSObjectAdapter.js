@@ -113,10 +113,10 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     value = new $data.oDataResult(value, oDataBuilderCfg);
                 }
             }
-
+            
             res.statusCode = value.statusCode !== 200 ? value.statusCode : res.statusCode;
-            if (!(value instanceof $data.EmptyServiceResult)) {
-                var resultText = value.toString();
+            var resultText;
+            if (!(value instanceof $data.EmptyServiceResult) && (resultText = value.toString())) {
                 res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
                 res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=UTF-8');
                 res.end(resultText);

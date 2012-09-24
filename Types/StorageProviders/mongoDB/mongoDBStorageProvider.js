@@ -777,61 +777,93 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
-        switch (this.providerConfiguration.dbCreation){
-            case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                var server = this._getServer();
-                new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        var server = this._getServer();
+        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+            if (error){
+                callBack.error(error);
+                return;
+            }
+            
+            var fn = function(error, client){
+                var cnt = 0;
+                var collectionCount = 0;
+                var readyFn = function(client){
+                    if (--cnt == 0){
+                        callBack.success(self.context);
+                        client.close();
+                    }
+                };
+                
+                for (var i in self.context._entitySetReferences){
+                    if (self.context._entitySetReferences.hasOwnProperty(i))
+                        cnt++;
+                }
+                
+                collectionCount = cnt;
+                var sets = Object.keys(self.context._entitySetReferences);
+                sets.forEach(function(i){
+                    if (self.context._entitySetReferences.hasOwnProperty(i)){
+                        client.collectionNames({ namesOnly: true }, function(error, names){
+                            names = names.map(function(it){ return it.slice(it.lastIndexOf('.') + 1); });
+                            switch (self.providerConfiguration.dbCreation){
+                                case $data.storageProviders.DbCreationType.DropAllExistingTables:
+                                    if (names.indexOf(self.context._entitySetReferences[i].tableName) >= 0){
+                                        client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
+                                            if (error){
+                                                callBack.error(error);
+                                                return;
+                                            }
+                                            if (self.context._entitySetReferences[i].tableOptions){
+                                                client.createCollection(self.context._entitySetReferences[i].tableName, self.context._entitySetReferences[i].tableOptions, function(error, result){
+                                                    if (error){
+                                                        callBack.error(error);
+                                                        return;
+                                                    }
+                                                    readyFn(client);
+                                                });
+                                            }else readyFn(client);
+                                        });
+                                    }else if (names.indexOf(self.context._entitySetReferences[i].tableName) < 0 && self.context._entitySetReferences[i].tableOptions){
+                                        client.createCollection(self.context._entitySetReferences[i].tableName, self.context._entitySetReferences[i].tableOptions, function(error, result){
+                                            if (error){
+                                                callBack.error(error);
+                                                return;
+                                            }
+                                            readyFn(client);
+                                        });
+                                    }else readyFn(client);
+                                    break;
+                                default:
+                                    if (names.indexOf(self.context._entitySetReferences[i].tableName) < 0 && self.context._entitySetReferences[i].tableOptions){
+                                        client.createCollection(self.context._entitySetReferences[i].tableName, self.context._entitySetReferences[i].tableOptions, function(error, result){
+                                            if (error){
+                                                callBack.error(error);
+                                                return;
+                                            }
+                                            readyFn(client);
+                                        });
+                                    }else readyFn(client);
+                                    break;
+                            }
+                        });
+                    }
+                });
+            };
+            
+            if (self.providerConfiguration.username){
+                client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password || '', function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
                     
-                    var fn = function(error, client){
-                        var cnt = 0;
-                        var collectionCount = 0;
-                        var readyFn = function(client){
-                            if (--cnt == 0){
-                                callBack.success(self.context);
-                                client.close();
-                            }
-                        };
-                        
-                        for (var i in self.context._entitySetReferences){
-                            if (self.context._entitySetReferences.hasOwnProperty(i))
-                                cnt++;
-                        }
-                        
-                        collectionCount = cnt;
-                        
-                        for (var i in self.context._entitySetReferences){
-                            if (self.context._entitySetReferences.hasOwnProperty(i)){
-                                
-                                client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
-                                    readyFn(client);
-                                });
-                            }
-                        }
-                    };
-                    
-                    if (self.providerConfiguration.username){
-                        client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password || '', function(error, result){
-                            if (error){
-                                callBack.error(error);
-                                return;
-                            }
-                            
-                            if (result){
-                                fn(error, client);
-                                return;
-                            }
-                        });
-                    }else fn(error, client);
+                    if (result){
+                        fn(error, client);
+                        return;
+                    }
                 });
-                break;
-            default:
-                callBack.success(this.context);
-                break;
-        }
+            }else fn(error, client);
+        });
     },
     executeQuery: function(query, callBack){
         var self = this;
