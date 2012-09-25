@@ -521,5 +521,179 @@
         }
 
     });
-    
+
+    test('int computed field',2, function(){
+        stop(3);
+        var memoryContext = new $news.Types.NewsContext({name: 'InMemory'});
+        memoryContext.onReady(function(){
+            start(1);
+            memoryContext.Tags.add(new $news.Types.Tag({Title:'Tag3'}));
+            memoryContext.saveChanges(function(){
+                start(1);
+                memoryContext.Tags.toArray(function(result){
+                    start(1);
+                    equal(result.length, 1, 'number of tags failed');
+                    equal(result[0].Id, 1, 'PK field failed');
+                });
+            });
+
+        });
+    });
+
+    test('int computed field with init data',2, function(){
+        stop(3);
+        var items = [
+            new $news.Types.Tag({Id:1, Title: "Tag1" }),
+            new $news.Types.Tag({Id:2, Title: "Tag2" })
+        ];
+        var memoryContext = new $news.Types.NewsContext({name: 'InMemory', source:{Tags:items}});
+        memoryContext.onReady(function(){
+            start(1);
+            memoryContext.Tags.add(new $news.Types.Tag({Title:'Tag3'}));
+            memoryContext.saveChanges(function(){
+                start(1);
+                memoryContext.Tags.toArray(function(result){
+                    start(1);
+                    equal(result.length, 3, 'number of tags failed');
+                    equal(result[2].Id, 3, 'PK field failed');
+                });
+            });
+
+        });
+    });
+
+    test('int computed field with init data complex',2, function(){
+        stop(3);
+        var items = [
+            new $news.Types.Tag({Id:1, Title: "Tag1" }),
+            new $news.Types.Tag({Id:7, Title: "Tag2" }),
+            new $news.Types.Tag({Id:2, Title: "Tag3" }),
+            new $news.Types.Tag({Id:9, Title: "Tag4" }),
+            new $news.Types.Tag({Id:3, Title: "Tag5" })
+        ];
+        var memoryContext = new $news.Types.NewsContext({name: 'InMemory', source:{Tags:items}});
+        memoryContext.onReady(function(){
+            start(1);
+            memoryContext.Tags.add(new $news.Types.Tag({Title:'Tag3'}));
+            memoryContext.saveChanges(function(){
+                start(1);
+                memoryContext.Tags.toArray(function(result){
+                    start(1);
+                    equal(result.length, 6, 'number of tags failed');
+                    equal(result[5].Id, 10, 'PK field failed');
+                });
+            });
+
+        });
+    });
+
+    test('modify data',3, function(){
+        stop(3);
+        var items = [
+            new $news.Types.Tag({Id:1, Title: "Tag1" }),
+            new $news.Types.Tag({Id:7, Title: "Tag2" }),
+            new $news.Types.Tag({Id:2, Title: "Tag3" }),
+            new $news.Types.Tag({Id:9, Title: "Tag4" }),
+            new $news.Types.Tag({Id:3, Title: "Tag5" })
+        ];
+        var memoryContext = new $news.Types.NewsContext({name: 'InMemory', source:{Tags:items}});
+        memoryContext.onReady(function(){
+            start(1);
+            var entity = new $news.Types.Tag({Id:2});
+            memoryContext.Tags.attach(entity);
+            entity.Title = "almafa"
+            memoryContext.saveChanges(function(){
+                start(1);
+                memoryContext.Tags
+                    .filter(function(item){return item.Id == 2;})
+                    .toArray(function(result){
+                        start(1);
+                        equal(result.length, 1, 'number of tags failed');
+                        equal(result[0].Id, 2, 'PK field value error');
+                        equal(result[0].Title, 'almafa', 'Title value failed');
+                });
+            });
+
+        });
+    });
+
+    test('guid computed field',3, function(){
+        stop(3);
+        $data.Class.define("$test.GuidItem", $data.Entity, null, {
+            Id: { type: $data.Guid, key: true, computed:true },
+            Title: {type:'string'}
+        });
+        $data.Class.define("$test.GuidContext", $data.EntityContext, null, {
+            TestTable: { type: $data.EntitySet, elementType: $test.GuidItem }
+        });
+        var memoryContext = new $test.GuidContext({name: 'InMemory'});
+        memoryContext.onReady(function(){
+            start(1);
+            memoryContext.TestTable.add(new $test.GuidItem({Title:'Tag3'}));
+            memoryContext.saveChanges(function(){
+                start(1);
+                memoryContext.TestTable.toArray(function(result){
+                    start(1);
+                    equal(result.length, 1, 'number of tags failed');
+                    notEqual(result[0].Id, undefined, 'PK field failed');
+                    ok(result[0].Id instanceof $data.Guid, 'PK field type failed');
+                });
+            });
+
+        });
+    });
+
+    test('guid computed field with init data',3, function(){
+        stop(3);
+        $data.Class.define("$test.GuidItem", $data.Entity, null, {
+            Id: { type: $data.Guid, key: true, computed:true },
+            Title: {type:'string'}
+        });
+        $data.Class.define("$test.GuidContext", $data.EntityContext, null, {
+            TestTable: { type: $data.EntitySet, elementType: $test.GuidItem }
+        });
+        var items = [
+            new $test.GuidItem({Id:$data.Guid.NewGuid(), Title: "Tag1" }),
+            new $test.GuidItem({Id:$data.Guid.NewGuid(), Title: "Tag2" })
+        ];
+        var memoryContext = new $test.GuidContext({name: 'InMemory', source:{TestTable:items}});
+        memoryContext.onReady(function(){
+            start(1);
+            memoryContext.TestTable.add(new $test.GuidItem({Title:'Tag3'}));
+            memoryContext.saveChanges(function(){
+                start(1);
+                memoryContext.TestTable.toArray(function(result){
+                    start(1);
+                    equal(result.length, 3, 'number of tags failed');
+                    notEqual(result[2].Id, undefined, 'PK field failed');
+                    ok(result[2].Id instanceof $data.Guid, 'PK field type failed');
+                });
+            });
+
+        });
+    });
+
+    test('persist local store',2, function(){
+        stop(4);
+        window.localStorage.removeItem("JayData_InMemory_Provider");
+        var memoryContext = new $news.Types.NewsContext({name: 'LocalStore'});
+        memoryContext.onReady(function(){
+            start(1);
+            memoryContext.Tags.add(new $news.Types.Tag({Title:'Tag3'}));
+            memoryContext.saveChanges(function(){
+                start(1);
+                var memoryContext2 = new $news.Types.NewsContext({name: 'LocalStore'});
+                memoryContext2.onReady(function(){
+                    start(1);
+                    memoryContext2.Tags.toArray(function(result){
+                        start(1);
+                        equal(result.length, 1, 'number of tags failed');
+                        equal(result[0].Id, 1, 'PK field failed');
+                    });
+                });
+            });
+
+        });
+    });
+
 });

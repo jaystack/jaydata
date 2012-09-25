@@ -10,6 +10,7 @@ $data.Class.define('$data.StorageModel', null, null, {
     PhysicalTypeName: {},
     EventHandlers: {},
     TableName: {},
+    TableOptions: { value: undefined },
     ComplexTypes: {},
     Associations: {},
     EntitySetReference: {}
@@ -168,6 +169,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var sm = this[storageModel.ItemName];
             sm.name = storageModel.ItemName;
             sm.tableName = storageModel.TableName;
+            sm.tableOptions = storageModel.TableOptions;
             sm.eventHandlers = storageModel.EventHandlers;
             this._entitySetReferences[storageModel.LogicalType.name] = sm;
 
@@ -189,6 +191,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
                     var storageModel = new $data.StorageModel();
                     storageModel.TableName = item.tableName || item.name;
+                    storageModel.TableOptions = item.tableOptions;
                     storageModel.ItemName = item.name;
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
