@@ -641,7 +641,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             '$data.Boolean': 'Edm.Boolean',
             '$data.Blob': 'Edm.Binary',
             '$data.Date': 'Edm.DateTime',
-            '$data.Number': 'Edm.Decimal',
+            '$data.Number': 'Edm.Double',
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
             '$data.ObjectID': 'Edm.String',
