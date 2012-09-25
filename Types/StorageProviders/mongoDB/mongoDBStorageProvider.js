@@ -788,7 +788,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var cnt = 0;
                 var collectionCount = 0;
                 var readyFn = function(client){
-                    if (--cnt == 0){
+                    if (--cnt <= 0){
                         callBack.success(self.context);
                         client.close();
                     }
@@ -801,6 +801,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 
                 collectionCount = cnt;
                 var sets = Object.keys(self.context._entitySetReferences);
+                if (!sets.length) return readyFn(client);
                 sets.forEach(function(i){
                     if (self.context._entitySetReferences.hasOwnProperty(i)){
                         client.collectionNames({ namesOnly: true }, function(error, names){
