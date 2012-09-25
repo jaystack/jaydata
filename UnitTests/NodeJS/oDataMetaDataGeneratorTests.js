@@ -300,7 +300,7 @@ exports['functionContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
                         '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Decimal" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod" ReturnType="Edm.Double" m:HttpMethod="GET">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1241,7 +1241,7 @@ exports['entityContext'] = {
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
                         '<EntityContainer Name="contextFIreturnNumber" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Decimal" m:HttpMethod="GET">' +
+                            '<FunctionImport Name="webMethod" ReturnType="Edm.Double" m:HttpMethod="GET">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1855,7 +1855,7 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property Name="p1" Type="Edm.Int32" />' +
                             '<Property Name="p2" Type="Edm.String" />' +
-                            '<Property Name="p3" Type="Edm.Decimal" />' +
+                            '<Property Name="p3" Type="Edm.Double" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESMultiple" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
@@ -1894,7 +1894,7 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property Name="p1" Nullable="false" Type="Edm.Int32" />' +
                             '<Property Name="p2" Nullable="false" Type="Edm.String" />' +
-                            '<Property Name="p3" Nullable="false" Type="Edm.Decimal" />' +
+                            '<Property Name="p3" Nullable="false" Type="Edm.Double" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsReq" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassReq" Name="Es1" />' +
@@ -1932,7 +1932,7 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p1" Type="Edm.Int32" p6:StoreGeneratedPattern="Identity" />' +
                             '<Property Name="p2" Type="Edm.String" />' +
-                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p3" Type="Edm.Decimal" p6:StoreGeneratedPattern="Computed" />' +
+                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p3" Type="Edm.Double" p6:StoreGeneratedPattern="Computed" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsComp" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassComp" Name="Es1" />' +
@@ -1971,8 +1971,8 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property Name="p1" Type="Edm.Int32" />' +
                             '<Property Name="p2" Nullable="false" Type="Edm.String" />' +
-                            '<Property Name="p3" Nullable="true" Type="Edm.Decimal" />' +
-                            '<Property Name="p4" Nullable="true" Type="Edm.Decimal" />' +
+                            '<Property Name="p3" Nullable="true" Type="Edm.Double" />' +
+                            '<Property Name="p4" Nullable="true" Type="Edm.Double" />' +
                         '</EntityType>' +
                         '<EntityContainer Name="contextESpropsNullable" m:IsDefaultEntityContainer="true">' +
                             '<EntitySet EntityType="$test.exampleClassNullable" Name="Es1" />' +
