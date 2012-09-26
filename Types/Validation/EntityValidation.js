@@ -59,7 +59,7 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
                 minLength: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length >= definedValue; },
                 maxLength: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length <= definedValue; },
                 length: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length == definedValue; },
-                regex: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.match(typeof value === 'string' ? new RegExp(definedValue.slice(1, -1)) : definedValue) }
+                regex: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.match(typeof definedValue === 'string' ? new RegExp(definedValue.slice(1, -1)) : definedValue) }
             },
             '$data.Date': {
                 required: function (value, definedValue) { return !Object.isNullOrUndefined(value); },
