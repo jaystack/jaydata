@@ -1,6 +1,49 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('guid key, navProperty', function () {
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(8);
+        stop(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            var itemGrp = new $news.Types.TestItemGroup({ Id: $data.parseGuid('73304541-7f4f-4133-84a4-16ccc2ce600d'), Name: 'Group1' });
+            equal(itemGrp.Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', ' init guid value');
+            var item = new $news.Types.TestItemGuid({ Id: $data.parseGuid('bb152892-3a48-4ffa-83cd-5f952e21c6eb'), i0: 0, b0: true, s0: '0', Group: itemGrp });
+
+            //db.TestItemGroups.add(itemGrp);
+            db.TestTable2.add(item);
+
+            db.saveChanges(function () {
+                db.TestItemGroups.toArray(function (res) {
+                    equal(res[0].Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
+                    db.TestTable2.toArray(function (res2) {
+                        equal(res2[0].Id.value, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
+
+
+                        db.TestItemGroups.attach(itemGrp);
+                        var item2 = new $news.Types.TestItemGuid({ Id: $data.parseGuid('03be7d99-5dc1-464b-b890-5b997c86a798'), i0: 1, b0: true, s0: '0', Group: itemGrp });
+                        db.TestTable2.add(item2);
+
+                        db.saveChanges(function () {
+                            db.TestItemGroups.toArray(function (res) {
+                                equal(res.length, 1, 'res length');
+                                equal(res[0].Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
+                                db.TestTable2.orderBy('it.i0').toArray(function (res2) {
+                                    equal(res2.length, 2, 'res2 length');
+                                    equal(res2[0].Id.value, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
+                                    equal(res2[1].Id.value, '03be7d99-5dc1-464b-b890-5b997c86a798', 'res2 init guid value');
+                                    start();
+                                });
+                            });
+                        });
+
+                    })
+                })
+            });
+
+        });
+    });
     test('concurrency test', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 

@@ -803,6 +803,7 @@ $data.Class.define('$data.EntityContext', null, null,
                                             if (value instanceof Array) {
                                                 if (value.indexOf(entityCachedItem.data) == -1) {
                                                     value.push(entityCachedItem.data);
+                                                    data[navPropertyName] = value;
                                                 }
                                             } else {
                                                 if (typeof intellisense === 'undefined') {

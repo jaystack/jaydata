@@ -83,13 +83,15 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                 }, this);
                             } else {
                                 if (refValue.entityState === $data.EntityState.Modified) {
-                                    var tblName = context._storageModel.getStorageModel(refValue.getType()).TableName;
-                                    var pk = '(';
+                                    var sMod = context._storageModel.getStorageModel(refValue.getType())
+                                    var tblName = sMod.TableName;
+                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: sMod.EntitySetReference }) + ')';
+                                    /*var pk = '(';
                                     refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
                                         if (index > 0) { pk += ','; }
                                         pk += refValue[k.name];
                                     }, this);
-                                    pk += ')';
+                                    pk += ')';*/
                                     dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
@@ -586,10 +588,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
-                switch (field.dataType) {
+                switch (Container.getName(field.dataType)) {
+                    case "$data.Guid":
                     case "Edm.Guid":
-                        keyValue = ("guid'" + keyValue + "'");
+                        keyValue = ("guid'" + (keyValue ? keyValue.value : keyValue)  + "'");
                         break;
+                    case "$data.Blob":
                     case "Edm.Binary":
                         keyValue = ("binary'" + keyValue + "'");
                         break;
@@ -597,6 +601,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         var hexDigits = '0123456789ABCDEF';
                         keyValue = (hexDigits[(i >> 4) & 15] + hexDigits[i & 15]);
                         break;
+                    case "$data.Date":
                     case "Edm.DateTime":
                         keyValue = ("datetime'" + keyValue.toISOString() + "'");
                         break;
@@ -610,7 +615,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         keyValue = (keyValue + "L");
                         break;
                     case 'Edm.String':
-                    case "string":
+                    case "$data.String":
                         keyValue = ("'" + keyValue + "'");
                         break;
                 }
