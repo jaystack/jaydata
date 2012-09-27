@@ -1,6 +1,48 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('map as jaydata type', function () {
+        expect(6);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.orderBy('it.Id').map(function (a) { return { Id: a.Id, Lead: a.Lead, Body: a.Body, Category: a.Category }; }, null, $news.Types.Article).toArray(function (art) {
+                    equal(art[1] instanceof $news.Types.Article, true, 'result is typed');
+                    
+                    equal(typeof art[1].Id, 'number', 'result Id is typed');
+                    equal(typeof art[1].Lead, 'string', 'result Lead is typed');
+                    equal(typeof art[1].Body, 'string', 'result Body is typed');
+                    equal(typeof art[1].CreateDate, 'undefined', 'result CreateDate is undefined');
+                    equal(art[1].Category instanceof $news.Types.Category, true, 'art[1].Category is Array');
+
+                    start();
+                });
+            });
+
+        });
+    });
+    test('map as default', function () {
+        expect(6);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.orderBy('it.Id').map(function (a) { return { Id: a.Id, Lead: a.Lead, Body: a.Body, Category: a.Category }; }, null, 'default').toArray(function (art) {
+                    equal(art[1] instanceof $news.Types.Article, true, 'result is typed');
+
+                    equal(typeof art[1].Id, 'number', 'result Id is typed');
+                    equal(typeof art[1].Lead, 'string', 'result Lead is typed');
+                    equal(typeof art[1].Body, 'string', 'result Body is typed');
+                    equal(typeof art[1].CreateDate, 'undefined', 'result CreateDate is undefined');
+                    equal(art[1].Category instanceof $news.Types.Category, true, 'art[1].Category is Array');
+
+                    start();
+                });
+            });
+
+        });
+    });
     test('sqLite 0..1 table generation not required', function () {
         if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
 
