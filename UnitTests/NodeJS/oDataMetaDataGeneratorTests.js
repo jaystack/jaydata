@@ -33,7 +33,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -54,7 +54,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2006/04/edm" Namespace="MyContext">' +
@@ -75,7 +75,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -96,7 +96,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="MyContext">' +
@@ -118,7 +118,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -143,7 +143,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -170,7 +170,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -195,7 +195,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -220,7 +220,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -245,7 +245,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -270,7 +270,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -295,7 +295,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -320,7 +320,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -345,7 +345,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -370,7 +370,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -396,7 +396,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -422,7 +422,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -449,7 +449,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -477,7 +477,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -506,7 +506,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -532,7 +532,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -557,7 +557,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -588,7 +588,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -619,7 +619,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -661,7 +661,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -693,7 +693,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -726,7 +726,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -766,7 +766,7 @@ exports['functionContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -816,7 +816,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -857,7 +857,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -898,7 +898,7 @@ exports['functionContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
@@ -933,7 +933,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -954,7 +954,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test.long.namespace">' +
@@ -975,7 +975,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2006/04/edm" Namespace="$test">' +
@@ -996,7 +996,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1017,7 +1017,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="$test">' +
@@ -1040,7 +1040,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1066,7 +1066,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1095,7 +1095,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1124,7 +1124,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1152,7 +1152,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1180,7 +1180,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1208,7 +1208,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1236,7 +1236,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1264,7 +1264,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1292,7 +1292,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1320,7 +1320,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1348,7 +1348,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1376,7 +1376,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1406,7 +1406,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1438,7 +1438,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1470,7 +1470,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1498,7 +1498,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1526,7 +1526,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1560,7 +1560,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1594,7 +1594,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1638,7 +1638,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1673,7 +1673,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1710,7 +1710,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1753,7 +1753,7 @@ exports['entityContext'] = {
             var xmlStr = generator.generateMetadataXml();
 
             test.equal(xmlStr,
-                '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                         '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1796,7 +1796,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1836,7 +1836,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1884,7 +1884,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1922,7 +1922,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -1961,7 +1961,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2000,7 +2000,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2039,7 +2039,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2079,7 +2079,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2119,7 +2119,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2168,7 +2168,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2227,7 +2227,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2286,7 +2286,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2344,7 +2344,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
@@ -2401,7 +2401,7 @@ exports['entityContext'] = {
         var xmlStr = generator.generateMetadataXml();
 
         test.equal(xmlStr,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
                     '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
