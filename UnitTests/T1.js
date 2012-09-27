@@ -1,6 +1,46 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('navProperty many', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(5);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.map(function (a) { return { id: a.Id, catArticles: a.Category.Articles }; }).toArray(function (art) {
+                    equal(art[0].catArticles instanceof Array, true, 'many nav property is array');
+                    equal(art[1].catArticles instanceof Array, true, 'many nav property is array');
+
+                    equal(art[1].catArticles[0] instanceof $news.Types.Article, true, 'item[1].catArticles[0] is $news.Types.Article');
+                    equal(art[1].catArticles[0].Body, 'Body1', 'item[1].catArticles[0].Body has value');
+                    equal(art[1].catArticles[0].Lead, 'Lead1', 'item[1].catArticles[0].Lead has value');
+                    start();
+                });
+            });
+
+        });
+    });
+    test('navProperty single', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(3);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.map(function (a) { return { id: a.Id, category: a.Category }; }).toArray(function (art) {
+                    equal(art[0].category instanceof $news.Types.Category, true, 'many nav property is $news.Types.Category');
+                    equal(art[1].category instanceof $news.Types.Category, true, 'many nav property is $news.Types.Category');
+
+                    equal(art[1].category.Title, 'Sport', 'art[1].category.Title has value');
+                    start();
+                });
+            });
+
+        });
+    });
     test('guid key, navProperty', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 
