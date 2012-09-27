@@ -249,7 +249,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         }
 
         if (expression.expression instanceof $data.Expressions.EntityExpression) {
-            this.DefaultSelection(builder, expression.expression.entityType, includes)
+            this.DefaultSelection(builder, expression.expression.entityType/*, includes*/)
         } else if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
             builder.modelBinderConfig.$type = $data.Array;
             builder.modelBinderConfig.$item = {};
