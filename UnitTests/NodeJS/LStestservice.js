@@ -22,8 +22,16 @@ $data.Class.define('Order', $data.Entity, null, {
 $data.Class.defineEx('Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: Person },
     Orders: { type: $data.EntitySet, elementType: Order },
-    FuncStrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'string' }]).returns('string'),
-    FuncIntParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'int' }]).returns('int')/*,
+    FuncStrParam: function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="string"/>
+        return a;
+    },
+    FuncIntParam: function (a) {
+        ///<param name="a" type="int"/>
+        ///<returns type="int"/>
+        return a;
+    }/*,
     FuncNumParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'number' }]).returns('number'),
     //FuncObjParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'object' }]).returns('object'),
     //FuncArrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'array' }]).returns('object'),
@@ -54,6 +62,7 @@ $data.Class.defineEx('Context', [$data.EntityContext, $data.ServiceBase], null, 
         })
     }*/
 });
+Context.annotateFromVSDoc();
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
