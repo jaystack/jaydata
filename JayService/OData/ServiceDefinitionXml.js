@@ -6,7 +6,7 @@
             atomNs: 'http://www.w3.org/2005/Atom',
             appNs: 'http://www.w3.org/2007/app',
 
-            xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
+            xmlHead: '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
 
         }, config);
 
