@@ -1,6 +1,162 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('sqLite 0..1 table generation not required', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass1', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string' },
+            BItem: { type: '$example.Types.BClass1', inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass1', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass1', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext1', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass1 },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass1 }
+        });
+
+
+
+        (new $example.Types.ClassContext1({ name: 'sqLite', databaseName: 'T1_ClassContext1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass1({ Name: 'name1', BItem: null });
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok('save success', 'save success');
+                        start();
+                    },
+                    error: function (ex) {
+                        ok(false, ex.message);
+                        start();
+                    }
+                });
+            });
+    });
+    test('sqLite 0..1 table generation required', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass2', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: {type: 'string'},
+            BItem: { type: '$example.Types.BClass2', required: true, inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass2', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass2', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext2', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass2 },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass2 }
+        });
+
+
+
+        (new $example.Types.ClassContext2({ name: 'sqLite', databaseName: 'T1_ClassContext2', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass2({Name: 'name1', BItem: null});
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok(false, 'required field failed');
+                        start();
+                    },
+                    error: function (ex) {
+                        equal(ex.message, 'could not execute statement (19 constraint failed)', 'required side is required');
+                        start();
+                    }
+                });
+        });
+    });
+    test('sqLite 0..1 table generation not required guid key', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass1g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string' },
+            BItem: { type: '$example.Types.BClass1g', inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass1g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass1g', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext1g', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass1g },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass1g }
+        });
+
+
+
+        (new $example.Types.ClassContext1g({ name: 'sqLite', databaseName: 'T1_ClassContext1g', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass1g({ Id: $data.parseGuid('97e78352-13ef-4068-9ed7-31023bbd8204'), Name: 'name1', BItem: null });
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok('save success', 'save success');
+                        start();
+                    },
+                    error: function (ex) {
+                        ok(false, ex.message);
+                        start();
+                    }
+                });
+            });
+    });
+    test('sqLite 0..1 table generation required guid key', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass2g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string' },
+            BItem: { type: '$example.Types.BClass2g', required: true, inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass2g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass2g', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext2g', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass2g },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass2g }
+        });
+
+
+
+        (new $example.Types.ClassContext2g({ name: 'sqLite', databaseName: 'T1_ClassContext2g', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass2g({ Id: $data.parseGuid('97e78352-13ef-4068-9ed7-31023bbd8204'), Name: 'name1', BItem: null });
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok(false, 'required field failed');
+                        start();
+                    },
+                    error: function (ex) {
+                        equal(ex.message, 'could not execute statement (19 constraint failed)', 'required side is required');
+                        start();
+                    }
+                });
+            });
+    });
     test('navProperty many', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 

@@ -179,9 +179,19 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     },
 
     buildDbType_modifyInstanceDefinition: function (instanceDefinition, storageModel) {
-        var buildDbType_copyPropertyDefinition = function (propertyDefinition) {
-            var cPropertyDef = JSON.parse(JSON.stringify(propertyDefinition));
+        var buildDbType_copyPropertyDefinition = function (propertyDefinition, refProp) {
+            var cPropertyDef;
+            if (refProp) {
+                cPropertyDef = JSON.parse(JSON.stringify(instanceDefinition[refProp]));
+                cPropertyDef.kind = propertyDefinition.kind;
+                cPropertyDef.name = propertyDefinition.name;
+                cPropertyDef.notMapped = false;
+            } else {
+                cPropertyDef = JSON.parse(JSON.stringify(propertyDefinition));
+            }
+
             cPropertyDef.dataType = Container.resolveType(propertyDefinition.dataType);
+            cPropertyDef.type = cPropertyDef.dataType;
             cPropertyDef.key = false;
             cPropertyDef.computed = false;
             return cPropertyDef;
@@ -211,7 +221,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
                 foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d) {
                     if (addToEntityDef) {
-                        instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d);
+                        instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
                     }
                     association.ReferentialConstraint.push(buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName));
                 }, this);
