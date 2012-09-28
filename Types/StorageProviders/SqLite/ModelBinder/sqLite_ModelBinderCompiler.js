@@ -135,7 +135,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         this.Visit(expression.selector, builder);
 
         if (expression.selector && expression.selector.expression instanceof $data.Expressions.ObjectLiteralExpression) {
-            builder.modelBinderConfig['$type'] = expression.projectionAs;
+            builder.modelBinderConfig['$type'] = expression.projectionAs || $data.Object;
         }
     },
     VisitParametricQueryExpression: function (expression, builder) {
