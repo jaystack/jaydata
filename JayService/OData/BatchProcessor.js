@@ -89,6 +89,8 @@
                 response.statusCode = 202;
                 var res = new $data.MultiPartMixedResult(responseData.body, responseData.batchBoundary);
                 success(res);
+            }).fail(function(err){
+                error(err);
             });
         }
     },
