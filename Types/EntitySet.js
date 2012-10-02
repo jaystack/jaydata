@@ -23,6 +23,11 @@ $data.Class.defineEx('$data.EntitySet',
         ///     <param name="collectionName" type="String">Name of the EntitySet</param>
         /// </signature>
         this.createNew = this[elementType.name] = this.elementType = this.defaultType = elementType;
+        var self = this;
+        context['createAdd' + elementType.name] = function (initData) {
+            var entity  = new elementType(initData);
+            return self.add(entity);
+        }
         this.stateManager = new $data.EntityStateManager(this);
 
         this.collectionName = collectionName;
@@ -41,7 +46,7 @@ $data.Class.defineEx('$data.EntitySet',
         return this.single("it." + key.name + " == this.value", { value: keyValue }, cb);
     },
 
-    addNew: function(item, ncb) {
+    addNew: function(item, cb) {
         var callback = $data.typeSystem.createCallbackSetting(cb);
         var _item = new this.createNew(item);
         this.entityContext.saveChanges(cb);
@@ -105,6 +110,7 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         data.context = this.entityContext;
         this._trackEntity(data);
+        return data;
     },
     remove: function (entity) {
         /// <signature>

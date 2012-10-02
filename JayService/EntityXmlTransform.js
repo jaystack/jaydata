@@ -8,7 +8,7 @@
             scheme: 'http://schemas.microsoft.com/ado/2007/08/dataservices/scheme',
             related: 'http://schemas.microsoft.com/ado/2007/08/dataservices/related',
 
-            xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
+            xmlHead: '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
 
             headers: [],
             excelUserAgent: 'PowerPivot'

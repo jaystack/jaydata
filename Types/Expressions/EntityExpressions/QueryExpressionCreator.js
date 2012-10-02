@@ -64,7 +64,9 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
         context.frameType = expression.getType();
         var selector = this.Visit(expression.selector, context);
         if (source !== expression.source || selector !== expression.selector) {
-            return Container.createProjectionExpression(source, selector, expression.params, expression.instance);
+            var expr = Container.createProjectionExpression(source, selector, expression.params, expression.instance);
+            expr.projectionAs = expression.projectionAs;
+            return expr;
         }
         return expression;
     },

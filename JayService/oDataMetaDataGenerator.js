@@ -97,7 +97,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             V2: '2.0',
             V3: '3.0',
 
-            xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
+            xmlHead: '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
 
             customPropertyNS: 'http://jaydata.org/extendedproperties',
             customPropertyNSName: 'Jay',

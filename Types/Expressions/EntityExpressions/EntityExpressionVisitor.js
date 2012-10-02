@@ -220,7 +220,9 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         var source = this.Visit(expression.source, context);
         var selector = this.Visit(expression.selector, context);
         if (source !== expression.source || selector !== expression.selector) {
-            return Container.createProjectionExpression(source, selector, expression.params, expression.instance);
+            var expr = Container.createProjectionExpression(source, selector, expression.params, expression.instance);
+            expr.projectionAs = expression.projectionAs;
+            return expr;
         }
         return expression;
     },

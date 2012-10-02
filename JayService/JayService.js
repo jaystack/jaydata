@@ -54,7 +54,7 @@ $data.Class.define("$data.JayService", null, null, {
     routeParser: function (app, req) {
         var schema = 'http';
         if (req && req.headers) {
-            if(req.headers['X-Forwarded-Protocol'] === 'https')
+            if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
                 schema += 's';
 
             if (req.headers.host) {

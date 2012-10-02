@@ -34,6 +34,8 @@ namespace JayData.NewsReader
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<TestItem> TestTable { get; set; }
         public DbSet<TagConnection> TagConnections { get; set; }
+        public DbSet<TestItemGuid> TestTable2 { get; set; }
+        public DbSet<TestItemGroup> TestItemGroups { get; set; }
     }
     public class NewsReaderContext : DbContext
     {
@@ -154,6 +156,25 @@ namespace JayData.NewsReader
         public virtual List<Tag> Tags { get; set; }
         public virtual User User { get; set; }
         public Guid? g0 { get; set; }
+
+    }
+    [Table("TestTable2")]
+    public class TestItemGuid
+    {
+        [Key]
+        public Guid Id { get; set; }
+        public int? i0 { get; set; }
+        public bool? b0 { get; set; }
+        public string s0 { get; set; }
+        public virtual TestItemGroup Group { get; set; }
+
+    }
+    public class TestItemGroup
+    {
+        [Key]
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public virtual List<TestItemGuid> Items { get; set; }
 
     }
     public class EntitiesContextInitializer : DropCreateDatabaseIfModelChanges<NewsReaderContext>
