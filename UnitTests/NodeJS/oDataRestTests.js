@@ -22,10 +22,17 @@ $data.Class.define('$example.Place', $data.Entity, null, {
     Location: { type: 'geo' }
 });
 
+$data.Class.define('$example.TestItem', $data.Entity, null, {
+    Id: { type: 'string', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' }
+});
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
     Places: { type: $data.EntitySet, elementType: $example.Place },
+    TestItems: { type: $data.EntitySet, elementType: $example.TestItem },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
@@ -67,21 +74,27 @@ $example.Context.deleteData = function (ctx, callback) {
         ctx.People.toArray(function (p) {
             ctx.Orders.toArray(function (o) {
                 ctx.Places.toArray(function (pl) {
-                    for (var i = 0; i < p.length; i++) {
-                        ctx.People.remove(p[i]);
-                    }
-                    for (var i = 0; i < o.length; i++) {
-                        ctx.Orders.remove(o[i]);
-                    }
-                    for (var i = 0; i < pl.length; i++) {
-                        ctx.Places.remove(pl[i]);
-                    }
-                    ctx.saveChanges(function () {
-                        if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables) {
-                            $example.Context.deleteData(ctx, callback);
-                        } else {
-                            callback.success();
+                    ctx.TestItems.toArray(function (t) {
+                        for (var i = 0; i < p.length; i++) {
+                            ctx.People.remove(p[i]);
                         }
+                        for (var i = 0; i < o.length; i++) {
+                            ctx.Orders.remove(o[i]);
+                        }
+                        for (var i = 0; i < pl.length; i++) {
+                            ctx.Places.remove(pl[i]);
+                        }
+                        for (var i = 0; i < t.length; i++) {
+                            ctx.TestItems.remove(t[i]);
+                        }
+                        ctx.saveChanges(function () {
+                            if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables ||
+                                pl.length >= $example.Context.generateTestData.itemsInTables || t.length >= $example.Context.generateTestData.itemsInTables) {
+                                $example.Context.deleteData(ctx, callback);
+                            } else {
+                                callback.success();
+                            }
+                        });
                     });
                 });
             });
@@ -997,7 +1010,7 @@ test("Modify Geography", 4, function () {
     $example.Context.generateTestData(context, function () {
         context.Places.toArray(function (places) {
             var place = places[0];
-            
+
             context.attach(place);
             place.Location = new $data.Geography(23.153, -16.138135);
             place.Name = 'Jay location';
@@ -1044,7 +1057,7 @@ test("Filter Geography not equal", 19, function () {
                 equal(places[i].Location.longitude, 123.15697, 'Location.longitude failed');
                 notEqual(places[i].Location.latitude, 1, 'Location.latitude failed');
             }
-            
+
 
             start();
         });
@@ -1072,5 +1085,33 @@ test("FunctionImport without param int (null param)", 1, function () {
             equal(ret, null, 'result is null');
             start();
         });
+    });
+});
+
+test("Bugfix delete test", 1, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        for (var i = 0; i < 10; i++) {
+            var t = new $example.TestItem({ Id: 'asdad' + i, Name: 'name' + i, Index: i });
+            context.TestItems.add(t);
+        }
+        context.saveChanges(function () {
+            context.TestItems.toArray(function (items) {
+                for (var i = 0; i < 5; i++) {
+                    context.TestItems.remove(items[i]);
+                }
+
+                context.saveChanges(function () {
+                    context.TestItems.toArray(function (items) {
+                        equal(items.length, 5, 'delete failed');
+                        start();
+                    })
+                });
+
+            });
+        });
+
     });
 });
