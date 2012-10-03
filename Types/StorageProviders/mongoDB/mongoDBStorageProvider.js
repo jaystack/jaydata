@@ -241,6 +241,10 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     compile: function (expression, context) {
+        if (!context.cursor) {
+            context.query = {};
+            context.cursor = context.query;
+        }
         this.Visit(expression, context);
     },
 
@@ -254,11 +258,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     VisitSimpleBinaryExpression: function (expression, context) {
-        if (!context.cursor){
-            context.query = {};
-            context.cursor = context.query;
-        }
-        
+     
         var cursor = context.cursor;
         
         switch (expression.nodeType){
