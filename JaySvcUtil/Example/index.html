@@ -5,13 +5,16 @@
     <script src="../../Scripts/datajs-1.0.3.min.js"></script>
     <script src="../../build/jaydata.js"></script>
     <script src="../../JayDataModules/deferred.js"></script>
-    <script src="../JaySvcUtil.js"></script>
     <script>
         $(function () {
             //$data.MetadataLoader.xsltRepoUrl = '../';
             $data.MetadataLoader.debugMode = true;
             $data.MetadataLoader.load('../../Services/emptyNewsReader.svc', function (factory, ctxType, text) {
-                c = factory();
+                c = factory({ almafa: 'alma' });
+                c.onReady(function () {
+                    console.log(c.storageProvider.providerConfiguration.almafa);
+
+                });
                 document.getElementById('asd').value = text;
             });
 

@@ -10,6 +10,7 @@ $data.Class.define('$data.StorageModel', null, null, {
     PhysicalTypeName: {},
     EventHandlers: {},
     TableName: {},
+    TableOptions: { value: undefined },
     ComplexTypes: {},
     Associations: {},
     EntitySetReference: {}
@@ -168,6 +169,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var sm = this[storageModel.ItemName];
             sm.name = storageModel.ItemName;
             sm.tableName = storageModel.TableName;
+            sm.tableOptions = storageModel.TableOptions;
             sm.eventHandlers = storageModel.EventHandlers;
             this._entitySetReferences[storageModel.LogicalType.name] = sm;
 
@@ -189,6 +191,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
                     var storageModel = new $data.StorageModel();
                     storageModel.TableName = item.tableName || item.name;
+                    storageModel.TableOptions = item.tableOptions;
                     storageModel.ItemName = item.name;
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
@@ -800,6 +803,7 @@ $data.Class.define('$data.EntityContext', null, null,
                                             if (value instanceof Array) {
                                                 if (value.indexOf(entityCachedItem.data) == -1) {
                                                     value.push(entityCachedItem.data);
+                                                    data[navPropertyName] = value;
                                                 }
                                             } else {
                                                 if (typeof intellisense === 'undefined') {
@@ -921,9 +925,11 @@ $data.Class.define('$data.EntityContext', null, null,
         var access = $data.Access.None;
         
         var eventData = {};
+        var sets = [];
         for (var i = 0; i < changedEntities.length; i++){
             var it = changedEntities[i];
             var n = it.entitySet.elementType.name;
+            sets.push(it.entitySet.name);
             var es = this._entitySetReferences[n];
             if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || (this.user && this.checkPermission)){
                 if (!eventData[n]) eventData[n] = {};
@@ -955,7 +961,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         
         var readyFn = function(cancel){
-            if (cancel){
+            if (cancel === false){
                 cancelEvent = 'async';
                 changedEntities.length = 0;
             }
@@ -987,7 +993,7 @@ $data.Class.define('$data.EntityContext', null, null,
         };
         
         var callbackFn = function(cancel){
-            if (cancel){
+            if (cancel === false){
                 cancelEvent = 'async';
                 changedEntities.length = 0;
                 
@@ -1042,7 +1048,7 @@ $data.Class.define('$data.EntityContext', null, null,
         };
         
         if (this.user && this.checkPermission){
-            this.checkPermission(access, this.user, ies, {
+            this.checkPermission(access, this.user, sets, {
                 success: function(){
                     if (i < ies.length) callbackFn();
                     else readyFn();

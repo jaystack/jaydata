@@ -50,7 +50,9 @@
             [{ type: $data.KoObservableEntity, params: [new ConstructorParameter(0), function () { return originalType }] }],
             null,
             instanceDefinition,
-            null);
+            {
+                isWrappedType: function (type) { return type === originalType; }
+            });
     };
 
     if (typeof ko !== 'undefined') {
@@ -373,7 +375,7 @@
             }
             var observableType = Container.resolveType(observableTypeName);
 
-            if(observableType.isAssignableTo && !observableType.isAssignableTo(type)){
+            if (!observableType.isWrappedType(type)) {
                 ObservableFactory(type, observableTypeName);
                 observableType = Container.resolveType(observableTypeName);
             }

@@ -65,6 +65,21 @@ $data.Class.define("$news.Types.TestItem", $data.Entity, null, {
     User: { type: '$news.Types.User', inverseProperty: '$$unbound' }
 }, null);
 
+
+$data.Class.define("$news.Types.TestItemGuid", $data.Entity, null, {
+    Id: { type: "guid", key: true },
+    i0: { type: "int" },
+    b0: { type: "boolean" },
+    s0: { type: "string" },
+    Group: { type: '$news.Types.TestItemGroup', inverseProperty: 'Items' }
+}, null);
+$data.Class.define("$news.Types.TestItemGroup", $data.Entity, null, {
+    Id: { type: "guid", key: true },
+    Name: { type: "string" },
+    Items: { type: 'Array', elementType: '$news.Types.TestItemGuid', inverseProperty: 'Group' },
+}, null);
+
+
 $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     Categories: { type: $data.EntitySet, elementType: $news.Types.Category },
     Articles: { type: $data.EntitySet, elementType: $news.Types.Article },
@@ -73,6 +88,9 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     Users: { type: $data.EntitySet, elementType: $news.Types.User },
     UserProfiles: { type: $data.EntitySet, elementType: $news.Types.UserProfile },
     TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItem },
+
+    TestTable2: { type: $data.EntitySet, elementType: $news.Types.TestItemGuid },
+    TestItemGroups: { type: $data.EntitySet, elementType: $news.Types.TestItemGroup },
 
     PrefilteredLocation: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocation', returnType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     PrefilteredLocations: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocations', returnType: $data.Queryable, elementType: '$news.Types.Location', params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),

@@ -19,6 +19,7 @@
   <xsl:param name="ContextInstanceName"/>
   <xsl:param name="EntitySetBaseClass"/>
   <xsl:param name="CollectionBaseClass"/>
+  <xsl:param name="DefaultNamespace"/>
 
   <xsl:template match="/">
 
@@ -27,44 +28,6 @@
 //////                             oData @@VERSION@@                                    /////////
 //////////////////////////////////////////////////////////////////////////////////////*/
 (function(global, $data, undefined) {
-  <xsl:variable name="EdmJayTypeMapping">
-    <map from="Edm.Boolean" to="$data.Boolean" />
-    <map from="Edm.Binary" to="$data.Blob" />
-    <map from="Edm.DateTime" to="$data.Date" />
-    <map from="Edm.DateTimeOffset" to="$data.Integer" />
-    <map from="Edm.Time" to="$data.Integer" />
-    <map from="Edm.Decimal" to="$data.Number" />
-    <map from="Edm.Single" to="$data.Number" />
-    <map from="Edm.Double" to="$data.Number" />
-    <map from="Edm.Guid" to="$data.String" />
-    <map from="Edm.Int16" to="$data.Integer" />
-    <map from="Edm.Int32" to="$data.Integer" />
-    <map from="Edm.Int64" to="$data.Integer" />
-    <map from="Edm.Byte" to="$data.Integer" />
-    <map from="Edm.String" to="$data.String" />
-    <map from="Edm.GeographyPoint" to="$data.Geography" />
-  </xsl:variable>
-
-  function registerEdmTypes() { <xsl:choose>
-    <xsl:when test="function-available('msxsl:node-set')">
-      <xsl:for-each select="msxsl:node-set($EdmJayTypeMapping)/*">
-        function <xsl:value-of select="translate(@from,'.','_')" />() { };
-        $data.Container.registerType('<xsl:value-of select="@from"/>', <xsl:value-of select="translate(@from,'.','_')"/>);
-        $data.Container.mapType(<xsl:value-of select="translate(@from,'.','_')" />, <xsl:value-of select="@to" />);
-      </xsl:for-each>
-    </xsl:when>
-    <xsl:otherwise>
-
-      <xsl:for-each select="exsl:node-set($EdmJayTypeMapping)/*">
-        function <xsl:value-of select="translate(@from,'.','_')" />() { };
-        $data.Container.registerType('<xsl:value-of select="@from"/>', <xsl:value-of select="translate(@from,'.','_')"/>);
-        $data.Container.mapType(<xsl:value-of select="translate(@from,'.','_')" />, <xsl:value-of select="@to" />);
-      </xsl:for-each>
-    </xsl:otherwise>
-  </xsl:choose>
-  };
-  registerEdmTypes();
-
 
 <xsl:for-each select="//edm:EntityType | //edm:ComplexType" xml:space="default">
   <xsl:message terminate="no">Info: generating type <xsl:value-of select="concat(../@Namespace, '.', @Name)"/>
@@ -72,7 +35,7 @@
   <xsl:variable name="props">
     <xsl:apply-templates select="*" />
   </xsl:variable>
-  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$EntityBaseClass"  />.extend('<xsl:value-of select="../@Namespace"/>.<xsl:value-of select="@Name"/>', {
+  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$EntityBaseClass"  />.extend('<xsl:value-of select="concat($DefaultNamespace,../@Namespace)"/>.<xsl:value-of select="@Name"/>', {
     <xsl:choose><xsl:when test="function-available('msxsl:node-set')">
     <xsl:for-each select="msxsl:node-set($props)/*">
       <xsl:value-of select="."/><xsl:if test="position() != last()">,
@@ -89,7 +52,7 @@
 </xsl:for-each>
 
 <xsl:for-each select="//edm:EntityContainer">
-  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$ContextBaseClass"  />.extend('<xsl:value-of select="concat(../@Namespace, '.', @Name)"/>', {
+  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$ContextBaseClass"  />.extend('<xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)"/>', {
     <xsl:for-each select="edm:EntitySet | edm:FunctionImport">
       <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
     </xsl:if>
@@ -97,10 +60,10 @@
   });
 
   $data.generatedContexts = $data.generatedContexts || [];
-  $data.generatedContexts.push(<xsl:value-of select="concat(../@Namespace, '.', @Name)" />);
+  $data.generatedContexts.push(<xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />);
   <xsl:if test="$AutoCreateContext = 'true'">
   /*Context Instance*/
-  <xsl:value-of select="../@Namespace"/>.<xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(../@Namespace, '.', @Name)" />( { name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />' });
+  <xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />( { name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />' });
 </xsl:if>
 
 </xsl:for-each>
@@ -111,22 +74,47 @@
 
   <xsl:template match="edm:Key"></xsl:template>
 
-  <xsl:template match="edm:FunctionImport">'<xsl:value-of select="@Name"/>': $data.EntityContext.generateServiceOperation({ serviceName:'<xsl:value-of select="@Name"/>', returnType: <xsl:apply-templates select="." mode="render-return-config" />, <xsl:apply-templates select="." mode="render-elementType-config" />params: [<xsl:for-each select="edm:Parameter">{ <xsl:value-of select="@Name"/>: '<xsl:value-of select="@Type"/>' }<xsl:if test="position() != last()">,</xsl:if>
+  <xsl:template match="edm:FunctionImport">'<xsl:value-of select="@Name"/>': $data.EntityContext.generateServiceOperation({ serviceName:'<xsl:value-of select="@Name"/>', returnType: <xsl:apply-templates select="." mode="render-return-config" />, <xsl:apply-templates select="." mode="render-elementType-config" />params: [<xsl:for-each select="edm:Parameter">{ <xsl:value-of select="@Name"/>: '<xsl:apply-templates select="@Type" mode="render-functionImport-type" />' }<xsl:if test="position() != last()">,</xsl:if>
     </xsl:for-each>], method: '<xsl:value-of select="@m:HttpMethod"/>' })</xsl:template>
 
+  <xsl:template match="@Type | @ReturnType" mode="render-functionImport-type">
+    <xsl:variable name="curr" select="."/>
+    <xsl:choose>
+      <xsl:when test="//edm:Schema[starts-with($curr, @Namespace)]"> 
+        <xsl:value-of select="concat($DefaultNamespace,$curr)" />
+      </xsl:when>
+      <xsl:otherwise> 
+        <xsl:value-of select="$curr"/>
+      </xsl:otherwise>
+    </xsl:choose>
+
+  </xsl:template>
+  
   <xsl:template match="edm:FunctionImport" mode="render-return-config">
     <xsl:choose>
       <xsl:when test="not(@ReturnType)">null</xsl:when>
       <xsl:when test="starts-with(@ReturnType, 'Collection')">$data.Queryable</xsl:when>
-      <xsl:otherwise> '<xsl:value-of select="@ReturnType"/>' </xsl:otherwise>
+      <xsl:otherwise> '<xsl:apply-templates select="@ReturnType" mode="render-functionImport-type" />' </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <xsl:template match="edm:FunctionImport" mode="render-elementType-config">
     <xsl:if test="starts-with(@ReturnType, 'Collection')">
-      <xsl:variable name="len" select="string-length(@ReturnType)-12"/>elementType: '<xsl:value-of select="substring(@ReturnType,12,$len)"/>', </xsl:if>
+      <xsl:variable name="len" select="string-length(@ReturnType)-12"/>
+      <xsl:variable name="curr" select="substring(@ReturnType,12,$len)"/>
+      <xsl:variable name="ElementType" >
+        <xsl:choose>
+          <xsl:when test="//edm:Schema[starts-with($curr, @Namespace)]">
+            <xsl:value-of select="concat($DefaultNamespace,$curr)" />
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$curr" />
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>elementType: '<xsl:value-of select="$ElementType"/>', </xsl:if>
   </xsl:template>
 
-  <xsl:template match="edm:EntitySet">'<xsl:value-of select="@Name"/>': { type: <xsl:value-of select="$EntitySetBaseClass"  />, elementType: <xsl:value-of select="@EntityType"/> }</xsl:template>
+  <xsl:template match="edm:EntitySet">'<xsl:value-of select="@Name"/>': { type: <xsl:value-of select="$EntitySetBaseClass"  />, elementType: <xsl:value-of select="concat($DefaultNamespace,@EntityType)"/> }</xsl:template>
   
   <xsl:template match="edm:Property | edm:NavigationProperty">
     <property>
@@ -150,7 +138,17 @@
       <xsl:when test="starts-with(., 'Collection')">
         <attribute name="type">'Array'</attribute>
         <xsl:variable name="len" select="string-length(.)-12"/>
-        <attribute name="elementType">'<xsl:value-of select="substring(.,12,$len)" />'</attribute>
+        <xsl:choose>
+          <xsl:when test="starts-with(., ../../../@Namespace)">
+            <attribute name="elementType">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="substring(.,12,$len)" />'</attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <attribute name="elementType">'<xsl:value-of select="substring(.,12,$len)" />'</attribute>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:when test="starts-with(., ../../../@Namespace)">
+        <attribute name="type">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="."/>'</attribute>
       </xsl:when>
       <xsl:otherwise>
         <attribute name="type">'<xsl:value-of select="."/>'</attribute>
@@ -214,14 +212,14 @@
     <xsl:choose>
       <xsl:when test="$m = '*'">
         <attribute name="type">'<xsl:value-of select="$CollectionBaseClass"/>'</attribute>
-        <attribute name="elementType">'<xsl:value-of select="$relation/@Type"/>'</attribute>
+        <attribute name="elementType">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$relation/@Type"/>'</attribute>
         <xsl:if test="not($otherProp/@Name)">
           <attribute name="inverseProperty">'$$unbound'</attribute></xsl:if>
         <xsl:if test="$otherProp/@Name">
           <attribute name="inverseProperty">'<xsl:value-of select="$otherProp/@Name"/>'</attribute></xsl:if>
       </xsl:when>
       <xsl:when test="$m = '0..1'">
-        <attribute name="type">'<xsl:value-of select="$relation/@Type"/>'</attribute>
+        <attribute name="type">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$relation/@Type"/>'</attribute>
         <xsl:choose>
           <xsl:when test="$otherProp">
             <attribute name="inverseProperty">'<xsl:value-of select="$otherProp/@Name"/>'</attribute>
@@ -234,7 +232,7 @@
         </xsl:choose>
       </xsl:when>
       <xsl:when test="$m = '1'">
-        <attribute name="type">'<xsl:value-of select="$relation/@Type"/>'</attribute>
+        <attribute name="type">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$relation/@Type"/>'</attribute>
         <attribute name="required">true</attribute>
         <xsl:choose>
           <xsl:when test="$otherProp">

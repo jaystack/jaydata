@@ -42,11 +42,10 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 
         var serviceInstance = this.instanceFactory(req, res);
 
-        var _v;
+        var _v, member;
         var memberName = this.resolveMemberName(req, serviceInstance);
         if (memberName) {
-
-            var member = this.resolveMember(req, memberName);
+            member = this.resolveMember(req, memberName);
             var oDataBuilderCfg;
             if (member) {
 
@@ -85,14 +84,22 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     if (esProc.isSupported(req)) {
                         _v = esProc.invoke(oDataBuilderCfg, req, res);
                     } else {
-                        //404
+                        //405
+                        _v = this.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
                     }
+                } else {
+                    //404
+                    _v = this.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
                 }
             }
         } else {
             _v = this.promiseHelper.fcall(function () {
-                var serviceDef = new $data.JayStorm.ServiceDefinitionXml();
-                return new $data.XmlResult(serviceDef.convertToResponse(serviceInstance, req.fullRoute));
+                if (req.method === 'GET') {
+                    var serviceDef = new $data.JayStorm.ServiceDefinitionXml();
+                    return new $data.XmlResult(serviceDef.convertToResponse(serviceInstance, req.fullRoute));
+                } else {
+                    return new $data.EmptyServiceResult(405);
+                }
             });
         }
 
@@ -106,13 +113,15 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     value = new $data.oDataResult(value, oDataBuilderCfg);
                 }
             }
-
-            if (!(value instanceof $data.EmptyServiceResult)) {
-                var resultText = value.toString();
+            
+            res.statusCode = value.statusCode !== 200 ? value.statusCode : res.statusCode;
+            var resultText;
+            if (!(value instanceof $data.EmptyServiceResult) && (resultText = value.toString())) {
                 res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
                 res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=UTF-8');
                 res.end(resultText);
             } else {
+                res.setHeader('Content-Length', 0);
                 res.end();
             }
         }).fail(function (err) {
@@ -201,7 +210,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     var result = member.apply(serviceInstance, args);
 
                     if (typeof result === 'function') {
-                        result.call(executionContext, success, error);
+                        result.call(serviceInstance, success, error);
                     } else if (self.promiseHelper.isPromise(result)) {
                         self.promiseHelper.when(result).then(function () {
                             defer.resolve(result.valueOf());
@@ -214,7 +223,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 var result = member.apply(serviceInstance, args);
 
                 if (typeof result === 'function') {
-                    result.call(executionContext, success, error);
+                    result.call(serviceInstance, success, error);
                 } else if (self.promiseHelper.isPromise(result)) {
                     return result;
                 } else {

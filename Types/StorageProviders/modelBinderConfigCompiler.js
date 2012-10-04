@@ -78,7 +78,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         if (projVisitor.projectionExpression) {
             this.Visit(projVisitor.projectionExpression, builder);
         } else {
-            this.DefaultSelection(builder);
+            this.DefaultSelection(builder, this._query.defaultType, this._includes);
         }
     },
     _defaultModelBinder: function (expression) {
@@ -181,14 +181,14 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
             }
         }, this);
     },
-    DefaultSelection: function (builder) {
+    DefaultSelection: function (builder, type, includes) {
         //no projection, get all item from entitySet
-        builder.modelBinderConfig['$type'] = this._query.defaultType;
+        builder.modelBinderConfig['$type'] = type;
 
-        var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
-        this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
-        if (this._includes) {
-            this._includes.forEach(function (include) {
+        var storageModel = this._query.context._storageModel.getStorageModel(type);
+        this._addPropertyToModelBinderConfig(type, builder);
+        if (includes) {
+            includes.forEach(function (include) {
                 var includes = include.name.split('.');
                 var association = null;
                 var tmpStorageModel = storageModel;
@@ -223,19 +223,45 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitProjectionExpression: function (expression, builder) {
         this.hasProjection = true;
         this.Visit(expression.selector, builder);
+
+        if (expression.selector && expression.selector.expression instanceof $data.Expressions.ObjectLiteralExpression) {
+            builder.modelBinderConfig['$type'] = expression.projectionAs || builder.modelBinderConfig['$type'] || $data.Object;
+        }
     },
     VisitParametricQueryExpression: function (expression, builder) {
-        if (expression.expression instanceof $data.Expressions.EntityExpression) {
-            this.VisitEntityAsProjection(expression.expression, builder);
+        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
+            this.VisitEntityAsProjection(expression, builder);
         } else {
             this.Visit(expression.expression, builder);
         }
 
     },
     VisitEntityAsProjection: function (expression, builder) {
-        this.Visit(expression.source, builder);
-        builder.modelBinderConfig['$type'] = expression.entityType;
-        this._addPropertyToModelBinderConfig(expression.entityType, builder);
+        this.mapping = '';
+        this.Visit(expression.expression, builder);
+        var includes;
+        if (this.mapping && this._includes instanceof Array) {
+            includes = this._includes.filter(function (inc) {
+                return inc.name.indexOf(this.mapping + '.') === 0
+            }, this);
+            includes = includes.map(function (inc) {
+                return { name: inc.name.replace(this.mapping + '.', ''), type: inc.type };
+            }, this);
+
+            if (includes.length > 0)
+                console.warn('WARN: include for mapped properties is not supported!');
+        }
+
+        if (expression.expression instanceof $data.Expressions.EntityExpression) {
+            this.DefaultSelection(builder, expression.expression.entityType/*, includes*/)
+        } else if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
+            builder.modelBinderConfig.$type = $data.Array;
+            builder.modelBinderConfig.$item = {};
+            builder.selectModelBinderProperty('$item');
+            this.DefaultSelection(builder, expression.expression.elementType /*, includes*/)
+            builder.popModelBinderProperty();
+        }
+
     },
 
     VisitEntityFieldExpression: function (expression, builder) {
@@ -300,6 +326,9 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 builder.modelBinderConfig['$selector'] = 'json:' + expression.associationInfo.FromPropertyName;
             }
         }
+
+        if (this.mapping && this.mapping.length > 0) { this.mapping += '.'; }
+        this.mapping += expression.associationInfo.FromPropertyName;
     },
     VisitObjectLiteralExpression: function (expression, builder) {
         builder.modelBinderConfig['$type'] = $data.Object;
@@ -309,8 +338,8 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     },
     VisitObjectFieldExpression: function (expression, builder) {
         builder.selectModelBinderProperty(expression.fieldName);
-        if (expression.expression instanceof $data.Expressions.EntityExpression) {
-            this.VisitEntityAsProjection(expression.expression, builder);
+        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
+            this.VisitEntityAsProjection(expression, builder);
         } else {
             this.Visit(expression.expression, builder);
         }

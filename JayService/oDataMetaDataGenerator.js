@@ -1,4 +1,4 @@
-﻿var genx = require('genx');
+﻿var genx = require('jaydata-genx');
 var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
 
 $data.Class.define('$data.GenxXMLCreator', null, null, {
@@ -17,6 +17,14 @@ $data.Class.define('$data.GenxXMLCreator', null, null, {
     },
     endElement: function () {
         return this.writer.endElement.apply(this.writer, arguments);
+    },
+    endElementInline: function () {
+        if (typeof this.writer.endElementInline === 'function') {
+            return this.writer.endElementInline.apply(this.writer, arguments);
+        } else {
+            return this.endElement();
+        }
+
     },
 
     addAttribute: function () {
@@ -72,6 +80,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         this.cfg = $data.typeSystem.extend({
             version: 'V2',
             maxVersion: 'V2',
+            dsVersion: 'V1', //DataServiceVersion have to V1
             extended: true,
             edmTypeMapping: true,
 
@@ -88,12 +97,12 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             V2: '2.0',
             V3: '3.0',
 
-            xmlHead: '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>',
+            xmlHead: '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
 
             customPropertyNS: 'http://jaydata.org/extendedproperties',
             customPropertyNSName: 'Jay',
 
-            contextNamespace: this.context.namespace || 'System'
+            contextNamespace: this.context.namespace || 'MyContext'
 
         }, config);
     },
@@ -133,7 +142,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         var maxDataServiceVersion = xml.declareAttribute(m, 'MaxDataServiceVersion');
 
         xml.startElement(dataservice)
-            .addAttribute(dataServiceVersion, this.cfg[this.cfg.version])
+            .addAttribute(dataServiceVersion, this.cfg[this.cfg.dsVersion])
             .addAttribute(maxDataServiceVersion, this.cfg[this.cfg.maxVersion]);
 
         this._buildSchema(xml);
@@ -192,8 +201,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 var elementType = Container.resolveType(memDef.elementType);
                 xml.startElement(entitySet)
                     .addAttribute(name, memDef.name)
-                    .addAttribute(entityType, this.cfg.contextNamespace + '.' + elementType.name)
-                    .endElement();
+                    .addAttribute(entityType, this.cfg.contextNamespace + '.' + elementType.name);
+                xml.endElementInline();
             }, this);
         }
         //FunctionImports
@@ -281,13 +290,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 .addAttribute(type, assoc.source.typeName)
                 .addAttribute(role, assoc.name + '_Source')
                 .addAttribute(multiplicity, assoc.source.multiplicity)
-                .endElement();
+            xml.endElementInline();;
 
             xml.startElement(end)
                 .addAttribute(type, assoc.target.typeName)
                 .addAttribute(role, assoc.name + '_Target')
-                .addAttribute(multiplicity, assoc.target.multiplicity)
-                .endElement();
+                .addAttribute(multiplicity, assoc.target.multiplicity);
+            xml.endElementInline();
 
             xml.endElement();
         }, this);
@@ -311,13 +320,13 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
             xml.startElement(end)
                 .addAttribute(role, assoc.name + '_Source')
-                .addAttribute(entitySet, assoc.source.entitySetName)
-                .endElement();
+                .addAttribute(entitySet, assoc.source.entitySetName);
+            xml.endElementInline();
 
             xml.startElement(end)
                 .addAttribute(role, assoc.name + '_Target')
-                .addAttribute(entitySet, assoc.target.entitySetName)
-                .endElement();
+                .addAttribute(entitySet, assoc.target.entitySetName);
+            xml.endElementInline();
 
             xml.endElement();
         }, this);
@@ -360,8 +369,9 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                 methodParameters.forEach(function (param) {
                     xml.startElement(parameter)
                         .addAttribute(name, param.name || param)
-                        .addAttribute(type, this._resolveTypeName(param.type || 'string'))
-                        .endElement();
+                        .addAttribute(type, this._resolveTypeName(param.type || 'string'));
+                    xml.endElementInline();
+
                 }, this);
             }
 
@@ -379,8 +389,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             xml.startElement(key);
             keys.forEach(function (memDef) {
                 xml.startElement(propRef)
-                    .addAttribute(name, memDef.name)
-                    .endElement();
+                    .addAttribute(name, memDef.name);
+                xml.endElementInline();
             }, this);
             xml.endElement();
         }
@@ -413,7 +423,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             this._buildPropertyAttribute(xml, prop, memDef[prop], memDef);
         }, this);
 
-        xml.endElement();
+        xml.endElementInline();
     },
     _buildPropertyAttribute: function (xml, name, value, memDef) {
         var resolvedConfig = this._supportedPropertyAttributes[name];
@@ -554,6 +564,9 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
                     return memDef.required !== undefined;
                 }
             },
+            regex: {
+                name: 'RegExp'
+            },
             maxLength: {
                 name: 'MaxLength',
                 converter: function (name, value) {
@@ -628,7 +641,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             '$data.Boolean': 'Edm.Boolean',
             '$data.Blob': 'Edm.Binary',
             '$data.Date': 'Edm.DateTime',
-            '$data.Number': 'Edm.Decimal',
+            '$data.Number': 'Edm.Double',
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
             '$data.ObjectID': 'Edm.String',

@@ -849,7 +849,7 @@
             var t = this.resolveType(type);
             return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
                 t === $data.Number || t === $data.String || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
-                t === $data.Geography;
+                t === $data.Geography || t === $data.Guid;
         };
 
         this.resolveType = function (typeOrName) {
@@ -885,6 +885,7 @@
                     if (value.getType) return value.getType().fullName;
                     if (value instanceof Date) return '$data.Date';
                     if (value instanceof $data.Geography) return '$data.Geography';
+                    if (value instanceof $data.Guid) return '$data.Guid';
                     //if(value instanceof "number") return
                 default:
                     return typeof value;
@@ -997,9 +998,9 @@
                     } else {
                         self["create" + item.shortName] = creatorFnc;
                     }
-                } else {
-                    if (console) { console.warn("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
-                };
+                }/* else {
+                    //if (console) { console.warn("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
+                };*/
 
                 var typePos = classTypes.indexOf(type);
                 if (typePos == -1) {
@@ -1009,9 +1010,9 @@
                     consolidatedClassNames[typePos] = item.fullName;
                 };
 
-                if (item.fullName in classNames) {
-                    console.warn("warning:!!! This typename has already been registered:" + item.fullName);
-                };
+                /*if (item.fullName in classNames) {
+                    //console.warn("warning:!!! This typename has already been registered:" + item.fullName);
+                };*/
                 classNames[item.fullName] = typePos;
             }
 

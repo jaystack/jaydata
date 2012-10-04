@@ -20,6 +20,7 @@
         }
         return value;
     },
+    parseData: function (value) { try { return JSON.parse(value); } catch (er) { return undefined; } },
 
     '$data.String': function (config, value) {
         if (typeof value === 'string' && value.indexOf("'") === 0 && value.lastIndexOf("'") === value.length - 1) {
@@ -28,10 +29,10 @@
             return value;
         }
     },
-    '$data.Integer': function (config, value) { return JSON.parse(value); },
-    '$data.Number': function (config, value) { return JSON.parse(value); },
-    '$data.Boolean': function (config, value) { return JSON.parse(value); },
-    '$data.Object': function (config, value) { return JSON.parse(value) },
+    '$data.Integer': function (config, value) { return this.parseData(value); },
+    '$data.Number': function (config, value) { return this.parseData(value); },
+    '$data.Boolean': function (config, value) { return this.parseData(value); },
+    '$data.Object': function (config, value) { return this.parseData(value); },
 
     '$data.Blob': function (config, value) { return value; },
     '$data.Array': function (config, value) {
@@ -42,7 +43,7 @@
                 converter = $data.Entity.fullName;
             }
 
-            value = JSON.parse(value);
+            value = this.parseData(value) || [];
             if (Array.isArray(value)) {
                 var subConfig = { type: type };
                 for (var i = 0; i < value.length; i++) {
@@ -51,11 +52,11 @@
             }
             return value;
         }
-        return JSON.parse(value);
+        return this.parseData(value) || [];
     },
     '$data.Date': function (config, value) {
         if (/^datetime'/.test(value)) {
-            return new Date(value.slice(9, value.length-1));
+            return new Date(value.slice(9, value.length - 1));
         } else if (/^\/Date\(/.test(value)) {
             return new Date(parseInt(value.slice(6, value.length - 2)));
         } else if (/^\d+$'/.test(value)) {
@@ -63,7 +64,7 @@
         }
         return value;
     },
-    '$data.Entity': function (config, value) { return new config.type(JSON.parse(value)); },
+    '$data.Entity': function (config, value) { return new config.type(this.parseData(value)); },
     '$data.Geography': function (config, value) {
         if (/^POINT\(/.test(value)) {
             var data = value.slice(6, value.length - 1).split(' ');
@@ -74,7 +75,7 @@
 
 
 }, {
-    defaultBinder: { 
+    defaultBinder: {
         get: function () {
             if (!$data.JayService.ArgumentBinder._defaultBinder) {
                 $data.JayService.ArgumentBinder._defaultBinder = new $data.JayService.ArgumentBinder();

@@ -22,10 +22,17 @@ $data.Class.define('$example.Place', $data.Entity, null, {
     Location: { type: 'geo' }
 });
 
+$data.Class.define('$example.TestItem', $data.Entity, null, {
+    Id: { type: 'string', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' }
+});
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
     Places: { type: $data.EntitySet, elementType: $example.Place },
+    TestItems: { type: $data.EntitySet, elementType: $example.TestItem },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
@@ -35,6 +42,7 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     FuncBoolParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncBoolParam', returnType: $data.Boolean, params: [{ a: $data.Boolean }] }),
     FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] }),
     FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.Geography, params: [{ a: $data.Geography }] }),
+
     ATables: {
         type: $data.EntitySet,
         elementType: $data.Entity.extend('$example.ATable', {
@@ -66,21 +74,27 @@ $example.Context.deleteData = function (ctx, callback) {
         ctx.People.toArray(function (p) {
             ctx.Orders.toArray(function (o) {
                 ctx.Places.toArray(function (pl) {
-                    for (var i = 0; i < p.length; i++) {
-                        ctx.People.remove(p[i]);
-                    }
-                    for (var i = 0; i < o.length; i++) {
-                        ctx.Orders.remove(o[i]);
-                    }
-                    for (var i = 0; i < pl.length; i++) {
-                        ctx.Places.remove(pl[i]);
-                    }
-                    ctx.saveChanges(function () {
-                        if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables) {
-                            $example.Context.deleteData(ctx, callback);
-                        } else {
-                            callback.success();
+                    ctx.TestItems.toArray(function (t) {
+                        for (var i = 0; i < p.length; i++) {
+                            ctx.People.remove(p[i]);
                         }
+                        for (var i = 0; i < o.length; i++) {
+                            ctx.Orders.remove(o[i]);
+                        }
+                        for (var i = 0; i < pl.length; i++) {
+                            ctx.Places.remove(pl[i]);
+                        }
+                        for (var i = 0; i < t.length; i++) {
+                            ctx.TestItems.remove(t[i]);
+                        }
+                        ctx.saveChanges(function () {
+                            if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables ||
+                                pl.length >= $example.Context.generateTestData.itemsInTables || t.length >= $example.Context.generateTestData.itemsInTables) {
+                                $example.Context.deleteData(ctx, callback);
+                            } else {
+                                callback.success();
+                            }
+                        });
                     });
                 });
             });
@@ -99,7 +113,7 @@ $example.Context.generateTestData = function (ctx, callback) {
     });
 };
 
-$example.Context.generateTestData.serviceurl = 'http://192.168.1.119:3001/testservice';
+$example.Context.generateTestData.serviceurl = '/testservice';
 $example.Context.generateTestData.itemsInTables = 10;
 $example.Context.getContext = function () {
     var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl, serviceUrl: $example.Context.generateTestData.serviceurl, user: 'asd', password: 'asd' });
@@ -449,7 +463,7 @@ test("REST - Batch GET JSON", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People',
+                        requestUri: 'People?$orderby=Age',
                         headers: {
                         }
                     }]
@@ -501,11 +515,11 @@ test("REST - Batch GET multiple JSON", 15, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People',
+                        requestUri: 'People?$orderby=Age',
                     },
                     {
                         method: 'GET',
-                        requestUri: 'Orders',
+                        requestUri: 'Orders?$orderby=Value',
                     }]
                 }
             }, function (data) {
@@ -578,7 +592,7 @@ test("REST - XML - GET", 6, function () {
         context.People.toArray(function (p) {
 
             OData.request({
-                requestUri: $example.Context.generateTestData.serviceurl + '/People',
+                requestUri: $example.Context.generateTestData.serviceurl + '/People?$orderby=Age',
                 method: 'GET',
                 headers: {
                     'Accept': 'application/atom+xml'
@@ -768,7 +782,7 @@ test("REST - XML - Batch GET", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People',
+                        requestUri: 'People?$orderby=Age',
                         headers: {
                             'Accept': 'application/atom+xml'
                         }
@@ -863,7 +877,7 @@ test("REST - Batch GET / query params", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People?$filter=(Age ge 15)&$order=Age'
+                        requestUri: 'People?$filter=(Age ge 15)&$orderby=Age'
                     }]
                 }
             }, function (data) {
@@ -914,7 +928,7 @@ test("REST - XML - Batch GET / query params", 8, function () {
                 data: {
                     __batchRequests: [{
                         method: 'GET',
-                        requestUri: 'People?$filter=(Age ge 15)&$order=Age',
+                        requestUri: 'People?$filter=(Age ge 15)&$orderby=Age',
                         headers: {
                             'Accept': 'application/atom+xml'
                         }
@@ -996,7 +1010,7 @@ test("Modify Geography", 4, function () {
     $example.Context.generateTestData(context, function () {
         context.Places.toArray(function (places) {
             var place = places[0];
-            
+
             context.attach(place);
             place.Location = new $data.Geography(23.153, -16.138135);
             place.Name = 'Jay location';
@@ -1043,9 +1057,61 @@ test("Filter Geography not equal", 19, function () {
                 equal(places[i].Location.longitude, 123.15697, 'Location.longitude failed');
                 notEqual(places[i].Location.latitude, 1, 'Location.latitude failed');
             }
-            
+
 
             start();
         });
+    });
+});
+
+test("FunctionImport without param str (null param)", 1, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.FuncStrParam(null, function (ret) {
+            equal(ret, 'null', 'result is null');
+            start();
+        });
+    });
+});
+
+test("FunctionImport without param int (null param)", 1, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.FuncNumParam(null, function (ret) {
+            equal(ret, null, 'result is null');
+            start();
+        });
+    });
+});
+
+test("Bugfix delete test", 1, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        for (var i = 0; i < 10; i++) {
+            var t = new $example.TestItem({ Id: 'asdad' + i, Name: 'name' + i, Index: i });
+            context.TestItems.add(t);
+        }
+        context.saveChanges(function () {
+            context.TestItems.toArray(function (items) {
+                for (var i = 0; i < 5; i++) {
+                    context.TestItems.remove(items[i]);
+                }
+
+                context.saveChanges(function () {
+                    context.TestItems.toArray(function (items) {
+                        equal(items.length, 5, 'delete failed');
+                        start();
+                    })
+                });
+
+            });
+        });
+
     });
 });

@@ -1065,6 +1065,10 @@
                     }
                 }
 
+                // Set withCredential 
+                if (request.withCredentials)
+                    xhr.withCredentials = true;
+
                 // Set the timeout if available.
                 if (request.timeoutMS) {
                     xhr.timeout = request.timeoutMS;
@@ -2304,7 +2308,7 @@
         /// <param name="propertyValue" type="String">Value to parse.</param>
         /// <returns type="Date">The parsed value.</returns>
 
-        return parseDateTimeMaybeOffset(propertyValue, false);
+        return parseDateTimeMaybeOffset(propertyValue, true); //Changed for .NET compability, that send with offset
     };
 
     var parseDateTimeOffset = function (propertyValue) {

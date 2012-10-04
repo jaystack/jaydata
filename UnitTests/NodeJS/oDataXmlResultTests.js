@@ -34,7 +34,7 @@ exports.Test = {
         }
         resultData = matches.join('><');
         test.equal(resultData,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/People\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
                 "<id>" +
                     "http://Example.com/testservice/People('idString')" +
@@ -93,7 +93,7 @@ exports.Test = {
         }
         resultData = matches.join('><');
         test.equal(resultData,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/People\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
                 '<id>' +
                     'http://Example.com/testservice/People' +
@@ -180,7 +180,7 @@ exports.Test = {
         }
         resultData = matches.join('><');
         test.equal(resultData,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/People\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
                 '<id>' +
                     'http://Example.com/testservice/People' +
@@ -263,7 +263,7 @@ exports.Test = {
         }
         resultData = matches.join('><');
         test.equal(resultData,
-            '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/People\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
                 '<id>' +
                     'http://Example.com/testservice/People' +
@@ -343,7 +343,7 @@ exports.Test = {
         var result = new $data.oDataResult(items, oDataBuidlerCfg);
 
         var resultData = result.toString();
-        var strResult = '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+        var strResult = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/ATables\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
                 '<id>' +
                     'http://Example.com/testservice/ATables' +
@@ -417,7 +417,7 @@ exports.Test = {
 
         var matches = resultData.split('><');
         var strMatches = strResult.split('><');
-
+        
         test.expect(matches.length + 2);
         test.equal(result.contentType, 'application/atom+xml', 'content type failed');
 
@@ -458,16 +458,17 @@ exports.Test = {
             collectionName: 'ATables',
             selectedFields: undefined,
             includes: undefined,
-            request: reqPoc
-        };
-        reqPoc.headers = {
-            "user-agent": "PowerPivot"
+            request: {
+                headers: {
+                    "user-agent": "PowerPivot"
+                }
+            }
         };
 
         var result = new $data.oDataResult(items, oDataBuidlerCfg);
 
         var resultData = result.toString();
-        var strResult = '<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>' +
+        var strResult = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" xml:base=\"http://Example.com/testservice/ATables\" d:dataservices=\"JayStrom\" m:metadata=\"OData\">" +
                 '<id>' +
                     'http://Example.com/testservice/ATables' +

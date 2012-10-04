@@ -1,4 +1,4 @@
-VERSION = '1.1.1'
+VERSION = '1.2.0'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules
@@ -24,7 +24,11 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
 	$(TYPESYSTEM_DIR)/JayLint.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
+	$(TYPESYSTEM_DIR)/Trace/Trace.js\
+	$(TYPESYSTEM_DIR)/Trace/Logger.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
+	$(TYPESYSTEM_DIR)/Types/Guid.js\
+	$(TYPESYSTEM_DIR)/Types/EdmTypes.js\
 
 VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
 
@@ -93,7 +97,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/EntityState.js\
 	$(TYPES_DIR)/EntityStateManager.js\
 	$(TYPES_DIR)/Exception.js\
-	$(TYPES_DIR)/ServiceOperation.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
 	$(TYPES_DIR)/EntityWrapper.js\
@@ -110,6 +113,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 
 JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\
+	$(JSERVICE_DIR)/Scripts/XMLHttpRequest-patched.js\
 	$(JSERVICE_DIR)/JayService.js\
 	$(JSERVICE_DIR)/OData/Helpers.js\
 	$(JSERVICE_DIR)/oDataMetaDataGenerator.js\
@@ -118,7 +122,6 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/JSObjectAdapter.js\
 	$(JSERVICE_DIR)/ServiceBase.js\
 	$(JSERVICE_DIR)/EntityTransform.js\
-	$(JSERVICE_DIR)/Middleware.js\
 	$(JSERVICE_DIR)/EntityXmlTransform.js\
 	$(JSERVICE_DIR)/oDataResponseDataBuilder.js\
 	$(JSERVICE_DIR)/OData/ServiceDefinitionXml.js\
@@ -235,7 +238,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./service_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
-	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "url": ">0.0.1", "genx": "0.9.0", "libxmljs": "0.5.4"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
+	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "url": ">0.0.1", "jaydata-genx": "0.9.0", "libxmljs": "0.5.4"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
 npmindexeddb: $(IndexedDbProvider) $(CREDITS)
 	@@echo "Building IndexedDb provider npm package..."

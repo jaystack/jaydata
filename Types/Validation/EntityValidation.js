@@ -59,7 +59,12 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
                 minLength: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length >= definedValue; },
                 maxLength: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length <= definedValue; },
                 length: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length == definedValue; },
-                regex: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.match(definedValue); }
+                regex: function (value, definedValue) {
+                    return Object.isNullOrUndefined(value) ||
+                        value.match(typeof definedValue === 'string'
+                            ? new RegExp((definedValue.indexOf('/') === 0 && definedValue.lastIndexOf('/') === (definedValue.length - 1)) ? definedValue.slice(1, -1) : definedValue)
+                            : definedValue)
+                }
             },
             '$data.Date': {
                 required: function (value, definedValue) { return !Object.isNullOrUndefined(value); },
@@ -77,6 +82,10 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
                 length: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length == definedValue; }
             },
             '$data.Object': {
+                required: function (value, definedValue) { return !Object.isNullOrUndefined(value); },
+                customValidator: function (value, definedValue) { return Object.isNullOrUndefined(value) || typeof definedValue == "function" ? definedValue(value) : true; }
+            },
+            '$data.Guid': {
                 required: function (value, definedValue) { return !Object.isNullOrUndefined(value); },
                 customValidator: function (value, definedValue) { return Object.isNullOrUndefined(value) || typeof definedValue == "function" ? definedValue(value) : true; }
             }

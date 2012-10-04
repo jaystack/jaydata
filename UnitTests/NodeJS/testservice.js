@@ -1,9 +1,22 @@
 ﻿require('jaydata');
 window.DOMParser = require('xmldom').DOMParser;
 
+var nodeunit = require('nodeunit');
+var util = require('util');
+require('../../NewsReaderContext.js');
+
+exports['commonTests'] = require('./commonTests.js');
+exports['EntityTransform'] = require('./EntityTransformTests.js');
+exports['oDataMetaDataGenerator'] = require('./oDataMetaDataGeneratorTests.js');
+exports['oDataResponseDataBuilder'] = require('./oDataResponseDataBuilderTests.js');
+exports['oDataBatchTest'] = require('./oDataBatchTests.js');
+exports['argumentBinderTests'] = require('./argumentBinderTests.js');
+exports['oDataXmlResultTests'] = require('./oDataXmlResultTests.js');
+
+exports['mongoProviderTests'] = require('../mongoProviderTests.js');
+
 var connect = require('connect');
 var app = connect();
-
 
 $data.Class.define('$exampleSrv.PersonSrv', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
@@ -26,18 +39,56 @@ $data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
     Location: { type: 'geo' }
 });
 
+$data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
+    Id: { type: 'string', key: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' }
+});
+
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
     Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
-    FuncStrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'string' }]).returns('string'),
-    FuncIntParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'int' }]).returns('int'),
-    FuncNumParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'number' }]).returns('number'),
-    FuncObjParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'object' }]).returns('object'),
-    FuncArrParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'array' }]).returns('object'),
-    FuncBoolParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'bool' }]).returns('bool'),
-    FuncDateParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'date' }]).returns('date'),
-    FuncGeographyParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: 'geo' }]).returns('geo'),
+    TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
+    FuncStrParam: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="string"/>
+        return a;
+    }),
+    FuncIntParam: (function (a) {
+        ///<param name="a" type="int"/>
+        ///<returns type="int"/>
+        return a;
+    }),
+    FuncNumParam: (function (a) {
+        ///<param name="a" type="number"/>
+        ///<returns type="number"/>
+        return a;
+    }),
+    FuncObjParam: (function (a) {
+        ///<param name="a" type="object"/>
+        ///<returns type="object"/>
+        return a;
+    }),
+    FuncArrParam: (function (a) {
+        ///<param name="a" type="array"/>
+        ///<returns type="object"/>
+        return a;
+    }),
+    FuncBoolParam: (function (a) {
+        ///<param name="a" type="bool"/>
+        ///<returns type="bool"/>
+        return a;
+    }),
+    FuncDateParam: (function (a) {
+        ///<param name="a" type="date"/>
+        ///<returns type="date"/>
+        return a; }),
+    FuncGeographyParam: (function (a) {
+        ///<param name="a" type="geo"/>
+        ///<returns type="geo"/>
+        return a;
+    }),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),
 
     ATables: {
@@ -64,6 +115,33 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     }
 });
 
+$exampleSrv.Context.annotateFromVSDoc();
+
+var onException = false;
+app.use(function(req, res, next){
+    if (!onException){
+        process.on('uncaughtException', function(err){
+            if (req.tracker){
+                var u = 0;
+                if (u = req.tracker.unfinished()) {
+                    var str = '<ul>';
+                    str += 'Undone tests [' + u + '] (or their setups/teardowns): ';
+                    var names = tracker.names();
+                    for (var i = 0; i < names.length; i += 1) {
+                        str += '<li>' + names[i] + '</li>';
+                    }
+                    str += '</ul>';
+                    next(str);
+                }
+            }else{
+                next(err);
+            }
+        });
+        onException = true;
+    }
+    next();
+});
+
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type, MaxDataServiceVersion, DataServiceVersion, Authorization');
@@ -83,10 +161,179 @@ app.use(connect.query());
 app.use(connect.bodyParser());
 app.use($data.JayService.OData.Utils.simpleBodyReader());
 
-app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
+app.use("/", connect.static(__dirname + "/../../"));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
     return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
+
+app.use("/nodeunit", function(req, res, next){
+    var reporter = {
+        run: function(files, options, callback){
+            var utils = {
+                betterErrors: function (assertion) {
+                    if (!assertion.error) return assertion;
+
+                    var e = assertion.error;
+                    if (e.actual && e.expected) {
+                        var actual = util.inspect(e.actual, false, 10).replace(/\n$/, '');
+                        var expected = util.inspect(e.expected, false, 10).replace(/\n$/, '');
+                        var multiline = (
+                            actual.indexOf('\n') !== -1 ||
+                            expected.indexOf('\n') !== -1
+                        );
+                        var spacing = (multiline ? '\n' : ' ');
+                        e._message = e.message;
+                        e.stack = (
+                            e.name + ':' + spacing +
+                            actual + spacing + e.operator + spacing +
+                            expected + '\n' +
+                            e.stack.split('\n').slice(1).join('\n')
+                        );
+                    }
+                    return assertion;
+                }
+            };
+            
+            var track = {
+                createTracker: function (on_exit) {
+                    var names = {};
+                    var tracker = {
+                        names: function () {
+                            var arr = [];
+                            for (var k in names) {
+                                if (names.hasOwnProperty(k)) {
+                                    arr.push(k);
+                                }
+                            }
+                            return arr;
+                        },
+                        unfinished: function () {
+                            return tracker.names().length;
+                        },
+                        put: function (testname) {
+                            names[testname] = testname;
+                        },
+                        remove: function (testname) {
+                            delete names[testname];
+                        }
+                    };
+                    
+                    req.tracker = tracker;
+
+                    return tracker;
+                },
+                default_on_exit: function (tracker) {
+                    
+                }
+            };
+            
+            res.write('<html>');
+            res.write('<head>');
+            res.write('<title>JayData NodeUnit Tests</title>');
+            res.write('<style type="text/css">');
+            res.write('body { font: 12px Helvetica Neue }');
+            res.write('h2 { margin:0 ; padding:0 }');
+            res.write('pre { font: 11px Andale Mono; margin-left: 1em; padding-left: 1em; margin-top:0; font-size:smaller;}');
+            res.write('.assertion_message { margin-left: 1em; }');
+            res.write('  ol {' +
+            '	list-style: none;' +
+            '	margin-left: 1em;' +
+            '	padding-left: 1em;' +
+            '	text-indent: -1em;' +
+            '}');
+            res.write('  ol li.pass:before { content: "\\2714 \\0020"; color: green; }');
+            res.write('  ol li.fail:before { content: "\\2716 \\0020"; color: red; }');
+            res.write('</style>');
+            res.write('</head>');
+            res.write('<body>');
+            
+            var start = new Date().getTime();
+            var tracker = track.createTracker(function (tracker) {
+                if (tracker.unfinished()) {
+                    res.write('')
+                    res.write('');
+                    res.write(error(bold(
+                        'FAILURES: Undone tests (or their setups/teardowns): '
+                    )));
+                    var names = tracker.names();
+                    for (var i = 0; i < names.length; i += 1) {
+                        res.write('- ' + names[i]);
+                    }
+                    res.write('');
+                    res.write('To fix this, make sure all tests call test.done()');
+                    process.reallyExit(tracker.unfinished());
+                }
+            });
+            
+            var opts = {
+                moduleStart: function (name) {
+                    res.write('<h2>' + name + '</h2>');
+                    res.write('<ol>');
+                },
+                testDone: function (name, assertions) {
+                    tracker.remove(name);
+
+                    if (!assertions.failures()) {
+                        res.write('<li class="pass">' + name + '</li>');
+                    }
+                    else {
+                        res.write('<li class="fail">' + name);
+                        assertions.forEach(function (a) {
+                            if (a.failed()) {
+                                a = utils.betterErrors(a);
+                                if (a.error instanceof AssertionError && a.message) {
+                                    res.write('<div class="assertion_message">' + 'Assertion Message: ' + a.message + '</div>');
+                                }
+                                res.write('<pre>' + a.error.stack + '</pre>');
+                            }
+                        });
+                        res.write('</li>');
+                    }
+                },
+                moduleDone: function () {
+                    res.write('</ol>');
+                },
+                done: function (assertions, end) {
+                    var end = end || new Date().getTime();
+                    var duration = end - start;
+                    if (assertions.failures()) {
+                        res.write(
+                            '<h3>FAILURES: '  + assertions.failures() +
+                            '/' + assertions.length + ' assertions failed (' +
+                            assertions.duration + 'ms)</h3>'
+                        );
+                    }
+                    else {
+                        res.write(
+                           '<h3>OK: ' + assertions.length +
+                           ' assertions (' + assertions.duration + 'ms)</h3>'
+                        );
+                    }
+                    res.write('</body>');
+                    res.write('</html>');
+
+                    if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
+                },
+                testStart: function(name) {
+                    tracker.put(name);
+                }
+            };
+            
+            if (files && files.length) {
+                var paths = files.map(function (p) {
+                    return path.join(process.cwd(), p);
+                });
+                nodeunit.runFiles(paths, opts);
+            } else {
+                nodeunit.runModules(files,opts);
+            }
+        }
+    };
+    reporter.run(exports, null, function(err){
+        if (err) next(err);
+        else res.end();
+    });
+});
 
 app.use(connect.errorHandler());
 

@@ -1,6 +1,8 @@
 ﻿require('jaydata');
 require('./NewsReaderContext.js');
 
+require('./UnitTests/NodeJS/testservice.js');
+
 var reporter = require('nodeunit').reporters.default;
 
 //Tests
@@ -14,4 +16,6 @@ exports['oDataXmlResultTests'] = require('./UnitTests/NodeJS/oDataXmlResultTests
 
 exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js');
 
-reporter.run(exports);
+reporter.run(exports, null, function(){
+    process.exit();
+});

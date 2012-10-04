@@ -79,7 +79,7 @@ $data.Class.define('$data.Queryable', null, null,
         return this.filter(predicate, params);
     },
 
-    map: function (projection, thisArg) {
+    map: function (projection, thisArg, mappedTo) {
 		///	<summary>Map specifies the shape or type of each returned element. You can specify whether your results will consist of complete Person objects, just one member, a subset of members, or some completely different result type based on a computation or new object creation. When map produces something other than a copy of the source element, the operation is called a projection. The use of projections to transform data is a powerful capability of JavaScript Language Query expressions.</summary>
         ///	<param name="projection" type="Function">A projection expression</param>
         ///	<param name="thisArg" type="Object">The query parameters</param>
@@ -118,13 +118,21 @@ $data.Class.define('$data.Queryable', null, null,
         this._checkOperation('map');
         var codeExpression = Container.createCodeExpression(projection, thisArg);
         var exp = Container.createProjectionExpression(this.expression, codeExpression);
+
+        if (mappedTo === 'default')
+            exp.projectionAs = this.defaultType;
+        else if (mappedTo)
+            exp.projectionAs = Container.resolveType(mappedTo);
+        else
+            exp.projectionAs = $data.Object;
+
         var q = Container.createQueryable(this, exp);
         return q;
     },
-    select: function (projection, thisArg) {
+    select: function (projection, thisArg, mappedTo) {
 		///<summary>Select is a convenience alias for C# developers. Use map instead.</summary>
 		///<returns type="$data.Queryable" />
-        return this.map(projection, thisArg);
+        return this.map(projection, thisArg, mappedTo);
     },
 
     length: function (onResult) {

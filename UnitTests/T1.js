@@ -1,6 +1,459 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('map as jaydata type', function () {
+        expect(6);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.orderBy('it.Id').map(function (a) { return { Id: a.Id, Lead: a.Lead, Body: a.Body, Category: a.Category }; }, null, $news.Types.Article).toArray(function (art) {
+                    equal(art[1] instanceof $news.Types.Article, true, 'result is typed');
+                    
+                    equal(typeof art[1].Id, 'number', 'result Id is typed');
+                    equal(typeof art[1].Lead, 'string', 'result Lead is typed');
+                    equal(typeof art[1].Body, 'string', 'result Body is typed');
+                    equal(typeof art[1].CreateDate, 'undefined', 'result CreateDate is undefined');
+                    equal(art[1].Category instanceof $news.Types.Category, true, 'art[1].Category is Array');
+
+                    start();
+                });
+            });
+
+        });
+    });
+    test('map as default', function () {
+        expect(6);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.orderBy('it.Id').map(function (a) { return { Id: a.Id, Lead: a.Lead, Body: a.Body, Category: a.Category }; }, null, 'default').toArray(function (art) {
+                    equal(art[1] instanceof $news.Types.Article, true, 'result is typed');
+
+                    equal(typeof art[1].Id, 'number', 'result Id is typed');
+                    equal(typeof art[1].Lead, 'string', 'result Lead is typed');
+                    equal(typeof art[1].Body, 'string', 'result Body is typed');
+                    equal(typeof art[1].CreateDate, 'undefined', 'result CreateDate is undefined');
+                    equal(art[1].Category instanceof $news.Types.Category, true, 'art[1].Category is Array');
+
+                    start();
+                });
+            });
+
+        });
+    });
+    test('sqLite 0..1 table generation not required', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass1', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string' },
+            BItem: { type: '$example.Types.BClass1', inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass1', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass1', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext1', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass1 },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass1 }
+        });
+
+
+
+        (new $example.Types.ClassContext1({ name: 'sqLite', databaseName: 'T1_ClassContext1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass1({ Name: 'name1', BItem: null });
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok('save success', 'save success');
+                        start();
+                    },
+                    error: function (ex) {
+                        ok(false, ex.message);
+                        start();
+                    }
+                });
+            });
+    });
+    test('sqLite 0..1 table generation required', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass2', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: {type: 'string'},
+            BItem: { type: '$example.Types.BClass2', required: true, inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass2', $data.Entity, null, {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass2', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext2', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass2 },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass2 }
+        });
+
+
+
+        (new $example.Types.ClassContext2({ name: 'sqLite', databaseName: 'T1_ClassContext2', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass2({Name: 'name1', BItem: null});
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok(false, 'required field failed');
+                        start();
+                    },
+                    error: function (ex) {
+                        equal(ex.message, 'could not execute statement (19 constraint failed)', 'required side is required');
+                        start();
+                    }
+                });
+        });
+    });
+    test('sqLite 0..1 table generation not required guid key', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass1g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string' },
+            BItem: { type: '$example.Types.BClass1g', inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass1g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass1g', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext1g', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass1g },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass1g }
+        });
+
+
+
+        (new $example.Types.ClassContext1g({ name: 'sqLite', databaseName: 'T1_ClassContext1g', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass1g({ Id: $data.parseGuid('97e78352-13ef-4068-9ed7-31023bbd8204'), Name: 'name1', BItem: null });
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok('save success', 'save success');
+                        start();
+                    },
+                    error: function (ex) {
+                        ok(false, ex.message);
+                        start();
+                    }
+                });
+            });
+    });
+    test('sqLite 0..1 table generation required guid key', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
+        expect(1);
+        stop(1);
+
+        $data.Class.define('$example.Types.AClass2g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string' },
+            BItem: { type: '$example.Types.BClass2g', required: true, inverseProperty: 'AItem' },
+        });
+        $data.Class.define('$example.Types.BClass2g', $data.Entity, null, {
+            Id: { type: 'guid', key: true, required: true },
+            Name: { type: 'string', required: true },
+            AItem: { type: 'Array', elementType: '$example.Types.AClass2g', inverseProperty: 'BItem' }
+        });
+        $data.Class.define('$example.Types.ClassContext2g', $data.EntityContext, null, {
+            AItems: { type: $data.EntitySet, elementType: $example.Types.AClass2g },
+            BItems: { type: $data.EntitySet, elementType: $example.Types.BClass2g }
+        });
+
+
+
+        (new $example.Types.ClassContext2g({ name: 'sqLite', databaseName: 'T1_ClassContext2g', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
+            .onReady(function (db) {
+                var a = new $example.Types.AClass2g({ Id: $data.parseGuid('97e78352-13ef-4068-9ed7-31023bbd8204'), Name: 'name1', BItem: null });
+                db.AItems.add(a);
+                db.saveChanges({
+                    success: function () {
+                        ok(false, 'required field failed');
+                        start();
+                    },
+                    error: function (ex) {
+                        equal(ex.message, 'could not execute statement (19 constraint failed)', 'required side is required');
+                        start();
+                    }
+                });
+            });
+    });
+    test('navProperty many', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(5);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.map(function (a) { return { id: a.Id, catArticles: a.Category.Articles }; }).toArray(function (art) {
+                    equal(art[0].catArticles instanceof Array, true, 'many nav property is array');
+                    equal(art[1].catArticles instanceof Array, true, 'many nav property is array');
+
+                    equal(art[1].catArticles[0] instanceof $news.Types.Article, true, 'item[1].catArticles[0] is $news.Types.Article');
+                    equal(art[1].catArticles[0].Body, 'Body1', 'item[1].catArticles[0].Body has value');
+                    equal(art[1].catArticles[0].Lead, 'Lead1', 'item[1].catArticles[0].Lead has value');
+                    start();
+                });
+            });
+
+        });
+    });
+    test('navProperty single', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(3);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.map(function (a) { return { id: a.Id, category: a.Category }; }).toArray(function (art) {
+                    equal(art[0].category instanceof $news.Types.Category, true, 'many nav property is $news.Types.Category');
+                    equal(art[1].category instanceof $news.Types.Category, true, 'many nav property is $news.Types.Category');
+
+                    equal(art[1].category.Title, 'Sport', 'art[1].category.Title has value');
+                    start();
+                });
+            });
+
+        });
+    });
+    test('guid key, navProperty', function () {
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(8);
+        stop(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            var itemGrp = new $news.Types.TestItemGroup({ Id: $data.parseGuid('73304541-7f4f-4133-84a4-16ccc2ce600d'), Name: 'Group1' });
+            equal(itemGrp.Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', ' init guid value');
+            var item = new $news.Types.TestItemGuid({ Id: $data.parseGuid('bb152892-3a48-4ffa-83cd-5f952e21c6eb'), i0: 0, b0: true, s0: '0', Group: itemGrp });
+
+            //db.TestItemGroups.add(itemGrp);
+            db.TestTable2.add(item);
+
+            db.saveChanges(function () {
+                db.TestItemGroups.toArray(function (res) {
+                    equal(res[0].Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
+                    db.TestTable2.toArray(function (res2) {
+                        equal(res2[0].Id.value, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
+
+
+                        db.TestItemGroups.attach(itemGrp);
+                        var item2 = new $news.Types.TestItemGuid({ Id: $data.parseGuid('03be7d99-5dc1-464b-b890-5b997c86a798'), i0: 1, b0: true, s0: '0', Group: itemGrp });
+                        db.TestTable2.add(item2);
+
+                        db.saveChanges(function () {
+                            db.TestItemGroups.toArray(function (res) {
+                                equal(res.length, 1, 'res length');
+                                equal(res[0].Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
+                                db.TestTable2.orderBy('it.i0').toArray(function (res2) {
+                                    equal(res2.length, 2, 'res2 length');
+                                    equal(res2[0].Id.value, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
+                                    equal(res2[1].Id.value, '03be7d99-5dc1-464b-b890-5b997c86a798', 'res2 init guid value');
+                                    start();
+                                });
+                            });
+                        });
+
+                    })
+                })
+            });
+
+        });
+    });
+    test('concurrency test', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(8);
+        stop(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            try {
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    db.Articles.toArray(function (a) {
+                        db.Articles.toArray(function (a2) {
+                            var article = a[0];
+                            var article2 = a2[0];
+                            equal(article.Id, article2.Id, 'test items equal failed');
+                            equal(article.RowVersion, article2.RowVersion, 'test items RowVersion equal failed');
+
+                            db.Articles.attach(article);
+                            article.Body += 'Changed body';
+                            db.saveChanges(function () {
+                                equal(article.Id, article2.Id, 'test items equal');
+                                notEqual(article.RowVersion, article2.RowVersion, 'test items RowVersion notequal failed');
+
+                                db.Articles.attach(article2);
+                                article2.Body += 'Changed later';
+
+                                db.saveChanges({
+                                    success: function () {
+                                        start(1);
+                                        ok(false, 'save success on invalid element failed');
+                                    },
+                                    error: function () {
+                                        article2.RowVersion = '*';
+                                        db.saveChanges({
+                                            success: function () {
+
+                                                equal(article.Id, article2.Id, 'test items equal');
+                                                notEqual(article.RowVersion, article2.RowVersion, 'test items RowVersion notequal failed');
+
+                                                db.Articles.filter(function (art) { return art.Id == this.Id }, { Id: article2.Id }).toArray(function (a3) {
+                                                    start(1);
+
+                                                    equal(a3[0].Id, article2.Id, 'test items equal failed');
+                                                    equal(a3[0].RowVersion, article2.RowVersion, 'test items RowVersion equal failed');
+                                                });
+                                            },
+                                            error: function () {
+                                                start(1);
+                                                ok(false, 'save not success on valid element failed');
+                                            }
+                                        });
+                                    }
+                                })
+
+                            });
+                        });
+                    });
+                });
+
+
+            } catch (ex) {
+                start(1);
+                ok(false, "Unhandled exception occured");
+                console.log("--=== concurrency test: ");
+                console.dir(ex);
+                console.log(" ===--");
+            }
+        });
+    });
+    test('OData provider - Filter by GUID field should be supported', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
+        expect(20);
+        stop(6);
+        $data.Class.define("$news.Types.TestItemExtended", $data.Entity, null, {
+            Id: { type: "int", key: true },
+            i0: { type: "int" },
+            b0: { type: "boolean" },
+            s0: { type: "string" },
+            blob: { type: "blob" },
+            n0: { type: "number" },
+            d0: { type: "date" },
+            g0: { type: "guid" },
+        }, null);
+
+        $data.Class.define("$news.Types.NewsContextPartial", $data.EntityContext, null, {
+            TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItemExtended }
+        });
+
+        (new $news.Types.NewsContextPartial(providerConfig)).onReady(function (db) {
+            var guid = new $data.Guid('ae22ffc7-8d96-488e-84f2-c04753242348');
+
+            var q = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: guid });
+            equal(q.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'ae22ffc7-8d96-488e-84f2-c04753242348')", 'param guid failed');
+
+            var q2 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: new $data.Guid('c22f0ecd-8cff-403c-89d7-8d18c457f1ef') });
+            equal(q2.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'c22f0ecd-8cff-403c-89d7-8d18c457f1ef')", 'inline guid failed');
+
+            var q3 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: new $data.Guid() });
+            equal(q3.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'00000000-0000-0000-0000-000000000000')", 'empty guid failed');
+
+            var q4 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: null });
+            equal(q4.toTraceString().queryText, "/TestTable?$filter=(g0 eq null)", 'null guid failed');
+
+            var item1 = new $news.Types.TestItemExtended({ Id: 42, g0: guid });
+            var item2 = new $news.Types.TestItemExtended({ Id: 43, g0: new $data.Guid('c22f0ecd-8cff-403c-89d7-8d18c457f1ef') });
+            var item3 = new $news.Types.TestItemExtended({ Id: 44, g0: new $data.Guid() });
+            var item4 = new $news.Types.TestItemExtended({ Id: 45, g0: null });
+            db.TestTable.add(item1);
+            db.TestTable.add(item2);
+            db.TestTable.add(item3);
+            db.TestTable.add(item4);
+            db.saveChanges(function () {
+                db.TestTable.toArray(function (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
+                        switch (item.Id) {
+                            case 42:
+                                equal(item.g0.valueOf(), 'ae22ffc7-8d96-488e-84f2-c04753242348', "Id:42, guid value failed");
+                                break;
+                            case 43:
+                                equal(item.g0.valueOf(), 'c22f0ecd-8cff-403c-89d7-8d18c457f1ef', "Id:43, guid value failed");
+                                break;
+                            case 44:
+                                equal(item.g0.valueOf(), '00000000-0000-0000-0000-000000000000', "Id:44, guid value failed");
+                                break;
+                            case 45:
+                                equal(item.g0, null, "Id:45, guid value failed");
+                                break;
+                            default:
+                        }
+                    }
+                    start();
+                });
+
+                q.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0.toString(), 'ae22ffc7-8d96-488e-84f2-c04753242348', "param guid value failed");
+                    start();
+                });
+                q2.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0.toString(), 'c22f0ecd-8cff-403c-89d7-8d18c457f1ef', "param inline value failed");
+                    start();
+                });
+                q3.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0.toString(), '00000000-0000-0000-0000-000000000000', "param empty value failed");
+                    start();
+                });
+                q4.toArray(function (items) {
+                    equal(items.length, 1, 'result count failed');
+                    equal(items[0].g0, null, "param null value failed");
+                    start();
+                });
+
+                db.TestTable.map(function (t) { return t.g0; }).toArray(function (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i]) {
+                            equal(items[i] instanceof $data.Guid, true, 'guid map failed: ' + i);
+                        } else {
+                            equal(items[i], null, 'guid map failed: ' + i);
+                        }
+                    }
+                    start();
+                });
+
+            });
+            
+
+        });
+
+
+    });
     test('EntityField == null or null == EntityField filter', 6, function () {
         stop(6);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

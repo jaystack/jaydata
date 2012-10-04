@@ -14,7 +14,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             serviceUrl: "",
             maxDataServiceVersion: '2.0',
             user: null,
-            password: null
+            password: null,
+            withCredentials: false
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -34,13 +35,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         requestUri: that.providerConfiguration.serviceUrl + "/Delete",
                         method: 'POST'
                     }, function (d) {
-                        console.log("RESET oData database");
+                        //console.log("RESET oData database");
                         callBack.success(that.context);
                     }, function (error) {
                         callBack.success(that.context);
                     }];
 
-                    this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password);
+                    this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
                     //if (this.providerConfiguration.user) {
                     //    requestData[0].user = this.providerConfiguration.user;
                     //    requestData[0].password = this.providerConfiguration.password || "";
@@ -82,13 +83,15 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                 }, this);
                             } else {
                                 if (refValue.entityState === $data.EntityState.Modified) {
-                                    var tblName = context._storageModel.getStorageModel(refValue.getType()).TableName;
-                                    var pk = '(';
+                                    var sMod = context._storageModel.getStorageModel(refValue.getType())
+                                    var tblName = sMod.TableName;
+                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: sMod.EntitySetReference }) + ')';
+                                    /*var pk = '(';
                                     refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
                                         if (index > 0) { pk += ','; }
                                         pk += refValue[k.name];
                                     }, this);
-                                    pk += ')';
+                                    pk += ')';*/
                                     dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
@@ -140,7 +143,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         ];
 
-        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password);
+        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {
         //    requestData[0].user = this.providerConfiguration.user;
         //    requestData[0].password = this.providerConfiguration.password || "";
@@ -172,8 +175,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             this._saveRest(independentBlocks, index2, callBack);
     },
     _saveRest: function (independentBlocks, index2, callBack) {
-        batchRequests = [];
-        convertedItem = [];
+        var batchRequests = [];
+        var convertedItem = [];
         var request;
         for (var index = 0; index < independentBlocks.length; index++) {
             for (var i = 0; i < independentBlocks[index].length; i++) {
@@ -242,7 +245,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         }, callBack.error];
 
-        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password);
+        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {
         //    requestData[0].user = this.providerConfiguration.user;
         //    requestData[0].password = this.providerConfiguration.password || "";
@@ -252,8 +255,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         OData.request.apply(this, requestData);
     },
     _saveBatch: function (independentBlocks, index2, callBack) {
-        batchRequests = [];
-        convertedItem = [];
+        var batchRequests = [];
+        var convertedItem = [];
         for (var index = 0; index < independentBlocks.length; index++) {
             for (var i = 0; i < independentBlocks[index].length; i++) {
                 convertedItem.push(independentBlocks[index][i].data);
@@ -328,7 +331,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         }, callBack.error, OData.batchHandler];
 
-        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password);
+        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {
         //    requestData[0].user = this.providerConfiguration.user;
         //    requestData[0].password = this.providerConfiguration.password || "";
@@ -342,7 +345,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                serializableObject[memdef.name] = item.physicalData[memdef.name];
+                if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function(def){ return def.name === memdef.name; })))
+                    serializableObject[memdef.name] = item.physicalData[memdef.name];
             }
         }, this);
         return serializableObject;
@@ -351,18 +355,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var property = item.data.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
         if (property && property[0]) {
             headers['If-Match'] = item.data[property[0].name];
-            item.data[property[0].name] = "";
+            //item.data[property[0].name] = "";
         }
-        //if (item.data.RowVersion || item.data.RowVersion === 0) {
-        //    headers['If-Match'] = item.data.RowVersion.toString();
-        //    item.data.RowVersion = "";
-        //}
     },
     getTraceString: function (queryable) {
         var sqlText = this._compile(queryable);
         return queryable;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography, $data.Guid], writable: false },
 
     supportedBinaryOperators: {
         value: {
@@ -553,11 +553,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
                 '$data.Geography': function (geo) {
-                    if (typeof geo === 'object' && Array.isArray(geo.coordinates)) {
+                    if (geo && typeof geo === 'object' && Array.isArray(geo.coordinates)) {
                         return new $data.Geography(geo.coordinates[0], geo.coordinates[1]);
                     }
                     return geo;
-                }
+                },
+                '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
             },
             toDb: {
                 '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
@@ -574,8 +575,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     if (geo instanceof $data.Geography)
                         return 'POINT(' + geo.longitude + ' ' + geo.latitude + ')';
                     return geo;
-                }
-            }
+                },
+                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
+}
         }
     },
     getEntityKeysValue: function (entity) {
@@ -586,10 +588,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
-                switch (field.dataType) {
+                switch (Container.getName(field.dataType)) {
+                    case "$data.Guid":
                     case "Edm.Guid":
-                        keyValue = ("guid'" + keyValue + "'");
+                        keyValue = ("guid'" + (keyValue ? keyValue.value : keyValue)  + "'");
                         break;
+                    case "$data.Blob":
                     case "Edm.Binary":
                         keyValue = ("binary'" + keyValue + "'");
                         break;
@@ -597,6 +601,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         var hexDigits = '0123456789ABCDEF';
                         keyValue = (hexDigits[(i >> 4) & 15] + hexDigits[i & 15]);
                         break;
+                    case "$data.Date":
                     case "Edm.DateTime":
                         keyValue = ("datetime'" + keyValue.toISOString() + "'");
                         break;
@@ -610,7 +615,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         keyValue = (keyValue + "L");
                         break;
                     case 'Edm.String':
-                    case "string":
+                    case "$data.String":
                         keyValue = ("'" + keyValue + "'");
                         break;
                 }
@@ -658,10 +663,11 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     }
     */
-    appendBasicAuth: function (request, user, password) {
+    appendBasicAuth: function (request, user, password, withCredentials) {
         request.headers = request.headers || {};
         if (!request.headers.Authorization && user && password) {
             request.headers.Authorization = "Basic " + this.__encodeBase64(user + ":" + password);
+            request.withCredentials = withCredentials;
         }
     },
     __encodeBase64: function (val) {

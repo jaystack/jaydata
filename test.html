@@ -15,10 +15,14 @@
     <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
     <script type="text/javascript" src="TypeSystem/utils.js"></script>
     <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
-    <script type="text/javascript" src="Scripts/datajs-1.0.3.js"></script>
+    <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
     <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
     <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
+    <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
+    <script type="text/javascript" src="TypeSystem/Trace/Logger.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Geography.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Guid.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/EdmTypes.js"></script>
     <!--*******************************Expressions****************************************-->
     <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
     <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
@@ -162,6 +166,16 @@
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
 
+
+    <!--******************************* OData Parser ****************************************-->
+    <script type="text/javascript" src="oDataParser/RequestExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/RequestLexer.js"></script>
+    <script type="text/javascript" src="oDataParser/RequestParser.js"></script>
+
+    <script type="text/javascript" src="oDataParser/EntityExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/ODataEntityExpressionBuilder.js"></script>
+
+
     <!--******************************* jsExtensions ****************************************-->
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>
     <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
@@ -206,6 +220,11 @@
 
     <script src="UnitTests/FaceBookProviderTests.js" type="text/javascript"></script>
     <script src="UnitTests/YQLProviderTests.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="oDataParser/currentTests.js"></script>
+    <script type="text/javascript" src="oDataParser/lexerTests.js"></script>
+    <script type="text/javascript" src="oDataParser/parserTests.js"></script>
+    <script type="text/javascript" src="oDataParser/expressionParserTests.js"></script>
 
     <!--<script src="UnitTests/AuthEntityContextTests.js" type="text/javascript"></script>--> <!--//TODO: fixed authentication context bugs-->
     

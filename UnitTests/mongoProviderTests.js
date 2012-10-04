@@ -6,7 +6,7 @@ $test.Context.init = function(callback){
     $test.context.onReady(function(db){
         callback(db);
     });
-}
+};
 
 exports.testAdd = function(test){
     test.expect(3);
@@ -898,8 +898,24 @@ exports.testUpdateArrayID = function(test){
                                 test.done();
                             });
                         });
-                    })
+                    });
                 });
+            });
+        });
+    });
+};
+
+exports.testCappedTable = function(test){
+    test.expect(2);
+    $test.Context.init(function(db){
+        for (var i = 0; i < 20; i++){
+            db.CappedItems.add(new $test.CappedItem({ Key: 'aaa1', Value: 'bbb6', Rank: i }));
+        }
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 20, 'Not 20 items added to capped collection');
+            db.CappedItems.toArray(function(result){
+                test.equal(result.length, 10, 'Not only 10 items in the capped collection');
+                test.done();
             });
         });
     });

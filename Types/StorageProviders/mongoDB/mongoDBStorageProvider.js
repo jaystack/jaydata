@@ -241,6 +241,10 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     compile: function (expression, context) {
+        if (!context.cursor) {
+            context.query = {};
+            context.cursor = context.query;
+        }
         this.Visit(expression, context);
     },
 
@@ -254,11 +258,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     VisitSimpleBinaryExpression: function (expression, context) {
-        if (!context.cursor){
-            context.query = {};
-            context.cursor = context.query;
-        }
-        
+     
         var cursor = context.cursor;
         
         switch (expression.nodeType){
@@ -527,20 +527,35 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
             this.Visit(arg, context);
         }, this);
         
-        if (!context.query[context.field]) context.query[context.field] = {};
-        
+        var opMapTo;
+        var opValue;
         switch (opName){
             case 'contains':
-                context.query[context.field].$regex = context.value;
+                opMapTo = '$regex';
+                opValue = context.value;
                 break;
             case 'startsWith':
-                context.query[context.field].$regex = '^' + context.value;
+                opMapTo = '$regex';
+                opValue = '^' + context.value;
                 break;
             case 'endsWith':
-                context.query[context.field].$regex = context.value + '$';
+                opMapTo = '$regex';
+                opValue = context.value + '$';
                 break;
             default:
                 break;
+        }
+        
+        if (opMapTo && opValue){
+            if (context.cursor instanceof Array){
+                var o = {};
+                o[context.field] = {};
+                o[context.field][opMapTo] = opValue;
+                context.cursor.push(o);
+            }else{
+                context.cursor[context.field] = {};
+                context.cursor[context.field][opMapTo] = opValue;
+            }
         }
     },
 
@@ -762,61 +777,94 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
-        switch (this.providerConfiguration.dbCreation){
-            case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                var server = this._getServer();
-                new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        var server = this._getServer();
+        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+            if (error){
+                callBack.error(error);
+                return;
+            }
+            
+            var fn = function(error, client){
+                var cnt = 0;
+                var collectionCount = 0;
+                var readyFn = function(client){
+                    if (--cnt <= 0){
+                        callBack.success(self.context);
+                        client.close();
+                    }
+                };
+                
+                for (var i in self.context._entitySetReferences){
+                    if (self.context._entitySetReferences.hasOwnProperty(i))
+                        cnt++;
+                }
+                
+                collectionCount = cnt;
+                var sets = Object.keys(self.context._entitySetReferences);
+                if (!sets.length) return readyFn(client);
+                sets.forEach(function(i){
+                    if (self.context._entitySetReferences.hasOwnProperty(i)){
+                        client.collectionNames({ namesOnly: true }, function(error, names){
+                            names = names.map(function(it){ return it.slice(it.lastIndexOf('.') + 1); });
+                            switch (self.providerConfiguration.dbCreation){
+                                case $data.storageProviders.DbCreationType.DropAllExistingTables:
+                                    if (names.indexOf(self.context._entitySetReferences[i].tableName) >= 0){
+                                        client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
+                                            if (error){
+                                                callBack.error(error);
+                                                return;
+                                            }
+                                            if (self.context._entitySetReferences[i].tableOptions){
+                                                client.createCollection(self.context._entitySetReferences[i].tableName, self.context._entitySetReferences[i].tableOptions, function(error, result){
+                                                    if (error){
+                                                        callBack.error(error);
+                                                        return;
+                                                    }
+                                                    readyFn(client);
+                                                });
+                                            }else readyFn(client);
+                                        });
+                                    }else if (names.indexOf(self.context._entitySetReferences[i].tableName) < 0 && self.context._entitySetReferences[i].tableOptions){
+                                        client.createCollection(self.context._entitySetReferences[i].tableName, self.context._entitySetReferences[i].tableOptions, function(error, result){
+                                            if (error){
+                                                callBack.error(error);
+                                                return;
+                                            }
+                                            readyFn(client);
+                                        });
+                                    }else readyFn(client);
+                                    break;
+                                default:
+                                    if (names.indexOf(self.context._entitySetReferences[i].tableName) < 0 && self.context._entitySetReferences[i].tableOptions){
+                                        client.createCollection(self.context._entitySetReferences[i].tableName, self.context._entitySetReferences[i].tableOptions, function(error, result){
+                                            if (error){
+                                                callBack.error(error);
+                                                return;
+                                            }
+                                            readyFn(client);
+                                        });
+                                    }else readyFn(client);
+                                    break;
+                            }
+                        });
+                    }
+                });
+            };
+            
+            if (self.providerConfiguration.username){
+                client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password || '', function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
                     
-                    var fn = function(error, client){
-                        var cnt = 0;
-                        var collectionCount = 0;
-                        var readyFn = function(client){
-                            if (--cnt == 0){
-                                callBack.success(self.context);
-                                client.close();
-                            }
-                        };
-                        
-                        for (var i in self.context._entitySetReferences){
-                            if (self.context._entitySetReferences.hasOwnProperty(i))
-                                cnt++;
-                        }
-                        
-                        collectionCount = cnt;
-                        
-                        for (var i in self.context._entitySetReferences){
-                            if (self.context._entitySetReferences.hasOwnProperty(i)){
-                                
-                                client.dropCollection(self.context._entitySetReferences[i].tableName, function(error, result){
-                                    readyFn(client);
-                                });
-                            }
-                        }
-                    };
-                    
-                    if (self.providerConfiguration.username){
-                        client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password || '', function(error, result){
-                            if (error){
-                                callBack.error(error);
-                                return;
-                            }
-                            
-                            if (result){
-                                fn(error, client);
-                                return;
-                            }
-                        });
-                    }else fn(error, client);
+                    if (result){
+                        fn(error, client);
+                        return;
+                    }
                 });
-                break;
-            default:
-                callBack.success(this.context);
-                break;
-        }
+            }else fn(error, client);
+        });
     },
     executeQuery: function(query, callBack){
         var self = this;
@@ -1034,7 +1082,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             counterState = c.removeAll.length;
             for (var i = 0; i < c.removeAll.length; i++){
                 var r = c.removeAll[i];
-                
+
                 var keys = Container.resolveType(r.type).memberDefinitions.getKeyProperties();
                 for (var j = 0; j < keys.length; j++){
                     var k = keys[j];
@@ -1044,13 +1092,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var props = Container.resolveType(r.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (!p.computed) {
-                        r.data[p.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](r.data[p.name]);
-                        if (typeof r.data[p.name] === 'undefined') delete r.data[p.name];
+                    if (!p.key) {
+                        delete r.data[p.name];
                     }
-
-                    //TODO:
-                    if (!(p.concurrencyMode === $data.ConcurrencyMode.Fixed)) delete r.data[p.name];
                 }
                 
                 collection.remove(r.data, { safe: true }, function(error, result){
@@ -1363,7 +1407,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
-                '$data.Geography': function (g) { if (g === undefined) { return new $data.Geography(); } return new $data.Geography(g[0], g[1]); }
+                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
@@ -1386,7 +1430,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return o; },
                 '$data.Array': function (o) { return o; },
-                '$data.ObjectID': function (id) { return id && typeof id === 'string' ? new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii')) : id; },
+                '$data.ObjectID': function (id) {
+                    if (id && typeof id === 'string'){
+                        return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii'));
+                    }else return id;
+                },
                 '$data.Geography': function (g) { return g ? [g.longitude, g.latitude] : g; }
             }
         }

@@ -61,7 +61,7 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         if (this.ObjectLiteralPath) { this.ObjectLiteralPath += '.' + expression.fieldName; } else { this.ObjectLiteralPath = expression.fieldName; }
         this.Visit(expression.expression, context);
 
-        if (expression.expression instanceof $data.Expressions.EntityExpression) {
+        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
             if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
             context['$expand'] += this.mapping.replace(/\./g, '/')
         } else {
