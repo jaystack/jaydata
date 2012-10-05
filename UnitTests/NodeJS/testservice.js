@@ -39,10 +39,17 @@ $data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
     Location: { type: 'geo' }
 });
 
+$data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
+    Id: { type: 'string', key: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' }
+});
+
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
     Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
+    TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
     FuncStrParam: (function (a) {
         ///<param name="a" type="string"/>
         ///<returns type="string"/>
