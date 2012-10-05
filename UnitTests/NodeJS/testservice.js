@@ -161,8 +161,8 @@ app.use(connect.query());
 app.use(connect.bodyParser());
 app.use($data.JayService.OData.Utils.simpleBodyReader());
 
-//app.use("/", connect.static(__dirname + "/../../"));
-app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
+app.use("/", connect.static(__dirname + "/../../"));
+//app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
     return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
