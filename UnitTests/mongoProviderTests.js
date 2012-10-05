@@ -922,3 +922,55 @@ exports.testCappedTable = function(test){
         });
     });
 };
+
+exports.CustomKeyDelete = function (test) {
+    test.expect(3);
+    $test.Context.init(function (db) {
+        for (var i = 0; i < 20; i++) {
+            db.CustomKeys.add(new $test.CustomKey({ Id: 'custom'+i.toString(), Key: 'aaa1', Value: 'bbb6', Rank: i }));
+        }
+        db.saveChanges(function (cnt) {
+            db.CustomKeys.toArray(function (result) {
+                test.equal(result.length, 20, '20 items in the collection');
+                for (var i = 0; i < 10; i++) {
+                    db.CustomKeys.remove(new $test.CustomKey({ Id: 'custom' + i.toString() }));
+                }
+                db.saveChanges(function (cnt) {
+                    test.equal(cnt, 10, '10 items removed from collection');
+                    db.CustomKeys.toArray(function (result) {
+                        test.equal(result.length, 10, '10 items in the collection');
+
+                        test.done();
+                    }); 
+                });
+            });
+        });
+    });
+};
+
+exports.CustomKeyDeleteWithInvalidKeys = function (test) {
+    test.expect(2);
+    $test.Context.init(function (db) {
+        for (var i = 0; i < 20; i++) {
+            db.CustomKeys.add(new $test.CustomKey({ Id: 'custom' + i.toString(), Key: 'aaa1', Value: 'bbb6', Rank: i }));
+        }
+        db.saveChanges(function (cnt) {
+            db.CustomKeys.toArray(function (result) {
+                test.equal(result.length, 20, '20 items in the collection');
+                db.CustomKeys.remove(new $test.CustomKey({ Rank: i }));
+                db.CustomKeys.remove(new $test.CustomKey({ Id: '' }));
+                //db.CustomKeys.remove(new $test.CustomKey({ Id: null }));
+                console.log('ERROR: no callback when Id:null');
+
+                db.saveChanges(function (cnt) {
+                    console.log('invalid count result: ' + cnt);
+                    db.CustomKeys.toArray(function (result) {
+                        test.equal(result.length, 20, '20 items in the collection');
+                        test.done();
+                    });
+                });
+            });
+        });
+    });
+};
+
