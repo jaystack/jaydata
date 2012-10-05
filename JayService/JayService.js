@@ -38,6 +38,14 @@ $data.Class.define("$data.JayService", null, null, {
         return f;
     },
     createAdapter: function (type, instanceFactory) {
+        ///	<signature>
+        ///     <summary>JSONObjectAdapter middleware factory for Express and Connect</summary>
+        ///     <description>JSONObjectAdapter middleware factory for Express and Connect</description>
+        ///     <param name="type" type="function">Service class type</param>
+        ///     <param name="instanceFactory" type="function">Service class instance factory</param>
+        ///     <return type="function" />
+        ///	</signature>
+
         var self = this;
         return function (req, res, next) {
             

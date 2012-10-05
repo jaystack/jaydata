@@ -1,6 +1,8 @@
 require('jaydata');
 require('./mongoProviderTestContext.js');
 
+console.log('------------------------------------------------------------------------------------------------------')
+
 $test.Context.init = function(callback){
     $test.context = new $test.Context({ name: 'mongoDB', databaseName: 'test', username: 'admin', password: '***', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     $test.context.onReady(function(db){

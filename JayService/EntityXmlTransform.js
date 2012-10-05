@@ -1,5 +1,13 @@
 ﻿$data.Class.define('$data.oDataServer.EntityXmlTransform', $data.oDataServer.EntityTransform, null, {
     constructor: function (context, requesUrl, config) {
+        ///	<signature>
+        ///     <summary>Transform class for Atom format</summary>
+        ///     <description>Transform class for Atom format</description>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        ///     <param name="requesUrl" type="String">Service Url</param>
+        ///     <param name="config" type="Object">Config for customize xml</param>
+        /// </signature>
+
         this.cfg = $data.typeSystem.extend({
             m: 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
             d: 'http://schemas.microsoft.com/ado/2007/08/dataservices',
@@ -17,6 +25,25 @@
 
     },
     convertToResponse: function (results, collectionNameOrElementType, selectedFields, includes) {
+        ///	<signature>
+        ///     <summary>Transform entities for JSON verbose format</summary>
+        ///     <description>Transform entities for JSON verbose format</description>
+        ///     <param name="results" type="Array">Array of Entities from any EntitySet of context</param>
+        ///     <param name="collectionNameOrElementType" type="function">elementType of input items</param>
+        ///     <param name="selectedFields" type="Array">Fields for result</param>
+        ///     <param name="includes" type="Array">navigation property includes</param>
+        ///     <return type="String" />
+        /// </signature>
+        ///	<signature>
+        ///     <summary>Transform entities for JSON verbose format</summary>
+        ///     <description>Transform entities for JSON verbose format</description>
+        ///     <param name="results" type="Array">Array of Entities from any EntitySet of context</param>
+        ///     <param name="collectionNameOrElementType" type="string">EntitySet name</param>
+        ///     <param name="selectedFields" type="Array">Fields for result</param>
+        ///     <param name="includes" type="Array">navigation property includes</param>
+        ///     <return type="String" />
+        /// </signature>
+
         if (!collectionNameOrElementType)
             return '<error />';
 

@@ -1,5 +1,15 @@
 $data.Class.define("$data.ServiceBase", null, null, {
+    constructor: function () {
+        ///	<signature>
+        ///     <summary>Class for extend $data.EntityContext with special OData standard functions</summary>
+        ///     <description>Class for extend $data.EntityContext with special OData standard functions</description>
+        /// </signature>
+
+    },
     $metadata: function () {
+        ///<summary>Generate OData standard metadata from current EntityContext</summary>
+        ///<description>Generate OData standard metadata from current EntityContext</description>
+        ///<returns type="String"/>
         ///<method type="GET" />
         ///<resultType type="$data.XmlResult" />
         
@@ -12,6 +22,9 @@ $data.Class.define("$data.ServiceBase", null, null, {
         return contextType.__metadataCache;
     },
     $batch: function () {
+        ///<summary>Process OData standard batch requests</summary>
+        ///<description>Process OData standard batch requests</description>
+        ///<returns type="function"/>
         ///<method type="POST" />
         ///<responseType type="multipart/mixed" />
 

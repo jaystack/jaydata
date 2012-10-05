@@ -1,5 +1,13 @@
 ﻿$data.Class.define('$data.JayService.OData.EntitySetProcessor', null, null, {
     constructor: function (memberName, context, restrictions) {
+        ///	<signature>
+        ///     <summary>Process OData standard batch requests</summary>
+        ///     <description>Process OData standard batch requests</description>
+        ///     <param name="memberName" type="string"/>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        ///     <param name="restrictions" type="Object">request restrictions</param>
+        /// </signature>
+
         this.memberName = memberName;
         this.context = context;
         this.restrictions = restrictions;
@@ -9,6 +17,15 @@
         };
     },
     invoke: function (config, req, res) {
+        ///	<signature>
+        ///     <summary>Process OData standard batch requests</summary>
+        ///     <description>Process OData standard batch requests</description>
+        ///     <param name="config" type="Object">config for build response</param>
+        ///     <param name="req" type="Object">request</param>
+        ///     <param name="res" type="Object">response</param>
+        ///     <return type="$data.Promise" />
+        /// </signature>
+
         var self = this;
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback();

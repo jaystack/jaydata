@@ -70,6 +70,75 @@ $data.Class.define('$data.oDataServer.MetaDataGeneratorAssoctiation', null, null
 
 $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
     constructor: function (config, context) {
+        ///	<signature>
+        ///     <summary>Generator for standard OData Metadata from context</summary>
+        ///     <description>Generator for standard OData Metadata from context</description>
+        ///     <param name="config" type="Object">
+        ///         configurable                defaultValue 
+        ///         -----------------------------------------
+        ///         version:                    'V2',
+        ///         maxVersion:                 'V2',
+        ///         dsVersion:                  'V1',
+        ///         extended:                   true,
+        ///         edmTypeMapping:             true,
+        ///         
+        ///         edmx:                       'http://schemas.microsoft.com/ado/2007/06/edmx',
+        ///         m:                          'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+        ///         d:                          'http://schemas.microsoft.com/ado/2007/08/dataservices',
+        ///         namespace:                  'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         
+        ///         nsV1:                       'http://schemas.microsoft.com/ado/2006/04/edm',
+        ///         nsV2:                       'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         nsV3:                       'http://schemas.microsoft.com/ado/2009/11/edm',
+        ///         
+        ///         V1:                         '1.0',
+        ///         V2:                         '2.0',
+        ///         V3:                         '3.0',
+        ///         
+        ///         xmlHead:                    '&#60;?xml version="1.0" encoding="UTF-8" standalone="yes" ?&#62;',
+        ///         
+        ///         customPropertyNS:           'http://jaydata.org/extendedproperties',
+        ///         customPropertyNSName:       'Jay',
+        ///         
+        ///         contextNamespace:           context.namespace || 'MyContext'
+        ///     </param>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        /// </signature>
+        ///	<signature>
+        ///     <summary>Transform class for JSON verbose format</summary>
+        ///     <description>Transform class for JSON verbose format</description>
+        ///     <param name="config" type="Object">
+        ///         configurable                defaultValue 
+        ///         -----------------------------------------
+        ///         version:                    'V2',
+        ///         maxVersion:                 'V2',
+        ///         dsVersion:                  'V1',
+        ///         extended:                   true,
+        ///         edmTypeMapping:             true,
+        ///         
+        ///         edmx:                       'http://schemas.microsoft.com/ado/2007/06/edmx',
+        ///         m:                          'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+        ///         d:                          'http://schemas.microsoft.com/ado/2007/08/dataservices',
+        ///         namespace:                  'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         
+        ///         nsV1:                       'http://schemas.microsoft.com/ado/2006/04/edm',
+        ///         nsV2:                       'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         nsV3:                       'http://schemas.microsoft.com/ado/2009/11/edm',
+        ///         
+        ///         V1:                         '1.0',
+        ///         V2:                         '2.0',
+        ///         V3:                         '3.0',
+        ///         
+        ///         xmlHead:                    '&#60;?xml version="1.0" encoding="UTF-8" standalone="yes" ?&#62;',
+        ///         
+        ///         customPropertyNS:           'http://jaydata.org/extendedproperties',
+        ///         customPropertyNSName:       'Jay',
+        ///         
+        ///         contextNamespace:           context.namespace || 'MyContext'
+        ///     </param>
+        ///     <param name="context" type="function">Context type</param>
+        /// </signature>
+
         var _context = context;
         if (_context instanceof $data.EntityContext)
             _context = _context.getType();
@@ -107,6 +176,11 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }, config);
     },
     generateMetadataXml: function () {
+        ///	<signature>
+        ///     <summary>Convert $metadata XML from context</summary>
+        ///     <description>Convert $metadata XML from context</description>
+        ///     <return type="string" />
+        /// </signature>
         var xml = new $data.GenxXMLCreator();
         var xmlResult = this.cfg.xmlHead;
 
@@ -738,7 +812,21 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
 
 $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
+    constructor: function () {
+        ///	<signature>
+        ///     <summary>VSDoc annotation parser</summary>
+        ///     <description>VSDoc annotation parser</description>
+        /// </signature>
+    },
     parseFromMethod: function (method, target) {
+        ///	<signature>
+        ///     <summary>Parse VSDoc annotation from function</summary>
+        ///     <description>Parse VSDoc annotation from function</description>
+        ///     <param name="method" type="function" />
+        ///     <param name="target" type="Object">output object</param>
+        ///     <returns type="Object"/>
+        /// </signature>
+
         var lines = method.toString().split('\n');
         var commentLines = [];
         for (var i = 1, l = lines.length; i < l; i++) {
@@ -845,6 +933,11 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
 });
 
 Function.prototype.annotateFromVSDoc = function () {
+    ///	<signature>
+    ///     <summary>Parse current constructor function public function's annotations and decorate it with used variables</summary>
+    ///     <description>Parse current constructor function public function's annotations and decorate it with used variables</description>
+    /// </signature>
+
     if (this.prototype) {
         var parser = new $data.oDataServer.serviceDefinitionParser();
         for (var funcName in this.prototype) {

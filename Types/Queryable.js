@@ -645,6 +645,29 @@ $data.Class.define('$data.Queryable', null, null,
         return Container.createQueryable(this, takeExp);
     },
     removeAll: function (onResult) {
+        ///	<summary>Delete the query result and returns the number of deleted entities in a query as the callback parameter.</summary>
+        ///	<param name="onResult" type="Function">A callback function</param>
+        ///	<returns type="$data.Promise" />
+        ///	<signature>
+        ///		<summary>Delete the query result and returns the number of deleted entities in a query as the callback parameter.</summary>
+        ///		<param name="onResult" type="Function">
+        ///			The callback function to handle the result.
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///	</signature>
+        ///	<signature>
+        ///		<summary>Delete the query result and returns the number of deleted entities in a query as the callback parameter.</summary>
+        ///		<param name="onResult" type="Object">
+        ///			Object of callback functions to handle success and error. &#10;
+        ///			Example: { success: function(result) { ... }, error: function() { alert("Something went wrong..."); } }
+        ///		</param>
+        ///		<returns type="$data.Promise" />
+        ///		<example>
+        ///			Delete all People who are younger than 18 years old. &#10;
+        ///			Persons.filter( function( p ){ return p.Age &#60; 18; } ).removeAll( function( result ) { console.dir(result); } );
+        ///		</example>
+        ///	</signature>
+
         this._checkOperation('batchDelete');
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult);

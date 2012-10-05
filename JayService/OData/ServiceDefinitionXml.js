@@ -1,4 +1,4 @@
-﻿$data.Class.define('$data.JayStorm.ServiceDefinitionXml', null, null, {
+﻿$data.Class.define('$data.oDataServer.ServiceDefinitionXml', null, null, {
     constructor: function (config) {
         this.cfg = $data.typeSystem.extend({
 

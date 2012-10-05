@@ -1,9 +1,35 @@
 ﻿$data.Class.define('$data.oDataServer.EntityTransform', null, null, {
     constructor: function (context, requesUrl) {
+        ///	<signature>
+        ///     <summary>Transform class for JSON verbose format</summary>
+        ///     <description>Transform class for JSON verbose format</description>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        ///     <param name="requesUrl" type="String">Service Url</param>
+        /// </signature>
+
         this.context = context;
         this.requesUrl = requesUrl;
     },
     convertToResponse: function (results, collectionNameOrElementType, selectedFields, includes) {
+        ///	<signature>
+        ///     <summary>Transform entities for JSON verbose format</summary>
+        ///     <description>Transform entities for JSON verbose format</description>
+        ///     <param name="results" type="Array">Array of Entities from any EntitySet of context</param>
+        ///     <param name="collectionNameOrElementType" type="function">elementType of input items</param>
+        ///     <param name="selectedFields" type="Array">Fields for result</param>
+        ///     <param name="includes" type="Array">Navigation property includes</param>
+        ///     <return type="Object" />
+        /// </signature>
+        ///	<signature>
+        ///     <summary>Transform entities for JSON verbose format</summary>
+        ///     <description>Transform entities for JSON verbose format</description>
+        ///     <param name="results" type="Array">Array of Entities from any EntitySet of context</param>
+        ///     <param name="collectionNameOrElementType" type="string">EntitySet name</param>
+        ///     <param name="selectedFields" type="Array">Fields for result</param>
+        ///     <param name="includes" type="Array">Navigation property includes</param>
+        ///     <return type="Object" />
+        /// </signature>
+
         if (!(results instanceof $data.Array) || !collectionNameOrElementType)
             return results;
 

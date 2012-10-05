@@ -1,30 +1,47 @@
 ﻿$data.Class.define('$data.oDataServer.oDataResponseDataBuilder', null, null, {
     constructor: function (cfg) {
+        ///	<signature>
+        ///     <summary>Transform class for standard OData JSON verbose format</summary>
+        ///     <description>Transform class for standard OData JSON verbose format</description>
+        ///     <param name="config" type="Object">
+        ///         property            type                    required                description
+        ///         -------------------------------------------------------------------------------
+        ///         version             String                  true                    Response OData version
+        ///         context             $data.EntityContext     true                    Context instance
+        ///         baseUrl             String                  true                    Service Url
+        ///         simpleResult        Boolean                 true                    true: skip transform
+        ///     
+        ///         collectionName      String                  if entitySet            EntitySet name
+        ///         selectedFields      Array                   if entitySet            Fields for result
+        ///         includes            Array                   if entitySet            Navigation property includes
+        ///         singleResult        Boolean                 if entitySet            Single entity result
+        ///     
+        ///         ---- or ----
+        ///     
+        ///         methodConfig,       Object                  if Functionimport       Method config
+        ///         {
+        ///           serviceOpName     String                  if Functionimport       Service function name
+        ///           returnType        function                if Functionimport       Method return type
+        ///           elementType       function                and if Array result     Element type if return type is Collection
+        ///         }
+        ///         methodName          String                  if Functionimport       Method name
+        ///     }
+        ///     </param>
+        /// </signature>
+
         this.config = $data.typeSystem.extend({
             version: 'V2'
-            //context
-            //baseUrl
-            //simpleResult
-
-            //collectionName
-            //selectedFields
-            //includes
-            //singleResult
-
-            //or
-
-            //methodConfig,
-            //{ 
-            //  returnType
-            //  serviceOpName
-            //  elementType
-            //}
-            //methodName
-
         }, cfg);
         this.transform = new $data.oDataServer.EntityTransform(this.config.context, this.config.baseUrl);
     },
     convertToResponse: function (data) {
+        ///	<signature>
+        ///     <summary>Transform data for standard OData JSON verbose format</summary>
+        ///     <description>Transform data for standard OData JSON verbose format</description>
+        ///     <param name="data">Value for convert</param>
+        ///     <return type="Object" />
+        /// </signature>
+
         if (this.config.simpleResult)
             return data;
 
