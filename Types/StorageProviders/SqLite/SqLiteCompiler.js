@@ -121,12 +121,6 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         var projectonCompiler = Container.createSqlProjectionCompiler();
         projectonCompiler.Visit(expression, sqlBuilder);
     },
-    VisitIncludeExpression: function (expression) {
-        var includeBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-        this.Visit(expression.source, includeBuilder);
-
-        this.newFilters['include'] = projectionBuilder;
-    },
     VisitEntitySetExpression: function (expression, sqlBuilder) {
         sqlBuilder.selectTextPart('from');
         sqlBuilder.addText(SqlStatementBlocks.from);
@@ -161,15 +155,28 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
     },
     VisitDefaultProjection: function (sqlBuilder) {
         sqlBuilder.selectTextPart('projection');
+        var needAlias = this.infos.filter(function (i) { return i.IsMapped; }).length > 1;
         if (sqlBuilder.sets.length > 1) {
             sqlBuilder.addText(SqlStatementBlocks.select);
-            sqlBuilder.sets[0].storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memberDef, index) {
-                if (index > 0) {
-                    sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+            sqlBuilder.sets.forEach(function (set, masterIndex) {
+
+                if (this.infos[masterIndex].IsMapped) {
+                    var alias = sqlBuilder.getExpressionAlias(set);
+                    set.storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memberDef, index) {
+                        if (index > 0 || masterIndex > 0) {
+                            sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+                        }
+                        sqlBuilder.addText(alias + ".");
+                        sqlBuilder.addText(memberDef.name);
+                        if (needAlias) {
+                            sqlBuilder.addText(SqlStatementBlocks.as);
+                            sqlBuilder.addText(alias + "__" + memberDef.name);
+                        }
+                    }, this);
                 }
-                sqlBuilder.addText("T0.");
-                sqlBuilder.addText(memberDef.name);
+
             }, this);
+
         }
         else {
             sqlBuilder.addText("SELECT *");
@@ -187,15 +194,33 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
         /// <param name="query" type="$data.Query" />
         var expression = query.expression;
         var context = { sets: [], infos: [], entityContext: query.context };
-        var optimizedExpression = expression.monitor({
+
+        var optimizedIncludeExpression = expression.monitor({
 
             MonitorEntitySetExpression: function (expression, context) {
                 if (expression.source instanceof $data.Expressions.EntityContextExpression && context.sets.indexOf(expression) == -1) {
-                    context.sets.push(expression);
-                    context.infos.push({ AliasNumber: 0, Association: null, FromType: null, FromPropertyName: null });
+                    this.backupEntitySetExpression = expression;
                 }
             },
+            MutateIncludeExpression: function (expression, context) {
+                var origSelector = expression.selector.value;
+                Container.createCodeExpression("function(it){return it." + origSelector + ";}", null);
 
+                var jsCodeTree = Container.createCodeParser(this.backupEntitySetExpression.source.instance).createExpression("function(it){return it." + origSelector + ";}");
+                var code2entity = Container.createCodeToEntityConverter(this.backupEntitySetExpression.source.instance);
+                var includeSelector = code2entity.Visit(jsCodeTree, { queryParameters: undefined, lambdaParameters: [this.backupEntitySetExpression] });
+
+                var result = Container.createIncludeExpression(expression.source, includeSelector);
+                return result;
+            }
+        }, context);
+        var optimizedExpression = optimizedIncludeExpression.monitor({
+            MonitorEntitySetExpression: function (expression, context) {
+                if (expression.source instanceof $data.Expressions.EntityContextExpression && context.sets.indexOf(expression) == -1) {
+                    context.sets.push(expression);
+                    context.infos.push({ AliasNumber: 0, Association: null, FromType: null, FromPropertyName: null, IsMapped: true });
+                }
+            },
             MutateEntitySetExpression: function (expression, context) {
                 if (expression.source instanceof $data.Expressions.EntityContextExpression) {
                     this.backupContextExpression = expression.source;
@@ -224,7 +249,8 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
                 context.infos.push({
                     AliasNumber: aliasNum - 1,
                     Association: expression.selector,
-                    NavigationPath: this.path
+                    NavigationPath: this.path,
+                    IsMapped: this.isMapped
                 });
                 return result;
             }
@@ -234,9 +260,9 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
         compiler.compile();
 
         var sqlBuilder = Container.createSqlBuilder(this.sets, this.entityContext);
-        
+
         query.modelBinderConfig = {};
-        var modelBinder = Container.createsqLite_ModelBinderCompiler(query, []);
+        var modelBinder = Container.createsqLite_ModelBinderCompiler(query, context);
         modelBinder.Visit(optimizedExpression);
 
         var result = {
