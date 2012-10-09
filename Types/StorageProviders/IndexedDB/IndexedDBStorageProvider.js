@@ -4,7 +4,14 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         // mapping IndexedDB types to browser invariant name
         this.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
         this.IDBRequest = window.IDBRequest || window.webkitIDBRequest || window.mozIDBRequest || window.msIDBRequest;
+
         this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction || window.msIDBTransaction;
+        this.IDBTransactionType = { READ_ONLY: "readonly", READ_WRITE: "readwrite" }
+        if (this.IDBTransaction.READ_ONLY && this.IDBTransaction.READ_WRITE) {
+            this.IDBTransactionType.READ_ONLY = this.IDBTransaction.READ_ONLY
+            this.IDBTransactionType.READ_WRITE = this.IDBTransaction.READ_WRITE
+        }
+
         this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.mozIDBKeyRange || window.msIDBKeyRange;
         this.IDBDatabaseException = window.IDBDatabaseException || window.webkitIDBDatabaseException || window.mozIDBDatabaseException || window.msIDBDatabaseException;
         this.IDBOpenDBRequest = window.IDBOpenDBRequest || window.webkitIDBOpenDBRequest || window.mozIDBOpenDBRequest || window.msIDBOpenDBRequest;
@@ -77,7 +84,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             idbOpenDBRequest.prototype.setCallbacks = setCallbacks;
     },
     supportedDataTypes: {
-        value: [$data.Integer, $data.Number, $data.Date, $data.String, $data.Boolean, $data.Blob, $data.Array, $data.Object],
+        value: [$data.Integer, $data.Number, $data.Date, $data.String, $data.Boolean, $data.Blob, $data.Array, $data.Object, $data.Guid],
         writable: false
     },
     fieldConverter: {
@@ -90,7 +97,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 '$data.Boolean': function (b) { return b; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Array': function (arr) { if (arr === undefined) { return new $data.Array(); }return arr; },
-                '$data.Object': function (obj) { return obj; }
+                '$data.Object': function (obj) { return obj; },
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
             },
             toDb: {
                 '$data.Integer': function (i) { return i; },
@@ -100,7 +108,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 '$data.Boolean': function (b) { return b; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Array': function (arr) { return arr; },
-                '$data.Object': function (obj) { return obj; }
+                '$data.Object': function (obj) { return obj; },
+                "$data.Guid": function (g) { return g ? g.value : g; }
             }
         }
     },
@@ -164,7 +173,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 }
                 if (self.newVersionAPI) {
                     if (newSequences && newSequences.length > 0) {
-                        var store = self.db.transaction([self.sequenceStore], self.IDBTransaction.READ_WRITE).setCallbacks({
+                        var store = self.db.transaction([self.sequenceStore], self.IDBTransactionType.READ_WRITE).setCallbacks({
                             onerror: callBack.error,
                             oncomplete: function () {
                                 callBack.success(self.context);
@@ -188,12 +197,14 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 }
                 else {
                     // Calling setVersion on webkit
-                    self.db.setVersion(self.providerConfiguration.version).setCallbacks({
+                    var versionRequest = self.db.setVersion(self.providerConfiguration.version.toString()).setCallbacks({
                         onerror: callBack.error,
                         onblocked: callBack.error,
                         onsuccess: function (event) {
                             initDb(self.db);
-                            callBack.success(self.context);
+                            versionRequest.result.oncomplete = function (evt) {
+                                callBack.success(self.context);
+                            }                            
                         }
                     });
                 }
@@ -213,7 +224,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
 
         // Creating read only transaction for query. Results are passed in transaction's oncomplete event
         var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
-        var store = self.db.transaction([entitySet.tableName], self.IDBTransaction.READ_ONLY).setCallbacks({
+        var store = self.db.transaction([entitySet.tableName], self.IDBTransactionType.READ_ONLY).setCallbacks({
             onerror: callBack.error,
             onabort: callBack.error,
             oncomplete: function (event) {
@@ -318,7 +329,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 for (var i in storesObj) {
                     stores.push(i);
                 }
-                var tran = self.db.transaction(stores, self.IDBTransaction.READ_WRITE).setCallbacks({
+                var tran = self.db.transaction(stores, self.IDBTransactionType.READ_WRITE).setCallbacks({
                     onerror: function (event) {
                         // Only call the error callback when it's not because of an abort
                         // aborted cases should call the error callback there
@@ -382,7 +393,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                                     /// <param name="callBack">Callback to call</param>
                                     callBack = $data.typeSystem.createCallbackSetting(callBack);
                                     var record = null;
-                                    var tran = self.db.transaction([self.sequenceStore], self.IDBTransaction.READ_WRITE)
+                                    var tran = self.db.transaction([self.sequenceStore], self.IDBTransactionType.READ_WRITE)
                                         .setCallbacks({
                                             onerror: callBack.error,
                                             oncomplete: function (event) {
