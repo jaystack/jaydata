@@ -1609,14 +1609,14 @@
         });
     });
     /*compiler fix*/
-    test('Include: indirect -> map Entity', 105, function () {
+    test('Include: indirect -> map Entity1', 105, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
                 var q = db.Articles.map(function (a) { return a.Category;});
-                //console.log('q: ', q.toTraceString());
+                console.log('q: ', q.toTraceString());
                 q.toArray({
                     success: function (results) {
                         start(1);
@@ -1636,6 +1636,8 @@
             });
         });
     });
+    /*FIX: odata need expand*/
+    //TODO: Viktor article =>tags sqlite on
     test('Include: indirect -> map EntitySet', 157, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1647,11 +1649,15 @@
                 q.toArray({
                     success: function (results) {
                         start(1);
-                        equal(results.length, 52, 'Result number error');
+                        equal(results.length, 26, 'Result number error');
                         results.forEach(function (r, index) {
-                            ok(r instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
-                            ok(r.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
-                            ok(r.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                            ok(r instanceof Array, 'data type error at ' + index + '. position');
+                            equal(r.length, 2, "tagconnection number faild");
+                            r.forEach(function (tc) {
+                                ok(tc instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
+                                ok(tc.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
+                                ok(tc.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                            });
                         });
                     },
                     error: function (error) {
@@ -1907,7 +1913,7 @@
             });
         });
     });
-    test('Include: mixed -> filter, map, include', 43, function () {
+    test('!!!!Include: mixed -> filter, map, include', 34, function () {
         var refDate = new Date(Date.parse("1979/05/01"));
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1920,8 +1926,9 @@
                                 return {
                                     name: item.Title,
                                     People: {
-                                        p1: { name: item.Author.LoginName, bio: item.Author.Profile.Bio },
-                                        p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location.Address }
+                                        p1: { name: item.Author.LoginName, bio: item.Author.Profile },
+                                        p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location.Address },
+                                        p3: { loc: item.Author.Profile.Location}
                                     },
                                     Cat: item.Category.Title,
                                     Articles: item.Category.Articles
