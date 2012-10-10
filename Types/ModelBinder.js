@@ -5,6 +5,24 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.cache = {};
     },
 
+    deepExtend: function(o, r){
+        for (var i in r){
+            if (o.hasOwnProperty(i)){
+                if (typeof r[i] === 'object'){
+                    if (Array.isArray(r[i])){
+                        for (var j = 0; j < r[i].length; j++){
+                            if (o[i].indexOf(r[i][j]) < 0){
+                                o[i].push(r[i][j]);
+                            }
+                        }
+                    }else this.deepExtend(o[i], r[i]);
+                }
+            }else{
+                o[i] = r[i];
+            }
+        }
+    },
+
     call: function (data, meta) {
         if (!Object.getOwnPropertyNames(meta).length) {
             return data;
@@ -130,7 +148,28 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     result = this.cache[key];
                     for (var j in meta){
                         if (j.indexOf('$') < 0){
-                            if (meta[j].$item) { result[j].push(this.call(data, meta[j].$item)); }
+                            if (meta[j].$item) {
+                                if (meta[j].$item.$keys){
+                                    var key = '';
+                                    for (var k = 0; k < meta[j].$item.$keys.length; k++) { key += (meta[j].$item.$type + '_' + meta[j].$item.$keys[k] + '#' + data[meta[j].$item.$keys[k]]); }
+                                    var r = this.call(data, meta[j].$item);
+                                    if (!this.cache[key]){
+                                        this.cache[key] = r;
+                                        result[j].push(r);
+                                    }else{
+                                        if (result[j].indexOf(this.cache[key]) < 0){
+                                            result[j].push(this.cache[key]);
+                                        }
+                                    }
+                                }else{
+                                    result[j].push(this.call(data, meta[j].$item));
+                                }
+                            }else{
+                                if (typeof meta[j] === 'object'){
+                                    var r = this.call(data, meta[j]);
+                                    this.deepExtend(result[j], r);
+                                }
+                            }
                         }
                     }
                 }
