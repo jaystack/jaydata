@@ -778,7 +778,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         var server = this._getServer();
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
@@ -874,7 +874,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         new $data.storageProviders.mongoDB.mongoDBCompiler().compile(query);
         
         var server = this._getServer();
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
@@ -1144,7 +1144,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }else readyFn(client, value);
         };
         
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
