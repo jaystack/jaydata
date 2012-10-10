@@ -12,6 +12,8 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
         if (expression.expression instanceof $data.Expressions.EntityExpression) {
             this.VisitEntityExpressionAsProjection(expression, sqlBuilder);
         } else if (expression.expression instanceof $data.Expressions.ObjectLiteralExpression) {
+            this.VisitEntitySetExpression(sqlBuilder.sets[0], sqlBuilder);
+            sqlBuilder.addText("rowid AS " + this.anonymFiledPrefix + SqlStatementBlocks.rowIdName + ", ");
             this.Visit(expression.expression, sqlBuilder);
         } else {
             this.VisitEntitySetExpression(sqlBuilder.sets[0], sqlBuilder);
@@ -126,8 +128,21 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
     },
 
     VisitEntityFieldExpression: function (expression, sqlBuilder) {
-        this.Visit(expression.source, sqlBuilder);
-        this.Visit(expression.selector, sqlBuilder);
+        if (expression.source instanceof $data.Expressions.ComplexTypeExpression) {
+            var alias = sqlBuilder.getExpressionAlias(expression.source.source.source);
+            var storageModel = expression.source.source.storageModel.ComplexTypes[expression.source.selector.memberName];
+            var member = storageModel.ReferentialConstraint.filter(function (item) { return item[expression.source.selector.memberName] == expression.selector.memberName; })[0];
+            if (!member) { Guard.raise(new Exception('Compiler error! ComplexType does not contain ' + expression.source.selector.memberName + ' property!')); return;}
+
+            sqlBuilder.addText(alias);
+            sqlBuilder.addText(SqlStatementBlocks.nameSeparator);
+            sqlBuilder.addText(member[storageModel.From]);
+        }
+        else {
+            this.Visit(expression.source, sqlBuilder);
+            this.Visit(expression.selector, sqlBuilder);
+        }
+        
     },
 
     VisitEntitySetExpression: function (expression, sqlBuilder) {
@@ -158,10 +173,6 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
     },
 
     VisitObjectLiteralExpression: function (expression, sqlBuilder) {
-        //this.hasObjectLiteral = true;
-        this.VisitEntitySetExpression(sqlBuilder.sets[0], sqlBuilder);
-        sqlBuilder.addText("rowid AS " + this.anonymFiledPrefix + SqlStatementBlocks.rowIdName + ", ");
-
         var membersNumber = expression.members.length;
         for (var i = 0; i < membersNumber; i++) {
             if (i != 0) {
@@ -170,7 +181,23 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
             this.Visit(expression.members[i], sqlBuilder);
         }
     },
-
+    MappedFullEntitySet: function (expression, sqlBuilder) {
+        var alias = sqlBuilder.getExpressionAlias(expression);
+        var properties = expression.storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties();
+        properties.forEach(function (prop, index) {
+            if (!prop.association) {
+                if (index > 0) {
+                    sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+                }
+                sqlBuilder.addText(alias);
+                sqlBuilder.addText(SqlStatementBlocks.nameSeparator);
+                sqlBuilder.addText(prop.name);
+                sqlBuilder.addText(SqlStatementBlocks.as);
+                sqlBuilder.addText(this.anonymFiledPrefix + prop.name);
+            }
+        }, this);
+        //ToDo: complex type
+    },
     VisitObjectFieldExpression: function (expression, sqlBuilder) {
 
         var tempObjectLiteralName = this.currentObjectLiteralName;
@@ -187,12 +214,15 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
             var tmpPrefix = this.anonymFiledPrefix;
             this.anonymFiledPrefix += expression.fieldName + "__";
 
-
-            this.Visit(expression.expression, sqlBuilder);
+            if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
+                this.MappedFullEntitySet(expression.expression, sqlBuilder);
+            } else {
+                this.Visit(expression.expression, sqlBuilder);
+            }
 
             this.anonymFiledPrefix = tmpPrefix;
 
-            if (!(expression.expression instanceof $data.Expressions.ObjectLiteralExpression) && !(expression.expression instanceof $data.Expressions.ComplexTypeExpression)) {
+            if (!(expression.expression instanceof $data.Expressions.ObjectLiteralExpression) && !(expression.expression instanceof $data.Expressions.ComplexTypeExpression) && !(expression.expression instanceof $data.Expressions.EntitySetExpression)) {
                 sqlBuilder.addText(SqlStatementBlocks.as);
                 sqlBuilder.addText(this.anonymFiledPrefix + expression.fieldName);
             }
