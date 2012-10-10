@@ -1608,7 +1608,7 @@
             });
         });
     });
-
+    /*compiler fix*/
     test('Include: indirect -> map Entity', 105, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1775,12 +1775,214 @@
             });
         });
     });
+    test('Include: indirect -> filter scalar(string)', 46, function () {
+        var refDate = new Date();
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.filter(function (a) { return a.Category.Title == 'Sport' });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 5, 'Article category error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(r.Title.length > 5, 'Title length error at ' + index + '. position');
+                            ok(r.Lead.length >= 5, 'Lead length error at ' + index + '. position');
+                            ok(r.Body.length >= 5, 'Body length error at ' + index + '. position');
+                            ok(r.CreateDate instanceof Date, 'CreateDate data type error at ' + index + '. position');
+                            ok(r.CreateDate >= refDate, 'CreateDate value error at ' + index + '. position');
+                            ok(r.Category === undefined, 'Category value error  at ' + index + '. position');
+                            ok(r.Author === undefined, 'Author value error  at ' + index + '. position');
+                            ok(r.Reviewer === undefined, 'Reviewer value error  at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> filter scalar(int)', 91, function () {
+        var refDate = new Date();
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.filter(function (a) { return a.Category.Id > 3 });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 10, 'Article category error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(r.Title.length > 5, 'Title length error at ' + index + '. position');
+                            ok(r.Lead.length > 5, 'Lead length error at ' + index + '. position');
+                            ok(r.Body.length > 5, 'Body length error at ' + index + '. position');
+                            ok(r.CreateDate instanceof Date, 'CreateDate data type error at ' + index + '. position');
+                            ok(r.CreateDate >= refDate, 'CreateDate value error at ' + index + '. position');
+                            ok(r.Category === undefined, 'Category value error  at ' + index + '. position');
+                            ok(r.Author === undefined, 'Author value error  at ' + index + '. position');
+                            ok(r.Reviewer === undefined, 'Reviewer value error  at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> filter ComplexType', 10, function () {
+        var refDate = new Date(Date.parse("1976/02/01"));
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.UserProfiles.filter(function (up) { return up.Location.Zip == 1117 });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 1, 'Article category error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.UserProfile, 'data type error at ' + index + '. position');
+                            equal(r.FullName, 'Full Name', 'Title length error at ' + index + '. position');
+                            ok(r.Birthday instanceof Date, 'CreateDate data type error at ' + index + '. position');
+                            equal(r.Birthday.valueOf(), refDate.valueOf(), 'CreateDate value error at ' + index + '. position');
+                            ok(r.Location instanceof $news.Types.Location, 'Category value error  at ' + index + '. position');
+                            equal(r.Location.Zip, 1117, 'Location.Zip value error  at ' + index + '. position');
+                            equal(r.Location.City, 'City2', 'Location.City value error  at ' + index + '. position');
+                            equal(r.Location.Address, 'Address7', 'Location.Address value error  at ' + index + '. position');
+                            equal(r.Location.Country, 'Country2', 'Location.Country value error  at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> filter scalar(string) ComplexType', 10, function () {
+        var refDate = new Date(Date.parse("1979/05/01"));
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.UserProfiles.filter(function (up) { return up.FullName == 'Full Name2' });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 1, 'Article category error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.UserProfile, 'data type error at ' + index + '. position');
+                            equal(r.FullName, 'Full Name2', 'FullName value error at ' + index + '. position');
+                            ok(r.Birthday instanceof Date, 'Birthday data type error at ' + index + '. position');
+                            equal(r.Birthday.valueOf(), refDate.valueOf(), 'Birthday value error at ' + index + '. position');
+                            ok(r.Location instanceof $news.Types.Location, 'Location data type at ' + index + '. position');
+                            equal(r.Location.Zip, 3451, 'Location.Zip value error  at ' + index + '. position');
+                            equal(r.Location.City, 'City5', 'Location.City value error  at ' + index + '. position');
+                            equal(r.Location.Address, 'Address0', 'Location.Address value error  at ' + index + '. position');
+                            equal(r.Location.Country, 'Country5', 'Location.Country value error  at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: mixed -> filter, map, include', 43, function () {
+        var refDate = new Date(Date.parse("1979/05/01"));
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include("Author.Profile").include("Category")
+                            .filter(function (item) { return item.Category.Title == 'World' && item.Author.Profile.FullName == 'Full Name2' && item.Reviewer.Profile.Bio == "Bio3" })
+                            .map(function (item) {
+                                return {
+                                    name: item.Title,
+                                    People: {
+                                        p1: { name: item.Author.LoginName, bio: item.Author.Profile.Bio },
+                                        p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location.Address }
+                                    },
+                                    Cat: item.Category.Title,
+                                    Articles: item.Category.Articles
+                                }
+                            });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 1, 'Article category error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof Object, 'data type error at ' + index + '. position');
+                            equal(typeof r.name, 'string', 'name data type  error at ' + index + '. position');
+                            equal(r.name, 'Article25', 'name value error at ' + index + '. position');
 
+                            ok(r.People instanceof Object, 'r.People data type error at ' + index + '. position');
+                            //p1 property
+                            ok(r.People.p1 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                            equal(typeof r.People.p1.name, 'string', 'r.People.p1.name data type  error at ' + index + '. position');
+                            equal(r.People.p1.name, 'Usr5', 'r.People.p1.name value error at ' + index + '. position');
+                            equal(typeof r.People.p1.bio, 'string', 'r.People.p1.bio data type  error at ' + index + '. position');
+                            equal(r.People.p1.bio, 'Bio5', 'r.People.p1.bio value error at ' + index + '. position');
+                            //p2 property
+                            ok(r.People.p2 instanceof Object, 'r.People.p2data type error at ' + index + '. position');
+                            equal(typeof r.People.p2.name, 'string', 'r.People.p2.name data type  error at ' + index + '. position');
+                            equal(r.People.p2.name, 'Usr3', 'r.People.p2.name value error at ' + index + '. position');
+                            equal(typeof r.People.p2.bio, 'string', 'r.People.p2.bio data type  error at ' + index + '. position');
+                            equal(r.People.p2.bio, 'Bio3', 'r.People.p2.bio value error at ' + index + '. position');
+                            //p2.Tags
+                            ok(r.People.p2.tags instanceof Array, 'r.People.p2.tags data type error at ' + index + '. position');
+                            equal(r.People.p2.tags.length, 2, 'r.People.p2.tags.length value error at ' + index + '. position');
+                            r.People.p2.tags.forEach(function (t) {
+                                ok(t instanceof $news.Types.TagConnection, 'r.People.p2.tags[i] data type error at ' + index + '. position');
+                            });
+                            //p2.adr
+                            equal(r.People.p2.adr, 'Address8', 'Location.Address value error  at ' + index + '. position');
+                            //r.Cat
+                            equal(typeof r.Cat, 'string', 'r.Cat data type  error at ' + index + '. position');
+                            equal(r.Cat, 'World', 'r.Cat value error at ' + index + '. position');
+                            //r.Articles
+                            ok(r.Articles instanceof Array, 'r.Articles data type error at ' + index + '. position');
+                            equal(r.Articles.length, 5, 'r.Articles.length value error at ' + index + '. position');
+                            r.Articles.forEach(function (a) {
+                                ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
+                                ok(['Article21', 'Article22', 'Article23', 'Article24', 'Article25'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
+                            });
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
     /*
         multiple include
         mixed direct indirect
-        default selection
-        default selection complex type
+        -- default selection
+        -- default selection complex type
     */
 
     /*test('sqlite_performace_issue', 0, function () {
