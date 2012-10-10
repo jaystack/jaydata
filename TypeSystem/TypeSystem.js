@@ -848,7 +848,7 @@
         this.isPrimitiveType = function(type) {
             var t = this.resolveType(type);
             return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
-                t === $data.Number || t === $data.String || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
+                t === $data.Number || t === $data.Integer || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
                 t === $data.Geography || t === $data.Guid;
         };
 

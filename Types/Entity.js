@@ -239,6 +239,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="value" />
 
         //if (origValue == value) return;
+        value = this.typeConversion(memberDefinition, value);
         var eventData = null;
         if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
             var origValue = this[memberDefinition.name];
@@ -291,6 +292,52 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                 this.constructor["instancePropertyChanged"].fire(eventData, this);
             }
         }
+    },
+    typeConversion: function (memberDefinition, value) {
+        var convertedValue = value;
+        if (typeof value === 'string') {
+            switch (Container.resolveName(memberDefinition.type)) {
+                case '$data.Guid':
+                    convertedValue = $data.parseGuid(value);
+                    break;
+                case '$data.Integer':
+                    convertedValue = parseInt(value);
+                    if (isNaN(convertedValue))
+                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', [memberDefinition, value]));
+                    break;
+                case '$data.Number':
+                    convertedValue = parseFloat(value);
+                    if (isNaN(convertedValue))
+                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', [memberDefinition, value]));
+                    break;
+                case '$data.Date':
+                    convertedValue = new Date(value);
+                    if (isNaN(convertedValue.valueOf()))
+                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', [memberDefinition, value]));
+                    break;
+                case '$data.Boolean':
+                    switch (value.toLowerCase()) {
+                        case 'true': 
+                            convertedValue = true;
+                            break;
+                        case 'false': 
+                            convertedValue = false;
+                            break;
+                        default:
+                            throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Boolean', [memberDefinition, value]));
+                    }
+                    break;
+                case '$data.Object':
+                    try {
+                        convertedValue = JSON.parse(value);
+                    } catch (e) {
+                        throw Guard.raise(new Exception('TypeError: ', e.toString(), [memberDefinition, value]));
+                    }
+                    break;
+            }
+        }
+
+        return convertedValue;
     },
 
     // protected
