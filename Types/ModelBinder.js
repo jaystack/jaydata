@@ -81,10 +81,15 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
                 result = converter ? converter(data[meta.$source]) : new (Container.resolveType(meta.$type))(data[meta.$source]); //Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
             }else result = (meta.$source.split(':')[0] == 'attr' && data.getAttribute) ? data.getAttribute(meta.$source.split(':')[1]) : (meta.$source == 'textContent' && !data[meta.$source] ? $(data).text() : data[meta.$source]);
-        }else if (meta.$item){
-            for (var i = 0; i < data.length; i++){
-                var r = this.call(data[i], meta.$item);
-                result.push(r);
+        } else if (meta.$item) {
+            if (Array.isArray(data)) {
+                for (var i = 0; i < data.length; i++) {
+                    var r = this.call(data[i], meta.$item);
+                    if (result.indexOf(r) < 0) result.push(r);
+                }
+            } else {
+                var r = this.call(data, meta.$item);
+                if (result.indexOf(r) < 0) result.push(r);
             }
         }else{
             var key = '';

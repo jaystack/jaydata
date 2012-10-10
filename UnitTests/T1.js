@@ -200,7 +200,7 @@
             });
     });
     test('navProperty many', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 
         expect(5);
         stop(1);
@@ -208,6 +208,7 @@
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
                 db.Articles.map(function (a) { return { id: a.Id, catArticles: a.Category.Articles }; }).toArray(function (art) {
+                    console.log(art);
                     equal(art[0].catArticles instanceof Array, true, 'many nav property is array');
                     equal(art[1].catArticles instanceof Array, true, 'many nav property is array');
 
@@ -221,7 +222,7 @@
         });
     });
     test('navProperty single', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 
         expect(3);
         stop(1);
@@ -350,7 +351,7 @@
         });
     });
     test('OData provider - Filter by GUID field should be supported', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 
         expect(20);
         stop(6);
@@ -373,17 +374,17 @@
             var guid = new $data.Guid('ae22ffc7-8d96-488e-84f2-c04753242348');
 
             var q = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: guid });
-            equal(q.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'ae22ffc7-8d96-488e-84f2-c04753242348')", 'param guid failed');
-
             var q2 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: new $data.Guid('c22f0ecd-8cff-403c-89d7-8d18c457f1ef') });
-            equal(q2.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'c22f0ecd-8cff-403c-89d7-8d18c457f1ef')", 'inline guid failed');
-
             var q3 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: new $data.Guid() });
-            equal(q3.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'00000000-0000-0000-0000-000000000000')", 'empty guid failed');
-
             var q4 = db.TestTable.filter(function (t) { return t.g0 == this.guid }, { guid: null });
-            equal(q4.toTraceString().queryText, "/TestTable?$filter=(g0 eq null)", 'null guid failed');
 
+            if (providerConfig.name == "sqLite") { ok(true, "Not supported"); ok(true, "Not supported"); ok(true, "Not supported"); ok(true, "Not supported"); }
+            else {
+                equal(q.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'ae22ffc7-8d96-488e-84f2-c04753242348')", 'param guid failed');
+                equal(q2.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'c22f0ecd-8cff-403c-89d7-8d18c457f1ef')", 'inline guid failed');
+                equal(q3.toTraceString().queryText, "/TestTable?$filter=(g0 eq guid'00000000-0000-0000-0000-000000000000')", 'empty guid failed');
+                equal(q4.toTraceString().queryText, "/TestTable?$filter=(g0 eq null)", 'null guid failed');
+            }
             var item1 = new $news.Types.TestItemExtended({ Id: 42, g0: guid });
             var item2 = new $news.Types.TestItemExtended({ Id: 43, g0: new $data.Guid('c22f0ecd-8cff-403c-89d7-8d18c457f1ef') });
             var item3 = new $news.Types.TestItemExtended({ Id: 44, g0: new $data.Guid() });
@@ -1181,7 +1182,7 @@
         });
     });
     test('1023_OData include does not include', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1208,7 +1209,7 @@
         });
     });
     test('1023_additional_test_1', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(6);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1239,7 +1240,7 @@
         });
     });
     test('1023_additional_test_2', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(14);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1420,7 +1421,7 @@
         });
     });
     test('DANI_CategoryModify', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(1);
         stop(5);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1444,9 +1445,6 @@
                 });
             });
         });
-    });
-    test('XXXX_navigation_property_handling', function () {
-        ok(true);
     });
     //test("get_mapped_custom", 24, function () {
     //    stop(4);

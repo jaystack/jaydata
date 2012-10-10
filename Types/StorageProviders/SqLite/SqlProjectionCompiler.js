@@ -128,8 +128,21 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
     },
 
     VisitEntityFieldExpression: function (expression, sqlBuilder) {
-        this.Visit(expression.source, sqlBuilder);
-        this.Visit(expression.selector, sqlBuilder);
+        if (expression.source instanceof $data.Expressions.ComplexTypeExpression) {
+            var alias = sqlBuilder.getExpressionAlias(expression.source.source.source);
+            var storageModel = expression.source.source.storageModel.ComplexTypes[expression.source.selector.memberName];
+            var member = storageModel.ReferentialConstraint.filter(function (item) { return item[expression.source.selector.memberName] == expression.selector.memberName; })[0];
+            if (!member) { Guard.raise(new Exception('Compiler error! ComplexType does not contain ' + expression.source.selector.memberName + ' property!')); return;}
+
+            sqlBuilder.addText(alias);
+            sqlBuilder.addText(SqlStatementBlocks.nameSeparator);
+            sqlBuilder.addText(member[storageModel.From]);
+        }
+        else {
+            this.Visit(expression.source, sqlBuilder);
+            this.Visit(expression.selector, sqlBuilder);
+        }
+        
     },
 
     VisitEntitySetExpression: function (expression, sqlBuilder) {

@@ -268,7 +268,7 @@ function T3(providerConfig, msg) {
     });
 
     test('Include_Articles_in_Category', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -288,7 +288,7 @@ function T3(providerConfig, msg) {
         });
     });
     test('Include_Category_in_Article', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(3);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

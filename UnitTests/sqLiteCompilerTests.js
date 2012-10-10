@@ -1172,7 +1172,7 @@
             };
             deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        test("Include: map with comlex includes", 2, function () {
+        test("Include: map with complex includes", 2, function () {
             var r = $data.NewsReaderContext.Articles.include("Author.Profile").include("Category")
                 .filter(function (item) { return item.Category.Title == 'cat1' && item.Author.Profile.FullName == 't1' && item.Reviewer.Profile.Bio == "t2" })
                 .map(function (item) {
@@ -1180,7 +1180,7 @@
                         name: item.Title,
                         People: {
                             p1: { name: item.Author.LoginName, bio: item.Author.Profile.Bio },
-                            p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags/*, Address: item.Reviewer.Profile.Location.Address */ }
+                            p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location.Address }
                         },
                         Cat: item.Category.Title,
                         Articles: item.Category.Articles
@@ -1194,6 +1194,7 @@
                     + "T4.LoginName AS People__p2__name, "
                     + "T5.Bio AS People__p2__bio, "
                     + "T6.Id AS People__p2__tags__Id, "
+                    + "T5.Location__Address AS People__p2__adr, "
                     + "T3.Title AS Cat, "
                     + "T7.Id AS Articles__Id, T7.RowVersion AS Articles__RowVersion, T7.Title AS Articles__Title, T7.Lead AS Articles__Lead, T7.Body AS Articles__Body, T7.CreateDate AS Articles__CreateDate, T7.Thumbnail_LowRes AS Articles__Thumbnail_LowRes, T7.Thumbnail_HighRes AS Articles__Thumbnail_HighRes FROM Articles T0 "
                         + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
@@ -1242,6 +1243,10 @@
                                     $type: $news.Types.TagConnection,
                                     Id: 'People__p2__tags__Id'
                                 }
+                            },
+                            adr: {
+                                $type: "string",
+                                $source: "People__p2__adr"
                             }
                         }
                     },
@@ -1268,7 +1273,113 @@
             };
             deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
         });
-        
+        test("Include: map with complex includes2", 2, function () {
+            var r = $data.NewsReaderContext.Articles.include("Author.Profile").include("Category")
+                .filter(function (item) { return item.Category.Title == 'cat1' && item.Author.Profile.FullName == 't1' && item.Reviewer.Profile.Bio == "t2" })
+                .map(function (item) {
+                    return {
+                        name: item.Title,
+                        People: {
+                            p1: { name: item.Author.LoginName, bio: item.Author.Profile.Bio },
+                            p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location }
+                        },
+                        Cat: item.Category.Title,
+                        Articles: item.Category.Articles
+                    }
+                })
+                .toTraceString();
+            equal(_resultToString(r),
+                "SELECT T0.rowid AS rowid$$, T0.Title AS name, "
+                    + "T1.LoginName AS People__p1__name, "
+                    + "T2.Bio AS People__p1__bio, "
+                    + "T4.LoginName AS People__p2__name, "
+                    + "T5.Bio AS People__p2__bio, "
+                    + "T6.Id AS People__p2__tags__Id, "
+                    + "T5.Location__Address AS People__p2__adr__Address, "
+                    + "T5.Location__City AS People__p2__adr__City, "
+                    + "T5.Location__Zip AS People__p2__adr__Zip, "
+                    + "T5.Location__Country AS People__p2__adr__Country, "
+                    + "T3.Title AS Cat, "
+                    + "T7.Id AS Articles__Id, T7.RowVersion AS Articles__RowVersion, T7.Title AS Articles__Title, T7.Lead AS Articles__Lead, T7.Body AS Articles__Body, T7.CreateDate AS Articles__CreateDate, T7.Thumbnail_LowRes AS Articles__Thumbnail_LowRes, T7.Thumbnail_HighRes AS Articles__Thumbnail_HighRes FROM Articles T0 "
+                        + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Author__Id = T1.Id) "
+	                    + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) "
+	                    + "\n\tLEFT OUTER JOIN Categories T3 ON (T0.Category__Id = T3.Id) "
+	                    + "\n\tLEFT OUTER JOIN Users T4 ON (T0.Reviewer__Id = T4.Id) "
+	                    + "\n\tLEFT OUTER JOIN UserProfiles T5 ON (T4.Id = T5.User__Id) "
+                        + "\n\tLEFT OUTER JOIN TagConnections T6 ON (T0.Id = T6.Article__Id) "
+	                    + "\n\tLEFT OUTER JOIN Articles T7 ON (T3.Id = T7.Category__Id) WHERE (((T3.Title = ?) AND (T2.FullName = ?)) AND (T5.Bio = ?)) | [\"cat1\",\"t1\",\"t2\"]");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $type: $data.Object,
+                    name: {
+                        $type: "string",
+                        $source: "name"
+                    },
+                    People: {
+                        $type: $data.Object,
+                        p1: {
+                            $type: $data.Object,
+                            name: {
+                                $type: "string",
+                                $source: "People__p1__name"
+                            },
+                            bio: {
+                                $type: "string",
+                                $source: "People__p1__bio"
+                            }
+                        },
+                        p2: {
+                            $type: $data.Object,
+                            name: {
+                                $type: "string",
+                                $source: "People__p2__name"
+                            },
+                            bio: {
+                                $type: "string",
+                                $source: "People__p2__bio"
+                            },
+                            tags: {
+                                $type: $data.Array,
+                                $item: {
+                                    $keys: ['People__p2__tags__Id'],
+                                    $type: $news.Types.TagConnection,
+                                    Id: 'People__p2__tags__Id'
+                                }
+                            },
+                            adr: {
+                                $type: $news.Types.Location,
+                                Address: "People__p2__adr__Address",
+                                City: "People__p2__adr__City",
+                                Zip: "People__p2__adr__Zip",
+                                Country: "People__p2__adr__Country",
+                            }
+                        }
+                    },
+                    Cat: {
+                        $type: "string",
+                        $source: "Cat"
+                    },
+                    Articles: {
+                        $types: $data.Array,
+                        $item: {
+                            $keys: ['Articles__Id'],
+                            $type: $news.Types.Article,
+                            Id: "Articles__Id",
+                            RowVersion: "Articles__RowVersion",
+                            Title: "Articles__Title",
+                            Lead: "Articles__Lead",
+                            Body: "Articles__Body",
+                            CreateDate: "Articles__CreateDate",
+                            Thumbnail_LowRes: "Articles__Thumbnail_LowRes",
+                            Thumbnail_HighRes: "Articles__Thumbnail_HighRes"
+                        }
+                    }
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
+        });
 
         module("sqLiteModelBinder");
         test("get full table without select", 2, function () {

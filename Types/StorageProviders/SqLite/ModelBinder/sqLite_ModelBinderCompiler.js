@@ -173,7 +173,9 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         this._addPropertyToModelBinderConfig(expression.elementType, builder);
         builder.popModelBinderProperty();
     },
-
+    VisitComplexTypeExpression: function (expression, builder) {
+        return expression;
+    },
     VisitEntityFieldExpression: function (expression, builder) {
         this.Visit(expression.source, builder);
         this.Visit(expression.selector, builder);
@@ -181,7 +183,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     VisitMemberInfoExpression: function (expression, builder) {
         if (expression.memberDefinition instanceof $data.MemberDefinition) {
             builder.modelBinderConfig['$type'] = expression.memberDefinition.type;
-            if (expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
+            if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
                 this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
             } else {
                 builder.modelBinderConfig['$source'] = this.currentObjectFieldName;
@@ -227,7 +229,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         }
         this.currentObjectFieldName += expression.fieldName;
 
-        if (expression.expression instanceof $data.Expressions.EntityExpression) {
+        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
             this.VisitEntityAsProjection(expression.expression, builder);
         } else if(expression.expression instanceof $data.Expressions.EntitySetExpression){
             this.VisitEntitySetAsProjection(expression.expression, builder);
