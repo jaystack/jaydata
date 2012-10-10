@@ -9,7 +9,7 @@
             $news.Types.NewsContext.generateTestData(db, function () {
                 db.Articles.orderBy('it.Id').map(function (a) { return { Id: a.Id, Lead: a.Lead, Body: a.Body, Category: a.Category }; }, null, $news.Types.Article).toArray(function (art) {
                     equal(art[1] instanceof $news.Types.Article, true, 'result is typed');
-                    
+
                     equal(typeof art[1].Id, 'number', 'result Id is typed');
                     equal(typeof art[1].Lead, 'string', 'result Lead is typed');
                     equal(typeof art[1].Body, 'string', 'result Body is typed');
@@ -90,7 +90,7 @@
 
         $data.Class.define('$example.Types.AClass2', $data.Entity, null, {
             Id: { type: 'int', key: true, computed: true },
-            Name: {type: 'string'},
+            Name: { type: 'string' },
             BItem: { type: '$example.Types.BClass2', required: true, inverseProperty: 'AItem' },
         });
         $data.Class.define('$example.Types.BClass2', $data.Entity, null, {
@@ -107,7 +107,7 @@
 
         (new $example.Types.ClassContext2({ name: 'sqLite', databaseName: 'T1_ClassContext2', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }))
             .onReady(function (db) {
-                var a = new $example.Types.AClass2({Name: 'name1', BItem: null});
+                var a = new $example.Types.AClass2({ Name: 'name1', BItem: null });
                 db.AItems.add(a);
                 db.saveChanges({
                     success: function () {
@@ -119,7 +119,7 @@
                         start();
                     }
                 });
-        });
+            });
     });
     test('sqLite 0..1 table generation not required guid key', function () {
         if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
@@ -449,7 +449,7 @@
                 });
 
             });
-            
+
 
         });
 
@@ -883,54 +883,50 @@
             }
         });
     });
-    //test('1038_additional_tests_1', 2, function () {
-    //    stop(3);
-    //    (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-    //        try {
-    //            start(1);
-    //            $news.Types.NewsContext.generateTestData(db, function () {
-    //                start(1);
-    //                var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: 1 })
-    //                       .select(function (item) {
-    //                           return {
-    //                               a: {
-    //                                   b: {
-    //                                       c: {
-    //                                           d: item.Title
-    //                                       }
-    //                                   }
-    //                               },
-    //                           };
-    //                       });
-    //                var meta = q.toTraceString();
-    //                console.dir(meta);
-    //                q.toArray(function (result) {
-    //                    start(1);
-    //                    console.dir(result);
-    //                    ok(result, 'Query OK');
-    //                    equal(result.length, 1, 'Result nnumber fiaild');
+    test('1038_additional_tests_1', 8, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            try {
+                start(1);
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start(1);
+                    var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: 1 })
+                           .select(function (item) {
+                               return {
+                                   a: {
+                                       b: {
+                                           c: {
+                                               d: item.Title
+                                           }
+                                       }
+                                   },
+                               };
+                           });
+                    q.toArray(function (result) {
+                        start(1);
+                        console.dir(result);
+                        ok(result, 'Query OK');
+                        equal(result.length, 1, 'Result nnumber fiaild');
 
-    //                    equal(typeof result[0], "object", 'object structure build');
-    //                    equal(typeof result[0].a, "object", 'object structure build (a)');
-    //                    equal(typeof result[0].a.b, "object", 'object structure build (a.b)');
-    //                    equal(typeof result[0].a.b.c, "object", 'object structure build (a.b.c)');
-    //                    equal(typeof result[0].a.b.c.d, "string", 'object structure build (a.b.c.d)');
-    //                    ok(result[0].a.b.c.d.length > 0, 'Complex type loading faild');
+                        equal(typeof result[0], "object", 'object structure build');
+                        equal(typeof result[0].a, "object", 'object structure build (a)');
+                        equal(typeof result[0].a.b, "object", 'object structure build (a.b)');
+                        equal(typeof result[0].a.b.c, "object", 'object structure build (a.b.c)');
+                        equal(typeof result[0].a.b.c.d, "string", 'object structure build (a.b.c.d)');
+                        ok(result[0].a.b.c.d.length > 0, 'Complex type loading faild');
 
-    //                });
-    //                ok(true);
+                    });
+                });
 
-    //            });
-
-    //        } catch (ex) {
-    //            start(4);
-    //            ok(false, "Unhandled exception occured");
-    //            console.log("--=== 1003_even if a simple field is projected an Article is returned: ");
-    //            console.dir(ex);
-    //            console.log(" ===--");
-    //        }
-    //    });
-    //});
+            } catch (ex) {
+                start(3);
+                ok(false, "Unhandled exception occured");
+                console.log("--=== 1003_even if a simple field is projected an Article is returned: ");
+                console.dir(ex);
+                console.log(" ===--");
+            }
+        });
+    });
     test('978_create article with inline category fails', 3, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1446,68 +1442,346 @@
             });
         });
     });
-    //test("get_mapped_custom", 24, function () {
-    //    stop(4);
-    //    (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-    //        start();
-    //        ok(db, "Db create faild");
-    //        try {
-    //            start();
-    //            $news.Types.NewsContext.generateTestData(db, function () {
-    //                start();
-    //                var q = db.Articles.map(function (m) {
-    //                    return {
-    //                        a: m.Title,
-    //                        Author: m.Title,
-    //                        Tags: { Title: m.Title },
-    //                        Reviewer: m.Author.Profile,
-    //                        b: { a: m.Author.Profile.FullName, b: m.Author.LoginName/*, c: m.Author.Profile.Location*/ }
-    //                    }
-    //                });
-    //                //console.dir(q.toTraceString());
-    //                q.toArray({
-    //                    success: function (r) {
-    //                        start();
-    //                        var m = r[0];
-    //                        console.dir(r);
-    //                        equal(typeof m.a, 'string', 'a');
-    //                        equal(typeof m.Author, 'string', 'Author');
-    //                        equal(m.Tags instanceof Object, true, 'Tags');
-    //                        equal(typeof m.Tags.Title, 'string', 'Tags.Title');
-    //                        equal(m.Reviewer instanceof $news.Types.UserProfile, true, 'Reviewer');
-    //                        equal(typeof m.Reviewer.Id, 'number', 'Reviewer.Id');
-    //                        equal(typeof m.Reviewer.FullName, 'string', 'Reviewer.FullName');
-    //                        equal(typeof m.Reviewer.Bio, 'string', 'Reviewer.Bio');
-    //                        equal(m.Reviewer.Avatar instanceof Object, true, 'Reviewer.Avatar');
-    //                        equal(m.Reviewer.Location instanceof $news.Types.Location, true, 'Reviewer.Location');
-    //                        equal(typeof m.Reviewer.Location.Address, 'string', 'Reviewer.Location.Address');
-    //                        equal(typeof m.Reviewer.Location.City, 'string', 'Reviewer.Location.City');
-    //                        equal(typeof m.Reviewer.Location.Zip, 'number', 'Reviewer.Location.Zip');
-    //                        equal(typeof m.Reviewer.Location.Country, 'string', 'Reviewer.Location.Country');
-    //                        equal(m.Reviewer.Birthday instanceof Date, true, 'Reviewer.Birthday');
-    //                        //equal(m.Reviewer.User instanceof $news.Types.User, true, 'Reviewer.User');
-    //                        equal(m.b instanceof Object, true, 'b');
-    //                        equal(typeof m.b.a, 'string', 'b.a');
-    //                        equal(typeof m.b.b, 'string', 'b.b');
-    //                        //equal(m.b.c instanceof $news.Types.Location, true, 'b.c');
-    //                        //equal(typeof m.b.c.Address, 'string', 'b.c.Address');
-    //                        //equal(typeof m.b.c.City, 'string', 'b.c.City');
-    //                        //equal(typeof m.b.c.Zip, 'number', 'b.c.Zip');
-    //                        //equal(typeof m.b.c.Country, 'string', 'b.c.Country');
+    test('get_mapped_custom', 23, function () {
+        stop(4);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start();
+            ok(db, "Db create faild");
+            try {
+                start();
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start();
+                    var q = db.Articles
+                        .include('Reviewer.Profile.User') //WARN: oData not supported, but not cause error!!! Simple ignore it!
+                        .map(function (m) {
+                            return {
+                                a: m.Title,
+                                Author: m.Title,
+                                Tags: { Title: m.Title },
+                                Reviewer: m.Reviewer.Profile,
+                                b: { a: m.Author.Profile.FullName, b: m.Author.LoginName, c: m.Author.Profile.Location }
+                            }
+                        });
+                    //console.dir(q.toTraceString());
+                    q.toArray({
+                        success: function (r) {
+                            start();
+                            var m = r[0];
+                            equal(typeof m.a, 'string', 'a');
+                            equal(typeof m.Author, 'string', 'Author');
+                            equal(m.Tags instanceof Object, true, 'Tags');
+                            equal(typeof m.Tags.Title, 'string', 'Tags.Title');
+                            equal(m.Reviewer instanceof $news.Types.UserProfile, true, 'Reviewer');
+                            equal(typeof m.Reviewer.Id, 'number', 'Reviewer.Id');
+                            equal(typeof m.Reviewer.FullName, 'string', 'Reviewer.FullName');
+                            equal(typeof m.Reviewer.Bio, 'string', 'Reviewer.Bio');
+                            //equal(m.Reviewer.Avatar instanceof Object, true, 'Reviewer.Avatar');
+                            equal(m.Reviewer.Location instanceof $news.Types.Location, true, 'Reviewer.Location');
+                            equal(typeof m.Reviewer.Location.Address, 'string', 'Reviewer.Location.Address');
+                            equal(typeof m.Reviewer.Location.City, 'string', 'Reviewer.Location.City');
+                            equal(typeof m.Reviewer.Location.Zip, 'number', 'Reviewer.Location.Zip');
+                            equal(typeof m.Reviewer.Location.Country, 'string', 'Reviewer.Location.Country');
+                            equal(m.Reviewer.Birthday instanceof Date, true, 'Reviewer.Birthday');
+                            //equal(m.Reviewer.User instanceof $news.Types.User, true, 'Reviewer.User'); //TODO: not supported yet
+                            equal(m.b instanceof Object, true, 'b');
+                            equal(typeof m.b.a, 'string', 'b.a');
+                            equal(typeof m.b.b, 'string', 'b.b');
+                            equal(m.b.c instanceof $news.Types.Location, true, 'b.c');
+                            equal(typeof m.b.c.Address, 'string', 'b.c.Address');
+                            equal(typeof m.b.c.City, 'string', 'b.c.City');
+                            equal(typeof m.b.c.Zip, 'number', 'b.c.Zip');
+                            equal(typeof m.b.c.Country, 'string', 'b.c.Country');
+                        },
+                        error: function (error) { console.log("ERROR"); console.log(error); }
+                    });
+                });
+            } catch (ex) {
+                start(2);
+                ok(false, "Unhandled exception occured");
+                console.log("--=== get_mapped_custom is returned: ");
+                console.dir(ex);
+                console.log(" ===--");
+            }
+        });
+    });
 
-    //                        console.log(r);
-    //                    }, error: function (error) { console.log("ERROR");console.log(error);}
-    //                });
-    //            });
-    //        } catch (ex) {
-    //            start(2);
-    //            ok(false, "Unhandled exception occured");
-    //            console.log("--=== get_mapped_custom is returned: ");
-    //            console.dir(ex);
-    //            console.log(" ===--");
-    //        }
-    //    });
-    //});
+    test('Include: indirect -> map scalar(string)', 53, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return a.Category.Title });
+                //console.log('q: ', q.toTraceString());
+                    q.toArray({
+                        success: function (categoriesTitle) {
+                            start(1);
+                            equal(categoriesTitle.length, 26, 'Article category error');
+                            categoriesTitle.forEach(function (ct, index) {
+                                equal(typeof ct, 'string', 'data type error at ' + index + '. position');
+                                ok(ct.length >= 4, 'data length error at ' + index + '. position');
+                            });
+                        },
+                        error: function (error) {
+                            start(1);
+                            ok(false, error);
+                        }
+                    });
+            });
+        });
+    });
+    test('Include: indirect -> map scalar(int)', 79, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return a.Category.Id });
+                q.toArray({
+                    success: function (categoriesId) {
+                        start(1);
+                        equal(categoriesId.length, 26, 'Article category error');
+                        categoriesId.forEach(function (ci, index) {
+                            equal(typeof ci, 'number', 'data type error at ' + index + '. position');
+                            ok(ci > 0, 'data min value error at ' + index + '. position');
+                            ok(ci < 6, 'data max value error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map object include scalar(string)', 79, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return { t: a.Category.Title } });
+                console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (categoriesTitle) {
+                        start(1);
+                        equal(categoriesTitle.length, 26, 'Article category error');
+                        categoriesTitle.forEach(function (ct, index) {
+                            equal(typeof ct, 'object', 'data type error at ' + index + '. position');
+                            equal(typeof ct.t, 'string', 'data type error at ' + index + '. position');
+                            ok(ct.t.length >= 4, 'data length error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map object include scalar(int)', 105, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return { t: a.Category.Id } });
+                console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (categoriesId) {
+                        start(1);
+                        equal(categoriesId.length, 26, 'Article category error');
+                        categoriesId.forEach(function (ci, index) {
+                            equal(typeof ci, 'object', 'data type error at ' + index + '. position');
+                            equal(typeof ci.t, 'number', 'data type error at ' + index + '. position');
+                            ok(ci.t > 0, 'data min value error at ' + index + '. position');
+                            ok(ci.t < 6, 'data max value error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+
+    test('Include: indirect -> map Entity', 105, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return a.Category;});
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 26, 'Result number error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.Category, 'data type error at ' + index + '. position');
+                            ok(r.Id > 0, 'category Id min value error at ' + index + '. position');
+                            ok(r.Id < 6, 'category Id max value error at ' + index + '. position');
+                            ok(r.Title.length >= 4, 'category title error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map EntitySet', 157, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return a.Tags;});
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 52, 'Result number error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
+                            ok(r.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
+                            ok(r.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map ComplexType', 19, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.UserProfiles.map(function(up){return up.Location});
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 6, 'Result number error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof $news.Types.Location, 'data type error at ' + index + '. position');
+                            ok(r.Address.length > 7, 'Location address value error at ' + index + '. position');
+                            ok(r.City.length > 4, 'Location city value error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map object include Entity', 131, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return { r: a.Category }; });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 26, 'Result number error');
+                        results.forEach(function (r, index) {
+                            equal(typeof r, 'object', 'data type error at ' + index + '. position');
+                            ok(r.r instanceof $news.Types.Category, 'data type error at ' + index + '. position');
+                            ok(r.r.Id > 0, 'category Id min value error at ' + index + '. position');
+                            ok(r.r.Id < 6, 'category Id max value error at ' + index + '. position');
+                            ok(r.r.Title.length >= 4, 'category title error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map object include EntitySet', 287, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.map(function (a) { return { r: a.Tags }; });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 26, 'Result number error');
+                        results.forEach(function (r, index) {
+                            equal(typeof r, 'object', 'data type error at ' + index + '. position');
+                            ok(r.r instanceof Array, 'data type error at ' + index + '. position');
+                            equal(r.r.length, 2, 'TagConnection number error');
+                            r.r.forEach(function (tc, index) {
+                                ok(tc instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
+                                ok(tc.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
+                                ok(tc.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                                ok(index < 2, 'TagConnection number error');
+                            });
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: indirect -> map object include ComplexType', 25, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.UserProfiles.map(function (up) { return {r: up.Location} });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 6, 'Result number error');
+                        results.forEach(function (r, index) {
+                            equal(typeof r, 'object', 'data type error at ' + index + '. position');
+                            ok(r.r instanceof $news.Types.Location, 'data type error at ' + index + '. position');
+                            ok(r.r.Address.length > 7, 'Location address value error at ' + index + '. position');
+                            ok(r.r.City.length > 4, 'Location city value error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+
+    /*
+        multiple include
+        mixed direct indirect
+        default selection
+        default selection complex type
+    */
 
     /*test('sqlite_performace_issue', 0, function () {
         stop(1);
@@ -1541,11 +1815,11 @@
 
             // Categories
             var cats = [
-				new $news.Types.Category({ Title: "Sport" }),
-				new $news.Types.Category({ Title: "World" }),
-				new $news.Types.Category({ Title: "Politics" }),
-				new $news.Types.Category({ Title: "Tech" }),
-				new $news.Types.Category({ Title: "Health" })
+                new $news.Types.Category({ Title: "Sport" }),
+                new $news.Types.Category({ Title: "World" }),
+                new $news.Types.Category({ Title: "Politics" }),
+                new $news.Types.Category({ Title: "Tech" }),
+                new $news.Types.Category({ Title: "Health" })
             ];
             for (var i = 0; i < cats.length; i++) {
                 $news.context.Categories.add(cats[i]);
