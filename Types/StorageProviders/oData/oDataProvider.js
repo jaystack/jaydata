@@ -217,10 +217,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             if (response.statusCode > 200 && response.statusCode < 300) {
                 var item = convertedItem[0];
                 if (response.statusCode == 204) {
-                    if (response.headers.ETag) {
+                    if (response.headers.ETag || response.headers.Etag) {
                         var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
                         if (property && property[0]) {
-                            item[property[0].name] = response.headers.ETag;
+                            item[property[0].name] = response.headers.ETag || response.headers.Etag;
                         }
                     }
                 } else {
@@ -228,7 +228,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         if (memDef.computed) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                item[memDef.name] = response.headers.ETag;
+                                item[memDef.name] = response.headers.ETag || response.headers.Etag;
                             } else {
                                 item[memDef.name] = data[memDef.name];
                             }
@@ -301,10 +301,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 for (var i = 0; i < result.length; i++) {
                     var item = convertedItem[i];
                     if (result[i].statusCode == 204) {
-                        if (result[i].headers.ETag) {
+                        if (result[i].headers.ETag || result[i].headers.Etag) {
                             var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
                             if (property && property[0]) {
-                                item[property[0].name] = result[i].headers.ETag;
+                                item[property[0].name] = result[i].headers.ETag || result[i].headers.Etag;
                             }
                         }
                         continue;
@@ -314,7 +314,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         //TODO: is this correct?
                         if (memDef.computed) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                item[memDef.name] = result[i].headers.ETag;
+                                item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag;
                             } else {
                                 item[memDef.name] = result[i].data[memDef.name];
                             }
