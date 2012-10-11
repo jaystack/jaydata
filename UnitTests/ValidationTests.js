@@ -189,61 +189,63 @@
 
     });
 
-    test("Entity validation - partial update", 4, function () {
-        $data.Class.define('vtestEntity', $data.Entity, null, {
-            Id: { type: 'int', key: true, computed: true },
-            Title: { type: 'string', required: true },
-            Lead: { type: 'string', required: true, minLength: 10 },
-            Enabled: { type: 'bool', required: true }
-        }, null);
+    if ($data.StorageProviderLoader.isSupported('sqLite')) {
+        test("Entity validation - partial update", 4, function () {
+            $data.Class.define('vtestEntity', $data.Entity, null, {
+                Id: { type: 'int', key: true, computed: true },
+                Title: { type: 'string', required: true },
+                Lead: { type: 'string', required: true, minLength: 10 },
+                Enabled: { type: 'bool', required: true }
+            }, null);
 
-        $data.Class.define('vtestContext', $data.EntityContext, null, {
-            Items: { type: $data.EntitySet, elementType: vtestEntity }
-        });
+            $data.Class.define('vtestContext', $data.EntityContext, null, {
+                Items: { type: $data.EntitySet, elementType: vtestEntity }
+            });
 
-        stop();
-        var context = new vtestContext({ name: 'sqLite', databaseName: 'vtest' });
-        context.onReady(function () {
-            var entity = new vtestEntity({ Title: 'title1', Lead: 'Long lead text here' });
-            context.Items.add(entity);
+            stop();
+            var context = new vtestContext({ name: 'sqLite', databaseName: 'vtest' });
+            context.onReady(function () {
+                var entity = new vtestEntity({ Title: 'title1', Lead: 'Long lead text here' });
+                context.Items.add(entity);
 
-            context.saveChanges(function () {
-                equal(entity.Enabled, false, 'boolean default value failed');
-                context.Items.toArray(function (result) {
-                    var e = result[0];
-                    equal(e.Enabled, false, 'boolean default value failed');
+                context.saveChanges(function () {
+                    equal(entity.Enabled, false, 'boolean default value failed');
+                    context.Items.toArray(function (result) {
+                        var e = result[0];
+                        equal(e.Enabled, false, 'boolean default value failed');
 
-                    var e2 = new vtestEntity({ Id: e.Id });
-                    context.Items.attach(e2);
+                        var e2 = new vtestEntity({ Id: e.Id });
+                        context.Items.attach(e2);
 
-                    //Dont want to change other fields, just title.
-                    //(Lead and Enabled also has validation failed)
-                    e2.Title = e.Title + '_changed';
+                        //Dont want to change other fields, just title.
+                        //(Lead and Enabled also has validation failed)
+                        e2.Title = e.Title + '_changed';
 
-                    context.saveChanges({
-                        success: function () {
-                            context.Items.filter(function (v) { return v.Id == this.Id }, { Id: e.Id }).single(undefined, undefined, function (result) {
-                                equal(result.Title, e.Title + '_changed', 'changed text failed');
-                                equal(result.Lead, e.Lead, 'original text failed');
+                        context.saveChanges({
+                            success: function () {
+                                context.Items.filter(function (v) { return v.Id == this.Id }, { Id: e.Id }).single(undefined, undefined, function (result) {
+                                    equal(result.Title, e.Title + '_changed', 'changed text failed');
+                                    equal(result.Lead, e.Lead, 'original text failed');
+                                    start();
+                                })
+                            },
+                            error: function (ex) {
+                                equal(e2.ValidationErrors.length, 0, 'Validation errors exists');
+                                ok(false, 'Partial update failed' + JSON.stringify(ex));
                                 start();
-                            })
-                        },
-                        error: function (ex) {
-                            equal(e2.ValidationErrors.length, 0, 'Validation errors exists');
-                            ok(false, 'Partial update failed' + JSON.stringify(ex));
-                            start();
-                        }
+                            }
+                        });
+
                     });
+
 
                 });
 
-
             });
 
+
         });
-
-
-    });
+    }
 
     var entityFieldConversationClass = $data.Class.define('entityFieldConversationClass', $data.Entity, null, {
         prop1: { dataType: 'int', key: true },
@@ -273,7 +275,7 @@
         efc.prop5 = false;
         equal(efc.prop5, false, 'bool');
 
-        var date = new Date('2000');
+        var date = new Date('2000/02/02 01:01:01');
         efc.prop6 = date;
         equal(efc.prop6.valueOf(), date.valueOf(), 'date');
 
@@ -304,8 +306,8 @@
         efc.prop5 = 'False';
         equal(efc.prop5, false, 'bool');
 
-        var date = new Date('2000');
-        efc.prop6 = '2000';
+        var date = new Date('2000/02/02 01:01:01');
+        efc.prop6 = '2000/02/02 01:01:01';
         equal(efc.prop6.valueOf(), date.valueOf(), 'date');
 
         var obj = { a: 42 };
@@ -444,21 +446,21 @@
             efc.prop7 = '{a:42}';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'SyntaxError: Unexpected token a', 'truea is not valid object');
+            equal(e.name.substr(0, 12), 'SyntaxError:', 'truea is not valid object');
         }
 
         try {
             efc.prop7 = '[{ba:42}]';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'SyntaxError: Unexpected token b', 'Falseb is not valid object');
+            equal(e.name.substr(0, 12), 'SyntaxError:',  'Falseb is not valid object');
         }
 
         try {
             efc.prop7 = 'world';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'SyntaxError: Unexpected token w', 'world is not valid object');
+            equal(e.name.substr(0, 12), 'SyntaxError:', 'world is not valid object');
         }
 
     });
