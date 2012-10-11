@@ -1609,7 +1609,9 @@
         });
     });
     /*compiler fix*/
-    test('Include: indirect -> map Entity1', 105, function () {
+    test('Include: indirect -> map Entity_', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        expect(105);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
@@ -1913,7 +1915,9 @@
             });
         });
     });
-    test('!!!!Include: mixed -> filter, map, include', 34, function () {
+    test('Include: mixed -> filter, map, include', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        expect(39);
         var refDate = new Date(Date.parse("1979/05/01"));
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1926,7 +1930,7 @@
                                 return {
                                     name: item.Title,
                                     People: {
-                                        p1: { name: item.Author.LoginName, bio: item.Author.Profile },
+                                        p1: { name: item.Author.LoginName, prof: item.Author.Profile },
                                         p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location.Address },
                                         p3: { loc: item.Author.Profile.Location}
                                     },
@@ -1949,8 +1953,10 @@
                             ok(r.People.p1 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
                             equal(typeof r.People.p1.name, 'string', 'r.People.p1.name data type  error at ' + index + '. position');
                             equal(r.People.p1.name, 'Usr5', 'r.People.p1.name value error at ' + index + '. position');
-                            equal(typeof r.People.p1.bio, 'string', 'r.People.p1.bio data type  error at ' + index + '. position');
-                            equal(r.People.p1.bio, 'Bio5', 'r.People.p1.bio value error at ' + index + '. position');
+                            ok(r.People.p1.prof instanceof $news.Types.UserProfile, 'r.People.p1.prof data type  error at ' + index + '. position');
+                            equal(r.People.p1.prof.Bio, 'Bio5', 'r.People.p1.bio value error at ' + index + '. position');
+                            ok(r.People.p1.prof.Location instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                            equal(r.People.p1.prof.Location.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
                             //p2 property
                             ok(r.People.p2 instanceof Object, 'r.People.p2data type error at ' + index + '. position');
                             equal(typeof r.People.p2.name, 'string', 'r.People.p2.name data type  error at ' + index + '. position');
@@ -1965,6 +1971,10 @@
                             });
                             //p2.adr
                             equal(r.People.p2.adr, 'Address8', 'Location.Address value error  at ' + index + '. position');
+                            //p3.loc
+                            ok(r.People.p3 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                            ok(r.People.p3.loc instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                            equal(r.People.p3.loc.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
                             //r.Cat
                             equal(typeof r.Cat, 'string', 'r.Cat data type  error at ' + index + '. position');
                             equal(r.Cat, 'World', 'r.Cat value error at ' + index + '. position');
@@ -1985,12 +1995,174 @@
             });
         });
     });
-    /*
-        multiple include
-        mixed direct indirect
-        -- default selection
-        -- default selection complex type
-    */
+    test('Include: direct -> Entity', 105, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include('Category');
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (result) {
+                        start(1);
+                        equal(result.length, 26, 'Article category error');
+                        result.forEach(function (article, index) {
+                            ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(article.Title.length >= 4, 'article.Title length error at ' + index + '. position');
+                            ok(article.Category instanceof $news.Types.Category, 'article.Category data type error at ' + index + '. position');
+                            ok(article.Category.Title.length >= 4, 'article.Category.Title length error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: direct -> EntitySet', 209, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include('Tags');
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (result) {
+                        start(1);
+                        equal(result.length, 26, 'Article category error');
+                        result.forEach(function (article, index) {
+                            ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(article.Title.length >= 4, 'article.Title length error at ' + index + '. position');
+                            ok(article.Tags instanceof Array, 'article.Tags type error at ' + index + '. position');
+                            equal(article.Tags.length, 2, 'article.Tags length number error at ' + index + '. position');
+                            article.Tags.forEach(function (tag) {
+                                ok(tag instanceof $news.Types.TagConnection, 'article.Tag[i] data type error at ' + index + '. position');
+                                equal(typeof tag.Id, 'number', 'article.Tag[i].Id data type error at ' + index + '. position');
+                            });
+                            
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: direct -> Entity EntitySet', 261, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include('Category').include('Tags');
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (result) {
+                        start(1);
+                        equal(result.length, 26, 'Article category error');
+                        result.forEach(function (article, index) {
+                            ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(article.Title.length >= 4, 'article.Title length error at ' + index + '. position');
+                            ok(article.Category instanceof $news.Types.Category, 'article.Category data type error at ' + index + '. position');
+                            ok(article.Category.Title.length >= 4, 'article.Category.Title length error at ' + index + '. position');
+                            ok(article.Tags instanceof Array, 'article.Tags type error at ' + index + '. position');
+                            equal(article.Tags.length, 2, 'article.Tags length number error at ' + index + '. position');
+                            article.Tags.forEach(function (tag) {
+                                ok(tag instanceof $news.Types.TagConnection, 'article.Tag[i] data type error at ' + index + '. position');
+                                equal(typeof tag.Id, 'number', 'article.Tag[i].Id data type error at ' + index + '. position');
+                            });
+
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: direct -> deep Entity', 209, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include('Author.Profile');
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (result) {
+                        start(1);
+                        equal(result.length, 26, 'Article category error');
+                        result.forEach(function (article, index) {
+                            ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(article.Title.length >= 4, 'article.Title length error at ' + index + '. position');
+                            ok(article.Author instanceof $news.Types.User, 'article.Author data type error at ' + index + '. position');
+                            ok(article.Author.LoginName.length >= 4, 'article.Author.LoginName length error at ' + index + '. position');
+                            ok(article.Author.Profile instanceof $news.Types.UserProfile, 'article.Author.Profile type error at ' + index + '. position');
+                            ok(article.Author.Profile.Bio.length > 2, 'article.Author.Profile.Bio length number error at ' + index + '. position');
+
+                            ok(article.Author.Profile.Location instanceof $news.Types.Location, 'article.Author.Profile.Location type error at ' + index + '. position');
+                            ok(article.Author.Profile.Location.Address.length > 2, 'article.Author.Profile.Location.Address length number error at ' + index + '. position');
+                            
+
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: direct -> mixed deep Entity, EntitySet', 417, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include('Author.Profile').include('Category').include('Tags');
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (result) {
+                        start(1);
+                        equal(result.length, 26, 'Article category error');
+                        result.forEach(function (article, index) {
+                            ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
+                            ok(article.Title.length >= 4, 'article.Title length error at ' + index + '. position');
+                            ok(article.Author instanceof $news.Types.User, 'article.Author data type error at ' + index + '. position');
+                            ok(article.Author.LoginName.length >= 4, 'article.Author.LoginName length error at ' + index + '. position');
+                            ok(article.Author.Profile instanceof $news.Types.UserProfile, 'article.Author.Profile type error at ' + index + '. position');
+                            ok(article.Author.Profile.Bio.length > 2, 'article.Author.Profile.Bio length number error at ' + index + '. position');
+
+                            ok(article.Author.Profile.Location instanceof $news.Types.Location, 'article.Author.Profile.Location type error at ' + index + '. position');
+                            ok(article.Author.Profile.Location.Address.length > 2, 'article.Author.Profile.Location.Address length number error at ' + index + '. position');
+
+                            ok(article.Category instanceof $news.Types.Category, 'article.Category data type error at ' + index + '. position');
+                            ok(article.Category.Title.length >= 4, 'article.Category.Title length error at ' + index + '. position');
+                            ok(article.Tags instanceof Array, 'article.Tags type error at ' + index + '. position');
+                            equal(article.Tags.length, 2, 'article.Tags length number error at ' + index + '. position');
+                            article.Tags.forEach(function (tag) {
+                                ok(tag instanceof $news.Types.TagConnection, 'article.Tag[i] data type error at ' + index + '. position');
+                                equal(typeof tag.Id, 'number', 'article.Tag[i].Id data type error at ' + index + '. position');
+                            });
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
 
     /*test('sqlite_performace_issue', 0, function () {
         stop(1);

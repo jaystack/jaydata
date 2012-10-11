@@ -32,8 +32,10 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
             sqlBuilder.addText(', ');
             sqlBuilder.addKeyField(SqlStatementBlocks.rowIdName);
             this.Visit(expression.expression, sqlBuilder);
-            sqlBuilder.addText(SqlStatementBlocks.as);
-            sqlBuilder.addText(SqlStatementBlocks.scalarFieldName);
+            if (!(expression.expression instanceof $data.Expressions.ComplexTypeExpression)) {
+                sqlBuilder.addText(SqlStatementBlocks.as);
+                sqlBuilder.addText(SqlStatementBlocks.scalarFieldName);
+            }
         }
     },
 

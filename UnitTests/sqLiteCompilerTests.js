@@ -705,9 +705,12 @@
             var expectedObject = {
                 $type: $data.Array,
                 $item: {
-                    $keys: ['rowid$$', 'T1__Id'],
-                    $type: $news.Types.TagConnection,
-                    Id: "T1__Id"
+                    $keys: ['rowid$$'],
+                    $item: {
+                        $keys: ['T1__Id'],
+                        $type: $news.Types.TagConnection,
+                        Id: "T1__Id"
+                    }
                 }
             };
             deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
@@ -1546,14 +1549,14 @@
             var q = $data.NewsReaderContext.Articles.map(function (item) { return item.Reviewer.Profile; });
             var r = q.toTraceString();
             start(1);
-            equal(_resultToString(r), "SELECT T2.Id AS Id, T2.FullName AS FullName, T2.Bio AS Bio, T2.Avatar AS Avatar, T2.Birthday AS Birthday, T2.User__Id AS User__Id, T2.Location__Address AS Location__Address, T2.Location__City AS Location__City, T2.Location__Zip AS Location__Zip, T2.Location__Country AS Location__Country FROM Articles T0 "
+            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.Id AS Id, T2.FullName AS FullName, T2.Bio AS Bio, T2.Avatar AS Avatar, T2.Birthday AS Birthday, T2.User__Id AS User__Id, T2.Location__Address AS Location__Address, T2.Location__City AS Location__City, T2.Location__Zip AS Location__Zip, T2.Location__Country AS Location__Country FROM Articles T0 "
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Reviewer__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
             var expectedObject = {
                 $type: $data.Array,
                 $item: {
-                    $keys: ['Id'],
+                    $keys: ['rowid$$', 'Id'],
                     $type: $news.Types.UserProfile,
                     Id: 'Id',
                     FullName: 'FullName',
