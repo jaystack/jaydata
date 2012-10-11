@@ -1219,8 +1219,8 @@
                         equal(article[0] instanceof $news.Types.Article, true, "result type faild");
                         equal(article[0].Category, undefined, "category filed not loaded");
 
-                        notEqual(article[0].Author, undefined, "category filed not loaded");
-                        notEqual(article[0].Author.Profile, undefined, "category filed not loaded");
+                        ok(article[0].Author !== undefined, "category filed not loaded");
+                        ok(article[0].Author.Profile !== undefined, "category filed not loaded");
 
                         equal(typeof article[0].Author.Profile.Bio, 'string', 'Category title type faild');
                         ok(article[0].Author.Profile.Bio.length > 0, 'Category title type faild');
@@ -1248,18 +1248,18 @@
                     q.toArray(function (article) {
                         start(1);
                         equal(article[0] instanceof $news.Types.Article, true, "result type faild");
-                        equal(article[0].Category, undefined, "category filed not loaded");
+                        ok(article[0].Category === undefined, "category filed not loaded");
 
                         equal(article[0].Author instanceof $news.Types.User, true, "result type faild");
-                        notEqual(article[0].Author, undefined, "category filed not loaded");
+                        ok(article[0].Author !== undefined, "category filed not loaded");
                         equal(article[0].Author.Profile instanceof $news.Types.UserProfile, true, "result type faild");
-                        notEqual(article[0].Author.Profile, undefined, "category filed not loaded");
+                        ok(article[0].Author.Profile !== undefined, "category filed not loaded");
                         equal(typeof article[0].Author.Profile.Bio, 'string', 'Category title type faild');
                         ok(article[0].Author.Profile.Bio.length > 0, 'Category title type faild');
 
-                        notEqual(article[0].Reviewer, undefined, "Reviewer filed not loaded");
+                        ok(article[0].Reviewer !== undefined, "Reviewer filed not loaded");
                         equal(article[0].Reviewer instanceof $news.Types.User, true, "Reviewer type faild");
-                        notEqual(article[0].Reviewer.Profile, undefined, "Reviewer.Profile filed not loaded");
+                        ok(article[0].Reviewer.Profile !== undefined, "Reviewer.Profile filed not loaded");
                         equal(article[0].Reviewer.Profile instanceof $news.Types.UserProfile, true, "Reviewer.Profile type faild");
 
                         equal(typeof article[0].Reviewer.Profile.Bio, 'string', 'Category title type faild');
@@ -1608,7 +1608,6 @@
             });
         });
     });
-    /*compiler fix*/
     test('Include: indirect -> map Entity_', function () {
         if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(105);
@@ -1639,7 +1638,6 @@
         });
     });
     /*FIX: odata need expand*/
-    //TODO: Viktor article =>tags sqlite on
     test('Include: indirect -> map EntitySet', 209, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
