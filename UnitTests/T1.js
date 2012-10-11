@@ -115,7 +115,7 @@
                         start();
                     },
                     error: function (ex) {
-                        equal(ex.message, 'could not execute statement (19 constraint failed)', 'required side is required');
+                        ok(ex.message == 'could not execute statement (19 constraint failed)' || ex.message == 'could not execute statement due to a constaint failure (19 constraint failed)', 'required side is required');
                         start();
                     }
                 });
@@ -193,7 +193,7 @@
                         start();
                     },
                     error: function (ex) {
-                        equal(ex.message, 'could not execute statement (19 constraint failed)', 'required side is required');
+                        ok(ex.message == 'could not execute statement (19 constraint failed)' || ex.message == 'could not execute statement due to a constaint failure (19 constraint failed)', 'required side is required');
                         start();
                     }
                 });
