@@ -935,7 +935,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         var counterState = 0;
         var counterFn = function(callback){
-            if (--counterState == 0) callback();
+            if (--counterState <= 0) callback();
         }
         
         var insertFn = function(client, c, collection){

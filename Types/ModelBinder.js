@@ -28,11 +28,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             return data;
         }
         var data = data;
-		if (meta.$type){
-			var type = Container.resolveName(meta.$type);
-            var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-			var result = converter ? converter() : new (Container.resolveType(meta.$type))(); //Container['create' + Container.resolveType(meta.$type).name]();
-		}
+        var result;
 
         if (meta.$selector){
 			var metaSelector = meta.$selector;
@@ -83,6 +79,24 @@ $data.Class.define('$data.ModelBinder', null, null, {
 			if (!data){
 				return data;
 			}
+        }
+        
+        if (meta.$type) {
+            var resolvedType = Container.resolveType(meta.$type);
+            var isPrimitive = false;
+            if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo)
+                isPrimitive = true;
+
+            var type = Container.resolveName(meta.$type);
+            var converter = this.context.storageProvider.fieldConverter.fromDb[type];
+            if (isPrimitive) {
+                if (data != undefined)
+                    return converter(data);
+                else
+                    return data;
+            } else {
+                result = converter ? converter() : new (Container.resolveType(meta.$type))(); //Container['create' + Container.resolveType(meta.$type).name]();
+            }
         }
 
 		if (meta.$value){
