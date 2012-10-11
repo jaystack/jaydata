@@ -1102,9 +1102,15 @@ $data.defaultErrorCallback = function () {
         console.dir(arguments);
     else
         console.log(arguments);*/
-    if (arguments[arguments.length - 1] && typeof arguments[arguments.length - 1].reject === 'function'){
+    if (arguments[arguments.length - 1] && typeof arguments[arguments.length - 1].reject === 'function') {
         arguments[arguments.length - 1].reject.apply(arguments[arguments.length - 1], arguments);
-    }else Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
+    } else {
+        if (arguments[0] instanceof Error) {
+            Guard.raise(arguments[0]);
+        } else {
+            Guard.raise(new Exception("DEFAULT ERROR CALLBACK!", "DefaultError", arguments));
+        }
+    }
 };
 $data.defaultSuccessCallback = function () { /*console.log('DEFAULT SUCCES CALLBACK');*/ };
 $data.defaultNotifyCallback = function () { /*console.log('DEFAULT NOTIFY CALLBACK');*/ };
