@@ -1638,7 +1638,7 @@
     });
     /*FIX: odata need expand*/
     //TODO: Viktor article =>tags sqlite on
-    test('Include: indirect -> map EntitySet', 157, function () {
+    test('Include: indirect -> map EntitySet', 209, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);

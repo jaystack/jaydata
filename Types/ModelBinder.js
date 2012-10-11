@@ -106,8 +106,46 @@ $data.Class.define('$data.ModelBinder', null, null, {
             if (Array.isArray(data)) {
                 for (var i = 0; i < data.length; i++) {
                     var key = '';
-                    if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) { key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[i][meta.$item.$keys[j]]); }
+                    if (meta.$keys) for (var j = 0; j < meta.$keys.length; j++) { key += (meta.$type + '_' + meta.$keys[j] + '#' + data[i][meta.$keys[j]]); }
                     var r = this.call(data[i], meta.$item);
+                    if (key){
+                        if (this.cache[key]){
+                            result = this.cache[key];
+                            if (result.indexOf(r) < 0){
+                                result.push(r);
+                            }
+                        }else{
+                            this.cache[key] = result;
+                            result.push(r);
+                        }
+                    }else{
+                        var key = '';
+                        if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) { key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[i][meta.$item.$keys[j]]); }
+                        if (keycache){
+                            if (keycache.indexOf(key) < 0){
+                                result.push(r);
+                                keycache.push(key);
+                            }
+                        }else result.push(r);
+                    }
+                }
+            } else {
+                var key = '';
+                if (meta.$keys) for (var j = 0; j < meta.$keys.length; j++) { key += (meta.$type + '_' + meta.$keys[j] + '#' + data[meta.$keys[j]]); }
+                var r = this.call(data, meta.$item);
+                if (key){
+                    if (this.cache[key]){
+                        result = this.cache[key];
+                        if (result.indexOf(r) < 0){
+                            result.push(r);
+                        }
+                    }else{
+                        this.cache[key] = result;
+                        result.push(r);
+                    }
+                }else{
+                    var key = '';
+                    if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) { key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[meta.$item.$keys[j]]); }
                     if (keycache){
                         if (keycache.indexOf(key) < 0){
                             result.push(r);
@@ -115,16 +153,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         }
                     }else result.push(r);
                 }
-            } else {
-                var key = '';
-                if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) { key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[meta.$item.$keys[j]]); }
-                var r = this.call(data, meta.$item);
-                if (keycache){
-                    if (keycache.indexOf(key) < 0){
-                        result.push(r);
-                        keycache.push(key);
-                    }
-                }else result.push(r);
             }
         }else{
             var key = '';
