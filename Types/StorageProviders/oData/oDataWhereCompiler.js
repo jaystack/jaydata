@@ -59,6 +59,9 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
 
     VisitEntityFieldExpression: function (expression, context) {
         this.Visit(expression.source, context);
+        if (expression.source instanceof $data.Expressions.ComplexTypeExpression) {
+            context.data += "/";
+        }
         this.Visit(expression.selector, context);
     },
 
