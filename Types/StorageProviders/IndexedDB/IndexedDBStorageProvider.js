@@ -4,9 +4,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         // mapping IndexedDB types to browser invariant name
         this.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
         this.IDBRequest = window.IDBRequest || window.webkitIDBRequest || window.mozIDBRequest || window.msIDBRequest;
-
         this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction || window.msIDBTransaction;
-        this.IDBTransactionType = { READ_ONLY: "readonly", READ_WRITE: "readwrite" }
+        this.IDBTransactionType = { READ_ONLY: "readonly", READ_WRITE: "readwrite", VERSIONCHANGE: "versionchange" }
         if (this.IDBTransaction.READ_ONLY && this.IDBTransaction.READ_WRITE) {
             this.IDBTransactionType.READ_ONLY = this.IDBTransaction.READ_ONLY
             this.IDBTransactionType.READ_WRITE = this.IDBTransaction.READ_WRITE
@@ -30,7 +29,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         value: {
             equal: { mapTo: ' == ', dataType: $data.Boolean },
             notEqual: { mapTo: ' != ', dataType: $data.Boolean },
-			equalTyped: { mapTo: ' == ', dataType: $data.Boolean },
+            equalTyped: { mapTo: ' == ', dataType: $data.Boolean },
             notEqualTyped: { mapTo: ' != ', dataType: $data.Boolean },
             greaterThan: { mapTo: ' > ', dataType: $data.Boolean },
             greaterThanOrEqual: { mapTo: ' >= ', dataType: $data.Boolean },
@@ -72,13 +71,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 this[i] = callbackSettings[i];
             }
 
-            if (this.readyState == self.IDBRequest.DONE)
-                console.log('WARNING: request finished before setCallbacks. Do not use breakpoints between creating the request object and finishing the setting of callbacks');
+            //if (this.readyState == self.IDBRequest.DONE)
+            //    console.log('WARNING: request finished before setCallbacks. Do not use breakpoints between creating the request object and finishing the setting of callbacks');
             return this;
         };
-        if (typeof idbRequest.prototype.setCallbacks !== 'function')
+        if (idbRequest && typeof idbRequest.prototype.setCallbacks !== 'function')
             idbRequest.prototype.setCallbacks = setCallbacks;
-        if (typeof idbTran.prototype.setCallbacks !== 'function')
+        if (idbTran && typeof idbTran.prototype.setCallbacks !== 'function')
             idbTran.prototype.setCallbacks = setCallbacks;
         if (idbOpenDBRequest && typeof idbOpenDBRequest.prototype.setCallbacks !== 'function')
             idbOpenDBRequest.prototype.setCallbacks = setCallbacks;
@@ -96,7 +95,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 '$data.String': function (string) { return string; },
                 '$data.Boolean': function (b) { return b; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Array': function (arr) { if (arr === undefined) { return new $data.Array(); }return arr; },
+                '$data.Array': function (arr) { if (arr === undefined) { return new $data.Array(); } return arr; },
                 '$data.Object': function (obj) { return obj; },
                 "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
             },
@@ -113,9 +112,167 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             }
         }
     },
+
+    _getObjectStoreDefinition: function (setDefinition) {
+        var contextStore = {
+            storeName: setDefinition.TableName
+        };
+        var keyFields = setDefinition.PhysicalType.memberDefinitions.getKeyProperties();
+
+        if (0 == keyFields.length) {
+            var error = new Error("Entity must have a key field: " + contextStore.storeName);
+            error.name = "KeyNotFoundError";
+            throw error;
+        }
+        /*if (1 != keyFields.length) {
+            var error = new Error("Entity must have only one key field: " + contextStore.storeName);
+            error.name = "MultipleKeysNotSupportedError";
+            throw error;
+        }*/
+        //var keyField = keyFields[0];
+        for (var i = 0; i < keyFields.length; i++) {
+
+            if (keyFields[i].computed === true &&
+                ("$data.Integer" !== Container.resolveName(keyFields[i].type))) {
+                var error = new Error("Computed key field must be of integer type: " + contextStore.storeName);
+                error.name = "ComputedKeyFieldError";
+                throw error;
+            }
+            if (keyFields.length > 2 && keyFields[i].computed) {
+                var error = new Error("With multiple keys the computed field is not allowed: " + contextStore.storeName);
+                error.name = "MultipleComputedKeyFieldError";
+                throw error;
+            }
+        }
+
+        contextStore.keyFields = keyFields;
+        return contextStore;
+    },
+
+    _getObjectStoreDefinitions: function () {
+        var objectStoreDefinitions = [];
+        var self = this;
+        self.context._storageModel.forEach(function (memDef) {
+            var objectStoreDefinition = self._getObjectStoreDefinition(memDef);
+            objectStoreDefinitions.push(objectStoreDefinition);
+        });
+        return objectStoreDefinitions;
+    },
+
+    _oldCreateDB: function (setVersionTran, definitions, onready) {
+        var self = this;
+        setVersionTran.db.onversionchange = function (event) {
+            return event.target.close();
+        };
+
+        self._createDB(setVersionTran.db, definitions);
+        setVersionTran.oncomplete = onready;
+    },
+    _createDB: function (db, definitions) {
+        for (var i = 0; i < definitions.length; i++) {
+            var storeDef = definitions[i];
+
+            if (!db.objectStoreNames.contains(storeDef.storeName)) {
+                var settings = {};
+                if (storeDef.keyFields.length == 1) {
+                    settings = {
+                        keyPath: storeDef.keyFields[0].name,
+                        autoIncrement: storeDef.keyFields[0].computed
+                    };
+                } else {
+                    settings.key = [];
+                    for (var i = 0; i < storeDef.keyFields.length; i++) {
+                        settings.key.push(storeDef.keyFields[i].name);
+                    }
+                }
+                db.createObjectStore(storeDef.storeName, settings);
+            }
+        }
+    },
+    _hasDbChanges: function (db, definitions) {
+        var isOriginal = true;
+        for (var i = 0; i < definitions.length && isOriginal; i++) {
+            isOriginal = isOriginal && db.objectStoreNames.contains(definitions[i].storeName);
+        }
+
+        return !isOriginal;
+    },
+    onupgradeneeded: function (objectStoreDefinitions) {
+        var self = this;
+        return function (e) {
+            var db = e.target.result;
+            db.onversionchange = function (event) {
+                return event.target.close();
+            };
+            var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+            if (hasTableChanges)
+                self._createDB(db, objectStoreDefinitions);
+        }
+    },
+
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
+        var objectStoreDefinitions;
+        try {
+            objectStoreDefinitions = self._getObjectStoreDefinitions();
+        } catch (e) {
+            console.log(objectStoreDefinitions);
+            callBack.error(e);
+        }
+        self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks({
+            onsuccess: function (e) {
+                var db = e.target.result;
+                db.onversionchange = function (event) {
+                    return event.target.close();
+                };
+
+                var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+                //oldAPI
+                if (db.setVersion) {
+                    if (db.version === "" || hasTableChanges) {
+                        db.setVersion(parseInt(db.version) || 1).onsuccess = function (e) {
+                            var db = e.target.result
+                            self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
+                                self.db = e.target.db;
+                                callBack.success(self.context);
+                            });
+                        }
+                        return;
+                    };
+                } else if (hasTableChanges) {
+                        //newVersionAPI
+                    db.close();
+                    var version = parseInt(db.version) + 1;
+                    self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
+                        onsuccess: function (e) {
+                            self.db = e.target.result;
+                            callBack.success(self.context);
+                        },
+                        onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
+                        onerror: callBack.error,
+                        onabort: callBack.error,
+                        onblocked: callBack.error
+                    });
+                    return;
+                }
+
+                self.db = db;
+                callBack.success(self.context);
+            },
+            //newVersionAPI
+            onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
+            onerror: callBack.error,
+            onabort: callBack.error,
+            onblocked: callBack.error
+        });
+    },
+
+    _initializeStore: function (callBack) {
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        var self = this;
+
+
         var initDb = function (db) {
             db.onversionchange = function (event) {
                 var ret = event.target.close();
@@ -204,7 +361,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                             initDb(self.db);
                             versionRequest.result.oncomplete = function (evt) {
                                 callBack.success(self.context);
-                            }                            
+                            }
                         }
                     });
                 }
@@ -216,6 +373,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         else
             self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks(openCallbacks);
     },
+
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
@@ -235,24 +393,18 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         modelBinderCompiler.Visit(query.expression);
         switch (query.expression.nodeType) {
             case $data.Expressions.ExpressionType.Count:
-                
-                //query.actionPack.push({ op: 'buildType', context: self.context, tempObjectName: 'lulz', propertyMapping: [{ from: 'count', dataType: $data.Integer }] });
-                //query.actionPack.push({ op: 'copyToResult', tempObjectName: 'lulz' });
                 store.count().onsuccess = function (event) {
                     var count = event.target.result;
                     query.rawDataList.push({ cnt: count });
                 }
                 break;
             default:
-                //query.actionPack.push({ op: 'buildType', context: self.context, logicalType: query.entitySet.createNew, tempObjectName: 'lulz' });
-                //query.actionPack.push({ op: 'copyToResult', tempObjectName: 'lulz' });
                 store.openCursor().onsuccess = function (event) {
                     // We currently support only toArray() so let's just dump all data
                     var cursor = event.target.result;
                     if (cursor) {
                         var value = cursor.value;
-                        //if (!compiledQuery.filterFunc || compiledQuery.filterFunc(value))
-                            query.rawDataList.push(cursor.value);
+                        query.rawDataList.push(cursor.value);
                         cursor['continue']();
                     }
                 };
@@ -287,7 +439,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             // Setting key fields (composite key)
             settings.keys = keys;
         } else if (keys.length == 1) {
-            // Simple key
+                // Simple key
             settings.keyPath = keys[0];
         } else {
             Guard.raise(new Exception('No valid key found!'));
@@ -321,7 +473,15 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                                 // Autogenerated fields for new items should not be present in the physicalData
                                 return;
                             }
-                            item.physicalData[memDef.name] = item.data[memDef.name];
+                            if (typeof memDef.concurrencyMode === 'undefined' && (memDef.key === true || item.data.entityState === $data.EntityState.Added || (item.data.changedProperties && item.data.changedProperties.some(function (def) { return def.name === memDef.name; })))) {
+                                var typeName = Container.resolveName(memDef.type);
+                                if (self.fieldConverter.toDb[typeName]) {
+                                    item.physicalData[memDef.name] = self.fieldConverter.toDb[typeName](item.data[memDef.name]);
+                                } else {
+                                    console.log('WARN!!!');
+                                    item.physicalData[memDef.name] = item.data[memDef.name];
+                                }
+                            }
                         });
                     return item;
                 });
@@ -385,72 +545,16 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         };
                         switch (item.data.entityState) {
                             case $data.EntityState.Added:
-                                function setAutoIncrementId(item, callBack) {
-                                    /// <summary>
-                                    /// Sets the value of the autoIncremented key for the item, then calls the callBack
-                                    /// </summary>
-                                    /// <param name="item">Item to set the Id on</param>
-                                    /// <param name="callBack">Callback to call</param>
-                                    callBack = $data.typeSystem.createCallbackSetting(callBack);
-                                    var record = null;
-                                    var tran = self.db.transaction([self.sequenceStore], self.IDBTransactionType.READ_WRITE)
-                                        .setCallbacks({
-                                            onerror: callBack.error,
-                                            oncomplete: function (event) {
-                                                item.physicalData[keySettings.keyPath] = record.lastInsertedId;
-                                                callBack.success(item);
-                                            }
-                                        });
-                                    // Gets the store
-                                    var store = tran.objectStore(self.sequenceStore);
-                                    // and tries to find the record for the item's store's sequenceId
-                                    store.openCursor(self.IDBKeyRange.only(item.entitySet.tableName))
-                                        .onsuccess = function (event) {
-                                            var cursor = event.target.result;
-                                            if (cursor) {
-                                                // Record found
-                                                record = cursor.value;
-                                                var id = record.lastInsertedId;
-                                                if (typeof id !== 'number')
-                                                    Guard.raise(new Exception('Invalid field type! Must be number', null, id));
-                                                // Increments the id
-                                                ++record.lastInsertedId;
-                                                // then persists it
-                                                cursor.update(record);
-                                            } else {
-                                                // Record was not found, we need to add it
-                                                store.add(record = { store: item.entitySet.tableName, lastInsertedId: 1 });
-                                            }
-                                        }
-                                }
                                 if (!keySettings.keyPath) {
                                     // Item needs explicit keys
                                     store.add(item.physicalData, itemKeys);
                                 }
                                 else {
-                                    function addItem(item) {
-                                        /// <summary>
-                                        /// Adds the item to the database, and sets the generated key
-                                        /// </summary>
-                                        /// <param name="item">Item to save</param>
-                                        store.add(item.physicalData)
-                                            .onsuccess = function (event) {
-                                                // Saves the generated key back to the entity
-                                                item.data[keySettings.keyPath] = event.target.result;
-                                            };
-                                    }
-                                    if (self.newVersionAPI && item.physicalData[keySettings.keyPath] === undefined) {
-                                        // Firefox needs help with autoIncrement id generation
-                                        setAutoIncrementId(item, {
-                                            success: addItem,
-                                            error: function (ex) {
-                                                Guard.raise(new Exception('Can\'t generate new id', null, ex));
-                                            }
-                                        });
-                                    } else {
-                                        // Webkit, simply add the item
-                                        addItem(item);
-                                    }
+                                    store.add(item.physicalData)
+                                        .onsuccess = function (event) {
+                                            // Saves the generated key back to the entity
+                                            item.data[keySettings.keyPath] = event.target.result;
+                                        };
                                 }
                                 break;
                             case $data.EntityState.Deleted:
@@ -462,7 +566,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                             case $data.EntityState.Modified:
                                 // Updates the item
                                 cursorAction(function (cursor, key, data) {
-                                    cursor.update(data);
+                                    cursor.update($data.typeSystem.extend(cursor.value, data));
                                 });
                                 break;
                             case $data.EntityState.Unchanged:
@@ -485,11 +589,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         return sqlText;
     }
 }, {
-	isSupported: {
-        get: function () { return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB; },
+    isSupported: {
+        get: function () {
+            return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB ? true : false;
+        },
         set: function () { }
     }
 });
 
 if ($data.storageProviders.indexedDb.IndexedDBStorageProvider.isSupported)
-	$data.StorageProviderBase.registerProvider('indexedDb', $data.storageProviders.indexedDb.IndexedDBStorageProvider);
+    $data.StorageProviderBase.registerProvider('indexedDb', $data.storageProviders.indexedDb.IndexedDBStorageProvider);

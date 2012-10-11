@@ -79,8 +79,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Skip: "Skip",
     OrderBy: "OrderBy",
     OrderByDescending: "OrderByDescending",
-    Include: "Include",
-    Count: "Count"
+    Include: "Include"
 });
 
 $data.BinaryOperator = function () {
