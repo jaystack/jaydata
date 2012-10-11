@@ -146,16 +146,20 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     VisitParametricQueryExpression: function (expression, builder) {
         if (expression.expression instanceof $data.Expressions.EntityExpression) {
             this.VisitEntityAsProjection(expression.expression, builder);
+            builder.modelBinderConfig['$keys'].unshift('rowid$$');
+        } else if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
+            this.currentObjectFieldName = this._sqlBuilder.getExpressionAlias(expression.expression);
+            this.VisitEntitySetAsProjection(expression.expression, builder);
+            builder.modelBinderConfig['$keys'] = ['rowid$$'];
+        } else if (expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
+            this.VisitEntityAsProjection(expression.expression, builder);
         } else {
             builder.modelBinderConfig['$keys'] = ['rowid$$'];
             this.Visit(expression.expression, builder);
             if (expression.expression instanceof $data.Expressions.EntityFieldExpression) {
                 builder.modelBinderConfig['$source'] = 'd';
-                
             }
-           
         }
-
     },
     VisitConstantExpression: function (expression, builder) {
         builder.modelBinderConfig['$type'] = expression.type;

@@ -10,8 +10,17 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
 
     VisitParametricQueryExpression: function (expression, sqlBuilder) {
         if (expression.expression instanceof $data.Expressions.EntityExpression) {
+            this.VisitEntitySetExpression(sqlBuilder.sets[0], sqlBuilder);
+            sqlBuilder.addText("rowid AS " + this.anonymFiledPrefix + SqlStatementBlocks.rowIdName + ", ");
             this.VisitEntityExpressionAsProjection(expression, sqlBuilder);
-        } else if (expression.expression instanceof $data.Expressions.ObjectLiteralExpression) {
+        }
+        else if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
+            this.VisitEntitySetExpression(sqlBuilder.sets[0], sqlBuilder);
+            sqlBuilder.addText("rowid AS " + this.anonymFiledPrefix + SqlStatementBlocks.rowIdName + ", ");
+            this.anonymFiledPrefix = sqlBuilder.getExpressionAlias(expression.expression) + '__'
+            this.MappedFullEntitySet(expression.expression, sqlBuilder);
+        }
+        else if (expression.expression instanceof $data.Expressions.ObjectLiteralExpression) {
             this.VisitEntitySetExpression(sqlBuilder.sets[0], sqlBuilder);
             sqlBuilder.addText("rowid AS " + this.anonymFiledPrefix + SqlStatementBlocks.rowIdName + ", ");
             this.Visit(expression.expression, sqlBuilder);
@@ -23,8 +32,10 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
             sqlBuilder.addText(', ');
             sqlBuilder.addKeyField(SqlStatementBlocks.rowIdName);
             this.Visit(expression.expression, sqlBuilder);
-            sqlBuilder.addText(SqlStatementBlocks.as);
-            sqlBuilder.addText(SqlStatementBlocks.scalarFieldName);
+            if (!(expression.expression instanceof $data.Expressions.ComplexTypeExpression)) {
+                sqlBuilder.addText(SqlStatementBlocks.as);
+                sqlBuilder.addText(SqlStatementBlocks.scalarFieldName);
+            }
         }
     },
 

@@ -697,6 +697,24 @@
                 $data.NewsReaderContext.Articles.select(function (m) { return { id: m.Id * 2 / 3 + 5 * 3, title: m.Title }; }).toTraceString()),
                 "SELECT T0.rowid AS rowid$$, (((T0.Id * ?) / ?) + ?) AS id, T0.Title AS title FROM Articles T0 | [2,3,15]");
         });
+        test("Projection: EntitySet", 2, function () {
+            var r = $data.NewsReaderContext.Articles.map(function (a) { return a.Tags;}).toTraceString();
+            equal(_resultToString(r),
+                "SELECT T0.rowid AS rowid$$, T1.Id AS T1__Id FROM Articles T0 "
+                        + "\n\tLEFT OUTER JOIN TagConnections T1 ON (T0.Id = T1.Article__Id) | []");
+            var expectedObject = {
+                $type: $data.Array,
+                $item: {
+                    $keys: ['rowid$$'],
+                    $item: {
+                        $keys: ['T1__Id'],
+                        $type: $news.Types.TagConnection,
+                        Id: "T1__Id"
+                    }
+                }
+            };
+            deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
+        });
 
         //==================================================================================================== SQL Parameters
 
@@ -805,13 +823,13 @@
         test("Projection: full entity", 2, function () {
             var q = $data.NewsReaderContext.Articles.select(function (m) { return m.Category; });
             var r = q.toTraceString();
-            equal(_resultToString(r), "SELECT T1.Id AS Id, T1.Title AS Title FROM Articles T0 \n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) | []");
+            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T1.Id AS Id, T1.Title AS Title FROM Articles T0 \n\tLEFT OUTER JOIN Categories T1 ON (T0.Category__Id = T1.Id) | []");
 
             var expectedObject = {
                 $type: $data.Array,
                 $item: {
                     $type: $news.Types.Category,
-                    $keys: ['Id'],
+                    $keys: ['rowid$$','Id'],
                     Id: "Id",
                     Title: "Title"
                 }
@@ -1531,14 +1549,14 @@
             var q = $data.NewsReaderContext.Articles.map(function (item) { return item.Reviewer.Profile; });
             var r = q.toTraceString();
             start(1);
-            equal(_resultToString(r), "SELECT T2.Id AS Id, T2.FullName AS FullName, T2.Bio AS Bio, T2.Avatar AS Avatar, T2.Birthday AS Birthday, T2.User__Id AS User__Id, T2.Location__Address AS Location__Address, T2.Location__City AS Location__City, T2.Location__Zip AS Location__Zip, T2.Location__Country AS Location__Country FROM Articles T0 "
+            equal(_resultToString(r), "SELECT T0.rowid AS rowid$$, T2.Id AS Id, T2.FullName AS FullName, T2.Bio AS Bio, T2.Avatar AS Avatar, T2.Birthday AS Birthday, T2.User__Id AS User__Id, T2.Location__Address AS Location__Address, T2.Location__City AS Location__City, T2.Location__Zip AS Location__Zip, T2.Location__Country AS Location__Country FROM Articles T0 "
 	                                            + "\n\tLEFT OUTER JOIN Users T1 ON (T0.Reviewer__Id = T1.Id) "
 	                                            + "\n\tLEFT OUTER JOIN UserProfiles T2 ON (T1.Id = T2.User__Id) | []");
 
             var expectedObject = {
                 $type: $data.Array,
                 $item: {
-                    $keys: ['Id'],
+                    $keys: ['rowid$$', 'Id'],
                     $type: $news.Types.UserProfile,
                     Id: 'Id',
                     FullName: 'FullName',
