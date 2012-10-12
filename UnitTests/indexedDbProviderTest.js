@@ -530,4 +530,118 @@
         }
         );
     });
+
+    $data.Class.define("idbexample.idbTestItem1", $data.Entity, null, {
+        Id: { type: "int", key: true, computed: true },
+        i0: { type: "int" },
+        b0: { type: "boolean" },
+        s0: { type: "string" },
+        blob: { type: "blob" },
+        n0: { type: "number" },
+        d0: { type: "date" },
+    }, null);
+
+    $data.Class.define("idbexample.idbTestItem2", $data.Entity, null, {
+        Id: { type: "guid", key: true, required: true },
+        i0: { type: "int" },
+        b0: { type: "boolean" },
+        s0: { type: "string" },
+        blob: { type: "blob" },
+        n0: { type: "number" },
+        d0: { type: "date" },
+    }, null);
+
+    $data.Class.define('idbexample.idbContext', $data.EntityContext, null, {
+        Items1: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem1 },
+        Items2: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem2 }
+    }, null);
+
+    test('many data test', function () {
+        var dataNumber = 1000;
+        expect((6+6)*dataNumber + 6);
+        
+
+        var context = new idbexample.idbContext({
+            name: 'indexedDb',
+            databaseName: 'idbexample_idbContext',
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        });
+        stop(1);
+        context.onReady(function () {
+            //start();
+            ok(true, 'idbContext context opened');
+            context.Items1.length({
+                success: function (result) {
+                    equal(result, 0, 'empty items table');
+                    for (var i = 0; i < dataNumber; i++) {
+                        var item1 = new idbexample.idbTestItem1({
+                            i0: i,
+                            b0: true,
+                            s0: 's0' + i,
+                            n0: parseFloat('2.2' + i),
+                            d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
+                        });
+                        var item2 = new idbexample.idbTestItem2({
+                            Id: $data.Guid.NewGuid(),
+                            i0: i,
+                            b0: false,
+                            s0: 's0' + i,
+                            n0: parseFloat('2.2' + i),
+                            d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
+                        });
+                        context.Items1.add(item1);
+                        context.Items2.add(item2);
+                    }
+                    context.saveChanges({
+                        success: function () {
+
+                            context.Items1.length(function (res1) {
+                                equal(res1, dataNumber, 'item1 length failed');
+                                context.Items2.length(function (res2) {
+                                    equal(res2, dataNumber, 'item2 length failed');
+
+                                    context.Items1.toArray(function (result1) {
+                                        equal(result1.length, res1, 'result1 length failed');
+                                        for (var i = 0; i < result1.length; i++) {
+                                            equal(typeof result1[i].Id, 'number', 'result1[i].Id failed');
+                                            equal(typeof result1[i].i0, 'number', 'result1[i].i0 failed');
+                                            equal(result1[i].b0, true, 'result1[i].b0 failed');
+                                            equal(typeof result1[i].s0, 'string', 'result1[i].s0 failed');
+                                            equal(typeof result1[i].n0, 'number', 'result1[i].n0 failed');
+                                            ok(result1[i].d0 instanceof $data.Date, 'result1[i].d0 failed');
+                                        }
+
+
+                                        context.Items2.toArray(function (result2) {
+                                            equal(result2.length, res2, 'result2 length failed');
+                                            for (var i = 0; i < result2.length; i++) {
+                                                ok(result2[i].Id instanceof $data.Guid, 'result2[i].i0 failed');
+                                                equal(typeof result2[i].i0, 'number', 'result2[i].i0 failed');
+                                                equal(result2[i].b0, false, 'result2[i].b0 failed');
+                                                equal(typeof result2[i].s0, 'string', 'result2[i].s0 failed');
+                                                equal(typeof result2[i].n0, 'number', 'result2[i].n0 failed');
+                                                ok(result2[i].d0 instanceof $data.Date, 'result2[i].d0 failed');
+                                            }
+                                            close(context);
+                                        });
+
+                                    });
+
+                                });
+                            });
+
+                        },
+                        error: function (e) {
+                            ok(false, 'error ' + e);
+                            close(context);
+                        }
+                    })
+                },
+                error: function (e) {
+                    ok(false, 'error '+ e);
+                    close(context);
+                }
+            });
+        });
+    });
 });

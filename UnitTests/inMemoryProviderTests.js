@@ -192,6 +192,25 @@
         });
     });
 
+    test('filter complex binary', 3, function () {
+        stop(1);
+        var items = [
+            new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
+            new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
+        ];
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items } });
+        memoryContext.onReady(function () {
+            var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && (o.woeid == 1235 || o.name == 'ocean1'); }).toTraceString();
+            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && ((o.woeid == 1235) || (o.name == 'ocean1')));\n}".replace(/[\n ]/g, ''));
+
+            memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toArray(function (r) {
+                start();
+                equal(r.length, 1, 'filter result length failed');
+                equal(r[0].name, 'ocean2', 'filter result[0] name failed');
+            });
+        });
+    });
+
     test('filter complex field equal', 4, function () {
         stop(1);
         var items = [
