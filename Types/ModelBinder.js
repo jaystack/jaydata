@@ -86,7 +86,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             var isPrimitive = false;
             if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo)
                 isPrimitive = true;
-            if (resolvedType === $data.Object){
+            if (resolvedType === $data.Object || resolvedType === $data.Array){
                 var keys = Object.keys(meta);
                 if (keys.length == 1 || (keys.length == 2 && meta.$selector)) isPrimitive = true;
             }
