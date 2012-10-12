@@ -86,11 +86,15 @@ $data.Class.define('$data.ModelBinder', null, null, {
             var isPrimitive = false;
             if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo)
                 isPrimitive = true;
+            if (resolvedType === $data.Object){
+                var keys = Object.keys(meta);
+                if (keys.length == 1 || (keys.length == 2 && meta.$selector)) isPrimitive = true;
+            }
 
             var type = Container.resolveName(meta.$type);
             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
             if (isPrimitive) {
-                if (data != undefined)
+                if (data != undefined && converter)
                     return converter(data);
                 else
                     return data;
