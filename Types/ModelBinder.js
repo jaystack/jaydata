@@ -138,8 +138,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         }
                     }else{
                         var key = '';
-                        if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) { key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[i][meta.$item.$keys[j]]); }
-                        if (keycache){
+                        if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) {
+                            if (typeof data[i][meta.$item.$keys[j]] === 'undefined'){
+                                key = undefined;
+                                break;
+                            }
+                            key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[i][meta.$item.$keys[j]]);
+                        }
+                        if (keycache && key){
                             if (keycache.indexOf(key) < 0){
                                 result.push(r);
                                 keycache.push(key);
@@ -163,8 +169,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }else{
                     var key = '';
-                    if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) { key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[meta.$item.$keys[j]]); }
-                    if (keycache){
+                    if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) {
+                        if (typeof data[meta.$item.$keys[j]] === 'undefined'){
+                            key = undefined;
+                            break;
+                        }
+                        key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[meta.$item.$keys[j]]);
+                    }
+                    if (keycache && key){
                         if (keycache.indexOf(key) < 0){
                             result.push(r);
                             keycache.push(key);

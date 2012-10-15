@@ -1609,7 +1609,7 @@
         });
     });
     test('Include: indirect -> map Entity_', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(105);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1983,6 +1983,213 @@
                                 ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
                                 ok(['Article21', 'Article22', 'Article23', 'Article24', 'Article25'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
                             });
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: mixed -> filter, map (without complex type property), include', function () {
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        expect(38);
+        var refDate = new Date(Date.parse("1979/05/01"));
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include("Author.Profile").include("Category")
+                            .filter(function (item) { return item.Category.Title == 'World' && item.Author.Profile.FullName == 'Full Name2' && item.Reviewer.Profile.Bio == "Bio3" })
+                            .map(function (item) {
+                                return {
+                                    name: item.Title,
+                                    People: {
+                                        p1: { name: item.Author.LoginName, prof: item.Author.Profile },
+                                        p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags },
+                                        p3: { loc: item.Author.Profile.Location}
+                                    },
+                                    Cat: item.Category.Title,
+                                    Articles: item.Category.Articles
+                                }
+                            });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 1, 'Article category error');
+                        results.forEach(function (r, index) {
+                            ok(r instanceof Object, 'data type error at ' + index + '. position');
+                            equal(typeof r.name, 'string', 'name data type  error at ' + index + '. position');
+                            equal(r.name, 'Article25', 'name value error at ' + index + '. position');
+
+                            ok(r.People instanceof Object, 'r.People data type error at ' + index + '. position');
+                            //p1 property
+                            ok(r.People.p1 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                            equal(typeof r.People.p1.name, 'string', 'r.People.p1.name data type  error at ' + index + '. position');
+                            equal(r.People.p1.name, 'Usr5', 'r.People.p1.name value error at ' + index + '. position');
+                            ok(r.People.p1.prof instanceof $news.Types.UserProfile, 'r.People.p1.prof data type  error at ' + index + '. position');
+                            equal(r.People.p1.prof.Bio, 'Bio5', 'r.People.p1.bio value error at ' + index + '. position');
+                            ok(r.People.p1.prof.Location instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                            equal(r.People.p1.prof.Location.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
+                            //p2 property
+                            ok(r.People.p2 instanceof Object, 'r.People.p2data type error at ' + index + '. position');
+                            equal(typeof r.People.p2.name, 'string', 'r.People.p2.name data type  error at ' + index + '. position');
+                            equal(r.People.p2.name, 'Usr3', 'r.People.p2.name value error at ' + index + '. position');
+                            equal(typeof r.People.p2.bio, 'string', 'r.People.p2.bio data type  error at ' + index + '. position');
+                            equal(r.People.p2.bio, 'Bio3', 'r.People.p2.bio value error at ' + index + '. position');
+                            //p2.Tags
+                            ok(r.People.p2.tags instanceof Array, 'r.People.p2.tags data type error at ' + index + '. position');
+                            equal(r.People.p2.tags.length, 2, 'r.People.p2.tags.length value error at ' + index + '. position');
+                            r.People.p2.tags.forEach(function (t) {
+                                ok(t instanceof $news.Types.TagConnection, 'r.People.p2.tags[i] data type error at ' + index + '. position');
+                            });
+                            //p2.adr
+                            //equal(r.People.p2.adr, 'Address8', 'Location.Address value error  at ' + index + '. position');
+                            //p3.loc
+                            ok(r.People.p3 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                            ok(r.People.p3.loc instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                            equal(r.People.p3.loc.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
+                            //r.Cat
+                            equal(typeof r.Cat, 'string', 'r.Cat data type  error at ' + index + '. position');
+                            equal(r.Cat, 'World', 'r.Cat value error at ' + index + '. position');
+                            //r.Articles
+                            ok(r.Articles instanceof Array, 'r.Articles data type error at ' + index + '. position');
+                            equal(r.Articles.length, 5, 'r.Articles.length value error at ' + index + '. position');
+                            r.Articles.forEach(function (a) {
+                                ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
+                                ok(['Article21', 'Article22', 'Article23', 'Article24', 'Article25'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
+                            });
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('Include: many mixed -> filter, map (without complex type property), include', function () {
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        expect(75);
+        var refDate = new Date(Date.parse("1979/05/01"));
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var q = db.Articles.include("Author.Profile").include("Category")
+                            .filter(function (item) { return (item.Category.Title == 'World' || item.Category.Title == 'Sport') && item.Author.Profile.FullName == 'Full Name2' })
+                            .map(function (item) {
+                                return {
+                                    name: item.Title,
+                                    People: {
+                                        p1: { name: item.Author.LoginName, prof: item.Author.Profile },
+                                        p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags },
+                                        p3: { loc: item.Author.Profile.Location}
+                                    },
+                                    Cat: item.Category.Title,
+                                    Articles: item.Category.Articles
+                                }
+                            });
+                //console.log('q: ', q.toTraceString());
+                q.toArray({
+                    success: function (results) {
+                        start(1);
+                        equal(results.length, 2, 'Article category error');
+                        
+                        var r = results[0];
+                        var index = 0;
+                        
+                        ok(r instanceof Object, 'data type error at ' + index + '. position');
+                        equal(typeof r.name, 'string', 'name data type  error at ' + index + '. position');
+                        equal(r.name, 'Article5', 'name value error at ' + index + '. position');
+
+                        ok(r.People instanceof Object, 'r.People data type error at ' + index + '. position');
+                        //p1 property
+                        ok(r.People.p1 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                        equal(typeof r.People.p1.name, 'string', 'r.People.p1.name data type  error at ' + index + '. position');
+                        equal(r.People.p1.name, 'Usr5', 'r.People.p1.name value error at ' + index + '. position');
+                        ok(r.People.p1.prof instanceof $news.Types.UserProfile, 'r.People.p1.prof data type  error at ' + index + '. position');
+                        equal(r.People.p1.prof.Bio, 'Bio5', 'r.People.p1.bio value error at ' + index + '. position');
+                        ok(r.People.p1.prof.Location instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                        equal(r.People.p1.prof.Location.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
+                        //p2 property
+                        ok(r.People.p2 instanceof Object, 'r.People.p2data type error at ' + index + '. position');
+                        equal(typeof r.People.p2.name, 'string', 'r.People.p2.name data type  error at ' + index + '. position');
+                        equal(r.People.p2.name, 'Usr2', 'r.People.p2.name value error at ' + index + '. position');
+                        equal(typeof r.People.p2.bio, 'string', 'r.People.p2.bio data type  error at ' + index + '. position');
+                        equal(r.People.p2.bio, 'Bio2', 'r.People.p2.bio value error at ' + index + '. position');
+                        //p2.Tags
+                        ok(r.People.p2.tags instanceof Array, 'r.People.p2.tags data type error at ' + index + '. position');
+                        equal(r.People.p2.tags.length, 2, 'r.People.p2.tags.length value error at ' + index + '. position');
+                        r.People.p2.tags.forEach(function (t) {
+                            ok(t instanceof $news.Types.TagConnection, 'r.People.p2.tags[i] data type error at ' + index + '. position');
+                        });
+                        //p2.adr
+                        //equal(r.People.p2.adr, 'Address8', 'Location.Address value error  at ' + index + '. position');
+                        //p3.loc
+                        ok(r.People.p3 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                        ok(r.People.p3.loc instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                        equal(r.People.p3.loc.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
+                        //r.Cat
+                        equal(typeof r.Cat, 'string', 'r.Cat data type  error at ' + index + '. position');
+                        equal(r.Cat, 'Sport', 'r.Cat value error at ' + index + '. position');
+                        //r.Articles
+                        ok(r.Articles instanceof Array, 'r.Articles data type error at ' + index + '. position');
+                        equal(r.Articles.length, 5, 'r.Articles.length value error at ' + index + '. position');
+                        r.Articles.forEach(function (a) {
+                            ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
+                            ok(['Article1', 'Article2', 'Article5', 'Article3', 'Article4'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
+                        });
+                        
+                        r = results[1];
+                        index = 1;
+                        
+                        ok(r instanceof Object, 'data type error at ' + index + '. position');
+                        equal(typeof r.name, 'string', 'name data type  error at ' + index + '. position');
+                        equal(r.name, 'Article25', 'name value error at ' + index + '. position');
+
+                        ok(r.People instanceof Object, 'r.People data type error at ' + index + '. position');
+                        //p1 property
+                        ok(r.People.p1 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                        equal(typeof r.People.p1.name, 'string', 'r.People.p1.name data type  error at ' + index + '. position');
+                        equal(r.People.p1.name, 'Usr5', 'r.People.p1.name value error at ' + index + '. position');
+                        ok(r.People.p1.prof instanceof $news.Types.UserProfile, 'r.People.p1.prof data type  error at ' + index + '. position');
+                        equal(r.People.p1.prof.Bio, 'Bio5', 'r.People.p1.bio value error at ' + index + '. position');
+                        ok(r.People.p1.prof.Location instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                        equal(r.People.p1.prof.Location.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
+                        //p2 property
+                        ok(r.People.p2 instanceof Object, 'r.People.p2data type error at ' + index + '. position');
+                        equal(typeof r.People.p2.name, 'string', 'r.People.p2.name data type  error at ' + index + '. position');
+                        equal(r.People.p2.name, 'Usr3', 'r.People.p2.name value error at ' + index + '. position');
+                        equal(typeof r.People.p2.bio, 'string', 'r.People.p2.bio data type  error at ' + index + '. position');
+                        equal(r.People.p2.bio, 'Bio3', 'r.People.p2.bio value error at ' + index + '. position');
+                        //p2.Tags
+                        ok(r.People.p2.tags instanceof Array, 'r.People.p2.tags data type error at ' + index + '. position');
+                        equal(r.People.p2.tags.length, 2, 'r.People.p2.tags.length value error at ' + index + '. position');
+                        r.People.p2.tags.forEach(function (t) {
+                            ok(t instanceof $news.Types.TagConnection, 'r.People.p2.tags[i] data type error at ' + index + '. position');
+                        });
+                        //p2.adr
+                        //equal(r.People.p2.adr, 'Address8', 'Location.Address value error  at ' + index + '. position');
+                        //p3.loc
+                        ok(r.People.p3 instanceof Object, 'r.People.p1 data type error at ' + index + '. position');
+                        ok(r.People.p3.loc instanceof $news.Types.Location, 'r.People.p1.prof.Location data type  error at ' + index + '. position');
+                        equal(r.People.p3.loc.Address, 'Address0', 'r.People.p1.prof.Location.Address value error at ' + index + '. position');
+                        //r.Cat
+                        equal(typeof r.Cat, 'string', 'r.Cat data type  error at ' + index + '. position');
+                        equal(r.Cat, 'World', 'r.Cat value error at ' + index + '. position');
+                        //r.Articles
+                        ok(r.Articles instanceof Array, 'r.Articles data type error at ' + index + '. position');
+                        equal(r.Articles.length, 5, 'r.Articles.length value error at ' + index + '. position');
+                        r.Articles.forEach(function (a) {
+                            ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
+                            ok(['Article21', 'Article22', 'Article23', 'Article24', 'Article25'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
                         });
                     },
                     error: function (error) {
