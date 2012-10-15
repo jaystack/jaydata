@@ -95,7 +95,7 @@
                 var isEntity = elementType.isAssignableTo && elementType.isAssignableTo($data.Entity);
                 var hasEntitySet = isEntity ? self._getEntitySetDefByType(elementType) : false;
                 if (includes.indexOf(step) >= 0 || !hasEntitySet) {
-                    if (isEntity && hasEntitySet){
+                    if (isEntity){
                         config[memDef.name] = {
                             $type: $data.Array,
                             $selector: ['json:' + memDef.name],
@@ -105,8 +105,8 @@
                                     $type: $data.Object,
                                     $value: function (meta, data) {
                                         var setDef = self._getEntitySetDefByType(data.getType());
-                                        var uri = self.generateUri(data, setDef);
                                         if (setDef) {
+                                            var uri = self.generateUri(data, setDef);
                                             var result = {
                                                 id: uri,
                                                 uri: uri,

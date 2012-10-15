@@ -1115,3 +1115,297 @@ test("Bugfix delete test", 1, function () {
 
     });
 });
+
+
+$data.Class.define('$example.ComplexT', $data.Entity, null, {
+    Name: { type: 'string' },
+    Description: { type: 'string' },
+    Age: { type: 'int' },
+    Created: { type: 'date' }
+});
+
+$data.Class.define('$example.ComplexTWithComplex', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: '$example.ComplexT' }
+});
+
+$data.Class.define('$example.ComplexTWithArrayComplex', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: 'Array', elementType: '$example.ComplexT' }
+});
+
+$data.Class.define('$example.ComplexTWithCC', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex2: { type: '$example.ComplexTWithComplex' }
+});
+
+$data.Class.define('$example.ComplexTWithCCAndArrayC', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: '$example.ComplexT' },
+    Complex2Arr: { type: 'Array', elementType: '$example.ComplexTWithComplex' }
+});
+
+$data.Class.define('$example.FuncContext', $data.EntityContext, null, {
+    People: { type: $data.EntitySet, elementType: $example.Person },
+    Orders: { type: $data.EntitySet, elementType: $example.Order },
+    FuncComplexRes: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexRes', returnType: $example.ComplexT, params: [{ a: $data.String }] }),
+    FuncComplexResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexResArray', returnType: $data.Queryable, elementType: $example.ComplexT, params: [{ a: $data.String }] }),
+    FuncComplex2Res: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex2Res', returnType: $example.ComplexTWithComplex, params: [{ a: $data.String }] }),
+    FuncComplex2ResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex2ResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithComplex, params: [{ a: $data.String }] }),
+    FuncComplex3Res: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex3Res', returnType: $example.ComplexTWithCC, params: [{ a: $data.String }] }),
+    FuncComplex3ResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex3ResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithCC, params: [{ a: $data.String }] }),
+    FuncComplexWithArrayComplexRes: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexWithArrayComplexRes', returnType: $example.ComplexTWithArrayComplex, params: [{ a: $data.String }] }),
+    FuncComplexWithArrayComplexResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexWithArrayComplexResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithArrayComplex, params: [{ a: $data.String }] }),
+    FuncComplexMultiRes: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexMultiRes', returnType: $example.ComplexTWithCCAndArrayC, params: [{ a: $data.String }] }),
+    FuncComplexMultiResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexMultiResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithCCAndArrayC, params: [{ a: $data.String }] })
+});
+
+
+$example.Context.generateTestData.funcserviceurl = '/funcservice';
+$example.FuncContext.getContext = function () {
+    var ctx = new $example.FuncContext({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.funcserviceurl, serviceUrl: $example.Context.generateTestData.funcserviceurl, user: 'asd', password: 'asd' });
+    return ctx;
+};
+
+test("FunctionImport - FuncComplexRes", 5, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexRes('Hello World', function (ret) {
+            equal(ret instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+            equal(ret.Name, 'Hello World', 'Name failed');
+            equal(ret.Description, 'desc', 'Description failed');
+            equal(ret.Age, 42, 'Age failed');
+            equal(ret.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplexResArray", 25, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexResArray('Hello World', function (result) {
+            for (var i = 0; i < 5; i++) {
+                var ret = result[i];
+                equal(ret instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+                equal(ret.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Description, 'desc', 'Description failed');
+                equal(ret.Age, i, 'Age failed');
+                equal(ret.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+            start();
+        });
+    });
+});
+
+test("FunctionImport - FuncComplex2Res", 7, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex2Res('Hello World', function (ret) {
+            equal(ret instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+            equal(ret.Title, 'Hello World', 'Title failed');
+
+            equal(ret.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+            equal(ret.Complex.Name, 'Hello World', 'Name failed');
+            equal(ret.Complex.Description, 'desc', 'Description failed');
+            equal(ret.Complex.Age, 42, 'Age failed');
+            equal(ret.Complex.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplex2ResArray", 35, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex2ResArray('Hello World', function (result) {
+            for (var i = 0; i < 5; i++) {
+                var ret = result[i];
+                equal(ret instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+                equal(ret.Title, 'Hello World' + i, 'Title failed');
+
+                equal(ret.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+                equal(ret.Complex.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Complex.Description, 'desc', 'Description failed');
+                equal(ret.Complex.Age, i, 'Age failed');
+                equal(ret.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+            start();
+        });
+    });
+});
+
+test("FunctionImport - FuncComplex3Res", 9, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex3Res('Hello World', function (ret) {
+            equal(ret instanceof $example.ComplexTWithCC, true, 'result is $example.ComplexTWithCC');
+            equal(ret.Title, 'Hello World', 'Title failed');
+
+            equal(ret.Complex2 instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+            equal(ret.Complex2.Title, 'Hello World', 'Title failed');
+
+            equal(ret.Complex2.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+            equal(ret.Complex2.Complex.Name, 'Hello World', 'Name failed');
+            equal(ret.Complex2.Complex.Description, 'desc', 'Description failed');
+            equal(ret.Complex2.Complex.Age, 42, 'Age failed');
+            equal(ret.Complex2.Complex.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplex3ResArray", 45, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex3ResArray('Hello World', function (result) {
+            for (var i = 0; i < 5; i++) {
+                var ret = result[i];
+                equal(ret instanceof $example.ComplexTWithCC, true, 'result is $example.ComplexTWithCC');
+                equal(ret.Title, 'Hello World' + i, 'Title failed');
+
+                equal(ret.Complex2 instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+                equal(ret.Complex2.Title, 'Hello World' + i, 'Title failed');
+
+                equal(ret.Complex2.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+                equal(ret.Complex2.Complex.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Complex2.Complex.Description, 'desc', 'Description failed');
+                equal(ret.Complex2.Complex.Age, i, 'Age failed');
+                equal(ret.Complex2.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+            start();
+        });
+    });
+
+});
+
+test("FunctionImport - FuncComplexWithArrayComplexRes", 28, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexWithArrayComplexRes('Hello World', function (result) {
+            equal(result instanceof $example.ComplexTWithArrayComplex, true, 'result is $example.ComplexTWithArrayComplex');
+            equal(result.Title, 'Hello World', 'Title failed');
+            equal(result.Complex instanceof Array, true, 'result.Complex is Array');
+
+            for (var i = 0; i < 5; i++) {
+                var ret = result.Complex[i];
+                equal(ret instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                equal(ret.Name, 'Hello World' +i, 'Name failed');
+                equal(ret.Description, 'desc', 'Description failed');
+                equal(ret.Age, i, 'Age failed');
+                equal(ret.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+
+
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplexWithArrayComplexResArray", 140, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexWithArrayComplexResArray('Hello World', function (resultArr) {
+            for (var i = 0; i < 5; i++) {
+                var result = resultArr[i];
+                equal(result instanceof $example.ComplexTWithArrayComplex, true, 'result is $example.ComplexTWithArrayComplex');
+                equal(result.Title, 'Hello World' +i, 'Title failed');
+                equal(result.Complex instanceof Array, true, 'result.Complex is Array');
+
+                for (var j = 0; j < 5; j++) {
+                    var ret = result.Complex[j];
+                    equal(ret instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                    equal(ret.Name, 'Hello World' + i +j, 'Name failed');
+                    equal(ret.Description, 'desc', 'Description failed');
+                    equal(ret.Age, i+j, 'Age failed');
+                    equal(ret.Created.valueOf(), new Date((2000 + i+j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+                }
+            }
+            start();
+        });
+    });
+});
+
+test("FunctionImport - FuncComplexMultiRes", 44, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexMultiRes('Hello World', function (result) {
+            equal(result instanceof $example.ComplexTWithCCAndArrayC, true, 'result is $example.ComplexTWithCCAndArrayC');
+            equal(result.Title, 'Hello World', 'Title failed');
+            equal(result.Complex2Arr instanceof Array, true, 'result.Complex is Array');
+            equal(result.Complex instanceof $example.ComplexT, true, 'result.Complex is $exampleSrv.ComplexT');
+
+            equal(result.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+            equal(result.Complex.Name, 'Hello World', 'Name failed');
+            equal(result.Complex.Description, 'desc', 'Description failed');
+            equal(result.Complex.Age, 42, 'Age failed');
+            equal(result.Complex.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+
+            for (var i = 0; i < 5; i++) {
+                var ret = result.Complex2Arr[i];
+                equal(ret instanceof $example.ComplexTWithComplex, true, 'ret is $example.ComplexTWithComplex');
+                equal(ret.Title, 'Hello World', 'Name failed');
+
+
+                equal(ret.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                equal(ret.Complex.Name, 'Hello World' +i, 'Name failed');
+                equal(ret.Complex.Description, 'desc', 'Description failed');
+                equal(ret.Complex.Age, i, 'Age failed');
+                equal(ret.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+
+
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplexMultiResArray", 220, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexMultiResArray('Hello World', function (resultArr) {
+            for (var i = 0; i < 5; i++) {
+                var result = resultArr[i];
+                equal(result instanceof $example.ComplexTWithCCAndArrayC, true, 'result is $example.ComplexTWithCCAndArrayC');
+                equal(result.Title, 'Hello World'+i, 'Title failed');
+                equal(result.Complex2Arr instanceof Array, true, 'result.Complex is Array');
+                equal(result.Complex instanceof $example.ComplexT, true, 'result.Complex is $exampleSrv.ComplexT');
+
+                equal(result.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                equal(result.Complex.Name, 'Hello World' +i, 'Name failed');
+                equal(result.Complex.Description, 'desc', 'Description failed');
+                equal(result.Complex.Age, i, 'Age failed');
+                equal(result.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+
+                for (var j = 0; j < 5; j++) {
+                    var ret = result.Complex2Arr[j];
+                    equal(ret instanceof $example.ComplexTWithComplex, true, 'ret is $example.ComplexTWithComplex');
+                    equal(ret.Title, 'Hello World', 'Name failed');
+
+
+                    equal(ret.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                    equal(ret.Complex.Name, 'Hello World' + i+j, 'Name failed');
+                    equal(ret.Complex.Description, 'desc', 'Description failed');
+                    equal(ret.Complex.Age, i+j, 'Age failed');
+                    equal(ret.Complex.Created.valueOf(), new Date((2000 + i+j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+                }
+            }
+            start();
+        });
+    });
+});

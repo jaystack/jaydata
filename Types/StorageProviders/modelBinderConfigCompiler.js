@@ -104,13 +104,22 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     if (!storageModel && this._query.context.storageProvider.supportedDataTypes.indexOf(Container.resolveType(prop.dataType)) < 0) {
                         //complex type
                         builder.selectModelBinderProperty(prop.name);
-                        builder.modelBinderConfig['$type'] = Container.resolveType(prop.dataType);
+                        var type = Container.resolveType(prop.dataType);
+                        builder.modelBinderConfig['$type'] = type;
                         if (this._isoDataProvider) {
                             builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
                         } else {
                             builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
                         }
-                        this._addPropertyToModelBinderConfig(Container.resolveType(prop.dataType), builder);
+                        if (type === $data.Array && prop.elementType) {
+                            builder.selectModelBinderProperty('$item');
+                            var arrayElementType = Container.resolveType(prop.elementType);
+                            builder.modelBinderConfig['$type'] = arrayElementType;
+                            this._addPropertyToModelBinderConfig(arrayElementType, builder);
+                            builder.popModelBinderProperty();
+                        } else {
+                            this._addPropertyToModelBinderConfig(type, builder);
+                        }
                         builder.popModelBinderProperty();
                     } else {
                         if (prop.key) {
