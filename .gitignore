@@ -5,3 +5,8 @@ build
 *~
 .idea
 *.pwd.js
+CommandLine.dll
+JayData_readme.txt
+JaySvcUtil.exe
+packages.config
+Scripts/jaydata*
