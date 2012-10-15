@@ -12,11 +12,11 @@ $data.Entity.extend('$test.ComplexValue', {
     Rank: { type: 'int' }
 });
 
-/*$data.Entity.extend('$test.MoreComplexValue', {
+$data.Entity.extend('$test.MoreComplexValue', {
     Value: { type: 'string' },
     Rank: { type: 'int' },
     Child: { type: '$test.ComplexValue' }
-});*/
+});
 
 $data.Entity.extend('$test.ComplexItem', {
     Id: { type: 'id', computed: true, key: true },
@@ -24,12 +24,12 @@ $data.Entity.extend('$test.ComplexItem', {
     Value: { type: '$test.ComplexValue' }
 });
 
-/*$data.Entity.extend('$test.MoreComplexItem', {
+$data.Entity.extend('$test.MoreComplexItem', {
     Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: '$test.MoreComplexValue' },
     ValueChild: { type: '$test.ComplexValue' }
-});*/
+});
 
 $data.Entity.extend('$test.ObjectItem', {
     Id: { type: 'id', computed: true, key: true },
@@ -75,7 +75,7 @@ $data.Entity.extend('$test.CustomKey', {
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
     ComplexItems: { type: $data.EntitySet, elementType: $test.ComplexItem },
-    //MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
+    MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
     ObjectItems: { type: $data.EntitySet, elementType: $test.ObjectItem },
     ArrayItems: { type: $data.EntitySet, elementType: $test.ArrayItem },
     ArrayIDs: { type: $data.EntitySet, elementType: $test.ArrayID },

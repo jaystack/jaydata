@@ -422,10 +422,9 @@ exports.testMapComplexField = function(test){
     });
 };
 
-/*exports.testMapMoreComplex = function(test){
-    test.expect(2);
+exports.testMapMoreComplex = function(test){
+    test.expect(8);
     $test.Context.init(function(db){
-        console.log(db._storageModel.getStorageModel('$test.MoreComplexItem').ComplexTypes, db._storageModel.getStorageModel('$test.MoreComplexItem').ComplexTypes.length);
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa1', Value: new $test.MoreComplexValue({ Value: 'bbb6', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }) }));
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa2', Value: new $test.MoreComplexValue({ Value: 'bbb7', Rank: 2, Child: new $test.ComplexValue({ Value: 'child2', Rank: 102 }) }) }));
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'bbb3', Value: new $test.MoreComplexValue({ Value: 'bbb8', Rank: 3, Child: new $test.ComplexValue({ Value: 'child3', Rank: 103 }) }) }));
@@ -433,7 +432,31 @@ exports.testMapComplexField = function(test){
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa5', Value: new $test.MoreComplexValue({ Value: 'bbb0', Rank: 5, Child: new $test.ComplexValue({ Value: 'child5', Rank: 105 }) }) }));
         db.saveChanges(function(cnt){
             test.equal(cnt, 5, 'Not 5 items added to collection');
-            db.MoreComplexItems.map(function(it){ return it.Value.Child.Value; }).toArray(function(data){
+            db.MoreComplexItems.map(function(it){ return it.Value.Child; }).toArray(function(data){
+                test.equal(data.length, 5, 'Not 5 items selected from collection');
+                test.ok(data[0] instanceof $test.ComplexValue, 'Entity is not a ComplexValue Object');
+                test.deepEqual(data[0].initData, { Value: 'child1', Rank: 101 }, 'Object is not as expected');
+                test.deepEqual(data[1].initData, { Value: 'child2', Rank: 102 }, 'Object is not as expected');
+                test.deepEqual(data[2].initData, { Value: 'child3', Rank: 103 }, 'Object is not as expected');
+                test.deepEqual(data[3].initData, { Value: 'child4', Rank: 104 }, 'Object is not as expected');
+                test.deepEqual(data[4].initData, { Value: 'child5', Rank: 105 }, 'Object is not as expected');
+                test.done();
+            });
+        });
+    });
+};
+
+/*exports.testMapMoreComplexField = function(test){
+    test.expect(2);
+    $test.Context.init(function(db){
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa1', Value: new $test.MoreComplexValue({ Value: 'bbb6', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa2', Value: new $test.MoreComplexValue({ Value: 'bbb7', Rank: 2, Child: new $test.ComplexValue({ Value: 'child2', Rank: 102 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'bbb3', Value: new $test.MoreComplexValue({ Value: 'bbb8', Rank: 3, Child: new $test.ComplexValue({ Value: 'child3', Rank: 103 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa4', Value: new $test.MoreComplexValue({ Value: 'bbb9', Rank: 4, Child: new $test.ComplexValue({ Value: 'child4', Rank: 104 }) }) }));
+        db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa5', Value: new $test.MoreComplexValue({ Value: 'bbb0', Rank: 5, Child: new $test.ComplexValue({ Value: 'child5', Rank: 105 }) }) }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.MoreComplexItems.map(function(it){ return it.Value.Child.Rank; }).toArray(function(data){
                 test.equal(data.length, 5, 'Not 5 items selected from collection');
                 console.log(data.map(function(it){ return it.initData; }));
                 //test.ok(data[0] instanceof Object, 'Entity is not an anonymous Object');
