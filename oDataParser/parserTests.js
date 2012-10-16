@@ -40,6 +40,54 @@ $(document).ready(function () {
         ));
         equal(current, expected);
     });
+    test("Filter: String: 'Hello World'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "'Hello World'";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant('Hello World', "string"));
+        equal(current, expected);
+    });
+    test("Filter: String: ''", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "''";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant('', "string"));
+        equal(current, expected);
+    });
+    test("Filter: String: 'John's stuff'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "'John''s stuff'";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant("John's stuff", "string"));
+        equal(current, expected);
+    });
+    test("Filter: String: 'John's stuff and it's complex'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "'John''s stuff and it''s complex'";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant("John's stuff and it's complex", "string"));
+        equal(current, expected);
+    });
+    test("Filter: String: John'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "'John'''";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant("John'", "string"));
+        equal(current, expected);
+    });
+    test("Filter: String: 'John'", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "'''John'''";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = JSON.stringify(p.builder.buildConstant("'John'", "string"));
+        equal(current, expected);
+    });
     test("Filter: Number: 42", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
         src.filter = "42";

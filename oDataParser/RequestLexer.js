@@ -120,20 +120,7 @@
                 case CharType.EOF: token.tokenType = TokenType.EOF; token.value = this.currentChar; return;
                 case CharType.WSP: token.tokenType = TokenType.WSP; token.value = this.currentChar; this.nextChar(); return;
                 case CharType.CTRLCHAR: token.tokenType = TokenType.CTRLCHAR; token.value = this.currentChar; this.nextChar(); return;
-                case CharType.CHAR:
-                    var startIndex = this.srcIndex;
-                    if (this.currentChar == ASCII.APOS && this.readTo("'")) {
-                        token.tokenType = TokenType.STRING;
-                        var length = this.srcIndex - startIndex - 1;
-                        token.value = this.src.substr(startIndex, this.srcIndex - startIndex - 1);
-                        this.column += length + 1;
-                    }
-                    else {
-                        token.tokenType = TokenType.CHAR;
-                        token.value = this.currentChar;
-                    }
-                    this.nextChar();
-                    return;
+                case CharType.CHAR: this.scanChar(token); return;
                 case CharType.DIGIT: this.scanDigits(token); return;
                 case CharType.ALPHA: this.scanWord(token); return;
                 default:
@@ -141,9 +128,9 @@
             }
         },
         readTo: function (str) {
-            if (this.srcIndex == this.srcLength - 1)
+            if (this.srcIndex == this.srcLength )
                 return false;
-            var p = this.src.indexOf(str, this.srcIndex + 1);
+            var p = this.src.indexOf(str, this.srcIndex);
             if (p < 0)
                 return false;
             this.srcIndex = p + 1;
@@ -171,6 +158,30 @@
             }
             token.tokenType = TokenType.WORD;
             token.value = this.src.substr(startIndex, length);
+        },
+        scanChar: function (token) {
+            var startIndex = this.srcIndex;
+
+            if (this.currentChar == ASCII.APOS && this.readTo("'")) {
+                this.scanString(token, startIndex);
+            }
+            else {
+                token.tokenType = TokenType.CHAR;
+                token.value = this.currentChar;
+                this.nextChar();
+            }
+        },
+        scanString: function (token, startIndex) {
+            token.tokenType = TokenType.STRING;
+            var length = this.srcIndex - startIndex - 1;
+            token.value += this.src.substr(startIndex, this.srcIndex - startIndex - 1);
+            this.column += length + 1;
+
+            this.nextChar();
+            if (this.currentChar == ASCII.APOS) {
+                token.value += "'";
+                this.scanChar(token);
+            }
         }
     });
 })();
