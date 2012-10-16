@@ -86,7 +86,7 @@ exports.testAddComplex = function(test){
     });
 };
 
-/*exports.testAddMoreComplex = function(test){
+exports.testAddMoreComplex = function(test){
     test.expect(4);
     $test.Context.init(function(db){
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa1', Value: new $test.MoreComplexValue({ Value: 'bbb6', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }) }));
@@ -104,7 +104,7 @@ exports.testAddComplex = function(test){
             });
         });
     });
-};*/
+};
 
 exports.testAddObject = function(test){
     test.expect(3);
@@ -447,7 +447,7 @@ exports.testMapMoreComplex = function(test){
 };
 
 /*exports.testMapMoreComplexField = function(test){
-    test.expect(2);
+    test.expect(7);
     $test.Context.init(function(db){
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa1', Value: new $test.MoreComplexValue({ Value: 'bbb6', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }) }));
         db.MoreComplexItems.add(new $test.MoreComplexItem({ Key: 'aaa2', Value: new $test.MoreComplexValue({ Value: 'bbb7', Rank: 2, Child: new $test.ComplexValue({ Value: 'child2', Rank: 102 }) }) }));
@@ -458,9 +458,9 @@ exports.testMapMoreComplex = function(test){
             test.equal(cnt, 5, 'Not 5 items added to collection');
             db.MoreComplexItems.map(function(it){ return it.Value.Child.Rank; }).toArray(function(data){
                 test.equal(data.length, 5, 'Not 5 items selected from collection');
-                console.log(data.map(function(it){ return it.initData; }));
-                //test.ok(data[0] instanceof Object, 'Entity is not an anonymous Object');
-                //test.deepEqual(data[0].initData, { Value: 'child1', Rank: 101 }, 'Object is not as expected');
+                for (var i = 0; i < data.length; i++){
+                    test.equal(data[i], i + 1, 'Rank is not ' + (i + 1));
+                }
                 test.done();
             });
         });
@@ -502,6 +502,26 @@ exports.testMapArrayComplex = function(test){
                 test.equal(data[1].length, 2, 'Second entity has not 2 items in array type');
                 test.ok(data[0][0] instanceof $test.ComplexValue, 'Complex type is not typed');
                 test.equal(data[1][1].Rank, 2, 'Rank of item is not 2');
+                test.done();
+            });
+        });
+    });
+};
+
+exports.testMapArrayMoreComplex = function(test){
+    test.expect(6);
+    $test.Context.init(function(db){
+        db.ArrayMoreComplexItems.add(new $test.ArrayMoreComplexItem({ Key: 'aaa1', Values: [new $test.MoreComplexValue({ Value: 'complex1', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) })], Rank: 1 }));
+        db.ArrayMoreComplexItems.add(new $test.ArrayMoreComplexItem({ Key: 'aaa2', Values: [new $test.MoreComplexValue({ Value: 'complex1', Rank: 1, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) }), new $test.MoreComplexValue({ Value: 'complex2', Rank: 2, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) })], Rank: 2 }));
+        db.ArrayMoreComplexItems.add(new $test.ArrayMoreComplexItem({ Key: 'bbb3', Values: [new $test.MoreComplexValue({ Value: 'complex3', Rank: 4, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) })], Rank: 3 }));
+        db.ArrayMoreComplexItems.add(new $test.ArrayMoreComplexItem({ Key: 'aaa4', Values: [new $test.MoreComplexValue({ Value: 'complex4', Rank: 8, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) })], Rank: 4 }));
+        db.ArrayMoreComplexItems.add(new $test.ArrayMoreComplexItem({ Key: 'aaa5', Values: [new $test.MoreComplexValue({ Value: 'complex8', Rank: 16, Child: new $test.ComplexValue({ Value: 'child1', Rank: 101 }) })], Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.ArrayMoreComplexItems.map(function(it){ return it.Values; }).toArray(function(data){
+                for (var i = 0; i < data.length; i++){
+                    test.ok(data[i] instanceof Array, 'Data[' + i + '] is not an array');
+                } //console.log(data[i], data[i][0].Child);
                 test.done();
             });
         });
@@ -649,6 +669,31 @@ exports.testFilterByComplex = function(test){
                 test.equal(data[1].Value, 'bbb8', 'Value of second item is not "bbb8"');
                 test.equal(data[2].Value, 'bbb9', 'Value of third item is not "bbb9"');
                 test.done();
+            });
+        });
+    });
+};
+
+exports.testFilterByVeryComplex = function(test){
+    test.expect(7);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.filter(function(it){ return it.Key == this.key && it.Value == 'bbb6' && ('aaa1' == it.Key || it.Value == 'bbb6') && ((this.name == '') || ((this.name != '') && (it.Rank == this.rank))); }, { key: 'aaa1', name: '', rank: 2 }).toArray(function(data){
+                test.equal(data.length, 1, 'Not 1 item selected from collection');
+                test.ok(data[0] instanceof $test.Item, 'Entity is not an Item');
+                test.equal(data[0].Key, 'aaa1', 'Key of item is not "aaa1"');
+                test.equal(data[0].Value, 'bbb6', 'Key of item is not "bbb6"');
+                test.equal(data[0].Rank, 1, 'Rank of item is not 1');
+                db.Items.filter(function(it){ return it.Key == this.key && it.Value == 'bbb6' && ('aaa1' == it.Key || it.Value == 'bbb6') && ((this.name == '') || ((this.name != '') && (it.Rank == this.rank))); }, { key: 'aaa1', name: 'alma', rank: 2 }).toArray(function(data){
+                    test.equal(data.length, 0, 'Not 0 item selected from collection');
+                    test.done();
+                });
             });
         });
     });
@@ -996,4 +1041,3 @@ exports.CustomKeyDeleteWithInvalidKeys = function (test) {
         });
     });
 };
-

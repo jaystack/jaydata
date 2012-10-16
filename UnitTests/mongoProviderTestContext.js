@@ -58,6 +58,13 @@ $data.Entity.extend('$test.ArrayComplexItem', {
     Rank: { type: 'int' }
 });
 
+$data.Entity.extend('$test.ArrayMoreComplexItem', {
+    Id: { type: 'string', computed: true, key: true },
+    Key: { type: 'string' },
+    Values: { type: 'Array', elementType: '$test.MoreComplexValue' },
+    Rank: { type: 'int' }
+});
+
 $data.Entity.extend('$test.CappedItem', {
     Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
@@ -80,6 +87,7 @@ $data.EntityContext.extend('$test.Context', {
     ArrayItems: { type: $data.EntitySet, elementType: $test.ArrayItem },
     ArrayIDs: { type: $data.EntitySet, elementType: $test.ArrayID },
     ArrayComplexItems: { type: $data.EntitySet, elementType: $test.ArrayComplexItem },
+    ArrayMoreComplexItems: { type: $data.EntitySet, elementType: $test.ArrayMoreComplexItem },
     CappedItems: { type: $data.EntitySet, elementType: $test.CappedItem, tableOptions: { capped: true, size: 10 * 1024, max: 10 } },
     CustomKeys: { type: $data.EntitySet, elementType: $test.CustomKey }
 });
