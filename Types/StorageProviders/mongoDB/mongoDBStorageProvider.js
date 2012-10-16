@@ -250,11 +250,36 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
 
     VisitParametricQueryExpression: function (expression, context) {
         this.Visit(expression.expression, context);
+        if (expression.expression && expression.expression.nodeType === $data.Expressions.ExpressionType.Constant){
+            context.value = expression.expression.value;
+            context.queryField = context.field = $data.Guid.NewGuid();
+            if (context.value === true) context.value = null;
+            
+            if (context.cursor instanceof Array){
+                var o = {};
+                o[context.queryField] = context.value;
+                context.cursor.push(o);
+            }else context.cursor[context.queryField] = context.value;
+        }
     },
 
     VisitUnaryExpression: function (expression, context) {
         context.unary = expression.nodeType;
         this.Visit(expression.operand, context);
+    },
+    
+    _constExpressionFilter: function(expression, context){
+        if (expression.left && expression.left.nodeType === $data.Expressions.ExpressionType.Constant && expression.right && [$data.Expressions.ExpressionType.Or, $data.Expressions.ExpressionType.And].indexOf(expression.nodeType) >= 0){
+            context.value = expression.left.value;
+            context.queryField = context.field = $data.Guid.NewGuid();
+            if (context.value === true) context.value = null;
+            
+            if (context.cursor instanceof Array){
+                var o = {};
+                o[context.queryField] = context.value;
+                context.cursor.push(o);
+            }else context.cursor[context.queryField] = context.value;
+        }
     },
 
     VisitSimpleBinaryExpression: function (expression, context) {
@@ -273,6 +298,8 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
+                this._constExpressionFilter(expression, context);
+                
                 context.cursor = cursor;
                 break;
             case $data.Expressions.ExpressionType.And:
@@ -286,6 +313,8 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
+                this._constExpressionFilter(expression, context);
+                
                 context.cursor = cursor;
                 break;
             case $data.Expressions.ExpressionType.Equal:
@@ -883,6 +912,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             
             var collection = new self.driver.Collection(client, entitySet.tableName);
             var find = query.find;
+            //console.log(JSON.stringify(find.query));
 
             var cb = function(error, results){
                 if (error){
