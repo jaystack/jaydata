@@ -11,25 +11,16 @@
 
             return cbWrapper = {
                 success: function () {
-                    callBack.success.apply(this, arguments);
-
-                    if (self.deferred.state() === "pending")
-                        self.deferred.resolve.apply(this, arguments);
-
+                    callBack.success.apply(self.deferred, arguments);
+                    self.deferred.resolve.apply(self.deferred, arguments);
                 },
                 error: function () {
-                    callBack.error.apply(this, arguments);
-
-                    if (self.deferred.state() === "pending")
-                        self.deferred.reject.apply(this, arguments);
-                    
+                    Array.prototype.push.call(arguments, self.deferred);
+                    callBack.error.apply(self.deferred, arguments);
                 },
                 notify: function () {
-                    callBack.notify.apply(this, arguments);
-
-                    if (self.deferred.state() === "pending")
-                        self.deferred.notify.apply(this, arguments);
-
+                    callBack.notify.apply(self.deferred, arguments);
+                    self.deferred.notify.apply(self.deferred, arguments);
                 }
             };
         },
