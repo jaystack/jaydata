@@ -257,7 +257,15 @@ exports.XMLHttpRequest = function() {
     var tempUrl = settings.url.split('?');
     if (tempUrl.length > 1) {
         var urlStart = tempUrl.shift();
-        settings.url = urlStart + '?' + encodeURIComponent(tempUrl.join('?'));
+        //settings.url = urlStart + '?' + encodeURIComponent(tempUrl.join('?'));
+        
+        var url = urlStart + '?';
+        var deepTempUrl = tempUrl[0].split('&');
+        for (var i = 0; i < deepTempUrl.length; i++){
+            url += (i > 0 ? '&' : '') + encodeURIComponent(deepTempUrl[i]);
+        }
+        
+        settings.url = url;
     }
 
 
