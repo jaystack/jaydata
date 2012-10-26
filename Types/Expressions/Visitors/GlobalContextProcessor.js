@@ -7,7 +7,7 @@ $C("$data.Expressions.GlobalContextProcessor", $data.Expressions.ParameterProces
 
     canResolve: function (paramExpression) {
         ///<param name="paramExpression" type="$data.Expressions.ParameterExpression" />
-        return paramExpression.nodeType == $data.Expressions.ExpressionType.Parameter &&
+        return paramExpression.nodeType == $data.Expressions.ExpressionType.Parameter && this.global && typeof this.global === 'object' &&
                paramExpression.name in this.global;
     },
 
@@ -27,13 +27,14 @@ $C("$data.Expressions.ConstantValueResolver", $data.Expressions.ParameterProcess
     constructor: function (paramsObject, global) {
         ///<param name="global" type="object" />
         this.globalResolver = Container.createGlobalContextProcessor(global);
+        this.paramResolver = Container.createGlobalContextProcessor(paramsObject);
         this.paramsObject = paramsObject;
     },
 
     canResolve: function (paramExpression) {
         ///<param name="paramExpression" type="$data.Expressions.ParameterExpression" />
         return (paramExpression.nodeType == $data.Expressions.ExpressionType.This && this.paramsObject) 
-                    ? true : this.globalResolver.canResolve(paramExpression);
+                    ? true : (this.paramResolver.canResolve(paramExpression) || this.globalResolver.canResolve(paramExpression));
     },
 
     resolve: function (paramExpression) {
@@ -42,7 +43,7 @@ $C("$data.Expressions.ConstantValueResolver", $data.Expressions.ParameterProcess
         if (paramExpression.nodeType == $data.Expressions.ExpressionType.This) {
             return Container.createConstantExpression(this.paramsObject, typeof this.paramsObject, 'this');
         }
-        return this.globalResolver.resolve(paramExpression);
+        return this.paramResolver.canResolve(paramExpression) ? this.paramResolver.resolve(paramExpression) : this.globalResolver.resolve(paramExpression);
     }
 
 });

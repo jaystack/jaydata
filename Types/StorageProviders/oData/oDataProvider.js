@@ -420,6 +420,11 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
+            strLength: {
+                mapTo: "length",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
+                parameters: [{ name: "@expression", dataType: "string" }]
+            },
 
             indexOf: {
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
