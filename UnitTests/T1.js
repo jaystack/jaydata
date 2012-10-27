@@ -1,6 +1,33 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+    test('batch error handler called', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(1);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var a1 = db.Articles.attachOrGet({ Id: 1 });
+                a1.Title = 'changed2';
+
+                var a2 = db.Articles.attachOrGet({ Id: 2 });
+                a2.Title = 'changed2';
+
+                db.saveChanges({
+                    success: function () {
+                        ok(false, 'save success');
+                        start();
+                    },
+                    error: function () {
+                        ok(true, 'error called');
+                        start();
+                    }
+                });
+            });
+        });
+    });
     test('map as jaydata type', function () {
         expect(6);
         stop(1);

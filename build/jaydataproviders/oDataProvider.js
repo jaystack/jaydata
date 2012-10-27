@@ -311,31 +311,39 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }, function (data, response) {
             if (response.statusCode == 202) {
                 var result = data.__batchResponses[0].__changeResponses;
+                var errors = [];
+
                 for (var i = 0; i < result.length; i++) {
-                    var item = convertedItem[i];
-                    if (result[i].statusCode == 204) {
-                        if (result[i].headers.ETag || result[i].headers.Etag) {
-                            var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
-                            if (property && property[0]) {
-                                item[property[0].name] = result[i].headers.ETag || result[i].headers.Etag;
+                    if (result[i].statusCode > 200 && result[i].statusCode < 300) {
+                        var item = convertedItem[i];
+                        if (result[i].statusCode == 204) {
+                            if (result[i].headers.ETag || result[i].headers.Etag) {
+                                var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
+                                if (property && property[0]) {
+                                    item[property[0].name] = result[i].headers.ETag || result[i].headers.Etag;
+                                }
                             }
+                            continue;
                         }
-                        continue;
+
+                        item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+                            //TODO: is this correct?
+                            if (memDef.computed) {
+                                if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                                    item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag;
+                                } else {
+                                    item[memDef.name] = result[i].data[memDef.name];
+                                }
+                            }
+                        }, this);
+
+                    } else {
+                        errors.push(result[i]);
                     }
-
-                    item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                        //TODO: is this correct?
-                        if (memDef.computed) {
-                            if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag;
-                            } else {
-                                item[memDef.name] = result[i].data[memDef.name];
-                            }
-                        }
-                    }, this);
-
                 }
-                if (callBack.success) {
+                if (errors.length > 0) {
+                    callBack.error(errors);
+                } else if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
             } else {
