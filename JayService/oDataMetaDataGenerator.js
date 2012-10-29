@@ -1,52 +1,6 @@
 ﻿var genx = require('jaydata-genx');
 var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
 
-$data.Class.define('$data.GenxXMLCreator', null, null, {
-    constructor: function () {
-        this.writer = new genx.Writer();
-    },
-    startDocument: function () {
-        return this.writer.startDocument.apply(this.writer, arguments);
-    },
-    endDocument: function () {
-        return this.writer.endDocument.apply(this.writer, arguments);
-    },
-
-    startElement: function () {
-        return this.writer.startElement.apply(this.writer, arguments);
-    },
-    endElement: function () {
-        return this.writer.endElement.apply(this.writer, arguments);
-    },
-    endElementInline: function () {
-        if (typeof this.writer.endElementInline === 'function') {
-            return this.writer.endElementInline.apply(this.writer, arguments);
-        } else {
-            return this.endElement();
-        }
-
-    },
-
-    addAttribute: function () {
-        return this.writer.addAttribute.apply(this.writer, arguments);
-    },
-
-    addText: function () {
-        return this.writer.addText.apply(this.writer, arguments);
-    },
-
-    declareNamespace: function (schema, schemaName) {
-        return this.writer.declareNamespace.apply(this.writer, arguments);
-    },
-    declareElement: function (namespace, elementName) {
-        return this.writer.declareElement.apply(this.writer, arguments);
-    },
-    declareAttribute: function (namespace, elementName) {
-        return this.writer.declareAttribute.apply(this.writer, arguments);
-    }
-});
-
-
 $data.Class.define('$data.oDataServer.MetaDataGeneratorRole', null, null, {
     constructor: function (typeName, entitySetName, multiplicity) {
         this.typeName = typeName;
@@ -181,17 +135,14 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         ///     <description>Convert $metadata XML from context</description>
         ///     <return type="string" />
         /// </signature>
-        var xml = new $data.GenxXMLCreator();
+        var xml = new $data.Xml.XmlCreator();
         var xmlResult = this.cfg.xmlHead;
-
-        xml.writer.on('data', function (data) {
-            xmlResult += data;
-        });
 
         xml.startDocument();
         this._buildEdmx(xml);
         xml.endDocument();
 
+        xmlResult += xml.getXmlString();
         return xmlResult;
     },
 

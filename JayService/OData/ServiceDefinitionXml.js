@@ -12,13 +12,8 @@
 
     },
     convertToResponse: function (contextInstance, requestUrl) {
-
-        var xml = new $data.GenxXMLCreator();
-
+        var xml = new $data.Xml.XmlCreator();
         var xmlResult = this.cfg.xmlHead;
-        xml.writer.on('data', function (data) {
-            xmlResult += data;
-        });
 
         xml.startDocument();
         
@@ -29,11 +24,6 @@
         var atomNs = xml.declareNamespace(this.cfg.atomNs, 'atom');
         var source = xml.declareAttribute(atomNs, 'source');
         xml.addAttribute(source, 'JayStrom');
-
-        //app
-        var appNs = xml.declareNamespace(this.cfg.appNs, 'app');
-        var application = xml.declareAttribute(appNs, 'application');
-        xml.addAttribute(application, contextInstance.getType().name);
 
         //xmlns
         var xmlns = xml.declareAttribute('xmlns');
@@ -47,6 +37,8 @@
 
         xml.endElement();
         xml.endDocument();
+
+        xmlResult += xml.getXmlString();
 
         return xmlResult.replace('xml__base', 'xml:base');
 

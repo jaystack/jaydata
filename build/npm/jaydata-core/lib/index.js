@@ -93,6 +93,7 @@ require('./JayService/Scripts/XMLHttpRequest-patched.js');
 require('./JayService/JayService.js');
 require('./JayService/OData/Helpers.js');
 require('./JayService/oDataMetaDataGenerator.js');
+require('./JayService/XMLCreator.js');
 require('./JayService/XmlResult.js');
 require('./JayService/ArgumentBinder.js');
 require('./JayService/JSObjectAdapter.js');

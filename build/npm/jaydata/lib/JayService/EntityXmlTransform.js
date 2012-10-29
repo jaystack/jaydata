@@ -67,10 +67,7 @@
         }
 
         var xmlResult = this.cfg.xmlHead;
-        this.xml = new $data.GenxXMLCreator();
-        this.xml.writer.on('data', function (data) {
-            xmlResult += data;
-        });
+        this.xml = new $data.Xml.XmlCreator();
 
         this.xml.startDocument();
         if ($data.Array.isArray(results)) {
@@ -79,6 +76,7 @@
             this._buildEntry(results, entitySetDef, defaultType, memDefs, includes, true);
         }
         this.xml.endDocument();
+        xmlResult += this.xml.getXmlString();
         return xmlResult.replace('xml__base', 'xml:base');
     },
 

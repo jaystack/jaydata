@@ -36,8 +36,8 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -57,8 +57,8 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2006/04/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -78,8 +78,8 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -99,8 +99,8 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -121,9 +121,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -146,11 +146,11 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod">' +
                             '</FunctionImport>' +
-                            '<FunctionImport Name="webMethod2" m:HttpMethod="POST">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod2">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -173,9 +173,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="newWebMethodName" m:HttpMethod="POST">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="newWebMethodName">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -198,9 +198,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.String" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.String">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -223,9 +223,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Int32" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Int32">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -248,9 +248,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -273,9 +273,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Binary" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Binary">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -298,9 +298,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Double" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Double">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -323,9 +323,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.DateTime" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.DateTime">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -348,9 +348,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -373,9 +373,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -399,9 +399,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Collection(Edm.String)" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection(Edm.String)">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -425,9 +425,9 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Collection(Edm.Int32)" m:HttpMethod="GET">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection(Edm.Int32)">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -452,10 +452,10 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.String" m:HttpMethod="GET">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.String">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -480,12 +480,12 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.String" m:HttpMethod="GET">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
-                                '<Parameter Name="b" Type="Edm.Int32" />' +
-                                '<Parameter Name="c" Type="Edm.DateTime" />' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.String">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
+                                '<Parameter Name="b" Type="Edm.Int32"/>' +
+                                '<Parameter Name="c" Type="Edm.DateTime"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -509,9 +509,9 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="$data.Object" m:HttpMethod="GET">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="$data.Object">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -535,9 +535,9 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Collection($data.Object)" m:HttpMethod="GET">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection($data.Object)">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -560,15 +560,15 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="MyContext.exampleClass1" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="MyContext.exampleClass1">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -591,15 +591,15 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="MyContext.exampleClass1withKey" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="MyContext.exampleClass1withKey">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -622,25 +622,25 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="MyContext.exampleClass1" />' +
-                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey" />' +
+                                '<Property Name="complexType1" Type="MyContext.exampleClass1"/>' +
+                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="MyContext.complextTypeClass1" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="MyContext.complextTypeClass1">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -664,15 +664,15 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Collection(MyContext.exampleClass1)" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection(MyContext.exampleClass1)">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -696,16 +696,16 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
-                                    '<Parameter Name="a" Type="MyContext.exampleClass1" />' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
+                                    '<Parameter Name="a" Type="MyContext.exampleClass1"/>' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -729,23 +729,23 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
-                                    '<Parameter Name="a" Type="MyContext.exampleClass1" />' +
-                                    '<Parameter Name="b" Type="MyContext.exampleClass1withKey" />' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
+                                    '<Parameter Name="a" Type="MyContext.exampleClass1"/>' +
+                                    '<Parameter Name="b" Type="MyContext.exampleClass1withKey"/>' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -769,26 +769,26 @@ exports['functionContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                        '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="MyContext.exampleClass1" />' +
-                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey" />' +
+                                '<Property Name="complexType1" Type="MyContext.exampleClass1"/>' +
+                                '<Property Name="complexType2" Type="MyContext.exampleClass1withKey"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
-                                    '<Parameter Name="a" Type="MyContext.complextTypeClass1" />' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
+                                    '<Parameter Name="a" Type="MyContext.complextTypeClass1"/>' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -819,18 +819,18 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<ComplexType Name="exampleClass1">' +
-                            '<Property Name="prop1" Type="Edm.Int32" />' +
-                            '<Property Name="prop2" Type="Edm.String" />' +
-                            '<Property Name="prop3" Type="Edm.DateTime" />' +
-                            '<Property Name="prop4" Type="Edm.Boolean" />' +
+                            '<Property Name="prop1" Type="Edm.Int32"/>' +
+                            '<Property Name="prop2" Type="Edm.String"/>' +
+                            '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                            '<Property Name="prop4" Type="Edm.Boolean"/>' +
                         '</ComplexType>' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethodName" ReturnType="Collection(Edm.String)" m:HttpMethod="POST">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
-                                '<Parameter Name="b" Type="Edm.Int32" />' +
-                                '<Parameter Name="c" Type="MyContext.exampleClass1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethodName" ReturnType="Collection(Edm.String)">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
+                                '<Parameter Name="b" Type="Edm.Int32"/>' +
+                                '<Parameter Name="c" Type="MyContext.exampleClass1"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -860,18 +860,18 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<ComplexType Name="exampleClass1">' +
-                            '<Property Name="prop1" Type="Edm.Int32" />' +
-                            '<Property Name="prop2" Type="Edm.String" />' +
-                            '<Property Name="prop3" Type="Edm.DateTime" />' +
-                            '<Property Name="prop4" Type="Edm.Boolean" />' +
+                            '<Property Name="prop1" Type="Edm.Int32"/>' +
+                            '<Property Name="prop2" Type="Edm.String"/>' +
+                            '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                            '<Property Name="prop4" Type="Edm.Boolean"/>' +
                         '</ComplexType>' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethodName" ReturnType="Edm.Int32" m:HttpMethod="POST">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
-                                '<Parameter Name="b" Type="Edm.Int32" />' +
-                                '<Parameter Name="c" Type="MyContext.exampleClass1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethodName" ReturnType="Edm.Int32">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
+                                '<Parameter Name="b" Type="Edm.Int32"/>' +
+                                '<Parameter Name="c" Type="MyContext.exampleClass1"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -901,18 +901,18 @@ exports['functionContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="MyContext">' +
+                    '<Schema Namespace="MyContext" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<ComplexType Name="exampleClass1">' +
-                            '<Property Name="prop1" Type="Edm.Int32" />' +
-                            '<Property Name="prop2" Type="Edm.String" />' +
-                            '<Property Name="prop3" Type="Edm.DateTime" />' +
-                            '<Property Name="prop4" Type="Edm.Boolean" />' +
+                            '<Property Name="prop1" Type="Edm.Int32"/>' +
+                            '<Property Name="prop2" Type="Edm.String"/>' +
+                            '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                            '<Property Name="prop4" Type="Edm.Boolean"/>' +
                         '</ComplexType>' +
-                        '<EntityContainer Name="ServiceClass" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethodName" m:HttpMethod="POST">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
-                                '<Parameter Name="b" Type="Edm.Int32" />' +
-                                '<Parameter Name="c" Type="MyContext.exampleClass1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="ServiceClass">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethodName">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
+                                '<Parameter Name="b" Type="Edm.Int32"/>' +
+                                '<Parameter Name="c" Type="MyContext.exampleClass1"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -936,8 +936,8 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextEmpty" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextEmpty">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -957,8 +957,8 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test.long.namespace">' +
-                        '<EntityContainer Name="contextNameSpace" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="$test.long.namespace" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextNameSpace">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -978,8 +978,8 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2006/04/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextV1" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextV1">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -999,8 +999,8 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextV2" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextV2">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -1020,8 +1020,8 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="3.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextV3" m:IsDefaultEntityContainer="true">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextV3">' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -1043,9 +1043,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFI" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFI">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1069,11 +1069,11 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIMultiple" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIMultiple">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod">' +
                             '</FunctionImport>' +
-                            '<FunctionImport Name="webMethod2" m:HttpMethod="POST">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod2">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1098,9 +1098,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIserviceOpName" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="newWebMethodName" m:HttpMethod="POST">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIserviceOpName">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="newWebMethodName">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1127,9 +1127,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIreturnsString" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.String" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnsString">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.String">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1155,9 +1155,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIreturnsInt" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Int32" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnsInt">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Int32">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1183,9 +1183,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIreturnBool" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnBool">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1211,9 +1211,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIreturnBlob" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Binary" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnBlob">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Binary">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1239,9 +1239,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIreturnNumber" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.Double" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnNumber">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Double">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1267,9 +1267,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIreturnDate" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.DateTime" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnDate">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.DateTime">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1295,9 +1295,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFImethodGET" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFImethodGET">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1323,9 +1323,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFImethodPOST" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" m:HttpMethod="POST">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFImethodPOST">' +
+                            '<FunctionImport m:HttpMethod="POST" Name="webMethod">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1351,9 +1351,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIelementTypeString" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Collection(Edm.String)" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIelementTypeString">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection(Edm.String)">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1379,9 +1379,9 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIelementTypeInt" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Collection(Edm.Int32)" m:HttpMethod="GET">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIelementTypeInt">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection(Edm.Int32)">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1409,10 +1409,10 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIparameter" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.String" m:HttpMethod="GET">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIparameter">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.String">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1441,12 +1441,12 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                        '<EntityContainer Name="contextFIparameters" m:IsDefaultEntityContainer="true">' +
-                            '<FunctionImport Name="webMethod" ReturnType="Edm.String" m:HttpMethod="GET">' +
-                                '<Parameter Name="a" Type="Edm.String" />' +
-                                '<Parameter Name="b" Type="Edm.Int32" />' +
-                                '<Parameter Name="c" Type="Edm.DateTime" />' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIparameters">' +
+                            '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.String">' +
+                                '<Parameter Name="a" Type="Edm.String"/>' +
+                                '<Parameter Name="b" Type="Edm.Int32"/>' +
+                                '<Parameter Name="c" Type="Edm.DateTime"/>' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -1473,9 +1473,9 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                            '<EntityContainer Name="contextFIreturnObject" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="$data.Object" m:HttpMethod="GET">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnObject">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="$data.Object">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1501,9 +1501,9 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
-                            '<EntityContainer Name="contextFIreturnObjectArray" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Collection($data.Object)" m:HttpMethod="GET">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnObjectArray">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection($data.Object)">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1529,15 +1529,15 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIreturnComplexType" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="$test.exampleClass1" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnComplexType">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="$test.exampleClass1">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1563,15 +1563,15 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIreturnComplexTypeWithKey" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="$test.exampleClass1withKey" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnComplexTypeWithKey">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="$test.exampleClass1withKey">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1597,25 +1597,25 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="$test.exampleClass1" />' +
-                                '<Property Name="complexType2" Type="$test.exampleClass1withKey" />' +
+                                '<Property Name="complexType1" Type="$test.exampleClass1"/>' +
+                                '<Property Name="complexType2" Type="$test.exampleClass1withKey"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIreturnComplexTypeInComplexType" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="$test.complextTypeClass1" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnComplexTypeInComplexType">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="$test.complextTypeClass1">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1641,15 +1641,15 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIreturnComplexTypeArray" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Collection($test.exampleClass1)" m:HttpMethod="GET">' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIreturnComplexTypeArray">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Collection($test.exampleClass1)">' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1676,16 +1676,16 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIparamTypeComplexType" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
-                                    '<Parameter Name="a" Type="$test.exampleClass1" />' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIparamTypeComplexType">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
+                                    '<Parameter Name="a" Type="$test.exampleClass1"/>' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1713,23 +1713,23 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIparamTypesComplexType" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
-                                    '<Parameter Name="a" Type="$test.exampleClass1" />' +
-                                    '<Parameter Name="b" Type="$test.exampleClass1withKey" />' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIparamTypesComplexType">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
+                                    '<Parameter Name="a" Type="$test.exampleClass1"/>' +
+                                    '<Parameter Name="b" Type="$test.exampleClass1withKey"/>' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1756,26 +1756,26 @@ exports['entityContext'] = {
                 '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
                 '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                     '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                        '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                        '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                             '<ComplexType Name="complextTypeClass1">' +
-                                '<Property Name="complexType1" Type="$test.exampleClass1" />' +
-                                '<Property Name="complexType2" Type="$test.exampleClass1withKey" />' +
+                                '<Property Name="complexType1" Type="$test.exampleClass1"/>' +
+                                '<Property Name="complexType2" Type="$test.exampleClass1withKey"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
                             '<ComplexType Name="exampleClass1withKey">' +
-                                '<Property Name="prop1" Type="Edm.Int32" />' +
-                                '<Property Name="prop2" Type="Edm.String" />' +
-                                '<Property Name="prop3" Type="Edm.DateTime" />' +
-                                '<Property Name="prop4" Type="Edm.Boolean" />' +
+                                '<Property Name="prop1" Type="Edm.Int32"/>' +
+                                '<Property Name="prop2" Type="Edm.String"/>' +
+                                '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                                '<Property Name="prop4" Type="Edm.Boolean"/>' +
                             '</ComplexType>' +
-                            '<EntityContainer Name="contextFIparamTypeComplexTypeInComplexType" m:IsDefaultEntityContainer="true">' +
-                                '<FunctionImport Name="webMethod" ReturnType="Edm.Boolean" m:HttpMethod="GET">' +
-                                    '<Parameter Name="a" Type="$test.complextTypeClass1" />' +
+                            '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIparamTypeComplexTypeInComplexType">' +
+                                '<FunctionImport m:HttpMethod="GET" Name="webMethod" ReturnType="Edm.Boolean">' +
+                                    '<Parameter Name="a" Type="$test.complextTypeClass1"/>' +
                                 '</FunctionImport>' +
                             '</EntityContainer>' +
                         '</Schema>' +
@@ -1799,18 +1799,18 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClass1withKey">' +
                             '<Key>' +
-                                '<PropertyRef Name="prop1" />' +
+                                '<PropertyRef Name="prop1"/>' +
                             '</Key>' +
-                            '<Property Name="prop1" Type="Edm.Int32" />' +
-                            '<Property Name="prop2" Type="Edm.String" />' +
-                            '<Property Name="prop3" Type="Edm.DateTime" />' +
-                            '<Property Name="prop4" Type="Edm.Boolean" />' +
+                            '<Property Name="prop1" Type="Edm.Int32"/>' +
+                            '<Property Name="prop2" Type="Edm.String"/>' +
+                            '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                            '<Property Name="prop4" Type="Edm.Boolean"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextES" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextES">' +
+                            '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -1839,27 +1839,27 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClass1withKey">' +
                             '<Key>' +
-                                '<PropertyRef Name="prop1" />' +
+                                '<PropertyRef Name="prop1"/>' +
                             '</Key>' +
-                            '<Property Name="prop1" Type="Edm.Int32" />' +
-                            '<Property Name="prop2" Type="Edm.String" />' +
-                            '<Property Name="prop3" Type="Edm.DateTime" />' +
-                            '<Property Name="prop4" Type="Edm.Boolean" />' +
+                            '<Property Name="prop1" Type="Edm.Int32"/>' +
+                            '<Property Name="prop2" Type="Edm.String"/>' +
+                            '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                            '<Property Name="prop4" Type="Edm.Boolean"/>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleClass2">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
-                            '<Property Name="p2" Type="Edm.String" />' +
-                            '<Property Name="p3" Type="Edm.Double" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
+                            '<Property Name="p2" Type="Edm.String"/>' +
+                            '<Property Name="p3" Type="Edm.Double"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESMultiple" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
-                            '<EntitySet EntityType="$test.exampleClass2" Name="Es2" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESMultiple">' +
+                            '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1"/>' +
+                            '<EntitySet EntityType="$test.exampleClass2" Name="Es2"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -1887,17 +1887,17 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClassReq">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Nullable="false" Type="Edm.Int32" />' +
-                            '<Property Name="p2" Nullable="false" Type="Edm.String" />' +
-                            '<Property Name="p3" Nullable="false" Type="Edm.Double" />' +
+                            '<Property Name="p1" Nullable="false" Type="Edm.Int32"/>' +
+                            '<Property Name="p2" Nullable="false" Type="Edm.String"/>' +
+                            '<Property Name="p3" Nullable="false" Type="Edm.Double"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESpropsReq" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClassReq" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsReq">' +
+                            '<EntitySet EntityType="$test.exampleClassReq" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -1925,17 +1925,17 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClassComp">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p1" Type="Edm.Int32" p6:StoreGeneratedPattern="Identity" />' +
-                            '<Property Name="p2" Type="Edm.String" />' +
-                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p3" Type="Edm.Double" p6:StoreGeneratedPattern="Computed" />' +
+                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p1" p6:StoreGeneratedPattern="Identity" Type="Edm.Int32"/>' +
+                            '<Property Name="p2" Type="Edm.String"/>' +
+                            '<Property xmlns:p6="http://schemas.microsoft.com/ado/2009/02/edm/annotation" Name="p3" p6:StoreGeneratedPattern="Computed" Type="Edm.Double"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESpropsComp" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClassComp" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsComp">' +
+                            '<EntitySet EntityType="$test.exampleClassComp" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -1964,18 +1964,18 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClassNullable">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
-                            '<Property Name="p2" Nullable="false" Type="Edm.String" />' +
-                            '<Property Name="p3" Nullable="true" Type="Edm.Double" />' +
-                            '<Property Name="p4" Nullable="true" Type="Edm.Double" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
+                            '<Property Name="p2" Nullable="false" Type="Edm.String"/>' +
+                            '<Property Name="p3" Nullable="true" Type="Edm.Double"/>' +
+                            '<Property Name="p4" Nullable="true" Type="Edm.Double"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESpropsNullable" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClassNullable" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsNullable">' +
+                            '<EntitySet EntityType="$test.exampleClassNullable" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -2003,17 +2003,17 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClassMax">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
-                            '<Property MaxLength="50" Name="p2" Type="Edm.String" />' +
-                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
+                            '<Property MaxLength="50" Name="p2" Type="Edm.String"/>' +
+                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESpropsMax" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClassMax" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsMax">' +
+                            '<EntitySet EntityType="$test.exampleClassMax" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -2042,18 +2042,18 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClassConc">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
-                            '<Property MaxLength="50" Name="p2" Type="Edm.String" />' +
-                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String" />' +
-                            '<Property ConcurrencyMode="Fixed" MaxLength="8" Name="RowVersion" Type="Edm.Binary" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
+                            '<Property MaxLength="50" Name="p2" Type="Edm.String"/>' +
+                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String"/>' +
+                            '<Property ConcurrencyMode="Fixed" MaxLength="8" Name="RowVersion" Type="Edm.Binary"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESpropsConc" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClassConc" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsConc">' +
+                            '<EntitySet EntityType="$test.exampleClassConc" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -2082,18 +2082,18 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClassCustom">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
-                            '<Property FixedLength="true" MaxLength="50" Name="p2" Precision="true" Scale="false" Type="Edm.String" Unicode="false" />' +
-                            '<Property FixedLength="false" MaxLength="MAX" Name="p3" Precision="false" Scale="false" Type="Edm.String" Unicode="false" />' +
-                            '<Property FixedLength="true" MaxLength="8" Name="p4" Precision="true" Scale="true" Type="Edm.String" Unicode="true" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
+                            '<Property FixedLength="true" MaxLength="50" Name="p2" Precision="true" Scale="false" Type="Edm.String" Unicode="false"/>' +
+                            '<Property FixedLength="false" MaxLength="MAX" Name="p3" Precision="false" Scale="false" Type="Edm.String" Unicode="false"/>' +
+                            '<Property FixedLength="true" MaxLength="8" Name="p4" Precision="true" Scale="true" Type="Edm.String" Unicode="true"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextESpropsCustom" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClassCustom" Name="Es1" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsCustom">' +
+                            '<EntitySet EntityType="$test.exampleClassCustom" Name="Es1"/>' +
                         '</EntityContainer>' +
                     '</Schema>' +
                 '</edmx:DataServices>' +
@@ -2122,21 +2122,21 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleClass1withKey">' +
                             '<Key>' +
-                                '<PropertyRef Name="prop1" />' +
+                                '<PropertyRef Name="prop1"/>' +
                             '</Key>' +
-                            '<Property Name="prop1" Type="Edm.Int32" />' +
-                            '<Property Name="prop2" Type="Edm.String" />' +
-                            '<Property Name="prop3" Type="Edm.DateTime" />' +
-                            '<Property Name="prop4" Type="Edm.Boolean" />' +
+                            '<Property Name="prop1" Type="Edm.Int32"/>' +
+                            '<Property Name="prop2" Type="Edm.String"/>' +
+                            '<Property Name="prop3" Type="Edm.DateTime"/>' +
+                            '<Property Name="prop4" Type="Edm.Boolean"/>' +
                         '</EntityType>' +
-                        '<EntityContainer Name="contextFIES" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1" />' +
-                            '<FunctionImport EntitySet="Es1" Name="webMethod" ReturnType="$test.exampleClass1withKey" m:HttpMethod="GET">' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextFIES">' +
+                            '<EntitySet EntityType="$test.exampleClass1withKey" Name="Es1"/>' +
+                            '<FunctionImport EntitySet="Es1" m:HttpMethod="GET" Name="webMethod" ReturnType="$test.exampleClass1withKey">' +
                             '</FunctionImport>' +
-                            '<FunctionImport EntitySet="Es1" Name="webMethod2" ReturnType="Collection($test.exampleClass1withKey)" m:HttpMethod="GET">' +
+                            '<FunctionImport EntitySet="Es1" m:HttpMethod="GET" Name="webMethod2" ReturnType="Collection($test.exampleClass1withKey)">' +
                             '</FunctionImport>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -2171,31 +2171,31 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleES1">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES2_BSetItem_Target" Name="ASetItem" Relationship="$test.exampleES2_BSetItem" ToRole="exampleES2_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES2">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES2_BSetItem_Source" Name="BSetItem" Relationship="$test.exampleES2_BSetItem" ToRole="exampleES2_BSetItem_Target"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES2_BSetItem">' +
-                            '<End Multiplicity="0..1" Role="exampleES2_BSetItem_Source" Type="$test.exampleES2" />' +
-                            '<End Multiplicity="*" Role="exampleES2_BSetItem_Target" Type="$test.exampleES1" />' +
+                            '<End Multiplicity="0..1" Role="exampleES2_BSetItem_Source" Type="$test.exampleES2"/>' +
+                            '<End Multiplicity="*" Role="exampleES2_BSetItem_Target" Type="$test.exampleES1"/>' +
                         '</Association>' +
-                        '<EntityContainer Name="contextAssoc" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleES1" Name="ASet" />' +
-                            '<EntitySet EntityType="$test.exampleES2" Name="BSet" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextAssoc">' +
+                            '<EntitySet EntityType="$test.exampleES1" Name="ASet"/>' +
+                            '<EntitySet EntityType="$test.exampleES2" Name="BSet"/>' +
                             '<AssociationSet Association="$test.exampleES2_BSetItem" Name="exampleES2_BSetItem">' +
-                                '<End EntitySet="BSet" Role="exampleES2_BSetItem_Source" />' +
-                                '<End EntitySet="ASet" Role="exampleES2_BSetItem_Target" />' +
+                                '<End EntitySet="BSet" Role="exampleES2_BSetItem_Source"/>' +
+                                '<End EntitySet="ASet" Role="exampleES2_BSetItem_Target"/>' +
                             '</AssociationSet>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -2230,31 +2230,31 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleES10">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES20_BSetItem_Target" Name="ASetItem" Relationship="$test.exampleES20_BSetItem" ToRole="exampleES20_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES20">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES20_BSetItem_Source" Name="BSetItem" Relationship="$test.exampleES20_BSetItem" ToRole="exampleES20_BSetItem_Target"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES20_BSetItem">' +
-                            '<End Multiplicity="1" Role="exampleES20_BSetItem_Source" Type="$test.exampleES20" />' +
-                            '<End Multiplicity="*" Role="exampleES20_BSetItem_Target" Type="$test.exampleES10" />' +
+                            '<End Multiplicity="1" Role="exampleES20_BSetItem_Source" Type="$test.exampleES20"/>' +
+                            '<End Multiplicity="*" Role="exampleES20_BSetItem_Target" Type="$test.exampleES10"/>' +
                         '</Association>' +
-                        '<EntityContainer Name="contextAssoc2" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleES10" Name="ASet" />' +
-                            '<EntitySet EntityType="$test.exampleES20" Name="BSet" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextAssoc2">' +
+                            '<EntitySet EntityType="$test.exampleES10" Name="ASet"/>' +
+                            '<EntitySet EntityType="$test.exampleES20" Name="BSet"/>' +
                             '<AssociationSet Association="$test.exampleES20_BSetItem" Name="exampleES20_BSetItem">' +
-                                '<End EntitySet="BSet" Role="exampleES20_BSetItem_Source" />' +
-                                '<End EntitySet="ASet" Role="exampleES20_BSetItem_Target" />' +
+                                '<End EntitySet="BSet" Role="exampleES20_BSetItem_Source"/>' +
+                                '<End EntitySet="ASet" Role="exampleES20_BSetItem_Target"/>' +
                             '</AssociationSet>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -2289,31 +2289,31 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleES100">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES200_BSetItem_Target" Name="ASetItem" Relationship="$test.exampleES200_BSetItem" ToRole="exampleES200_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES200">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES200_BSetItem_Source" Name="BSetItem" Relationship="$test.exampleES200_BSetItem" ToRole="exampleES200_BSetItem_Target"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES200_BSetItem">' +
-                            '<End Multiplicity="1" Role="exampleES200_BSetItem_Source" Type="$test.exampleES200" />' +
-                            '<End Multiplicity="0..1" Role="exampleES200_BSetItem_Target" Type="$test.exampleES100" />' +
+                            '<End Multiplicity="1" Role="exampleES200_BSetItem_Source" Type="$test.exampleES200"/>' +
+                            '<End Multiplicity="0..1" Role="exampleES200_BSetItem_Target" Type="$test.exampleES100"/>' +
                         '</Association>' +
-                        '<EntityContainer Name="contextAssoc3" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleES100" Name="ASet" />' +
-                            '<EntitySet EntityType="$test.exampleES200" Name="BSet" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextAssoc3">' +
+                            '<EntitySet EntityType="$test.exampleES100" Name="ASet"/>' +
+                            '<EntitySet EntityType="$test.exampleES200" Name="BSet"/>' +
                             '<AssociationSet Association="$test.exampleES200_BSetItem" Name="exampleES200_BSetItem">' +
-                                '<End EntitySet="BSet" Role="exampleES200_BSetItem_Source" />' +
-                                '<End EntitySet="ASet" Role="exampleES200_BSetItem_Target" />' +
+                                '<End EntitySet="BSet" Role="exampleES200_BSetItem_Source"/>' +
+                                '<End EntitySet="ASet" Role="exampleES200_BSetItem_Target"/>' +
                             '</AssociationSet>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -2347,30 +2347,30 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleES1000">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES2000">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES2000_BSetItem_Target" Name="BSetItem" Relationship="$test.exampleES2000_BSetItem" ToRole="exampleES2000_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES2000_BSetItem">' +
-                            '<End Multiplicity="*" Role="exampleES2000_BSetItem_Source" Type="$test.exampleES1000" />' +
-                            '<End Multiplicity="0..1" Role="exampleES2000_BSetItem_Target" Type="$test.exampleES2000" />' +
+                            '<End Multiplicity="*" Role="exampleES2000_BSetItem_Source" Type="$test.exampleES1000"/>' +
+                            '<End Multiplicity="0..1" Role="exampleES2000_BSetItem_Target" Type="$test.exampleES2000"/>' +
                         '</Association>' +
-                        '<EntityContainer Name="contextAssoc4" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleES1000" Name="ASet" />' +
-                            '<EntitySet EntityType="$test.exampleES2000" Name="BSet" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextAssoc4">' +
+                            '<EntitySet EntityType="$test.exampleES1000" Name="ASet"/>' +
+                            '<EntitySet EntityType="$test.exampleES2000" Name="BSet"/>' +
                             '<AssociationSet Association="$test.exampleES2000_BSetItem" Name="exampleES2000_BSetItem">' +
-                                '<End EntitySet="ASet" Role="exampleES2000_BSetItem_Source" />' +
-                                '<End EntitySet="BSet" Role="exampleES2000_BSetItem_Target" />' +
+                                '<End EntitySet="ASet" Role="exampleES2000_BSetItem_Source"/>' +
+                                '<End EntitySet="BSet" Role="exampleES2000_BSetItem_Target"/>' +
                             '</AssociationSet>' +
                         '</EntityContainer>' +
                     '</Schema>' +
@@ -2404,30 +2404,30 @@ exports['entityContext'] = {
             '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
             '<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">' +
                 '<edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0" m:MaxDataServiceVersion="2.0">' +
-                    '<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="$test">' +
+                    '<Schema Namespace="$test" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">' +
                         '<EntityType Name="exampleES10000">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                         '</EntityType>' +
                         '<EntityType Name="exampleES20000">' +
                             '<Key>' +
-                                '<PropertyRef Name="p1" />' +
+                                '<PropertyRef Name="p1"/>' +
                             '</Key>' +
-                            '<Property Name="p1" Type="Edm.Int32" />' +
+                            '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<NavigationProperty FromRole="exampleES20000_BSetItem_Target" Name="BSetItem" Relationship="$test.exampleES20000_BSetItem" ToRole="exampleES20000_BSetItem_Source"></NavigationProperty>' +
                         '</EntityType>' +
                         '<Association Name="exampleES20000_BSetItem">' +
-                            '<End Multiplicity="0..1" Role="exampleES20000_BSetItem_Source" Type="$test.exampleES10000" />' +
-                            '<End Multiplicity="*" Role="exampleES20000_BSetItem_Target" Type="$test.exampleES20000" />' +
+                            '<End Multiplicity="0..1" Role="exampleES20000_BSetItem_Source" Type="$test.exampleES10000"/>' +
+                            '<End Multiplicity="*" Role="exampleES20000_BSetItem_Target" Type="$test.exampleES20000"/>' +
                         '</Association>' +
-                        '<EntityContainer Name="contextAssoc5" m:IsDefaultEntityContainer="true">' +
-                            '<EntitySet EntityType="$test.exampleES10000" Name="ASet" />' +
-                            '<EntitySet EntityType="$test.exampleES20000" Name="BSet" />' +
+                        '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextAssoc5">' +
+                            '<EntitySet EntityType="$test.exampleES10000" Name="ASet"/>' +
+                            '<EntitySet EntityType="$test.exampleES20000" Name="BSet"/>' +
                             '<AssociationSet Association="$test.exampleES20000_BSetItem" Name="exampleES20000_BSetItem">' +
-                                '<End EntitySet="ASet" Role="exampleES20000_BSetItem_Source" />' +
-                                '<End EntitySet="BSet" Role="exampleES20000_BSetItem_Target" />' +
+                                '<End EntitySet="ASet" Role="exampleES20000_BSetItem_Source"/>' +
+                                '<End EntitySet="BSet" Role="exampleES20000_BSetItem_Target"/>' +
                             '</AssociationSet>' +
                         '</EntityContainer>' +
                     '</Schema>' +
