@@ -66,8 +66,6 @@
             });
         }
 
-        self = this;
-
         var xmlResult = this.cfg.xmlHead;
         this.xml = new $data.GenxXMLCreator();
         this.xml.writer.on('data', function (data) {

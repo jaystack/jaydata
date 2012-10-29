@@ -295,7 +295,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     },
     typeConversion: function (memberDefinition, value) {
         var convertedValue = value;
-        if (typeof value === 'string') {
+        if (typeof value === 'string' && !memberDefinition.concurrencyMode) {
             switch (Container.resolveName(memberDefinition.type)) {
                 case '$data.Guid':
                     convertedValue = $data.parseGuid(value);
