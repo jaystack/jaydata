@@ -1,5 +1,4 @@
-﻿var genx = require('jaydata-genx');
-var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
+﻿var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
 
 $data.Class.define('$data.oDataServer.MetaDataGeneratorRole', null, null, {
     constructor: function (typeName, entitySetName, multiplicity) {

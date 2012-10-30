@@ -15,6 +15,7 @@ $data.StorageProviderLoader = {
     npmModules: {        
         'indexedDb': 'jaydata-indexeddb',
         'InMemory': 'jaydata-inmemory',
+        'LocalStore': 'jaydata-inmemory',
         'mongoDB': 'jaydata-mongodb',
         'oData': 'jaydata-odata',
         'sqLite': 'jaydata-sqlite',

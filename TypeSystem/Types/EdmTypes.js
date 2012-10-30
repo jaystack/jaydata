@@ -22,7 +22,7 @@
 
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
-    $data.Container.mapType(Edm_Decimal, $data.Number);
+    $data.Container.mapType(Edm_Decimal, $data.String);
 
     function Edm_Single() { };
     $data.Container.registerType('Edm.Single', Edm_Single);

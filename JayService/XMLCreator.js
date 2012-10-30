@@ -150,7 +150,7 @@ $data.Class.define('$data.Xml.XmlCreator', null, null, {
     },
     escapeText: function (text) {
         if (text) {
-            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')/*.replace(/"/g, '&quot;').replace(/'/g, '&apos;')*/;
         }
         return text;
     }

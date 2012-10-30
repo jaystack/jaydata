@@ -126,7 +126,7 @@ app.use(function(req, res, next){
                 if (u = req.tracker.unfinished()) {
                     var str = '<ul>';
                     str += 'Undone tests [' + u + '] (or their setups/teardowns): ';
-                    var names = tracker.names();
+                    var names = req.tracker.names();
                     for (var i = 0; i < names.length; i += 1) {
                         str += '<li>' + names[i] + '</li>';
                     }
