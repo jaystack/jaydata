@@ -1381,6 +1381,20 @@ $data.Class.define('$data.EntityContext', null, null,
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attachOrGet(entity);
     },
+
+    addMany: function(entities) {
+        /// <summary>
+        ///     Adds several entities to their matching entity set.
+        /// </summary>
+        /// <param name="entity" type="Array" />
+        /// <returns type="Array">Returns the added entity.</returns>
+        var self = this;
+        entities.forEach(function (entity) {
+            self.add(entity);
+        });
+        return entities;
+    },
+
     add: function (entity) {
         /// <summary>
         ///     Adds a new entity to its matching entity set.
