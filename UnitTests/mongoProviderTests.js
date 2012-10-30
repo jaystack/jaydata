@@ -1041,3 +1041,24 @@ exports.CustomKeyDeleteWithInvalidKeys = function (test) {
         });
     });
 };
+
+exports.ArrayModelBinderFix = function (test) {
+    test.expect(61);
+    $test.Context.init(function (db) {
+        for (var i = 0; i < 20; i++) {
+            db.ArrayItems.add(new $test.ArrayItem({ Key: 'aaa' + i, Values: ['bbb' + i], Rank: i }));
+        }
+        db.saveChanges(function (cnt) {
+            db.ArrayItems.toArray(function (result) {
+                test.equal(result.length, 20, '20 items in the collection');
+                for (var i = 0; i < 20; i++){
+                    var r = result[i];
+                    test.equal(r.Key, 'aaa' + i, 'Key of item ' + i + ' is bad');
+                    test.ok(r.Values instanceof Array, 'Values of item ' + i + ' is not an array');
+                    test.equal(r.Values[0], 'bbb' + i, 'Values first element of item ' + i + ' is bad');
+                }
+                test.done();
+            });
+        });
+    });
+};

@@ -6,6 +6,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
     },
 
     deepExtend: function(o, r){
+        if (o === null || o === undefined){
+            o = r;
+            return;
+        }
         for (var i in r){
             if (o.hasOwnProperty(i)){
                 if (typeof r[i] === 'object'){
