@@ -112,6 +112,15 @@ $data.Class.defineEx('$data.EntitySet',
         this._trackEntity(data);
         return data;
     },
+
+    addMany: function(entities) {
+        var result = [];
+        var self = this;
+        entities.forEach(function (entity) {
+            result.push(self.add(entity));
+        });
+        return result;
+    },
     remove: function (entity) {
         /// <signature>
         ///     <summary>Creates a typed entity and marks it as Deleted.</summary>

@@ -1387,7 +1387,7 @@ $data.Class.define('$data.EntityContext', null, null,
         ///     Adds several entities to their matching entity set.
         /// </summary>
         /// <param name="entity" type="Array" />
-        /// <returns type="Array">Returns the added entity.</returns>
+        /// <returns type="Array">Returns the added entities.</returns>
         var self = this;
         entities.forEach(function (entity) {
             self.add(entity);
