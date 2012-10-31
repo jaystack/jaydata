@@ -26,8 +26,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
         if (metadataUri in this.factoryCache) {
 
-            console.log("served from cache");
-            console.dir(this.factoryCache[metadataUri]);
+            /*console.log("served from cache");
+            console.dir(this.factoryCache[metadataUri]);*/
             callBack.success.apply({}, this.factoryCache[metadataUri]);
             return;
         }

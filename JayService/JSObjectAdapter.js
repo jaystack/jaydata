@@ -118,6 +118,8 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 
         this.promiseHelper.when(_v)
         .then(function (value) {
+            if (res._header || res._headerSent) return;
+            
             if (!(value instanceof $data.ServiceResult)) {
                 if (member.hasOwnProperty('resultType')){
                     if (typeof member.resultType === 'string') member.resultType = Container.resolveType(member.resultType);
