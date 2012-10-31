@@ -226,11 +226,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 } else {
 
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                        if (memDef.computed) {
+                        if (memDef.computed || memDef.key) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 item[memDef.name] = response.headers.ETag || response.headers.Etag;
                             } else {
-                                item[memDef.name] = data[memDef.name];
+                                var converter = that.fieldConverter.fromDb[Container.resolveType(memDef.type)];
+                                item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
                             }
                         }
                     }, this);
@@ -315,11 +316,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
                         item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                             //TODO: is this correct?
-                            if (memDef.computed) {
+                            if (memDef.computed || memDef.key) {
                                 if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                     item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag;
                                 } else {
-                                    item[memDef.name] = result[i].data[memDef.name];
+                                    var converter = that.fieldConverter.fromDb[Container.resolveType(memDef.type)];
+                                    item[memDef.name] = converter ? converter(result[i].data[memDef.name]) : result[i].data[memDef.name];
                                 }
                             }
                         }, this);
