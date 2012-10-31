@@ -60,7 +60,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
         return databaseQuery.projectionSql;
     },
     generateProjectionFunc: function (query) {
-        var isAuthenticated = this.provider.AuthenticationProvider.Authenticated;
+        var isAuthenticated = this.provider.AuthenticationProvider.Authenticated || this.provider.providerConfiguration.Access_Token;
         var publicMemberDefinitions = query.defaultType.memberDefinitions.getPublicMappedProperties();
         if (!isAuthenticated && publicMemberDefinitions.some(function (memDef) { return memDef.isPublic == true; })) {
             publicMemberDefinitions = publicMemberDefinitions.filter(function (memDef) { return memDef.isPublic == true; });

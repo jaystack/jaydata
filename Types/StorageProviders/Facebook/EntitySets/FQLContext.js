@@ -17,7 +17,7 @@ $data.Class.define("$data.Facebook.FQLContext", $data.EntityContext, null, {
                 .select(function (f) { return f.uid2; });
 
         this.MyFriends = this.Users
-                .where(function (u) { return u.uid == this.me || u.uid in this.friends; }, { me: $data.Facebook.FQLCommands.me, friends: friendsQuery });
+                .where(function (u) { return u.uid in this.friends; }, { friends: friendsQuery });
     },
     Users: {
         dataType: $data.EntitySet,
