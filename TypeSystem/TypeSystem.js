@@ -481,7 +481,13 @@
 
         root[shortClassName] = this.classNames[className] = classFunction;
         //classFunction.toJSON = classToJSON;
-
+        var baseCount = classFunction.baseTypes.length;
+        for (var i = 0; i < baseCount; i++) {
+            var b = classFunction.baseTypes[i];
+            if ("inheritedTypeProcessor" in b) {
+                b.inheritedTypeProcessor(classFunction);
+            }
+        }
         //classFunction.prototype.constructor = instanceDefinition.constructor;
         //classFunction.constructor = instanceDefinition.constructor;
         //classFunction.toJSON = function () { return classFunction.memberDefinitions.filter( function(md) { return md; };

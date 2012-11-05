@@ -46,6 +46,25 @@ $data.Class.define('$data.EntityContext', null, null,
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
+        if ("string" === typeof storageProviderCfg) {
+            if (0 === storageProviderCfg.indexOf("http")) {
+                storageProviderCfg = {
+                    name: "oData",
+                    oDataServiceHost: storageProviderCfg,
+                }
+
+            } else {
+                storageProviderCfg = {
+                    name: "sqLite",
+                    databaseName: storageProviderCfg
+                }
+            }
+        }
+
+        if ("provider" in storageProviderCfg) {
+            storageProviderCfg.name = storageProviderCfg.provider;
+        }
+
         //Initialize properties
         this.lazyLoad = false;
         this.trackChanges = false;
@@ -1355,7 +1374,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var tempOperation = $data.EntityContext.generateServiceOperation({ serviceName: functionName, returnType: $data.Queryable, elementType: this[returnEntitySet].elementType, params: params });
         return tempOperation.apply(this, arg);
     },
-    attach: function (entity) {
+    attach: function (entity, keepChanges) {
         /// <summary>
         ///     Attaches an entity to its matching entity set.
         /// </summary>
@@ -1366,7 +1385,7 @@ $data.Class.define('$data.EntityContext', null, null,
             entity = entity.getEntity();
         }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
-        return entitySet.attach(entity);
+        return entitySet.attach(entity, keepChanges);
     },
     attachOrGet: function (entity) {
         /// <summary>

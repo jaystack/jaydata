@@ -156,7 +156,7 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
-    attach: function (entity) {
+    attach: function (entity, keepChanges) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -200,9 +200,11 @@ $data.Class.defineEx('$data.EntitySet',
                 Guard.raise(new Exception("Context already contains this entity!!!"));
             }
         }
-
-        data.entityState = $data.EntityState.Unchanged;
-        data.changedProperties = undefined;
+        if (!keepChanges) {
+            console.log("dropping changes");
+            data.entityState = $data.EntityState.Unchanged;
+            data.changedProperties = undefined;
+        }
         data.context = this.entityContext;
         this._trackEntity(data);
     },
