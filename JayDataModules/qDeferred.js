@@ -1,7 +1,7 @@
 ﻿(function ($data) {
     var q;
     if (typeof Q === 'undefined') {
-        if (typeof exports !== 'undefined') {
+        if (typeof module !== 'undefined' && module.exports) {
             q = require('q');
         } else {
             Guard.raise(new Exception('Q is not defined'));
