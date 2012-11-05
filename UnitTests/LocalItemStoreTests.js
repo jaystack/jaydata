@@ -4,7 +4,28 @@
 
     function xtest() { };
 
-    test('create_context_type', 3, function () {
+    test('simplified entity context constructor', 3, function() {
+
+        $data.Entity.extend("Article", {
+            Id: { type: 'int', key: true, computed: true },
+            Title: { type: 'string' }
+        });
+
+        $data.EntityContext.extend("mine", {
+            Articles: { type: $data.EntitySet, elementType: Article }
+        });
+        var db = new mine("http://localhost:50594/jaydata/Services/emptyNewsReader.svc");
+        ok(db.storageProvider instanceof $data.storageProviders.oData.oDataProvider, "provider type guessed correctly from url");
+
+        db = new mine("FooBarDb");
+        ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init string");
+
+        db = new mine({ provider: 'sqLite', databaseName: "FooBarDb" });
+        ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init data");
+
+    });
+
+    xtest('create_context_type', 3, function () {
 
         $data.Entity.extend("MyType2", {
             Id: { type: 'int', key: true, computed: true },
@@ -26,7 +47,7 @@
         });
     });
 
-    test('promise chain', 7, function () {
+    xtest('promise chain', 7, function () {
 
         var rand = Math.random().toString().substr(2, 4);
         var typeName = 'Cart' + rand;
@@ -68,7 +89,7 @@
     });
 
 
-    test('save_and_update', 2, function () {
+    xtest('save_and_update', 2, function () {
         $data.define("Cart10", {
             Product: String,
             Value: Number
@@ -98,7 +119,7 @@
             });
     });
 
-    test('save item to Local Item Store', 10, function () {
+    xtest('save item to Local Item Store', 10, function () {
 
         var type = $data.define("Cart4", {
             ID: "int",

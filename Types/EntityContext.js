@@ -46,6 +46,25 @@ $data.Class.define('$data.EntityContext', null, null,
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
+        if ("string" === typeof storageProviderCfg) {
+            if (0 === storageProviderCfg.indexOf("http")) {
+                storageProviderCfg = {
+                    name: "oData",
+                    oDataServiceHost: storageProviderCfg,
+                }
+
+            } else {
+                storageProviderCfg = {
+                    name: "sqLite",
+                    databaseName: storageProviderCfg
+                }
+            }
+        }
+
+        if ("provider" in storageProviderCfg) {
+            storageProviderCfg.name = storageProviderCfg.provider;
+        }
+
         //Initialize properties
         this.lazyLoad = false;
         this.trackChanges = false;
