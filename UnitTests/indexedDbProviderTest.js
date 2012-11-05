@@ -1,6 +1,6 @@
 ﻿$(document).ready(function () {
 
-    if ($data.storageProviders.indexedDb.IndexedDBStorageProvider.isSupported !== true)
+    if (!$data.StorageProviderLoader.isSupported('indexedDb'))
         return;
 
     logResult = [];
@@ -26,11 +26,15 @@
     module('indexedDbProviderTest');
     test('storageProvider_finds_interfaces', function () {
         expect(4);
-        var provider = new $data.storageProviders.indexedDb.IndexedDBStorageProvider();
-        ok(provider.indexedDB, "IndexedDB interface found");
-        ok(provider.IDBRequest, "IDBRequest");
-        ok(provider.IDBTransaction, "IDBTransaction");
-        ok(provider.IDBKeyRange, "IDBKeyRange");
+        stop(1);
+        $data.StorageProviderLoader.load(['indexedDb'], function () {
+            start(1);
+            var provider = new $data.storageProviders.indexedDb.IndexedDBStorageProvider();
+            ok(provider.indexedDB, "IndexedDB interface found");
+            ok(provider.IDBRequest, "IDBRequest");
+            ok(provider.IDBTransaction, "IDBTransaction");
+            ok(provider.IDBKeyRange, "IDBKeyRange");
+        });
     });
 
     test('disallow_types_with_incorrect_keys', function () {
