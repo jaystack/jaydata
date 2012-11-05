@@ -50,9 +50,8 @@ $data.Class.define('$data.EntityContext', null, null,
             if (0 === storageProviderCfg.indexOf("http")) {
                 storageProviderCfg = {
                     name: "oData",
-                    oDataServiceHost: storageProviderCfg,
+                    oDataServiceHost: storageProviderCfg
                 }
-
             } else {
                 storageProviderCfg = {
                     name: "sqLite",

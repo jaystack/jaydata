@@ -679,19 +679,19 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
     getDefaultItemStoreFactory: function (instanceOrType, store, options) {
 
-        function resolveStoreName(store, options) {
-            if (!store) {
-                var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
-                var typeName = $data.Container.resolveName(type) + "_items";
-                var typeName = typeName.replace(".", "_");
-                store = "local:" + typeName;
-            } else {
-                var splitStore = store.split(":");
-                if (splitStore.length < 2) {
-                    //if 
-                }
-            }
-        }
+        //function resolveStoreName(store, options) {
+        //    if (!store) {
+        //        var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
+        //        var typeName = $data.Container.resolveName(type) + "_items";
+        //        var typeName = typeName.replace(".", "_");
+        //        store = "local:" + typeName;
+        //    } else {
+        //        var splitStore = store.split(":");
+        //        if (splitStore.length < 2) {
+        //            //if 
+        //        }
+        //    }
+        //}
 
         var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
         var typeName = $data.Container.resolveName(type) + "_items";
@@ -699,7 +699,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         store = "local:" + typeName;
 
         //provider = 'indexedDb';
-        provider = 'sqLite';
+        var provider = 'local';
 
         var inMemoryType = $data.EntityContext.extend(typeName, {
             'Items': { type: $data.EntitySet, elementType: type }
