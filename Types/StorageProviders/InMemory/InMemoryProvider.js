@@ -4,9 +4,14 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
             source: null,
-            persistentData:false,
-            localStoreName:'JayData_InMemory_Provider'
+            persistentData: false,
+            //obsolate
+            localStoreName: 'JayData_InMemory_Provider',
+            databaseName: 'JayData_InMemory_Provider'
         }, cfg);
+
+        if (this.providerConfiguration.databaseName === 'JayData_InMemory_Provider')
+            this.providerConfiguration.databaseName = this.providerConfiguration.localStoreName;
     },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -17,7 +22,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         }
         var localStorageData = null;
         if(this.providerConfiguration.persistentData && window.localStorage){
-            var localStoreName = this.providerConfiguration.localStoreName || "JayData_InMemory_Provider";
+            var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             var that = this;
             localStorageData = JSON.parse(window.localStorage.getItem(localStoreName),
                 function(key, value){
@@ -166,7 +171,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             }
         }
         if(this.providerConfiguration.persistentData && window.localStorage){
-            var localStoreName = this.providerConfiguration.localStoreName || "JayData_InMemory_Provider";
+            var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             localStorageData = window.localStorage.setItem(localStoreName, JSON.stringify(this.providerConfiguration.source));
         }
         callBack.success();
