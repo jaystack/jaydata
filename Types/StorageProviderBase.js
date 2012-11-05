@@ -235,7 +235,9 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     }
 },
 {
+    onRegisterProvider: { value: new $data.Event() },
     registerProvider: function (name, provider) {
+        this.onRegisterProvider.fire({ name: name, provider: provider }, this);
         $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || [];
         $data.RegisteredStorageProviders[name] = provider;
     },
@@ -254,3 +256,33 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         set: function () { }
     }
 });
+
+(function () {
+    var localProviders = ['webSql', 'indexedDb', 'LocalStore'];
+
+    for (var i = 0; i < localProviders.length; i++) {
+        var providerName = localProviders[i];
+
+        if ($data.StorageProviderLoader.isSupported(providerName)) {
+            var moduleName = $data.StorageProviderLoader.npmModules[providerName];
+            $data.StorageProviderLoader.npmModules['local'] = moduleName;
+
+            var mappedName = $data.StorageProviderLoader.ProviderNames[providerName];
+            $data.StorageProviderLoader.ProviderNames['local'] = mappedName;
+
+            $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || [];
+            var provider = $data.RegisteredStorageProviders[providerName];
+            if (!provider) {
+                $data.StorageProviderBase.onRegisterProvider.attach(function (sender, providerData) {
+                    if (providerData.name === providerName) {
+                        $data.StorageProviderBase.registerProvider("local", providerData.provider);
+                    }
+                });
+            } else {
+                $data.StorageProviderBase.registerProvider("local", provider);
+            }
+            break;
+        }
+    }
+})();
+
