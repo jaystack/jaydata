@@ -44,6 +44,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         }
     },
     load: function (providerList, callback) {
+        callback = $data.typeSystem.createCallbackSetting(callback);
         var currentProvider = providerList.shift();
 
         while (currentProvider && !this.isSupported(currentProvider)) {
