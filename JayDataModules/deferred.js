@@ -1,4 +1,4 @@
-﻿(function ($data) {
+(function ($data) {
     if (typeof jQuery !== 'undefined') {
         $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
             constructor: function () {
