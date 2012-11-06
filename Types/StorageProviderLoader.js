@@ -2,14 +2,14 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
     isSupported: function (providerName) {
         switch (providerName) {
             case 'indexedDb':
-                return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+                return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || (window.msIndexedDB && !(/^file:/.test(window.location.href)));
             case 'storm':
                 return 'XMLHttpRequest' in window;
             case 'webSql':
             case 'sqLite':
                 return 'openDatabase' in window;
             case 'LocalStore':
-                return 'localStorage' in window;
+                return 'localStorage' in window && window.localStorage ? true : false;
             case 'sqLite':
                 return 'openDatabase' in window;
             case 'mongoDB':
