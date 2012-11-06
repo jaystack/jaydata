@@ -25,7 +25,7 @@
 
     });
 
-    xtest('create_context_type', 3, function () {
+    test('create_context_type', 3, function () {
 
         $data.Entity.extend("MyType2", {
             Id: { type: 'int', key: true, computed: true },
@@ -47,7 +47,7 @@
         });
     });
 
-    xtest('promise chain', 7, function () {
+    test('promise chain', 7, function () {
 
         var rand = Math.random().toString().substr(2, 4);
         var typeName = 'Cart' + rand;
@@ -89,7 +89,7 @@
     });
 
 
-    xtest('save_and_update', 2, function () {
+    test('save_and_update', 2, function () {
         $data.define("Cart10", {
             Product: String,
             Value: Number
@@ -119,7 +119,7 @@
             });
     });
 
-    xtest('save item to Local Item Store', 10, function () {
+    test('save item to Local Item Store', 10, function () {
 
         var type = $data.define("Cart4", {
             ID: "int",
@@ -206,5 +206,74 @@
                     })
             });
 
+    });
+
+    test('filter in Local Item Store', 1, function () {
+        $data.define("Cart11", {
+            Product: String,
+            Value: Number
+        });
+
+        stop(1);
+        var promises = []
+        for (var i = 0; i < 10; i++) {
+            promises.push($data("Cart11").save({ Value: i, Product: 'item' + i }));
+        }
+
+        $.when(promises).then(function () {
+            $data("Cart11").filter(function (item) { return item.Value >= this.val }, { val: 5 }).then(function (items) {
+                equal(items.length, 5, 'filter length correct');
+
+                $data("Cart11").removeAll().then(function () {
+                    start();
+                });
+            });
+        });
+    });
+
+    test('filter in Local Item Store 2', 1, function () {
+        $data.define("Cart13", {
+            Product: String,
+            Value: Number
+        });
+
+        stop(1);
+        var promises = []
+        for (var i = 0; i < 10; i++) {
+            promises.push($data("Cart13").save({ Value: i, Product: 'item' + i }));
+        }
+
+        $.when(promises).then(function () {
+            $data("Cart13").filter(function (item) { return item.Product.contains(this.val) }, { val: 'tem5' }).then(function (items) {
+                equal(items.length, 1, 'filter length correct');
+
+                $data("Cart13").removeAll().then(function () {
+                    start();
+                });
+            });
+        });
+    });
+
+    test('first in Local Item Store', 1, function () {
+        $data.define("Cart12", {
+            Product: String,
+            Value: Number
+        });
+
+        stop(1);
+        var promises = []
+        for (var i = 0; i < 10; i++) {
+            promises.push($data("Cart12").save({ Value: i, Product: 'item' + i }));
+        }
+
+        $.when(promises).then(function () {
+            $data("Cart12").first(function (item) { return item.Value >= this.val && item.Value < 6 }, { val: 5 }).then(function (item) {
+                equal(item.Value, 5, 'item.Value is correct');
+
+                $data("Cart12").removeAll().then(function () {
+                    start();
+                });
+            });
+        });
     });
 });
