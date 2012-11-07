@@ -669,7 +669,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
             '$data.ObjectID': 'Edm.String',
-            '$data.Geography': 'Edm.GeographyPoint'
+            '$data.Geography': 'Edm.GeographyPoint',
+            '$data.Guid': 'Edm.Guid'
         }
     },
 

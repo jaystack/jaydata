@@ -361,7 +361,8 @@
             '$data.Number': 'Edm.Decimal',
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
-            '$data.ObjectID': 'Edm.String'
+            '$data.ObjectID': 'Edm.String',
+            '$data.Guid': 'Edm.Guid'
         }
     },
     _valueConverters: {
@@ -374,6 +375,7 @@
             '$data.String': function (v) { return v; },
             '$data.ObjectID': function (v) { return v.toString(); },
             '$data.Object': function (v) { return JSON.stringify(v); },
+            '$data.Guid': function (v) { return v.toString(); },
         }
     },
     supports: {
@@ -384,7 +386,8 @@
                 'Edm.DateTime',
                 'Edm.Decimal',
                 'Edm.Int32',
-                'Edm.String'
+                'Edm.String',
+                'Edm.Guid'
             ]
         }
     },

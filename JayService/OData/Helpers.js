@@ -87,8 +87,23 @@ $data.Class.define('$data.JayService.OData.Utils', null, null, null, {
             var resolvedType = Container.resolveType(memDef.type);
             if (withoutConvert)
                 result[memDef.name] = value;
-            else
-                result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
+            else {
+                switch (resolvedType) {
+                    case $data.String:
+                    case $data.ObjectID:
+                        result[memDef.name] = value.slice(1, value.length - 1);
+                        break;
+                    case $data.Guid:
+                        result[memDef.name] = value.slice(5, value.length - 1);
+                        break;
+                    default:
+                        result[memDef.name] = value;
+                        break;
+                }
+
+
+                //result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
+            }
         }
 
         return result;

@@ -28,12 +28,21 @@ $data.Class.define('$example.TestItem', $data.Entity, null, {
     Index: { type: 'int' }
 });
 
+$data.Class.define('$example.TestItemGuid', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' }
+});
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
     Places: { type: $data.EntitySet, elementType: $example.Place },
     TestItems: { type: $data.EntitySet, elementType: $example.TestItem },
+    TestItemGuids: { type: $data.EntitySet, elementType: $example.TestItemGuid },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
+    FuncGuidParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGuidParam', returnType: $data.Guid, params: [{ a: $data.Guid }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
     FuncObjParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncObjParam', returnType: $data.Object, params: [{ a: $data.Object }] }),
@@ -75,25 +84,30 @@ $example.Context.deleteData = function (ctx, callback) {
             ctx.Orders.toArray(function (o) {
                 ctx.Places.toArray(function (pl) {
                     ctx.TestItems.toArray(function (t) {
-                        for (var i = 0; i < p.length; i++) {
-                            ctx.People.remove(p[i]);
-                        }
-                        for (var i = 0; i < o.length; i++) {
-                            ctx.Orders.remove(o[i]);
-                        }
-                        for (var i = 0; i < pl.length; i++) {
-                            ctx.Places.remove(pl[i]);
-                        }
-                        for (var i = 0; i < t.length; i++) {
-                            ctx.TestItems.remove(t[i]);
-                        }
-                        ctx.saveChanges(function () {
-                            if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables ||
-                                pl.length >= $example.Context.generateTestData.itemsInTables || t.length >= $example.Context.generateTestData.itemsInTables) {
-                                $example.Context.deleteData(ctx, callback);
-                            } else {
-                                callback.success();
+                        ctx.TestItemGuids.toArray(function (tg) {
+                            for (var i = 0; i < p.length; i++) {
+                                ctx.People.remove(p[i]);
                             }
+                            for (var i = 0; i < o.length; i++) {
+                                ctx.Orders.remove(o[i]);
+                            }
+                            for (var i = 0; i < pl.length; i++) {
+                                ctx.Places.remove(pl[i]);
+                            }
+                            for (var i = 0; i < t.length; i++) {
+                                ctx.TestItems.remove(t[i]);
+                            }
+                            for (var i = 0; i < tg.length; i++) {
+                                ctx.TestItemGuids.remove(tg[i]);
+                            }
+                            ctx.saveChanges(function () {
+                                if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables ||
+                                    pl.length >= $example.Context.generateTestData.itemsInTables || t.length >= $example.Context.generateTestData.itemsInTables) {
+                                    $example.Context.deleteData(ctx, callback);
+                                } else {
+                                    callback.success();
+                                }
+                            });
                         });
                     });
                 });
@@ -107,7 +121,8 @@ $example.Context.generateTestData = function (ctx, callback) {
             ctx.People.add({ Name: 'Person' + i, Description: 'desc' + i, Age: 10 + i });
             ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2, Data: { a: 5, b: i } });
             ctx.Places.add({ Name: 'Places' + i, Location: new $data.Geography(123.15697, i) });
-        }
+            ctx.TestItemGuids.add({ Id: $data.Guid.NewGuid(), Name: 'name' + i, Index: i, GuidField: $data.Guid.NewGuid() });
+        } 
 
         ctx.saveChanges(callback);
     });
@@ -200,6 +215,34 @@ test("REST - GET ById", 4, function () {
                 equal(data.Name, person.Name, 'Name field failed');
                 equal(data.Description, person.Description, 'Description field failed');
                 equal(data.Age, person.Age, 'Age field failed');
+
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            });
+
+        });
+    });
+});
+test("REST - GET ById guid", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (p) {
+            var item = p[0];
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/TestItemGuids(guid'" + item.Id + "')",
+                method: 'GET',
+                data: undefined,
+                user: 'asd',
+                password: 'asd'
+            }, function (data) {
+
+                equal(data.Id, item.Id.value, 'Id field failed');
+                equal(data.Name, item.Name, 'Name field failed');
+                equal(data.Index, item.Index, 'Index field failed');
 
                 start();
             }, function () {
@@ -1116,6 +1159,107 @@ test("Bugfix delete test", 1, function () {
     });
 });
 
+test("Save Guid", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.deleteData(context, function () {
+        var item = new $example.TestItemGuid({ Id: $data.Guid.NewGuid(), Name: 'item1' });
+
+        context.TestItemGuids.add(item);
+
+        context.saveChanges({
+            success: function () {
+
+                context.TestItemGuids.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length failed');
+                    equal(items[0].Id.valueOf(), item.Id.valueOf(), 'loaded Id failed');
+
+                    equal(items[0].Name, 'item1', 'Name failed');
+
+                    start();
+                });
+            },
+            error: function (ex) {
+                ok(false, 'save error occured: ' + ex);
+                start();
+            }
+        })
+
+    });
+});
+
+test("Modify Guid - Filter Guid", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.attach(item);
+            item.GuidField = $data.parseGuid('12345678-1234-1234-1234-123412341234');
+            item.Name = 'Jay location';
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.GuidField == this.Guid', { Guid: $data.parseGuid('12345678-1234-1234-1234-123412341234') }).single(null, null, function (itemRes) {
+
+                    equal(itemRes.Id.valueOf(), item.Id.valueOf(), 'loaded Id failed');
+                    equal(itemRes.GuidField.valueOf(), item.GuidField.valueOf(), 'loaded GuidField failed');
+
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("Delete item with guid key", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.TestItemGuids.remove(item);
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.Id == this.Guid', { Guid: item.Id }).length(function (cnt) {
+                    equal(cnt, 0, 'delete failed');
+                    context.TestItemGuids.length(function (count) {
+                        equal(count, items.length - 1, 'delete failed all result');
+                    });
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("Delete item by guid", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.TestItemGuids.remove({ Id: item.Id });
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.Id == this.Guid', { Guid: item.Id }).length(function (cnt) {
+                    equal(cnt, 0, 'delete failed');
+                    context.TestItemGuids.length(function (count) {
+                        equal(count, items.length - 1, 'delete failed all result');
+                    });
+                    start();
+                });
+            });
+        });
+    });
+});
 
 $data.Class.define('$example.ComplexT', $data.Entity, null, {
     Name: { type: 'string' },
@@ -1301,7 +1445,7 @@ test("FunctionImport - FuncComplexWithArrayComplexRes", 28, function () {
             for (var i = 0; i < 5; i++) {
                 var ret = result.Complex[i];
                 equal(ret instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
-                equal(ret.Name, 'Hello World' +i, 'Name failed');
+                equal(ret.Name, 'Hello World' + i, 'Name failed');
                 equal(ret.Description, 'desc', 'Description failed');
                 equal(ret.Age, i, 'Age failed');
                 equal(ret.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
@@ -1321,16 +1465,16 @@ test("FunctionImport - FuncComplexWithArrayComplexResArray", 140, function () {
             for (var i = 0; i < 5; i++) {
                 var result = resultArr[i];
                 equal(result instanceof $example.ComplexTWithArrayComplex, true, 'result is $example.ComplexTWithArrayComplex');
-                equal(result.Title, 'Hello World' +i, 'Title failed');
+                equal(result.Title, 'Hello World' + i, 'Title failed');
                 equal(result.Complex instanceof Array, true, 'result.Complex is Array');
 
                 for (var j = 0; j < 5; j++) {
                     var ret = result.Complex[j];
                     equal(ret instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
-                    equal(ret.Name, 'Hello World' + i +j, 'Name failed');
+                    equal(ret.Name, 'Hello World' + i + j, 'Name failed');
                     equal(ret.Description, 'desc', 'Description failed');
-                    equal(ret.Age, i+j, 'Age failed');
-                    equal(ret.Created.valueOf(), new Date((2000 + i+j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+                    equal(ret.Age, i + j, 'Age failed');
+                    equal(ret.Created.valueOf(), new Date((2000 + i + j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
                 }
             }
             start();
@@ -1362,7 +1506,7 @@ test("FunctionImport - FuncComplexMultiRes", 44, function () {
 
 
                 equal(ret.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
-                equal(ret.Complex.Name, 'Hello World' +i, 'Name failed');
+                equal(ret.Complex.Name, 'Hello World' + i, 'Name failed');
                 equal(ret.Complex.Description, 'desc', 'Description failed');
                 equal(ret.Complex.Age, i, 'Age failed');
                 equal(ret.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
@@ -1382,12 +1526,12 @@ test("FunctionImport - FuncComplexMultiResArray", 220, function () {
             for (var i = 0; i < 5; i++) {
                 var result = resultArr[i];
                 equal(result instanceof $example.ComplexTWithCCAndArrayC, true, 'result is $example.ComplexTWithCCAndArrayC');
-                equal(result.Title, 'Hello World'+i, 'Title failed');
+                equal(result.Title, 'Hello World' + i, 'Title failed');
                 equal(result.Complex2Arr instanceof Array, true, 'result.Complex is Array');
                 equal(result.Complex instanceof $example.ComplexT, true, 'result.Complex is $exampleSrv.ComplexT');
 
                 equal(result.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
-                equal(result.Complex.Name, 'Hello World' +i, 'Name failed');
+                equal(result.Complex.Name, 'Hello World' + i, 'Name failed');
                 equal(result.Complex.Description, 'desc', 'Description failed');
                 equal(result.Complex.Age, i, 'Age failed');
                 equal(result.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
@@ -1399,10 +1543,10 @@ test("FunctionImport - FuncComplexMultiResArray", 220, function () {
 
 
                     equal(ret.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
-                    equal(ret.Complex.Name, 'Hello World' + i+j, 'Name failed');
+                    equal(ret.Complex.Name, 'Hello World' + i + j, 'Name failed');
                     equal(ret.Complex.Description, 'desc', 'Description failed');
-                    equal(ret.Complex.Age, i+j, 'Age failed');
-                    equal(ret.Complex.Created.valueOf(), new Date((2000 + i+j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+                    equal(ret.Complex.Age, i + j, 'Age failed');
+                    equal(ret.Complex.Created.valueOf(), new Date((2000 + i + j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
                 }
             }
             start();

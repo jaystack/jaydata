@@ -45,13 +45,26 @@ $data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
     Index: { type: 'int' }
 });
 
+$data.Class.define('$exampleSrv.TestItemGuid', $data.Entity, null, {
+    Id: { type: 'guid', key: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' }
+});
+
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
     Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
     TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
+    TestItemGuids: { type: $data.EntitySet, elementType: $exampleSrv.TestItemGuid },
     FuncStrParam: (function (a) {
         ///<param name="a" type="string"/>
+        ///<returns type="string"/>
+        return a;
+    }),
+    FuncGuidParam: (function (a) {
+        ///<param name="a" type="guid"/>
         ///<returns type="string"/>
         return a;
     }),
