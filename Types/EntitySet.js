@@ -201,7 +201,6 @@ $data.Class.defineEx('$data.EntitySet',
             }
         }
         if (!keepChanges) {
-            console.log("dropping changes");
             data.entityState = $data.EntityState.Unchanged;
             data.changedProperties = undefined;
         }

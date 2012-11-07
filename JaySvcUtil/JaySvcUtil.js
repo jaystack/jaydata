@@ -583,6 +583,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 });
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
-$data.service = function(serviceUri, cb, config) {
+$data.service = function (serviceUri, cb, config) {
     $data.MetadataLoader.load(serviceUri, cb, config);
-}
+};
