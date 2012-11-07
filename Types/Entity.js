@@ -156,6 +156,8 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                         this.initData[i] = new Date(initData[i]);
                     else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
                         this.initData[i] = new $data.Geography(initData[i]);
+                    else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
+                        this.initData[i] = $data.parseGuid(initData[i]);
                     else {
                         this.initData[i] = initData[i];
 

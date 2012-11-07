@@ -272,6 +272,12 @@
                         return new $data.Geography();
                     }
                     return o;
+                },
+                '$data.Guid': function (o) {
+                    if (o === undefined) {
+                        return new $data.Guid();
+                    }
+                    return o;
                 }
             },
             toDb: {
@@ -303,6 +309,9 @@
                     return JSON.stringify(o);
                 },
                 '$data.Geography': function (g) {
+                    return g;
+                },
+                '$data.Guid': function (g) {
                     return g;
                 }
             }

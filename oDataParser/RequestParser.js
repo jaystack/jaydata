@@ -294,6 +294,7 @@
             var expr;
             if (expr = this.parseDatetimeLiteral()) return expr;
             if (expr = this.parseStringLiteral()) return expr;
+            if (expr = this.parseGuidLiteral()) return expr;
             if (expr = this.parseBoolLiteral()) return expr;
             if (expr = this.parseNumberLiteral()) return expr;
             if (expr = this.parseGeographyLiteral()) return expr;
@@ -318,6 +319,22 @@
             }
             this.lexer.nextToken();
             return this.builder.buildConstant(d, "datetime");
+        },
+        parseGuidLiteral: function () {
+            if (this.lexer.token.value != "guid")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid guid format.", "parseGuidLiteral");
+            var d;
+            try {
+                d = $data.parseGuid(token.value)
+            } catch (e) {
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid guid format.", "parseGuidLiteral");
+            }
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "guid");
         },
         parseStringLiteral: function () {
             //bnf: StringLiteral      : STRING
