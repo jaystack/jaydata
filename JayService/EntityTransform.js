@@ -312,7 +312,7 @@
                     return g;
                 },
                 '$data.Guid': function (g) {
-                    return g;
+                    return "guid'" + g.toString() + "'";
                 }
             }
         }

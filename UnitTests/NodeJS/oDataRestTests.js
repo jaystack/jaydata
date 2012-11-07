@@ -1215,6 +1215,52 @@ test("Modify Guid - Filter Guid", 2, function () {
     });
 });
 
+test("Delete item with guid key", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.TestItemGuids.remove(item);
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.Id == this.Guid', { Guid: item.Id }).length(function (cnt) {
+                    equal(cnt, 0, 'delete failed');
+                    context.TestItemGuids.length(function (count) {
+                        equal(count, items.length - 1, 'delete failed all result');
+                    });
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("Delete item by guid", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.TestItemGuids.remove({ Id: item.Id });
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.Id == this.Guid', { Guid: item.Id }).length(function (cnt) {
+                    equal(cnt, 0, 'delete failed');
+                    context.TestItemGuids.length(function (count) {
+                        equal(count, items.length - 1, 'delete failed all result');
+                    });
+                    start();
+                });
+            });
+        });
+    });
+});
+
 $data.Class.define('$example.ComplexT', $data.Entity, null, {
     Name: { type: 'string' },
     Description: { type: 'string' },

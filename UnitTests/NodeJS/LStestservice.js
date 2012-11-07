@@ -19,9 +19,17 @@ $data.Class.define('Order', $data.Entity, null, {
     Completed: { type: 'bool' }
 });
 
+$data.Class.define('TestItemGuid', $data.Entity, null, {
+    Id: { type: 'guid', key: true, nullable: false },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' }
+});
+
 $data.Class.defineEx('Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: Person },
     Orders: { type: $data.EntitySet, elementType: Order },
+    TestItemGuids: { type: $data.EntitySet, elementType: TestItemGuid },
     FuncStrParam: function (a) {
         ///<param name="a" type="string"/>
         ///<returns type="string"/>
