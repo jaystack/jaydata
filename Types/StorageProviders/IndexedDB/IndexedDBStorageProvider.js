@@ -299,14 +299,20 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     initializeMemoryStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
+        var self = this;
 
-        if (this.originalContext && this.providerConfiguration.memoryOperations) {
-            this.operationProvider = new this.originalContext({ name: 'InMemory' });
-            this.supportedBinaryOperators = this.operationProvider.storageProvider.supportedBinaryOperators;
-            this.supportedSetOperations = this.operationProvider.storageProvider.supportedSetOperations;
-            this.supportedFieldOperations = this.operationProvider.storageProvider.supportedFieldOperations;
-            this.supportedUnaryOperators = this.operationProvider.storageProvider.supportedUnaryOperators;
-            this.operationProvider.onReady(callBack);
+        if (self.originalContext && self.providerConfiguration.memoryOperations) {
+            self.operationProvider = new self.originalContext({ name: 'InMemory' });
+            self.operationProvider.onReady({
+                success: function () {
+                    self.supportedBinaryOperators = self.operationProvider.storageProvider.supportedBinaryOperators;
+                    self.supportedSetOperations = self.operationProvider.storageProvider.supportedSetOperations;
+                    self.supportedFieldOperations = self.operationProvider.storageProvider.supportedFieldOperations;
+                    self.supportedUnaryOperators = self.operationProvider.storageProvider.supportedUnaryOperators;
+                    callBack.success();
+                },
+                error: callBack.error
+            });
         } else {
             callBack.success();
         }
