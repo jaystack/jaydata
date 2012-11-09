@@ -686,7 +686,7 @@ $C('$data.storageProviders.mongoDB.mongoDBOrderCompiler', $data.storageProviders
     },
     VisitMemberInfoExpression: function (expression, context) {
         if (context.data) context.data += '.';
-        context.data += expression.memberName;
+        context.data += expression.memberDefinition.computed ? '_id' : expression.memberName;
     }
 });
 
