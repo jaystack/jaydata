@@ -584,5 +584,23 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
 $data.service = function (serviceUri, cb, config) {
-    $data.MetadataLoader.load(serviceUri, cb, config);
+    var cfg;
+    if (typeof serviceUri === 'object') {
+        //appId, serviceName, ownerid, isSSL, port
+        cfg = serviceUri;
+        var protocol = cfg.isSSL || cfg.isSSL === undefined ? 'https' : 'http';
+        var port = cfg.port ? (':' + cfg.port) : '';
+
+        if (cfg.ownerId) {
+            serviceUri = protocol + '://open.jaystack.net/' + cfg.ownerId + '/' + cfg.appId + '/api/' + cfg.serviceName;
+        } else {
+            serviceUri = protocol + '://' + cfg.appId + '.jaystack.net' + port + '/' + cfg.serviceName;
+        }
+
+        cfg = $data.typeSystem.extend(cfg, config);
+    } else {
+        cfg = config;
+    }
+
+    $data.MetadataLoader.load(serviceUri, cb, cfg);
 };
