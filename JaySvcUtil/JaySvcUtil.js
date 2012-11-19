@@ -13,7 +13,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             url: metadataUri,
             user: undefined,
             password: undefined,
-            withCredentials: undefined
+            withCredentials: undefined,
+            httpHeaders: undefined
         };
 
         $data.typeSystem.extend( cnf, config || {});
@@ -61,7 +62,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     metadataUri: self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version],
                     user: cnf.user,
                     password: cnf.password,
-                    headers: cnf.headers
+                    httpHeaders: cnf.httpHeaders
                 }, function (xsl, response) {
                     if (response.statusCode < 200 || response.statusCode > 299) {
                         callBack.error(response);

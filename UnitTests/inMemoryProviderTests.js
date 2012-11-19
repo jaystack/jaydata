@@ -988,12 +988,12 @@
                         equal(res.length, 1, 'result length failed');
 
                         deepEqual(res[0], {
-                            contains: title.contains('hello'),
-                            contains2: title.contains('hello2'),
-                            notcontains: !title.contains('hello'),
-                            startsWith: title.startsWith('  hello'),
-                            startsWith2: title.startsWith('hello'),
-                            endsWith: title.endsWith('world   '),
+                            contains: $data.StringFunctions.contains(title, 'hello'),
+                            contains2: $data.StringFunctions.contains(title, 'hello2'),
+                            notcontains: !$data.StringFunctions.contains(title, 'hello'),
+                            startsWith: $data.StringFunctions.startsWith(title, '  hello'),
+                            startsWith2: $data.StringFunctions.startsWith(title, 'hello'),
+                            endsWith: $data.StringFunctions.endsWith(title, 'world   '),
                             length: title.length,
                             substr: title.substr(2),
                             substr2: title.substr(2, 3),

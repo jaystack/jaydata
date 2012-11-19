@@ -4,7 +4,8 @@
 
     function xtest() { };
 
-    test('simplified entity context constructor', 3, function() {
+    test('simplified entity context constructor', 3, function () {
+        stop();
 
         $data.Entity.extend("Article", {
             Id: { type: 'int', key: true, computed: true },
@@ -14,14 +15,25 @@
         $data.EntityContext.extend("mine", {
             Articles: { type: $data.EntitySet, elementType: Article }
         });
+
+
         var db = new mine("http://localhost:50594/jaydata/Services/emptyNewsReader.svc");
-        ok(db.storageProvider instanceof $data.storageProviders.oData.oDataProvider, "provider type guessed correctly from url");
+        db.onReady(function () {
+            ok(db.storageProvider instanceof $data.storageProviders.oData.oDataProvider, "provider type guessed correctly from url");
 
-        db = new mine("FooBarDb");
-        ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init string");
+            db = new mine("FooBarDb");
+            db.onReady(function () {
+                ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init string");
 
-        db = new mine({ provider: 'sqLite', databaseName: "FooBarDb" });
-        ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init data");
+                db = new mine({ provider: 'sqLite', databaseName: "FooBarDb" });
+                db.onReady(function () {
+                    ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init data");
+                    start();
+                });
+            });
+        });
+
+        
 
     });
 
@@ -31,13 +43,11 @@
             Id: { type: 'int', key: true, computed: true },
             Field: { type: String }
         });
-        
-        var contextFactory = $data.Entity.getDefaultItemStoreFactory(new MyType2());
-        var contextInstance = new contextFactory();
+
+        var contextInstance = $data.ItemStore._getDefaultItemStoreFactory(new MyType2());
         ok(contextInstance instanceof $data.EntityContext, "context is EntityContext");
 
-        var contextFactory = $data.Entity.getDefaultItemStoreFactory(MyType2);
-        var contextIntance = new contextFactory();
+        contextInstance = $data.ItemStore._getDefaultItemStoreFactory(MyType2);
         ok(contextInstance instanceof $data.EntityContext, "context is EntityContext");
 
         stop(1);
@@ -97,7 +107,7 @@
 
         stop(1);
         $data("Cart10")
-            .save({ Value:15, Product: "AAAA" })
+            .save({ Value: 15, Product: "AAAA" })
             .then(function (item) {
                 start(1);
                 ok(true, "first save done")
@@ -107,7 +117,7 @@
                 console.log("before resave", JSON.stringify(item));
                 return item.save();
             })
-            .then(function(item) {
+            .then(function (item) {
                 return $data("Cart10").read(item.Id);
             })
             .then(function (resaveditem) {
@@ -276,4 +286,152 @@
             });
         });
     });
+
+
+
+
+    $data.Entity.extend("ItemStore.Example.Article", {
+        Id: { type: 'int', key: true, computed: true },
+        Title: { type: 'string' }
+    });
+
+    $data.EntityContext.extend("ItemStore.Example.Context", {
+        Articles: { type: $data.EntitySet, elementType: ItemStore.Example.Article }
+    });
+
+    var factory = function () {
+        return new ItemStore.Example.Context({ name: 'local', databaseName: 'mine_DB' });
+    }
+
+    test('$data implementation', 3, function () {
+        stop();
+        var context = factory();
+
+        context.onReady(function () {
+            start();
+            equal($data('ItemStore.Example.Article').fullName, 'ItemStore.Example.Article', 'type resolve from context instance');
+
+            equal($data(context.getType(), 'Article').fullName, 'ItemStore.Example.Article', 'type resolve from context type');
+            equal($data(context, 'Article').fullName, 'ItemStore.Example.Article', 'type resolve from context instance');
+
+
+            $data.ItemStore = new $data.ItemStoreClass();
+        });
+    });
+
+    test('storeFactory on entities', 10, function () {
+        stop(1);
+
+        $data.addStore('remote', factory, true);
+
+        var item = new ItemStore.Example.Article({ Title: 'first' });
+        equal(typeof item.storeFactory, 'undefined', 'store factory not set on new item');
+
+        item.save().then(function (item) {
+            ok(true, 'item saved');
+
+            equal(typeof item.storeFactory, 'undefined', 'store factory not set on new item');
+
+            item.Title = 'asdasd';
+            equal(item.Title, 'asdasd', 'item Title after refresh');
+            item.refresh().then(function (rItem) {
+                equal(item.Title, 'first', 'item Title after refresh');
+                equal(rItem.Title, 'first', 'item Title after refresh');
+
+                $data('ItemStore.Example.Article').read(item.Id).then(function (item) {
+                    equal(typeof item.storeFactory, 'function', 'store factory set on loaded item');
+
+                    $data('ItemStore.Example.Article').readAll().then(function (items) {
+                        equal(typeof items[0].storeFactory, 'function', 'store factory set on loaded item');
+
+
+                        var context = factory();
+                        context.onReady(function () {
+                            context.Articles.first()
+                                .then(function (item) {
+                                    equal(typeof item.storeFactory, 'function', 'store factory set on loaded item');
+
+                                    $data('ItemStore.Example.Article').removeAll()
+                                        .then(function () {
+                                            return $data('ItemStore.Example.Article').itemCount()
+                                                .then(function (count) {
+                                                    equal(count, 0, 'items deleted');
+                                                    $data.ItemStore = new $data.ItemStoreClass();
+                                                    start();
+                                                });
+                                        });
+                                });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test('load entity from standard context and save', 3, function () {
+        stop(1);
+        $data.addStore('dummy', function () { ok(false, 'dummy store factory'); throw 'wrong code running'; }, true);
+
+        var context = factory();
+        context.onReady(function () {
+            var item = new ItemStore.Example.Article({ Title: 'first' });
+            context.add(item);
+
+            context.saveChanges(function () {
+                context.Articles.first().then(function (item2) {
+                    item2.Title = 'changed Title';
+                    item2.save()
+                        .then(function () {
+                            context.Articles.toArray().then(function (items) {
+                                equal(items.length, 1, 'result count failed');
+                                equal(items[0].Id, item.Id, 'result Id failed');
+                                equal(items[0].Title, 'changed Title', 'result Title failed');
+
+                                items[0].remove()
+                                    .then(function () {
+                                    $data.ItemStore = new $data.ItemStoreClass();
+                                    start();
+                                });
+                            });
+                        });
+                });
+            });
+
+        });
+    });
+
+    test('default factory change', 6, function () {
+        stop(1);
+
+        $data.addStore('remote', factory, true);
+
+        var item = new ItemStore.Example.Article({ Title: 'first' });
+        equal(typeof item.storeFactory, 'undefined', 'store factory not set on new item');
+
+        item.save().then(function (item) {
+            ok(true, 'item saved');
+
+            equal(typeof item.storeFactory, 'undefined', 'store factory not set on new item');
+
+            
+            $data.addStore('dummy', function () { ok(false, 'dummy store factory'); throw 'wrong code running'; }, true);
+
+            $data('ItemStore.Example.Article').read(item.Id, 'remote').then(function (item2) {
+                equal(item2.Id, item2.Id, 'item Id');
+                equal(item2.Title, item2.Title, 'item Title');
+
+                $data('ItemStore.Example.Article').removeAll('remote')
+                    .then(function () {
+                        return $data('ItemStore.Example.Article').itemCount('remote')
+                            .then(function (count) {
+                                equal(count, 0, 'items deleted');
+                                $data.ItemStore = new $data.ItemStoreClass();
+                                start();
+                            });
+                    });
+            });
+        });
+    });
+
+
 });

@@ -46,6 +46,8 @@ $data.Class.define('$data.EntityContext', null, null,
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
+        var origConfig = JSON.parse(JSON.stringify(storageProviderCfg));
+        
         if ("string" === typeof storageProviderCfg) {
             if (0 === storageProviderCfg.indexOf("http")) {
                 storageProviderCfg = {
@@ -141,6 +143,10 @@ $data.Class.define('$data.EntityContext', null, null,
             }
             this[delegateName].fire(data);
         };
+
+        this._contextFactory = function () {
+            return new (ctx.getType())(origConfig);
+        }
         /*
         while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
         if (providerType){
@@ -614,6 +620,10 @@ $data.Class.define('$data.EntityContext', null, null,
         var clbWrapper = {};
         clbWrapper.success = function (query) {
             query.buildResultSet(that);
+
+            if ($data.ItemStore && 'QueryResultModifier' in $data.ItemStore)
+                $data.ItemStore.QueryResultModifier.call(that, query);
+
             var successResult;
             
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
@@ -638,7 +648,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 successResult = query.result;
             }
             
-            var readyFn = function(){
+            var readyFn = function () {
                 callBack.success(successResult);
             };
             
@@ -1438,7 +1448,8 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.remove(entity);
-    }
+    },
+    _contextFactory: { type: Function }
 }, {
     generateServiceOperation: function (cfg) {
 

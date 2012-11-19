@@ -98,6 +98,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/EntitySet.js\
 	$(TYPES_DIR)/EntityState.js\
 	$(TYPES_DIR)/EntityStateManager.js\
+	$(TYPES_DIR)/ItemStore.js\
 	$(TYPES_DIR)/Exception.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
