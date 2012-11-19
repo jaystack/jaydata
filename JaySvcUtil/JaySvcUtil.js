@@ -197,7 +197,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             return resultDocument.textContent;
         } else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
             var xslt = require('node_xslt');
-            var libxml = require('libxmljs');
 
             return xslt.transform(xslt.readXsltString(transformXslt), xslt.readXmlString(metadata), [
                 'SerivceUri', "'" + cnf.SerivceUri + "'",
@@ -230,26 +229,21 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 version: versionNum || 'unknown'
             };
         }else if (typeof module !== 'undefined' && typeof require !== 'undefined'){
-            var xslt = require('node_xslt');
-            var libxml = require('libxmljs');
-
             var schemaXml = metadata;
+            
             var schemaNamespace = 'http://schemas.microsoft.com/ado/2008/09/edm';
-
-            /*var parserEvents = {
-             startElementNS: function() {
-             if ('Schema' === arguments[0]){
-             schemaNamespace = arguments[3];
-             }
-             }
-             };
-
-             var parser = new libxml.SaxParser(parserEvents);
-             parser.parseString(schemaXml);*/
+            var version = 'nodejs';
+            for (var i in this._supportedODataVersions){
+                if (schemaXml.search(new RegExp('<Schema.+xmlns=\"' + i + '\"', 'gi')) >= 0){
+                    schemaNamespace = i;
+                    version = this._supportedODataVersions[i];
+                    break;
+                }
+            }
 
             return {
                 ns: schemaNamespace,
-                version: 'nodejs'
+                version: version
             }
         }
     },
