@@ -47,7 +47,7 @@
                                 if (result) batchResult.push({ __changeRequests: result });
                                 saveSuccess();
                             },
-                            error: function () { cbWrapper.error(batchResult) }
+                            error: function (e) { cbWrapper.error(e === 'Authorization failed' ? e : batchResult) }
                         });
 
                     } else {
@@ -56,7 +56,7 @@
                                 if (result) batchResult.push(result);
                                 saveSuccess();
                             },
-                            error: function () { cbWrapper.error(batchResult) }
+                            error: function (e) { cbWrapper.error(e === 'Authorization failed' ? e : batchResult) }
                         });
 
                     }
@@ -67,7 +67,7 @@
             saveSuccess();
 
         } else {
-            cbWrapper.error();
+            cbWrapper.error(new Exception('Parse request failed', 'Bad Request'));
         }
 
         //processResponse
@@ -152,7 +152,7 @@
             success: function () {
                 callback.success(referenceData);
             },
-            error: function () { callback.error(); }
+            error: function (e) { callback.error(e); }
         });
     },
     _processBatchRead: function (getBatchrequest, req, res, callback) {

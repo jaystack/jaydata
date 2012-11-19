@@ -140,6 +140,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 res.end();
             }
         }).fail(function (err) {
+            if (err === 'Authorization failed') {
+                res.statusCode = 401;
+            }
             next(err);
         });
     },
