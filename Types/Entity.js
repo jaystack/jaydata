@@ -369,8 +369,9 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// </param>
         /// <returns>value associated for [i]memberDefinition[/i]</returns>
 
+        callback = $data.typeSystem.createCallbackSetting(callback);
         if (this[memberDefinition.name] != undefined) {
-            callback(this[memberDefinition.name]);
+            callback.success(this[memberDefinition.name]);
             return;
         }
 
@@ -385,7 +386,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="value" />
         /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
-        callback();
+        
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        var pHandler = new $data.PromiseHandler();
+        callBack = pHandler.createCallback(callback);
+        callback.success(this[memberDefinition.name]);
+        return pHandler.getPromise();
     },
 
     isValid: function () {
