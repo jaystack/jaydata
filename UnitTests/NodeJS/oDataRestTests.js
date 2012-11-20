@@ -130,8 +130,16 @@ $example.Context.generateTestData = function (ctx, callback) {
 
 $example.Context.generateTestData.serviceurl = '/testservice';
 $example.Context.generateTestData.itemsInTables = 10;
-$example.Context.getContext = function () {
-    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl, serviceUrl: $example.Context.generateTestData.serviceurl, user: 'asd', password: 'asd' });
+$example.Context.getContext = function (cfg) {
+    var config = $data.typeSystem.extend({ 
+        name: 'oData', 
+        oDataServiceHost: $example.Context.generateTestData.serviceurl, 
+        serviceUrl: $example.Context.generateTestData.serviceurl, 
+        user: 'asd', 
+        password: 'asd'
+    }, cfg || {});
+
+    var ctx = new $example.Context(config);
     return ctx;
 };
 
@@ -1550,6 +1558,33 @@ test("FunctionImport - FuncComplexMultiResArray", 220, function () {
                 }
             }
             start();
+        });
+    });
+});
+
+test("REST - GET JSONP", 9, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context = $example.Context.getContext({ oDataServiceHost: ('http://' + location.host + $example.Context.generateTestData.serviceurl).replace('3001', '3002'), enableJSONP: true });
+        context.onReady(function () {
+            context.Orders.toArray(function (orders) {
+                var order = orders[0];
+
+                equal(order.Date instanceof Date, true, 'date result failed');
+                ok(order.Date > new Date(1980), true, 'date result value failed');
+                equal(typeof order.Completed, 'boolean', 'bool result failed');
+                equal(typeof order.Value, 'number', 'int result failed');
+                equal(typeof order.Id, 'string', 'id result failed');
+                notEqual(order.Id.indexOf("'"), 0, 'id result failed');
+
+                equal(typeof order.Data, 'object', 'Data result failed');
+                equal(typeof order.Data.a, 'number', 'Data.a result failed');
+                equal(typeof order.Data.b, 'number', 'Data.b result failed');
+
+                start();
+            });
         });
     });
 });

@@ -15,7 +15,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             maxDataServiceVersion: '2.0',
             user: null,
             password: null,
-            withCredentials: false
+            withCredentials: false,
+            enableJSONP: false
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -127,6 +128,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
+                enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 }
