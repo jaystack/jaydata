@@ -1230,8 +1230,8 @@ test("Delete item with guid key", 2, function () {
                     equal(cnt, 0, 'delete failed');
                     context.TestItemGuids.length(function (count) {
                         equal(count, items.length - 1, 'delete failed all result');
+                        start();
                     });
-                    start();
                 });
             });
         });
@@ -1253,8 +1253,8 @@ test("Delete item by guid", 2, function () {
                     equal(cnt, 0, 'delete failed');
                     context.TestItemGuids.length(function (count) {
                         equal(count, items.length - 1, 'delete failed all result');
+                        start();
                     });
-                    start();
                 });
             });
         });
