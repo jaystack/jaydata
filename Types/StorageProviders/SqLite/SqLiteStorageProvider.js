@@ -48,7 +48,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             fromDb: {
                 "$data.Integer": function (number) { return number; },
                 "$data.Number": function (number) { return number; },
-                "$data.Date": function (dbData) { return new Date(dbData); },
+                "$data.Date": function (dbData) { return dbData != null ? new Date(dbData) : dbData; },
                 "$data.String": function (text) { return text; },
                 "$data.Boolean": function (b) { return b === 1 ? true : false; },
                 "$data.Blob": function (blob) { return blob; },
