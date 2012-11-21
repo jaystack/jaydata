@@ -85,6 +85,13 @@
             return new $data.Geography(data[0], data[1]);
         }
         return value;
+    },
+    '$data.Guid': function (config, value) {
+        if (/^guid'\w{8}-\w{4}-\w{4}-\w{4}-\w{12}'$/.test(value)) {
+            var data = value.slice(5, value.length - 1)
+            return $data.parseGuid(data);
+        }
+        return value;
     }
 
 

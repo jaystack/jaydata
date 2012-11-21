@@ -60,13 +60,17 @@ $data.Class.define("$data.JayService", null, null, {
         return new $data.XmlResult(data);
     },
     routeParser: function (app, req) {
-        var schema = 'http';
-        if (req && req.headers) {
-            if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
-                schema += 's';
+        if (!(typeof req.fullRoute === 'string' && req.fullRoute.length)){
+            var schema = 'http';
+            if (req && req.headers) {
+                if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
+                    schema += 's';
 
-            if (req.headers.host) {
-                req.fullRoute = schema + '://' + req.headers.host + app.route;
+                if (req.headers.host) {
+                    var appOwnerId = typeof req.getAppOwnerId === 'function' ? req.getAppOwnerId() : undefined;
+                    var appId = typeof req.getAppId === 'function' ? req.getAppId() : undefined;                
+                    req.fullRoute = (appOwnerId && appId ? schema + '://' + req.headers.host + '/' + appOwnerId + '/' + appId + '/api' + app.route : schema + '://' + req.headers.host + app.route);
+                }
             }
         }
     }

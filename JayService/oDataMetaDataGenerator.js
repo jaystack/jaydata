@@ -1,4 +1,4 @@
-﻿var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
+﻿var xmldom = require('xmldom');
 
 $data.Class.define('$data.oDataServer.MetaDataGeneratorRole', null, null, {
     constructor: function (typeName, entitySetName, multiplicity) {
@@ -669,7 +669,8 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
             '$data.ObjectID': 'Edm.String',
-            '$data.Geography': 'Edm.GeographyPoint'
+            '$data.Geography': 'Edm.GeographyPoint',
+            '$data.Guid': 'Edm.Guid'
         }
     },
 
@@ -793,21 +794,21 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
 
         var xmlString = '<root>' + commentLines.join('\n') + '</root>';
 
-        var xml = parseXML(xmlString);
+        var xml = (new xmldom.DOMParser()).parseFromString(xmlString, 'application/xml');
 
         var resultDef = target || {};
 
         for (var defName in this.supportedFunctionDefinitisons) {
             var def = this.supportedFunctionDefinitisons[defName];
             var fieldName = def.fieldName || defName;
-            var elements = xml.find('//' + (def.elementName || defName));
+            var elements = xml.getElementsByTagName(def.elementName || defName);
             if (def.single) {
                 if (def.attrValue) {
                     if (elements.length === 0)
                         continue;
-                    var attr = elements[0].attr(def.attrValue);
+                    var attr = elements[0].getAttribute(def.attrValue);
                     if (attr)
-                        resultDef[fieldName] = resultDef[fieldName] || attr.value();
+                        resultDef[fieldName] = resultDef[fieldName] || attr;
                 } else {
                     if (elements.length > 0)
                         resultDef[fieldName] = resultDef[fieldName] || true;
@@ -866,12 +867,12 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
                         if (i === 0)
                             this.params = [];
 
-                        var nameAttr = xmlDomElements[i].attr('name');
-                        var typeAttr = xmlDomElements[i].attr('type');
+                        var nameAttr = xmlDomElements[i].getAttribute('name');
+                        var typeAttr = xmlDomElements[i].getAttribute('type');
                         if (nameAttr && typeAttr) {
                             var param = {};
-                            param['name'] = nameAttr.value();
-                            param['type'] = typeAttr.value();
+                            param['name'] = nameAttr;
+                            param['type'] = typeAttr;
                             this.params.push(param);
                         }
 

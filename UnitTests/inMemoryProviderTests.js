@@ -715,4 +715,299 @@
         });
     });
 
+    test('filter not operator', 5, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Categories.filter(function (c) { return !(c.Title == 'Sport'); }).toArray(function (res) {
+                    equal(res.length, 4, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Category, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - contains', 7, function () {
+        stop(2);
+        
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.contains('ticle2'); }).toArray(function (res) {
+                    equal(res.length, 6, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - startsWith', 7, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.startsWith('Article2'); }).toArray(function (res) {
+                    equal(res.length, 6, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - endsWith', 6, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.endsWith('1'); }).toArray(function (res) {
+                    equal(res.length, 5, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - length', 6, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.length() == 8 }).toArray(function (res) {
+                    equal(res.length, 5, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - substr', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.substr(2) == "ticle21" }).toArray(function (res) {
+                    equal(res.length, 1, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - substr 2 param', 7, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.substr(2, 6) == "ticle2" }).toArray(function (res) {
+                    equal(res.length, 6, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - toLowerCase', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.toLowerCase() == "article1" }).toArray(function (res) {
+                    equal(res.length, 1, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - toUpperCase', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.toUpperCase() == "ARTICLE1" }).toArray(function (res) {
+                    equal(res.length, 1, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - trim', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: '  hello world   ', Lead: 'lead' });
+                db.saveChanges(function () { 
+                    db.Articles.filter(function (a) { return a.Title.trim() == "hello world" }).toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    test('filter field operation - ltrim', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: '  hello world   ', Lead: 'lead' });
+                db.saveChanges(function () {
+                    db.Articles.filter(function (a) { return a.Title.ltrim() == "hello world   " }).toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    test('filter field operation - rtrim', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: '  hello world   ', Lead: 'lead' });
+                db.saveChanges(function () {
+                    db.Articles.filter(function (a) { return a.Title.rtrim() == "  hello world" }).toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    test('map field operation', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var title = '  hello world   ';
+                db.Articles.add({ Title: title, Lead: 'lead' });
+                db.saveChanges(function () {
+                    db.Articles.filter(function (a) { return a.Title == "  hello world   " })
+                        .map(function (a) {
+                            return {
+                                contains: a.Title.contains('hello'),
+                                contains2: a.Title.contains('hello2'),
+                                notcontains: !a.Title.contains('hello'),
+                                startsWith: a.Title.startsWith('  hello'),
+                                startsWith2: a.Title.startsWith('hello'),
+                                endsWith: a.Title.endsWith('world   '),
+                                length: a.Title.length(),
+                                substr: a.Title.substr(2),
+                                substr2: a.Title.substr(2,3),
+                                toLowerCase: a.Title.toLowerCase(),
+                                toUpperCase: a.Title.toUpperCase(),
+                                trim: a.Title.trim(),
+                                ltrim: a.Title.ltrim(),
+                                rtrim: a.Title.rtrim()
+                            };
+                        })
+                        .toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        deepEqual(res[0], {
+                            contains: $data.StringFunctions.contains(title, 'hello'),
+                            contains2: $data.StringFunctions.contains(title, 'hello2'),
+                            notcontains: !$data.StringFunctions.contains(title, 'hello'),
+                            startsWith: $data.StringFunctions.startsWith(title, '  hello'),
+                            startsWith2: $data.StringFunctions.startsWith(title, 'hello'),
+                            endsWith: $data.StringFunctions.endsWith(title, 'world   '),
+                            length: title.length,
+                            substr: title.substr(2),
+                            substr2: title.substr(2, 3),
+                            toLowerCase: title.toLowerCase(),
+                            toUpperCase: title.toUpperCase(),
+                            trim: title.trim(),
+                            ltrim: title.trimLeft(),
+                            rtrim: title.trimRight()
+                        });
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
 });

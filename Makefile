@@ -1,4 +1,4 @@
-VERSION = '1.2.3'
+VERSION = '1.2.4'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules
@@ -30,6 +30,7 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
 	$(TYPESYSTEM_DIR)/Types/Guid.js\
 	$(TYPESYSTEM_DIR)/Types/EdmTypes.js\
+	$(TYPESYSTEM_DIR)/Extensions.js\
 
 VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
 
@@ -97,6 +98,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/EntitySet.js\
 	$(TYPES_DIR)/EntityState.js\
 	$(TYPES_DIR)/EntityStateManager.js\
+	$(TYPES_DIR)/ItemStore.js\
 	$(TYPES_DIR)/Exception.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
@@ -210,7 +212,7 @@ npmjaydata-core: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
 	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-core/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata-core/lib/index.js
-	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1", "libxmljs": "0.5.4"},/;s/"name": "jaydata"/"name": "jaydata-core"/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata-core/package.json
+	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1"},/;s/"name": "jaydata"/"name": "jaydata-core"/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata-core/package.json
 
 npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata npm package..."
@@ -248,7 +250,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./service_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
-	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1", "libxmljs": "0.5.4"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
+	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
 
 npmindexeddb: $(IndexedDbProvider) $(CREDITS)
 	@@echo "Building IndexedDb provider npm package..."

@@ -686,7 +686,7 @@ $C('$data.storageProviders.mongoDB.mongoDBOrderCompiler', $data.storageProviders
     },
     VisitMemberInfoExpression: function (expression, context) {
         if (context.data) context.data += '.';
-        context.data += expression.memberName;
+        context.data += expression.memberDefinition.computed ? '_id' : expression.memberName;
     }
 });
 
@@ -1251,7 +1251,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         return serializableObject;
     },
     
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.Geography], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.Geography, $data.Guid], writable: false },
     
     supportedBinaryOperators: {
         value: {
@@ -1438,7 +1438,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
-                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g; }
+                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g; },
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
@@ -1466,7 +1467,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii'));
                     }else return id;
                 },
-                '$data.Geography': function (g) { return g ? [g.longitude, g.latitude] : g; }
+                '$data.Geography': function (g) { return g ? [g.longitude, g.latitude] : g; },
+                "$data.Guid": function (g) { return g ? g.value : g; }
             }
         }
     }

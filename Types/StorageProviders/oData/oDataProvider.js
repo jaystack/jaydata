@@ -15,7 +15,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             maxDataServiceVersion: '2.0',
             user: null,
             password: null,
-            withCredentials: false
+            withCredentials: false,
+            enableJSONP: false
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -127,6 +128,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
+                enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 }
@@ -244,7 +246,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 callBack.error(response);
             }
 
-        }, callBack.error];
+        }, function (e) {
+            callBack.error(new Exception((e.response || {}).body, e.message, e));
+        }];
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {
@@ -327,11 +331,11 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         }, this);
 
                     } else {
-                        errors.push(result[i]);
+                        errors.push(new Exception((result[i].response || {}).body, result[i].message, result[i]));
                     }
                 }
                 if (errors.length > 0) {
-                    callBack.error(errors);
+                    callBack.error(new Exception('See inner exceptions','Batch failed', errors));
                 } else if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
@@ -339,7 +343,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 callBack.error(response);
             }
 
-        }, callBack.error, OData.batchHandler];
+        }, function (e) {
+            callBack.error(new Exception((e.response || {}).body, e.message, e));
+        }, OData.batchHandler];
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {

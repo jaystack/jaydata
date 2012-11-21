@@ -3,17 +3,17 @@ window.DOMParser = require('xmldom').DOMParser;
 
 var nodeunit = require('nodeunit');
 var util = require('util');
-require('../../NewsReaderContext.js');
+require('./NewsReaderContext.js');
 
-exports['commonTests'] = require('./commonTests.js');
-exports['EntityTransform'] = require('./EntityTransformTests.js');
-exports['oDataMetaDataGenerator'] = require('./oDataMetaDataGeneratorTests.js');
-exports['oDataResponseDataBuilder'] = require('./oDataResponseDataBuilderTests.js');
-exports['oDataBatchTest'] = require('./oDataBatchTests.js');
-exports['argumentBinderTests'] = require('./argumentBinderTests.js');
-exports['oDataXmlResultTests'] = require('./oDataXmlResultTests.js');
+exports['commonTests'] = require('./UnitTests/NodeJS/commonTests.js');
+exports['EntityTransform'] = require('./UnitTests/NodeJS/EntityTransformTests.js');
+exports['oDataMetaDataGenerator'] = require('./UnitTests/NodeJS/oDataMetaDataGeneratorTests.js');
+exports['oDataResponseDataBuilder'] = require('./UnitTests/NodeJS/oDataResponseDataBuilderTests.js');
+exports['oDataBatchTest'] = require('./UnitTests/NodeJS/oDataBatchTests.js');
+exports['argumentBinderTests'] = require('./UnitTests/NodeJS/argumentBinderTests.js');
+exports['oDataXmlResultTests'] = require('./UnitTests/NodeJS/oDataXmlResultTests.js');
 
-exports['mongoProviderTests'] = require('../mongoProviderTests.js');
+exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js');
 
 var connect = require('connect');
 var app = connect();
@@ -96,7 +96,8 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     FuncDateParam: (function (a) {
         ///<param name="a" type="date"/>
         ///<returns type="date"/>
-        return a; }),
+        return a;
+    }),
     FuncGeographyParam: (function (a) {
         ///<param name="a" type="geo"/>
         ///<returns type="geo"/>
@@ -131,10 +132,10 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
 $exampleSrv.Context.annotateFromVSDoc();
 
 var onException = false;
-app.use(function(req, res, next){
-    if (!onException){
-        process.on('uncaughtException', function(err){
-            if (req.tracker){
+app.use(function (req, res, next) {
+    if (!onException) {
+        process.on('uncaughtException', function (err) {
+            if (req.tracker) {
                 var u = 0;
                 if (u = req.tracker.unfinished()) {
                     var str = '<ul>';
@@ -146,7 +147,7 @@ app.use(function(req, res, next){
                     str += '</ul>';
                     next(str);
                 }
-            }else{
+            } else {
                 next(err);
             }
         });
@@ -174,15 +175,14 @@ app.use(connect.query());
 app.use(connect.bodyParser());
 app.use($data.JayService.OData.Utils.simpleBodyReader());
 
-app.use("/", connect.static(__dirname + "/../../"));
-//app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
+app.use("/", connect.static(__dirname));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
     return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
 
-app.use("/nodeunit", function(req, res, next){
+app.use("/nodeunit", function (req, res, next) {
     var reporter = {
-        run: function(files, options, callback){
+        run: function (files, options, callback) {
             var utils = {
                 betterErrors: function (assertion) {
                     if (!assertion.error) return assertion;
@@ -207,7 +207,7 @@ app.use("/nodeunit", function(req, res, next){
                     return assertion;
                 }
             };
-            
+
             var track = {
                 createTracker: function (on_exit) {
                     var names = {};
@@ -231,16 +231,16 @@ app.use("/nodeunit", function(req, res, next){
                             delete names[testname];
                         }
                     };
-                    
+
                     req.tracker = tracker;
 
                     return tracker;
                 },
                 default_on_exit: function (tracker) {
-                    
+
                 }
             };
-            
+
             res.write('<html>');
             res.write('<head>');
             res.write('<title>JayData NodeUnit Tests</title>');
@@ -260,7 +260,7 @@ app.use("/nodeunit", function(req, res, next){
             res.write('</style>');
             res.write('</head>');
             res.write('<body>');
-            
+
             var start = new Date().getTime();
             var tracker = track.createTracker(function (tracker) {
                 if (tracker.unfinished()) {
@@ -278,7 +278,7 @@ app.use("/nodeunit", function(req, res, next){
                     process.reallyExit(tracker.unfinished());
                 }
             });
-            
+
             var opts = {
                 moduleStart: function (name) {
                     res.write('<h2>' + name + '</h2>');
@@ -312,7 +312,7 @@ app.use("/nodeunit", function(req, res, next){
                     var duration = end - start;
                     if (assertions.failures()) {
                         res.write(
-                            '<h3>FAILURES: '  + assertions.failures() +
+                            '<h3>FAILURES: ' + assertions.failures() +
                             '/' + assertions.length + ' assertions failed (' +
                             assertions.duration + 'ms)</h3>'
                         );
@@ -328,22 +328,22 @@ app.use("/nodeunit", function(req, res, next){
 
                     if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
                 },
-                testStart: function(name) {
+                testStart: function (name) {
                     tracker.put(name);
                 }
             };
-            
+
             if (files && files.length) {
                 var paths = files.map(function (p) {
                     return path.join(process.cwd(), p);
                 });
                 nodeunit.runFiles(paths, opts);
             } else {
-                nodeunit.runModules(files,opts);
+                nodeunit.runModules(files, opts);
             }
         }
     };
-    reporter.run(exports, null, function(err){
+    reporter.run(exports, null, function (err) {
         if (err) next(err);
         else res.end();
     });
@@ -446,7 +446,7 @@ $data.Class.defineEx('$exampleSrv.FuncContext', [$data.EntityContext, $data.Serv
 
             var res2 = [];
             for (var j = 0; j < 5; j++) {
-                res2.push(new $exampleSrv.ComplexT({ Name: a + i +j, Description: 'desc', Age: i +j, Created: new Date((2000 + i+j).toString() + '/01/01 01:01:01') }));
+                res2.push(new $exampleSrv.ComplexT({ Name: a + i + j, Description: 'desc', Age: i + j, Created: new Date((2000 + i + j).toString() + '/01/01 01:01:01') }));
             }
 
             res.push(new $exampleSrv.ComplexTWithArrayComplex({ Title: a + i, Complex: res2 }));
@@ -498,3 +498,4 @@ app.use("/funcservice", $data.JayService.createAdapter($exampleSrv.FuncContext, 
 
 
 app.listen(3001);
+app.listen(3002);

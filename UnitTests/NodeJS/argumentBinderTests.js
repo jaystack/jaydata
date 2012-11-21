@@ -167,6 +167,22 @@ exports.Test = {
             });
         });
     },
+    'guid binder': function (test) {
+        test.expect(3);
+
+        var guid = $data.parseGuid('12345678-1234-1234-1234-123412341234');
+        var result = $data.ArgumentBinder.defaultBinder('a', { type: $data.Guid }, { query: { a: "guid'12345678-1234-1234-1234-123412341234'" } });
+        test.equal(result.valueOf(), guid.valueOf(), 'Guid resolve failed1');
+
+        var context = $example.Context.getContext();
+        context.onReady(function () {
+            context.FuncGuidParam(guid, function (res) {
+                test.equal(res instanceof $data.Guid, true, 'Guid call resolve failed');
+                test.equal(res.valueOf(), guid.valueOf(), 'Guid resolve failed');
+                test.done();
+            });
+        });
+    }
     //'entity binder': function (test) {
     //    test.expect(2);
 

@@ -1,6 +1,6 @@
 $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', $data.StorageProviderBase, null,
 {
-    constructor: function (cfg) {
+    constructor: function (cfg, ctxInstance) {
         // mapping IndexedDB types to browser invariant name
         this.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
         this.IDBRequest = window.IDBRequest || window.webkitIDBRequest || window.mozIDBRequest || window.msIDBRequest;
@@ -21,9 +21,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         this.providerConfiguration = $data.typeSystem.extend({
             databaseName: 'JayDataDemo',
             version: 1,
-            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
+            dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
+            memoryOperations: true
         }, cfg);
         this._setupExtensionMethods();
+
+        if (ctxInstance)
+            this.originalContext = ctxInstance.getType();
     },
     supportedBinaryOperators: {
         value: {
@@ -46,6 +50,18 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             length: {},
             toArray: {},
             forEach: {}
+        },
+        enumerable: true,
+        writable: true
+    },
+    supportedFieldOperations: {
+        value: {
+        },
+        enumerable: true,
+        writable: true
+    },
+    supportedUnaryOperators: {
+        value: {
         },
         enumerable: true,
         writable: true
@@ -213,59 +229,93 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
-        var objectStoreDefinitions;
-        try {
-            objectStoreDefinitions = self._getObjectStoreDefinitions();
-        } catch (e) {
-            console.log(objectStoreDefinitions);
-            callBack.error(e);
-        }
-        self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks({
-            onsuccess: function (e) {
-                var db = e.target.result;
-                db.onversionchange = function (event) {
-                    return event.target.close();
-                };
 
-                var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
-                //oldAPI
-                if (db.setVersion) {
-                    if (db.version === "" || hasTableChanges) {
-                        db.setVersion(parseInt(db.version) || 1).onsuccess = function (e) {
-                            var db = e.target.result
-                            self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
-                                self.db = e.target.db;
-                                callBack.success(self.context);
-                            });
-                        }
-                        return;
-                    };
-                } else if (hasTableChanges) {
-                        //newVersionAPI
-                    db.close();
-                    var version = parseInt(db.version) + 1;
-                    self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
-                        onsuccess: function (e) {
-                            self.db = e.target.result;
-                            callBack.success(self.context);
-                        },
-                        onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
-                        onerror: callBack.error,
-                        onabort: callBack.error,
-                        onblocked: callBack.error
-                    });
-                    return;
+        this.initializeMemoryStore({
+            success: function () {
+                var objectStoreDefinitions;
+                try {
+                    objectStoreDefinitions = self._getObjectStoreDefinitions();
+                } catch (e) {
+                    console.log(objectStoreDefinitions);
+                    callBack.error(e);
                 }
+                self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks({
+                    onsuccess: function (e) {
+                        var db = e.target.result;
+                        db.onversionchange = function (event) {
+                            return event.target.close();
+                        };
 
-                self.db = db;
-                callBack.success(self.context);
+                        var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+                        //oldAPI
+                        if (db.setVersion) {
+                            if (db.version === "" || hasTableChanges) {
+                                db.setVersion(parseInt(db.version) || 1).setCallbacks({
+                                    onsuccess: function (e) {
+                                        var db = e.target.result
+                                        self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
+                                            self.db = e.target.db;
+                                            callBack.success(self.context);
+                                        });
+                                    },
+                                    onerror: function () {
+                                        var v = arguments;
+                                    },
+                                    onblocked: function () {
+                                        var v = arguments;
+                                    }
+                                });
+                                return;
+                            };
+                        } else if (hasTableChanges) {
+                            //newVersionAPI
+                            db.close();
+                            var version = parseInt(db.version) + 1;
+                            self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
+                                onsuccess: function (e) {
+                                    self.db = e.target.result;
+                                    callBack.success(self.context);
+                                },
+                                onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
+                                onerror: callBack.error,
+                                onabort: callBack.error,
+                                onblocked: callBack.error
+                            });
+                            return;
+                        }
+
+                        self.db = db;
+                        callBack.success(self.context);
+                    },
+                    //newVersionAPI
+                    onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
+                    onerror: callBack.error,
+                    onabort: callBack.error,
+                    onblocked: callBack.error
+                });
             },
-            //newVersionAPI
-            onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
-            onerror: callBack.error,
-            onabort: callBack.error,
-            onblocked: callBack.error
+            error: callBack.error
         });
+    },
+    initializeMemoryStore: function (callBack) {
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        var self = this;
+
+        if (self.originalContext && self.providerConfiguration.memoryOperations) {
+            self.operationProvider = new self.originalContext({ name: 'InMemory' });
+            self.operationProvider.onReady({
+                success: function () {
+                    self.supportedBinaryOperators = self.operationProvider.storageProvider.supportedBinaryOperators;
+                    self.supportedSetOperations = self.operationProvider.storageProvider.supportedSetOperations;
+                    self.supportedFieldOperations = self.operationProvider.storageProvider.supportedFieldOperations;
+                    self.supportedUnaryOperators = self.operationProvider.storageProvider.supportedUnaryOperators;
+                    callBack.success();
+                },
+                error: callBack.error
+            });
+        } else {
+            callBack.success();
+        }
     },
 
     _initializeStore: function (callBack) {
@@ -386,30 +436,56 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             onerror: callBack.error,
             onabort: callBack.error,
             oncomplete: function (event) {
-                callBack.success(query);
+                if (self.operationProvider) {
+                    self.operationProvider.storageProvider.providerConfiguration.source[entitySet.tableName] = query.rawDataList;
+                    self.operationProvider.storageProvider.executeQuery(query, {
+                        success: function (query) {
+                            if (query.expression.nodeType === $data.Expressions.ExpressionType.Count) {
+                                query.rawDataList[0] = { cnt: query.rawDataList[0] };
+                            }
+                            callBack.success(query);
+                        },
+                        error: callBack.error
+                    });
+                } else {
+                    callBack.success(query);
+                }
             }
         }).objectStore(entitySet.tableName);
         var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
         modelBinderCompiler.Visit(query.expression);
-        switch (query.expression.nodeType) {
-            case $data.Expressions.ExpressionType.Count:
-                store.count().onsuccess = function (event) {
-                    var count = event.target.result;
-                    query.rawDataList.push({ cnt: count });
+
+        if (self.operationProvider) {
+            store.openCursor().onsuccess = function (event) {
+                // We currently support only toArray() so let's just dump all data
+                var cursor = event.target.result;
+                if (cursor) {
+                    var value = cursor.value;
+                    query.rawDataList.push(cursor.value);
+                    cursor['continue']();
                 }
-                break;
-            default:
-                store.openCursor().onsuccess = function (event) {
-                    // We currently support only toArray() so let's just dump all data
-                    var cursor = event.target.result;
-                    if (cursor) {
-                        var value = cursor.value;
-                        query.rawDataList.push(cursor.value);
-                        cursor['continue']();
+            };
+        } else {
+            switch (query.expression.nodeType) {
+                case $data.Expressions.ExpressionType.Count:
+                    store.count().onsuccess = function (event) {
+                        var count = event.target.result;
+                        query.rawDataList.push({ cnt: count });
                     }
-                };
-                break;
-        }
+                    break;
+                default:
+                    store.openCursor().onsuccess = function (event) {
+                        // We currently support only toArray() so let's just dump all data
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            var value = cursor.value;
+                            query.rawDataList.push(cursor.value);
+                            cursor['continue']();
+                        }
+                    };
+                    break;
+            }
+        };
     },
     _getKeySettings: function (memDef) {
         /// <summary>

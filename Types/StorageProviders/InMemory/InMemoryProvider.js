@@ -56,7 +56,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                 }else if (resolvedType === $data.Guid){
 
                 }else{
-                    Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!'));
+                    Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!', 'ComputedKeyFieldError'));
                 }
             }
             //validate init data
@@ -217,7 +217,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         var compiled = this._compile(queryable);
         return compiled;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object], writable: false },
+    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Guid], writable: false },
 
     supportedBinaryOperators: {
         value: {
@@ -239,16 +239,72 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
 
     supportedUnaryOperators: {
         value: {
+            not: { mapTo: '!' }
         }
     },
 
     supportedFieldOperations: {
         value: {
+            contains: {
+                mapTo: "$data.StringFunctions.contains(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
 
+            startsWith: {
+                mapTo: "$data.StringFunctions.startsWith(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
+
+            endsWith: {
+                mapTo: "$data.StringFunctions.endsWith(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
+            length: {
+                dataType: "number",
+                propertyFunction: true
+            },
+            substr: {
+                mapTo: "substr(",
+                rightValue: ")",
+                dataType: "string",
+                parameters: [{ name: "startFrom", dataType: "number" }, { name: "length", dataType: "number" }],
+                propertyFunction: true
+            },
+            toLowerCase: {
+                dataType: "string", mapTo: "toLowerCase()",
+                propertyFunction: true
+            },
+            toUpperCase: {
+                dataType: "string", mapTo: "toUpperCase()",
+                propertyFunction: true
+            },
+            'trim': {
+                dataType: $data.String,
+                mapTo: 'trim()',
+                propertyFunction: true
+            },
+            'ltrim': {
+                dataType: $data.String,
+                mapTo: 'trimLeft()',
+                propertyFunction: true
+            },
+            'rtrim': {
+                dataType: $data.String,
+                mapTo: 'trimRight()',
+                propertyFunction: true
+            }
         },
         enumerable: true,
         writable: true
     },
+    
+
     supportedSetOperations: {
         value: {
             filter: {},
@@ -279,7 +335,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
-                '$data.Guid': function (guid) { return guid; }
+                '$data.Guid': function (guid) { return typeof guid === 'string' ? $data.parseGuid(guid) : guid; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },

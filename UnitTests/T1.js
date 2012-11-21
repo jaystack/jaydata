@@ -1,6 +1,38 @@
 ﻿function EntityContextTests(providerConfig, msg) {
     msg = msg || '';
     module("BugFix" + msg);
+
+    test('date null value', function () {
+        expect(2);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var a1 = new db.Articles.elementType({ Title: '123', Lead: 'asd', CreateDate: null });
+                db.Articles.add(a1);
+                db.saveChanges({
+                    success: function () {
+                        db.Articles.filter('it.Title === "123" || it.Id === 1').toArray(function (res) {
+                            if (res[0].CreateDate === null) {
+                                equal(res[0].CreateDate, null, 'CreateDate is null')
+                                notEqual(res[1].CreateDate, null, 'CreateDate not null')
+                            } else {
+                                equal(res[1].CreateDate, null, 'CreateDate is null')
+                                notEqual(res[0].CreateDate, null, 'CreateDate not null')
+                            }
+
+                            start();
+                        });
+                    },
+                    error: function () {
+                        ok(false, 'error called');
+                        start();
+                    }
+                });
+            });
+        });
+    });
     test('batch error handler called', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(1);

@@ -152,13 +152,18 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             for (var i in initData) {
                 if (memDefNames.indexOf(i) > -1) {
                     var type = Container.resolveType(typeMemDefs.getMember(i).type);
-                    if (type === $data.Date && typeof initData[i] === 'string')
-                        this.initData[i] = new Date(initData[i]);
-                    else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
-                        this.initData[i] = new $data.Geography(initData[i]);
-                    else {
+                    if (!Object.isNullOrUndefined(initData[i])) {
+                        if (type === $data.Date && typeof initData[i] === 'string')
+                            this.initData[i] = new Date(initData[i]);
+                        else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
+                            this.initData[i] = new $data.Geography(initData[i]);
+                        else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
+                            this.initData[i] = $data.parseGuid(initData[i]);
+                        else {
+                            this.initData[i] = initData[i];
+                        }
+                    } else {
                         this.initData[i] = initData[i];
-
                     }
                 }
             }
@@ -364,8 +369,9 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// </param>
         /// <returns>value associated for [i]memberDefinition[/i]</returns>
 
+        callback = $data.typeSystem.createCallbackSetting(callback);
         if (this[memberDefinition.name] != undefined) {
-            callback(this[memberDefinition.name]);
+            callback.success(this[memberDefinition.name]);
             return;
         }
 
@@ -380,7 +386,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="value" />
         /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
-        callback();
+        
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        var pHandler = new $data.PromiseHandler();
+        callBack = pHandler.createCallback(callback);
+        callback.success(this[memberDefinition.name]);
+        return pHandler.getPromise();
     },
 
     isValid: function () {
@@ -446,60 +457,23 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     //    this.__onReadyList.push(callback);
     //},
 
-
-    promiseWrapper: function (action, store, options) {
-
-        var self = this;
-        var pHandler = new $data.PromiseHandler();
-        var deferred = pHandler.deferred;
-        var pHandlerResult = pHandler.getPromise();
-        try {
-            var contextFactory = $data.Entity.getDefaultItemStoreFactory(self, store, options);
-            var context = contextFactory();
-            context.onReady(function () {
-                var result = action(context);
-                context.saveChanges({
-                    success: function () {
-                        deferred.resolve(result);
-                    },
-                    error: function (err) {
-                        deferred.reject(err);
-                    }
-                });
-            });
-            //var set = context.getEntitySetFromElementType(entity.getType());
-            
-        } catch (error) {
-            deferred.reject(error);
-        }
-        //deferred.resolve("!");
-
-        return pHandlerResult;
-    },
-
     remove: function (store, options, callback) {
-        var self = this;
-        return self.promiseWrapper(function (context) {
-            context.remove(self);
-            return self;
-        });
+        if ($data.ItemStore && 'EntityInstanceRemove' in $data.ItemStore)
+            return $data.ItemStore.EntityInstanceRemove.apply(this, arguments);
+        else
+            throw 'not implemented'; //todo
     },
-
-
-
-    save: function(store, options) {
-        var self = this;
-        return self.promiseWrapper(function (context) {
-           var key = self.getType().memberDefinitions.getKeyProperties()[0];
-            //return context.add(self);
-           if (self[key.name]) {
-               context.attach(self, true);
-               return self;
-
-           } else {
-               return context.add(self);
-           }
-        }, store, options);
+    save: function (store, options) {
+        if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
+            return $data.ItemStore.EntityInstanceSave.apply(this, arguments);
+        else
+            throw 'not implemented'; //todo
+    },
+    refresh: function () {
+        if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
+            return $data.ItemStore.EntityInstanceRefresh.apply(this, arguments);
+        else
+            throw 'not implemented'; //todo
     }
  
 }, {
@@ -508,267 +482,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     //copy public properties to current instance
     __copyPropertiesToInstance: { value: false, notMapped: true, enumerable: false, storeOnObject: true },
      
-    defaultItemStoreFactory: { value: undefined },
-    
-
     inheritedTypeProcessor: function (type) {
-
-        function findById (set, keyValue) {
-
-            //var callback = $data.typeSystem.createCallbackSetting(cb);
-            //todo multifield key support
-            var key = set.defaultType.memberDefinitions.getKeyProperties()[0];
-            if ("filter" in set.entityContext.storageProvider.supportedSetOperations) {
-                return set.filter("it." + key.name + " == this.value", { value: keyValue });
-            } else {
-                return {
-                    toArray: function (cb) {
-                        var pHandler = new $data.PromiseHandler();
-                        var deferred = pHandler.deferred;
-                        var promise = pHandler.getPromise();
-                        set.toArray({
-                            success: function (items) {
-                                for (var i = 0; i < items.length; i++) {
-                                    if (items[i][key.name] === keyValue) {
-                                        //deferred.resolve(items[i]);
-                                        cb.success(items[i]);
-                                        return items[i];
-                                    }
-                                }
-                                cb.error(new Error("unknown id"));
-                                //deferred.reject(new Error("unknown id"));
-                            },
-                            error: function (error) {
-                                cb.error(error);
-                                //console.log(error);
-                                //deferred.reject(error);
-                            }
-                        });
-
-                    }
-                }
-                
-            }
-
-        };
-
-        type.get = function (key, store, options) {
-            var result = new Type({ Id: key });
-            result.defaultItemStore = store;
-            result.refresh();
-        },
-
-        type.removeAll = function (store, options) {
-
-            var self = this;
-            var pHandler = new $data.PromiseHandler();
-            var deferred = pHandler.deferred;
-            var pHandlerResult = pHandler.getPromise();
-            try {
-                var contextFactory = $data.Entity.getDefaultItemStoreFactory(type, store, options);
-                var context = contextFactory();
-                context.onReady(function () {
-                    var set = context.getEntitySetFromElementType(type);
-                    //var result = action(context);
-                    set.toArray({
-                        success: function (items) {
-                            items.forEach(function (item) {
-                                context.remove(item);
-                            });
-                            context.saveChanges({
-                                success: function () {
-                                    deferred.resolve(items);
-                                },
-                                error: function (err) {
-                                    deferred.reject(err);
-                                }
-                            });
-                        },
-                        error: function (err) {
-                            deferred.reject(err);
-                        }
-                    });
-                });
-            } catch (error) {
-                deferred.reject(error);
-            }
-            //deferred.resolve("!");
-
-            return pHandlerResult;
-        },
-        type.readAll = function (store, options) {
-            //return the entity
-            //refresh when ready
-            var pHandler = new $data.PromiseHandler();
-            var deferred = pHandler.deferred;
-            var promise = pHandler.getPromise();
-            var storeFactory = $data.Entity.getDefaultItemStoreFactory(type, store, options);
-            var store = storeFactory();
-            store.onReady(function () {
-                var set = store.getEntitySetFromElementType(type);
-                set.toArray({
-                    success: function (items) {
-                        //callback(items, null);
-                        deferred.resolve(items);
-                    },
-                    error: function (err) {
-                        //callback(null, err);
-                        deferred.reject(err);
-                    }
-                });
-            });
-            //var keyFields
-            return promise;
-        };
-
-        type.read = function (key, store, options) {
-            //return the entity
-            //refresh when ready
-            var pHandler = new $data.PromiseHandler();
-            var deferred = pHandler.deferred;
-            var promise = pHandler.getPromise();
-            var storeFactory = $data.Entity.getDefaultItemStoreFactory(type, store, options);
-            var store = storeFactory();
-            store.onReady(function () {
-                var set = store.getEntitySetFromElementType(type);
-                var itemsQuery = findById(set, key);
-                itemsQuery.toArray({
-                    success: function (items) {
-                        //callback(items, null);
-                        if (items.length < 1) {
-                            deferred.reject(new Error("Not items found by that key"));
-                        } else {
-                            if (items.length === 1) {
-                                deferred.resolve(items[0]);
-                            } else {
-                                deferred.resolve(items);
-                            }
-                        }
-                    },
-                    error: function (err) {
-                        //callback(null, err);
-                        deferred.reject(err);
-                    }
-                });
-            });
-            //var keyFields
-            return promise;
-        };
-
-        type.save = function ( initData, store, options) {
-            var instance = new type(initData);
-            return instance.save();
-        };
-
-        type.remove = function (key, store, options) {
-            var entityPk = type.memberDefinitions.getKeyProperties();
-            var obj = {};
-            obj[entityPk[0].name] = key;
-            var inst = new type(obj);
-            return inst.remove();
-        };
-        type.itemCount = function () {
-
-        };
-
-        type.filter = function (predicate, thisArgs, store, options) {
-            var pHandler = new $data.PromiseHandler();
-            var deferred = pHandler.deferred;
-            var promise = pHandler.getPromise();
-            var storeFactory = $data.Entity.getDefaultItemStoreFactory(type, store, options);
-            var store = storeFactory();
-            store.onReady(function () {
-                var set = store.getEntitySetFromElementType(type);
-                set.toArray({
-                    success: function (items) {
-                        deferred.resolve(items.filter(predicate, thisArgs));
-                    },
-                    error: function (err) {
-                        //callback(null, err);
-                        deferred.reject(err);
-                    }
-                });
-            });
-            return promise;
-        };
-
-        type.first = function (predicate, thisArgs, store, options) {
-            var pHandler = new $data.PromiseHandler();
-            var deferred = pHandler.deferred;
-            var promise = pHandler.getPromise();
-            var storeFactory = $data.Entity.getDefaultItemStoreFactory(type, store, options);
-            var store = storeFactory();
-            store.onReady(function () {
-                var set = store.getEntitySetFromElementType(type);
-                set.toArray({
-                    success: function (items) {
-                        deferred.resolve(items.filter(predicate, thisArgs)[0]);
-                    },
-                    error: function (err) {
-                        //callback(null, err);
-                        deferred.reject(err);
-                    }
-                });
-            });
-            return promise;
-        };
-
-        if (typeof String.prototype.startsWith !== 'function') {
-            String.prototype.startsWith = function (str) {
-                return this.indexOf(str) === 0;
-            };
-        }
-        if (typeof String.prototype.endsWith !== 'function') {
-            String.prototype.endsWith = function (str) {
-                return this.slice(-str.length) === str;
-            };
-        }
-        if (typeof String.prototype.contains !== 'function') {
-            String.prototype.contains = function (str) {
-                return this.indexOf(str) >= 0;
-            };
-        }
-    },
-
-    getDefaultItemStoreFactory: function (instanceOrType, store, options) {
-
-        //function resolveStoreName(store, options) {
-        //    if (!store) {
-        //        var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
-        //        var typeName = $data.Container.resolveName(type) + "_items";
-        //        var typeName = typeName.replace(".", "_");
-        //        store = "local:" + typeName;
-        //    } else {
-        //        var splitStore = store.split(":");
-        //        if (splitStore.length < 2) {
-        //            //if 
-        //        }
-        //    }
-        //}
-
-        var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
-        var typeName = $data.Container.resolveName(type) + "_items";
-        var typeName = typeName.replace(".", "_");
-        store = "local:" + typeName;
-
-        //provider = 'indexedDb';
-        var provider = 'local';
-
-        var inMemoryType = $data.EntityContext.extend(typeName, {
-            'Items': { type: $data.EntitySet, elementType: type }
-        });
-
-        var factory = function () {
-            return new inMemoryType({ name: provider, databaseName: typeName });
-        }
-        return factory;
+        if ($data.ItemStore && 'EntityInheritedTypeProcessor' in $data.ItemStore)
+            $data.ItemStore.EntityInheritedTypeProcessor.apply(this, arguments);
     }
 });
 
-
-
-
-$data.__nameCache = {};
 
 $data.define = function (name, definition) {
     if (!definition) {
@@ -816,12 +535,12 @@ $data.define = function (name, definition) {
 
 
     var entityType = $data.Entity.extend(name, _def);
-    $data.__nameCache[name] = entityType;
     return entityType;
 }
-
 $data.implementation = function (name) {
-    var result = $data.__nameCache[name];
-    return result;
-}
+    return Container.resolveType(name);
+};
+
+
+
 

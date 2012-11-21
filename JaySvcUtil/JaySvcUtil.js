@@ -13,7 +13,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             url: metadataUri,
             user: undefined,
             password: undefined,
-            withCredentials: undefined
+            withCredentials: undefined,
+            httpHeaders: undefined
         };
 
         $data.typeSystem.extend( cnf, config || {});
@@ -61,7 +62,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     metadataUri: self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version],
                     user: cnf.user,
                     password: cnf.password,
-                    headers: cnf.headers
+                    httpHeaders: cnf.httpHeaders
                 }, function (xsl, response) {
                     if (response.statusCode < 200 || response.statusCode > 299) {
                         callBack.error(response);
@@ -197,7 +198,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             return resultDocument.textContent;
         } else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
             var xslt = require('node_xslt');
-            var libxml = require('libxmljs');
 
             return xslt.transform(xslt.readXsltString(transformXslt), xslt.readXmlString(metadata), [
                 'SerivceUri', "'" + cnf.SerivceUri + "'",
@@ -230,26 +230,21 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 version: versionNum || 'unknown'
             };
         }else if (typeof module !== 'undefined' && typeof require !== 'undefined'){
-            var xslt = require('node_xslt');
-            var libxml = require('libxmljs');
-
             var schemaXml = metadata;
+            
             var schemaNamespace = 'http://schemas.microsoft.com/ado/2008/09/edm';
-
-            /*var parserEvents = {
-             startElementNS: function() {
-             if ('Schema' === arguments[0]){
-             schemaNamespace = arguments[3];
-             }
-             }
-             };
-
-             var parser = new libxml.SaxParser(parserEvents);
-             parser.parseString(schemaXml);*/
+            var version = 'nodejs';
+            for (var i in this._supportedODataVersions){
+                if (schemaXml.search(new RegExp('<Schema.+xmlns=\"' + i + '\"', 'gi')) >= 0){
+                    schemaNamespace = i;
+                    version = this._supportedODataVersions[i];
+                    break;
+                }
+            }
 
             return {
                 ns: schemaNamespace,
-                version: 'nodejs'
+                version: version
             }
         }
     },
@@ -584,5 +579,23 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
 $data.service = function (serviceUri, cb, config) {
-    $data.MetadataLoader.load(serviceUri, cb, config);
+    var cfg;
+    if (typeof serviceUri === 'object') {
+        //appId, serviceName, ownerid, isSSL, port, license
+        cfg = serviceUri;
+        var protocol = cfg.isSSL || cfg.isSSL === undefined ? 'https' : 'http';
+        var port = cfg.port ? (':' + cfg.port) : '';
+
+        if (typeof cfg.license === 'string' && cfg.license.toLowerCase() === 'business') {
+            serviceUri = protocol + '://' + cfg.appId + '.jaystack.net' + port + '/' + cfg.serviceName;
+        } else {
+            serviceUri = protocol + '://open.jaystack.net/' + cfg.ownerId + '/' + cfg.appId + '/api/' + cfg.serviceName;
+        }
+
+        cfg = $data.typeSystem.extend(cfg, config);
+    } else {
+        cfg = config;
+    }
+
+    $data.MetadataLoader.load(serviceUri, cb, cfg);
 };
