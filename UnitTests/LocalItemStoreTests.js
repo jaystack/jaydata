@@ -23,13 +23,18 @@
 
             db = new mine("FooBarDb");
             db.onReady(function () {
-                ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init string");
+                ok(db.storageProvider instanceof $data.StorageProviderBase, "provider type guessed correctly from init string");
 
-                db = new mine({ provider: 'sqLite', databaseName: "FooBarDb" });
-                db.onReady(function () {
-                    ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init data");
+                if ($data.StorageProviderLoader.isSupported('sqLite')) {
+                    db = new mine({ provider: 'sqLite', databaseName: "FooBarDb" });
+                    db.onReady(function () {
+                        ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init data");
+                        start();
+                    });
+                } else {
+                    ok(true);
                     start();
-                });
+                }
             });
         });
 

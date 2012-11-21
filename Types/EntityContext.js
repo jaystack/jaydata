@@ -56,7 +56,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
             } else {
                 storageProviderCfg = {
-                    name: "sqLite",
+                    name: "local",
                     databaseName: storageProviderCfg
                 }
             }
