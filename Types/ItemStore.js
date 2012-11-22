@@ -6,11 +6,11 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             }
         }
 
-        self.addItemStoreAlias('default', this._getDefaultItemStoreFactory, true);
+        self.addItemStoreAlias('local', this._getDefaultItemStoreFactory, true);
         $data.addStore = function () {
             return self.addItemStoreAlias.apply(self, arguments);
         };
-        $data.implementation = self.implementation();
+        $data.implementation = self.implementation;
     },
     itemStoreConfig: {},
 
@@ -83,146 +83,115 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
         return undefined;
     },
-    implementation: function () {
-        var self = this;
-        return function (contextOrName, name) {
-            var result;
+    implementation: function (contextOrName, name) {
+        var self = $data.ItemStore;
+        var result;
 
-            if ('string' === typeof contextOrName) {
-                result = Container.resolveType(contextOrName);
-                //todo try to find on default context
+        if ('string' === typeof contextOrName) {
+            result = Container.resolveType(contextOrName);
+            //todo try to find on default context
 
-            } else {
-                if (contextOrName && (contextOrName instanceof $data.EntityContext || (contextOrName.isAssignableTo && contextOrName.isAssignableTo($data.EntityContext)))) {
-                    var contextType = typeof contextOrName !== 'function' ? contextOrName.getType() : contextOrName;
-                    var memDefs = contextType.memberDefinitions.getPublicMappedProperties();
-                    for (var i = 0; i < memDefs.length; i++) {
-                        var memDef = memDefs[i];
-                        var memDefType = Container.resolveType(memDef.type);
-                        if (memDefType.isAssignableTo && memDefType.isAssignableTo($data.EntitySet)) {
-                            var elementType = Container.resolveType(memDef.elementType);
-                            if (elementType.name === name) {
-                                result = elementType;
-                                break;
-                            }
+        } else {
+            if (contextOrName && (contextOrName instanceof $data.EntityContext || (contextOrName.isAssignableTo && contextOrName.isAssignableTo($data.EntityContext)))) {
+                var contextType = typeof contextOrName !== 'function' ? contextOrName.getType() : contextOrName;
+                var memDefs = contextType.memberDefinitions.getPublicMappedProperties();
+                for (var i = 0; i < memDefs.length; i++) {
+                    var memDef = memDefs[i];
+                    var memDefType = Container.resolveType(memDef.type);
+                    if (memDefType.isAssignableTo && memDefType.isAssignableTo($data.EntitySet)) {
+                        var elementType = Container.resolveType(memDef.elementType);
+                        if (elementType.name === name) {
+                            result = elementType;
+                            break;
                         }
-                    }
-
-                    if (contextOrName instanceof $data.EntityContext) {
-                        self.addItemStoreAlias('default', contextOrName._contextFactory, true);
                     }
                 }
             }
+        }
 
-            if (!result)
-                throw 'type not found exception';
+        if (!result)
+            throw 'type not found exception';
 
-            return result;
-        };
+        return result;
     },
 
 
     //Entity Instance
-    EntityInstanceSave: {
-        get: function () {
-            var self = this;
-
-            return function (hint, storeAlias) {
-                var entity = this;
-                storeAlias = self._getStoreAlias(entity, storeAlias);
-                return self._getStoreEntitySet(storeAlias, entity)
-                    .then(function (entitySet) {
-                        return self._getSaveMode(entity, entitySet, hint, storeAlias)
-                            .then(function (mode) {
-                                mode = mode || 'add';
-                                switch (mode) {
-                                    case 'add':
-                                        entitySet.add(entity);
-                                        break;
-                                    case 'attach':
-                                        entitySet.attach(entity, true);
-                                        entity.entityState = $data.EntityState.Modified;
-                                        break;
-                                    default:
-                                        var d = new $data.PromiseHandler();
-                                        d.deferred.reject('save mode not supported: ' + mode);
-                                        return d.getPromise();
-                                }
-
-                                return entitySet.entityContext.saveChanges()
-                                    .then(function () { return entity; });
-                            });
-                    });
-            };
-        },
-        set: function (hint, storeAlias) { }
-    },
-    EntityInstanceRemove: {
-        get: function () {
-            var self = this;
-
-            return function (storeAlias) {
-                var entity = this;
-                storeAlias = self._getStoreAlias(entity, storeAlias);
-                return self._getStoreEntitySet(storeAlias, entity)
-                    .then(function (entitySet) {
-                        entitySet.remove(entity);
+    EntityInstanceSave: function (hint, storeAlias) {
+        var self = $data.ItemStore;
+        var entity = this;
+        storeAlias = self._getStoreAlias(entity, storeAlias);
+        return self._getStoreEntitySet(storeAlias, entity)
+            .then(function (entitySet) {
+                return self._getSaveMode(entity, entitySet, hint, storeAlias)
+                    .then(function (mode) {
+                        mode = mode || 'add';
+                        switch (mode) {
+                            case 'add':
+                                entitySet.add(entity);
+                                break;
+                            case 'attach':
+                                entitySet.attach(entity, true);
+                                entity.entityState = $data.EntityState.Modified;
+                                break;
+                            default:
+                                var d = new $data.PromiseHandler();
+                                d.deferred.reject('save mode not supported: ' + mode);
+                                return d.getPromise();
+                        }
 
                         return entitySet.entityContext.saveChanges()
                             .then(function () { return entity; });
                     });
-            };
-        },
-        set: function () { }
+            });
     },
-    EntityInstanceRefresh: {
-        get: function () {
-            var self = this;
+    EntityInstanceRemove: function (storeAlias) {
+        var self = $data.ItemStore;
+        var entity = this;
+        storeAlias = self._getStoreAlias(entity, storeAlias);
+        return self._getStoreEntitySet(storeAlias, entity)
+            .then(function (entitySet) {
+                entitySet.remove(entity);
 
-            return function (storeAlias) {
-                var entity = this;
-                var entityType = entity.getType();
+                return entitySet.entityContext.saveChanges()
+                    .then(function () { return entity; });
+            });
+    },
+    EntityInstanceRefresh: function (storeAlias) {
+        var self = $data.ItemStore;
+        var entity = this;
+        var entityType = entity.getType();
 
-                var key = self._getKeyObjectFromEntity(entity, entityType);
+        var key = self._getKeyObjectFromEntity(entity, entityType);
 
-                return entityType.read(key, storeAlias)
-                    .then(function (loadedEntity) {
-                        //??
-                        entityType.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                            entity[memDef.name] = loadedEntity[memDef.name];
-                        });
+        return entityType.read(key, storeAlias)
+            .then(function (loadedEntity) {
+                //??
+                entityType.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+                    entity[memDef.name] = loadedEntity[memDef.name];
+                });
 
-                        entity.changedProperties = undefined;
-                        return entity;
-                    });
-            };
-        },
-        set: function () { }
+                entity.changedProperties = undefined;
+                return entity;
+            });
     },
 
     //Entity Type
-    EntityInheritedTypeProcessor: {
-        get: function () {
-            var self = this;
-
-            return function (type) {
-                type.readAll = self.EntityTypeReadAll(type);
-                type.read = self.EntityTypeRead(type);
-                type.removeAll = self.EntityTypeRemoveAll(type);
-                type.remove = self.EntityTypeRemove(type);
-                type.get = self.EntityTypeGet(type);
-                type.save = self.EntityTypeSave(type);
-                type.itemCount = self.EntityTypeItemCount(type);
-                type.filter = self.EntityTypeFilter(type);
-                type.first = self.EntityTypeFirst(type);
-            }
-        },
-        set: function () { }
+    EntityInheritedTypeProcessor: function (type) {
+        var self = $data.ItemStore;
+        type.readAll = self.EntityTypeReadAll(type);
+        type.read = self.EntityTypeRead(type);
+        type.removeAll = self.EntityTypeRemoveAll(type);
+        type.remove = self.EntityTypeRemove(type);
+        type.get = self.EntityTypeGet(type);
+        type.save = self.EntityTypeSave(type);
+        type.itemCount = self.EntityTypeItemCount(type);
+        type.filter = self.EntityTypeFilter(type);
+        type.first = self.EntityTypeFirst(type);
     },
     EntityTypeReadAll: function (type) {
-        var self = this;
-
         return function (storeAlias) {
+            var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     return entitySet.forEach(function (item) { self._setStoreAlias(item, storeAlias); });
@@ -230,9 +199,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
     EntityTypeRemoveAll: function (type) {
-        var self = this;
-
         return function (storeAlias) {
+            var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     return entitySet.toArray().then(function (items) {
@@ -247,9 +215,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
     EntityTypeRead: function (type) {
-        var self = this;
-
         return function (key, storeAlias) {
+            var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     try {
@@ -265,25 +232,22 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         };
     },
     EntityTypeGet: function (type) {
-        var self = this;
-
         return function (key, storeAlias) {
+            var self = $data.ItemStore;
             var item = new type(self._getKeyObjectFromEntity(key));
             return item.refresh(storeAlias);
         };
     },
     EntityTypeSave: function (type) {
-        var self = this;
-
         return function (initData, hint, storeAlias) {
+            var self = $data.ItemStore;
             var instance = new type(initData);
             return instance.save(hint, storeAlias);
         }
     },
     EntityTypeRemove: function (type) {
-        var self = this;
-
         return function (key, storeAlias) {
+            var self = $data.ItemStore;
             var entityPk = type.memberDefinitions.getKeyProperties();
             var entity;
             if (entityPk.length === 1) {
@@ -297,9 +261,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
     EntityTypeItemCount: function (type) {
-        var self = this;
-
         return function (storeAlias) {
+            var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     return entitySet.length();
@@ -307,9 +270,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
     EntityTypeFilter: function (type) {
-        var self = this;
-
         return function (predicate, thisArg, storeAlias) {
+            var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     return entitySet.filter(predicate, thisArg).forEach(function (item) { self._setStoreAlias(item, storeAlias); });
@@ -317,9 +279,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
     EntityTypeFirst: function (type) {
-        var self = this;
-
         return function (predicate, thisArg, storeAlias) {
+            var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     return entitySet.first(predicate, thisArg)
@@ -392,29 +353,22 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     },
 
     //EntityContext
-    QueryResultModifier: {
-        get: function () {
-            var self = this;
+    QueryResultModifier: function (query) {
+        var context = query.context;
+        var type = query.modelBinderConfig.$type;
+        if ('string' === typeof type) {
+            type = Container.resolveType(type);
+        }
 
-            return function (query) {
-                var context = this;
-                var type = query.modelBinderConfig.$type;
-                if ('string' === typeof type) {
-                    type = Container.resolveType(type);
-                }
+        if (type === $data.Array && query.modelBinderConfig.$item && query.modelBinderConfig.$item.$type) {
+            type = query.modelBinderConfig.$item.$type;
+        }
 
-                if (type === $data.Array && query.modelBinderConfig.$item && query.modelBinderConfig.$item.$type) {
-                        type = query.modelBinderConfig.$item.$type;
-                }
-
-                if ((type && type.isAssignableTo && type.isAssignableTo($data.Entity)) || (typeof type === 'undefined' && query.result && query.result[0] instanceof $data.Entity)) {
-                    for (var i = 0; i < query.result.length; i++) {
-                        query.result[i].storeFactory = context._contextFactory;
-                    }
-                }
+        if ((type && type.isAssignableTo && type.isAssignableTo($data.Entity)) || (typeof type === 'undefined' && query.result && query.result[0] instanceof $data.Entity)) {
+            for (var i = 0; i < query.result.length; i++) {
+                query.result[i].storeFactory = context._contextFactory;
             }
-        },
-        set: function () { }
+        }
     }
 });
 
