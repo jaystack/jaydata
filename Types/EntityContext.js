@@ -46,8 +46,17 @@ $data.Class.define('$data.EntityContext', null, null,
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
-        var origConfig = JSON.parse(JSON.stringify(storageProviderCfg));
-        
+        var self = this;
+        var args = JSON.parse(JSON.stringify(storageProviderCfg));
+        this.contextToken = {
+            typeName: this.getType().fullName,
+            args: args,
+            factory: function () {
+                return new (self.getType())(args);
+            }
+        }
+
+
         if ("string" === typeof storageProviderCfg) {
             if (0 === storageProviderCfg.indexOf("http")) {
                 storageProviderCfg = {
@@ -144,9 +153,6 @@ $data.Class.define('$data.EntityContext', null, null,
             this[delegateName].fire(data);
         };
 
-        this._contextFactory = function () {
-            return new (ctx.getType())(origConfig);
-        }
         /*
         while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
         if (providerType){
@@ -1449,7 +1455,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.remove(entity);
     },
-    _contextFactory: { type: Function }
+    contextToken: { type: Object }
 }, {
     generateServiceOperation: function (cfg) {
 

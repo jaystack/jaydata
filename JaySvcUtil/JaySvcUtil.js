@@ -109,6 +109,9 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         var factoryFn = self.createFactoryFunc(ctxType, cnf);
         this.factoryCache[cnf.url] = [factoryFn, ctxType];
 
+        factoryFn.type = ctxType;
+        factoryFn.codeText = codeText;
+
         if (self.debugMode)
             callBack.success(factoryFn, ctxType, codeText);
         else
@@ -578,24 +581,67 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 });
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
-$data.service = function (serviceUri, cb, config) {
-    var cfg;
+$data.service = function (serviceUri, config, cb) {
+    var cfg, _url, _config, _callback;
+    function getParam(paramValue) {
+        switch (typeof paramValue) {
+            case 'object':
+                _config = paramValue;
+                break;
+            case 'function':
+                _callback = paramValue;
+                break;
+            default:
+                break;
+        }
+    }
+    getParam(config);
+    getParam(cb);
+
     if (typeof serviceUri === 'object') {
-        //appId, serviceName, ownerid, isSSL, port, license
+        //appId, serviceName, ownerid, isSSL, port, license, url
         cfg = serviceUri;
         var protocol = cfg.isSSL || cfg.isSSL === undefined ? 'https' : 'http';
         var port = cfg.port ? (':' + cfg.port) : '';
 
         if (typeof cfg.license === 'string' && cfg.license.toLowerCase() === 'business') {
-            serviceUri = protocol + '://' + cfg.appId + '.jaystack.net' + port + '/' + cfg.serviceName;
+            if (cfg.appId && cfg.serviceName) {
+                serviceUri = protocol + '://' + cfg.appId + '.jaystack.net' + port + '/' + cfg.serviceName;
+            } else {
+                serviceUri = cfg.url;
+            }
         } else {
-            serviceUri = protocol + '://open.jaystack.net/' + cfg.ownerId + '/' + cfg.appId + '/api/' + cfg.serviceName;
+            if (cfg.ownerId && cfg.appId && cfg.serviceName) {
+                serviceUri = protocol + '://open.jaystack.net/' + cfg.ownerId + '/' + cfg.appId + '/api/' + cfg.serviceName;
+            } else {
+                serviceUri = cfg.url;
+            }
         }
 
-        cfg = $data.typeSystem.extend(cfg, config);
+        delete cfg.url;
+        cfg = $data.typeSystem.extend(cfg, _config);
     } else {
-        cfg = config;
+        cfg = _config;
     }
 
-    $data.MetadataLoader.load(serviceUri, cb, cfg);
+    var pHandler = new $data.PromiseHandler();
+    _callback = pHandler.createCallback(_callback);
+
+    $data.MetadataLoader.load(serviceUri, {
+        success: function (factory) {
+            var type = factory.type;
+            //register to local store
+            if (cfg) {
+                var storeAlias = cfg.serviceName || cfg.storeAlias;
+                if (storeAlias && 'addStore' in $data) {
+                    $data.addStore(storeAlias, factory, cfg.isDefault)
+                }
+            }
+
+            _callback.success(factory, type);
+        },
+        error: _callback.error
+    }, cfg);
+
+    return pHandler.getPromise();
 };

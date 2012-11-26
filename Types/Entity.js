@@ -457,13 +457,13 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     //    this.__onReadyList.push(callback);
     //},
 
-    remove: function (store, options, callback) {
+    remove: function () {
         if ($data.ItemStore && 'EntityInstanceRemove' in $data.ItemStore)
             return $data.ItemStore.EntityInstanceRemove.apply(this, arguments);
         else
             throw 'not implemented'; //todo
     },
-    save: function (store, options) {
+    save: function () {
         if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
             return $data.ItemStore.EntityInstanceSave.apply(this, arguments);
         else
@@ -474,7 +474,8 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             return $data.ItemStore.EntityInstanceRefresh.apply(this, arguments);
         else
             throw 'not implemented'; //todo
-    }
+    },
+    storeToken: { type: Object, monitorChanges: false, notMapped: true }
  
 }, {
     //create get_[property] and set_[property] functions for properties

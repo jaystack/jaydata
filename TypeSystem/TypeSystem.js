@@ -1227,3 +1227,7 @@ $data.typeSystem = {
         }
     }
 };
+
+$data.debug = function () {
+    console.log.apply(console, arguments);
+};
