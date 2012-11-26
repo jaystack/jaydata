@@ -475,7 +475,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         else
             throw 'not implemented'; //todo
     },
-    storeToken: { type: Object, monitorChanges: false, notMapped: true }
+    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true }
  
 }, {
     //create get_[property] and set_[property] functions for properties
