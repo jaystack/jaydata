@@ -586,7 +586,11 @@ $data.service = function (serviceUri, config, cb) {
     function getParam(paramValue) {
         switch (typeof paramValue) {
             case 'object':
-                _config = paramValue;
+                if (typeof paramValue.success === 'function' || typeof paramValue.error === 'function') {
+                    _callback = paramValue;
+                } else {
+                    _config = paramValue;
+                }
                 break;
             case 'function':
                 _callback = paramValue;
