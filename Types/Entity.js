@@ -498,7 +498,7 @@ $data.define = function (name, definition) {
     var hasKey = false;
     var keyFields = [];
     Object.keys(definition).forEach(function (fieldName) {
-        if (Object.hasOwnProperty(definition[fieldName],"type")) {
+        if ("type" in definition[fieldName]) {
             var propDef = definition[fieldName]; 
             _def[fieldName] = propDef;
             if (propDef.key) {
