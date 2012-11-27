@@ -160,7 +160,7 @@
 
     $data.Queryable.prototype.renderTo = function (selector, templateName, renderMode) {
         return this.toArray().then(function (items) {
-            return data.renderTo(selector, templateName, renderMode)(items);
+            return $data.renderTo(selector, templateName, renderMode)(items);
         });
     };
 
@@ -210,7 +210,9 @@
         }
         return { cacheKey: key, clientId: clientId };
     }
-
+    function getFromCache(cacheKey) {
+       return  $data.displayCache[cacheKey].value;
+    }
     Handlebars.registerHelper("entityScope", function () {
 
         var sname = $data.Container.resolveName(this.getType()).split(".");
@@ -251,7 +253,7 @@
             var entKey = $(this).data("type") + ":" + $(this).data("id");
             var method = app[$(this).data("command") + $(this).data("type")];
             var cacheKey = $(this).data("cache-item");
-            var entity = $data.displayCache[cacheKey].value;
+            var entity = getFromCache(cacheKey);
             var args = [entity, $(this).data("id")];
             method.apply(app, args);
         });
