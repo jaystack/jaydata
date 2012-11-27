@@ -498,9 +498,9 @@ $data.define = function (name, definition) {
     var hasKey = false;
     var keyFields = [];
     Object.keys(definition).forEach(function (fieldName) {
-        var propDef = definition[fieldName]; 
+        var propDef = definition[fieldName];
         if (typeof propDef === 'object' && ("type" in propDef || "get" in propDef || "set" in propDef)) {
-            
+
             _def[fieldName] = propDef;
             if (propDef.key) {
                 keyFields.push(propDef);
@@ -524,7 +524,7 @@ $data.define = function (name, definition) {
     if (keyFields.length < 1) {
         var keyProp;
         switch (true) {
-            case "id" in _def: 
+            case "id" in _def:
                 keyProp = "id";
                 break;
             case "Id" in _def:
