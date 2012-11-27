@@ -1,4 +1,4 @@
-﻿(function ($data) {
+(function ($data) {
 
     $data.initService = function (apiKey, options) {
         var d = new $data.PromiseHandler();
