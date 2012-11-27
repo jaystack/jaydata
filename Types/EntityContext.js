@@ -48,7 +48,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         var self = this;
         var args = JSON.parse(JSON.stringify(storageProviderCfg));
-        this.contextToken = {
+        this.storeToken = {
             typeName: this.getType().fullName,
             args: args,
             factory: function () {
@@ -1455,7 +1455,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.remove(entity);
     },
-    contextToken: { type: Object }
+    storeToken: { type: Object }
 }, {
     generateServiceOperation: function (cfg) {
 

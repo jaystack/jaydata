@@ -321,18 +321,18 @@
         }
     }
 
-    test('contextToken - entityType store', 7, function () {
-        equal(typeof ItemStore.Example.Article.storeToken, 'undefined', 'contextToken in entitySet type, BEFORE FIRST INIT');
+    test('storeToken - entityType store', 7, function () {
+        equal(typeof ItemStore.Example.Article.storeToken, 'undefined', 'storeToken in entitySet type, BEFORE FIRST INIT');
 
         var ctx = factory();
 
-        equal(ctx.contextToken.typeName, 'ItemStore.Example.Context', 'contextToken typeName');
-        deepEqual(ctx.contextToken.args, { name: 'local', databaseName: 'mine_DB' }, 'contextToken args');
-        equal(typeof ctx.contextToken.factory, 'function', 'contextToken factory');
+        equal(ctx.storeToken.typeName, 'ItemStore.Example.Context', 'storeToken typeName');
+        deepEqual(ctx.storeToken.args, { name: 'local', databaseName: 'mine_DB' }, 'storeToken args');
+        equal(typeof ctx.storeToken.factory, 'function', 'storeToken factory');
 
-        equal(ItemStore.Example.Article.storeToken.typeName, 'ItemStore.Example.Context', 'contextToken typeName');
-        deepEqual(ItemStore.Example.Article.storeToken.args, { name: 'local', databaseName: 'mine_DB' }, 'contextToken args');
-        equal(typeof ItemStore.Example.Article.storeToken.factory, 'function', 'contextToken factory');
+        equal(ItemStore.Example.Article.storeToken.typeName, 'ItemStore.Example.Context', 'storeToken typeName');
+        deepEqual(ItemStore.Example.Article.storeToken.args, { name: 'local', databaseName: 'mine_DB' }, 'storeToken args');
+        equal(typeof ItemStore.Example.Article.storeToken.factory, 'function', 'storeToken factory');
     });
 
 
@@ -477,7 +477,7 @@
 
         var ctx = new ItemStore.Example.Context2({ name: 'local', databaseName: 'ItemStore_test_context2' });
         var savedItemId;
-        $data.addStore('remote', ctx.contextToken.factory)
+        $data.addStore('remote', ctx.storeToken.factory)
             .then(function () {
                 return $data('Article2', 'remote').save({ Title: 'apple', Description: 'tree' })
             })
@@ -735,10 +735,10 @@
         });
     });
 
-    test('add contextToken as factory', 5, function () {
+    test('add storeToken as factory', 5, function () {
         stop(1);
         var context = new $news.Types.NewsContext({ name: 'local', oDataServiceHost: "Services/emptyNewsReader.svc" });
-        $data.addStore('remote', context.contextToken, true).then(function () {
+        $data.addStore('remote', context.storeToken, true).then(function () {
             return $data('Article', 'remote')
                 .save({ Title: 'watermelon', Lead: 'fruit' })
                 .then(function (art) {

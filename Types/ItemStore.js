@@ -19,7 +19,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         var promise = new $data.PromiseHandler();
 
         if ('string' === typeof name) {
-            //contextToken
+            //storeToken
             if ('object' === typeof contextFactoryOrToken && 'factory' in contextFactoryOrToken) {
                 var type = Container.resolveType(contextFactoryOrToken.typeName);
 
@@ -79,9 +79,9 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             this.itemStoreConfig['default'] = name;
         }
     },
-    _setStoreAlias: function (entity, contextToken) {
-        if ('object' === typeof contextToken)
-            entity.storeToken = contextToken
+    _setStoreAlias: function (entity, storeToken) {
+        if ('object' === typeof storeToken)
+            entity.storeToken = storeToken
         return entity;
     },
     _getStoreAlias: function (entity, storeAlias) {
@@ -265,7 +265,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
-                    return entitySet.forEach(function (item) { self._setStoreAlias(item, entitySet.entityContext.contextToken); });
+                    return entitySet.forEach(function (item) { self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                 });
         }
     },
@@ -293,7 +293,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                     try {
                         var singleParam = self._findByIdQueryable(entitySet, key);
                         return entitySet.single(singleParam.predicate, singleParam.thisArgs)
-                            .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.contextToken); });
+                            .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                     } catch (e) {
                         var d = new $data.PromiseHandler();
                         d.deferred.reject(e);
@@ -359,7 +359,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             var self = $data.ItemStore;
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
-                    return entitySet.filter(predicate, thisArg).forEach(function (item) { self._setStoreAlias(item, entitySet.entityContext.contextToken); });
+                    return entitySet.filter(predicate, thisArg).forEach(function (item) { self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                 });
         }
     },
@@ -369,7 +369,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             return self._getStoreEntitySet(storeAlias, type)
                 .then(function (entitySet) {
                     return entitySet.first(predicate, thisArg)
-                        .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.contextToken); });
+                        .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                 });
         }
     },
@@ -454,7 +454,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
         if ((type && type.isAssignableTo && type.isAssignableTo($data.Entity)) || (typeof type === 'undefined' && query.result && query.result[0] instanceof $data.Entity)) {
             for (var i = 0; i < query.result.length; i++) {
-                self._setStoreAlias(query.result[i], context.contextToken)
+                self._setStoreAlias(query.result[i], context.storeToken)
             }
         }
     }
