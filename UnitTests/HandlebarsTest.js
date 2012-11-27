@@ -4,30 +4,8 @@
 
     function xtest() { };
 
-    
-    test('entity render', 3, function () {
-       
-        //$data.define("Todo", {
-        //    Task: String,
-        //});
 
-        ////$data("Todo")
-        ////    .save({ Task: "hello bello" })
-        ////    .then();
-
-        //ok($data("Todo").render, "render static method on type");
-        
-        
-        
-        //var renderFn = $data("Todo").render("<a>{{Task}}</a>");
-        //ok(typeof renderFn === 'function', "static render w/o instance returns function");
-        //var result = renderFn({ Task: "Hello" });
-        //ok(result === "<a>Hello</a>");
-        //$data("Todo").render({Task:"Adasdad","<a>{{Task}}</a>"});
-
-    });
-
-    test('entity renderx', 7, function () {
+    test('Handlebar render methods', 19, function () {
 
         $data.define("Todo", { Task: String });
 
@@ -63,13 +41,9 @@
         equal(r7, "<li>abc</li>");
 
 
-        //var data = { items: [new Todo({ Task: "t1" }), new Todo({ Task: "t2" })] };
-        //var r8 = $data.render(data, "<ul>{{#each items}}{{{entity}}}{{/each}}</ul>");
-        //equal(r8, "<ul><div>t1</div><div>t2</div></ul>");
-
         var data = { items: [new Todo({ Task: "t1" }), new Todo({ Task: "t2" })] };
         var r9 = $data.render(data, "<ul>{{#each items}}{{{entity 'Todo_Alternative'}}}{{/each}}</ul>");
-        equal(r9, "<ul><div><b>t1</b></div><div><b>t2</b></div></ul>");
+        equal(r9, "<ul><div><b>t1</b></div><div><b>t2</b></div></ul>", "entity helper works");
 
         var todos = [new Todo({ Task: "t1" }), new Todo({ Task: "t2" })];
         var r10 = $data("Todo").renderItems(todos);
@@ -97,8 +71,8 @@
 
         $data("Todo").read(1).then(function (item) {
             start(1);
-            var r13 = item.render("<li><button {{entityCommand 'select'}}>{{Task}}</button></li>");
-            equal(r13, "<li><button data-command=select data-type=Todo data-id=1 data-cache-client=4 data-cache-item=2>HW</button></li>");
+            var r13 = item.render("<li><button {{entityCommand 'select'}}></button></li>");
+            equal(r13, "<li><button data-command=select data-type=Todo data-id=1 data-cache-client=4 data-cache-item=2></button></li>");
             var result = $('#output').append(r13);
             stop(0);
             result.find('button').trigger("click");
@@ -108,7 +82,26 @@
             .read(15)
             .then($data.renderTo("#todoList", '<a href="#" {{entityCommand "select"}}>{{Task}}</a>'));
 
-        console.dir($data("Todo").storeToken);
+        stop(1);
+        $data("Todo").storeToken.factory().onReady(function (db) {
+            console.dir(db);
+            db.Items.filter("it.Task == 'hello'").take(1).renderTo("#todoList2").then(function () {
+                start(1);
+                ok(true, "Queryable renderTo");
+                equal($('#todoList2').html(), '<div>hello</div>');
+            });
+        });
+
+        stop(1);
+        $data("Todo").storeToken.factory().onReady(function (db) {
+            console.dir(db);
+            db.Items.filter("it.Task == 'hello'").take(1).renderTo("#todoList2",'{{Task}}').then(function () {
+                start(1);
+                ok(true, "Queryable renderTo");
+                equal($('#todoList2').html(), 'hello');
+            });
+        });
+
 
 
 
