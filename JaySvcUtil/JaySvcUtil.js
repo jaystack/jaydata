@@ -582,7 +582,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
 $data.service = function (serviceUri, config, cb) {
-    var cfg, _url, _config, _callback;
+    var _url, _config, _callback;
     function getParam(paramValue) {
         switch (typeof paramValue) {
             case 'object':
@@ -599,29 +599,9 @@ $data.service = function (serviceUri, config, cb) {
     getParam(cb);
 
     if (typeof serviceUri === 'object') {
-        //appId, serviceName, ownerid, isSSL, port, license, url
-        cfg = serviceUri;
-        var protocol = cfg.isSSL || cfg.isSSL === undefined ? 'https' : 'http';
-        var port = cfg.port ? (':' + cfg.port) : '';
-
-        if (typeof cfg.license === 'string' && cfg.license.toLowerCase() === 'business') {
-            if (cfg.appId && cfg.serviceName) {
-                serviceUri = protocol + '://' + cfg.appId + '.jaystack.net' + port + '/' + cfg.serviceName;
-            } else {
-                serviceUri = cfg.url;
-            }
-        } else {
-            if (cfg.ownerId && cfg.appId && cfg.serviceName) {
-                serviceUri = protocol + '://open.jaystack.net/' + cfg.ownerId + '/' + cfg.appId + '/api/' + cfg.serviceName;
-            } else {
-                serviceUri = cfg.url;
-            }
-        }
-
-        delete cfg.url;
-        cfg = $data.typeSystem.extend(cfg, _config);
-    } else {
-        cfg = _config;
+        _config = $data.typeSystem.extend(serviceUri, _config);
+        serviceUri = serviceUri.url;
+        delete _config.url;
     }
 
     var pHandler = new $data.PromiseHandler();
@@ -631,17 +611,17 @@ $data.service = function (serviceUri, config, cb) {
         success: function (factory) {
             var type = factory.type;
             //register to local store
-            if (cfg) {
-                var storeAlias = cfg.serviceName || cfg.storeAlias;
+            if (_config) {
+                var storeAlias = _config.serviceName || _config.storeAlias;
                 if (storeAlias && 'addStore' in $data) {
-                    $data.addStore(storeAlias, factory, cfg.isDefault)
+                    $data.addStore(storeAlias, factory, _config.isDefault)
                 }
             }
 
             _callback.success(factory, type);
         },
         error: _callback.error
-    }, cfg);
+    }, _config);
 
     return pHandler.getPromise();
 };

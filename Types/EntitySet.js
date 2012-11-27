@@ -369,6 +369,12 @@ $data.Class.defineEx('$data.EntitySet',
 
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
     },
+    saveChanges: function () {
+        this.entityContext.saveChanges.apply(this.entityContext, arguments);
+    },
+    addProperty: function (name, getter, setter) {
+        this.elementType.addProperty.apply(this.elementType, arguments);
+    },
     expression: {
         get: function () {
             if (!this._expression) {

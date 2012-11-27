@@ -637,7 +637,7 @@
             return $data.service({ url: 'Services/emptyNewsReader.svc' });
         }, true).then(function (ctx) {
 
-            $data('Article', 'remote')
+            return $data('Article', 'remote')
                 .save({ Title: 'watermelon', Lead: 'fruit' })
                 .then(function (art) {
                     notEqual(art instanceof $news.Types.Article, true, 'valid type');
@@ -673,7 +673,7 @@
             return p.getPromise();
         }, true).then(function (ctx) {
 
-            $data('Article', 'remote')
+            return $data('Article', 'remote')
                 .save({ Title: 'watermelon1', Lead: 'fruit1' })
                 .then(function (art) {
                     equal(art instanceof $news.Types.Article, true, 'valid type');
@@ -705,12 +705,10 @@
         stop(1);
 
         $data.addStore('remote', function () {
-            var p = new $data.PromiseHandler();
-            p.deferred.resolve(new $news.Types.NewsContext({ name: 'local', oDataServiceHost: "Services/emptyNewsReader.svc" }));
-            return p.getPromise();
+            return new $news.Types.NewsContext({ name: 'local', oDataServiceHost: "Services/emptyNewsReader.svc" });
         }, true).then(function () {
 
-            $data('Article', 'remote')
+            return $data('Article', 'remote')
                 .save({ Title: 'watermelon', Lead: 'fruit' })
                 .then(function (art) {
                     equal(art instanceof $news.Types.Article, true, 'valid type');
@@ -741,7 +739,7 @@
         stop(1);
         var context = new $news.Types.NewsContext({ name: 'local', oDataServiceHost: "Services/emptyNewsReader.svc" });
         $data.addStore('remote', context.contextToken, true).then(function () {
-            $data('Article', 'remote')
+            return $data('Article', 'remote')
                 .save({ Title: 'watermelon', Lead: 'fruit' })
                 .then(function (art) {
                     equal(art instanceof $news.Types.Article, true, 'valid type');
@@ -766,6 +764,125 @@
             $data.ItemStore = new $data.ItemStoreClass();
             start();
         });
+    });
+
+    test('return $data.initService business in factory', 1, function () {
+        stop(1);
+
+        $data.addStore('remote', function () {
+            //FlowerShop
+            return $data.initService({
+                appId: '133e0907-f70b-4f11-92b3-dfebc9bdd6db',
+                serviceName: 'mydatabase',
+                license: 'business'
+            });
+        }, true).then(function (ctx) {
+
+            return $data('Flower', 'remote')
+                .takeFirst()
+                .then(function (flower) {
+                    equal(typeof flower.Name, 'string', 'flower name is string');
+                });
+        })
+        .then(function () {
+            $data.ItemStore = new $data.ItemStoreClass();
+            start();
+        })
+        .fail(function (e) {
+            equal(e.message, 'factory dont have context instance', 'invalid factory');
+            $data.ItemStore = new $data.ItemStoreClass();
+            start();
+        });
+    });
+
+    test('return $data.initService open in factory', 1, function () {
+        stop(1);
+
+        $data.addStore('remote', function () {
+            //slidingpuzzle
+            return $data.initService({
+                appId: '62f4bc12-6736-4681-844b-67d9662605c5',
+                ownerId: '1199df77-c68b-4f52-8106-fa62d9542880',
+                serviceName: 'mydatabase'
+            });
+        }, true).then(function (ctx) {
+
+            return $data('Highscore', 'remote')
+                .takeFirst()
+                .then(function (highscore) {
+                    equal(typeof highscore.Time, 'number', 'highscore Time is number');
+                });
+        })
+        .then(function () {
+            $data.ItemStore = new $data.ItemStoreClass();
+            start();
+        })
+        .fail(function (e) {
+            equal(e.message, 'factory dont have context instance', 'invalid factory');
+            $data.ItemStore = new $data.ItemStoreClass();
+            start();
+        });
+    });
+
+    test('$data.define computed field getter', 3, function () {
+        $data.define('compFieldtestType1', {
+            Name: String,
+            Age: Number,
+            compF: {
+                get: function () {
+                    return 'hello';
+                }
+            }
+        });
+
+        var item = new compFieldtestType1({ Name: 'Name1' });
+        equal(item.Name, 'Name1', 'Name property');
+        equal(item.compF, 'hello', 'compF property');
+        item.compF = 'world';
+        equal(item.compF, 'hello', 'compF property');
+    });
+
+    test('$data.define computed field setter', 5, function () {
+        $data.define('compFieldtestType2', {
+            Name: String,
+            Age: Number,
+            compF: {
+                set: function (value) {
+                    this.Age = value;
+                }
+            }
+        });
+
+        var item = new compFieldtestType2({ Name: 'Name1' });
+        equal(item.Name, 'Name1', 'Name property');
+        equal(item.Age, undefined, 'Age property');
+        equal(item.compF, undefined, 'compF property');
+        item.compF = 25;
+        equal(item.compF, undefined, 'compF property 2');
+        equal(item.Age, 25, 'Age property 2');
+    });
+
+    test('$data.define computed field getter-setter', 5, function () {
+        $data.define('compFieldtestType3', {
+            Name: String,
+            Age: Number,
+            compF: {
+                get: function () {
+                    return 'hello';
+                },
+                set: function (value) {
+                    this.Age = value;
+                }
+            }
+        });
+
+        var item = new compFieldtestType3({ Name: 'Name1' });
+        equal(item.Name, 'Name1', 'Name property');
+        equal(item.Age, undefined, 'Age property');
+        equal(item.compF, 'hello', 'compF property');
+        item.compF = 25;
+        equal(item.compF, 'hello', 'compF property 2');
+        equal(item.Age, 25, 'Age property 2');
     });
 
 });

@@ -698,7 +698,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         for (var i = 0; i < allMembers.length; i++) {
             var member = allMembers[i];
 
-            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.ServiceBase || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
+            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.Base || member.definedBy === $data.ServiceBase || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
                 continue;
             }
 

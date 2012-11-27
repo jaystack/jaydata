@@ -482,7 +482,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     __setPropertyfunctions: { value: true, notMapped: true, enumerable: false, storeOnObject: true },
     //copy public properties to current instance
     __copyPropertiesToInstance: { value: false, notMapped: true, enumerable: false, storeOnObject: true },
-     
+
     inheritedTypeProcessor: function (type) {
         if ($data.ItemStore && 'EntityInheritedTypeProcessor' in $data.ItemStore)
             $data.ItemStore.EntityInheritedTypeProcessor.apply(this, arguments);
@@ -498,15 +498,26 @@ $data.define = function (name, definition) {
     var hasKey = false;
     var keyFields = [];
     Object.keys(definition).forEach(function (fieldName) {
-        if (Object.hasOwnProperty(definition[fieldName],"type")) {
-            var propDef = definition[fieldName]; 
+        var propDef = definition[fieldName]; 
+        if (typeof propDef === 'object' && ("type" in propDef || "get" in propDef || "set" in propDef)) {
+            
             _def[fieldName] = propDef;
             if (propDef.key) {
                 keyFields.push(propDef);
             }
 
+            if (("get" in propDef || "set" in propDef) && (!('notMapped' in propDef) || propDef.notMapped === true)) {
+                propDef.notMapped = true;
+                propDef.storeOnObject = true;
+            }
+            if ("get" in propDef && !("set" in propDef)) {
+                propDef.set = function () { };
+            } else if ("set" in propDef && !("get" in propDef)) {
+                propDef.get = function () { };
+            }
+
         } else {
-            _def[fieldName] = { type: definition[fieldName] };
+            _def[fieldName] = { type: propDef };
         }
     });
 
