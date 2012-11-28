@@ -74,6 +74,24 @@ $data.Event = Event = $data.Class.define("$data.Event", null, null, {
                 });
             }
         };
+        this.fireCancelAble = function (eventData, snder) {
+            var snd = snder || sender || this;
+            //eventData.eventName = name;
+            ///<value name="subscriberList type="Array" />
+            var isValid = true;
+            if (subscriberList) {
+                subscriberList.forEach(function (subscriber) {
+                    ///<param name="subscriber" type="EventSubscriber" />
+                    try {
+                        isValid = isValid && (subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state) === false ? false : true);
+                    } catch (ex) {
+                        console.log("unhandled exception in event handler. exception suppressed");
+                        console.dir(ex);
+                    }
+                });
+            }
+            return isValid;
+        };
     }
 });
 
@@ -486,6 +504,30 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     inheritedTypeProcessor: function (type) {
         if ($data.ItemStore && 'EntityInheritedTypeProcessor' in $data.ItemStore)
             $data.ItemStore.EntityInheritedTypeProcessor.apply(this, arguments);
+    },
+
+
+    //Type Events
+    addEventListener: function(eventName, fn) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            this[delegateName] = new $data.Event(eventName, this);
+        }
+        this[delegateName].attach(fn);
+    },
+    removeEventListener: function(eventName, fn) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            return;
+        }
+        this[delegateName].detach(fn);
+    },
+    raiseEvent: function(eventName, data) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            return;
+        }
+        this[delegateName].fire(data);
     }
 });
 

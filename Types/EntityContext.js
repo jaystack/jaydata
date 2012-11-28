@@ -142,7 +142,7 @@ $data.Class.define('$data.EntityContext', null, null,
             if (!(delegateName in this)) {
                 return;
             }
-            this[delegateName].attach(fn);
+            this[delegateName].detach(fn);
         };
 
         this.raiseEvent = function(eventName, data) {
@@ -788,6 +788,9 @@ $data.Class.define('$data.EntityContext', null, null,
                     }
                 }
 
+                //type before events with items
+                this.processEntityTypeBeforeEventHandler(skipItems, entityCachedItem);
+
                 var navigationProperties = [];
                 var smPhyMemDefs = sModel.PhysicalType.memberDefinitions.asArray();
                 for (var ism = 0; ism < smPhyMemDefs.length; ism++) {
@@ -1096,6 +1099,58 @@ $data.Class.define('$data.EntityContext', null, null,
         
         return pHandlerResult;
     },
+
+    processEntityTypeBeforeEventHandler: function (skipItems, entityCachedItem) {
+        if (!entityCachedItem.skipSave) {
+            var entity = entityCachedItem.data;
+            var entityType = entity.getType();
+            var state = entity.entityState;
+
+            switch (true) {
+                case state === $data.EntityState.Added && entityType.onbeforeCreate instanceof $data.Event:
+                    if (entityType.onbeforeCreate.fireCancelAble(entity) === false) {
+                        entityCachedItem.skipSave = true;
+                        skipItems.push(entity);
+                    }
+                    break;
+                case state === $data.EntityState.Modified && entityType.onbeforeUpdate instanceof $data.Event:
+                    if (entityType.onbeforeUpdate.fireCancelAble(entity) === false) {
+                        entityCachedItem.skipSave = true;
+                        skipItems.push(entity);
+                    }
+                    break;
+                case state === $data.EntityState.Deleted && entityType.onbeforeDelete instanceof $data.Event:
+                    if (entityType.onbeforeDelete.fireCancelAble(entity) === false) {
+                        entityCachedItem.skipSave = true;
+                        skipItems.push(entity);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    },
+    processEntityTypeAfterEventHandler: function (entityCachedItem) {
+        var entity = entityCachedItem.data;
+        var entityType = entity.getType();
+        var state = entity.entityState;
+
+        switch (true) {
+            case state === $data.EntityState.Added && entityType.onafterCreate instanceof $data.Event:
+                entityType.onafterCreate.fire(entity);
+                break;
+            case state === $data.EntityState.Modified && entityType.onafterUpdate instanceof $data.Event:
+                entityType.onafterUpdate.fire(entity);
+                break;
+            case state === $data.EntityState.Deleted && entityType.onafterDelete instanceof $data.Event:
+                entityType.onafterDelete.fire(entity);
+                break;
+            default:
+                break;
+        }
+    },
+
+
     prepareRequest: function () { },
     _postProcessSavedItems: function (callBack, changedEntities) {
         if (this.ChangeCollector && this.ChangeCollector instanceof $data.Notifications.ChangeCollectorBase)
@@ -1107,6 +1162,8 @@ $data.Class.define('$data.EntityContext', null, null,
         for (var i = 0; i < changedEntities.length; i++) {
             var entity = changedEntities[i];
 
+            //type after events with items
+            this.processEntityTypeAfterEventHandler(entity);
 
             var oes = entity.data.entityState;
             
