@@ -2,8 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title></title>
-    <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
-    <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
     <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
@@ -151,27 +149,31 @@
 
     <script src="JayDataModules/deferred.js"></script>
     <script src="JayDataModules/handlebars.js"></script>
-    <script src="NewsReaderContext.js"></script>
-    <script src="UnitTests/HandlebarsTest.js"></script>
+<script>
+    var Todo = $data.define("Todo", {
+        Task: String,
+        Completed: Boolean,
+        DueDate: Date
+    });
+    $(function () {
+    $data("Todo")
+        .readAll()
+        .then($data.renderTo("#todoList", "TodoArray"));
+    });
+</script>
 </head>
 <body>
-    <script id="Todo" type="text/x-handlebars-template"><div>{{Task}}</div></script>
-    <script id="Todo_Alternative" type="text/x-handlebars-template"><div><b>{{Task}}</b></div></script>
-    <script id="Todo_WithId" type="text/x-handlebars-template"><li><span>{{Id}}</span>:<span>{{Task}}</span></li></script>
-    <script id="TodoItems" type="text/x-handlebars-template"><div>Total count:{{length}}</div><ul>{{#each .}}{{renderEntity}}{{/each}}</ul></script>
+    <script id="TodoArray" type="text/x-handlebars">
+        <div>Total items: {{length}}</div>
+        <ul>
+            {{#each .}}
+                <li>{{Task}}</li>
+            {{/each}}
+        </ul>
+    </script>
 
+    <div id="todoList">
 
-    <h1 id="qunit-header">JayData unit tests</h1>
-    <h2 id="qunit-banner"></h2>
-    <div id="qunit-testrunner-toolbar"></div>
-    <h2 id="qunit-userAgent"></h2>
-    <ol id="qunit-tests"></ol>
-    <div id="qunit-fixture">
     </div>
-    <div id="output"></div>
-
-    <div id="todoList"></div>
-    <div id="todoList2"></div>
-
 </body>
 </html>

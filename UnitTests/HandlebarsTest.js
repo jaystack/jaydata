@@ -42,7 +42,7 @@
 
 
         var data = { items: [new Todo({ Task: "t1" }), new Todo({ Task: "t2" })] };
-        var r9 = $data.render(data, "<ul>{{#each items}}{{{entity 'Todo_Alternative'}}}{{/each}}</ul>");
+        var r9 = $data.render(data, "<ul>{{#each items}}{{{renderEntity 'Todo_Alternative'}}}{{/each}}</ul>");
         equal(r9, "<ul><div><b>t1</b></div><div><b>t2</b></div></ul>", "entity helper works");
 
         var todos = [new Todo({ Task: "t1" }), new Todo({ Task: "t2" })];
@@ -85,9 +85,9 @@
         stop(1);
         $data("Todo").storeToken.factory().onReady(function (db) {
             console.dir(db);
-            db.Items.filter("it.Task == 'hello'").take(1).renderTo("#todoList2").then(function () {
+            db.Items.filter("it.Task == 'hello'").take(1).renderItemsTo("#todoList2").then(function () {
                 start(1);
-                ok(true, "Queryable renderTo");
+                ok(true, "Queryable renderItemsTo");
                 equal($('#todoList2').html(), '<div>hello</div>');
             });
         });
@@ -95,16 +95,27 @@
         stop(1);
         $data("Todo").storeToken.factory().onReady(function (db) {
             console.dir(db);
-            db.Items.filter("it.Task == 'hello'").take(1).renderTo("#todoList2",'{{Task}}').then(function () {
+            db.Items
+             .filter("it.Task == 'hello'")
+             .take(1)
+             .renderTo("#todoList2","TodoItems").then(function () {
                 start(1);
                 ok(true, "Queryable renderTo");
-                equal($('#todoList2').html(), 'hello');
+                equal($('#todoList2').html(), '<div>Total count:1</div><ul><div>hello</div></ul>');
             });
         });
 
+        var container = $("<div></div>");
+        new Todo({ Task: "HW" }).renderTo(container, "<div>{{Task}}</div>");
+        equal(container.html(), "<div>HW</div>");
 
+        new Todo({ Task: "HW2" }).renderTo(container, "<div>{{Task}}</div>","replaceContent");
+        equal(container.html(), "<div>HW2</div>");
 
+        new Todo({ Task: "HW" }).renderTo(container, "<div>{{Task}}</div>", "append");
+        equal(container.html(), "<div>HW2</div><div>HW</div>");
 
+        /**************************/
 
         //var todos = [new Todo({ Task: "t1" }), new Todo({ Task: "t2" })];
         //var r10 = $data("Todo").renderItems(todos,'<li>{{Task}}</li>');
