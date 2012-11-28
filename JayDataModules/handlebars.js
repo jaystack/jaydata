@@ -73,8 +73,9 @@
         }
 
         var typeName;
-        for (var field in data) {
-            if (data.hasOwnProperty(field)) {
+        var item = (Array.isArray(data) ? data[0] : data);
+        for (var field in item) {
+            if (item.hasOwnProperty(field)) {
                 typeName += (field + "::");
             }
         };
@@ -100,11 +101,7 @@
 
         return function (data) {
             var result;
-            if (data instanceof $data.Entity) {
-                result = $data.render(data, templateName);
-            } else {
-                result = $data.renderItems(data, templateName);
-            }
+            result = $data.render(data, templateName);
             switch (renderMode) {
                 case "append":
                 case "replaceContent":
@@ -121,6 +118,35 @@
                     break;
             }
             
+            return data;
+        }
+    }
+
+    $data.renderItemsTo = function (selector, templateName, renderMode) {
+        renderMode = renderMode || "replaceContent";
+        if (renderMode === 'replaceContent') {
+            $(selector).empty();
+        };
+
+        return function (data) {
+            var result;
+            result = $data.renderItems(data, templateName);
+            switch (renderMode) {
+                case "append":
+                case "replaceContent":
+                    $(selector).append(result);
+                    break;
+                case "replace":
+                    $(selector).replaceWith(result);
+                    break;
+                case "after":
+                    $(selector).after(result);
+                    break;
+                case "before":
+                    $(selector).before(result);
+                    break;
+            }
+
             return data;
         }
     }
@@ -151,6 +177,10 @@
         }
 
         type.renderItems = renderItems;
+
+        //type.renderTo = function (data, selector, template, renderMode) {
+        //    $data.renderTo(selector, template, renderMode)(data);
+        //}
     }
 
 
@@ -158,9 +188,19 @@
         return this.getType().render(this, templateName);
     }
 
+    $data.Entity.prototype.renderTo = function (selector, templateName, renderMode) {
+        return $data.renderTo(selector, templateName, renderMode)(this);
+    }
+
     $data.Queryable.prototype.renderTo = function (selector, templateName, renderMode) {
         return this.toArray().then(function (items) {
             return $data.renderTo(selector, templateName, renderMode)(items);
+        });
+    };
+
+    $data.Queryable.prototype.renderItemsTo = function (selector, templateName, renderMode) {
+        return this.toArray().then(function (items) {
+            return $data.renderItemsTo(selector, templateName, renderMode)(items);
         });
     };
 
@@ -183,8 +223,11 @@
         }
     });
 
-    Handlebars.registerHelper("entity", function (templateName) {
-        return $data.render(this, templateName);
+    Handlebars.registerHelper("renderEntity", function (templateName) {
+        if (arguments.length < 2) {
+            templateName = undefined;
+        }
+        return new Handlebars.SafeString($data.render(this, templateName));
     });
 
     $data.displayCache = {};
