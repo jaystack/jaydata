@@ -74,6 +74,24 @@ $data.Event = Event = $data.Class.define("$data.Event", null, null, {
                 });
             }
         };
+        this.fireCancelAble = function (eventData, snder) {
+            var snd = snder || sender || this;
+            //eventData.eventName = name;
+            ///<value name="subscriberList type="Array" />
+            var isValid = true;
+            if (subscriberList) {
+                subscriberList.forEach(function (subscriber) {
+                    ///<param name="subscriber" type="EventSubscriber" />
+                    try {
+                        isValid = isValid && (subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state) === false ? false : true);
+                    } catch (ex) {
+                        console.log("unhandled exception in event handler. exception suppressed");
+                        console.dir(ex);
+                    }
+                });
+            }
+            return isValid;
+        };
     }
 });
 
@@ -457,13 +475,13 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     //    this.__onReadyList.push(callback);
     //},
 
-    remove: function (store, options, callback) {
+    remove: function () {
         if ($data.ItemStore && 'EntityInstanceRemove' in $data.ItemStore)
             return $data.ItemStore.EntityInstanceRemove.apply(this, arguments);
         else
             throw 'not implemented'; //todo
     },
-    save: function (store, options) {
+    save: function () {
         if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
             return $data.ItemStore.EntityInstanceSave.apply(this, arguments);
         else
@@ -474,17 +492,42 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             return $data.ItemStore.EntityInstanceRefresh.apply(this, arguments);
         else
             throw 'not implemented'; //todo
-    }
+    },
+    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true }
  
 }, {
     //create get_[property] and set_[property] functions for properties
     __setPropertyfunctions: { value: true, notMapped: true, enumerable: false, storeOnObject: true },
     //copy public properties to current instance
     __copyPropertiesToInstance: { value: false, notMapped: true, enumerable: false, storeOnObject: true },
-     
+
     inheritedTypeProcessor: function (type) {
         if ($data.ItemStore && 'EntityInheritedTypeProcessor' in $data.ItemStore)
             $data.ItemStore.EntityInheritedTypeProcessor.apply(this, arguments);
+    },
+
+
+    //Type Events
+    addEventListener: function(eventName, fn) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            this[delegateName] = new $data.Event(eventName, this);
+        }
+        this[delegateName].attach(fn);
+    },
+    removeEventListener: function(eventName, fn) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            return;
+        }
+        this[delegateName].detach(fn);
+    },
+    raiseEvent: function(eventName, data) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            return;
+        }
+        this[delegateName].fire(data);
     }
 });
 
@@ -497,22 +540,33 @@ $data.define = function (name, definition) {
     var hasKey = false;
     var keyFields = [];
     Object.keys(definition).forEach(function (fieldName) {
-        if (Object.hasOwnProperty(definition[fieldName],"type")) {
-            var propDef = definition[fieldName]; 
+        var propDef = definition[fieldName];
+        if (typeof propDef === 'object' && ("type" in propDef || "get" in propDef || "set" in propDef)) {
+
             _def[fieldName] = propDef;
             if (propDef.key) {
                 keyFields.push(propDef);
             }
 
+            if (("get" in propDef || "set" in propDef) && (!('notMapped' in propDef) || propDef.notMapped === true)) {
+                propDef.notMapped = true;
+                propDef.storeOnObject = true;
+            }
+            if ("get" in propDef && !("set" in propDef)) {
+                propDef.set = function () { };
+            } else if ("set" in propDef && !("get" in propDef)) {
+                propDef.get = function () { };
+            }
+
         } else {
-            _def[fieldName] = { type: definition[fieldName] };
+            _def[fieldName] = { type: propDef };
         }
     });
 
     if (keyFields.length < 1) {
         var keyProp;
         switch (true) {
-            case "id" in _def: 
+            case "id" in _def:
                 keyProp = "id";
                 break;
             case "Id" in _def:

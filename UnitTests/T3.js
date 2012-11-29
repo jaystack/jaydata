@@ -1024,6 +1024,403 @@ function T3(providerConfig, msg) {
             });
         });
     });
+
+
+    test('Type beforeCreate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var beforeCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'beforeCreate event sender');
+                    ok(item === entity, 'beforeCreate event argument');
+
+                    equal(item.Id, entity.Id, 'beforeCreate Lead property');
+                    equal(item.Id, undefined, 'beforeCreate Lead property value');
+                    equal(item.Title, entity.Title, 'beforeCreate Lead property');
+                    equal(item.Title, 'hello', 'beforeCreate Lead property value');
+                    equal(item.Lead, entity.Lead, 'beforeCreate Lead property');
+                    equal(item.Lead, 'world', 'beforeCreate Lead property value');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                };
+
+                db.Articles.elementType.addEventListener('beforeCreate', beforeCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.saveChanges(function () {
+                    db.Articles.elementType.removeEventListener('beforeCreate', beforeCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.saveChanges(function () {
+                        start();
+                    });
+                });
+            });
+        });
+    });
+
+    test('Type beforeCreate cancel in context', 11, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var beforeCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'beforeCreate event sender');
+                    ok(item === entity, 'beforeCreate event argument');
+
+                    equal(item.Id, entity.Id, 'beforeCreate Lead property');
+                    equal(item.Id, undefined, 'beforeCreate Lead property value');
+                    equal(item.Title, entity.Title, 'beforeCreate Lead property');
+                    equal(item.Title, 'hello', 'beforeCreate Lead property value');
+                    equal(item.Lead, entity.Lead, 'beforeCreate Lead property');
+                    equal(item.Lead, 'world', 'beforeCreate Lead property value');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                    return false;
+                };
+
+                db.Articles.elementType.addEventListener('beforeCreate', beforeCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.saveChanges(function (cnt) {
+                    equal(cnt, 0, 'added entity count');
+                    db.Articles.elementType.removeEventListener('beforeCreate', beforeCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.Articles.filter('it.Title == "hello"').toArray().then(function (items) {
+                        equal(items.length, 0, 'added entity count');
+
+                        start();
+                    });
+                });
+            });
+        });
+    });
+
+    test('Type beforeCreate cancel one in context', 9, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var beforeCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'beforeCreate event sender');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                    return item.Title === 'hello' ? false : true;
+                };
+
+                db.Articles.elementType.addEventListener('beforeCreate', beforeCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                db.saveChanges(function (cnt) {
+                    equal(cnt, 1, 'added entity count');
+                    db.Articles.elementType.removeEventListener('beforeCreate', beforeCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.Articles.filter('it.Title == "hello" || it.Title == "hello2"').toArray().then(function (items) {
+                        equal(items.length, 1, 'added entity count');
+
+                        equal(typeof items[0].Id, 'number', 'loaded Id property');
+                        equal(items[0].Title, 'hello2', 'loaded Title property');
+                        equal(items[0].Lead, 'world2', 'loaded Lead property');
+
+                        start();
+                    });
+                });
+            });
+        });
+    });
+
+    test('Type afterCreate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var afterCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'afterCreate event sender');
+                    ok(item === entity, 'afterCreate event argument');
+
+                    equal(item.Id, entity.Id, 'afterCreate Lead property');
+                    equal(typeof item.Id, 'number', 'afterCreate Lead property value');
+                    equal(item.Title, entity.Title, 'afterCreate Lead property');
+                    equal(item.Title, 'hello', 'afterCreate Lead property value');
+                    equal(item.Lead, entity.Lead, 'afterCreate Lead property');
+                    equal(item.Lead, 'world', 'afterCreate Lead property value');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                };
+
+                db.Articles.elementType.addEventListener('afterCreate', afterCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.saveChanges(function () {
+                    db.Articles.elementType.removeEventListener('afterCreate', afterCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.saveChanges(function () {
+                        start();
+                    });
+                });
+            });
+        });
+    });
+
+    test('Type beforeUpdate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.first().then(function (entity) {
+                    var beforeUpdate = function (sender, item) {
+                        ok(sender === db.Articles.elementType, 'beforeUpdate event sender');
+                        ok(item === entity, 'beforeUpdate event argument');
+
+                        equal(item.Id, entity.Id, 'beforeUpdate Lead property');
+                        equal(typeof item.Id, 'number', 'beforeUpdate Lead property value');
+                        equal(item.Title, entity.Title, 'beforeUpdate Lead property');
+                        equal(item.Title, 'hello', 'beforeUpdate Lead property value');
+                        equal(item.Lead, entity.Lead, 'beforeUpdate Lead property');
+                        equal(item.Lead, 'world', 'beforeUpdate Lead property value');
+
+                        equal(item.entityState, $data.EntityState.Modified, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.Articles.elementType.addEventListener('beforeUpdate', beforeUpdate);
+
+                    db.Articles.attach(entity);
+                    entity.Title = 'hello';
+                    entity.Lead = 'world';
+
+                    db.saveChanges(function () {
+                        db.Articles.elementType.removeEventListener('beforeUpdate', beforeUpdate);
+
+                        db.Articles.attach(entity);
+                        entity.Title = 'hello2';
+                        entity.Lead = 'world2';
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type beforeUpdate cancel in context', 11, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.first().then(function (entity) {
+                    var beforeUpdate = function (sender, item) {
+                        ok(sender === db.Articles.elementType, 'beforeUpdate event sender');
+                        ok(item === entity, 'beforeUpdate event argument');
+
+                        equal(item.Id, entity.Id, 'beforeUpdate Lead property');
+                        equal(typeof item.Id, 'number', 'beforeUpdate Lead property value');
+                        equal(item.Title, entity.Title, 'beforeUpdate Lead property');
+                        equal(item.Title, 'hello', 'beforeUpdate Lead property value');
+                        equal(item.Lead, entity.Lead, 'beforeUpdate Lead property');
+                        equal(item.Lead, 'world', 'beforeUpdate Lead property value');
+
+                        equal(item.entityState, $data.EntityState.Modified, 'beforeCreate EntityState property value');
+                        start();
+
+                        return false;
+                    };
+
+                    db.Articles.elementType.addEventListener('beforeUpdate', beforeUpdate);
+
+                    db.Articles.attach(entity);
+                    entity.Title = 'hello';
+                    entity.Lead = 'world';
+
+                    db.saveChanges(function () {
+                        db.Articles.elementType.removeEventListener('beforeUpdate', beforeUpdate);
+
+                        db.Articles.single('it.Id == this.value', { value: entity.Id }).then(function (item) {
+                            notEqual(item.Title, 'hello', 'beforeUpdate Lead property value');
+                            notEqual(item.Lead, 'world', 'beforeUpdate Lead property value');
+                            start();
+                        }).fail(function (e) {
+                            ok(false, e);
+                            start();
+                        });
+
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type afterUpdate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.first().then(function (entity) {
+                    var afterUpdate = function (sender, item) {
+                        ok(sender === db.Articles.elementType, 'afterUpdate event sender');
+                        ok(item === entity, 'afterUpdate event argument');
+
+                        equal(item.Id, entity.Id, 'afterUpdate Lead property');
+                        equal(typeof item.Id, 'number', 'afterUpdate Lead property value');
+                        equal(item.Title, entity.Title, 'afterUpdate Lead property');
+                        equal(item.Title, 'hello', 'afterUpdate Lead property value');
+                        equal(item.Lead, entity.Lead, 'afterUpdate Lead property');
+                        equal(item.Lead, 'world', 'afterUpdate Lead property value');
+
+                        equal(item.entityState, $data.EntityState.Modified, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.Articles.elementType.addEventListener('afterUpdate', afterUpdate);
+
+                    db.Articles.attach(entity);
+                    entity.Title = 'hello';
+                    entity.Lead = 'world';
+
+                    db.saveChanges(function () {
+                        db.Articles.elementType.removeEventListener('afterUpdate', afterUpdate);
+
+                        db.Articles.attach(entity);
+                        entity.Title = 'hello2';
+                        entity.Lead = 'world2';
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type beforeDelete in context', 5, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.TagConnections.toArray().then(function (entities) {
+                    var entity = entities[0];
+
+                    var beforeDelete = function (sender, item) {
+                        ok(sender === db.TagConnections.elementType, 'beforeDelete event sender');
+                        ok(item === entity, 'beforeDelete event argument');
+
+                        equal(item.Id, entity.Id, 'beforeDelete Id property');
+                        equal(typeof item.Id, 'number', 'beforeDelete Id property value');
+
+                        equal(item.entityState, $data.EntityState.Deleted, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.TagConnections.elementType.addEventListener('beforeDelete', beforeDelete);
+
+                    db.TagConnections.remove(entity);
+
+                    return db.saveChanges(function () {
+                        db.TagConnections.elementType.removeEventListener('beforeDelete', beforeDelete);
+
+                        db.TagConnections.remove(entities[1]);
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type beforeDelete cancel in context', 6, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.TagConnections.toArray().then(function (entities) {
+                    var entity = entities[0];
+
+                    var beforeDelete = function (sender, item) {
+                        ok(sender === db.TagConnections.elementType, 'beforeDelete event sender');
+                        ok(item === entity, 'beforeDelete event argument');
+
+                        equal(item.Id, entity.Id, 'beforeDelete Id property');
+                        equal(typeof item.Id, 'number', 'beforeDelete Id property value');
+
+                        equal(item.entityState, $data.EntityState.Deleted, 'beforeCreate EntityState property value');
+                        start();
+                        return false;
+                    };
+
+                    db.TagConnections.elementType.addEventListener('beforeDelete', beforeDelete);
+
+                    db.TagConnections.remove(entity);
+
+                    return db.saveChanges(function () {
+                        db.TagConnections.elementType.removeEventListener('beforeDelete', beforeDelete);
+
+                        db.TagConnections.remove(entities[1]);
+
+                        db.TagConnections.single('it.Id == this.value', { value: entity.Id }).then(function (item) {
+                            ok(true, 'not deleted');
+                            start();
+                        }).fail(function (e) {
+                            ok(false, e);
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type afterDelete in context', 5, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.TagConnections.toArray().then(function (entities) {
+                    var entity = entities[0];
+
+                    var afterDelete = function (sender, item) {
+                        ok(sender === db.TagConnections.elementType, 'afterDelete event sender');
+                        ok(item === entity, 'afterDelete event argument');
+
+                        equal(item.Id, entity.Id, 'afterDelete Id property');
+                        equal(typeof item.Id, 'number', 'afterDelete Id property value');
+
+                        equal(item.entityState, $data.EntityState.Deleted, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.TagConnections.elementType.addEventListener('afterDelete', afterDelete);
+
+                    db.TagConnections.remove(entity);
+
+                    return db.saveChanges(function () {
+                        db.TagConnections.elementType.removeEventListener('afterDelete', afterDelete);
+
+                        db.TagConnections.remove(entities[1]);
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
 }
 
 function T3_oDataV3(providerConfig, msg) {
@@ -1161,5 +1558,4 @@ function T3_oDataV3(providerConfig, msg) {
             });
         });
     });
-
 }

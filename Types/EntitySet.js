@@ -36,6 +36,8 @@ $data.Class.defineEx('$data.EntitySet',
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
         }
+
+        this.elementType.storeToken = this.elementType.storeToken || context.storeToken;
     },
 
 
@@ -366,6 +368,12 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
+    },
+    saveChanges: function () {
+        this.entityContext.saveChanges.apply(this.entityContext, arguments);
+    },
+    addProperty: function (name, getter, setter) {
+        this.elementType.addProperty.apply(this.elementType, arguments);
     },
     expression: {
         get: function () {

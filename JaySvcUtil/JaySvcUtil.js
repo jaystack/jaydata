@@ -109,6 +109,9 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         var factoryFn = self.createFactoryFunc(ctxType, cnf);
         this.factoryCache[cnf.url] = [factoryFn, ctxType];
 
+        factoryFn.type = ctxType;
+        factoryFn.codeText = codeText;
+
         if (self.debugMode)
             callBack.success(factoryFn, ctxType, codeText);
         else
@@ -578,24 +581,51 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 });
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
-$data.service = function (serviceUri, cb, config) {
-    var cfg;
-    if (typeof serviceUri === 'object') {
-        //appId, serviceName, ownerid, isSSL, port, license
-        cfg = serviceUri;
-        var protocol = cfg.isSSL || cfg.isSSL === undefined ? 'https' : 'http';
-        var port = cfg.port ? (':' + cfg.port) : '';
-
-        if (typeof cfg.license === 'string' && cfg.license.toLowerCase() === 'business') {
-            serviceUri = protocol + '://' + cfg.appId + '.jaystack.net' + port + '/' + cfg.serviceName;
-        } else {
-            serviceUri = protocol + '://open.jaystack.net/' + cfg.ownerId + '/' + cfg.appId + '/api/' + cfg.serviceName;
+$data.service = function (serviceUri, config, cb) {
+    var _url, _config, _callback;
+    function getParam(paramValue) {
+        switch (typeof paramValue) {
+            case 'object':
+                if (typeof paramValue.success === 'function' || typeof paramValue.error === 'function') {
+                    _callback = paramValue;
+                } else {
+                    _config = paramValue;
+                }
+                break;
+            case 'function':
+                _callback = paramValue;
+                break;
+            default:
+                break;
         }
+    }
+    getParam(config);
+    getParam(cb);
 
-        cfg = $data.typeSystem.extend(cfg, config);
-    } else {
-        cfg = config;
+    if (typeof serviceUri === 'object') {
+        _config = $data.typeSystem.extend(serviceUri, _config);
+        serviceUri = serviceUri.url;
+        delete _config.url;
     }
 
-    $data.MetadataLoader.load(serviceUri, cb, cfg);
+    var pHandler = new $data.PromiseHandler();
+    _callback = pHandler.createCallback(_callback);
+
+    $data.MetadataLoader.load(serviceUri, {
+        success: function (factory) {
+            var type = factory.type;
+            //register to local store
+            if (_config) {
+                var storeAlias = _config.serviceName || _config.storeAlias;
+                if (storeAlias && 'addStore' in $data) {
+                    $data.addStore(storeAlias, factory, _config.isDefault === undefined || _config.isDefault)
+                }
+            }
+
+            _callback.success(factory, type);
+        },
+        error: _callback.error
+    }, _config);
+
+    return pHandler.getPromise();
 };

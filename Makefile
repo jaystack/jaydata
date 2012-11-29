@@ -1,4 +1,4 @@
-VERSION = '1.2.4'
+VERSION = '1.2.5'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules
@@ -114,6 +114,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
 	$(JAYSVCUTIL_DIR)/JaySvcUtil.js\
 	$(BASEMODULE_DIR)/deferred.js\
+	$(TYPES_DIR)/JayStorm.js\
 
 JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\

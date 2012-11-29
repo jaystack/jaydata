@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
     <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
     <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
 
@@ -104,8 +105,6 @@
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
 
     <script type="text/javascript" src="Types/EntityWrapper.js"></script>
-    <script type="text/javascript" src="JaySvcUtil/JaySvcUtil.js"></script>
-    <script type="text/javascript" src="Types/JayStorm.js"></script>
 
     <!--******************************* Ajax*********************************************-->    
     <script type="text/javascript" src="Types/Ajax/jQueryAjaxWrapper.js"></script>
@@ -143,54 +142,36 @@
     <!--******************************* StorageProvider - IndexDb ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
     
-    <!--******************************* Authentication???? ****************************************-->
-    <script type="text/javascript" src="Types/Authentication/AuthenticationBase.js"></script>
-    <script type="text/javascript" src="Types/Authentication/Anonymous.js"></script>
-    <script type="text/javascript" src="Types/Authentication/FacebookAuth.js"></script>
-
-    <!--******************************* StorageProvider - Facebook ****************************************-->
-    <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookProvider.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/user.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/friend.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/page.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQLContext.js"></script>
-    
-    <!--******************************* StorageProvider - YQL ****************************************-->
-    <script type="text/javascript" src="Types/StorageProviders/YQL/YQLProvider.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/YQL/YQLCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/geo.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/YQLContext.js"></script>
-        
+      
     <!--******************************* StorageProvider - inMemory ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
 
 
-    <!--******************************* OData Parser ****************************************-->
-    <script type="text/javascript" src="oDataParser/RequestExpressionBuilder.js"></script>
-    <script type="text/javascript" src="oDataParser/RequestLexer.js"></script>
-    <script type="text/javascript" src="oDataParser/RequestParser.js"></script>
-
-    <script type="text/javascript" src="oDataParser/EntityExpressionBuilder.js"></script>
-    <script type="text/javascript" src="oDataParser/ODataEntityExpressionBuilder.js"></script>
     <script src="JayDataModules/deferred.js"></script>
-    <script src="UnitTests/LocalItemStoreTests.js"></script>
+    <script src="JayDataModules/handlebars.js"></script>
     <script src="NewsReaderContext.js"></script>
+    <script src="UnitTests/HandlebarsTest.js"></script>
 </head>
 <body>
-    <h1 id="qunit-header">
-        JayData unit tests</h1>
-    <h2 id="qunit-banner">
-    </h2>
-    <div id="qunit-testrunner-toolbar">
-    </div>
-    <h2 id="qunit-userAgent">
-    </h2>
-    <ol id="qunit-tests">
-    </ol>
+    <script id="Todo" type="text/x-handlebars-template"><div>{{Task}}</div></script>
+    <script id="Todo_Alternative" type="text/x-handlebars-template"><div><b>{{Task}}</b></div></script>
+    <script id="Todo_WithId" type="text/x-handlebars-template"><li><span>{{Id}}</span>:<span>{{Task}}</span></li></script>
+    <script id="TodoItems" type="text/x-handlebars-template"><div>Total count:{{length}}</div><ul>{{#each .}}{{renderEntity}}{{/each}}</ul></script>
+
+
+    <h1 id="qunit-header">JayData unit tests</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
     <div id="qunit-fixture">
-        test markup, will be hidden</div>
+    </div>
+    <div id="output"></div>
+
+    <div id="todoList"></div>
+    <div id="todoList2"></div>
+
 </body>
 </html>
