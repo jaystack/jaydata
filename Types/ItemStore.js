@@ -190,7 +190,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
 
     //Entity Instance
-    EntityInstanceSave: function (hint, storeAlias) {
+    EntityInstanceSave: function (storeAlias, hint) {
         var self = $data.ItemStore;
         var entity = this;
         return self._getStoreEntitySet(storeAlias, entity)
@@ -311,10 +311,11 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         };
     },
     EntityTypeSave: function (type) {
-        return function (initData, hint, storeAlias) {
+        return function (initData, storeAlias, hint) {
+
             var self = $data.ItemStore;
             var instance = new type(initData);
-            return instance.save(hint, storeAlias);
+            return instance.save(storeAlias, hint);
         }
     },
     EntityTypeAddMany: function (type) {

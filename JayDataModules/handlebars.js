@@ -95,11 +95,12 @@
     //render modes: replace, replaceContent, append, before, after
     $data.renderTo = function (selector, templateName, renderMode) {
         renderMode = renderMode || "replaceContent";
-        if (renderMode === 'replaceContent') {
-            $(selector).empty();
-        };
 
         return function (data) {
+            if (renderMode === 'replaceContent') {
+                $(selector).empty();
+            };
+
             var result;
             result = $data.render(data, templateName);
             switch (renderMode) {
@@ -124,11 +125,12 @@
 
     $data.renderItemsTo = function (selector, templateName, renderMode) {
         renderMode = renderMode || "replaceContent";
-        if (renderMode === 'replaceContent') {
-            $(selector).empty();
-        };
 
         return function (data) {
+            if (renderMode === 'replaceContent') {
+                $(selector).empty();
+            };
+
             var result;
             result = $data.renderItems(data, templateName);
             switch (renderMode) {
@@ -178,6 +180,44 @@
 
         type.renderItems = renderItems;
 
+        type.addCommand = function (commandName, event, handler, root) {
+            root = root || document;
+            if (typeof event === 'function') {
+                handler = event;
+                event = 'click';
+            }
+            var sname = type.fullName.split(".");
+            var name = sname[sname.length - 1];
+            var filter = "[data-command='" + commandName + "'][data-type='" + name + "']";
+            //alert(filter);
+            $(root).delegate(filter, event, function () {
+                var self = this;
+                var cacheKey = $(this).data("cache-item");
+                var entity = getFromCache(cacheKey);
+                var args = [entity, $(this).data("id")];
+                handler.apply(entity, [entity, self, $(self).data("id")]);
+            });
+        }
+
+        type.renderTo = function (item, selector, templateName, renderMode) {
+            if (typeof item !== 'object') {
+                replaceMode = templateName;
+                templateName = selector;
+                selector = item;
+                return type.readAll().then($data.renderTo(selector, templateName, renderMode));
+            }
+            throw new Error("Not implemented");
+        }
+
+        type.renderItemsTo = function (items, selector, templateName, renderMode) {
+            if (!(Array.isArray(items))) {
+                replaceMode = templateName;
+                templateName = selector;
+                selector = items;
+                return type.readAll().then($data.renderItemsTo(selector, templateName, renderMode));
+            }
+            throw new Error("Not implemented");
+        }
         //type.renderTo = function (data, selector, template, renderMode) {
         //    $data.renderTo(selector, template, renderMode)(data);
         //}
