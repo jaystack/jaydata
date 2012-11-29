@@ -777,7 +777,6 @@
                 license: 'business'
             });
         }, true).then(function (ctx) {
-
             return $data('Flower', 'remote')
                 .takeFirst()
                 .then(function (flower) {
@@ -789,7 +788,7 @@
             start();
         })
         .fail(function (e) {
-            equal(e.message, 'factory dont have context instance', 'invalid factory');
+            ok(false, JSON.stringify(e));
             $data.ItemStore = new $data.ItemStoreClass();
             start();
         });
@@ -818,7 +817,7 @@
             start();
         })
         .fail(function (e) {
-            equal(e.message, 'factory dont have context instance', 'invalid factory');
+            ok(false, e);
             $data.ItemStore = new $data.ItemStoreClass();
             start();
         });
