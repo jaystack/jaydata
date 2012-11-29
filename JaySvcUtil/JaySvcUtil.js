@@ -618,7 +618,7 @@ $data.service = function (serviceUri, config, cb) {
             if (_config) {
                 var storeAlias = _config.serviceName || _config.storeAlias;
                 if (storeAlias && 'addStore' in $data) {
-                    $data.addStore(storeAlias, factory, _config.isDefault)
+                    $data.addStore(storeAlias, factory, _config.isDefault === undefined || _config.isDefault)
                 }
             }
 
