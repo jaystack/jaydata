@@ -1082,3 +1082,23 @@ exports.testOrderByIdDescending = function(test){
         });
     });
 };
+
+exports.testNotContains = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.filter(function(it){ return !it.Key.contains('aaa'); }).toArray(function(data){
+                test.equal(data.length, 1, 'Not only 1 item from collection');
+                test.ok(data[0] instanceof $test.Item, 'Entity is not an Item');
+                test.equal(data[0].Key, 'bbb3', 'Key of item is not "bbb3"');
+                test.done();
+            });
+        });
+    });
+};
