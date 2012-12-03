@@ -2,6 +2,112 @@
     msg = msg || '';
     module("BugFix" + msg);
 
+    test('remove navgation property value', function () {
+        expect(4);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.include('Category').filter('it.Id == 1').toArray(function (items) {
+                    var item = items[0];
+                    db.Articles.attach(item);
+                    notEqual(item.Category, null, 'article category is not null');
+                    equal(item.Category instanceof $news.Types.Category, true, 'article category is Category');
+
+                    item.Category = null;
+                    equal(item.Category, null, 'article category set to null');
+
+                    db.saveChanges(function () {
+
+                        db.Articles.include('Category').filter('it.Id == 1').toArray(function (items2) {
+                            equal(items2[0].Category, null, 'article has valid category value');
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test('remove navgation property value without inclue', function () {
+        expect(4);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.filter('it.Id == 1').toArray(function (items) {
+                    var item = items[0];
+                    db.Articles.attach(item);
+                    ok(item.Category !== null, 'article category is not null');
+                    equal(item.Category, undefined, 'article category is undefined');
+
+                    item.Category = null;
+                    equal(item.Category, null, 'article category set to null');
+
+                    db.saveChanges(function () {
+
+                        db.Articles.include('Category').filter('it.Id == 1').toArray(function (items2) {
+                            equal(items2[0].Category, null, 'article has valid category value');
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test('load entity without include', function () {
+        expect(3);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: 'TitleData', Lead: 'LeadData' });
+                db.saveChanges(function () {
+
+
+                    db.Articles.single('it.Title == "TitleData"', null, function (item) {
+                        db.Articles.attach(item);
+                        ok(item.Category === undefined, 'article category is undefined');
+                        equal(item.Title, 'TitleData', 'item title');
+                        equal(item.Lead, 'LeadData', 'item lead');
+
+                        start();
+                    });
+                });
+            });
+        });
+    });
+
+    test('load entity with include', function () {
+        expect(3);
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: 'TitleData', Lead: 'LeadData' });
+                db.saveChanges(function () {
+
+
+                    db.Articles.include('Category').single('it.Title == "TitleData"', null, function (item) {
+                        db.Articles.attach(item);
+                        ok(item.Category === null, 'article category is null');
+                        equal(item.Title, 'TitleData', 'item title');
+                        equal(item.Lead, 'LeadData', 'item lead');
+
+                        start();
+                    });
+                });
+            });
+        });
+    });
+
     test('date null value', function () {
         expect(2);
         stop(1);
@@ -1572,20 +1678,20 @@
                 start(1);
                 var q = db.Articles.map(function (a) { return a.Category.Title });
                 //console.log('q: ', q.toTraceString());
-                    q.toArray({
-                        success: function (categoriesTitle) {
-                            start(1);
-                            equal(categoriesTitle.length, 26, 'Article category error');
-                            categoriesTitle.forEach(function (ct, index) {
-                                equal(typeof ct, 'string', 'data type error at ' + index + '. position');
-                                ok(ct.length >= 4, 'data length error at ' + index + '. position');
-                            });
-                        },
-                        error: function (error) {
-                            start(1);
-                            ok(false, error);
-                        }
-                    });
+                q.toArray({
+                    success: function (categoriesTitle) {
+                        start(1);
+                        equal(categoriesTitle.length, 26, 'Article category error');
+                        categoriesTitle.forEach(function (ct, index) {
+                            equal(typeof ct, 'string', 'data type error at ' + index + '. position');
+                            ok(ct.length >= 4, 'data length error at ' + index + '. position');
+                        });
+                    },
+                    error: function (error) {
+                        start(1);
+                        ok(false, error);
+                    }
+                });
             });
         });
     });
@@ -1675,7 +1781,7 @@
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                var q = db.Articles.map(function (a) { return a.Category;});
+                var q = db.Articles.map(function (a) { return a.Category; });
                 console.log('q: ', q.toTraceString());
                 q.toArray({
                     success: function (results) {
@@ -1703,7 +1809,7 @@
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                var q = db.Articles.map(function (a) { return a.Tags;});
+                var q = db.Articles.map(function (a) { return a.Tags; });
                 //console.log('q: ', q.toTraceString());
                 q.toArray({
                     success: function (results) {
@@ -1733,7 +1839,7 @@
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                var q = db.UserProfiles.map(function(up){return up.Location});
+                var q = db.UserProfiles.map(function (up) { return up.Location });
                 //console.log('q: ', q.toTraceString());
                 q.toArray({
                     success: function (results) {
@@ -1819,7 +1925,7 @@
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-                var q = db.UserProfiles.map(function (up) { return {r: up.Location} });
+                var q = db.UserProfiles.map(function (up) { return { r: up.Location } });
                 //console.log('q: ', q.toTraceString());
                 q.toArray({
                     success: function (results) {
@@ -1989,7 +2095,7 @@
                                     People: {
                                         p1: { name: item.Author.LoginName, prof: item.Author.Profile },
                                         p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags, adr: item.Reviewer.Profile.Location.Address },
-                                        p3: { loc: item.Author.Profile.Location}
+                                        p3: { loc: item.Author.Profile.Location }
                                     },
                                     Cat: item.Category.Title,
                                     Articles: item.Category.Articles
@@ -2069,7 +2175,7 @@
                                     People: {
                                         p1: { name: item.Author.LoginName, prof: item.Author.Profile },
                                         p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags },
-                                        p3: { loc: item.Author.Profile.Location}
+                                        p3: { loc: item.Author.Profile.Location }
                                     },
                                     Cat: item.Category.Title,
                                     Articles: item.Category.Articles
@@ -2149,7 +2255,7 @@
                                     People: {
                                         p1: { name: item.Author.LoginName, prof: item.Author.Profile },
                                         p2: { name: item.Reviewer.LoginName, bio: item.Reviewer.Profile.Bio, tags: item.Tags },
-                                        p3: { loc: item.Author.Profile.Location}
+                                        p3: { loc: item.Author.Profile.Location }
                                     },
                                     Cat: item.Category.Title,
                                     Articles: item.Category.Articles
@@ -2160,10 +2266,10 @@
                     success: function (results) {
                         start(1);
                         equal(results.length, 2, 'Article category error');
-                        
+
                         var r = results[0];
                         var index = 0;
-                        
+
                         ok(r instanceof Object, 'data type error at ' + index + '. position');
                         equal(typeof r.name, 'string', 'name data type  error at ' + index + '. position');
                         equal(r.name, 'Article5', 'name value error at ' + index + '. position');
@@ -2205,10 +2311,10 @@
                             ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
                             ok(['Article1', 'Article2', 'Article5', 'Article3', 'Article4'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
                         });
-                        
+
                         r = results[1];
                         index = 1;
-                        
+
                         ok(r instanceof Object, 'data type error at ' + index + '. position');
                         equal(typeof r.name, 'string', 'name data type  error at ' + index + '. position');
                         equal(r.name, 'Article25', 'name value error at ' + index + '. position');
@@ -2307,7 +2413,7 @@
                                 ok(tag instanceof $news.Types.TagConnection, 'article.Tag[i] data type error at ' + index + '. position');
                                 equal(typeof tag.Id, 'number', 'article.Tag[i].Id data type error at ' + index + '. position');
                             });
-                            
+
                         });
                     },
                     error: function (error) {
@@ -2374,7 +2480,7 @@
 
                             ok(article.Author.Profile.Location instanceof $news.Types.Location, 'article.Author.Profile.Location type error at ' + index + '. position');
                             ok(article.Author.Profile.Location.Address.length > 2, 'article.Author.Profile.Location.Address length number error at ' + index + '. position');
-                            
+
 
                         });
                     },
