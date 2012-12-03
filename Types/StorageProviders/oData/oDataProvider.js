@@ -74,7 +74,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1") ||
                         (association.FromMultiplicity == '$$unbound')) {
                         var refValue = logicalEntity[association.FromPropertyName];
-                        if (refValue !== null && refValue !== undefined) {
+                        if (/*refValue !== null &&*/ refValue !== undefined) {
                             if (refValue instanceof $data.Array) {
                                 dbInstance[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
                                 refValue.forEach(function (rv) {
@@ -82,6 +82,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                     if (contentId < 0) { Guard.raise("Dependency graph error"); }
                                     dbInstance[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
                                 }, this);
+                            } else if (refValue === null) {
+                                dbInstance[association.FromPropertyName] = null;
                             } else {
                                 if (refValue.entityState === $data.EntityState.Modified) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())

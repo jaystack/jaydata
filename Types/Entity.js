@@ -318,27 +318,33 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     },
     typeConversion: function (memberDefinition, value) {
         var convertedValue = value;
+        
         if (typeof value === 'string' && !memberDefinition.concurrencyMode) {
             switch (Container.resolveName(memberDefinition.type)) {
                 case '$data.Guid':
+                    if (value === '') return undefined;
                     convertedValue = $data.parseGuid(value);
                     break;
                 case '$data.Integer':
+                    if (value === '') return undefined;
                     convertedValue = parseInt(value);
                     if (isNaN(convertedValue))
                         throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', [memberDefinition, value]));
                     break;
                 case '$data.Number':
+                    if (value === '') return undefined;
                     convertedValue = parseFloat(value);
                     if (isNaN(convertedValue))
                         throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', [memberDefinition, value]));
                     break;
                 case '$data.Date':
+                    if (value === '') return undefined;
                     convertedValue = new Date(value);
                     if (isNaN(convertedValue.valueOf()))
                         throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', [memberDefinition, value]));
                     break;
                 case '$data.Boolean':
+                    if (value === '') return undefined;
                     switch (value.toLowerCase()) {
                         case 'true': 
                             convertedValue = true;
@@ -351,11 +357,14 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                     }
                     break;
                 case '$data.Object':
+                    if (value === '') return undefined;
                     try {
                         convertedValue = JSON.parse(value);
                     } catch (e) {
                         throw Guard.raise(new Exception('TypeError: ', e.toString(), [memberDefinition, value]));
                     }
+                    break;
+                default:
                     break;
             }
         }
