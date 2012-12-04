@@ -66,11 +66,7 @@ $data.Class.define("$data.JayService", null, null, {
                 if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
                     schema += 's';
 
-                if (req.headers.host) {
-                    var appOwnerId = typeof req.getAppOwnerId === 'function' ? req.getAppOwnerId() : undefined;
-                    var appId = typeof req.getAppId === 'function' ? req.getAppId() : undefined;                
-                    req.fullRoute = (appOwnerId && appId ? schema + '://' + req.headers.host + '/' + appOwnerId + '/' + appId + '/api' + app.route : schema + '://' + req.headers.host + app.route);
-                }
+                req.fullRoute = (req.baseRoute || (schema + '://' + req.headers.host)) + app.route;
             }
         }
     }
