@@ -561,18 +561,22 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
         switch (opName){
             case 'contains':
                 opMapTo = '$regex';
-                opValue = context.value;
+                opValue = context.value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
                 break;
             case 'startsWith':
                 opMapTo = '$regex';
-                opValue = '^' + context.value;
+                opValue = '^' + context.value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
                 break;
             case 'endsWith':
                 opMapTo = '$regex';
-                opValue = context.value + '$';
+                opValue = context.value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1") + '$';
                 break;
             default:
                 break;
+        }
+        
+        if (context.unary === $data.Expressions.ExpressionType.Not){
+            opValue = '^((?!' + opValue + ').)*$';
         }
         
         if (opMapTo && opValue){
