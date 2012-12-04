@@ -5,7 +5,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.cache = {};
     },
 
-    deepExtend: function(o, r){
+    _deepExtend: function(o, r){
         if (o === null || o === undefined){
             o = r;
             return;
@@ -19,12 +19,78 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 o[i].push(r[i][j]);
                             }
                         }
-                    }else this.deepExtend(o[i], r[i]);
+                    }else this._deepExtend(o[i], r[i]);
                 }
             }else{
                 o[i] = r[i];
             }
         }
+    },
+    
+    _dataSelector: function(metaSelector, data){
+        if (!metaSelector) return data;
+        
+        if (!(metaSelector instanceof Array)){
+            metaSelector = [metaSelector];
+        }
+
+        var i = 0;
+        var part;
+        while (i < metaSelector.length){
+            part = data;
+            var selector = metaSelector[i];
+            var type = selector.split(':');
+            switch (type[0]){
+                case 'json':
+                    var path = type[1].split('.');
+                    while (path.length) {
+                        if (typeof part[path[0]] === 'undefined') {
+                            if (i === metaSelector.length){
+                                return undefined;
+                            }else if (path.length){
+                                break;
+                            }
+                        }else{
+                            part = part[path[0]];
+                            path = path.slice(1);
+                            if (part === null) return part;
+                        }
+                    }
+                    if (!path.length){
+                        i = metaSelector.length;
+                    }
+                    break;
+                case 'css':
+                case 'xml':
+                    if (part.querySelector){
+                        part = part[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
+                    }else{
+                        part = $(part).find(type[1]);
+                        if (!meta.$item) part = part[0];
+                    }
+                    break;
+            }
+            i++;
+        }
+        
+        return part;
+    },
+    
+    _keyProcessor: function(type, keys, data){
+        var key = '';
+        
+        for (var i = 0; i < keys.length; i++){
+            var part = data;
+            var id = typeof keys[i] !== 'object' ? keys[i] : keys[i].$source;
+            if (keys[i].$selector){
+                part = this._dataSelector(keys[i].$selector, part);
+            }
+            if (part[id] === null) return null;
+            if (typeof part[id] === 'undefined') return undefined;
+            key += (type + '_' + id + '#' + part[id]);
+        }
+        
+        return key;
     },
 
     call: function (data, meta) {
@@ -35,54 +101,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
         var result;
 
         if (meta.$selector){
-			var metaSelector = meta.$selector;
-			if (!(metaSelector instanceof Array)){
-				metaSelector = [metaSelector];
-			}
-
-			var i = 0;
-			var part;
-			while (i < metaSelector.length){
-				part = data;
-				var selector = metaSelector[i];
-				var type = selector.split(':');
-				switch (type[0]){
-					case 'json':
-						var path = type[1].split('.');
-						while (path.length) {
-						    if (typeof part[path[0]] === 'undefined') {
-								if (i === metaSelector.length){
-									return undefined;
-								}else if (path.length){
-									break;
-								}
-							}else{
-								part = part[path[0]];
-								path = path.slice(1);
-								if (part === null) return part;
-							}
-						}
-						if (!path.length){
-							i = metaSelector.length;
-						}
-						break;
-					case 'css':
-					case 'xml':
-						if (part.querySelector){
-							part = part[meta.$item ? 'querySelectorAll' : 'querySelector'](type[1]);
-						}else{
-							part = $(part).find(type[1]);
-							if (!meta.$item) part = part[0];
-						}
-						break;
-				}
-				i++;
-			}
-
-			data = part;
-			if (!data){
-				return data;
-			}
+            data = this._dataSelector(meta.$selector, data);
+            if (!data){
+                return data;
+            }
         }
         
         if (meta.$type) {
@@ -107,9 +129,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }
         }
 
-		if (meta.$value){
-			if (typeof meta.$value === 'function'){
-				result = meta.$value.call(this, meta, data);
+        if (meta.$value){
+            if (typeof meta.$value === 'function'){
+                result = meta.$value.call(this, meta, data);
             }else if (meta.$type){
                 var type = Container.resolveName(meta.$type);
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
@@ -121,14 +143,16 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
                 result = converter ? converter(data[meta.$source]) : new (Container.resolveType(meta.$type))(data[meta.$source]); //Container['create' + Container.resolveType(meta.$type).name](data[meta.$source]);
             }else result = (meta.$source.split(':')[0] == 'attr' && data.getAttribute) ? data.getAttribute(meta.$source.split(':')[1]) : (meta.$source == 'textContent' && !data[meta.$source] ? $(data).text() : data[meta.$source]);
-        } else if (meta.$item) {
+        }else if (meta.$item){
             var keycache;
             if (meta.$item.$keys) keycache = [];
             
             if (Array.isArray(data)) {
                 for (var i = 0; i < data.length; i++) {
                     var key = '';
-                    if (meta.$keys) for (var j = 0; j < meta.$keys.length; j++) { key += (meta.$type + '_' + meta.$keys[j] + '#' + data[i][meta.$keys[j]]); }
+                    if (meta.$keys){
+                        key = this._keyProcessor(meta.$type, meta.$keys, data[i]);
+                    }
                     var r = this.call(data[i], meta.$item);
                     if (key){
                         if (this.cache[key]){
@@ -142,24 +166,24 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         }
                     }else{
                         var key = '';
-                        if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) {
-                            if (typeof data[i][meta.$item.$keys[j]] === 'undefined'){
-                                key = undefined;
-                                break;
-                            }
-                            key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[i][meta.$item.$keys[j]]);
+                        if (meta.$item.$keys){
+                            key = this._keyProcessor(meta.$type, meta.$item.$keys, data[i]);
                         }
-                        if (keycache && key){
-                            if (keycache.indexOf(key) < 0){
-                                result.push(r);
-                                keycache.push(key);
-                            }
-                        }else result.push(r);
+                        if (key !== null){
+                            if (keycache && key){
+                                if (keycache.indexOf(key) < 0){
+                                    result.push(r);
+                                    keycache.push(key);
+                                }
+                            }else result.push(r);
+                        }
                     }
                 }
             } else {
                 var key = '';
-                if (meta.$keys) for (var j = 0; j < meta.$keys.length; j++) { key += (meta.$type + '_' + meta.$keys[j] + '#' + data[meta.$keys[j]]); }
+                if (meta.$keys){
+                    key = this._keyProcessor(meta.$type, meta.$keys, data);
+                }
                 var r = this.call(data, meta.$item);
                 if (key){
                     if (this.cache[key]){
@@ -173,26 +197,25 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }else{
                     var key = '';
-                    if (meta.$item.$keys) for (var j = 0; j < meta.$item.$keys.length; j++) {
-                        if (typeof data[meta.$item.$keys[j]] === 'undefined'){
-                            key = undefined;
-                            break;
-                        }
-                        key += (meta.$type + '_' + meta.$item.$keys[j] + '#' + data[meta.$item.$keys[j]]);
+                    if (meta.$item.$keys){
+                        key = this._keyProcessor(meta.$type, meta.$item.$keys, data);
                     }
-                    if (keycache && key){
-                        if (keycache.indexOf(key) < 0){
-                            result.push(r);
-                            keycache.push(key);
-                        }
-                    }else result.push(r);
+                    if (key !== null){
+                        if (keycache && key){
+                            if (keycache.indexOf(key) < 0){
+                                result.push(r);
+                                keycache.push(key);
+                            }
+                        }else result.push(r);
+                    }
                 }
             }
         }else{
             var key = '';
             if (meta.$keys){
-                for (var j = 0; j < meta.$keys.length; j++) { key += (meta.$type + '_' + meta.$keys[j] + '#' + data[meta.$keys[j]]); }
+                key = this._keyProcessor(meta.$type, meta.$keys, data);
                 if (!this.cache[key]){
+                    if (key === null) return null;
                     for (var j in meta){
                         if (j.indexOf('$') < 0){
                             if (!meta[j].$item) {
@@ -212,15 +235,16 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         if (j.indexOf('$') < 0){
                             if (meta[j].$item) {
                                 if (meta[j].$item.$keys){
-                                    var key = '';
-                                    for (var k = 0; k < meta[j].$item.$keys.length; k++) { key += (meta[j].$item.$type + '_' + meta[j].$item.$keys[k] + '#' + data[meta[j].$item.$keys[k]]); }
-                                    var r = this.call(data, meta[j].$item);
-                                    if (!this.cache[key]){
-                                        this.cache[key] = r;
-                                        result[j].push(r);
-                                    }else{
-                                        if (result[j].indexOf(this.cache[key]) < 0){
-                                            result[j].push(this.cache[key]);
+                                    var key = this._keyProcessor(meta[j].$item.$type, meta[j].$item.$keys, this._dataSelector(meta[j].$item.$keys, data));
+                                    if (key !== null){
+                                        var r = this.call(data, meta[j].$item);
+                                        if (!this.cache[key]){
+                                            this.cache[key] = r;
+                                            result[j].push(r);
+                                        }else{
+                                            if (result[j].indexOf(this.cache[key]) < 0){
+                                                result[j].push(this.cache[key]);
+                                            }
                                         }
                                     }
                                 }else{
@@ -229,7 +253,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             }else{
                                 if (typeof meta[j] === 'object'){
                                     var r = this.call(data, meta[j]);
-                                    this.deepExtend(result[j], r);
+                                    this._deepExtend(result[j], r);
                                 }
                             }
                         }
@@ -252,8 +276,8 @@ $data.Class.define('$data.ModelBinder', null, null, {
         }
 
 
-		if (result instanceof $data.Entity)
-		    result.changedProperties = undefined;
+        if (result instanceof $data.Entity)
+            result.changedProperties = undefined;
         return result;
     }
 });
