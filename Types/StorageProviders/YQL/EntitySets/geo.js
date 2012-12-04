@@ -60,13 +60,10 @@ $data.Class.defineEx('$data.Yahoo.types.Geo.PlaceMetaFull', [{ type: null }, { t
 
 
 $data.Class.define('$data.Yahoo.types.Geo.placetype', $data.Entity, null, {
-    woeid: { type: 'int', key: true },
     placeTypeDescription: { type: 'string' },
-    uri: { type: 'string' },
+    uri: { type: 'string', key: true },
     placeTypeName: { type: 'placeTypeNameRef' },
-    lang: { type: 'string' },
-    placetype: { type: 'string' },
-    placetypeid: { type: 'string' }
+    lang: { type: 'string' }
 }, null);
 
 $data.Class.defineEx('$data.Yahoo.types.Geo.sibling', [{ type: $data.Entity }, { type: $data.Yahoo.types.Geo.PlaceMetaFull }], null, {
