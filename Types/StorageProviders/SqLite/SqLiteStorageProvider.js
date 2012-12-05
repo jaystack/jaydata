@@ -312,15 +312,16 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                         var deleteCmd = [];
                         for (var i = 0; i < that.SqlCommands.length; i++) {
                             if (that.SqlCommands[i] == "") { continue; }
-                            var regEx = /^CREATE TABLE IF NOT EXISTS ([^ ]*) (\(.*\))/g;
+                            var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
                             var data = regEx.exec(that.SqlCommands[i]);
                             if (data) {
                                 var tableName = data[1];
                                 var tableDef = data[2];
                                 if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
-                                    var existsRegEx = new RegExp('^CREATE TABLE ([^ ]*) (\(.*\))', 'g');
-                                    var existTableDef = existsRegEx.exec(existObjectInDB[tableName.slice(1, tableName.length - 1)].sql)[2];
-                                    if (tableDef.toLowerCase() != existTableDef.toLowerCase()) {
+                                    var regex = new RegExp('\\(.*\\)', 'g');
+                                    var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
+
+                                    if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
                                         deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
                                     }
                                 }
