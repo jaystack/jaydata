@@ -230,11 +230,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 } else {
 
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                        if (memDef.computed || memDef.key) {
+                        var propType = Container.resolveType(memDef.type);
+                        if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 item[memDef.name] = response.headers.ETag || response.headers.Etag;
                             } else {
-                                var converter = that.fieldConverter.fromDb[Container.resolveType(memDef.type)];
+                                var converter = that.fieldConverter.fromDb[Container.resolveName(memDef.type)];
                                 item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
                             }
                         }
@@ -322,11 +323,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
                         item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                             //TODO: is this correct?
-                            if (memDef.computed || memDef.key) {
+                            var propType = Container.resolveType(memDef.type);
+                            if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
                                 if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                     item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag;
                                 } else {
-                                    var converter = that.fieldConverter.fromDb[Container.resolveType(memDef.type)];
+                                    var converter = that.fieldConverter.fromDb[Container.resolveName(memDef.type)];
                                     item[memDef.name] = converter ? converter(result[i].data[memDef.name]) : result[i].data[memDef.name];
                                 }
                             }

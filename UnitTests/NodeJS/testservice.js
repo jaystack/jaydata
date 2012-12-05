@@ -40,16 +40,37 @@ $data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
 });
 
 $data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
-    Id: { type: 'string', key: true },
+    Id: { type: 'string', key: true, required: true },
     Name: { type: 'string' },
     Index: { type: 'int' }
 });
 
 $data.Class.define('$exampleSrv.TestItemGuid', $data.Entity, null, {
-    Id: { type: 'guid', key: true },
+    Id: { type: 'guid', key: true, required: true },
     Name: { type: 'string' },
     Index: { type: 'int' },
     GuidField: { type: 'guid' }
+});
+
+$data.Class.define('$exampleSrv.TestItemComputed', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' },
+    DateField: { type: 'date' },
+    BoolField: { type: 'bool' },
+    ObjectField: { type: 'object' }
+});
+
+$exampleSrv.TestItemComputed.addEventListener('beforeCreate', function (sender, item) {
+    if (!item.Name)
+        item.Name = 'default Name';
+
+    item.Index = 42;
+    item.GuidField = $data.parseGuid('7b33e20d-3cca-4452-b3e2-eca9525377a1');
+    item.DateField = new Date('2012');
+    item.BoolField = true;
+    item.ObjectField = { work: 'item', computed: 'field' };
 });
 
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
@@ -58,6 +79,7 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
     TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
     TestItemGuids: { type: $data.EntitySet, elementType: $exampleSrv.TestItemGuid },
+    TestItemComputeds: { type: $data.EntitySet, elementType: $exampleSrv.TestItemComputed },
     FuncStrParam: (function (a) {
         ///<param name="a" type="string"/>
         ///<returns type="string"/>

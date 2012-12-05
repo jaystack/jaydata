@@ -35,12 +35,23 @@ $data.Class.define('$example.TestItemGuid', $data.Entity, null, {
     GuidField: { type: 'guid' }
 });
 
+$data.Class.define('$example.TestItemComputed', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' },
+    DateField: { type: 'date' },
+    BoolField: { type: 'bool' },
+    ObjectField: { type: 'object' }
+});
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
     Places: { type: $data.EntitySet, elementType: $example.Place },
     TestItems: { type: $data.EntitySet, elementType: $example.TestItem },
     TestItemGuids: { type: $data.EntitySet, elementType: $example.TestItemGuid },
+    TestItemComputeds: { type: $data.EntitySet, elementType: $example.TestItemComputed },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
     FuncGuidParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGuidParam', returnType: $data.Guid, params: [{ a: $data.Guid }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
@@ -122,7 +133,7 @@ $example.Context.generateTestData = function (ctx, callback) {
             ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2, Data: { a: 5, b: i } });
             ctx.Places.add({ Name: 'Places' + i, Location: new $data.Geography(123.15697, i) });
             ctx.TestItemGuids.add({ Id: $data.Guid.NewGuid(), Name: 'name' + i, Index: i, GuidField: $data.Guid.NewGuid() });
-        } 
+        }
 
         ctx.saveChanges(callback);
     });
@@ -131,11 +142,11 @@ $example.Context.generateTestData = function (ctx, callback) {
 $example.Context.generateTestData.serviceurl = '/testservice';
 $example.Context.generateTestData.itemsInTables = 10;
 $example.Context.getContext = function (cfg) {
-    var config = $data.typeSystem.extend({ 
-        name: 'oData', 
-        oDataServiceHost: $example.Context.generateTestData.serviceurl, 
-        serviceUrl: $example.Context.generateTestData.serviceurl, 
-        user: 'asd', 
+    var config = $data.typeSystem.extend({
+        name: 'oData',
+        oDataServiceHost: $example.Context.generateTestData.serviceurl,
+        serviceUrl: $example.Context.generateTestData.serviceurl,
+        user: 'asd',
         password: 'asd'
     }, cfg || {});
 
@@ -1583,6 +1594,70 @@ test("REST - GET JSONP", 9, function () {
                 equal(typeof order.Data.a, 'number', 'Data.a result failed');
                 equal(typeof order.Data.b, 'number', 'Data.b result failed');
 
+                start();
+            });
+        });
+    });
+});
+
+test("REST - load all fields on create - single", 7, function () {
+
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        var item = new $example.TestItemComputed({ Id: $data.parseGuid('c33bd325-afa9-4941-b21b-bf398f8a2dac'), Name: 'testName' });
+
+        context.add(item);
+
+        context.saveChanges(function () {
+            //item props
+            equal(item.Id.value, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
+            equal(item.Name, 'testName', 'Name property');
+            equal(item.Index, 42, 'Index property');
+            equal(item.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
+            equal(item.BoolField, true, 'BoolField property');
+            deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
+
+            $example.TestItemComputed.removeAll().then(function () {
+                start();
+            });
+        });
+    });
+});
+
+test("REST - load all fields on create - batch", 14, function () {
+
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        var item = new $example.TestItemComputed({ Id: $data.parseGuid('c33bd325-afa9-4941-b21b-bf398f8a2dac'), Name: 'testName' });
+        var item2 = new $example.TestItemComputed({ Id: $data.parseGuid('7eeb43b5-752f-4fc6-8f77-665e1ad48a9b') }); 2
+
+        context.add(item);
+        context.add(item2);
+
+        context.saveChanges(function () {
+            //item props
+            equal(item.Id.value, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
+            equal(item.Name, 'testName', 'Name property');
+            equal(item.Index, 42, 'Index property');
+            equal(item.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
+            equal(item.BoolField, true, 'BoolField property');
+            deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
+
+            equal(item2.Id.value, '7eeb43b5-752f-4fc6-8f77-665e1ad48a9b', 'GuidField property');
+            equal(item2.Name, 'default Name', 'Name property');
+            equal(item2.Index, 42, 'Index property');
+            equal(item2.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item2.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
+            equal(item2.BoolField, true, 'BoolField property');
+            deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
+
+            $example.TestItemComputed.removeAll().then(function () {
                 start();
             });
         });
