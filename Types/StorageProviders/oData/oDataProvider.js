@@ -85,7 +85,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             } else if (refValue === null) {
                                 dbInstance[association.FromPropertyName] = null;
                             } else {
-                                if (refValue.entityState === $data.EntityState.Modified) {
+                                if (convertedItems.indexOf(refValue) < 0) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
                                     var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: sMod.EntitySetReference }) + ')';
