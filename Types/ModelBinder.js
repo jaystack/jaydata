@@ -25,6 +25,8 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 o[i] = r[i];
             }
         }
+        if (o instanceof $data.Entity)
+            o.changedProperties = undefined;
     },
     
     _dataSelector: function(metaSelector, data){
@@ -216,6 +218,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 key = this._keyProcessor(meta.$type, meta.$keys, data);
                 if (!this.cache[key]){
                     if (key === null) return null;
+                    this.cache[key] = result;
                     for (var j in meta){
                         if (j.indexOf('$') < 0){
                             if (!meta[j].$item) {
@@ -228,27 +231,48 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             } else { result[j] = this.call(data, meta[j]); }
                         }
                     }
-                    this.cache[key] = result;
                 }else{
                     result = this.cache[key];
                     for (var j in meta){
                         if (j.indexOf('$') < 0){
                             if (meta[j].$item) {
-                                if (meta[j].$item.$keys){
-                                    var key = this._keyProcessor(meta[j].$item.$type, meta[j].$item.$keys, this._dataSelector(meta[j].$item.$keys, data));
-                                    if (key !== null){
-                                        var r = this.call(data, meta[j].$item);
-                                        if (!this.cache[key]){
-                                            this.cache[key] = r;
-                                            result[j].push(r);
-                                        }else{
-                                            if (result[j].indexOf(this.cache[key]) < 0){
-                                                result[j].push(this.cache[key]);
+                                data = this._dataSelector(meta[j].$selector, data);
+                                if (Array.isArray(data)){
+                                    for (var i = 0; i < data.length; i++) {
+                                        if (meta[j].$item.$keys) {
+                                            var key = this._keyProcessor(meta[j].$item.$type, meta[j].$item.$keys, data[i]);
+                                            if (key !== null) {
+                                                var r = this.call(data[i], meta[j].$item);
+                                                if (!this.cache[key]) {
+                                                    this.cache[key] = r;
+                                                    result[j].push(r);
+                                                } else {
+                                                    if (result[j].indexOf(this.cache[key]) < 0) {
+                                                        result[j].push(this.cache[key]);
+                                                    }
+                                                }
                                             }
+                                        } else {
+                                            result[j].push(this.call(data[i], meta[j].$item));
                                         }
                                     }
                                 }else{
-                                    result[j].push(this.call(data, meta[j].$item));
+                                    if (meta[j].$item.$keys) {
+                                        var key = this._keyProcessor(meta[j].$item.$type, meta[j].$item.$keys, data);
+                                        if (key !== null) {
+                                            var r = this.call(data, meta[j].$item);
+                                            if (!this.cache[key]) {
+                                                this.cache[key] = r;
+                                                result[j].push(r);
+                                            } else {
+                                                if (result[j].indexOf(this.cache[key]) < 0) {
+                                                    result[j].push(this.cache[key]);
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        result[j].push(this.call(data, meta[j].$item));
+                                    }
                                 }
                             }else{
                                 if (typeof meta[j] === 'object'){
