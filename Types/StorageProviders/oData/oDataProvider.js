@@ -571,7 +571,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             fromDb: {
                 '$data.Integer': function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : undefined; },
+                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : dbData; },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
