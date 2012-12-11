@@ -766,4 +766,20 @@
         var def = Types.AAOverride.memberDefinitions.asArray().filter(function (d) { return d.name === 'myFunc'; })[0]
         ok(def.method === func, 'definition has good pointer 2');
     });
+
+    test('type create factory', 8, function () {
+
+        var instance = dataClass.create();
+        equal(instance instanceof dataClass, true, 'instanceof');
+        equal(instance instanceof $data.Base, true, 'instanceof base');
+        equal(instance instanceof $data.Entity, false, 'instanceof entity');
+
+        var art = $news.Types.Article.create({ Lead: 'lead', Title: 'title' });
+        equal(art instanceof $news.Types.Article, true, 'instanceof');
+        equal(art instanceof $data.Base, true, 'instanceof base');
+        equal(art instanceof $data.Entity, true, 'instanceof entity');
+        equal(art.Lead, 'lead', 'art.Lead');
+        equal(art.Title, 'title', 'art.Title');
+
+    });
 });

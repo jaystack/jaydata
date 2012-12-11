@@ -241,12 +241,18 @@ $(document).ready(function () {
             stop(1);
 
             context.Pages.filter(function (p) { return p.name == 'JayData'; })
-            .toArray(function (Pages) {
-                start(1);
-                equal(Pages.length, 2, 'result count');
-                equal(Pages[0].page_id, 315494325176794, 'page identity');
-                equal(Pages[0].type, "SOFTWARE", "page category length");
-                equal(Pages[0].pic_cover.cover_id, 342871709105722, "pic cover object length");
+            .toArray({
+                success: function (Pages) {
+                    start(1);
+                    equal(Pages.length, 2, 'result count');
+                    equal(Pages[0].page_id, 315494325176794, 'page identity');
+                    equal(Pages[0].type, "SOFTWARE", "page category length");
+                    equal(Pages[0].pic_cover.cover_id, 342871709105722, "pic cover object length");
+                },
+                error: function (e) {
+                    ok(false, 'Error: ' + e);
+                    start();
+                }
             });
 
         });

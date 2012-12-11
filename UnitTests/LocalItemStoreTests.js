@@ -884,4 +884,105 @@
         equal(item.Age, 25, 'Age property 2');
     });
 
+    test('type default factory value', 3, function () {
+        stop(1);
+
+        $data.define('myArticle', {
+            Lead: String,
+            Title: String
+        });
+
+        $data.EntityContext.extend('myContext', {
+            myArts: { type: $data.EntitySet, elementType: myArticle }
+        });
+
+        equal(typeof myArticle.storeToken, 'undefined', 'storeToken not set');
+
+        var context = new myContext({ name: 'local' });
+        deepEqual(myArticle.storeToken, context.storeToken, 'storeToken has value before onready');
+
+        context.onReady(function () {
+            deepEqual(myArticle.storeToken, context.storeToken, 'storeToken has value after onready');
+
+            start()
+        });
+
+    });
+
+    test('storeToken - typeName and args', 4, function () {
+        stop(1);
+
+        $data.Entity.extend('myArticle', {
+            Lead: { type: String },
+            Title: { type: String }
+        }, {
+            storeToken: {
+                value: {
+                    typeName: 'myContext',
+                    args: { name: 'local', databaseName: 'myArticle' }
+                }
+            }
+        });
+
+        $data.EntityContext.extend('myContext', {
+            myArts: { type: $data.EntitySet, elementType: myArticle }
+        });
+
+        myArticle.readAll().then(function (arts) {
+            equal(arts.length, 0, 'no item in store');
+
+            return myArticle.save({ Lead: 'lead42', Title: 'title42' });
+        }).then(function () {
+            return myArticle.readAll();
+        }).then(function (arts) {
+            equal(arts.length, 1, 'saved item in store');
+            equal(arts[0].Lead, 'lead42', 'Lead');
+            equal(arts[0].Title, 'title42', 'Title');
+
+            return myArticle.removeAll();
+        }).then(function () {
+            start(1);
+        }).fail(function (ex) {
+            start(1);
+            ok(false, 'error:' + ex);
+        });
+
+    });
+
+    test('storeToken - factory', 4, function () {
+        stop(1);
+
+        $data.Entity.extend('myArticle2', {
+            Lead: { type: String },
+            Title: { type: String }
+        }, {
+            storeToken: function () {
+                return new myContext({ name: 'local', databaseName: 'myArticle2' });
+            }
+        });
+
+        $data.EntityContext.extend('myContext', {
+            myArts: { type: $data.EntitySet, elementType: myArticle2 }
+        });
+
+        myArticle2.readAll().then(function (arts) {
+            equal(arts.length, 0, 'no item in store');
+
+            return myArticle2.save({ Lead: 'lead42', Title: 'title42' });
+        }).then(function () {
+            return myArticle2.readAll();
+        }).then(function (arts) {
+            equal(arts.length, 1, 'saved item in store');
+            equal(arts[0].Lead, 'lead42', 'Lead');
+            equal(arts[0].Title, 'title42', 'Title');
+
+            return myArticle2.removeAll();
+        }).then(function () {
+            start(1);
+        }).fail(function (ex) {
+            start(1);
+            ok(false, 'error:' + ex);
+        });
+
+    });
 });

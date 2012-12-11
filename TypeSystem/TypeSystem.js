@@ -692,6 +692,7 @@
                 t.apply(inst, parameters);
                 return inst;
             };
+            this.createInstance = function (type, parameters) { return IoC(type, parameters); };
 
             this.mapType = function (aliasTypeOrName, realTypeOrName) {
                 Guard.requireValue("aliasType", aliasTypeOrName);
@@ -943,6 +944,7 @@
             callback.apply(this, [this[memberDefinition.name]]);
         }
     }, {
+        create: function () { return Container.createInstance(this, arguments); },
         extend: function (name, instanceDefinition, classDefinition) {
             return $data.Class.define(name, this, null, instanceDefinition, classDefinition);
         },

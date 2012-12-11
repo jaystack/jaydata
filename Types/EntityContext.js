@@ -46,15 +46,8 @@ $data.Class.define('$data.EntityContext', null, null,
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
-        var self = this;
-        var args = JSON.parse(JSON.stringify(storageProviderCfg));
-        this.storeToken = {
-            typeName: this.getType().fullName,
-            args: args,
-            factory: function () {
-                return new (self.getType())(args);
-            }
-        }
+        if ($data.ItemStore && 'ContextRegister' in $data.ItemStore)
+            $data.ItemStore.ContextRegister.apply(this, arguments);
 
 
         if ("string" === typeof storageProviderCfg) {

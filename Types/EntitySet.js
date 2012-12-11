@@ -36,8 +36,6 @@ $data.Class.defineEx('$data.EntitySet',
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
         }
-
-        this.elementType.storeToken = this.elementType.storeToken || context.storeToken;
     },
 
 

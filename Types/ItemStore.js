@@ -96,8 +96,13 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
         if (aliasOrToken && 'object' === typeof aliasOrToken && 'function' === typeof aliasOrToken.factory) {
             contextPromise = aliasOrToken.factory(type);
+        } else if (aliasOrToken && 'object' === typeof aliasOrToken && 'object' === typeof aliasOrToken.args && 'string' === typeof aliasOrToken.typeName) {
+            var type = Container.resolveType(aliasOrToken.typeName);
+            contextPromise = new type(JSON.parse(JSON.stringify(aliasOrToken.args)));
         } else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
             contextPromise = this.itemStoreConfig.aliases[aliasOrToken](type);
+        } else if (aliasOrToken && 'function' === typeof aliasOrToken) {
+            contextPromise = aliasOrToken();
         } else {
             contextPromise = this.itemStoreConfig.aliases[this.itemStoreConfig['default']](type);
         }
@@ -441,6 +446,32 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     },
 
     //EntityContext
+    ContextRegister: function (storageProviderCfg) {
+        //context instance
+        var self = this;
+        var args = JSON.parse(JSON.stringify(storageProviderCfg));
+        this.storeToken = {
+            typeName: this.getType().fullName,
+            args: args,
+            factory: function () {
+                return new (self.getType())(args);
+            }
+        }
+
+        //set elementType storetoken
+        var members = this.getType().memberDefinitions.getPublicMappedProperties();
+        for (var i = 0; i < members.length; i++) {
+            var item = members[i];
+            if (item.type) {
+                var itemResolvedDataType = Container.resolveType(item.type);
+                if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
+                    var elementType = Container.resolveType(item.elementType);
+                    elementType.storeToken = elementType.storeToken || this.storeToken;
+                }
+            }
+        }
+
+    },
     QueryResultModifier: function (query) {
         var self = $data.ItemStore;
         var context = query.context;
