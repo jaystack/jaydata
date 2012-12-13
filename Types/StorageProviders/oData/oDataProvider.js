@@ -194,19 +194,19 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     case $data.EntityState.Unchanged: continue; break;
                     case $data.EntityState.Added:
                         request.method = "POST";
-                        request.requestUri += independentBlocks[index][i].entitySet.name;
+                        request.requestUri += independentBlocks[index][i].entitySet.tableName;
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Modified:
                         request.method = "MERGE";
-                        request.requestUri += independentBlocks[index][i].entitySet.name;
+                        request.requestUri += independentBlocks[index][i].entitySet.tableName;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Deleted:
                         request.method = "DELETE";
-                        request.requestUri += independentBlocks[index][i].entitySet.name;
+                        request.requestUri += independentBlocks[index][i].entitySet.tableName;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         break;
@@ -274,19 +274,19 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     case $data.EntityState.Unchanged: continue; break;
                     case $data.EntityState.Added:
                         request.method = "POST";
-                        request.requestUri = independentBlocks[index][i].entitySet.name;
+                        request.requestUri = independentBlocks[index][i].entitySet.tableName;
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Modified:
                         request.method = "MERGE";
-                        request.requestUri = independentBlocks[index][i].entitySet.name;
+                        request.requestUri = independentBlocks[index][i].entitySet.tableName;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Deleted:
                         request.method = "DELETE";
-                        request.requestUri = independentBlocks[index][i].entitySet.name;
+                        request.requestUri = independentBlocks[index][i].entitySet.tableName;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         break;

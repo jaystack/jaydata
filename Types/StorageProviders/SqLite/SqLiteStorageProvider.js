@@ -512,7 +512,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     },
     save_DeleteEntity: function (item) {
         ///DELETE FROM Posts WHERE Id=1;
-        var deleteSqlString = "DELETE FROM [" + item.entitySet.name + "] WHERE(";
+        var deleteSqlString = "DELETE FROM [" + item.entitySet.tableName + "] WHERE(";
         var hasCondition = false;
         var addAllField = false;
         var deleteParam = [];
