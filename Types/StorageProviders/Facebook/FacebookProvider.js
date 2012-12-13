@@ -101,6 +101,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
     supportedSetOperations: {
         value: {
             filter: {},
+            length: {},
             map: {},
             forEach: {},
             toArray: {},
@@ -147,6 +148,10 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
                 query.rawDataList = data.data;
                 var compiler = Container.createModelBinderConfigCompiler(query, []);
                 compiler.Visit(query.expression);
+
+                if (query.expression instanceof $data.Expressions.CountExpression) {
+                    query.rawDataList = [{ cnt: data.data.length }];
+                }
                 callBack.success(query);
             },
             error: function (jqXHR, textStatus, errorThrow) {
