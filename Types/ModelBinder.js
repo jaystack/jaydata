@@ -2,6 +2,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
 
     constructor: function(context){
         this.context = context;
+        this.providerName = null;
+        if (this.context.storageProvider && typeof this.context.storageProvider.getType === 'function'){
+            for (var i in $data.RegisteredStorageProviders){
+                if ($data.RegisteredStorageProviders[i] === this.context.storageProvider.getType()){
+                    this.providerName = i;
+                }
+            }
+        }
         this.cache = {};
     },
 
@@ -93,6 +101,18 @@ $data.Class.define('$data.ModelBinder', null, null, {
         }
         
         return key;
+    },
+    
+    _typeFactory: function(type, name, data){
+        var memDef = Container.resolveType(type).memberDefinitions.getMember(name);
+        var type = Container.resolveName(memDef.type);
+        //console.log(memDef, memDef.converter, this.providerName);
+        if (this.providerName && memDef && memDef.converter && memDef.converter[this.providerName] && typeof memDef.converter[this.providerName].fromDb == 'function'){
+            return memDef.converter[this.providerName].fromDb(data, memDef, this.context, type);
+        }else{
+            var converter = this.context.storageProvider.fieldConverter.fromDb[type];
+            return converter ? converter(data) : new (Container.resolveType(type.memberDefinitions.getMember(j).type))(data);
+        }
     },
 
     call: function (data, meta) {
@@ -224,9 +244,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             if (!meta[j].$item) {
                                 if (meta[j].$type || meta[j].$source) { result[j] = this.call(data, meta[j]); }
                                 else if (meta.$type) {
-                                    var type = Container.resolveName(meta.$type.memberDefinitions.getMember(j).type);
-                                    var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                    result[j] = converter ? converter(data[meta[j]]) : new (Container.resolveType(meta.$type.memberDefinitions.getMember(j).type))(data[meta[j]]); //Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
+                                    result[j] = this._typeFactory(meta.$type, j, data[meta[j]]);
                                 } else { result[j] = meta[j].$source ? data[meta[j].$source] : data[meta[j]]; }
                             } else { result[j] = this.call(data, meta[j]); }
                         }
@@ -289,9 +307,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         if (!meta[j].$item) {
                             if (meta[j].$type || meta[j].$source) { result[j] = this.call(data, meta[j]); }
                             else if (meta.$type) {
-                                var type = Container.resolveName(Container.resolveType(meta.$type).memberDefinitions.getMember(j).type);
-                                var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                result[j] = converter ? converter(data[meta[j]]) : new (Container.resolveType(meta.$type.memberDefinitions.getMember(j).type))(data[meta[j]]); //Container['create' + Container.resolveType(meta.$type.memberDefinitions.getMember(j).type).name](data[meta[j]]);
+                                result[j] = this._typeFactory(meta.$type, j, data[meta[j]]);
                             } else { result[j] = meta[j].$source ? data[meta[j].$source] : data[meta[j]]; }
                         } else { result[j] = this.call(data, meta[j]); }
                     }

@@ -7,6 +7,20 @@ $data.Entity.extend('$test.Item', {
     ForeignKey: { type: 'id' }
 });
 
+$data.Entity.extend('$test.ConvertItem', {
+    Id: { type: 'id', computed: true, key: true },
+    Key: { type: 'string' },
+    Value: { type: 'string' },
+    Rank: { type: 'string', converter: {
+            mongoDB: {
+                fromDb: function(value, memberDefinition, context, type){
+                    return 'Rank #' + value;
+                }
+            }
+        }
+    }
+});
+
 $data.Entity.extend('$test.ComplexValue', {
     Value: { type: 'string' },
     Rank: { type: 'int' }
@@ -81,6 +95,7 @@ $data.Entity.extend('$test.CustomKey', {
 
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
+    ConvertItems: { type: $data.EntitySet, elementType: $test.ConvertItem },
     ComplexItems: { type: $data.EntitySet, elementType: $test.ComplexItem },
     MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
     ObjectItems: { type: $data.EntitySet, elementType: $test.ObjectItem },

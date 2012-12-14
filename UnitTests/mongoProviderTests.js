@@ -29,6 +29,23 @@ exports.testAdd = function(test){
     });
 };
 
+exports.testConverter = function(test){
+    test.expect(4);
+    $test.Context.init(function(db){
+        db.ConvertItems.add(new $test.ConvertItem({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 1, 'Not 1 item added to collection');
+            db.ConvertItems.toArray(function(r){
+                test.equal(r.length, 1, 'Not 5 items selected from collection');
+                test.ok(r[0] instanceof $test.ConvertItem, 'Entity is not an Item');
+                test.equal(r[0].Rank, 'Rank #1', 'Rank not converted');
+                test.done();
+            });
+        });
+    });
+};
+
+
 exports.testAddEntity = function(test){
     test.expect(7);
     $test.Context.init(function(db){

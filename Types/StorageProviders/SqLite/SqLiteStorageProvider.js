@@ -10,7 +10,14 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             maxSize: 1024 * 1024,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
-
+        
+        this.providerName = '';
+        for (var i in $data.RegisteredStorageProviders){
+            if ($data.RegisteredStorageProviders[i] === this.getType()){
+                this.providerName = i;
+            }
+        }
+        
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -524,7 +531,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
                 if (fieldDef.key || addAllField) {
                     deleteSqlString += "([" + fieldDef.name + "] == ?)";
-                    deleteParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.data[fieldDef.name]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        deleteParam.push(logicalFieldDef.converter[this.providerName].toDb(item.data[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        deleteParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.data[fieldDef.name]));
+                    }
                     hasCondition = true;
                 }
 
@@ -558,12 +570,22 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
                 if (fieldDef.key) {
                     whereSection += '([' + fieldDef.name + '] == ?)';
-                    whereParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        whereParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], fieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        whereParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    }
                     hasCondition = true;
                 }
                 else {
                     setSection += "[" + fieldDef.name + "] = ?";
-                    setParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        setParam.push(fieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        setParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    }
                 }
             }
         }, this);
@@ -588,7 +610,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 if (fieldDef.dataType && (!fieldDef.dataType.isAssignableTo || (fieldDef.dataType.isAssignableTo && !fieldDef.dataType.isAssignableTo($data.EntitySet)))) {
                     fieldValue += '?';
                     fieldList += "[" + fieldName + "]";
-                    fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        fieldParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[fieldName], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
+                    }
                 }
             }
 
