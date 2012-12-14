@@ -98,6 +98,10 @@
             .then(function (items) {
                 start(1);
                 ok(items.length === 0, "items wiped");
+            })
+            .fail(function (e) {
+                ok(false, 'Error: ' + e);
+                start();
             });
 
 
@@ -390,7 +394,7 @@
             item.save().then(function (item) {
                 ok(true, 'item saved');
 
-                equal(typeof item.storeToken, 'undefined', 'store token not set on new item');
+                notEqual(typeof item.storeToken, 'undefined', 'store token set on new item');
 
                 item.Title = 'asdasd';
                 equal(item.Title, 'asdasd', 'item Title after refresh');
@@ -630,7 +634,7 @@
             });
     });
 
-    test('return $data.service in factory', 6, function () {
+    test('return $data.service in factory', 5, function () {
         stop(1);
 
         $data.addStore('remote', function () {
@@ -646,16 +650,9 @@
                     equal(art.Title, 'watermelon', 'has Title');
                     equal(art.Lead, 'fruit', 'has Lead');
 
-                    return $data('Article').removeAll().then(function () {
-                        return $data('Article', 'remote').itemCount();
-                    });
-                })
-                .then(function (count) {
-                    equal(count, 0, 'item deleted');
-                    $data.ItemStore = new $data.ItemStoreClass();
                     start();
                 });
-                
+
         })
         .fail(function (e) {
             equal(e.message, 'factory dont have context instance', 'invalid factory');
@@ -985,4 +982,132 @@
         });
 
     });
+
+    test('$data.define with setStore oData', 5, function () {
+        stop();
+
+        (new $news.Types.NewsContext({ name: "oData", oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                $data.define('newsArticle', {
+                    Id: "int",
+                    Lead: String,
+                    Title: String,
+                }).setStore("remote", { name: 'oData', dataSource: "Services/emptyNewsReader.svc/Articles" })
+
+                newsArticle.field('Id').setKey().setNullable().setComputed();
+
+                newsArticle.readAll().then(function (items) {
+
+                    equal(items.length, 26, 'items length');
+                    equal(items[0] instanceof newsArticle, true, 'result type');
+
+                    return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' });
+                }).then(function (item) {
+
+                    return newsArticle.takeFirst('it.Title == "newsArticle_Title"');
+
+                }).then(function (it) {
+
+                    equal(it.Title, 'newsArticle_Title', "Title");
+                    equal(it.Lead, 'Lead', "Lead");
+                    equal(typeof it.Id, 'number', 'Id');
+
+                    start();
+                }).fail(function (e) {
+                    ok(false, 'Error: ' + e);
+                    start();
+                });
+
+            });
+        });
+    });
+
+    test('$data.define with setStore sqLite', 1, function () {
+
+        if ($data.StorageProviderLoader.isSupported('sqLite')) {
+            stop();
+            expect(6);
+
+            $data.define('newsArticle', {
+                Id: "int",
+                Lead: String,
+                Title: String,
+            }).setStore("local", { name: 'sqLite', tableName: 'Articles' })
+
+            newsArticle.field('Id').setKey().setNullable().setComputed();
+
+            newsArticle.readAll().then(function (items) {
+
+                equal(items.length, 0, 'items length');
+
+                return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' });
+            }).then(function (item) {
+
+                return newsArticle.takeFirst('it.Title == "newsArticle_Title"');
+
+            }).then(function (it) {
+
+                equal(it instanceof newsArticle, true, 'result type');
+                equal(it.Title, 'newsArticle_Title', "Title");
+                equal(it.Lead, 'Lead', "Lead");
+                equal(typeof it.Id, 'number', 'Id');
+
+                return newsArticle.removeAll().then(function () { return newsArticle.itemCount(); });
+            }).then(function (items) {
+                equal(items, 0, 'items count');
+
+                start();
+            }).fail(function (e) {
+                ok(false, 'Error: ' + e);
+                start();
+            });
+
+
+        } else {
+            expect(1);
+            ok('not supported');
+        }
+    });
+
+    test('$data.define with setStore default', 6, function () {
+        stop();
+
+        $data.define('newsArticle2', {
+            Id: "int",
+            Lead: String,
+            Title: String,
+        }).setStore("local")
+
+        newsArticle2.field('Id').setKey().setNullable().setComputed();
+
+        newsArticle2.readAll().then(function (items) {
+
+            equal(items.length, 0, 'items length');
+
+            return newsArticle2.save({ Lead: 'Lead', Title: 'newsArticle2_Title' });
+        }).then(function (item) {
+
+            return newsArticle2.takeFirst('it.Title == "newsArticle2_Title"');
+
+        }).then(function (it) {
+
+            equal(it instanceof newsArticle2, true, 'result type');
+            equal(it.Title, 'newsArticle2_Title', "Title");
+            equal(it.Lead, 'Lead', "Lead");
+            equal(typeof it.Id, 'number', 'Id');
+
+            return newsArticle2.removeAll().then(function () { return newsArticle2.itemCount(); });
+        }).then(function (items) {
+            equal(items, 0, 'items count');
+
+            start();
+        }).fail(function (e) {
+            ok(false, 'Error: ' + e);
+            start();
+        });
+
+    });
+
+
 });

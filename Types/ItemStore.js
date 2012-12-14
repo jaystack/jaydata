@@ -23,7 +23,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             if ('object' === typeof contextFactoryOrToken && 'factory' in contextFactoryOrToken) {
                 var type = Container.resolveType(contextFactoryOrToken.typeName);
 
-                self.itemStoreConfig.aliases[name] = contextFactoryOrToken;
+                self.itemStoreConfig.aliases[name] = contextFactoryOrToken.factory;
                 self.itemStoreConfig.contextTypes[name] = type;
                 if (isDefault) {
                     self.itemStoreConfig['default'] = name;
@@ -80,32 +80,25 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
     _setStoreAlias: function (entity, storeToken) {
-        if ('object' === typeof storeToken)
+        if ('object' === typeof storeToken && !entity.storeToken)
             entity.storeToken = storeToken
         return entity;
     },
     _getStoreAlias: function (entity, storeAlias) {
+        var validStoreAlias = undefined;
+        if (typeof storeAlias === 'string') {
+            validStoreAlias = storeAlias;
+        }
+
         if (entity instanceof $data.Entity) {
-            return storeAlias || entity.storeToken || entity.getType().storeToken;
+            var type = entity.getType();
+            return validStoreAlias || entity.storeToken || type.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined);
         } else {
-            return storeAlias || entity.storeToken;
+            return validStoreAlias || entity.storeToken || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined);
         }
     },
     _getStoreContext: function (aliasOrToken, type, nullIfInvalid) {
-        var contextPromise;
-
-        if (aliasOrToken && 'object' === typeof aliasOrToken && 'function' === typeof aliasOrToken.factory) {
-            contextPromise = aliasOrToken.factory(type);
-        } else if (aliasOrToken && 'object' === typeof aliasOrToken && 'object' === typeof aliasOrToken.args && 'string' === typeof aliasOrToken.typeName) {
-            var type = Container.resolveType(aliasOrToken.typeName);
-            contextPromise = new type(JSON.parse(JSON.stringify(aliasOrToken.args)));
-        } else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
-            contextPromise = this.itemStoreConfig.aliases[aliasOrToken](type);
-        } else if (aliasOrToken && 'function' === typeof aliasOrToken) {
-            contextPromise = aliasOrToken();
-        } else {
-            contextPromise = this.itemStoreConfig.aliases[this.itemStoreConfig['default']](type);
-        }
+        var contextPromise = this._getContextPromise(aliasOrToken, type);
 
         if (!contextPromise || contextPromise instanceof $data.EntityContext) {
             var promise = new $data.PromiseHandler();
@@ -125,8 +118,25 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             }
         });
     },
-    _getStoreEntitySet: function (aliasOrToken, instanceOrType) {
-        aliasOrToken = this._getStoreAlias(instanceOrType, aliasOrToken);
+    _getContextPromise: function (aliasOrToken, type) {
+        if (aliasOrToken && 'object' === typeof aliasOrToken && 'function' === typeof aliasOrToken.factory) {
+            return aliasOrToken.factory(type);
+        } else if (aliasOrToken && 'object' === typeof aliasOrToken && 'object' === typeof aliasOrToken.args && 'string' === typeof aliasOrToken.typeName) {
+            var type = Container.resolveType(aliasOrToken.typeName);
+            return new type(JSON.parse(JSON.stringify(aliasOrToken.args)));
+        } else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken]) {
+            return this._getDefaultItemStoreFactory(type, type.storeConfigs.stores[aliasOrToken]);
+        } else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
+            return this.itemStoreConfig.aliases[aliasOrToken](type);
+        } else if (aliasOrToken && 'function' === typeof aliasOrToken) {
+            return aliasOrToken();
+        } else {
+            return this.itemStoreConfig.aliases[this.itemStoreConfig['default']](type);
+        }
+
+    },
+    _getStoreEntitySet: function (storeAlias, instanceOrType) {
+        var aliasOrToken = this._getStoreAlias(instanceOrType, storeAlias);
         var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();;
 
         return this._getStoreContext(aliasOrToken, type)
@@ -140,19 +150,28 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 return entitySet;
             });
     },
-    _getDefaultItemStoreFactory: function (instanceOrType) {
+    _getDefaultItemStoreFactory: function (instanceOrType, storeConfig) {
         if (instanceOrType) {
             var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
             var typeName = $data.Container.resolveName(type) + "_items";
-            var typeName = typeName.replace(".", "_");
+            var typeName = typeName.replace(/\./g, "_");
 
-            var provider = 'local';
+            var storeConfig = $data.typeSystem.extend({
+                collectionName: 'Items',
+                tableName: typeName,
+                initParam: { provider: 'local', databaseName: typeName }
+            }, storeConfig);
 
-            var inMemoryType = $data.EntityContext.extend(typeName, {
-                'Items': { type: $data.EntitySet, elementType: type }
-            });
+            if (storeConfig.tableName && !storeConfig.collectionName)
+                storeConfig.collectionName = storeConfig.tableName;
 
-            return new inMemoryType({ name: provider, databaseName: typeName });
+            var contextDef = {}
+            contextDef[storeConfig.collectionName] = { type: $data.EntitySet, elementType: type }
+            if (storeConfig.tableName)
+                contextDef[storeConfig.collectionName]['tableName'] = storeConfig.tableName;
+
+            var inMemoryType = $data.EntityContext.extend(typeName, contextDef);
+            return new inMemoryType(storeConfig.initParam);
         }
         return undefined;
     },
@@ -218,7 +237,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                         }
 
                         return entitySet.entityContext.saveChanges()
-                            .then(function () { return entity; });
+                            .then(function () { self._setStoreAlias(entity, entitySet.entityContext.storeToken); return entity; });
                     });
             });
     },
@@ -264,6 +283,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         type.itemCount = self.EntityTypeItemCount(type);
         type.query = self.EntityTypeQuery(type);
         type.takeFirst = self.EntityTypeTakeFirst(type);
+
+        type.setStore = self.EntityTypeSetStore(type);
     },
     EntityTypeReadAll: function (type) {
         return function (storeAlias) {
@@ -380,6 +401,60 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     },
 
+    EntityTypeSetStore: function (type) {
+        return function (name, config) {
+            var self = $data.ItemStore;
+
+            var defStoreConfig = {};
+            if (config) {
+                if (config.tableName) {
+                    defStoreConfig.tableName = config.tableName;
+                    delete config.tableName;
+                }
+
+                if (config.collectionName) {
+                    defStoreConfig.collectionName = config.collectionName;
+                    delete config.collectionName;
+                }
+
+                if (typeof config.dataSource === 'string') {
+                    var ds = config.dataSource;
+                    if (ds.lastIndexOf('/') === ds.length - 1) {
+                        ds = ds.substring(0, ds.lastIndexOf('/'));
+                    }
+                    var parsedApiUrl = ds.substring(0, ds.lastIndexOf('/'));
+                    if (!defStoreConfig.tableName)
+                        defStoreConfig.tableName = ds.substring(ds.lastIndexOf('/') + 1);
+
+                    var provider = config.provider || config.name;
+                    switch (provider) {
+                        case 'oData':
+                        case 'webApi':
+                            config.oDataServiceHost = config.oDataServiceHost || parsedApiUrl;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+
+            } else {
+                config = { name: 'local' };
+            }
+
+            if (!type.storeConfigs) {
+                type.storeConfigs = {
+                    stores: {},
+                    'default': name
+                };
+            }
+            type.storeConfigs.stores[name] = defStoreConfig;
+            type.storeConfigs.stores[name].initParam = config;
+
+            return type;
+        }
+    },
+
     _findByIdQueryable: function (set, keys) {
         var keysProps = set.defaultType.memberDefinitions.getKeyProperties();
         if (keysProps.length > 1 && keys && 'object' === typeof keys) {
@@ -467,6 +542,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
                     var elementType = Container.resolveType(item.elementType);
                     elementType.storeToken = elementType.storeToken || this.storeToken;
+                    elementType.assignedToContext = true;
                 }
             }
         }
@@ -491,5 +567,52 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }
     }
 });
-
 $data.ItemStore = new $data.ItemStoreClass();
+
+
+
+$data.Entity.addMember('field', function (propName) {
+    if (this.assignedToContext)
+        Guard.raise(new Exception("Type '" + this.fullName + "' already used in context!", 'Invalid Operation'));
+
+    var def = this.memberDefinitions.getMember(propName);
+    if (def) {
+        if (def.definedBy === this) {
+            return new $data.MemberWrapper(def);
+        } else {
+            Guard.raise(new Exception("Member '" + propName + "' defined on '" + def.definedBy.fullName + "'!", 'Invalid Operation'));
+        }
+    } else {
+        Guard.raise(new Exception("Member '" + propName + "' not exists!", 'Invalid Operation'));
+    }
+
+    return this;
+}, true);
+
+
+$data.Class.define('$data.MemberWrapper', null, null, {
+    constructor: function (memberDefinition) {
+        this.memberDefinition = memberDefinition;
+    },
+    setKey: function (value) {
+        this.memberDefinition.key = value || true;
+        return this;
+    },
+    setComputed: function (value) {
+        this.memberDefinition.computed = value || true;
+        return this;
+    },
+    setRequired: function (value) {
+        this.memberDefinition.required = value || true;
+        return this;
+    },
+    setNullable: function (value) {
+        this.memberDefinition.nullable = value || true;
+        return this;
+    },
+    changeDefinition: function (attr, value) {
+        this.memberDefinition[attr] = value;
+        return this;
+    }
+});
+
