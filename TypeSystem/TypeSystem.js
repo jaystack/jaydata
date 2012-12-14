@@ -530,7 +530,8 @@
             this.addProperty(holder, memberDefinition.name, pd, propagation);
 
             //if lazyload TODO
-            if (!memberDefinition.classMember && classFunction.__setPropertyfunctions == true) {
+            if (!memberDefinition.classMember && classFunction.__setPropertyfunctions == true && 
+                !('get_' + memberDefinition.name in holder || 'set_' + memberDefinition.name in holder)) {
                 var pdGetMethod = memberDefinition.createGetMethod();
                 this.addProperty(holder, 'get_' + memberDefinition.name, pdGetMethod, propagation);
 
@@ -922,20 +923,24 @@
 
     global["$C"] = function () { Class.define.apply(Class, arguments); };
 
+
+    var storeProperty = function (memberDefinition, value) {
+        var backingFieldName = "_" + memberDefinition.name;
+        if (!this[backingFieldName]) {
+            Object.defineProperty(this, backingFieldName, memberDefinition.createStorePropertyDescriptor(value));
+        }
+        else {
+            this[backingFieldName] = value;
+        }
+    };
+    var retrieveProperty = function (memberDefinition) {
+        var backingFieldName = "_" + memberDefinition.name;
+        return this[backingFieldName];
+    };
+
     $data.Class.define('$data.Base', function Base() { }, null, {
-        storeProperty: function (memberDefinition, value) {
-            var backingFieldName = "_" + memberDefinition.name;
-            if (!this[backingFieldName]) {
-                Object.defineProperty(this, backingFieldName, memberDefinition.createStorePropertyDescriptor(value));
-            }
-            else {
-                this[backingFieldName] = value;
-            }
-        },
-        retrieveProperty: function (memberDefinition) {
-            var backingFieldName = "_" + memberDefinition.name;
-            return this[backingFieldName];
-        },
+        storeProperty: storeProperty,
+        retrieveProperty: retrieveProperty,
         setProperty: function (memberDefinition, value, callback) {
             this[memberDefinition.name] = value;
             callback();
@@ -977,15 +982,31 @@
 
             return this;
         },
-        addMember: function (name, definition) {
+        addMember: function (name, definition, isClassMember) {
             var memberDefinition = new MemberDefinition(definition, this);
             memberDefinition.name = name;
-            $data.Class.buildMember(this, memberDefinition);
 
-            this.memberDefinitions.clearCache();
-
+            if (isClassMember) {
+                memberDefinition.classMember = true;
+                $data.Class.buildMember(this, memberDefinition, undefined, 'staticDefinitions');
+                this.staticDefinitions.clearCache();
+            } else {
+                $data.Class.buildMember(this, memberDefinition);
+                this.memberDefinitions.clearCache();
+            }
             return this;
-        }
+        },
+        describeField: function (name, definition) {
+            var memDef = this.memberDefinitions.getMember(name);
+            if (!memDef) {
+                this.addMember(name, definition);
+            } else {
+                Guard.raise(new Exception("Field '" + name + "' already defined!", "Invalid operation"));
+            }
+            return this;
+        },
+        storeProperty: storeProperty,
+        retrieveProperty: retrieveProperty
     });
 
     $data.Class.ConstructorParameter = ConstructorParameter = $data.Class.define('ConstructorParameter', null, null, {
