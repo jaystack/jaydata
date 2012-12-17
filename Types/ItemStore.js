@@ -429,8 +429,10 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                     var provider = config.provider || config.name;
                     switch (provider) {
                         case 'oData':
-                        case 'webApi':
                             config.oDataServiceHost = config.oDataServiceHost || parsedApiUrl;
+                            break;
+                        case 'webApi':
+                            config.apiUrl = config.apiUrl || parsedApiUrl;
                             break;
                         default:
                             break;
