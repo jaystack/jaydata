@@ -343,17 +343,17 @@
     test('addStore', 9, function () {
         stop();
 
-        equal($data.ItemStore.itemStoreConfig.default, 'local', 'default store');
+        equal($data.ItemStore.itemStoreConfig['default'], 'local', 'default store');
         equal(Object.keys($data.ItemStore.itemStoreConfig.aliases).length, 1, 'store aliases');
         equal(Object.keys($data.ItemStore.itemStoreConfig.contextTypes).length, 0, 'store aliases');
 
         $data.addStore('remote2', factory, true).then(function () {
-            equal($data.ItemStore.itemStoreConfig.default, 'remote2', 'changed default store');
+            equal($data.ItemStore.itemStoreConfig['default'], 'remote2', 'changed default store');
             equal(Object.keys($data.ItemStore.itemStoreConfig.aliases).length, 2, 'store aliases');
             equal(Object.keys($data.ItemStore.itemStoreConfig.contextTypes).length, 1, 'store aliases');
 
             $data.addStore('remote3', factory).then(function () {
-                equal($data.ItemStore.itemStoreConfig.default, 'remote2', 'not changed default store');
+                equal($data.ItemStore.itemStoreConfig['default'], 'remote2', 'not changed default store');
                 equal(Object.keys($data.ItemStore.itemStoreConfig.aliases).length, 3, 'store aliases');
                 equal(Object.keys($data.ItemStore.itemStoreConfig.contextTypes).length, 2, 'store aliases');
 
@@ -635,6 +635,7 @@
     });
 
     test('return $data.service in factory', 5, function () {
+        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -765,6 +766,7 @@
     });
 
     test('return $data.initService business in factory', 1, function () {
+        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -793,6 +795,7 @@
     });
 
     test('return $data.initService open in factory', 1, function () {
+        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
