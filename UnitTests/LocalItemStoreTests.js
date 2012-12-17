@@ -663,7 +663,7 @@
 
     test('return promise in factory', 6, function () {
         stop(1);
-
+        $news.Types.Article.storeToken = undefined;
         $data.addStore('remote', function () {
             var p = new $data.PromiseHandler();
             p.deferred.resolve(new $news.Types.NewsContext({ name: 'oData', oDataServiceHost: "Services/emptyNewsReader.svc" }));
@@ -700,7 +700,7 @@
 
     test('return context in factory', 5, function () {
         stop(1);
-
+        $news.Types.Article.storeToken = undefined;
         $data.addStore('remote', function () {
             return new $news.Types.NewsContext({ name: 'local', oDataServiceHost: "Services/emptyNewsReader.svc" });
         }, true).then(function () {
@@ -734,6 +734,7 @@
 
     test('add storeToken as factory', 5, function () {
         stop(1);
+        $news.Types.Article.storeToken = undefined;
         var context = new $news.Types.NewsContext({ name: 'local', oDataServiceHost: "Services/emptyNewsReader.svc" });
         $data.addStore('remote', context.storeToken, true).then(function () {
             return $data('Article', 'remote')
@@ -910,6 +911,7 @@
         stop(1);
 
         $data.Entity.extend('myArticle', {
+            Id: { type: 'int', key: true, computed: true },
             Lead: { type: String },
             Title: { type: String }
         }, {
@@ -950,6 +952,7 @@
         stop(1);
 
         $data.Entity.extend('myArticle2', {
+            Id: { type: 'int', key: true, computed: true },
             Lead: { type: String },
             Title: { type: String }
         }, {
