@@ -221,19 +221,18 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             if (response.statusCode > 200 && response.statusCode < 300) {
                 var item = convertedItem[0];
                 if (response.statusCode == 204) {
-                    if (response.headers.ETag || response.headers.Etag) {
+                    if (response.headers.ETag || response.headers.Etag || response.headers.etag) {
                         var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
                         if (property && property[0]) {
-                            item[property[0].name] = response.headers.ETag || response.headers.Etag;
+                            item[property[0].name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
                         }
                     }
                 } else {
-
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         var propType = Container.resolveType(memDef.type);
                         if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                item[memDef.name] = response.headers.ETag || response.headers.Etag;
+                                item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
                             } else {
                                 var converter = that.fieldConverter.fromDb[Container.resolveName(memDef.type)];
                                 item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
@@ -312,10 +311,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     if (result[i].statusCode > 200 && result[i].statusCode < 300) {
                         var item = convertedItem[i];
                         if (result[i].statusCode == 204) {
-                            if (result[i].headers.ETag || result[i].headers.Etag) {
+                            if (result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag) {
                                 var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
                                 if (property && property[0]) {
-                                    item[property[0].name] = result[i].headers.ETag || result[i].headers.Etag;
+                                    item[property[0].name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
                                 }
                             }
                             continue;
@@ -326,7 +325,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             var propType = Container.resolveType(memDef.type);
                             if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
                                 if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                    item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag;
+                                    item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
                                 } else {
                                     var converter = that.fieldConverter.fromDb[Container.resolveName(memDef.type)];
                                     item[memDef.name] = converter ? converter(result[i].data[memDef.name]) : result[i].data[memDef.name];
