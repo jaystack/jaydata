@@ -19,7 +19,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.toArray(function (r) {
                 start();
@@ -35,7 +35,7 @@
             new $data.Yahoo.types.Geo.place({ woeid: 1235, name: 'invalidplace', lang: 'en-us' })
         ];
         try {
-            var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+            var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
             memoryContext.onReady(function () {
                 memoryContext.Oceans.toArray(function (r) {
                     start();
@@ -55,7 +55,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.length(function (r) {
                 start();
@@ -69,7 +69,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.forEach(function (r, idx) {
                 start();
@@ -84,7 +84,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean1'; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.name == 'ocean1');\n}".replace(/[\n ]/g, ''));
@@ -103,7 +103,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.single(function (o) { return o.name == 'ocean1'; }, undefined, function (r) {
                 start();
@@ -118,7 +118,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.first(undefined, undefined, function (r) {
                 start();
@@ -133,7 +133,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.some(function (o) { return o.name == 'ocean2'; }, undefined, function (r) {
                 start();
@@ -152,7 +152,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             try {
                 memoryContext.Oceans.every(function (o) { return o.lang == 'en-us'; }, undefined, function (r) {
@@ -179,7 +179,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && (o.woeid == 1235));\n}".replace(/[\n ]/g, ''));
@@ -198,7 +198,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items } });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && (o.woeid == 1235 || o.name == 'ocean1'); }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && ((o.woeid == 1235) || (o.name == 'ocean1')));\n}".replace(/[\n ]/g, ''));
@@ -221,7 +221,7 @@
                 placeTypeName: new $data.Yahoo.types.Geo.placeTypeNameCf({ code: '2', content: 'Sea' })
             })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.placeTypeName.code == '1'; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn (o.placeTypeName.code == '1');\n}".replace(/[\n ]/g, ''));
@@ -245,7 +245,7 @@
                 placeTypeName: new $data.Yahoo.types.Geo.placeTypeNameCf({ code: '2', content: 'Sea' })
             })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.woeid in [1235, 1236, 1237]; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ([1235,1236,1237].indexOf(o.woeid) > -1);\n}".replace(/[\n ]/g, ''));
@@ -277,7 +277,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1238, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1239, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.take(5).toTraceString();
             equal(q.$take, 5, 'take value failed');
@@ -300,7 +300,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1238, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1239, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.skip(4).toTraceString();
             equal(q.$skip, 4, 'skip value failed');
@@ -323,7 +323,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1238, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1239, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.skip(2).take(1).toTraceString();
             equal(q.$skip, 2, 'skip value failed');
@@ -347,7 +347,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1237, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1237, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.orderBy(function (o) { return o.name; }).toTraceString();
             equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy value failed');
@@ -407,7 +407,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.map(function (o) { return o.name; }).toTraceString();
             equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn o.name;\n}".replace(/[\n ]/g, ''));
@@ -478,7 +478,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.toArray(function (r) {
                 equal(r.length, 2, 'context source length failed');

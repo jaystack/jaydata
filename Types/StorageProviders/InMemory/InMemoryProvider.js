@@ -18,7 +18,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
 
         var setKeys = [];
         for(var i in this.context._entitySetReferences){
-            setKeys.push(this.context._entitySetReferences[i].collectionName);
+            setKeys.push(this.context._entitySetReferences[i].tableName);
         }
         var localStorageData = null;
         if(this.providerConfiguration.persistentData && window.localStorage){
@@ -40,18 +40,18 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         for(var index = 0;index<this.context._storageModel.length;index++){
             var storageModel = this.context._storageModel[index];
             //Create store for EntitySet
-            this.providerConfiguration.source[storageModel.ItemName] = [];
+            this.providerConfiguration.source[storageModel.TableName] = [];
             //Check primary key
             var keys = storageModel.LogicalType.memberDefinitions.getKeyProperties();
             var computedKeys = keys.filter(function(key){return key.computed});
             if(computedKeys.length>1){
-                Guard.raise(new Exception('More than one computed field not supported in '+storageModel.ItemName+' entity set.'));
+                Guard.raise(new Exception('More than one computed field not supported in ' + storageModel.TableName + ' entity set.'));
             }
             var isIntegerPk = false;
             if(computedKeys.length === 1){
                 var resolvedType = Container.resolveType(computedKeys[0].type);
                 if(resolvedType === $data.Integer){
-                    this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName] = 0;
+                    this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = 0;
                     isIntegerPk = true;
                 }else if (resolvedType === $data.Guid){
 
@@ -60,19 +60,19 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                 }
             }
             //validate init data
-            if(tempSource[storageModel.ItemName]){
-                for(var i=0;i<tempSource[storageModel.ItemName].length;i++){
-                    var entity = tempSource[storageModel.ItemName][i];
+            if (tempSource[storageModel.TableName]) {
+                for (var i = 0; i < tempSource[storageModel.TableName].length; i++) {
+                    var entity = tempSource[storageModel.TableName][i];
                     if(entity instanceof storageModel.LogicalType){
                         if(isIntegerPk){
                             var keyValue = entity[computedKeys[0].name]
-                            if(keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName]){
-                                this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName] = keyValue;
+                            if (keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName]) {
+                                this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = keyValue;
                             }
                         }
-                        this.providerConfiguration.source[storageModel.ItemName].push(entity);
+                        this.providerConfiguration.source[storageModel.TableName].push(entity);
                     }else{
-                        Guard.raise(new Exception('Invalid element in source: '+storageModel.ItemName));
+                        Guard.raise(new Exception('Invalid element in source: ' + storageModel.TableName));
                     }
                 }
             }
@@ -89,7 +89,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             callBack.error(e);
             return;
         }
-        var sourceName = query.context.getEntitySetFromElementType(query.defaultType).collectionName;
+        var sourceName = query.context.getEntitySetFromElementType(query.defaultType).tableName;
         var result = [].concat(this.providerConfiguration.source[sourceName] || []);
         if (sql.$filter && !sql.$every)
             result = result.filter(sql.$filter);
@@ -146,17 +146,17 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             switch (item.data.entityState) {
                 case $data.EntityState.Added:
                     this._save_add_processPk(item);
-                    this.providerConfiguration.source[item.entitySet.collectionName].push(item.data);
+                    this.providerConfiguration.source[item.entitySet.tableName].push(item.data);
                     break;
                 case $data.EntityState.Deleted:
-                    var collection = this.providerConfiguration.source[item.entitySet.name];
+                    var collection = this.providerConfiguration.source[item.entitySet.tableName];
                     var entity = this._save_getEntity(item, collection);
                     var idx = collection.indexOf(entity);
                     collection.splice(idx, 1);
                     break;
                 case $data.EntityState.Modified:
                     if(item.data.changedProperties && item.data.changedProperties.length>0){
-                        var collection = this.providerConfiguration.source[item.entitySet.name];
+                        var collection = this.providerConfiguration.source[item.entitySet.tableName];
                         var entity = this._save_getEntity(item, collection);
                         for(var j=0;j<item.data.changedProperties.length;j++){
                             var field = item.data.changedProperties[j];
@@ -184,9 +184,9 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             if(keyResolveType === $data.Guid){
                 item.data[key.name] = $data.Guid.NewGuid();
             } else if(keyResolveType === $data.Integer){
-                var sequenceValue = this.providerConfiguration.source['inmemory_sequence'][item.entitySet.collectionName];
+                var sequenceValue = this.providerConfiguration.source['inmemory_sequence'][item.entitySet.tableName];
                 item.data[key.name] = sequenceValue+1;
-                this.providerConfiguration.source['inmemory_sequence'][item.entitySet.collectionName] = sequenceValue+1;
+                this.providerConfiguration.source['inmemory_sequence'][item.entitySet.tableName] = sequenceValue + 1;
             }else{
                 Guard.raise(new Exception("Not supported data type!"))
             }
