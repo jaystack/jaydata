@@ -92,9 +92,9 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
         if (entity instanceof $data.Entity) {
             var type = entity.getType();
-            return validStoreAlias || entity.storeToken || type.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined);
+            return validStoreAlias || entity.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
         } else {
-            return validStoreAlias || entity.storeToken || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined);
+            return validStoreAlias || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined) || entity.storeToken;
         }
     },
     _getStoreContext: function (aliasOrToken, type, nullIfInvalid) {

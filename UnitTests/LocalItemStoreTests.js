@@ -667,7 +667,7 @@
         $news.Types.Article.storeToken = undefined;
         $data.addStore('remote', function () {
             var p = new $data.PromiseHandler();
-            p.deferred.resolve(new $news.Types.NewsContext({ name: 'oData', oDataServiceHost: "Services/emptyNewsReader.svc" }));
+            p.deferred.resolve(new $news.Types.NewsContext({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }));
             return p.getPromise();
         }, true).then(function (ctx) {
 
