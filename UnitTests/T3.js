@@ -10,31 +10,31 @@ function T3(providerConfig, msg) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
                 db.Articles.withInlineCount().toArray(function (items) {
-                    equal(items.inlineCount, items.length, 'inline count without filter, take, skip');
+                    equal(items.totalCount, items.length, 'inline count without filter, take, skip');
                     start(1);
                 });
 
                 db.Articles.filter('it.Title.contains("1")').withInlineCount().toArray(function (items) {
-                    equal(items.inlineCount, items.length, 'inline count with filter');
+                    equal(items.totalCount, items.length, 'inline count with filter');
                     start(1);
                 });
 
                 db.Articles.withInlineCount().take(3).toArray(function (items) {
-                    notEqual(items.inlineCount, items.length, 'inline count with take');
+                    notEqual(items.totalCount, items.length, 'inline count with take');
                     equal(items.length, 3, 'length value with take');
-                    equal(items.inlineCount, 26, 'inline count value with take');
+                    equal(items.totalCount, 26, 'inline count value with take');
                     start(1);
                 });
 
                 db.Articles.withInlineCount().skip(2).take(3).toArray(function (items) {
-                    notEqual(items.inlineCount, items.length, 'inline count with skip, take');
+                    notEqual(items.totalCount, items.length, 'inline count with skip, take');
                     equal(items.length, 3, 'length value with skip, take');
-                    equal(items.inlineCount, 26, 'inline count value with skip, take');
+                    equal(items.totalCount, 26, 'inline count value with skip, take');
                     start(1);
 
                     db.Articles.withInlineCount().skip(8).take(3).toArray(function (items2) {
-                        notEqual(items2.inlineCount, items.length, 'inline count with skip, take');
-                        equal(items2.inlineCount, 26, 'inline count value with skip, take');
+                        notEqual(items2.totalCount, items.length, 'inline count with skip, take');
+                        equal(items2.totalCount, 26, 'inline count value with skip, take');
 
                         for (var i = 0; i < items.length; i++) {
                             for (var j = 0; j < items2.length; j++) {

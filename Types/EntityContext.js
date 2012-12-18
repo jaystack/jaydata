@@ -645,7 +645,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 successResult = query.result[0];
             } else {
                 if (typeof query.__count === 'number')
-                    query.result.inlineCount = query.__count;
+                    query.result.totalCount = query.__count;
 
                 successResult = query.result;
             }
