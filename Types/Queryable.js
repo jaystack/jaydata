@@ -644,6 +644,14 @@ $data.Class.define('$data.Queryable', null, null,
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
     },
+
+    withInlineCount: function (selector) {
+        this._checkOperation('withInlineCount');
+        var constExp = Container.createConstantExpression(selector || 'allpages', "string");
+        var inlineCountExp = Container.createInlineCountExpression(this.expression, constExp);
+        return Container.createQueryable(this, inlineCountExp);
+    },
+
     removeAll: function (onResult) {
         ///	<summary>Delete the query result and returns the number of deleted entities in a query as the callback parameter.</summary>
         ///	<param name="onResult" type="Function">A callback function</param>

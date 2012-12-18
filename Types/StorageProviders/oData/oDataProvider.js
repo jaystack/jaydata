@@ -139,6 +139,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 if (!data) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'string' ? [{ cnt: data }] : data;
+                    if (sql.withInlineCount && typeof data === 'object' && (data.__count || ('d' in data && data.d.__count))) {
+                        query.__count = new Number(data.__count || data.d.__count).valueOf();
+                    }
+
                     callBack.success(query);
                 }
             },
@@ -560,7 +564,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             orderByDescending: {},
             first: {},
             include: {},
-            batchDelete: {}
+            batchDelete: {},
+            withInlineCount: {}
         },
         enumerable: true,
         writable: true

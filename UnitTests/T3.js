@@ -1,6 +1,54 @@
 function T3(providerConfig, msg) {
     msg = msg || '';
     module("DataTests" + msg);
+
+    test('inlineCount - array result', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(19);
+        stop(5);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.withInlineCount().toArray(function (items) {
+                    equal(items.inlineCount, items.length, 'inline count without filter, take, skip');
+                    start(1);
+                });
+
+                db.Articles.filter('it.Title.contains("1")').withInlineCount().toArray(function (items) {
+                    equal(items.inlineCount, items.length, 'inline count with filter');
+                    start(1);
+                });
+
+                db.Articles.withInlineCount().take(3).toArray(function (items) {
+                    notEqual(items.inlineCount, items.length, 'inline count with take');
+                    equal(items.length, 3, 'length value with take');
+                    equal(items.inlineCount, 26, 'inline count value with take');
+                    start(1);
+                });
+
+                db.Articles.withInlineCount().skip(2).take(3).toArray(function (items) {
+                    notEqual(items.inlineCount, items.length, 'inline count with skip, take');
+                    equal(items.length, 3, 'length value with skip, take');
+                    equal(items.inlineCount, 26, 'inline count value with skip, take');
+                    start(1);
+
+                    db.Articles.withInlineCount().skip(8).take(3).toArray(function (items2) {
+                        notEqual(items2.inlineCount, items.length, 'inline count with skip, take');
+                        equal(items2.inlineCount, 26, 'inline count value with skip, take');
+
+                        for (var i = 0; i < items.length; i++) {
+                            for (var j = 0; j < items2.length; j++) {
+                                notEqual(items[i].Id, items2[j].Id, 'i: ' + i + ', j: ' + j + ' Id not equal');
+                            }
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
     test('Filter_noFilter', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(9);

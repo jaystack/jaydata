@@ -58,6 +58,17 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
         return expression;
     },
 
+    VisitInlineCountExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        context = context || {};
+        context.frameType = expression.getType();
+        var selector = this.Visit(expression.selector, context);
+        if (source !== expression.source || selector !== expression.selector) {
+            return Container.createInlineCountExpression(source, selector, expression.params, expression.instance);
+        }
+        return expression;
+    },
+
     VisitProjectionExpression: function (expression, context) {
         var source = this.Visit(expression.source, context);
         context = context || {};

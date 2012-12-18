@@ -38,6 +38,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         
         return {
             queryText: queryText,
+            withInlineCount: '$inlinecount' in queryFragments,
             method: queryFragments.method || 'GET',
             params: []
         };
@@ -96,6 +97,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         context["$filter"] = context.data;
         context.data = "";
 
+    },
+    VisitInlineCountExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+        context["$inlinecount"] = expression.selector.value;
     },
     VisitEntitySetExpression: function (expression, context) {
         context.urlText += "/" + expression.instance.tableName;
