@@ -137,6 +137,31 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         this.context = ctx;
     },
 
+    _buildContinuationFunction: function (context, query) {
+        if (Array.isArray(query.result)) {
+            query.result.next = this._buildPagingMethod(context, query, 'next');
+            query.result.prev = this._buildPagingMethod(context, query, 'prev');
+        }
+    },
+    _buildPagingMethod: function (context, query, mode) {
+        return function (onResult_items) {
+            var pHandler = new $data.PromiseHandler();
+            var cbWrapper = pHandler.createCallback(onResult_items);
+
+            var continuation = new $data.Expressions.ContinuationExpressionBuilder(mode);
+            var continuationResult = continuation.compile(query);
+            if (continuationResult.expression) {
+                var queryable = Container.createQueryable(context, continuationResult.expression);
+                queryable.defaultType = query.defaultType;
+                context.executeQuery(queryable, cbWrapper);
+            } else {
+                cbWrapper.error(new Exception(continuationResult.message, 'Invalid Operation', continuationResult));
+            }
+
+            return pHandler.getPromise();
+        }
+    },
+
     supportedFieldOperations: {
         value: {
             length: { dataType: "number", allowedIn: "filter, map" },

@@ -83,6 +83,7 @@ module $data {
     }
 
     class EntityContext implements Object {
+        constructor (config: any);
         constructor (config: { name: string; oDataServiceHost: string; });
         constructor (config: { name: string; oDataServiceHost?: string; databaseName?: string; localStoreName?: string; user?: string; password?: string; });
 

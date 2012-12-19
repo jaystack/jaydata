@@ -1,6 +1,331 @@
 function T3(providerConfig, msg) {
     msg = msg || '';
     module("DataTests" + msg);
+
+    test('paging - next - 5', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - next - 5 inside promise', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray().then(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - prev - 5', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).skip(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.prev().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'prev item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - prev - 5 from 3', 2, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).skip(3).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [4, 5, 6, 7, 8], 'item Id list');
+
+                    it.prev().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'prev item Id list');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - prev - error - 5 from 0', 3, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+
+                    it.prev().then(function (it) {
+                        ok(false, 'invalid run, excepted fail way');
+                        start();
+                    }).fail(function (ex) {
+                        equal(ex.message, 'Invalid skip value!', 'error message');
+                        equal(ex.data.skip, -5, 'invalid skip value');
+
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - error - no take', 7, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.toArray(function (it) {
+                    equal(it.length, 26, 'full result requested');
+
+                    it.next().then(function (it) {
+                        ok(false, 'invalid run, excepted fail way');
+                        start();
+                    }).fail(function (ex) {
+                        equal(ex.message, 'take expression not defined in the chain!', 'error message');
+                        equal(typeof ex.data.skip, 'undefined', 'skip value');
+                        equal(typeof ex.data.take, 'undefined', 'skip value');
+
+                        start();
+                    });
+
+
+                    it.prev().then(function (it) {
+                        ok(false, 'invalid run, excepted fail way');
+                        start();
+                    }).fail(function (ex) {
+                        equal(ex.message, 'take expression not defined in the chain!', 'error message');
+                        equal(typeof ex.data.skip, 'undefined', 'skip value');
+                        equal(typeof ex.data.take, 'undefined', 'skip value');
+
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging deep - next-next-prev - 5', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        
+                        it.next().then(function (it) {
+                            deepEqual(it.map(function (i) { return i.Id; }), [11, 12, 13, 14, 15], 'next2 item Id list');
+                            
+                            it.prev().then(function (it) {
+                                deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'prev item Id list');
+                                start();
+                            }).fail(function (ex) {
+                                ok(false, 'Error: ' + ex);
+                                start();
+                            });
+
+                        }).fail(function (ex) {
+                            ok(false, 'Error: ' + ex);
+                            start();
+                        });
+
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging deep - next-next-prev - 5 with map', 8, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.map(function (it) { return { Id: it.Id, Title: it.Title } }).take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+
+                        it.next().then(function (it) {
+                            deepEqual(it.map(function (i) { return i.Id; }), [11, 12, 13, 14, 15], 'next2 item Id list');
+                            equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+
+                            it.prev().then(function (it) {
+                                deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'prev item Id list');
+                                equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+                                start();
+                            }).fail(function (ex) {
+                                ok(false, 'Error: ' + ex);
+                                start();
+                            });
+
+                        }).fail(function (ex) {
+                            ok(false, 'Error: ' + ex);
+                            start();
+                        });
+
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging deep - next-next-prev - 2 with filter, order', 8, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.filter('it.Title.contains("1")').orderBy('it.Title').take(2).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Title; }), ['Article1', 'Article21'], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Title; }), ['Article31', 'Article41'], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                        it.next().then(function (it) {
+                            deepEqual(it.map(function (i) { return i.Title; }), ['Article51'], 'next2 item Id list');
+                            equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                            it.prev().then(function (it) {
+                                deepEqual(it.map(function (i) { return i.Title; }), ['Article31', 'Article41'], 'prev item Id list');
+                                equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                                start();
+                            }).fail(function (ex) {
+                                ok(false, 'Error: ' + ex);
+                                start();
+                            });
+
+                        }).fail(function (ex) {
+                            ok(false, 'Error: ' + ex);
+                            start();
+                        });
+
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('inlineCount - array result', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(19);
+        stop(5);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.withInlineCount().toArray(function (items) {
+                    equal(items.totalCount, items.length, 'inline count without filter, take, skip');
+                    start(1);
+                });
+
+                db.Articles.filter('it.Title.contains("1")').withInlineCount().toArray(function (items) {
+                    equal(items.totalCount, items.length, 'inline count with filter');
+                    start(1);
+                });
+
+                db.Articles.withInlineCount().take(3).toArray(function (items) {
+                    notEqual(items.totalCount, items.length, 'inline count with take');
+                    equal(items.length, 3, 'length value with take');
+                    equal(items.totalCount, 26, 'inline count value with take');
+                    start(1);
+                });
+
+                db.Articles.withInlineCount().skip(2).take(3).toArray(function (items) {
+                    notEqual(items.totalCount, items.length, 'inline count with skip, take');
+                    equal(items.length, 3, 'length value with skip, take');
+                    equal(items.totalCount, 26, 'inline count value with skip, take');
+                    start(1);
+
+                    db.Articles.withInlineCount().skip(8).take(3).toArray(function (items2) {
+                        notEqual(items2.totalCount, items.length, 'inline count with skip, take');
+                        equal(items2.totalCount, 26, 'inline count value with skip, take');
+
+                        for (var i = 0; i < items.length; i++) {
+                            for (var j = 0; j < items2.length; j++) {
+                                notEqual(items[i].Id, items2[j].Id, 'i: ' + i + ', j: ' + j + ' Id not equal');
+                            }
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
     test('Filter_noFilter', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(9);

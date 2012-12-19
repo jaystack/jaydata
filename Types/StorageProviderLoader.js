@@ -27,6 +27,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
             'LocalStore': 'jaydata-inmemory',
             'mongoDB': 'jaydata-mongodb',
             'oData': 'jaydata-odata',
+            'webApi': 'jaydata-webapi',
             'sqLite': 'jaydata-sqlite',
             'webSql': 'jaydata-sqlite',
             'storm': 'jaydata-storm'
@@ -38,6 +39,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
             'InMemory': 'InMemory',
             'LocalStore': 'InMemory',
             'oData': 'oData',
+            'webApi': 'WebApi',
             'sqLite': 'SqLite',
             'webSql': 'SqLite',
             'storm': 'Storm'

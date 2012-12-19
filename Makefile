@@ -80,6 +80,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/QueryParameterExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/RepresentationExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/ServiceOperationExpression.js\
+	$(TYPES_DIR)/Expressions/ContinuationExpressionBuilder.js\
 	$(TYPES_DIR)/Validation/EntityValidationBase.js\
 	$(TYPES_DIR)/Validation/EntityValidation.js\
 	$(TYPES_DIR)/Notifications/ChangeDistributorBase.js\
@@ -186,6 +187,8 @@ MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.j
 
 StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 
+WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
+
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 
@@ -193,7 +196,7 @@ all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)
 
-npms: npmjaydata npmjaydata-core npmindexeddb npmsqlite npmodata npminmemory npmmongodb npmstorm
+npms: npmjaydata npmjaydata-core npmindexeddb npmsqlite npmodata npminmemory npmmongodb npmstorm npmwebapi
 
 npmjaydata-core: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata-core npm package..."
@@ -227,6 +230,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@rsync -R $(IndexedDbProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(SqLiteProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(oDataProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(WebApiProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(StormProvider) $(NPM_DIR)/jaydata/lib
@@ -239,6 +243,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(IndexedDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/indexeddb_index.js;)
 	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/sqlite_index.js;)
 	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;)
+	@$(foreach dir,$(WebApiProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/webapi_index.js;)
 	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/inmemory_index.js;)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
 	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/storm_index.js;)
@@ -246,6 +251,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "require('./indexeddb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./sqlite_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./odata_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./webapi_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./inmemory_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
@@ -290,6 +296,20 @@ npmodata: $(oDataProvider) $(CREDITS)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/odata/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-odata"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/odata/package.json
 
+npmwebapi: $(WebApiProvider) $(CREDITS)
+	@@echo "Building WebApiProvider provider npm package..."
+	@@test -d $(NPM_DIR)/webapi || mkdir -p $(NPM_DIR)/webapi
+	@@cp -r $(NPM_BASE_DIR)/provider/* $(NPM_DIR)/webapi
+	@@rsync -R $(WebApiProvider) $(NPM_DIR)/webapi/lib
+	@@cp -r $(GPL_LIC) $(NPM_DIR)/webapi
+	@@cp -r $(MIT_LIC) $(NPM_DIR)/webapi
+	@@cp -r $(CREDITS) $(NPM_DIR)/webapi
+	@@echo "require('datajs');" >> $(NPM_DIR)/webapi/lib/index.js;
+	@$(foreach dir,$(WebApiProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/webapi/lib/index.js;)
+	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/webapi/lib/index.js
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-webapi"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/webApi/package.json
+
+
 npminmemory: $(InMemoryProvider) $(CREDITS)
 	@@echo "Building InMemoryProvider provider npm package..."
 	@@test -d $(NPM_DIR)/inmemory || mkdir -p $(NPM_DIR)/inmemory
@@ -326,7 +346,7 @@ npmstorm: $(StormProvider) $(CREDITS)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/storm/lib/index.js
 	@@sed -e 's/"name": "jaydata"/"name": "jaydata-storm"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","jaydata-inmemory": "$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/storm/package.json
 
-providers: indexeddbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider
+providers: indexeddbprovider sqliteprovider odataprovider facebookprovider yqlprovider inmemoryprovider mongodbprovider stormprovider webapiprovider
 
 indexeddbprovider: $(IndexedDbProvider) $(CREDITS)
 	@@echo "Building IndexedDbProvider provider..."
@@ -348,6 +368,13 @@ odataprovider: $(oDataProvider) $(CREDITS)
 	@@cat $(CREDITS) $(oDataProvider) > $(PROVIDERS_DIR)/oDataProvider.js
 	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/oDataProvider.js --js_output_file $(TEMP_DIR)/oDataProvider.min.js
 	@@cat $(CREDITS) $(TEMP_DIR)/oDataProvider.min.js > $(PROVIDERS_DIR)/oDataProvider.min.js
+
+webapiprovider: $(WebApiProvider) $(CREDITS)
+	@@echo "Building WebApiProvider provider..."
+	@@test -d $(PROVIDERS_DIR) || mkdir -p $(PROVIDERS_DIR)
+	@@cat $(CREDITS) $(WebApiProvider) > $(PROVIDERS_DIR)/WebApiProvider.js
+	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/WebApiProvider.js --js_output_file $(TEMP_DIR)/WebApiProvider.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/WebApiProvider.min.js > $(PROVIDERS_DIR)/WebApiProvider.min.js
 
 facebookprovider: $(FacebookProvider) $(CREDITS)
 	@@echo "Building FacebookProvider provider..."
