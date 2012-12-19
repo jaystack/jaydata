@@ -79,6 +79,8 @@ exports.Test = {
         var context = $example.Context.getContext();
         context.onReady(function () {
             context.FuncArrParam(array, function (res) {
+                delete res.prev;
+                delete res.next;
                 test.deepEqual(res, array, 'array call resolve failed');
 
                 test.done();
@@ -94,6 +96,8 @@ exports.Test = {
         var context = $example.Context.getContext();
         context.onReady(function () {
             context.FuncArrParam(array, function (res) {
+                delete res.prev;
+                delete res.next;
                 test.deepEqual(res, array, 'array call resolve failed');
 
                 test.done();

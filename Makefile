@@ -80,6 +80,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/QueryParameterExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/RepresentationExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/ServiceOperationExpression.js\
+	$(TYPES_DIR)/Expressions/ContinuationExpressionBuilder.js\
 	$(TYPES_DIR)/Validation/EntityValidationBase.js\
 	$(TYPES_DIR)/Validation/EntityValidation.js\
 	$(TYPES_DIR)/Notifications/ChangeDistributorBase.js\
