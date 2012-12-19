@@ -307,7 +307,7 @@ npmwebapi: $(WebApiProvider) $(CREDITS)
 	@@echo "require('datajs');" >> $(NPM_DIR)/webapi/lib/index.js;
 	@$(foreach dir,$(WebApiProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/webapi/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/webapi/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-webapi"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/webApi/package.json
+	@@sed -e 's/"name": "jaydata"/"name": "jaydata-webapi"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)","datajs": "1.0.3"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/webapi/package.json
 
 
 npminmemory: $(InMemoryProvider) $(CREDITS)
