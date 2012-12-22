@@ -49,7 +49,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         return connection;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid], writable: false },
+    //$data.Array, 
+    supportedDataTypes: { value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid], writable: false },
     fieldConverter: {
         value: {
             fromDb: {
@@ -59,6 +60,10 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 "$data.String": function (text) { return text; },
                 "$data.Boolean": function (b) { return b === 1 ? true : false; },
                 "$data.Blob": function (blob) { return blob; },
+                "$data.Array": function () {
+                    if (arguments.length == 0) return [];
+                    return arguments[0] ? JSON.parse(arguments[0]) : undefined;
+                },
                 "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
             },
             toDb: {
@@ -68,8 +73,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 "$data.String": function (text) { return text; },
                 "$data.Boolean": function (b) { return b ? 1 : 0; },
                 "$data.Blob": function (blob) { return blob; },
+                "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
                 "$data.Guid": function (g) { return g ? g.value : g; },
-                "$data.Object": function(value){if(value === null){return null;} throw 'Not supported exception';}
+                "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; }
             }
         }
     },
@@ -696,11 +702,34 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.build = function () {
 
             switch (Container.resolveType(this.fld.dataType)) {
-                case $data.String: case $data.Guid: case "text": case "string": this.buildFieldNameAndType("TEXT"); break;
-                case $data.Boolean: case $data.Integer: case "bool": case "boolean": case "int": case "integer": this.buildFieldNameAndType("INTEGER"); break;
-                case $data.Number: case $data.Date: case "number": case "datetime": case "date": this.buildFieldNameAndType("REAL"); break;
-                case $data.Blob: case "blob": this.buildFieldNameAndType("BLOB"); break;
-                default: this.buildRelations(); break;
+                case $data.Array:
+                case $data.String:
+                case $data.Guid:
+                case "text":
+                case "string":
+                    this.buildFieldNameAndType("TEXT");
+                    break;
+                case $data.Boolean:
+                case $data.Integer:
+                case "bool":
+                case "boolean":
+                case "int":
+                case "integer":
+                    this.buildFieldNameAndType("INTEGER");
+                    break;
+                case $data.Number:
+                case $data.Date:
+                case "number":
+                case "datetime":
+                case "date":
+                    this.buildFieldNameAndType("REAL");
+                    break;
+                case $data.Blob:
+                case "blob":
+                    this.buildFieldNameAndType("BLOB");
+                    break;
+                default: this.buildRelations();
+                    break;
             }
 
             return this.fieldDef;

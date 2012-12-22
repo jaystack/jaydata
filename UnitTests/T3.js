@@ -1036,7 +1036,7 @@ function T3(providerConfig, msg) {
         $data.Class.define("$navProp.Category", $data.Entity, null, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
-            Articles: { dataType: "Array", elementType: "$navProp.Article" }
+            Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Category" }
         }, null);
         $data.Class.define("$navProp.Article", $data.Entity, null, {
             Id: { dataType: "int", key: true, computed: true },

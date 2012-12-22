@@ -70,14 +70,17 @@
                 db.Articles.add({ Title: 'TitleData', Lead: 'LeadData' });
                 db.saveChanges(function () {
 
+                    db.Articles.length(function (c) {
+                        console.log("!!!!", c);
+                        db.Articles.single('it.Title == "TitleData"', null, function (item) {
+                            db.Articles.attach(item);
+                            ok(item.Category === undefined, 'article category is undefined');
+                            equal(item.Title, 'TitleData', 'item title');
+                            equal(item.Lead, 'LeadData', 'item lead');
 
-                    db.Articles.single('it.Title == "TitleData"', null, function (item) {
-                        db.Articles.attach(item);
-                        ok(item.Category === undefined, 'article category is undefined');
-                        equal(item.Title, 'TitleData', 'item title');
-                        equal(item.Lead, 'LeadData', 'item lead');
+                            start();
+                        });
 
-                        start();
                     });
                 });
             });
