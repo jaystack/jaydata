@@ -110,14 +110,15 @@ $data.Class.define('$data.EntityContext', null, null,
                 ctx.storageProvider.setContext(ctx);
                 ctx.stateManager = new $data.EntityStateManager(ctx);
 
-                if (storageProviderCfg.name in ctx.getType()._storageModelCache) {
-                    ctx._storageModel = ctx.getType()._storageModelCache[storageProviderCfg.name];
+                var contextType = ctx.getType();
+                if (providerType.name in contextType._storageModelCache) {
+                    ctx._storageModel = contextType._storageModelCache[providerType.name];
                 } else {
                     ctx._initializeStorageModel();
-                    ctx.getType()._storageModelCache[storageProviderCfg.name] = ctx._storageModel;
+                    contextType._storageModelCache[providerType.name] = ctx._storageModel;
                 }
 
-                ctx._initializeEntitySets(ctx.constructor);
+                ctx._initializeEntitySets(contextType);
                 if (storageProviderCfg && storageProviderCfg.user) Object.defineProperty(ctx, 'user', { value: storageProviderCfg.user, enumerable: true });
                 if (storageProviderCfg && storageProviderCfg.checkPermission) Object.defineProperty(ctx, 'checkPermission', { value: storageProviderCfg.checkPermission, enumerable: true });
 
