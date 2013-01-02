@@ -238,6 +238,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 } catch (e) {
                     console.log(objectStoreDefinitions);
                     callBack.error(e);
+                    return;
                 }
                 self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks({
                     onsuccess: function (e) {
