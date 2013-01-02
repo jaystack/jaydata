@@ -47,15 +47,19 @@
         $data.Class.define('indexedDbProviderTest_ContextWithError', $data.EntityContext, null, {
             Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_PersonWithoutKey }
         }, null);
-        try {
-            var context = new indexedDbProviderTest_ContextWithError({
-                name: 'indexedDb',
-                databaseName: 'indexedDbProvider_openDbSimpleContext',
-                dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
-            });
-        } catch (exception) {
-            equal(exception.name, "KeyNotFoundError");
-        }
+
+        var context = new indexedDbProviderTest_ContextWithError({
+            name: 'indexedDb',
+            databaseName: 'indexedDbProvider_openDbSimpleContext',
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        });
+
+        context.onReady({
+            error: function (exception) {
+                equal(exception.name, "KeyNotFoundError");
+            }
+        });
+
 
         $data.Class.define('indexedDbProviderTest_PersonWithoutMultipleKeys', $data.Entity, null, {
             Id: { dataType: 'int', key: true },

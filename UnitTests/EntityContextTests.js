@@ -1498,4 +1498,152 @@
     //        });
     //    });
     //});
+
+
+
+    test('multiple onready test', function () {
+        var run = 5;
+        stop(run*2);
+        expect((run*2*2)+1);
+
+        var initCounter = 0;
+        var slowProvider = $data.Class.define('slowProvider', $data.StorageProviderBase, null, {
+            initializeStore: function (callBack) {
+                setTimeout(function () {
+                    equal(initCounter++, 0, 'initializeStore called more than once');
+
+                    callBack.success(this.context);
+                }, 2000);
+            },
+            supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date], writable: false },
+            setContext: function (ctx) { this.context = ctx; },
+            saveChanges: function (callback, changedItems) {
+                this.entities = this.entities || 0;
+                this.entities += changedItems.length;
+                callback.success();
+            },
+            executeQuery: function (queryable, callBack) {
+                callBack.success();
+            }
+        }, null);
+        $data.StorageProviderBase.registerProvider("slow", slowProvider);
+
+        var ctx = new $news.Types.NewsContext({ name: 'slow' });
+
+        for (var i = 0; i < run; i++) {
+            ctx.onReady(function (context) {
+                ok(context, 'context onready Called ' + i);
+                equal(i, run, 'async called callback not wait for iterations');
+                start();
+            });
+        }
+
+        ctx.onReady(function () {
+            var iteration = 0;
+            for (var i = 0; i < run; i++) {
+                ctx.onReady(function (context) {
+                    ok(context, 'context onready Called after ready ' + i);
+                    equal(i, iteration++, 'sync called callback wait for iterations');
+                    start();
+                });
+            }
+        });
+
+    });
+
+
+    test('multiple onready fail test', function () {
+        var run = 5;
+        stop(run + 1);
+        expect((run*2) + 1);
+
+        var ctx = new $news.Types.NewsContext({ name: 'nothing' });
+
+        ctx.onReady(function (context) {
+            ok(false, 'onready called');
+            start(run + 1);
+        });
+
+        ctx.onReady({
+            success: function () {
+                ok(false, 'onready called');
+                start(run + 1);
+            },
+            error: function (err) {
+                equal(err, 'Provider fallback failed!', 'context error callback');
+                start();
+
+                var iteration = 0;
+                for (var i = 0; i < run; i++) {
+                    ctx.onReady({
+                        error: function (err) {
+                            equal(err, 'Provider fallback failed!', 'context error callback');
+                            equal(i, iteration++, 'sync called callback wait for iterations');
+                            start();
+                        }
+                    });
+                }
+            }
+        });
+
+    });
+
+
+    test('multiple onready fail initializeStore test', function () {
+        var run = 5;
+        stop(run * 2);
+        expect((run * 2 * 2) +1);
+        var initCounter = 0;
+        var slowErrorProvider = $data.Class.define('slowErrorProvider', $data.StorageProviderBase, null, {
+            initializeStore: function (callBack) {
+                setTimeout(function () {
+                    equal(initCounter++, 0, 'initializeStore called more than once');
+
+                    callBack.error('generated fail');
+                }, 2000);
+            },
+            supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date], writable: false },
+            setContext: function (ctx) { this.context = ctx; },
+            saveChanges: function (callback, changedItems) {
+                this.entities = this.entities || 0;
+                this.entities += changedItems.length;
+                callback.success();
+            },
+            executeQuery: function (queryable, callBack) {
+                callBack.success();
+            }
+        }, null);
+        $data.StorageProviderBase.registerProvider("slowErrorProvider", slowErrorProvider);
+
+        var ctx = new $news.Types.NewsContext({ name: 'slowErrorProvider' });
+
+        for (var i = 0; i < run; i++) {
+            ctx.onReady({
+                success: function () { ok(false, 'success onready'); start(); },
+                error: function (err) {
+                    equal(err, 'generated fail', 'context onready error Called ' + i);
+                    equal(i, run, 'async called callback not wait for iterations');
+                    start();
+                }
+            });
+        }
+
+        ctx.onReady({
+            success: function () { ok(false, 'success onready'); start(run); },
+            error: function () {
+                var iteration = 0;
+                for (var i = 0; i < run; i++) {
+                    ctx.onReady({
+                        success: function () { ok(false, 'success onready'); start(); },
+                        error: function (err) {
+                            equal(err, 'generated fail', 'context onready error Called after ready ' + i);
+                            equal(i, iteration++, 'sync called callback wait for iterations');
+                            start();
+                        }
+                    });
+                }
+            }
+        });
+
+    });
 });

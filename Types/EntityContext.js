@@ -75,6 +75,17 @@ $data.Class.define('$data.EntityContext', null, null,
         this._storageModel = [];
 
         var ctx = this;
+        ctx._isOK = false;
+
+        var origSuccessInitProvider = this._successInitProvider;
+        this._successInitProvider = function (errorOrContext) {
+            if (errorOrContext instanceof $data.EntityContext) {
+                origSuccessInitProvider(ctx);
+            } else {
+                origSuccessInitProvider(ctx, errorOrContext);
+            }
+        }
+
         this._storageModel.getStorageModel = function (typeName) {
             var resolvedType = Container.resolveType(typeName);
 
@@ -92,7 +103,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         var i = 0, providerType;
         var providerList = [].concat(storageProviderCfg.name);
-        var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider });
+        var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider, error: this._successInitProvider });
         $data.StorageProviderLoader.load(providerList, {
             success: function (providerType) {
                 ctx.storageProvider = new providerType(storageProviderCfg, ctx);
@@ -110,7 +121,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 if (storageProviderCfg && storageProviderCfg.user) Object.defineProperty(ctx, 'user', { value: storageProviderCfg.user, enumerable: true });
                 if (storageProviderCfg && storageProviderCfg.checkPermission) Object.defineProperty(ctx, 'checkPermission', { value: storageProviderCfg.checkPermission, enumerable: true });
 
-                ctx._isOK = false;
+                //ctx._isOK = false;
                 if (ctx.storageProvider) {
                     ctx.storageProvider.initializeStore(callBack);
                 }
@@ -555,14 +566,26 @@ $data.Class.define('$data.EntityContext', null, null,
         });
     },
 
-    _successInitProvider: function (result) {
-        if (result != undefined && result._isOK != undefined) {
-            result._isOK = true;
-            if (result.onReadyFunction) {
-                result.onReadyFunction(result);
+    _successInitProvider: function (context, error) {
+        if (context instanceof $data.EntityContext && context._isOK !== undefined) {
+            if (!error) {
+                context._isOK = true;
+                if (context.onReadyFunction) {
+                    for (var i = 0; i < context.onReadyFunction.length; i++) {
+                        context.onReadyFunction[i].success(context);
+                    }
+                    context.onReadyFunction = undefined;
+                }
+            } else {
+                context._isOK = error;
+                if (context.onReadyFunction) {
+                    for (var i = 0; i < context.onReadyFunction.length; i++) {
+                        context.onReadyFunction[i].error(error);
+                    }
+                    context.onReadyFunction = undefined;
+                }
             }
         }
-
     },
     onReady: function (fn) {
         /// <signature>
@@ -587,10 +610,15 @@ $data.Class.define('$data.EntityContext', null, null,
         /// </signature>
         var pHandler = new $data.PromiseHandler();
         var callBack = pHandler.createCallback(fn);
-        this.onReadyFunction = callBack.success;
-        if (this._isOK) {
+        if (this._isOK === true) {
             callBack.success(this);
+        } else if (this._isOK !== false) {
+            callBack.error(this._isOK);
+        } else {
+            this.onReadyFunction = this.onReadyFunction || [];
+            this.onReadyFunction.push(callBack);
         }
+        
         return pHandler.getPromise();
     },
     getEntitySetFromElementType: function (elementType) {
