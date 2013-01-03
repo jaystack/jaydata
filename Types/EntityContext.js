@@ -1578,8 +1578,23 @@ $data.Class.define('$data.EntityContext', null, null,
 
         } else {
             fn = function () {
+                var context = this;
 
-                var virtualEntitySet = cfg.elementType ? this.getEntitySetFromElementType(Container.resolveType(cfg.elementType)) : null;
+                var bindedEntity = {};
+                if (this instanceof $data.Entity) {
+                    if (this.context) {
+                        context = this.context;
+                    } else {
+                        Guard.raise('entity not attached into context');
+                    }
+
+                    bindedEntity = {
+                        data: this,
+                        entitySet: context.getEntitySetFromElementType(this.getType())
+                    };
+                }
+
+                var virtualEntitySet = cfg.elementType ? context.getEntitySetFromElementType(Container.resolveType(cfg.elementType)) : null;
 
                 var paramConstExpression = null;
                 if (cfg.params) {
@@ -1592,12 +1607,13 @@ $data.Class.define('$data.EntityContext', null, null,
                     }
                 }
 
-                var ec = Container.createEntityContextExpression(this);
-                var memberdef = this.getType().getMemberDefinition(cfg.serviceName);
+                var ec = Container.createEntityContextExpression(context);
+                var memberdef = (bindedEntity.data || context).getType().getMemberDefinition(cfg.serviceName);
                 var es = Container.createServiceOperationExpression(ec,
                         Container.createMemberInfoExpression(memberdef),
                         paramConstExpression,
-                        cfg);
+                        cfg,
+                        bindedEntity);
 
                 //Get callback function
                 var clb = arguments[arguments.length - 1];
@@ -1614,10 +1630,10 @@ $data.Class.define('$data.EntityContext', null, null,
                     return q;
                 }
                 else {
-                    var returnType = Container.resolveType(cfg.returnType);
+                    var returnType = cfg.returnType ? Container.resolveType(cfg.returnType) : null;
 
-                    var q = Container.createQueryable(this, es);
-                    q.defaultType = returnType;
+                    var q = Container.createQueryable(context, es);
+                    q.defaultType = returnType || $data.Object;
 
                     if (returnType === $data.Queryable) {
                         q.defaultType = Container.resolveType(cfg.elementType);

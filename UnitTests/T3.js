@@ -1349,7 +1349,37 @@ function T3(providerConfig, msg) {
             });
         });
     });
+    test('OData_Function_Import_CreateCategory_Post', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(7);
+        stop(5);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.CreateCategory('new Category').then(function (result) {
+                    start(1);
+                    ok(!result);
 
+                    db.Categories.single('it.Title == "new Category"').then(function (newCat) {
+                        start(1);
+
+                        ok(newCat);
+                        ok(newCat instanceof $news.Types.Category, 'Return type faild');
+                        ok(newCat.Title, 'new Category');
+                    });
+
+                    db.Categories.single('it.Title == "new Category"').then(function (newCat) {
+                        start(1);
+
+                        ok(newCat);
+                        ok(newCat instanceof $news.Types.Category, 'Return type faild');
+                        ok(newCat.Title, 'new Category');
+                    });
+                })
+            });
+        });
+    });
 
     test('Type beforeCreate in context', 9, function () {
         stop(2);

@@ -79,9 +79,9 @@ namespace JayData
         }
 
         [WebInvoke(Method = "POST")]
-        public void CreateCategory(string title, string subTitle)
+        public void CreateCategory(string title)
         {
-            this.CurrentDataSource.CreateObjectSet<Category>().AddObject(new Category{Title=title, Subtitle= subTitle});
+            this.CurrentDataSource.CreateObjectSet<Category>().AddObject(new Category{Title=title});
             this.CurrentDataSource.SaveChanges();
         }
 

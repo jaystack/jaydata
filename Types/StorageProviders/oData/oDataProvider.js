@@ -136,7 +136,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 }
             },
             function (data, textStatus, jqXHR) {
-                if (!data) data = JSON.parse(textStatus.body);
+                if (!data && textStatus.body) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'string' ? [{ cnt: data }] : data;
                     if (sql.withInlineCount && typeof data === 'object' && (data.__count || ('d' in data && data.d.__count))) {
@@ -612,7 +612,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     getEntityKeysValue: function (entity) {
         var result = [];
         var keyValue = undefined;
-        var memDefs = entity.entitySet.createNew.memberDefinitions.asArray();
+        var memDefs = entity.data.getType().memberDefinitions.getKeyProperties();
         for (var i = 0, l = memDefs.length; i < l; i++) {
             var field = memDefs[i];
             if (field.key) {
