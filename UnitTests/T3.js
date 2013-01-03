@@ -1355,7 +1355,7 @@ function T3(providerConfig, msg) {
         stop(5);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
                 db.CreateCategory('new Category').then(function (result) {
                     start(1);
@@ -1377,14 +1377,14 @@ function T3(providerConfig, msg) {
                         ok(newCat.Title, 'new Category');
                     });
                 })
-            });
+            //});
         });
     });
 
     test('Type beforeCreate in context', 9, function () {
         stop(2);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
 
                 var beforeCreate = function (sender, item) {
                     ok(sender === db.Articles.elementType, 'beforeCreate event sender');
@@ -1413,14 +1413,14 @@ function T3(providerConfig, msg) {
                         start();
                     });
                 });
-            });
+            //});
         });
     });
 
     test('Type beforeCreate cancel in context', 11, function () {
         stop(2);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
 
                 var beforeCreate = function (sender, item) {
                     ok(sender === db.Articles.elementType, 'beforeCreate event sender');
@@ -1453,14 +1453,14 @@ function T3(providerConfig, msg) {
                         start();
                     });
                 });
-            });
+            //});
         });
     });
 
     test('Type beforeCreate cancel one in context', 9, function () {
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
 
                 var beforeCreate = function (sender, item) {
                     ok(sender === db.Articles.elementType, 'beforeCreate event sender');
@@ -1490,14 +1490,14 @@ function T3(providerConfig, msg) {
                         start();
                     });
                 });
-            });
+            //});
         });
     });
 
     test('Type afterCreate in context', 9, function () {
         stop(2);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
 
                 var afterCreate = function (sender, item) {
                     ok(sender === db.Articles.elementType, 'afterCreate event sender');
@@ -1526,7 +1526,7 @@ function T3(providerConfig, msg) {
                         start();
                     });
                 });
-            });
+            //});
         });
     });
 
