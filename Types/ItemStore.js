@@ -17,6 +17,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     addItemStoreAlias: function (name, contextFactoryOrToken, isDefault) {
         var self = this;
         var promise = new $data.PromiseHandler();
+        var callback = promise.createCallback();
 
         if ('string' === typeof name) {
             //storeToken
@@ -29,7 +30,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                     self.itemStoreConfig['default'] = name;
                 }
 
-                promise.deferred.resolve();
+                callback.success();
                 return promise.getPromise();
             }
                 //contextFactory
@@ -37,7 +38,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 var preContext = contextFactoryOrToken();
                 var contextPromise;
                 if (preContext && preContext instanceof $data.EntityContext) {
-                    promise.deferred.resolve(preContext);
+                    callback.success(preContext);
                     contextPromise = promise.getPromise();
                 } else {
                     contextPromise = preContext;
@@ -62,14 +63,15 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                             });
                     } else {
                         promise = new $data.PromiseHandler();
-                        promise.deferred.reject(new Exception('factory dont have context instance', 'Invalid arguments'));
+                        callback = promise.createCallback();
+                        callback.error(new Exception('factory dont have context instance', 'Invalid arguments'));
                         return promise.getPromise();
                     }
                 });
             }
         }
 
-        promise.deferred.reject(new Exception('Name or factory missing', 'Invalid arguments'));
+        callback.error(new Exception('Name or factory missing', 'Invalid arguments'));
         return promise.getPromise();
     },
     resetStoreToDefault: function (name, isDefault) {
@@ -102,7 +104,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
         if (!contextPromise || contextPromise instanceof $data.EntityContext) {
             var promise = new $data.PromiseHandler();
-            promise.deferred.resolve(contextPromise);
+            var callback = promise.createCallback();
+            callback.success(contextPromise);
             contextPromise = promise.getPromise();
         }
 
@@ -113,7 +116,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 return null;
             } else {
                 var promise = new $data.PromiseHandler();
-                promise.deferred.reject(new Exception('factory return type error', 'Error'));
+                var callback = promise.createCallback();
+                callback.error(new Exception('factory return type error', 'Error'));
                 return promise.getPromise();
             }
         });
@@ -144,7 +148,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 var entitySet = ctx.getEntitySetFromElementType(type);
                 if (!entitySet) {
                     var d = new $data.PromiseHandler();
-                    d.deferred.reject("EntitySet not exist for " + type.fullName);
+                    var callback = d.createCallback();
+                    callback.error("EntitySet not exist for " + type.fullName);
                     return d.getPromise();
                 }
                 return entitySet;
@@ -232,7 +237,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                                 break;
                             default:
                                 var d = new $data.PromiseHandler();
-                                d.deferred.reject('save mode not supported: ' + mode);
+                                var callback = d.createCallback();
+                                callback.error('save mode not supported: ' + mode);
                                 return d.getPromise();
                         }
 
@@ -322,7 +328,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                             .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                     } catch (e) {
                         var d = new $data.PromiseHandler();
-                        d.deferred.reject(e);
+                        var callback = d.createCallback();
+                        callback.error(e);
                         return d.getPromise();
                     }
                 });
@@ -500,22 +507,25 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     _getSaveMode: function (entity, entitySet, hint, storeAlias) {
         var self = this;
         var promise = new $data.PromiseHandler();
-        var deferred = promise.deferred;
+        var callback = promise.createCallback();
         var entityType = entity.getType();
 
         switch (true) {
             case hint === 'update':
-                deferred.resolve('attach'); break;
+                callback.success('attach'); break;
             case hint === 'new':
-                deferred.resolve('add'); break;
+                callback.success('add'); break;
             case false === entityType.memberDefinitions.getKeyProperties().every(function (keyDef) { return entity[keyDef.name]; }):
-                deferred.resolve('add'); break;
+                callback.success('add'); break;
+            case !!entity.storeToken:
+                callback.success('attach'); break;
+                break;
             default:
                 //use the current entity store informations
                 storeAlias = this._getStoreAlias(entity, storeAlias);
                 entityType.read(self._getKeyObjectFromEntity(entity, entityType), storeAlias)
-                    .then(function () { deferred.resolve('attach'); })
-                    .fail(function () { deferred.resolve('add'); });
+                    .then(function () { callback.success('attach'); })
+                    .fail(function () { callback.success('add'); });
                 break;
         }
 
