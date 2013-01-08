@@ -144,6 +144,12 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.src += '};fn(typeof di === "undefined" ? data : di);'
             context.meta.pop();
         }else if (meta.$type){
+            if (!context.forEach){
+                context.src += 'if (typeof di === "undefined"){';
+                context.src += 'var di = data;';
+                this._buildSelector(meta, context);
+                context.src += '}';
+            }
             var type = Container.resolveName(Container.resolveType(meta.$type));
             var item = '_' + type.replace(/\./gi, '_') + '_';
             if (context.item == item) item += 'new_';
@@ -202,7 +208,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             }else{
                                 context.src += item + '.' + i + ' = di.' + meta[i].$source + ';';
                             }
-                            context.src += '};' + item + '.' + i + ' = fn(di);';
+                            context.src += '};';
+                            if (meta[i].$type) context.src += item + '.' + i + ' = fn(di);';
+                            else context.src += 'fn(di);';
                         }else if (meta[i].$type){
                             context.meta.push(i);
                             context.src += 'var fn = function(di){';
