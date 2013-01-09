@@ -971,7 +971,20 @@ $data.Class.define('$data.EntityContext', null, null,
                 for (var j = 0; j < entity.data.getType().memberDefinitions.getPublicMappedProperties().length; j++) {
                     var memDef = entity.data.getType().memberDefinitions.getPublicMappedProperties()[j];
 
-                    if (memDef.required && !memDef.computed && !entity.data[memDef.name]) entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+                    var memDefType = Container.resolveType(memDef.type);
+                    if (memDef.required && !memDef.computed && !entity.data[memDef.name]) {
+                        switch (memDefType) {
+                            case $data.String:
+                            case $data.Number:
+                            case $data.Integer:
+                            case $data.Date:
+                            case $data.Boolean:
+                                entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
                 //}, this);
             }
