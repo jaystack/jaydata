@@ -62,7 +62,8 @@ $data.Class.define('$data.ModelBinder', null, null, {
     
     _buildKey: function(name, type, keys, context, data){
         if (keys){
-            var type = Container.resolveType(type).fullName;
+            var type = Container.resolveType(type);
+            type = type.fullName || type.name;
             context.src += 'var ' + name + 'Fn = function(di){';
             if (!(keys instanceof Array) || keys.length == 1){
                 if (typeof keys !== 'string') keys = keys[0];
@@ -159,9 +160,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }
             context.iter = undefined;
             context.forEach = true;
+            var itemForKey = 'itemForKey_' + iter.replace(/\./gi, '_');
             context.src += 'var forEachFn = function(di, i){';
             context.src += 'var diBackup = di;';
-            this._buildKey('itemForKey', meta.$type, meta.$item.$keys, context);
+            if (this.providerName == "sqLite" && this.references && meta.$item.$keys) this._buildKey(itemForKey, meta.$type, meta.$item.$keys, context);
             var item = context.item || 'iter';
             context.item = item;
             if (!meta.$item.$source){
@@ -192,16 +194,26 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += '}';
             }else{
                 if (this.references && meta.$item.$keys){
-                    context.src += 'if (typeof itemForKey !== "undefined" && itemForKey !== null){';
-                    context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && itemForKey){';
-                    context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(itemForKey) < 0){';
+                    context.src += 'if (typeof ' + itemForKey + ' !== "undefined" && ' + itemForKey + ' !== null){';
+                    context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && ' + itemForKey + '){';
+                    context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(' + itemForKey + ') < 0){';
                     context.src += iter + '.push(' + (context.item || item) + ');';
-                    context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(itemForKey);'
+                    context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(' + itemForKey + ');'
                     context.src += '}}else{';
                     context.src += iter + '.push(' + (context.item || item) + ');';
                     context.src += '}}else{';
                     context.src += iter + '.push(' + (context.item || item) + ');';
                     context.src += '}';
+                    /*context.src += 'if (typeof itemKey !== "undefined" && itemKey !== null){';
+                    context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && itemKey){';
+                    context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(itemKey) < 0){';
+                    context.src += iter + '.push(' + (context.item || item) + ');';
+                    context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(itemKey);'
+                    context.src += '}}else{';
+                    context.src += iter + '.push(' + (context.item || item) + ');';
+                    context.src += '}}else{';
+                    context.src += iter + '.push(' + (context.item || item) + ');';
+                    context.src += '}';*/
                 }else{
                     context.src += iter + '.push(' + (context.item || item) + ');';
                 }
