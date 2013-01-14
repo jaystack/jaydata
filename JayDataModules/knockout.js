@@ -289,6 +289,9 @@
             var observables = expression.expression.observables;
             if (observables && observables.length > 0) {
                 observables.forEach(function (obsObj) {
+                    if (!obsObj)
+                        return;
+
                     obsObj.observable.subscribe(function () {
                         if (!obsObj.skipExecute) {
                             var preparator = Container.createQueryExpressionCreator(self);
