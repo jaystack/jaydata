@@ -191,7 +191,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 convertedItem.push(independentBlocks[index][i].data);
                 request = {
                     requestUri: this.providerConfiguration.oDataServiceHost + '/',
-                    headers: {}
+                    headers: {
+                        MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
+                    }
                 };
                 //request.headers = { "Content-Id": convertedItem.length };
                 switch (independentBlocks[index][i].data.entityState) {
@@ -305,6 +307,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             method: "POST",
             data: {
                 __batchRequests: [{ __changeRequests: batchRequests }]
+            },
+            headers: {
+                MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
             }
         }, function (data, response) {
             if (response.statusCode == 202) {
