@@ -1066,7 +1066,7 @@
 
                 //date
                 var q = memoryContext.Entities.filter(function (o) { return o.propDate < this.date; }, { date: new Date('2005/01/01') });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propDate < new Date(Date.parse('2005-01-01T00:00:00.000Z')));\n}".replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), ("function anonymous(o) {\n return (o.propDate < new Date(Date.parse('" + (new Date('2005/01/01')).toISOString() + "')));\n}").replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {
