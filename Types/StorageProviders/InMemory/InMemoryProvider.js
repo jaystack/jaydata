@@ -329,24 +329,24 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             fromDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : undefined; },
+                '$data.Date': function (dbData) { return dbData; },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
+                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.Guid': function (guid) { return typeof guid === 'string' ? $data.parseGuid(guid) : guid; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
-                '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
-                '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
-                '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
-                '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
+                '$data.Number': function (number) { return number; },
+                '$data.Date': function (date) { return date; },
+                '$data.String': function (text) { return text; },
+                '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); },
-                '$data.Guid': function (guid) { return guid; }
+                '$data.Object': function (o) { return o; },
+                '$data.Array': function (o) { return o; },
+                '$data.Guid': function (guid) { return guid ? guid.value : guid; }
             }
         }
     }
