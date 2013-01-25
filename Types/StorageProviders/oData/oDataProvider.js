@@ -390,7 +390,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var sqlText = this._compile(queryable);
         return queryable;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography, $data.Guid], writable: false },
+    supportedDataTypes: {
+        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
 
     supportedBinaryOperators: {
         value: {
@@ -444,10 +449,24 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
             },
 
-            length: {
+            length: [{
+                allowedType: 'string',
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
+            {
+                allowedType: 'GeographyLineString',
+                mapTo: "geo.length",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: ['GeographyLineString'] }]
+            },
+            {
+                allowedType: 'GeometryLineString',
+                mapTo: "geo.length",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeometryLineString' }]
+            }],
+
             strLength: {
                 mapTo: "length",
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
@@ -536,7 +555,37 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             ceiling: {
                 allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
-            }
+            },
+
+
+            /* geo functions */
+            distance: [{
+                allowedType: 'GeographyPoint',
+                mapTo: "geo.distance",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "to", dataType: 'GeographyPoint' }]
+
+            }, {
+                allowedType: 'GeometryPoint',
+                mapTo: "geo.distance",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "to", dataType: 'GeometryPoint' }]
+
+            }],
+
+            intersects: [{
+                allowedType: 'GeographyPoint',
+                mapTo: "geo.intersects",
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "in", dataType: 'GeographyPolygon' }]
+
+            }, {
+                allowedType: 'GeometryPoint',
+                mapTo: "geo.intersects",
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "in", dataType: 'GeometryPolygon' }]
+
+            }]
         },
         enumerable: true,
         writable: true
@@ -586,12 +635,20 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
-                '$data.Geography': function (geo) {
-                    if (geo && typeof geo === 'object' && Array.isArray(geo.coordinates)) {
-                        return new $data.Geography(geo.coordinates[0], geo.coordinates[1]);
-                    }
-                    return geo;
-                },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; },
                 '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
             },
             toDb: {
@@ -604,12 +661,20 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },
-                '$data.Geography': function (geo) {
-                    /*POINT(-127.89734578345 45.234534534)*/
-                    if (geo instanceof $data.Geography)
-                        return 'POINT(' + geo.longitude + ' ' + geo.latitude + ')';
-                    return geo;
-                },
+                '$data.GeographyPoint': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
                 '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
 }
         }

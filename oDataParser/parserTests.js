@@ -182,10 +182,18 @@ $(document).ready(function () {
     });
     test("Filter: Geography", 1, function () {
         var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
-        src.filter = "POINT(44.001 -33.123)";
+        src.filter = "geography'POINT(44.001 -33.123)'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = p.builder.buildConstant(new $data.Geography(44.001, -33.123));
+        var expected = p.builder.buildConstant(new $data.GeographyPoint(44.001, -33.123));
+        equal(current, JSON.stringify(expected));
+    });
+    test("Filter: Geometry", 1, function () {
+        var src = new $data.oDataParser.QueryRequest(); var p = new $data.oDataParser.RequestParser(); p.req = src;
+        src.filter = "geometry'POINT(44.001 -33.123)'";
+        p.parseFilterExpr();
+        var current = JSON.stringify(p.req.filter);
+        var expected = p.builder.buildConstant(new $data.GeometryPoint(44.001, -33.123));
         equal(current, JSON.stringify(expected));
     });
     test("Filter: '1 eq 2'", 1, function () {

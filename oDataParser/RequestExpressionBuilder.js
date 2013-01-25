@@ -56,6 +56,9 @@ $data.Class.define('$data.oDataParser.RequestExpressionBuilder', null, null, {
             case "round": callName = "round"; break;
             case "floor": callName = "floor"; break;
             case "ceiling": callName = "ceiling"; break;
+            case "geo.distance": callName = "distance"; break;
+            case "geo.intersects": callName = "intersects"; break;
+            case "geo.length": callName = "length"; break;
             default: Guard.raise(new Exception("Not implemented globalCall name in $data.oDataParser.RequestExpressionBuilder.buildGlobalCall: " + name)); break;
         }
 

@@ -173,8 +173,34 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                     if (!Object.isNullOrUndefined(initData[i])) {
                         if (type === $data.Date && typeof initData[i] === 'string')
                             this.initData[i] = new Date(initData[i]);
-                        else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
-                            this.initData[i] = new $data.Geography(initData[i]);
+                        else if (type === $data.GeographyPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeographyPoint))
+                            this.initData[i] = new $data.GeographyPoint(initData[i]);
+                        else if(type === $data.GeographyLineString && !(initData[i] instanceof $data.GeographyLineString))
+                            this.initData[i] = new $data.GeographyLineString(initData[i]);
+                        else if (type === $data.GeographyPolygon && !(initData[i] instanceof $data.GeographyPolygon))
+                            this.initData[i] = new $data.GeographyPolygon(initData[i]);
+                        else if (type === $data.GeographyMultiPoint && !(initData[i] instanceof $data.GeographyMultiPoint))
+                            this.initData[i] = new $data.GeographyMultiPoint(initData[i]);
+                        else if (type === $data.GeographyMultiLineString && !(initData[i] instanceof $data.GeographyMultiLineString))
+                            this.initData[i] = new $data.GeographyMultiLineString(initData[i]);
+                        else if (type === $data.GeographyMultiPolygon && !(initData[i] instanceof $data.GeographyMultiPolygon))
+                            this.initData[i] = new $data.GeographyMultiPolygon(initData[i]);
+                        else if (type === $data.GeographyCollection && !(initData[i] instanceof $data.GeographyCollection))
+                            this.initData[i] = new $data.GeographyCollection(initData[i]);
+                        else if (type === $data.GeometryPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeometryPoint))
+                            this.initData[i] = new $data.GeometryPoint(initData[i]);
+                        else if (type === $data.GeometryLineString && !(initData[i] instanceof $data.GeometryLineString))
+                            this.initData[i] = new $data.GeometryLineString(initData[i]);
+                        else if (type === $data.GeometryPolygon && !(initData[i] instanceof $data.GeometryPolygon))
+                            this.initData[i] = new $data.GeometryPolygon(initData[i]);
+                        else if (type === $data.GeometryMultiPoint && !(initData[i] instanceof $data.GeometryMultiPoint))
+                            this.initData[i] = new $data.GeometryMultiPoint(initData[i]);
+                        else if (type === $data.GeometryMultiLineString && !(initData[i] instanceof $data.GeometryMultiLineString))
+                            this.initData[i] = new $data.GeometryMultiLineString(initData[i]);
+                        else if (type === $data.GeometryMultiPolygon && !(initData[i] instanceof $data.GeometryMultiPolygon))
+                            this.initData[i] = new $data.GeometryMultiPolygon(initData[i]);
+                        else if (type === $data.GeometryCollection && !(initData[i] instanceof $data.GeometryCollection))
+                            this.initData[i] = new $data.GeometryCollection(initData[i]);
                         else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
                             this.initData[i] = initData[i] ? $data.parseGuid(initData[i]) : undefined;
                         else {
