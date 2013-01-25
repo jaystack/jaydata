@@ -39,7 +39,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
     
     _buildSelector: function(meta, context){
         if (meta.$selector){
-            if (!(meta.$selector instanceof Array)){
+            if (!(Array.isArray(meta.$selector))){
                 meta.$selector = [meta.$selector];
             }
             
@@ -65,7 +65,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             var type = Container.resolveType(type);
             type = type.fullName || type.name;
             context.src += 'var ' + name + 'Fn = function(di){';
-            if (!(keys instanceof Array) || keys.length == 1){
+            if (!(Array.isArray(keys)) || keys.length == 1){
                 if (typeof keys !== 'string') keys = keys[0];
                 context.src += 'if (typeof di.' + keys + ' === "undefined") return undefined;';
                 context.src += 'if (di.' + keys + ' === null) return null;';
@@ -88,7 +88,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 
     build: function(meta, context){
         if (meta.$selector){
-            if (!(meta.$selector instanceof Array)) meta.$selector = [meta.$selector];
+            if (!(Array.isArray(meta.$selector))) meta.$selector = [meta.$selector];
             for (var i = 0; i < meta.$selector.length; i++){
                 meta.$selector[i] = meta.$selector[i].replace('json:', '');
             }
@@ -125,7 +125,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             if (iter.indexOf('.') < 0) context.src += 'var ' + iter + ';';
             context.src += 'var fn = function(di){';
             if (meta.$selector){
-                context.src += 'if (typeof di !== "undefined" && !(di instanceof Array)){';
+                context.src += 'if (typeof di !== "undefined" && !(Array.isArray(di))){';
                 this._buildSelector(meta, context);
                 context.src += '}';
             }
@@ -219,7 +219,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 }
             }
             context.src += '};';
-            context.src += 'if (di instanceof Array) di.forEach(forEachFn);';
+            context.src += 'if (Array.isArray(di)) di.forEach(forEachFn);';
             context.src += 'else forEachFn(di, 0);';
             context.forEach = false;
             context.item = null;

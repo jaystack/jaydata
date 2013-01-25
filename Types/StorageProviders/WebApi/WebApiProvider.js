@@ -852,13 +852,13 @@ $C('$data.storageProviders.webApi.webApiCompiler', $data.Expressions.EntityExpre
     VisitOrderExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var orderCompiler = Container.createoDataOrderCompiler(this.provider);
+        var orderCompiler = Container.createwebApiOrderCompiler(this.provider);
         orderCompiler.compile(expression, context);
     },
     VisitPagingExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var pagingCompiler = Container.createoDataPagingCompiler();
+        var pagingCompiler = Container.createwebApiPagingCompiler();
         pagingCompiler.compile(expression, context);
     },
     VisitIncludeExpression: function (expression, context) {
@@ -889,7 +889,7 @@ $C('$data.storageProviders.webApi.webApiCompiler', $data.Expressions.EntityExpre
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var projectionCompiler = Container.createoDataProjectionCompiler(this.context);
+        var projectionCompiler = Container.createwebApiProjectionCompiler(this.context);
         projectionCompiler.compile(expression, context);
     },
     VisitFilterExpression: function (expression, context) {
@@ -897,7 +897,7 @@ $C('$data.storageProviders.webApi.webApiCompiler', $data.Expressions.EntityExpre
 
         this.Visit(expression.source, context);
 
-        var filterCompiler = Container.createoDataWhereCompiler(this.provider);
+        var filterCompiler = Container.createwebApiWhereCompiler(this.provider);
         context.data = "";
         filterCompiler.compile(expression.selector, context);
         context["$filter"] = context.data;
