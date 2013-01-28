@@ -718,9 +718,51 @@
 
             this.isPrimitiveType = function (type) {
                 var t = this.resolveType(type);
-                return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
-                    t === $data.Number || t === $data.Integer || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
-                    t === $data.Geography || t === $data.Guid;
+
+                switch (true) {
+                    case t === Number:
+                    case t === String:
+                    case t === Date:
+                    case t === Boolean:
+                    case t === Array:
+                    case t === Object:
+
+                    case t === $data.Number:
+                    case t === $data.Integer:
+                    case t === $data.Date:
+                    case t === $data.String:
+                    case t === $data.Boolean:
+                    case t === $data.Array:
+                    case t === $data.Object:
+                    case t === $data.Guid:
+
+                    case t === $data.SimpleBase:
+                    case t === $data.Geospatial:
+                    case t === $data.Geography:
+                    case t === $data.GeographyPoint:
+                    case t === $data.GeographyLineString:
+                    case t === $data.GeographyPolygon:
+                    case t === $data.GeographyMultiPoint:
+                    case t === $data.GeographyMultiLineString:
+                    case t === $data.GeographyMultiPolygon:
+                    case t === $data.GeographyCollection:
+                    case t === $data.Geometry:
+                    case t === $data.GeometryPoint:
+                    case t === $data.GeometryLineString:
+                    case t === $data.GeometryPolygon:
+                    case t === $data.GeometryMultiPoint:
+                    case t === $data.GeometryMultiLineString:
+                    case t === $data.GeometryMultiPolygon:
+                    case t === $data.GeometryCollection:
+
+                        return true;
+                    default:
+                        return false;
+                }
+
+                //return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
+                //    t === $data.Number || t === $data.Integer || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
+                //    t === $data.GeographyPoint || t === $data.Guid;
             };
 
             this.resolveType = function (typeOrName) {
@@ -755,7 +797,24 @@
                         if (value instanceof Array) return '$data.Array';
                         if (value.getType) return value.getType().fullName;
                         if (value instanceof Date) return '$data.Date';
+                        if (value instanceof $data.GeographyPoint) return '$data.GeographyPoint';
+                        if (value instanceof $data.GeographyLineString) return '$data.GeographyLineString';
+                        if (value instanceof $data.GeographyPolygon) return '$data.GeographyPolygon';
+                        if (value instanceof $data.GeographyMultiPoint) return '$data.GeographyMultiPoint';
+                        if (value instanceof $data.GeographyMultiLineString) return '$data.GeographyMultiLineString';
+                        if (value instanceof $data.GeographyMultiPolygon) return '$data.GeographyMultiPolygon';
+                        if (value instanceof $data.GeographyCollection) return '$data.GeographyCollection';
                         if (value instanceof $data.Geography) return '$data.Geography';
+                        if (value instanceof $data.GeometryPoint) return '$data.GeometryPoint';
+                        if (value instanceof $data.GeometryLineString) return '$data.GeometryLineString';
+                        if (value instanceof $data.GeometryPolygon) return '$data.GeometryPolygon';
+                        if (value instanceof $data.GeometryMultiPoint) return '$data.GeometryMultiPoint';
+                        if (value instanceof $data.GeometryMultiLineString) return '$data.GeometryMultiLineString';
+                        if (value instanceof $data.GeometryMultiPolygon) return '$data.GeometryMultiPolygon';
+                        if (value instanceof $data.GeometryCollection) return '$data.GeometryCollection';
+                        if (value instanceof $data.Geometry) return '$data.Geometry';
+                        if (value instanceof $data.Geospatial) return '$data.Geospatial';
+                        if (value instanceof $data.SimpleBase) return '$data.SimpleBase';
                         if (value instanceof $data.Guid) return '$data.Guid';
                         //if(value instanceof "number") return
                     default:

@@ -175,6 +175,19 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     resolveFieldOperation: function (operationName, expression, frameType) {
         ///<summary></summary>
         var result = this.supportedFieldOperations[operationName];
+        if (Array.isArray(result)) {
+            var i = 0;
+            for (; i < result.length; i++) {
+                if (result[i].allowedType === 'default' || Container.resolveType(result[i].allowedType) === Container.resolveType(expression.selector.memberDefinition.type)) {
+                    result = result[i];
+                    break;
+                }
+            }
+            if (i === result.length) {
+                result = undefined;
+            }
+        }
+
         if (!result) {
             Guard.raise(new Exception("Field operation '" + operationName + "' is not supported by the provider"));
         };

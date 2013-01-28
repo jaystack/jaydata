@@ -1914,3 +1914,454 @@ function T3_oDataV3(providerConfig, msg) {
         });
     });
 }
+
+
+$data.Class.define('$example.GeoTestEntity', $data.Entity, null, {
+    Id: { type: 'int', key: true, computed: true },
+    Name: { type: 'string' },
+    GeographyPoint: { type: 'GeographyPoint' },
+    GeographyLineString: { type: 'GeographyLineString' },
+    GeographyPolygon: { type: 'GeographyPolygon' },
+    GeographyMultiPoint: { type: 'GeographyMultiPoint' },
+    GeographyMultiLineString: { type: 'GeographyMultiLineString' },
+    GeographyMultiPolygon: { type: 'GeographyMultiPolygon' },
+    GeographyCollection: { type: 'GeographyCollection' },
+});
+
+$data.Class.define('$example.GeometryTestEntity', $data.Entity, null, {
+    Id: { type: 'int', key: true, computed: true },
+    Name: { type: 'string' },
+    GeometryPoint: { type: 'GeometryPoint' },
+    GeometryLineString: { type: 'GeometryLineString' },
+    GeometryPolygon: { type: 'GeometryPolygon' },
+    GeometryMultiPoint: { type: 'GeometryMultiPoint' },
+    GeometryMultiLineString: { type: 'GeometryMultiLineString' },
+    GeometryMultiPolygon: { type: 'GeometryMultiPolygon' },
+    GeometryCollection: { type: 'GeometryCollection' },
+});
+
+$data.Class.define('$example.Context', $data.EntityContext, null, {
+    GeoTestEntities: { type: $data.EntitySet, elementType: $example.GeoTestEntity },
+    GeometryTestEntities: { type: $data.EntitySet, elementType: $example.GeometryTestEntity }
+});
+
+function GeoTests(providerConfig, msg, afterTestFn) {
+    msg = msg || '';
+    module("GeoTests" + msg);
+
+    test("Save GeographyObjects", 19, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeographyPoint([1, 5]);
+            var lString = new $data.GeographyLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeographyMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeographyMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeographyMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeographyCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeoTestEntity({
+                Name: 'Item1Name',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygon,
+                GeographyMultiPoint: mPoint,
+                GeographyMultiLineString: mLineString,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            var item2 = new $example.GeoTestEntity({
+                Name: 'Item2Name',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygonWithHole,
+                GeographyMultiPoint: mPoint,
+                GeographyMultiLineString: mLineString,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            context.GeoTestEntities.add(item);
+            context.GeoTestEntities.add(item2);
+
+            var itemsToSave = [item, item2];
+            context.saveChanges(function () {
+                context.GeoTestEntities.toArray(function (items) {
+
+                    equal(items.length, 2, 'result length');
+                    for (var i = 0; i < items.length; i++) {
+                        var resItem = items[i];
+                        var refItem = itemsToSave[i];
+
+                        equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                        equal(resItem.Name, 'Item' + (i + 1) + 'Name', 'itemName');
+
+                        deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                        deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                        deepEqual(resItem.GeographyPolygon.coordinates, (i == 0 ? polygon : polygonWithHole).coordinates, 'GeographyPolygon data');
+                        deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
+                        deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
+                        deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                        deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                    }
+
+                    context.GeoTestEntities.remove(items[0]);
+                    context.GeoTestEntities.remove(items[1]);
+                    context.saveChanges(function () {
+                        if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                        else start();
+                    });
+                });
+            });
+
+        });
+    });
+    test("Modify GeographyObjects", 20, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeographyPoint([1, 5]);
+            var lString = new $data.GeographyLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeographyMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeographyMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeographyMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeographyCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeoTestEntity({
+                Name: 'ItemName',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygon,
+                GeographyMultiPoint: null,
+                GeographyMultiLineString: undefined,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            context.GeoTestEntities.add(item);
+
+            context.saveChanges(function () {
+                context.GeoTestEntities.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length');
+                    var resItem = items[0];
+                    var refItem = item;
+
+                    equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                    equal(resItem.Name, 'ItemName', 'itemName');
+
+                    deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                    deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                    deepEqual(resItem.GeographyPolygon.coordinates, polygon.coordinates, 'GeographyPolygon data');
+                    deepEqual(resItem.GeographyMultiPoint, null, 'GeographyMultiPoint data');
+                    ok(!resItem.GeographyMultiLineString, 'GeographyMultiLineString data');
+                    deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                    deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                    context.GeoTestEntities.attach(resItem);
+                    resItem.Name = 'Item updated';
+                    resItem.GeographyPolygon = polygonWithHole;
+                    resItem.GeographyMultiPoint = mPoint;
+                    resItem.GeographyMultiLineString = mLineString;
+
+                    context.saveChanges(function () {
+                        context.GeoTestEntities.toArray(function (itemsup) {
+
+                            equal(itemsup.length, 1, 'result length');
+                            var refItem = resItem;
+                            var resItem = itemsup[0];
+
+                            equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                            equal(resItem.Name, 'Item updated', 'itemName updated');
+
+                            deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                            deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                            deepEqual(resItem.GeographyPolygon.coordinates, polygonWithHole.coordinates, 'GeographyPolygon data');
+                            deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
+                            deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
+                            deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                            deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                            context.GeoTestEntities.remove(resItem);
+                            context.saveChanges(function () {
+                                if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                                else start();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test("Save GeometryObjects", 19, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeometryPoint([1, 5]);
+            var lString = new $data.GeometryLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeometryMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeometryMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeometryMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeometryCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeometryTestEntity({
+                Name: 'Item1Name',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygon,
+                GeometryMultiPoint: mPoint,
+                GeometryMultiLineString: mLineString,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            var item2 = new $example.GeometryTestEntity({
+                Name: 'Item2Name',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygonWithHole,
+                GeometryMultiPoint: mPoint,
+                GeometryMultiLineString: mLineString,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            context.GeometryTestEntities.add(item);
+            context.GeometryTestEntities.add(item2);
+
+            var itemsToSave = [item, item2];
+            context.saveChanges(function () {
+                context.GeometryTestEntities.toArray(function (items) {
+
+                    equal(items.length, 2, 'result length');
+                    for (var i = 0; i < items.length; i++) {
+                        var resItem = items[i];
+                        var refItem = itemsToSave[i];
+
+                        equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                        equal(resItem.Name, 'Item' + (i + 1) + 'Name', 'itemName');
+
+                        deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                        deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                        deepEqual(resItem.GeometryPolygon.coordinates, (i == 0 ? polygon : polygonWithHole).coordinates, 'GeometryPolygon data');
+                        deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
+                        deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
+                        deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                        deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                    }
+
+                    context.GeometryTestEntities.remove(items[0]);
+                    context.GeometryTestEntities.remove(items[1]);
+                    context.saveChanges(function () {
+                        if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                        else start();
+                    });
+                });
+            });
+
+        });
+    });
+
+    test("Modify GeometryObjects", 20, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeometryPoint([1, 5]);
+            var lString = new $data.GeometryLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeometryMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeometryMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeometryMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeometryCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeometryTestEntity({
+                Name: 'ItemName',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygon,
+                GeometryMultiPoint: null,
+                GeometryMultiLineString: undefined,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            context.GeometryTestEntities.add(item);
+
+            context.saveChanges(function () {
+                context.GeometryTestEntities.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length');
+                    var resItem = items[0];
+                    var refItem = item;
+
+                    equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                    equal(resItem.Name, 'ItemName', 'itemName');
+
+                    deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                    deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                    deepEqual(resItem.GeometryPolygon.coordinates, polygon.coordinates, 'GeometryPolygon data');
+                    deepEqual(resItem.GeometryMultiPoint, null, 'GeometryMultiPoint data');
+                    ok(!resItem.GeometryMultiLineString, 'GeometryMultiLineString data');
+                    deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                    deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                    context.GeometryTestEntities.attach(resItem);
+                    resItem.Name = 'Item updated';
+                    resItem.GeometryPolygon = polygonWithHole;
+                    resItem.GeometryMultiPoint = mPoint;
+                    resItem.GeometryMultiLineString = mLineString;
+
+                    context.saveChanges(function () {
+                        context.GeometryTestEntities.toArray(function (itemsup) {
+
+                            equal(itemsup.length, 1, 'result length');
+                            var refItem = resItem;
+                            var resItem = itemsup[0];
+
+                            equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                            equal(resItem.Name, 'Item updated', 'itemName updated');
+
+                            deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                            deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                            deepEqual(resItem.GeometryPolygon.coordinates, polygonWithHole.coordinates, 'GeometryPolygon data');
+                            deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
+                            deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
+                            deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                            deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                            context.GeometryTestEntities.remove(resItem);
+                            context.saveChanges(function () {
+                                if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                                else start();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+}
