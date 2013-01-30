@@ -178,7 +178,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         head.appendChild(script);
 
         var loadInterval = this.scriptLoadInterval || 50;
-        var iteration = (Math.ceiling || Math.ceil)(this.scriptLoadTimeout / loadInterval);
+        var iteration = Math.ceil(this.scriptLoadTimeout / loadInterval);
         console.log('Script element watcher iterating ' + iteration + ' times');
         function watcher() {
             console.log('Script element watcher iteration ' + iteration);
