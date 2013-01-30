@@ -25,4 +25,5 @@
 
     GeoTests({ name: "InMemory", databaseName: 'GeoTests_T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_InMemory');
     GeoTests({ name: "LocalStore", databaseName: 'GeoTests_T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_LocalStore');
+    GeoTestsFuncCompile({ name: "oData", maxDataServiceVersion: '3.0', oDataServiceHost: "/api" }, '_oData');
 });

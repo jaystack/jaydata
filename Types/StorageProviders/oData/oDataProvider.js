@@ -458,13 +458,15 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 allowedType: 'GeographyLineString',
                 mapTo: "geo.length",
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
-                parameters: [{ name: "@expression", dataType: ['GeographyLineString'] }]
+                parameters: [{ name: "@expression", dataType: ['GeographyLineString'] }],
+                fixedDataType: 'decimal'
             },
             {
                 allowedType: 'GeometryLineString',
                 mapTo: "geo.length",
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
-                parameters: [{ name: "@expression", dataType: 'GeometryLineString' }]
+                parameters: [{ name: "@expression", dataType: 'GeometryLineString' }],
+                fixedDataType: 'decimal'
             }],
 
             strLength: {
@@ -563,14 +565,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 allowedType: 'GeographyPoint',
                 mapTo: "geo.distance",
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
-                parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "to", dataType: 'GeographyPoint' }]
-
+                parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "to", dataType: 'GeographyPoint' }],
+                fixedDataType: 'decimal'
             }, {
                 allowedType: 'GeometryPoint',
                 mapTo: "geo.distance",
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
-                parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "to", dataType: 'GeometryPoint' }]
-
+                parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "to", dataType: 'GeometryPoint' }],
+                fixedDataType: 'decimal'
             }],
 
             intersects: [{

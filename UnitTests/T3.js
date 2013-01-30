@@ -1913,6 +1913,8 @@ function T3_oDataV3(providerConfig, msg) {
             });
         });
     });
+
+    
 }
 
 
@@ -2364,4 +2366,32 @@ function GeoTests(providerConfig, msg, afterTestFn) {
         });
     });
 
+    
+}
+
+function GeoTestsFuncCompile(providerConfig, msg) {
+    test("Geo functions compile", 1, function () {
+        if (providerConfig.name != "oData") { ok(true, "Not supported"); return; }
+        expect(5);
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var q = context.GeoTestEntities.filter(function (it) { it.GeographyPoint.distance(this.location) < 50.16 }, { location: new $data.GeographyPoint(1, 5) }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(geo.distance(GeographyPoint,geography'POINT(1 5)') lt 50.16)");
+            q = context.GeoTestEntities.filter(function (it) { 50.16 > it.GeographyPoint.distance(this.location) }, { location: new $data.GeographyPoint(1, 5) }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(50.16 gt geo.distance(GeographyPoint,geography'POINT(1 5)'))");
+
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, -0.5], [101.0, 0.0], [101.0, 1.0], [100.5, 1.5], [100.0, -0.5]]
+            ]);
+            q = context.GeoTestEntities.filter(function (it) { it.GeographyPoint.intersects(this.polygon) }, { polygon: polygon }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=geo.intersects(GeographyPoint,geography'POLYGON((100 -0.5,101 0,101 1,100.5 1.5,100 -0.5))')");
+
+
+            q = context.GeoTestEntities.filter(function (it) { it.GeographyLineString.length() > 50.36 }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(geo.length(GeographyLineString) gt 50.36)");
+            q = context.GeoTestEntities.filter(function (it) { 50.36 < it.GeographyLineString.length() }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(50.36 lt geo.length(GeographyLineString))");
+
+        });
+    });
 }
