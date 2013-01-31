@@ -33,13 +33,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         value: {
             equal: { mapTo: ' == ', dataType: $data.Boolean },
             notEqual: { mapTo: ' != ', dataType: $data.Boolean },
-            equalTyped: { mapTo: ' == ', dataType: $data.Boolean },
-            notEqualTyped: { mapTo: ' != ', dataType: $data.Boolean },
+            equalTyped: { mapTo: ' === ', dataType: $data.Boolean },
+            notEqualTyped: { mapTo: ' !== ', dataType: $data.Boolean },
             greaterThan: { mapTo: ' > ', dataType: $data.Boolean },
             greaterThanOrEqual: { mapTo: ' >= ', dataType: $data.Boolean },
-
             lessThan: { mapTo: ' < ', dataType: $data.Boolean },
             lessThenOrEqual: { mapTo: ' <= ', dataType: $data.Boolean },
+
             or: { mapTo: ' || ', dataType: $data.Boolean },
             and: { mapTo: ' && ', dataType: $data.Boolean }
             //'in': { mapTo: ' in ', dataType: $data.Boolean, resolvableType: [$data.Array, $data.Queryable] }
@@ -454,12 +454,25 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         else
             self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks(openCallbacks);
     },
-
+    _compile: function (query, params) {
+        var compiler = Container.createIndexedDBCompiler();
+        var compiledQuery = compiler.compile(query);
+        
+        return compiledQuery;
+    },
+    getTraceString: function (query) {
+        var compiledExpression = this._compile(query);
+        var executor = Container.createIndexedDBExpressionExecutor(this);
+        executor.runQuery(compiledExpression);
+        return compiledExpression;
+    },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
 
-        //var compiledQuery = self._compile(query);
+        var compiledExpression = this._compile(query);
+        var executor = Container.createIndexedDBExpressionExecutor(this);
+        executor.runQuery(compiledExpression);
 
         // Creating read only transaction for query. Results are passed in transaction's oncomplete event
         var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
@@ -691,10 +704,6 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         }
         saveNextIndependentBlock();
     },
-    _compile: function (query) {
-        var sqlText = Container.createIndexedDBCompiler().compile(query);
-        return sqlText;
-    }
 }, {
     isSupported: {
         get: function () {

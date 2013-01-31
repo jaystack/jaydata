@@ -487,13 +487,13 @@
                         equal(item.IdGuid, undefined, 'IdGuid is not set');
                         context.saveChanges({
                             error: function (e) {
-                                
+
                                 item.Id = 1;
                                 item.IdGuid = $data.parseGuid('83a2532a-bc7c-4554-b0fd-c63642a95d04');
 
                                 context.saveChanges({
                                     error: function (e) {
-                                        
+
                                         ok(false, '(in IE10, multiple key not supported on this implementation) save error ' + e);
 
                                         close(context);
@@ -518,7 +518,7 @@
                                                 close(context);
                                             },
                                             error: function (res) {
-                                                ok(false, 'save error '+ res);
+                                                ok(false, 'save error ' + res);
                                                 close(context);
                                             }
                                         });
@@ -566,8 +566,8 @@
 
     test('many data test', function () {
         var dataNumber = 1000;
-        expect((6+6)*dataNumber + 6);
-        
+        expect((6 + 6) * dataNumber + 6);
+
 
         var context = new idbexample.idbContext({
             name: 'indexedDb',
@@ -646,8 +646,48 @@
                     })
                 },
                 error: function (e) {
-                    ok(false, 'error '+ e);
+                    ok(false, 'error ' + e);
                     close(context);
+                }
+            });
+        });
+    });
+
+    test('almafa', function () {
+        var context = new idbexample.idbContext({
+            name: 'indexedDb',
+            databaseName: 'idbexample_idbContext',
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        });
+        stop(1);
+        context.onReady(function () {
+
+            for (var i = 0; i < 1000; i++) {
+                var item1 = new idbexample.idbTestItem1({
+                    i0: i,
+                    b0: true,
+                    s0: 's0' + i,
+                    n0: parseFloat('2.2' + i),
+                    d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
+                });
+                var item2 = new idbexample.idbTestItem2({
+                    Id: $data.Guid.NewGuid(),
+                    i0: i,
+                    b0: false,
+                    s0: 's0' + i,
+                    n0: parseFloat('2.2' + i),
+                    d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
+                });
+                context.Items1.add(item1);
+                context.Items2.add(item2);
+            }
+            context.saveChanges({
+                success: function () {
+                    context.Items1.where(function (item) { return item.i0 <= 20 && (item.i0 > 15 || item.i0 <= 100) && item.i0>95; }, {a:20}).toArray(function () {
+                        ok(true);
+                        close(context);
+                    });
+
                 }
             });
         });

@@ -80,7 +80,11 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Skip: "Skip",
     OrderBy: "OrderBy",
     OrderByDescending: "OrderByDescending",
-    Include: "Include"
+    Include: "Include",
+
+    IndexedPhysicalAnd:"IndexedDBPhysicalAndFilterExpression",
+    IndexedLogicalAnd:"IndexedDBLogicalAndFilterExpression",
+    IndexedLogicalOr:"IndexedDBLogicalOrFilterExpression"
 });
 
 $data.BinaryOperator = function () {
