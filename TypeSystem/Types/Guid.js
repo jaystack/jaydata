@@ -1,7 +1,11 @@
 $data.Guid = function Guid(value) {
     ///<param name="value" type="string" />
 
-    this.value = value || '00000000-0000-0000-0000-000000000000';
+    if (value === undefined || (typeof value === 'string' && /^[a-zA-z0-9]{8}-[a-zA-z0-9]{4}-[a-zA-z0-9]{4}-[a-zA-z0-9]{4}-[a-zA-z0-9]{12}$/.test(value))) {
+        this.value = value || '00000000-0000-0000-0000-000000000000';
+    } else {
+        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Guid', value));
+    }
 };
 $data.Container.registerType(['$data.Guid', 'Guid', 'guid'], $data.Guid);
 
@@ -18,20 +22,7 @@ $data.Guid.prototype.toString = function () {
 };
 
 $data.Guid.NewGuid = function () {
-    ///<description>a performant guid generator with high chance of doubling</description>
-    var S4 = function () {
-        return Math.floor(
-            Math.random() * 0x10000 /* 65536 */
-        ).toString(16);
-    };
-
-    return new $data.Guid((
-        S4() + S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + S4() + S4()
-        ));
+    return $data.createGuid();
 };
 
 $data.parseGuid = function (guid) {

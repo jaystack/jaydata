@@ -38,6 +38,14 @@ $data.Class.define("$data.JayService", null, null, {
         return f;
     },
     createAdapter: function (type, instanceFactory) {
+        ///	<signature>
+        ///     <summary>JSONObjectAdapter middleware factory for Express and Connect</summary>
+        ///     <description>JSONObjectAdapter middleware factory for Express and Connect</description>
+        ///     <param name="type" type="function">Service class type</param>
+        ///     <param name="instanceFactory" type="function">Service class instance factory</param>
+        ///     <return type="function" />
+        ///	</signature>
+
         var self = this;
         return function (req, res, next) {
             
@@ -52,13 +60,13 @@ $data.Class.define("$data.JayService", null, null, {
         return new $data.XmlResult(data);
     },
     routeParser: function (app, req) {
-        var schema = 'http';
-        if (req && req.headers) {
-            if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
-                schema += 's';
+        if (!(typeof req.fullRoute === 'string' && req.fullRoute.length)){
+            var schema = 'http';
+            if (req && req.headers) {
+                if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
+                    schema += 's';
 
-            if (req.headers.host) {
-                req.fullRoute = schema + '://' + req.headers.host + app.route;
+                req.fullRoute = (req.baseRoute || (schema + '://' + req.headers.host)) + app.route;
             }
         }
     }

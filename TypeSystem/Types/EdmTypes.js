@@ -22,7 +22,7 @@
 
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
-    $data.Container.mapType(Edm_Decimal, $data.Number);
+    $data.Container.mapType(Edm_Decimal, $data.String);
 
     function Edm_Single() { };
     $data.Container.registerType('Edm.Single', Edm_Single);
@@ -58,6 +58,58 @@
 
     function Edm_GeographyPoint() { };
     $data.Container.registerType('Edm.GeographyPoint', Edm_GeographyPoint);
-    $data.Container.mapType(Edm_GeographyPoint, $data.Geography);
+    $data.Container.mapType(Edm_GeographyPoint, $data.GeographyPoint);
+
+    function Edm_GeographyLineString() { };
+    $data.Container.registerType('Edm.GeographyLineString', Edm_GeographyLineString);
+    $data.Container.mapType(Edm_GeographyLineString, $data.GeographyLineString);
+
+    function Edm_GeographyPolygon() { };
+    $data.Container.registerType('Edm.GeographyPolygon', Edm_GeographyPolygon);
+    $data.Container.mapType(Edm_GeographyPolygon, $data.GeographyPolygon);
+
+    function Edm_GeographyMultiPoint() { };
+    $data.Container.registerType('Edm.GeographyMultiPoint', Edm_GeographyMultiPoint);
+    $data.Container.mapType(Edm_GeographyMultiPoint, $data.GeographyMultiPoint);
+
+    function Edm_GeographyMultiLineString() { };
+    $data.Container.registerType('Edm.GeographyMultiLineString', Edm_GeographyMultiLineString);
+    $data.Container.mapType(Edm_GeographyMultiLineString, $data.GeographyMultiLineString);
+
+    function Edm_GeographyMultiPolygon() { };
+    $data.Container.registerType('Edm.GeographyMultiPolygon', Edm_GeographyMultiPolygon);
+    $data.Container.mapType(Edm_GeographyMultiPolygon, $data.GeographyMultiPolygon);
+
+    function Edm_GeographyCollection() { };
+    $data.Container.registerType('Edm.GeographyCollection', Edm_GeographyCollection);
+    $data.Container.mapType(Edm_GeographyCollection, $data.GeographyCollection);
+
+    function Edm_GeometryPoint() { };
+    $data.Container.registerType('Edm.GeometryPoint', Edm_GeometryPoint);
+    $data.Container.mapType(Edm_GeometryPoint, $data.GeometryPoint);
+
+    function Edm_GeometryLineString() { };
+    $data.Container.registerType('Edm.GeometryLineString', Edm_GeometryLineString);
+    $data.Container.mapType(Edm_GeometryLineString, $data.GeometryLineString);
+
+    function Edm_GeometryPolygon() { };
+    $data.Container.registerType('Edm.GeometryPolygon', Edm_GeometryPolygon);
+    $data.Container.mapType(Edm_GeometryPolygon, $data.GeometryPolygon);
+
+    function Edm_GeometryMultiPoint() { };
+    $data.Container.registerType('Edm.GeometryMultiPoint', Edm_GeometryMultiPoint);
+    $data.Container.mapType(Edm_GeometryMultiPoint, $data.GeometryMultiPoint);
+
+    function Edm_GeometryMultiLineString() { };
+    $data.Container.registerType('Edm.GeometryMultiLineString', Edm_GeometryMultiLineString);
+    $data.Container.mapType(Edm_GeometryMultiLineString, $data.GeometryMultiLineString);
+
+    function Edm_GeometryMultiPolygon() { };
+    $data.Container.registerType('Edm.GeometryMultiPolygon', Edm_GeometryMultiPolygon);
+    $data.Container.mapType(Edm_GeometryMultiPolygon, $data.GeometryMultiPolygon);
+
+    function Edm_GeometryCollection() { };
+    $data.Container.registerType('Edm.GeometryCollection', Edm_GeometryCollection);
+    $data.Container.mapType(Edm_GeometryCollection, $data.GeometryCollection);
 
 })($data);

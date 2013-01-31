@@ -250,11 +250,36 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
 
     VisitParametricQueryExpression: function (expression, context) {
         this.Visit(expression.expression, context);
+        if (expression.expression && expression.expression.nodeType === $data.Expressions.ExpressionType.Constant){
+            context.value = expression.expression.value;
+            context.queryField = context.field = $data.Guid.NewGuid();
+            if (context.value === true) context.value = null;
+            
+            if (context.cursor instanceof Array){
+                var o = {};
+                o[context.queryField] = context.value;
+                context.cursor.push(o);
+            }else context.cursor[context.queryField] = context.value;
+        }
     },
 
     VisitUnaryExpression: function (expression, context) {
         context.unary = expression.nodeType;
         this.Visit(expression.operand, context);
+    },
+    
+    _constExpressionFilter: function(expression, context){
+        if (expression.left && expression.left.nodeType === $data.Expressions.ExpressionType.Constant && expression.right && [$data.Expressions.ExpressionType.Or, $data.Expressions.ExpressionType.And].indexOf(expression.nodeType) >= 0){
+            context.value = expression.left.value;
+            context.queryField = context.field = $data.Guid.NewGuid();
+            if (context.value === true) context.value = null;
+            
+            if (context.cursor instanceof Array){
+                var o = {};
+                o[context.queryField] = context.value;
+                context.cursor.push(o);
+            }else context.cursor[context.queryField] = context.value;
+        }
     },
 
     VisitSimpleBinaryExpression: function (expression, context) {
@@ -273,6 +298,8 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
+                this._constExpressionFilter(expression, context);
+                
                 context.cursor = cursor;
                 break;
             case $data.Expressions.ExpressionType.And:
@@ -286,6 +313,8 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
+                this._constExpressionFilter(expression, context);
+                
                 context.cursor = cursor;
                 break;
             case $data.Expressions.ExpressionType.Equal:
@@ -532,18 +561,22 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
         switch (opName){
             case 'contains':
                 opMapTo = '$regex';
-                opValue = context.value;
+                opValue = context.value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
                 break;
             case 'startsWith':
                 opMapTo = '$regex';
-                opValue = '^' + context.value;
+                opValue = '^' + context.value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
                 break;
             case 'endsWith':
                 opMapTo = '$regex';
-                opValue = context.value + '$';
+                opValue = context.value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1") + '$';
                 break;
             default:
                 break;
+        }
+        
+        if (context.unary === $data.Expressions.ExpressionType.Not){
+            opValue = '^((?!' + opValue + ').)*$';
         }
         
         if (opMapTo && opValue){
@@ -656,7 +689,8 @@ $C('$data.storageProviders.mongoDB.mongoDBOrderCompiler', $data.storageProviders
         this.Visit(expression.selector, context);
     },
     VisitMemberInfoExpression: function (expression, context) {
-        context.data += expression.memberName;
+        if (context.data) context.data += '.';
+        context.data += expression.memberDefinition.computed ? '_id' : expression.memberName;
     }
 });
 
@@ -778,7 +812,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         var server = this._getServer();
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
@@ -874,7 +908,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         new $data.storageProviders.mongoDB.mongoDBCompiler().compile(query);
         
         var server = this._getServer();
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
@@ -882,6 +916,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             
             var collection = new self.driver.Collection(client, entitySet.tableName);
             var find = query.find;
+            //console.log(JSON.stringify(find.query));
 
             var cb = function(error, results){
                 if (error){
@@ -934,7 +969,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         var counterState = 0;
         var counterFn = function(callback){
-            if (--counterState == 0) callback();
+            if (--counterState <= 0) callback();
         }
         
         var insertFn = function(client, c, collection){
@@ -1144,7 +1179,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }else readyFn(client, value);
         };
         
-        new this.driver.Db(this.providerConfiguration.databaseName, server, {}).open(function(error, client){
+        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
@@ -1220,7 +1255,12 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         return serializableObject;
     },
     
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.Geography], writable: false },
+    supportedDataTypes: {
+        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.GeographyPoint, $data.Guid,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
     
     supportedBinaryOperators: {
         value: {
@@ -1407,7 +1447,21 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
-                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g; }
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; },
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
@@ -1435,7 +1489,21 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii'));
                     }else return id;
                 },
-                '$data.Geography': function (g) { return g ? [g.longitude, g.latitude] : g; }
+                '$data.GeographyPoint': function (g) { return g; },
+                '$data.GeographyLineString': function (g) { return g; },
+                '$data.GeographyPolygon': function (g) { return g; },
+                '$data.GeographyMultiPoint': function (g) { return g; },
+                '$data.GeographyMultiLineString': function (g) { return g; },
+                '$data.GeographyMultiPolygon': function (g) { return g; },
+                '$data.GeographyCollection': function (g) { return g; },
+                '$data.GeometryPoint': function (g) { return g; },
+                '$data.GeometryLineString': function (g) { return g; },
+                '$data.GeometryPolygon': function (g) { return g; },
+                '$data.GeometryMultiPoint': function (g) { return g; },
+                '$data.GeometryMultiLineString': function (g) { return g; },
+                '$data.GeometryMultiPolygon': function (g) { return g; },
+                '$data.GeometryCollection': function (g) { return g; },
+                "$data.Guid": function (g) { return g ? g.value : g; }
             }
         }
     }

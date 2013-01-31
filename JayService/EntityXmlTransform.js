@@ -1,5 +1,13 @@
 ﻿$data.Class.define('$data.oDataServer.EntityXmlTransform', $data.oDataServer.EntityTransform, null, {
     constructor: function (context, requesUrl, config) {
+        ///	<signature>
+        ///     <summary>Transform class for Atom format</summary>
+        ///     <description>Transform class for Atom format</description>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        ///     <param name="requesUrl" type="String">Service Url</param>
+        ///     <param name="config" type="Object">Config for customize xml</param>
+        /// </signature>
+
         this.cfg = $data.typeSystem.extend({
             m: 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
             d: 'http://schemas.microsoft.com/ado/2007/08/dataservices',
@@ -17,6 +25,25 @@
 
     },
     convertToResponse: function (results, collectionNameOrElementType, selectedFields, includes) {
+        ///	<signature>
+        ///     <summary>Transform entities for JSON verbose format</summary>
+        ///     <description>Transform entities for JSON verbose format</description>
+        ///     <param name="results" type="Array">Array of Entities from any EntitySet of context</param>
+        ///     <param name="collectionNameOrElementType" type="function">elementType of input items</param>
+        ///     <param name="selectedFields" type="Array">Fields for result</param>
+        ///     <param name="includes" type="Array">navigation property includes</param>
+        ///     <return type="String" />
+        /// </signature>
+        ///	<signature>
+        ///     <summary>Transform entities for JSON verbose format</summary>
+        ///     <description>Transform entities for JSON verbose format</description>
+        ///     <param name="results" type="Array">Array of Entities from any EntitySet of context</param>
+        ///     <param name="collectionNameOrElementType" type="string">EntitySet name</param>
+        ///     <param name="selectedFields" type="Array">Fields for result</param>
+        ///     <param name="includes" type="Array">navigation property includes</param>
+        ///     <return type="String" />
+        /// </signature>
+
         if (!collectionNameOrElementType)
             return '<error />';
 
@@ -39,13 +66,8 @@
             });
         }
 
-        self = this;
-
         var xmlResult = this.cfg.xmlHead;
-        this.xml = new $data.GenxXMLCreator();
-        this.xml.writer.on('data', function (data) {
-            xmlResult += data;
-        });
+        this.xml = new $data.Xml.XmlCreator();
 
         this.xml.startDocument();
         if ($data.Array.isArray(results)) {
@@ -54,6 +76,7 @@
             this._buildEntry(results, entitySetDef, defaultType, memDefs, includes, true);
         }
         this.xml.endDocument();
+        xmlResult += this.xml.getXmlString();
         return xmlResult.replace('xml__base', 'xml:base');
     },
 
@@ -338,7 +361,8 @@
             '$data.Number': 'Edm.Decimal',
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
-            '$data.ObjectID': 'Edm.String'
+            '$data.ObjectID': 'Edm.String',
+            '$data.Guid': 'Edm.Guid'
         }
     },
     _valueConverters: {
@@ -351,6 +375,7 @@
             '$data.String': function (v) { return v; },
             '$data.ObjectID': function (v) { return v.toString(); },
             '$data.Object': function (v) { return JSON.stringify(v); },
+            '$data.Guid': function (v) { return v.toString(); },
         }
     },
     supports: {
@@ -361,7 +386,8 @@
                 'Edm.DateTime',
                 'Edm.Decimal',
                 'Edm.Int32',
-                'Edm.String'
+                'Edm.String',
+                'Edm.Guid'
             ]
         }
     },

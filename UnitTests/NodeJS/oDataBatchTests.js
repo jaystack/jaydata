@@ -16,7 +16,7 @@ $data.Class.define('$example.Order', $data.Entity, null, {
 $data.Class.define('$example.Place', $data.Entity, null, {
     Id: { type: 'string', key: true, computed: true },
     Name: { type: 'string' },
-    Location: { type: 'geo' }
+    Location: { type: 'GeographyPoint' }
 });
 
 $data.Class.define('$example.Context', $data.EntityContext, null, {
@@ -24,6 +24,7 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     Orders: { type: $data.EntitySet, elementType: $example.Order },
     Places: { type: $data.EntitySet, elementType: $example.Place },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
+    FuncGuidParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGuidParam', returnType: $data.Guid, params: [{ a: $data.Guid }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
     FuncObjParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncObjParam', returnType: $data.Object, params: [{ a: $data.Object }] }),
@@ -31,7 +32,8 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     FuncArrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncArrParam', returnType: $data.Object, params: [{ a: $data.Array }] }),
     FuncBoolParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncBoolParam', returnType: $data.Boolean, params: [{ a: $data.Boolean }] }),
     FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] }),
-    FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.Geography, params: [{ a: $data.Geography }] }),
+    FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.GeographyPoint, params: [{ a: $data.GeographyPoint }] }),
+    FuncGeometryParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeometryParam', returnType: $data.GeometryPoint, params: [{ a: $data.GeometryPoint }] }),
     ATables: {
         type: $data.EntitySet,
         elementType: $data.Entity.extend('$example.ATable', {

@@ -61,7 +61,9 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
                 this.storageModel = this.source.storageModel;
                 break;
             default:
-                Guard.raise("Unknown source type for EntitySetExpression: " + this.source.getType().name);
+                Guard.raise("take and skip must be the last expressions in the chain!");
+                //Guard.raise("Unknown source type for EntitySetExpression: " + this.getType().name);
+                break;
         }
 
         // suspicious code

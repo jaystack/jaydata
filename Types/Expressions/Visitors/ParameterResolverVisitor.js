@@ -184,6 +184,12 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         var body  = call.member;
         var args = call.args;
 
+        function convertToValue(arg) {
+            if (arg instanceof $data.Expressions.ConstantExpression)
+                return arg.value;
+            return arg;
+        };
+
         if (isExecutable(args, body, obj)) {
             var fn = body.value;
             if (typeof fn === 'string' && obj.value) {
@@ -193,7 +199,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
                 //TODO dig that name out from somewhere
                 Guard.raise("Constant expression is not a method...");
             }
-            var value = eNode.implementation(obj.value, fn, args);
+            var value = eNode.implementation(obj.value, fn, args.map(convertToValue));
             return new $data.Expressions.ConstantExpression(value);
         }
         return call;

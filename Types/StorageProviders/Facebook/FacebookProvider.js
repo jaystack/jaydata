@@ -7,7 +7,8 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
         this.context = {};
         this.providerConfiguration = $data.typeSystem.extend({
             FQLFormat: "format=json",
-            FQLQueryUrl: "https://graph.facebook.com/fql?q="
+            FQLQueryUrl: "https://graph.facebook.com/fql?q=",
+            Access_Token: ''
         }, cfg);
         this.initializeStore = function (callBack) {
             callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -100,6 +101,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
     supportedSetOperations: {
         value: {
             filter: {},
+            length: {},
             map: {},
             forEach: {},
             toArray: {},
@@ -134,13 +136,22 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
         if (!sql.selectMapping)
             this._discoverType('', schema, includes);
 
+        var requestUrl = this.providerConfiguration.FQLQueryUrl + encodeURIComponent(sql.queryText) + "&" + this.providerConfiguration.FQLFormat;
+        if (this.providerConfiguration.Access_Token) {
+            requestUrl += '&access_token=' + this.providerConfiguration.Access_Token;
+        }
+
         var requestData = {
-            url: this.providerConfiguration.FQLQueryUrl + encodeURIComponent(sql.queryText) + "&" + this.providerConfiguration.FQLFormat,
+            url: requestUrl,
             dataType: "JSON",
             success: function (data, textStatus, jqXHR) {
                 query.rawDataList = data.data;
                 var compiler = Container.createModelBinderConfigCompiler(query, []);
                 compiler.Visit(query.expression);
+
+                if (query.expression instanceof $data.Expressions.CountExpression) {
+                    query.rawDataList = [{ cnt: data.data.length }];
+                }
                 callBack.success(query);
             },
             error: function (jqXHR, textStatus, errorThrow) {

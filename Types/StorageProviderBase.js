@@ -137,6 +137,31 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         this.context = ctx;
     },
 
+    _buildContinuationFunction: function (context, query) {
+        if (Array.isArray(query.result)) {
+            query.result.next = this._buildPagingMethod(context, query, 'next');
+            query.result.prev = this._buildPagingMethod(context, query, 'prev');
+        }
+    },
+    _buildPagingMethod: function (context, query, mode) {
+        return function (onResult_items) {
+            var pHandler = new $data.PromiseHandler();
+            var cbWrapper = pHandler.createCallback(onResult_items);
+
+            var continuation = new $data.Expressions.ContinuationExpressionBuilder(mode);
+            var continuationResult = continuation.compile(query);
+            if (continuationResult.expression) {
+                var queryable = Container.createQueryable(context, continuationResult.expression);
+                queryable.defaultType = query.defaultType;
+                context.executeQuery(queryable, cbWrapper);
+            } else {
+                cbWrapper.error(new Exception(continuationResult.message, 'Invalid Operation', continuationResult));
+            }
+
+            return pHandler.getPromise();
+        }
+    },
+
     supportedFieldOperations: {
         value: {
             length: { dataType: "number", allowedIn: "filter, map" },
@@ -150,6 +175,19 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     resolveFieldOperation: function (operationName, expression, frameType) {
         ///<summary></summary>
         var result = this.supportedFieldOperations[operationName];
+        if (Array.isArray(result)) {
+            var i = 0;
+            for (; i < result.length; i++) {
+                if (result[i].allowedType === 'default' || Container.resolveType(result[i].allowedType) === Container.resolveType(expression.selector.memberDefinition.type)) {
+                    result = result[i];
+                    break;
+                }
+            }
+            if (i === result.length) {
+                result = undefined;
+            }
+        }
+
         if (!result) {
             Guard.raise(new Exception("Field operation '" + operationName + "' is not supported by the provider"));
         };
@@ -235,7 +273,9 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     }
 },
 {
+    onRegisterProvider: { value: new $data.Event() },
     registerProvider: function (name, provider) {
+        this.onRegisterProvider.fire({ name: name, provider: provider }, this);
         $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || [];
         $data.RegisteredStorageProviders[name] = provider;
     },
@@ -254,3 +294,33 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         set: function () { }
     }
 });
+
+(function () {
+    var localProviders = ['webSql', 'indexedDb', 'LocalStore'];
+
+    for (var i = 0; i < localProviders.length; i++) {
+        var providerName = localProviders[i];
+
+        if ($data.StorageProviderLoader.isSupported(providerName)) {
+            var moduleName = $data.StorageProviderLoader.npmModules[providerName];
+            $data.StorageProviderLoader.npmModules['local'] = moduleName;
+
+            var mappedName = $data.StorageProviderLoader.ProviderNames[providerName];
+            $data.StorageProviderLoader.ProviderNames['local'] = mappedName;
+
+            $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || [];
+            var provider = $data.RegisteredStorageProviders[providerName];
+            if (!provider) {
+                $data.StorageProviderBase.onRegisterProvider.attach(function (sender, providerData) {
+                    if (providerData.name === providerName) {
+                        $data.StorageProviderBase.registerProvider("local", providerData.provider);
+                    }
+                });
+            } else {
+                $data.StorageProviderBase.registerProvider("local", provider);
+            }
+            break;
+        }
+    }
+})();
+

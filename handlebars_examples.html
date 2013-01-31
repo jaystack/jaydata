@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.js"></script>
+    <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
+    <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
+
+    <!--************************************************************************************-->
+    <script type="text/javascript" src="TypeSystem/initializeJayDataClient.js"></script>
+    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
+    <script type="text/javascript" src="TypeSystem/utils.js"></script>
+    <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
+    <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
+    <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
+    <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
+    <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
+    <script type="text/javascript" src="TypeSystem/Trace/Logger.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Geography.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Guid.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/EdmTypes.js"></script>
+    <!--*******************************Expressions****************************************-->
+    <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
+    
+    <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/CallExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/CodeParser.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ConstantExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/FunctionExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/ObjectFieldExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/ObjectLiteralExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/PagingExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/ParameterExpression.js"> </script>
+    <script type="text/javascript" src="Types/Expressions/PropertyExpression.js" ></script>   
+    <script type="text/javascript" src="Types/Expressions/SimpleBinaryExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/ThisExpression.js" ></script>    
+    
+    <script type="text/javascript" src="Types/Expressions/Visitors/ExpressionVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/ParameterProcessor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/GlobalContextProcessor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/LocalContextProcessor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/LambdaParameterProcessor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/ParameterResolverVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/LogicalSchemaBinderVisitor.js"></script>
+
+    <script type="text/javascript" src="Types/Expressions/Visitors/ExpTreeVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/SetExecutableVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/Visitors/ExecutorVisitor.js"></script>
+    
+    <script type="text/javascript" src="Types/Expressions/ExpressionBuilder.js"></script>
+    
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/AssociationInfoExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeToEntityConverter.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ComplexTypeExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityContextExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpressionVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntitySetExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ServiceOperationExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/FrameOperationExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/FilterExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/IncludeExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/MemberInfoExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/OrderExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ParametricQueryExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ProjectionExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/QueryExpressionCreator.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/QueryParameterExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/RepresentationExpression.js"></script>
+    
+    <!--******************************* Validation ****************************************-->  
+    <script type="text/javascript" src="Types/Validation/EntityValidationBase.js"></script>
+    <script type="text/javascript" src="Types/Validation/EntityValidation.js"></script>
+    <!--******************************* Notification ****************************************-->  
+    <script type="text/javascript" src="Types/Notifications/ChangeDistributorBase.js"></script>
+    <script type="text/javascript" src="Types/Notifications/ChangeCollectorBase.js"></script>
+    <script type="text/javascript" src="Types/Notifications/ChangeDistributor.js"></script>
+    <script type="text/javascript" src="Types/Notifications/ChangeCollector.js"></script>
+    
+    <!--******************************* Types ****************************************--> 
+    <script type="text/javascript" src="Types/Access.js"></script>
+    <script type="text/javascript" src="Types/Promise.js"></script>
+    <script type="text/javascript" src="Types/Entity.js"></script>
+    <script type="text/javascript" src="Types/ItemStore.js"></script>
+    <script type="text/javascript" src="Types/EntityContext.js"></script>
+    <script type="text/javascript" src="Types/QueryProvider.js"></script>
+    <script type="text/javascript" src="Types/ModelBinder.js"></script>
+    <script type="text/javascript" src="Types/QueryBuilder.js"></script>
+    <script type="text/javascript" src="Types/Query.js"></script>
+    <script type="text/javascript" src="Types/Queryable.js"></script>
+    <script type="text/javascript" src="Types/EntitySet.js"></script>
+
+    <script type="text/javascript" src="Types/AuthEntityContext.js"></script>
+    <script type="text/javascript" src="Types/EntityState.js"></script>
+    <script type="text/javascript" src="Types/EntityStateManager.js"></script>
+    <script type="text/javascript" src="Types/Exception.js"></script>
+    <script type="text/javascript" src="Types/StorageProviderLoader.js"></script>
+    <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
+
+    <script type="text/javascript" src="Types/EntityWrapper.js"></script>
+
+    <!--******************************* Ajax*********************************************-->    
+    <script type="text/javascript" src="Types/Ajax/jQueryAjaxWrapper.js"></script>
+    <script type="text/javascript" src="Types/Ajax/WinJSAjaxWrapper.js"></script>
+    <script type="text/javascript" src="Types/Ajax/ExtJSAjaxWrapper.js"></script>        
+    <script type="text/javascript" src="Types/Ajax/AjaxStub.js"></script>
+
+    <!--******************************* DbClient ****************************************-->
+    <script type="text/javascript" src="Types/DbClient/DbCommand.js"></script>
+    <script type="text/javascript" src="Types/DbClient/DbConnection.js"></script>
+    <script type="text/javascript" src="Types/DbClient/OpenDatabaseClient/OpenDbCommand.js"></script>
+    <script type="text/javascript" src="Types/DbClient/OpenDatabaseClient/OpenDbConnection.js"></script>
+    <script type="text/javascript" src="Types/DbClient/JayStorageClient/JayStorageCommand.js"></script>
+    <script type="text/javascript" src="Types/DbClient/JayStorageClient/JayStorageConnection.js"></script>
+    <script type="text/javascript" src="Types/DbClient/SqLiteNJClient/SqLiteNjCommand.js"></script>
+    <script type="text/javascript" src="Types/DbClient/SqLiteNJClient/SqLiteNjConnection.js"></script>
+
+    <script type="text/javascript" src="Types/StorageProviders/modelBinderConfigCompiler.js"></script>
+    <!--******************************* StorageProvider - sqLite ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteStorageProvider.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlOrderCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlProjectionCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/ExpressionMonitor.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
+    <!--******************************* StorageProvider - oData ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataProvider.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataWhereCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataOrderCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataPagingCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
+    <!--******************************* StorageProvider - IndexDb ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
+    
+      
+    <!--******************************* StorageProvider - inMemory ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
+    <script src="JaySvcUtil/JaySvcUtil.js"></script>
+    <script src="Types/JayStorm.js"></script>
+
+    <script src="JayDataModules/deferred.js"></script>
+    <script src="JayDataModules/handlebars.js"></script>
+<script>
+    var apiKey = { appId: '133e0907-f70b-4f11-92b3-dfebc9bdd6db',
+        applicationKey: 'XXX',
+        serviceName: 'mydatabase',
+        license: 'business',
+        isDefault: true
+    };
+
+
+    function FlowerShowApplication() {
+
+        function displayCart() {
+            $data("Cart").renderTo("#cart", "CartArrayTemplate");
+        }
+
+        function listCategories() {
+            $data("Category")
+                .renderItemsTo("#categories")
+                .then(function (categories) {
+                    listProducts(categories[0]);
+                });
+        }
+
+        function listProducts(category) {
+            $data("Flower")
+              .query("it.Category_ID == catId", { catId: category.id })
+              .then($data.renderItemsTo("#products"));
+        }
+
+        function addFlowerToCart(flower) {
+            $data("Cart")
+                .read(this.id)
+                .then(
+                    function (cartItem) {
+                        //this gets called if we already have this flower in the cart
+                        //only increment amount
+                        cartItem.Amount += 1;
+                        return cartItem.save();
+                    },
+                    function () {
+                        //this gets called if we dont have this flower in the cart
+                        return $data("Cart").save({ FlowerID: flower.id, Name: flower.Name, Amount: 1 });
+                    })
+                .then(displayCart);
+        }
+
+        function removeCartItem(cartItem) {
+            cartItem.remove().then(displayCart);
+        }
+
+        $data("Category").addCommand("select", listProducts);
+        $data("Flower").addCommand("addToCart", addFlowerToCart);
+        $data("Cart").addCommand("remove", removeCartItem);
+
+        this.start = function () {
+            listCategories();
+            displayCart();
+        }
+    }
+
+    $data.define("Cart", {
+        //we will use the flower id as primary key
+        FlowerID: { type: String, key: true },
+        Name: String,
+        Amount: Number
+    }).storeToken = "local";
+
+    $data.initService(apiKey).then(function () {
+        new FlowerShowApplication().start();
+    });
+
+</script>
+</head>
+<body>
+    <script id="Category" type="text/x-handlebars">
+        <li><a href="#" {{entityCommand 'select'}}>{{Name}}</a></li>
+    </script>
+
+    <script id="Flower" type="text/x-handlebars">
+        <li>
+            {{Name}}<br />
+            <img src="{{ImageUrl}}" style="width:250px;height:150px"><br />
+            Price: {{Price }}, 
+            <a href="#" {{entityCommand 'addToCart'}}>Add to cart</a>
+        </li>
+    </script>
+
+    <script id="Cart" type="text/x-handlebars">
+        <li>{{Name}}, {{Amount}}, <a href="#" {{entityCommand 'remove'}}>X</a></li>
+    </script>
+
+    <script id="CartArrayTemplate" type="text/x-handlebars">
+        <ul>
+           {{#each .}} {{renderEntity}} {{/each }}
+        </ul>
+        <div>
+          Total: {{length}} items.
+        </div>
+    </script>
+    <ul id="categories" style="width:150px;float:left">
+
+    </ul>
+    <ul id="products" style="width:300px;float:left">
+
+    </ul>
+
+    <ul id="cart" style="width:300px;float:left">
+
+    </ul>
+</body>
+</html>

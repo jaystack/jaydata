@@ -25,7 +25,7 @@
         equal(dataClass.inheritsFrom.name, "Base", "dataClass inherits from Base");
         equal(dataClass.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "dataClass memberDefinitions exists");
         var defs = dataClass.memberDefinitions.asArray();
-        equal(defs.length, 4, "dataClass memberDefinitions count");
+        equal(defs.length, 8, "dataClass memberDefinitions count");
 
         equal(defs[0].kind, "method", "dataClass memberDefinitions[0] type");
         equal(defs[3].kind, "property", "dataClass memberDefinitions[3] type");
@@ -114,7 +114,7 @@
         equal(classBase.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "dataClass memberDefinitions exists");
 
         var defs = classBase.memberDefinitions.asArray();
-        equal(defs.length, 6, "classBase memberDefinitions count");
+        equal(defs.length, 10, "classBase memberDefinitions count");
 
         equal(defs[0].kind, "method", "classBase memberDefinitions[0] - constructor type");
         equal(defs[4].kind, "method", "classBase memberDefinitions[4] type");
@@ -222,7 +222,7 @@
         equal(classEx, classEx.prototype.constructor, "classEx equal with ctor");
         equal(classEx.inheritsFrom.name, "dataClass", "classEx inherits from dataClass");
         equal(classEx.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "classEx memberDefinitions exists");
-        equal(classEx.memberDefinitions.asArray().length, 6, "classEx memberDefinitions count");
+        equal(classEx.memberDefinitions.asArray().length, 10, "classEx memberDefinitions count");
 
         equal(classBase.memberDefinitions.asArray()[0].kind, "method", "classEx memberDefinitions[0] type");
         equal(classBase.memberDefinitions.asArray()[4].kind, "method", "classEx memberDefinitions[4] type");
@@ -393,7 +393,7 @@
         equal(mixinClass, mixinClass.prototype.constructor, "mixinClass equal with ctor");
         equal(mixinClass.inheritsFrom.name, "Base", "mixinClass inherits from Base");
         equal(mixinClass.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "mixinClass memberDefinitions exists");
-        equal(mixinClass.memberDefinitions.asArray().length, 7, "mixinClass memberDefinitions count");
+        equal(mixinClass.memberDefinitions.asArray().length, 11, "mixinClass memberDefinitions count");
 
         equal(mixinClass.mixins.length, 1, "mixinClass mixins count");
         equal(mixinClass.mixins[0].type, propClass, "mixinClass mixin - simpleClass");
@@ -404,7 +404,7 @@
         var class4 = new mixinClass();
 
         equal(class4.constructor.memberDefinitions instanceof $data.MemberDefinitionCollection, true, "class4 has members");
-        equal(class4.constructor.memberDefinitions.asArray().length, 7, "class4 member count");
+        equal(class4.constructor.memberDefinitions.asArray().length, 11, "class4 member count");
 
         equal(class4.prop1, 1, "class4 mixin's prop value");
         equal(class4.prop2, 12, "class4 prop value, mixin not override");
@@ -441,7 +441,7 @@
         var class4 = new mixinClass2();
 
         equal(mixinClass2.mixins.length, 2, "mixinClass2 mixins count");
-        equal(class4.constructor.memberDefinitions.asArray().length, 11, "class4 member count");
+        equal(class4.constructor.memberDefinitions.asArray().length, 15, "class4 member count");
 
         equal(class4.prop5, undefined, "class4 prop value not set");
 
@@ -514,6 +514,30 @@
 
     });
 
+    test('Type inhertitance ctor init', 9, function () {
+        $data.Entity.extend("Types.AA", {
+            Title: { type: 'string' }
+        });
+
+        Types.AA.extend("Types.BB", {
+            Desc: {type: 'string'}
+        });
+
+        var item = new Types.AA({ Title: 'hello', Desc: 'world', Age: 23 });
+        equal(item.Title, 'hello', 'AA.Title ctor init failed');
+        notEqual(item.Desc, 'world', 'AA.Desc ctor init failed');
+        equal(item.Desc, undefined, 'AA.Desc ctor init failed');
+        notEqual(item.Age, 23, 'AA.Age ctor init failed');
+        equal(item.Age, undefined, 'AA.Age ctor init failed');
+
+        item = new Types.BB({ Title: 'hello', Desc: 'world', Age: 23 });
+        equal(item.Title, 'hello', 'BB.Title ctor init failed');
+        equal(item.Desc, 'world', 'BB.Desc ctor init failed');
+        notEqual(item.Age, 23, 'BB.Age ctor init failed');
+        equal(item.Age, undefined, 'BB.Age ctor init failed');
+
+    });
+
 
     test("Extends fail", 1, function () {
         raises(function () {
@@ -571,6 +595,191 @@
         } catch (e) {
             ok(false, '$data.Trace failed: ' + e);
         }
+
+    });
+
+
+    test('Type add member', 26, function () {
+        $data.Entity.extend("Types.AAExtended", {
+            Title: { type: 'string' }
+        });
+
+        var item = new Types.AAExtended({ Title: 'hello', Desc: 'world', Age: 23 });
+        equal(item.Title, 'hello', '1 Title ctor init failed');
+        notEqual(item.Desc, 'world', '1 Desc ctor init failed');
+        equal(item.Desc, undefined, '1 Desc ctor init failed');
+        notEqual(item.Age, 23, '1 Age ctor init failed');
+        equal(item.Age, undefined, '1 Age ctor init failed');
+
+        var props = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
+        deepEqual(props, ['Title'], '1 public members failed');
+
+        Types.AAExtended.addMember('Desc', {
+            type: 'string'
+        });
+
+        item = new Types.AAExtended({ Title: 'hello', Desc: 'world', Age: 23 });
+        equal(item.Title, 'hello', '2 Title ctor init failed');
+        equal(item.Desc, 'world', '2 Desc ctor init failed');
+        notEqual(item.Age, 23, '2 Age ctor init failed');
+        equal(item.Age, undefined, '2 Age ctor init failed');
+
+        props = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
+        deepEqual(props, ['Title', 'Desc'], '1 public members failed');
+
+
+        Types.AAExtended.extend("Types.BBExtended", {
+            Age: { type: 'int' }
+        });
+
+        item = new Types.AAExtended({ Title: 'hello', Desc: 'world', Age: 23 });
+        equal(item.Title, 'hello', '3 Title ctor init failed');
+        equal(item.Desc, 'world', '3 Desc ctor init failed');
+        notEqual(item.Age, 23, '3 Age ctor init failed');
+        equal(item.Age, undefined, '3 Age ctor init failed');
+
+        props = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
+        deepEqual(props, ['Title', 'Desc'], '1 public members failed');
+
+        item = new Types.BBExtended({ Title: 'hello', Desc: 'world', Age: 23 });
+        equal(item.Title, 'hello', '3 Title ctor init failed');
+        equal(item.Desc, 'world', '3 Desc ctor init failed');
+        equal(item.Age, 23, '3 Age ctor init failed');
+
+        props = Types.BBExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
+        deepEqual(props, ['Age', 'Title', 'Desc'], '1 public members failed');
+
+
+        Types.AAExtended.addMember('memberFunc', function (param1) {
+            return 'hello world' + param1;
+        });
+
+        equal(typeof item.memberFunc, 'function', 'function defined');
+        equal(item.memberFunc('!!!'), 'hello world!!!', 'defined function call');
+        props = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
+        deepEqual(props, ['Title', 'Desc'], 'public members failed 2');
+        var member = Types.AAExtended.memberDefinitions.getMember('memberFunc');
+        equal(member instanceof $data.MemberDefinition, true, 'member type');
+        equal(member.kind, 'method', 'member kind');
+        equal(typeof member.method, 'function', 'member method');
+
+    });
+
+    test('Type add field', 22, function () {
+        $data.Entity.extend("Types.AAAExtendedProperty", {
+            Title: { type: 'string' }
+        });
+
+        Types.AAAExtendedProperty.addProperty('GetTitleComputed', function () { return this.Title + ' world'; });
+
+        var item = new Types.AAAExtendedProperty({ Title: 'hello' });
+        equal(item.Title, 'hello', 'Title value');
+        equal('GetTitleComputed' in item, true, 'computed property on item');
+        equal(item.GetTitleComputed, 'hello world', 'computed property value');
+
+        equal('GetTitleComputed2' in item, false, 'computed property not on item 2');
+
+        Types.AAAExtendedProperty.addProperty('GetTitleComputed2', function () { return this.Title + ' world2'; });
+        equal('GetTitleComputed2' in item, true, 'computed property on item 3');
+        equal(item.GetTitleComputed2, 'hello world2', 'computed property value 3');
+
+        item.GetTitleComputed2 = 'not hello';
+        equal(item.GetTitleComputed2, 'hello world2', 'computed property value after change');
+
+        Types.AAAExtendedProperty.addProperty('GetTitleComputed3', function () { return this.Title + ' world3'; }, function (value) { this.Title = value; });
+        item.GetTitleComputed3 = 'hi';
+        equal(item.GetTitleComputed3, 'hi world3', 'computed property value after change 2');
+
+        Types.AAAExtendedProperty.addProperty('GetTitleComputed4', 'string', function () { return this.Title + ' world4'; }, function (value) { this.Title = value; });
+        equal(item.GetTitleComputed4, 'hi world4', 'computed property value after change 3');
+
+
+        var comp = Types.AAAExtendedProperty.memberDefinitions.getMember('GetTitleComputed4');
+        equal(comp instanceof $data.MemberDefinition, true, 'memDef type');
+        ok(Container.resolveType(comp.type) === $data.String, 'memDef type');
+        equal('get' in comp, true, 'memDef get');
+        equal('set' in comp, true, 'memDef set');
+        equal(comp.notMapped, true, 'memDef notMapped');
+        equal(comp.storeOnObject, true, 'memDef storeOnObject');
+
+        comp = Types.AAAExtendedProperty.memberDefinitions.getMember('GetTitleComputed2');
+        equal(comp instanceof $data.MemberDefinition, true, 'memDef type');
+        ok(!comp.type, 'memDef type not set');
+        equal('get' in comp, true, 'memDef get');
+        equal('set' in comp, true, 'memDef set');
+        equal(comp.set.toString().replace(/[\n ]/g, ''), "function(){}", 'setter default value');
+        equal(comp.notMapped, true, 'memDef notMapped');
+        equal(comp.storeOnObject, true, 'memDef storeOnObject');
+    });
+
+    test('Type add field to $news.Types.Article', 2, function () {
+        var propDef = $news.Types.Article.memberDefinitions.getMember('shortLead');
+        ok(!propDef, 'shortLead not defined');
+
+        $news.Types.Article.addProperty('shortLead', 'string', function () {
+            return this.Lead && this.Lead.length > 20 ? (this.Lead.substring(0, 20) + '...') : this.Lead; 
+        });
+
+        var article = new $news.Types.Article({ Title: 'Important Article', Lead: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur nec lorem est, eu ultricies quam. Proin venenatis dolor porta justo sodales laoreet. Mauris turpis risus, facilisis ac consequat quis, mollis a elit. In iaculis rutrum massa. In consectetur aliquet bibendum. Quisque tincidunt aliquet ante, eu sodales felis facilisis vel. Phasellus lacus turpis, euismod eu hendrerit vitae, elementum sit amet neque. Fusce eget justo eget ligula iaculis mollis. Aenean vitae commodo nibh. Nullam ut neque nec ante viverra sollicitudin' });
+        equal(article.shortLead, 'Lorem ipsum dolor si...', 'short Lead value');
+
+
+    });
+
+    test('Type add member override', 11, function () {
+        $data.Entity.extend("Types.AAOverride", {
+            Title: { type: 'string' },
+            myFunc: function () {
+                return 'orig Function';
+            }
+        });
+
+        var item = new Types.AAOverride({ Title: 'apple' });
+        equal(item.myFunc(), 'orig Function', 'orig myFunc');
+        equal(typeof item.myFunc2, 'undefined', 'not defined myFunc');
+
+        Types.AAOverride.addMember('myFunc', function () {
+            return 'Function #2';
+        });
+
+        equal(item.myFunc(), 'Function #2', 'updated myFunc');
+        equal(typeof item.myFunc2, 'undefined', 'not defined myFunc 2');
+
+        Types.AAOverride.addMember('myFunc2', function () {
+            return 'myFunc2 Function #2';
+        });
+
+        equal(typeof item.myFunc2, 'function', 'defined myFunc 2');
+        equal(item.myFunc2(), 'myFunc2 Function #2', 'myFunc2');
+
+        var item2 = new Types.AAOverride({ Title: 'world' });
+        equal(typeof item2.myFunc2, 'function', 'defined myFunc 2');
+        equal(item2.myFunc2(), 'myFunc2 Function #2', 'myFunc2');
+
+        var func = function () {
+            return 'Function #3';
+        };
+        Types.AAOverride.addMember('myFunc', func);
+
+        equal(item.myFunc(), 'Function #3', 'updated myFunc 2');
+        ok(Types.AAOverride.memberDefinitions.getMember('myFunc').method === func, 'definition has good pointer');
+        var def = Types.AAOverride.memberDefinitions.asArray().filter(function (d) { return d.name === 'myFunc'; })[0]
+        ok(def.method === func, 'definition has good pointer 2');
+    });
+
+    test('type create factory', 8, function () {
+
+        var instance = dataClass.create();
+        equal(instance instanceof dataClass, true, 'instanceof');
+        equal(instance instanceof $data.Base, true, 'instanceof base');
+        equal(instance instanceof $data.Entity, false, 'instanceof entity');
+
+        var art = $news.Types.Article.create({ Lead: 'lead', Title: 'title' });
+        equal(art instanceof $news.Types.Article, true, 'instanceof');
+        equal(art instanceof $data.Base, true, 'instanceof base');
+        equal(art instanceof $data.Entity, true, 'instanceof entity');
+        equal(art.Lead, 'lead', 'art.Lead');
+        equal(art.Title, 'title', 'art.Title');
 
     });
 });

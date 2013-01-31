@@ -112,6 +112,15 @@ $data.Class.defineEx('$data.EntitySet',
         this._trackEntity(data);
         return data;
     },
+
+    addMany: function(entities) {
+        var result = [];
+        var self = this;
+        entities.forEach(function (entity) {
+            result.push(self.add(entity));
+        });
+        return result;
+    },
     remove: function (entity) {
         /// <signature>
         ///     <summary>Creates a typed entity and marks it as Deleted.</summary>
@@ -147,7 +156,7 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
-    attach: function (entity) {
+    attach: function (entity, keepChanges) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -191,9 +200,10 @@ $data.Class.defineEx('$data.EntitySet',
                 Guard.raise(new Exception("Context already contains this entity!!!"));
             }
         }
-
-        data.entityState = $data.EntityState.Unchanged;
-        data.changedProperties = undefined;
+        if (!keepChanges) {
+            data.entityState = $data.EntityState.Unchanged;
+            data.changedProperties = undefined;
+        }
         data.context = this.entityContext;
         this._trackEntity(data);
     },
@@ -356,6 +366,12 @@ $data.Class.defineEx('$data.EntitySet',
         /// </signature>
 
         return this.entityContext.loadItemProperty(entity, memberDefinition, callback);
+    },
+    saveChanges: function () {
+        return this.entityContext.saveChanges.apply(this.entityContext, arguments);
+    },
+    addProperty: function (name, getter, setter) {
+        return this.elementType.addProperty.apply(this.elementType, arguments);
     },
     expression: {
         get: function () {

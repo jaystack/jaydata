@@ -10,7 +10,14 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             maxSize: 1024 * 1024,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
-
+        
+        this.providerName = '';
+        for (var i in $data.RegisteredStorageProviders){
+            if ($data.RegisteredStorageProviders[i] === this.getType()){
+                this.providerName = i;
+            }
+        }
+        
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -42,17 +49,41 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         return connection;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid], writable: false },
+    //$data.Array, 
+    supportedDataTypes: {
+        value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid, $data.GeographyPoint,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
     fieldConverter: {
         value: {
             fromDb: {
                 "$data.Integer": function (number) { return number; },
                 "$data.Number": function (number) { return number; },
-                "$data.Date": function (dbData) { return new Date(dbData); },
+                "$data.Date": function (dbData) { return dbData != null ? new Date(dbData) : dbData; },
                 "$data.String": function (text) { return text; },
                 "$data.Boolean": function (b) { return b === 1 ? true : false; },
                 "$data.Blob": function (blob) { return blob; },
-                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
+                "$data.Array": function () {
+                    if (arguments.length == 0) return [];
+                    return arguments[0] ? JSON.parse(arguments[0]) : undefined;
+                },
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(JSON.parse(g)); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(JSON.parse(g)); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(JSON.parse(g)); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(JSON.parse(g)); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(JSON.parse(g)); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(JSON.parse(g)); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(JSON.parse(g)); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(JSON.parse(g)); } return g; }
             },
             toDb: {
                 "$data.Integer": function (number) { return number; },
@@ -61,8 +92,23 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 "$data.String": function (text) { return text; },
                 "$data.Boolean": function (b) { return b ? 1 : 0; },
                 "$data.Blob": function (blob) { return blob; },
+                "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
                 "$data.Guid": function (g) { return g ? g.value : g; },
-                "$data.Object": function(value){if(value === null){return null;} throw 'Not supported exception';}
+                "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; },
+                '$data.GeographyPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return JSON.stringify(g); } return g; }
             }
         }
     },
@@ -312,15 +358,16 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                         var deleteCmd = [];
                         for (var i = 0; i < that.SqlCommands.length; i++) {
                             if (that.SqlCommands[i] == "") { continue; }
-                            var regEx = /^CREATE TABLE IF NOT EXISTS ([^ ]*) (\(.*\))/g;
+                            var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
                             var data = regEx.exec(that.SqlCommands[i]);
                             if (data) {
                                 var tableName = data[1];
                                 var tableDef = data[2];
                                 if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
-                                    var existsRegEx = /^CREATE TABLE ([^ ]*) (\(.*\))/g;
-                                    var existTableDef = existsRegEx.exec(existObjectInDB[tableName.slice(1, tableName.length - 1)].sql)[2];
-                                    if (tableDef.toLowerCase() != existTableDef.toLowerCase()) {
+                                    var regex = new RegExp('\\(.*\\)', 'g');
+                                    var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
+
+                                    if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
                                         deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
                                     }
                                 }
@@ -511,7 +558,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     },
     save_DeleteEntity: function (item) {
         ///DELETE FROM Posts WHERE Id=1;
-        var deleteSqlString = "DELETE FROM [" + item.entitySet.name + "] WHERE(";
+        var deleteSqlString = "DELETE FROM [" + item.entitySet.tableName + "] WHERE(";
         var hasCondition = false;
         var addAllField = false;
         var deleteParam = [];
@@ -523,7 +570,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
                 if (fieldDef.key || addAllField) {
                     deleteSqlString += "([" + fieldDef.name + "] == ?)";
-                    deleteParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.data[fieldDef.name]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        deleteParam.push(logicalFieldDef.converter[this.providerName].toDb(item.data[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        deleteParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.data[fieldDef.name]));
+                    }
                     hasCondition = true;
                 }
 
@@ -557,12 +609,22 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
                 if (fieldDef.key) {
                     whereSection += '([' + fieldDef.name + '] == ?)';
-                    whereParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        whereParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], fieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        whereParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    }
                     hasCondition = true;
                 }
                 else {
                     setSection += "[" + fieldDef.name + "] = ?";
-                    setParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        setParam.push(fieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        setParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
+                    }
                 }
             }
         }, this);
@@ -587,7 +649,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 if (fieldDef.dataType && (!fieldDef.dataType.isAssignableTo || (fieldDef.dataType.isAssignableTo && !fieldDef.dataType.isAssignableTo($data.EntitySet)))) {
                     fieldValue += '?';
                     fieldList += "[" + fieldName + "]";
-                    fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
+                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                        fieldParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[fieldName], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    }else{
+                        fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
+                    }
                 }
             }
 
@@ -668,11 +735,48 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.build = function () {
 
             switch (Container.resolveType(this.fld.dataType)) {
-                case $data.String: case $data.Guid: case "text": case "string": this.buildFieldNameAndType("TEXT"); break;
-                case $data.Boolean: case $data.Integer: case "bool": case "boolean": case "int": case "integer": this.buildFieldNameAndType("INTEGER"); break;
-                case $data.Number: case $data.Date: case "number": case "datetime": case "date": this.buildFieldNameAndType("REAL"); break;
-                case $data.Blob: case "blob": this.buildFieldNameAndType("BLOB"); break;
-                default: this.buildRelations(); break;
+                case $data.Array:
+                case $data.String:
+                case $data.Guid:
+                case "text":
+                case "string":
+                case $data.GeographyPoint:
+                case $data.GeographyLineString:
+                case $data.GeographyPolygon:
+                case $data.GeographyMultiPoint:
+                case $data.GeographyMultiLineString:
+                case $data.GeographyMultiPolygon:
+                case $data.GeographyCollection:
+                case $data.GeometryPoint:
+                case $data.GeometryLineString:
+                case $data.GeometryPolygon:
+                case $data.GeometryMultiPoint:
+                case $data.GeometryMultiLineString:
+                case $data.GeometryMultiPolygon:
+                case $data.GeometryCollection:
+                    this.buildFieldNameAndType("TEXT");
+                    break;
+                case $data.Boolean:
+                case $data.Integer:
+                case "bool":
+                case "boolean":
+                case "int":
+                case "integer":
+                    this.buildFieldNameAndType("INTEGER");
+                    break;
+                case $data.Number:
+                case $data.Date:
+                case "number":
+                case "datetime":
+                case "date":
+                    this.buildFieldNameAndType("REAL");
+                    break;
+                case $data.Blob:
+                case "blob":
+                    this.buildFieldNameAndType("BLOB");
+                    break;
+                default: this.buildRelations();
+                    break;
             }
 
             return this.fieldDef;

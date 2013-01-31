@@ -17,8 +17,10 @@ Key providers
 =======
 WebSQL
 SQLite
+HTML5 localStorage
 IndexedDB
 OData
+MongoDB
 Facebook
 YQL
 

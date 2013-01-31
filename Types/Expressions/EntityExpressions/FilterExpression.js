@@ -14,6 +14,12 @@ $C('$data.Expressions.FilterExpression', $data.Expressions.EntitySetExpression, 
     nodeType: { value: $data.Expressions.ExpressionType.Filter, enumerable: true }
 });
 
+$C('$data.Expressions.InlineCountExpression', $data.Expressions.EntitySetExpression, null, {
+    constructor: function (source, selector) {
+    },
+    nodeType: { value: $data.Expressions.ExpressionType.InlineCount, enumerable: true }
+});
+
 $C('$data.Expressions.FrameOperator', $data.Expressions.ExpressionNode, null, {
     constructor: function () {
         this.isTerminated = true;

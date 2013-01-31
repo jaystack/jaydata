@@ -1,4 +1,4 @@
-﻿/// <reference path="/scripts/qunit.js"/>
+﻿/// <reference path="/scripts/qUnit/qunit.js"/>
 /// <reference path="/scripts/jquery-1.7.1.min.js"/>
 /// <reference path="/Scripts/jquery.validate.js"/>
     

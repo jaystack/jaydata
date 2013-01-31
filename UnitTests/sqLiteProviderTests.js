@@ -2,6 +2,40 @@
     if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 
     module("sqLiteProviderTest");
+    test("memberDefinition converter", function(){
+        $data.EntityContext.extend('$conv.ConverterTest', {
+            Items: { type: $data.EntitySet, elementType: $data.Entity.extend('$conv.Item', {
+                    Id: { type: 'int', key: true, computed: true },
+                    Value: { type: 'string', converter: {
+                            sqLite: {
+                                fromDb: function(value){
+                                    return 'Value #' + value;
+                                },
+                                toDb: function(value){
+                                    return value.replace('Value #', '');
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+        });
+        stop();
+        var c = new $conv.ConverterTest({ name: 'sqLite', databaseName: 'conv', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
+        c.onReady(function(db){
+            db.Items.add({ Value: 'Value #3' });
+            db.saveChanges(function(cnt){
+                equal(cnt, 1, 'not 1 item saved');
+                db.Items.toArray(function(r){
+                    equal(r.length, 1, 'not 1 item in table');
+                    r = r[0];
+                    ok(r instanceof $conv.Item, 'not $conv.Item');
+                    equal(r.Value, 'Value #3', 'bad value');
+                    start();
+                })
+            });
+        });
+    });
     test("simpleFieldDataTypeTest", function () {
         var context = $data.Class.define("ProviderTestContext", $data.EntityContext, null, {
             SimpleDataTypes: {

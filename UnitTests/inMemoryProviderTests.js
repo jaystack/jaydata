@@ -19,7 +19,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.toArray(function (r) {
                 start();
@@ -35,7 +35,7 @@
             new $data.Yahoo.types.Geo.place({ woeid: 1235, name: 'invalidplace', lang: 'en-us' })
         ];
         try {
-            var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+            var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
             memoryContext.onReady(function () {
                 memoryContext.Oceans.toArray(function (r) {
                     start();
@@ -55,7 +55,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.length(function (r) {
                 start();
@@ -69,7 +69,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.forEach(function (r, idx) {
                 start();
@@ -84,7 +84,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean1'; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.name == 'ocean1');\n}".replace(/[\n ]/g, ''));
@@ -103,7 +103,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.single(function (o) { return o.name == 'ocean1'; }, undefined, function (r) {
                 start();
@@ -118,7 +118,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.first(undefined, undefined, function (r) {
                 start();
@@ -133,7 +133,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.some(function (o) { return o.name == 'ocean2'; }, undefined, function (r) {
                 start();
@@ -152,7 +152,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             try {
                 memoryContext.Oceans.every(function (o) { return o.lang == 'en-us'; }, undefined, function (r) {
@@ -179,10 +179,29 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && (o.woeid == 1235));\n}".replace(/[\n ]/g, ''));
+
+            memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toArray(function (r) {
+                start();
+                equal(r.length, 1, 'filter result length failed');
+                equal(r[0].name, 'ocean2', 'filter result[0] name failed');
+            });
+        });
+    });
+
+    test('filter complex binary', 3, function () {
+        stop(1);
+        var items = [
+            new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
+            new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
+        ];
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
+        memoryContext.onReady(function () {
+            var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && (o.woeid == 1235 || o.name == 'ocean1'); }).toTraceString();
+            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && ((o.woeid == 1235) || (o.name == 'ocean1')));\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toArray(function (r) {
                 start();
@@ -202,7 +221,7 @@
                 placeTypeName: new $data.Yahoo.types.Geo.placeTypeNameCf({ code: '2', content: 'Sea' })
             })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.placeTypeName.code == '1'; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn (o.placeTypeName.code == '1');\n}".replace(/[\n ]/g, ''));
@@ -226,7 +245,7 @@
                 placeTypeName: new $data.Yahoo.types.Geo.placeTypeNameCf({ code: '2', content: 'Sea' })
             })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.woeid in [1235, 1236, 1237]; }).toTraceString();
             equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ([1235,1236,1237].indexOf(o.woeid) > -1);\n}".replace(/[\n ]/g, ''));
@@ -258,7 +277,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1238, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1239, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.take(5).toTraceString();
             equal(q.$take, 5, 'take value failed');
@@ -281,7 +300,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1238, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1239, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.skip(4).toTraceString();
             equal(q.$skip, 4, 'skip value failed');
@@ -304,7 +323,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1238, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1239, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.skip(2).take(1).toTraceString();
             equal(q.$skip, 2, 'skip value failed');
@@ -328,7 +347,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1237, name: 'ocean5', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1237, name: 'ocean6', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.orderBy(function (o) { return o.name; }).toTraceString();
             equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy value failed');
@@ -388,7 +407,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.map(function (o) { return o.name; }).toTraceString();
             equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn o.name;\n}".replace(/[\n ]/g, ''));
@@ -459,7 +478,7 @@
             new $data.Yahoo.types.Geo.ocean({ woeid: 1234, name: 'ocean1', lang: 'en-us' }),
             new $data.Yahoo.types.Geo.ocean({ woeid: 1235, name: 'ocean2', lang: 'en-us' })
         ];
-        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { Oceans: items} });
+        var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             memoryContext.Oceans.toArray(function (r) {
                 equal(r.length, 2, 'context source length failed');
@@ -696,4 +715,412 @@
         });
     });
 
+    test('filter not operator', 5, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Categories.filter(function (c) { return !(c.Title == 'Sport'); }).toArray(function (res) {
+                    equal(res.length, 4, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Category, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - contains', 7, function () {
+        stop(2);
+        
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.contains('ticle2'); }).toArray(function (res) {
+                    equal(res.length, 6, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - startsWith', 7, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.startsWith('Article2'); }).toArray(function (res) {
+                    equal(res.length, 6, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - endsWith', 6, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.endsWith('1'); }).toArray(function (res) {
+                    equal(res.length, 5, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - length', 6, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.length() == 8 }).toArray(function (res) {
+                    equal(res.length, 5, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - substr', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.substr(2) == "ticle21" }).toArray(function (res) {
+                    equal(res.length, 1, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - substr 2 param', 7, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.substr(2, 6) == "ticle2" }).toArray(function (res) {
+                    equal(res.length, 6, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - toLowerCase', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.toLowerCase() == "article1" }).toArray(function (res) {
+                    equal(res.length, 1, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - toUpperCase', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.filter(function (a) { return a.Title.toUpperCase() == "ARTICLE1" }).toArray(function (res) {
+                    equal(res.length, 1, 'result length failed');
+
+                    for (var i = 0; i < res.length; i++) {
+                        ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                    }
+
+                    start(1);
+                });
+            });
+        });
+    });
+
+    test('filter field operation - trim', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: '  hello world   ', Lead: 'lead' });
+                db.saveChanges(function () { 
+                    db.Articles.filter(function (a) { return a.Title.trim() == "hello world" }).toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    test('filter field operation - ltrim', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: '  hello world   ', Lead: 'lead' });
+                db.saveChanges(function () {
+                    db.Articles.filter(function (a) { return a.Title.ltrim() == "hello world   " }).toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    test('filter field operation - rtrim', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.add({ Title: '  hello world   ', Lead: 'lead' });
+                db.saveChanges(function () {
+                    db.Articles.filter(function (a) { return a.Title.rtrim() == "  hello world" }).toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        for (var i = 0; i < res.length; i++) {
+                            ok(res[0] instanceof $news.Types.Article, 'item ' + i + ' type failed');
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    test('map field operation', 2, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext({ name: 'InMemory' })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                var title = '  hello world   ';
+                db.Articles.add({ Title: title, Lead: 'lead' });
+                db.saveChanges(function () {
+                    db.Articles.filter(function (a) { return a.Title == "  hello world   " })
+                        .map(function (a) {
+                            return {
+                                contains: a.Title.contains('hello'),
+                                contains2: a.Title.contains('hello2'),
+                                notcontains: !a.Title.contains('hello'),
+                                startsWith: a.Title.startsWith('  hello'),
+                                startsWith2: a.Title.startsWith('hello'),
+                                endsWith: a.Title.endsWith('world   '),
+                                length: a.Title.length(),
+                                substr: a.Title.substr(2),
+                                substr2: a.Title.substr(2,3),
+                                toLowerCase: a.Title.toLowerCase(),
+                                toUpperCase: a.Title.toUpperCase(),
+                                trim: a.Title.trim(),
+                                ltrim: a.Title.ltrim(),
+                                rtrim: a.Title.rtrim()
+                            };
+                        })
+                        .toArray(function (res) {
+                        equal(res.length, 1, 'result length failed');
+
+                        deepEqual(res[0], {
+                            contains: $data.StringFunctions.contains(title, 'hello'),
+                            contains2: $data.StringFunctions.contains(title, 'hello2'),
+                            notcontains: !$data.StringFunctions.contains(title, 'hello'),
+                            startsWith: $data.StringFunctions.startsWith(title, '  hello'),
+                            startsWith2: $data.StringFunctions.startsWith(title, 'hello'),
+                            endsWith: $data.StringFunctions.endsWith(title, 'world   '),
+                            length: title.length,
+                            substr: title.substr(2),
+                            substr2: title.substr(2, 3),
+                            toLowerCase: title.toLowerCase(),
+                            toUpperCase: title.toUpperCase(),
+                            trim: title.trim(),
+                            ltrim: title.trimLeft(),
+                            rtrim: title.trimRight()
+                        });
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
+    $data.Entity.extend('$example.FilterTypeTest', {
+        Id: { type: 'int', key: true, computed: true },
+        Name: { type: 'string' },
+        propDate: { type: 'date' },
+        propBool: { type: 'bool' },
+        propNum: { type: 'number' },
+        propInt: { type: 'int' },
+        propGuid: { type: 'guid' }
+    });
+
+    $data.EntityContext.extend('$example.FilterTypeContext', {
+        Entities: { type: $data.EntitySet, elementType: $example.FilterTypeTest }
+    });
+
+    test('filter types', 18, function () {
+        stop(1);
+
+        var memoryContext = new $example.FilterTypeContext({ name: 'InMemory' });
+        memoryContext.onReady(function () {
+
+            var item = new $example.FilterTypeTest({
+                Name: 'name',
+                propDate: new Date('2000/01/01'),
+                propBool: true,
+                propNum: 3.14,
+                propInt: 42,
+                propGuid: new $data.Guid('c1736305-189b-436c-ac2d-09a76eb9de1b')
+            });
+            memoryContext.Entities.add(item);
+            var item2 = new $example.FilterTypeTest({
+                Name: 'name2',
+                propDate: new Date('2013/01/01'),
+                propBool: false,
+                propNum: 4.14,
+                propInt: 56,
+                propGuid: new $data.Guid('c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2')
+            });
+            memoryContext.Entities.add(item2);
+
+            memoryContext.saveChanges(function () {
+
+
+                //string
+                var q = memoryContext.Entities.filter(function (o) { return o.Name == 'name'; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.Name == 'name');\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter string result length failed');
+                    equal(r[0].Name, 'name', 'filter string result[0] name failed');
+                });
+
+                //date
+                var q = memoryContext.Entities.filter(function (o) { return o.propDate < this.date; }, { date: new Date('2005/01/01') });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), ("function anonymous(o) {\n return (o.propDate < new Date(Date.parse('" + (new Date('2005/01/01')).toISOString() + "')));\n}").replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter date result length failed');
+                    equal(r[0].Name, 'name', 'filter date result[0] name failed');
+                });
+
+                //bool
+                var q = memoryContext.Entities.filter(function (o) { return o.propBool == false; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propBool == false);\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter bool result length failed');
+                    equal(r[0].Name, 'name2', 'filter bool result[0] name failed');
+                });
+
+                //number
+                var q = memoryContext.Entities.filter(function (o) { return o.propNum < 4.1; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propNum < 4.1);\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter number result length failed');
+                    equal(r[0].Name, 'name', 'filter number result[0] name failed');
+                });
+
+                //int
+                var q = memoryContext.Entities.filter(function (o) { return o.propInt > 50; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propInt > 50);\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter number result length failed');
+                    equal(r[0].Name, 'name2', 'filter number result[0] name failed');
+                });
+
+                //guid
+                var q = memoryContext.Entities.filter(function (o) { return o.propGuid == this.guid; }, { guid: new $data.Guid('c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2') });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propGuid == 'c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2');\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter number result length failed');
+                    equal(r[0].Name, 'name2', 'filter number result[0] name failed');
+                });
+
+                start();
+            });
+        });
+    });
 });

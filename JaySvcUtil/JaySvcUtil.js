@@ -13,7 +13,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             url: metadataUri,
             user: undefined,
             password: undefined,
-            withCredentials: undefined
+            withCredentials: undefined,
+            httpHeaders: undefined
         };
 
         $data.typeSystem.extend( cnf, config || {});
@@ -26,8 +27,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
         if (metadataUri in this.factoryCache) {
 
-            console.log("served from cache");
-            console.dir(this.factoryCache[metadataUri]);
+            /*console.log("served from cache");
+            console.dir(this.factoryCache[metadataUri]);*/
             callBack.success.apply({}, this.factoryCache[metadataUri]);
             return;
         }
@@ -61,7 +62,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     metadataUri: self.xsltRepoUrl + self._supportedODataVersionXSLT[versionInfo.version],
                     user: cnf.user,
                     password: cnf.password,
-                    headers: cnf.headers
+                    httpHeaders: cnf.httpHeaders
                 }, function (xsl, response) {
                     if (response.statusCode < 200 || response.statusCode > 299) {
                         callBack.error(response);
@@ -107,6 +108,9 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         var ctxType = $data.generatedContexts.pop();
         var factoryFn = self.createFactoryFunc(ctxType, cnf);
         this.factoryCache[cnf.url] = [factoryFn, ctxType];
+
+        factoryFn.type = ctxType;
+        factoryFn.codeText = codeText;
 
         if (self.debugMode)
             callBack.success(factoryFn, ctxType, codeText);
@@ -197,7 +201,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             return resultDocument.textContent;
         } else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
             var xslt = require('node_xslt');
-            var libxml = require('libxmljs');
 
             return xslt.transform(xslt.readXsltString(transformXslt), xslt.readXmlString(metadata), [
                 'SerivceUri', "'" + cnf.SerivceUri + "'",
@@ -212,7 +215,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         }
     },
     _findVersion: function (metadata) {
-        if ("getElementsByTagName" in metadata){
+        if (typeof metadata === 'object' && "getElementsByTagName" in metadata){
             var version = 'http://schemas.microsoft.com/ado/2008/09/edm';
             var item = metadata.getElementsByTagName('Schema');
             if (item)
@@ -230,26 +233,21 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 version: versionNum || 'unknown'
             };
         }else if (typeof module !== 'undefined' && typeof require !== 'undefined'){
-            var xslt = require('node_xslt');
-            var libxml = require('libxmljs');
-
             var schemaXml = metadata;
+            
             var schemaNamespace = 'http://schemas.microsoft.com/ado/2008/09/edm';
-
-            /*var parserEvents = {
-             startElementNS: function() {
-             if ('Schema' === arguments[0]){
-             schemaNamespace = arguments[3];
-             }
-             }
-             };
-
-             var parser = new libxml.SaxParser(parserEvents);
-             parser.parseString(schemaXml);*/
+            var version = 'nodejs';
+            for (var i in this._supportedODataVersions){
+                if (schemaXml.search(new RegExp('<Schema.+xmlns=\"' + i + '\"', 'gi')) >= 0){
+                    schemaNamespace = i;
+                    version = this._supportedODataVersions[i];
+                    break;
+                }
+            }
 
             return {
                 ns: schemaNamespace,
-                version: 'nodejs'
+                version: version
             }
         }
     },
@@ -583,6 +581,51 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 });
 
 $data.MetadataLoader = new $data.MetadataLoaderClass();
-$data.service = function(serviceUri, cb, config) {
-    $data.MetadataLoader.load(serviceUri, cb, config);
-}
+$data.service = function (serviceUri, config, cb) {
+    var _url, _config, _callback;
+    function getParam(paramValue) {
+        switch (typeof paramValue) {
+            case 'object':
+                if (typeof paramValue.success === 'function' || typeof paramValue.error === 'function') {
+                    _callback = paramValue;
+                } else {
+                    _config = paramValue;
+                }
+                break;
+            case 'function':
+                _callback = paramValue;
+                break;
+            default:
+                break;
+        }
+    }
+    getParam(config);
+    getParam(cb);
+
+    if (typeof serviceUri === 'object') {
+        _config = $data.typeSystem.extend(serviceUri, _config);
+        serviceUri = serviceUri.url;
+        delete _config.url;
+    }
+
+    var pHandler = new $data.PromiseHandler();
+    _callback = pHandler.createCallback(_callback);
+
+    $data.MetadataLoader.load(serviceUri, {
+        success: function (factory) {
+            var type = factory.type;
+            //register to local store
+            if (_config) {
+                var storeAlias = _config.serviceName || _config.storeAlias;
+                if (storeAlias && 'addStore' in $data) {
+                    $data.addStore(storeAlias, factory, _config.isDefault === undefined || _config.isDefault)
+                }
+            }
+
+            _callback.success(factory, type);
+        },
+        error: _callback.error
+    }, _config);
+
+    return pHandler.getPromise();
+};

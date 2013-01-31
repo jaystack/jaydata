@@ -38,6 +38,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         
         return {
             queryText: queryText,
+            withInlineCount: '$inlinecount' in queryFragments,
             method: queryFragments.method || 'GET',
             params: []
         };
@@ -97,6 +98,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         context.data = "";
 
     },
+    VisitInlineCountExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+        context["$inlinecount"] = expression.selector.value;
+    },
     VisitEntitySetExpression: function (expression, context) {
         context.urlText += "/" + expression.instance.tableName;
         //this.logicalType = expression.instance.elementType;
@@ -107,7 +112,13 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
     },
     VisitServiceOperationExpression: function (expression, context) {
+        if (expression.bindedEntity.data instanceof $data.Entity) {
+            context.urlText += "/" + expression.bindedEntity.entitySet.tableName;
+            context.urlText += '(' + this.provider.getEntityKeysValue(expression.bindedEntity) + ')';
+        }
         context.urlText += "/" + expression.cfg.serviceName;
+        context.method = context.method || expression.cfg.method;
+
         //this.logicalType = expression.returnType;
         if (expression.params) {
             for (var i = 0; i < expression.params.length; i++) {

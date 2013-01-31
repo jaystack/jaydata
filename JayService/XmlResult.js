@@ -64,7 +64,12 @@ $data.ServiceResult.extend('$data.oDataResult', {
             builderCfg.methodConfig) {
             this.contentType = $data.JayService.OData.Defaults.jsonReturnContentType;
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderCfg);
-            this.data = builder.convertToResponse(data);
+            this.data = JSON.stringify(builder.convertToResponse(data));
+
+            if (request.query.$callback) {
+                this.data = request.query.$callback + '(' + this.data + ');';
+            }
+
         } else {
             this.contentType = $data.JayService.OData.Defaults.xmlContentType;
             builderCfg.headers = request.headers;
@@ -72,9 +77,9 @@ $data.ServiceResult.extend('$data.oDataResult', {
             this.data = transf.convertToResponse(data, builderCfg.collectionName, builderCfg.selectedFields, builderCfg.includes);
         }
     },
-    toString: function () {
+    /*toString: function () {
         return typeof this.data === 'string' ? this.data : JSON.stringify(this.data);
-    },
+    },*/
     jsonFormats: {
         value: [
             'json',

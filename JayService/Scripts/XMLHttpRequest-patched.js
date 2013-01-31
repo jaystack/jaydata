@@ -257,7 +257,17 @@ exports.XMLHttpRequest = function() {
     var tempUrl = settings.url.split('?');
     if (tempUrl.length > 1) {
         var urlStart = tempUrl.shift();
-        settings.url = urlStart + '?' + encodeURIComponent(tempUrl.join('?'));
+        //settings.url = urlStart + '?' + encodeURIComponent(tempUrl.join('?'));
+
+        var url = urlStart + '?';
+        var deepTempUrl = tempUrl[0].split('&');
+        for (var i = 0; i < deepTempUrl.length; i++) {
+            if (deepTempUrl[i]) {
+                var pairs = deepTempUrl[i].split('=')
+                url += (i > 0 ? '&' : '') + pairs[0] + (pairs[1] ? ('=' + encodeURIComponent(pairs[1])) : '');
+            }
+        }
+        settings.url = url;
     }
 
 

@@ -1,9 +1,23 @@
-﻿$data.Class.define('$data.JayService.ArgumentBinder', null, null, {
+﻿$data.Class.define('$data.ArgumentBinder', null, null, {
     convert: function (name, options, request) {
-        //<params name="config" type="object" />
-        //<params name="value" type="object" />
+        ///	<signature>
+        ///     <summary>Request (GET) parameter resolver for create typed parameters</summary>
+        ///     <description>Request (GET) parameter resolver for create typed parameters</description>
+        ///     <param name="name" type="String">Name of parameter</param>
+        ///     <param name="options" type="Object">Config object with type property for a resolved type</param>
+        ///     <param name="request" type="Object">Request context</param>
+        ///     <returns type="object">options.type</returns>
+        /// </signature>
+        ///	<signature>
+        ///     <summary>Request (GET) parameter resolver for create typed parameters</summary>
+        ///     <description>Request (GET) parameter resolver for create typed parameters</description>
+        ///     <param name="name" type="String">Name of parameter</param>
+        ///     <param name="options" type="Object">Config object with type property for a resolved type</param>
+        ///     <param name="request" type="Object">Request context</param>
+        ///     <returns type="String">If cannot convert</returns>
+        /// </signature>
 
-        var self = $data.JayService.ArgumentBinder._defaultBinder;
+        var self = $data.ArgumentBinder._defaultBinder;
 
         var value = request.query[name];
         if (options.type) {
@@ -65,10 +79,24 @@
         return value;
     },
     '$data.Entity': function (config, value) { return new config.type(this.parseData(value)); },
-    '$data.Geography': function (config, value) {
-        if (/^POINT\(/.test(value)) {
-            var data = value.slice(6, value.length - 1).split(' ');
-            return new $data.Geography(data[0], data[1]);
+    '$data.GeographyPoint': function (config, value) {
+        if (/^geography'POINT\(/.test(value)) {
+            var data = value.slice(16, value.length - 2).split(' ');
+            return new $data.GeographyPoint(data);
+        }
+        return value;
+    },
+    '$data.GeometryPoint': function (config, value) {
+        if (/^geometry'POINT\(/.test(value)) {
+            var data = value.slice(16, value.length - 2).split(' ');
+            return new $data.GeometryPoint(data);
+        }
+        return value;
+    },
+    '$data.Guid': function (config, value) {
+        if (/^guid'\w{8}-\w{4}-\w{4}-\w{4}-\w{12}'$/.test(value)) {
+            var data = value.slice(5, value.length - 1)
+            return $data.parseGuid(data);
         }
         return value;
     }
@@ -77,13 +105,13 @@
 }, {
     defaultBinder: {
         get: function () {
-            if (!$data.JayService.ArgumentBinder._defaultBinder) {
-                $data.JayService.ArgumentBinder._defaultBinder = new $data.JayService.ArgumentBinder();
+            if (!$data.ArgumentBinder._defaultBinder) {
+                $data.ArgumentBinder._defaultBinder = new $data.ArgumentBinder();
             }
-            return $data.JayService.ArgumentBinder._defaultBinder.convert;
+            return $data.ArgumentBinder._defaultBinder.convert;
         },
         set: function (value) {
-            $data.JayService.ArgumentBinder._defaultBinder = value;
+            $data.ArgumentBinder._defaultBinder = value;
         }
     },
     _defaultBinder: { value: null }

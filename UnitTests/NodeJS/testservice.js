@@ -36,13 +36,41 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
 $data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
     Name: { type: 'string' },
-    Location: { type: 'geo' }
+    Location: { type: 'GeographyPoint' }
 });
 
 $data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
-    Id: { type: 'string', key: true },
+    Id: { type: 'string', key: true, required: true },
     Name: { type: 'string' },
     Index: { type: 'int' }
+});
+
+$data.Class.define('$exampleSrv.TestItemGuid', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' }
+});
+
+$data.Class.define('$exampleSrv.TestItemComputed', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' },
+    DateField: { type: 'date' },
+    BoolField: { type: 'bool' },
+    ObjectField: { type: 'object' }
+});
+
+$exampleSrv.TestItemComputed.addEventListener('beforeCreate', function (sender, item) {
+    if (!item.Name)
+        item.Name = 'default Name';
+
+    item.Index = 42;
+    item.GuidField = $data.parseGuid('7b33e20d-3cca-4452-b3e2-eca9525377a1');
+    item.DateField = new Date('2012');
+    item.BoolField = true;
+    item.ObjectField = { work: 'item', computed: 'field' };
 });
 
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
@@ -50,8 +78,15 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
     Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
     TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
+    TestItemGuids: { type: $data.EntitySet, elementType: $exampleSrv.TestItemGuid },
+    TestItemComputeds: { type: $data.EntitySet, elementType: $exampleSrv.TestItemComputed },
     FuncStrParam: (function (a) {
         ///<param name="a" type="string"/>
+        ///<returns type="string"/>
+        return a;
+    }),
+    FuncGuidParam: (function (a) {
+        ///<param name="a" type="guid"/>
         ///<returns type="string"/>
         return a;
     }),
@@ -85,8 +120,13 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
         ///<returns type="date"/>
         return a; }),
     FuncGeographyParam: (function (a) {
-        ///<param name="a" type="geo"/>
-        ///<returns type="geo"/>
+        ///<param name="a" type="GeographyPoint"/>
+        ///<returns type="GeographyPoint"/>
+        return a;
+    }),
+    FuncGeometryParam: (function (a) {
+        ///<param name="a" type="GeometryPoint"/>
+        ///<returns type="GeometryPoint"/>
         return a;
     }),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),
@@ -126,7 +166,7 @@ app.use(function(req, res, next){
                 if (u = req.tracker.unfinished()) {
                     var str = '<ul>';
                     str += 'Undone tests [' + u + '] (or their setups/teardowns): ';
-                    var names = tracker.names();
+                    var names = req.tracker.names();
                     for (var i = 0; i < names.length; i += 1) {
                         str += '<li>' + names[i] + '</li>';
                     }
@@ -162,6 +202,7 @@ app.use(connect.bodyParser());
 app.use($data.JayService.OData.Utils.simpleBodyReader());
 
 app.use("/", connect.static(__dirname + "/../../"));
+//app.use("/", connect.static("/home/borzav/sf/jay/jaydata"));
 app.use("/testservice", $data.JayService.createAdapter($exampleSrv.Context, function () {
     return new $exampleSrv.Context({ name: 'mongoDB', databaseName: 'testserviceDb', responseLimit: 30 });
 }));
@@ -336,5 +377,151 @@ app.use("/nodeunit", function(req, res, next){
 });
 
 app.use(connect.errorHandler());
+
+$data.Class.define('$exampleSrv.ComplexT', $data.Entity, null, {
+    Name: { type: 'string' },
+    Description: { type: 'string' },
+    Age: { type: 'int' },
+    Created: { type: 'date' }
+});
+
+$data.Class.define('$exampleSrv.ComplexTWithComplex', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: '$exampleSrv.ComplexT' }
+});
+
+$data.Class.define('$exampleSrv.ComplexTWithArrayComplex', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: 'Array', elementType: '$exampleSrv.ComplexT' }
+});
+
+$data.Class.define('$exampleSrv.ComplexTWithCC', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex2: { type: '$exampleSrv.ComplexTWithComplex' }
+});
+
+$data.Class.define('$exampleSrv.ComplexTWithCCAndArrayC', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: '$exampleSrv.ComplexT' },
+    Complex2Arr: { type: 'Array', elementType: '$exampleSrv.ComplexTWithComplex' }
+});
+
+$data.Class.defineEx('$exampleSrv.FuncContext', [$data.EntityContext, $data.ServiceBase], null, {
+    People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
+    Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
+    FuncComplexRes: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="$exampleSrv.ComplexT"/>
+        return new $exampleSrv.ComplexT({ Name: a, Description: 'desc', Age: 42, Created: new Date('2000/01/01 01:01:01') });
+    }),
+    FuncComplexResArray: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="Array" elementType="$exampleSrv.ComplexT"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+            res.push(new $exampleSrv.ComplexT({ Name: a + i, Description: 'desc', Age: i, Created: new Date((2000 + i).toString() + '/01/01 01:01:01') }));
+        }
+        return res;
+    }),
+    FuncComplex2Res: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="$exampleSrv.ComplexTWithComplex"/>
+        return new $exampleSrv.ComplexTWithComplex({ Title: a, Complex: new $exampleSrv.ComplexT({ Name: a, Description: 'desc', Age: 42, Created: new Date('2000/01/01 01:01:01') }) });
+    }),
+    FuncComplex2ResArray: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="Array" elementType="$exampleSrv.ComplexTWithComplex"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+            res.push(new $exampleSrv.ComplexTWithComplex({ Title: a + i, Complex: new $exampleSrv.ComplexT({ Name: a + i, Description: 'desc', Age: i, Created: new Date((2000 + i).toString() + '/01/01 01:01:01') }) }));
+        }
+        return res;
+    }),
+    FuncComplex3Res: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="$exampleSrv.ComplexTWithCC"/>
+        return new $exampleSrv.ComplexTWithCC({ Title: a, Complex2: new $exampleSrv.ComplexTWithComplex({ Title: a, Complex: new $exampleSrv.ComplexT({ Name: a, Description: 'desc', Age: 42, Created: new Date('2000/01/01 01:01:01') }) }) });
+    }),
+    FuncComplex3ResArray: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="Array" elementType="$exampleSrv.ComplexTWithCC"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+            res.push(new $exampleSrv.ComplexTWithCC({ Title: a + i, Complex2: new $exampleSrv.ComplexTWithComplex({ Title: a + i, Complex: new $exampleSrv.ComplexT({ Name: a + i, Description: 'desc', Age: i, Created: new Date((2000 + i).toString() + '/01/01 01:01:01') }) }) }));
+        }
+        return res;
+    }),
+    FuncComplexWithArrayComplexRes: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="$exampleSrv.ComplexTWithArrayComplex"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+            res.push(new $exampleSrv.ComplexT({ Name: a + i, Description: 'desc', Age: i, Created: new Date((2000 + i).toString() + '/01/01 01:01:01') }));
+        }
+        return new $exampleSrv.ComplexTWithArrayComplex({ Title: a, Complex: res });
+    }),
+    FuncComplexWithArrayComplexResArray: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="Array" elementType="$exampleSrv.ComplexTWithArrayComplex"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+
+            var res2 = [];
+            for (var j = 0; j < 5; j++) {
+                res2.push(new $exampleSrv.ComplexT({ Name: a + i +j, Description: 'desc', Age: i +j, Created: new Date((2000 + i+j).toString() + '/01/01 01:01:01') }));
+            }
+
+            res.push(new $exampleSrv.ComplexTWithArrayComplex({ Title: a + i, Complex: res2 }));
+        }
+        return res;
+    }),
+    FuncComplexMultiRes: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="$exampleSrv.ComplexTWithCCAndArrayC"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+            res.push(new $exampleSrv.ComplexTWithComplex({ Title: a, Complex: new $exampleSrv.ComplexT({ Name: a + i, Description: 'desc', Age: i, Created: new Date((2000 + i).toString() + '/01/01 01:01:01') }) }));
+        }
+        return new $exampleSrv.ComplexTWithCCAndArrayC({
+            Title: a,
+            Complex: new $exampleSrv.ComplexT({ Name: a, Description: 'desc', Age: 42, Created: new Date('2000/01/01 01:01:01') }),
+            Complex2Arr: res
+        });
+    }),
+    FuncComplexMultiResArray: (function (a) {
+        ///<param name="a" type="string"/>
+        ///<returns type="Array" elementType="$exampleSrv.ComplexTWithCCAndArrayC"/>
+
+        var res = [];
+        for (var i = 0; i < 5; i++) {
+
+            var res2 = [];
+            for (var j = 0; j < 5; j++) {
+                res2.push(new $exampleSrv.ComplexTWithComplex({ Title: a, Complex: new $exampleSrv.ComplexT({ Name: a + i + j, Description: 'desc', Age: i + j, Created: new Date((2000 + i + j).toString() + '/01/01 01:01:01') }) }));
+            }
+
+            res.push(new $exampleSrv.ComplexTWithCCAndArrayC({
+                Title: a + i,
+                Complex: new $exampleSrv.ComplexT({ Name: a + i, Description: 'desc', Age: i, Created: new Date((2000 + i).toString() + '/01/01 01:01:01') }),
+                Complex2Arr: res2
+            }));
+        }
+        return res;
+    })
+});
+
+$exampleSrv.FuncContext.annotateFromVSDoc();
+
+app.use("/funcservice", $data.JayService.createAdapter($exampleSrv.FuncContext, function () {
+    return new $exampleSrv.FuncContext({ name: 'mongoDB', databaseName: 'funcserviceDb', responseLimit: 30 });
+}));
+
+
 
 app.listen(3001);

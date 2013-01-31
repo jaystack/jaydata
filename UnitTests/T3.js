@@ -1,6 +1,331 @@
 function T3(providerConfig, msg) {
     msg = msg || '';
     module("DataTests" + msg);
+
+    test('paging - next - 5', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - next - 5 inside promise', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray().then(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - prev - 5', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).skip(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.prev().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'prev item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - prev - 5 from 3', 2, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).skip(3).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [4, 5, 6, 7, 8], 'item Id list');
+
+                    it.prev().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'prev item Id list');
+                        start();
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - prev - error - 5 from 0', 3, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+
+                    it.prev().then(function (it) {
+                        ok(false, 'invalid run, excepted fail way');
+                        start();
+                    }).fail(function (ex) {
+                        equal(ex.message, 'Invalid skip value!', 'error message');
+                        equal(ex.data.skip, -5, 'invalid skip value');
+
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging - error - no take', 7, function () {
+        stop(2);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.toArray(function (it) {
+                    equal(it.length, 26, 'full result requested');
+
+                    it.next().then(function (it) {
+                        ok(false, 'invalid run, excepted fail way');
+                        start();
+                    }).fail(function (ex) {
+                        equal(ex.message, 'take expression not defined in the chain!', 'error message');
+                        equal(typeof ex.data.skip, 'undefined', 'skip value');
+                        equal(typeof ex.data.take, 'undefined', 'skip value');
+
+                        start();
+                    });
+
+
+                    it.prev().then(function (it) {
+                        ok(false, 'invalid run, excepted fail way');
+                        start();
+                    }).fail(function (ex) {
+                        equal(ex.message, 'take expression not defined in the chain!', 'error message');
+                        equal(typeof ex.data.skip, 'undefined', 'skip value');
+                        equal(typeof ex.data.take, 'undefined', 'skip value');
+
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging deep - next-next-prev - 5', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        
+                        it.next().then(function (it) {
+                            deepEqual(it.map(function (i) { return i.Id; }), [11, 12, 13, 14, 15], 'next2 item Id list');
+                            
+                            it.prev().then(function (it) {
+                                deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'prev item Id list');
+                                start();
+                            }).fail(function (ex) {
+                                ok(false, 'Error: ' + ex);
+                                start();
+                            });
+
+                        }).fail(function (ex) {
+                            ok(false, 'Error: ' + ex);
+                            start();
+                        });
+
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging deep - next-next-prev - 5 with map', 8, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.map(function (it) { return { Id: it.Id, Title: it.Title } }).take(5).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+
+                        it.next().then(function (it) {
+                            deepEqual(it.map(function (i) { return i.Id; }), [11, 12, 13, 14, 15], 'next2 item Id list');
+                            equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+
+                            it.prev().then(function (it) {
+                                deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'prev item Id list');
+                                equal(it[0] instanceof $news.Types.Article, false, 'anonymous type');
+                                start();
+                            }).fail(function (ex) {
+                                ok(false, 'Error: ' + ex);
+                                start();
+                            });
+
+                        }).fail(function (ex) {
+                            ok(false, 'Error: ' + ex);
+                            start();
+                        });
+
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('paging deep - next-next-prev - 2 with filter, order', 8, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.filter('it.Title.contains("1")').orderBy('it.Title').take(2).toArray(function (it) {
+                    deepEqual(it.map(function (i) { return i.Title; }), ['Article1', 'Article21'], 'item Id list');
+                    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                    it.next().then(function (it) {
+                        deepEqual(it.map(function (i) { return i.Title; }), ['Article31', 'Article41'], 'next item Id list');
+                        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                        it.next().then(function (it) {
+                            deepEqual(it.map(function (i) { return i.Title; }), ['Article51'], 'next2 item Id list');
+                            equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                            it.prev().then(function (it) {
+                                deepEqual(it.map(function (i) { return i.Title; }), ['Article31', 'Article41'], 'prev item Id list');
+                                equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                                start();
+                            }).fail(function (ex) {
+                                ok(false, 'Error: ' + ex);
+                                start();
+                            });
+
+                        }).fail(function (ex) {
+                            ok(false, 'Error: ' + ex);
+                            start();
+                        });
+
+                    }).fail(function (ex) {
+                        ok(false, 'Error: ' + ex);
+                        start();
+                    });
+                })
+
+            });
+        });
+    });
+
+    test('inlineCount - array result', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(19);
+        stop(5);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.withInlineCount().toArray(function (items) {
+                    equal(items.totalCount, items.length, 'inline count without filter, take, skip');
+                    start(1);
+                });
+
+                db.Articles.filter('it.Title.contains("1")').withInlineCount().toArray(function (items) {
+                    equal(items.totalCount, items.length, 'inline count with filter');
+                    start(1);
+                });
+
+                db.Articles.withInlineCount().take(3).toArray(function (items) {
+                    notEqual(items.totalCount, items.length, 'inline count with take');
+                    equal(items.length, 3, 'length value with take');
+                    equal(items.totalCount, 26, 'inline count value with take');
+                    start(1);
+                });
+
+                db.Articles.withInlineCount().skip(2).take(3).toArray(function (items) {
+                    notEqual(items.totalCount, items.length, 'inline count with skip, take');
+                    equal(items.length, 3, 'length value with skip, take');
+                    equal(items.totalCount, 26, 'inline count value with skip, take');
+                    start(1);
+
+                    db.Articles.withInlineCount().skip(8).take(3).toArray(function (items2) {
+                        notEqual(items2.totalCount, items.length, 'inline count with skip, take');
+                        equal(items2.totalCount, 26, 'inline count value with skip, take');
+
+                        for (var i = 0; i < items.length; i++) {
+                            for (var j = 0; j < items2.length; j++) {
+                                notEqual(items[i].Id, items2[j].Id, 'i: ' + i + ', j: ' + j + ' Id not equal');
+                            }
+                        }
+
+                        start(1);
+                    });
+                });
+            });
+        });
+    });
+
     test('Filter_noFilter', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(9);
@@ -268,7 +593,7 @@ function T3(providerConfig, msg) {
     });
 
     test('Include_Articles_in_Category', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -288,7 +613,7 @@ function T3(providerConfig, msg) {
         });
     });
     test('Include_Category_in_Article', function () {
-        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(3);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -711,7 +1036,7 @@ function T3(providerConfig, msg) {
         $data.Class.define("$navProp.Category", $data.Entity, null, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
-            Articles: { dataType: "Array", elementType: "$navProp.Article" }
+            Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Category" }
         }, null);
         $data.Class.define("$navProp.Article", $data.Entity, null, {
             Id: { dataType: "int", key: true, computed: true },
@@ -1024,6 +1349,433 @@ function T3(providerConfig, msg) {
             });
         });
     });
+    test('OData_Function_Import_CreateCategory_Post', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(7);
+        stop(5);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            //$news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                db.CreateCategory('new Category').then(function (result) {
+                    start(1);
+                    ok(!result);
+
+                    db.Categories.single('it.Title == "new Category"').then(function (newCat) {
+                        start(1);
+
+                        ok(newCat);
+                        ok(newCat instanceof $news.Types.Category, 'Return type faild');
+                        ok(newCat.Title, 'new Category');
+                    });
+
+                    db.Categories.single('it.Title == "new Category"').then(function (newCat) {
+                        start(1);
+
+                        ok(newCat);
+                        ok(newCat instanceof $news.Types.Category, 'Return type faild');
+                        ok(newCat.Title, 'new Category');
+                    });
+                })
+            //});
+        });
+    });
+
+    test('Type beforeCreate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            //$news.Types.NewsContext.generateTestData(db, function () {
+
+                var beforeCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'beforeCreate event sender');
+                    ok(item === entity, 'beforeCreate event argument');
+
+                    equal(item.Id, entity.Id, 'beforeCreate Lead property');
+                    equal(item.Id, undefined, 'beforeCreate Lead property value');
+                    equal(item.Title, entity.Title, 'beforeCreate Lead property');
+                    equal(item.Title, 'hello', 'beforeCreate Lead property value');
+                    equal(item.Lead, entity.Lead, 'beforeCreate Lead property');
+                    equal(item.Lead, 'world', 'beforeCreate Lead property value');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                };
+
+                db.Articles.elementType.addEventListener('beforeCreate', beforeCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.saveChanges(function () {
+                    db.Articles.elementType.removeEventListener('beforeCreate', beforeCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.saveChanges(function () {
+                        start();
+                    });
+                });
+            //});
+        });
+    });
+
+    test('Type beforeCreate cancel in context', 11, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            //$news.Types.NewsContext.generateTestData(db, function () {
+
+                var beforeCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'beforeCreate event sender');
+                    ok(item === entity, 'beforeCreate event argument');
+
+                    equal(item.Id, entity.Id, 'beforeCreate Lead property');
+                    equal(item.Id, undefined, 'beforeCreate Lead property value');
+                    equal(item.Title, entity.Title, 'beforeCreate Lead property');
+                    equal(item.Title, 'hello', 'beforeCreate Lead property value');
+                    equal(item.Lead, entity.Lead, 'beforeCreate Lead property');
+                    equal(item.Lead, 'world', 'beforeCreate Lead property value');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                    return false;
+                };
+
+                db.Articles.elementType.addEventListener('beforeCreate', beforeCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.saveChanges(function (cnt) {
+                    equal(cnt, 0, 'added entity count');
+                    db.Articles.elementType.removeEventListener('beforeCreate', beforeCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.Articles.filter('it.Title == "hello"').toArray().then(function (items) {
+                        equal(items.length, 0, 'added entity count');
+
+                        start();
+                    });
+                });
+            //});
+        });
+    });
+
+    test('Type beforeCreate cancel one in context', 9, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            //$news.Types.NewsContext.generateTestData(db, function () {
+
+                var beforeCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'beforeCreate event sender');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                    return item.Title === 'hello' ? false : true;
+                };
+
+                db.Articles.elementType.addEventListener('beforeCreate', beforeCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                db.saveChanges(function (cnt) {
+                    equal(cnt, 1, 'added entity count');
+                    db.Articles.elementType.removeEventListener('beforeCreate', beforeCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.Articles.filter('it.Title == "hello" || it.Title == "hello2"').toArray().then(function (items) {
+                        equal(items.length, 1, 'added entity count');
+
+                        equal(typeof items[0].Id, 'number', 'loaded Id property');
+                        equal(items[0].Title, 'hello2', 'loaded Title property');
+                        equal(items[0].Lead, 'world2', 'loaded Lead property');
+
+                        start();
+                    });
+                });
+            //});
+        });
+    });
+
+    test('Type afterCreate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            //$news.Types.NewsContext.generateTestData(db, function () {
+
+                var afterCreate = function (sender, item) {
+                    ok(sender === db.Articles.elementType, 'afterCreate event sender');
+                    ok(item === entity, 'afterCreate event argument');
+
+                    equal(item.Id, entity.Id, 'afterCreate Lead property');
+                    equal(typeof item.Id, 'number', 'afterCreate Lead property value');
+                    equal(item.Title, entity.Title, 'afterCreate Lead property');
+                    equal(item.Title, 'hello', 'afterCreate Lead property value');
+                    equal(item.Lead, entity.Lead, 'afterCreate Lead property');
+                    equal(item.Lead, 'world', 'afterCreate Lead property value');
+
+                    equal(item.entityState, $data.EntityState.Added, 'beforeCreate EntityState property value');
+                    start();
+                };
+
+                db.Articles.elementType.addEventListener('afterCreate', afterCreate);
+
+                var entity = new db.Articles.elementType({ Title: 'hello', Lead: 'world' });
+                db.Articles.add(entity);
+                db.saveChanges(function () {
+                    db.Articles.elementType.removeEventListener('afterCreate', afterCreate);
+
+                    db.Articles.add({ Title: 'hello2', Lead: 'world2' });
+                    db.saveChanges(function () {
+                        start();
+                    });
+                });
+            //});
+        });
+    });
+
+    test('Type beforeUpdate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.first().then(function (entity) {
+                    var beforeUpdate = function (sender, item) {
+                        ok(sender === db.Articles.elementType, 'beforeUpdate event sender');
+                        ok(item === entity, 'beforeUpdate event argument');
+
+                        equal(item.Id, entity.Id, 'beforeUpdate Lead property');
+                        equal(typeof item.Id, 'number', 'beforeUpdate Lead property value');
+                        equal(item.Title, entity.Title, 'beforeUpdate Lead property');
+                        equal(item.Title, 'hello', 'beforeUpdate Lead property value');
+                        equal(item.Lead, entity.Lead, 'beforeUpdate Lead property');
+                        equal(item.Lead, 'world', 'beforeUpdate Lead property value');
+
+                        equal(item.entityState, $data.EntityState.Modified, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.Articles.elementType.addEventListener('beforeUpdate', beforeUpdate);
+
+                    db.Articles.attach(entity);
+                    entity.Title = 'hello';
+                    entity.Lead = 'world';
+
+                    db.saveChanges(function () {
+                        db.Articles.elementType.removeEventListener('beforeUpdate', beforeUpdate);
+
+                        db.Articles.attach(entity);
+                        entity.Title = 'hello2';
+                        entity.Lead = 'world2';
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type beforeUpdate cancel in context', 11, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Articles.first().then(function (entity) {
+                    var beforeUpdate = function (sender, item) {
+                        ok(sender === db.Articles.elementType, 'beforeUpdate event sender');
+                        ok(item === entity, 'beforeUpdate event argument');
+
+                        equal(item.Id, entity.Id, 'beforeUpdate Lead property');
+                        equal(typeof item.Id, 'number', 'beforeUpdate Lead property value');
+                        equal(item.Title, entity.Title, 'beforeUpdate Lead property');
+                        equal(item.Title, 'hello', 'beforeUpdate Lead property value');
+                        equal(item.Lead, entity.Lead, 'beforeUpdate Lead property');
+                        equal(item.Lead, 'world', 'beforeUpdate Lead property value');
+
+                        equal(item.entityState, $data.EntityState.Modified, 'beforeCreate EntityState property value');
+                        start();
+
+                        return false;
+                    };
+
+                    db.Articles.elementType.addEventListener('beforeUpdate', beforeUpdate);
+
+                    db.Articles.attach(entity);
+                    entity.Title = 'hello';
+                    entity.Lead = 'world';
+
+                    db.saveChanges(function () {
+                        db.Articles.elementType.removeEventListener('beforeUpdate', beforeUpdate);
+
+                        db.Articles.single('it.Id == this.value', { value: entity.Id }).then(function (item) {
+                            notEqual(item.Title, 'hello', 'beforeUpdate Lead property value');
+                            notEqual(item.Lead, 'world', 'beforeUpdate Lead property value');
+                            start();
+                        }).fail(function (e) {
+                            ok(false, e);
+                            start();
+                        });
+
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type afterUpdate in context', 9, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.first().then(function (entity) {
+                    var afterUpdate = function (sender, item) {
+                        ok(sender === db.Articles.elementType, 'afterUpdate event sender');
+                        ok(item === entity, 'afterUpdate event argument');
+
+                        equal(item.Id, entity.Id, 'afterUpdate Lead property');
+                        equal(typeof item.Id, 'number', 'afterUpdate Lead property value');
+                        equal(item.Title, entity.Title, 'afterUpdate Lead property');
+                        equal(item.Title, 'hello', 'afterUpdate Lead property value');
+                        equal(item.Lead, entity.Lead, 'afterUpdate Lead property');
+                        equal(item.Lead, 'world', 'afterUpdate Lead property value');
+
+                        equal(item.entityState, $data.EntityState.Modified, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.Articles.elementType.addEventListener('afterUpdate', afterUpdate);
+
+                    db.Articles.attach(entity);
+                    entity.Title = 'hello';
+                    entity.Lead = 'world';
+
+                    db.saveChanges(function () {
+                        db.Articles.elementType.removeEventListener('afterUpdate', afterUpdate);
+
+                        db.Articles.attach(entity);
+                        entity.Title = 'hello2';
+                        entity.Lead = 'world2';
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type beforeDelete in context', 5, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.TagConnections.toArray().then(function (entities) {
+                    var entity = entities[0];
+
+                    var beforeDelete = function (sender, item) {
+                        ok(sender === db.TagConnections.elementType, 'beforeDelete event sender');
+                        ok(item === entity, 'beforeDelete event argument');
+
+                        equal(item.Id, entity.Id, 'beforeDelete Id property');
+                        equal(typeof item.Id, 'number', 'beforeDelete Id property value');
+
+                        equal(item.entityState, $data.EntityState.Deleted, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.TagConnections.elementType.addEventListener('beforeDelete', beforeDelete);
+
+                    db.TagConnections.remove(entity);
+
+                    return db.saveChanges(function () {
+                        db.TagConnections.elementType.removeEventListener('beforeDelete', beforeDelete);
+
+                        db.TagConnections.remove(entities[1]);
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type beforeDelete cancel in context', 6, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.TagConnections.toArray().then(function (entities) {
+                    var entity = entities[0];
+
+                    var beforeDelete = function (sender, item) {
+                        ok(sender === db.TagConnections.elementType, 'beforeDelete event sender');
+                        ok(item === entity, 'beforeDelete event argument');
+
+                        equal(item.Id, entity.Id, 'beforeDelete Id property');
+                        equal(typeof item.Id, 'number', 'beforeDelete Id property value');
+
+                        equal(item.entityState, $data.EntityState.Deleted, 'beforeCreate EntityState property value');
+                        start();
+                        return false;
+                    };
+
+                    db.TagConnections.elementType.addEventListener('beforeDelete', beforeDelete);
+
+                    db.TagConnections.remove(entity);
+
+                    return db.saveChanges(function () {
+                        db.TagConnections.elementType.removeEventListener('beforeDelete', beforeDelete);
+
+                        db.TagConnections.remove(entities[1]);
+
+                        db.TagConnections.single('it.Id == this.value', { value: entity.Id }).then(function (item) {
+                            ok(true, 'not deleted');
+                            start();
+                        }).fail(function (e) {
+                            ok(false, e);
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
+
+    test('Type afterDelete in context', 5, function () {
+        stop(2);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.TagConnections.toArray().then(function (entities) {
+                    var entity = entities[0];
+
+                    var afterDelete = function (sender, item) {
+                        ok(sender === db.TagConnections.elementType, 'afterDelete event sender');
+                        ok(item === entity, 'afterDelete event argument');
+
+                        equal(item.Id, entity.Id, 'afterDelete Id property');
+                        equal(typeof item.Id, 'number', 'afterDelete Id property value');
+
+                        equal(item.entityState, $data.EntityState.Deleted, 'beforeCreate EntityState property value');
+                        start();
+                    };
+
+                    db.TagConnections.elementType.addEventListener('afterDelete', afterDelete);
+
+                    db.TagConnections.remove(entity);
+
+                    return db.saveChanges(function () {
+                        db.TagConnections.elementType.removeEventListener('afterDelete', afterDelete);
+
+                        db.TagConnections.remove(entities[1]);
+
+                        db.saveChanges(function () {
+                            start();
+                        });
+                    });
+                }).fail($data.debug);
+            });
+        });
+    });
 }
 
 function T3_oDataV3(providerConfig, msg) {
@@ -1162,4 +1914,484 @@ function T3_oDataV3(providerConfig, msg) {
         });
     });
 
+    
+}
+
+
+$data.Class.define('$example.GeoTestEntity', $data.Entity, null, {
+    Id: { type: 'int', key: true, computed: true },
+    Name: { type: 'string' },
+    GeographyPoint: { type: 'GeographyPoint' },
+    GeographyLineString: { type: 'GeographyLineString' },
+    GeographyPolygon: { type: 'GeographyPolygon' },
+    GeographyMultiPoint: { type: 'GeographyMultiPoint' },
+    GeographyMultiLineString: { type: 'GeographyMultiLineString' },
+    GeographyMultiPolygon: { type: 'GeographyMultiPolygon' },
+    GeographyCollection: { type: 'GeographyCollection' },
+});
+
+$data.Class.define('$example.GeometryTestEntity', $data.Entity, null, {
+    Id: { type: 'int', key: true, computed: true },
+    Name: { type: 'string' },
+    GeometryPoint: { type: 'GeometryPoint' },
+    GeometryLineString: { type: 'GeometryLineString' },
+    GeometryPolygon: { type: 'GeometryPolygon' },
+    GeometryMultiPoint: { type: 'GeometryMultiPoint' },
+    GeometryMultiLineString: { type: 'GeometryMultiLineString' },
+    GeometryMultiPolygon: { type: 'GeometryMultiPolygon' },
+    GeometryCollection: { type: 'GeometryCollection' },
+});
+
+$data.Class.define('$example.Context', $data.EntityContext, null, {
+    GeoTestEntities: { type: $data.EntitySet, elementType: $example.GeoTestEntity },
+    GeometryTestEntities: { type: $data.EntitySet, elementType: $example.GeometryTestEntity }
+});
+
+function GeoTests(providerConfig, msg, afterTestFn) {
+    msg = msg || '';
+    module("GeoTests" + msg);
+
+    test("Save GeographyObjects", 19, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeographyPoint([1, 5]);
+            var lString = new $data.GeographyLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeographyMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeographyMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeographyMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeographyCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeoTestEntity({
+                Name: 'Item1Name',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygon,
+                GeographyMultiPoint: mPoint,
+                GeographyMultiLineString: mLineString,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            var item2 = new $example.GeoTestEntity({
+                Name: 'Item2Name',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygonWithHole,
+                GeographyMultiPoint: mPoint,
+                GeographyMultiLineString: mLineString,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            context.GeoTestEntities.add(item);
+            context.GeoTestEntities.add(item2);
+
+            var itemsToSave = [item, item2];
+            context.saveChanges(function () {
+                context.GeoTestEntities.toArray(function (items) {
+
+                    equal(items.length, 2, 'result length');
+                    for (var i = 0; i < items.length; i++) {
+                        var resItem = items[i];
+                        var refItem = itemsToSave[i];
+
+                        equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                        equal(resItem.Name, 'Item' + (i + 1) + 'Name', 'itemName');
+
+                        deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                        deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                        deepEqual(resItem.GeographyPolygon.coordinates, (i == 0 ? polygon : polygonWithHole).coordinates, 'GeographyPolygon data');
+                        deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
+                        deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
+                        deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                        deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                    }
+
+                    context.GeoTestEntities.remove(items[0]);
+                    context.GeoTestEntities.remove(items[1]);
+                    context.saveChanges(function () {
+                        if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                        else start();
+                    });
+                });
+            });
+
+        });
+    });
+    test("Modify GeographyObjects", 20, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeographyPoint([1, 5]);
+            var lString = new $data.GeographyLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeographyMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeographyMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeographyMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeographyCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeoTestEntity({
+                Name: 'ItemName',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygon,
+                GeographyMultiPoint: null,
+                GeographyMultiLineString: undefined,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            context.GeoTestEntities.add(item);
+
+            context.saveChanges(function () {
+                context.GeoTestEntities.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length');
+                    var resItem = items[0];
+                    var refItem = item;
+
+                    equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                    equal(resItem.Name, 'ItemName', 'itemName');
+
+                    deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                    deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                    deepEqual(resItem.GeographyPolygon.coordinates, polygon.coordinates, 'GeographyPolygon data');
+                    deepEqual(resItem.GeographyMultiPoint, null, 'GeographyMultiPoint data');
+                    ok(!resItem.GeographyMultiLineString, 'GeographyMultiLineString data');
+                    deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                    deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                    context.GeoTestEntities.attach(resItem);
+                    resItem.Name = 'Item updated';
+                    resItem.GeographyPolygon = polygonWithHole;
+                    resItem.GeographyMultiPoint = mPoint;
+                    resItem.GeographyMultiLineString = mLineString;
+
+                    context.saveChanges(function () {
+                        context.GeoTestEntities.toArray(function (itemsup) {
+
+                            equal(itemsup.length, 1, 'result length');
+                            var refItem = resItem;
+                            var resItem = itemsup[0];
+
+                            equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                            equal(resItem.Name, 'Item updated', 'itemName updated');
+
+                            deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                            deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                            deepEqual(resItem.GeographyPolygon.coordinates, polygonWithHole.coordinates, 'GeographyPolygon data');
+                            deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
+                            deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
+                            deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                            deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                            context.GeoTestEntities.remove(resItem);
+                            context.saveChanges(function () {
+                                if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                                else start();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test("Save GeometryObjects", 19, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeometryPoint([1, 5]);
+            var lString = new $data.GeometryLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeometryMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeometryMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeometryMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeometryCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeometryTestEntity({
+                Name: 'Item1Name',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygon,
+                GeometryMultiPoint: mPoint,
+                GeometryMultiLineString: mLineString,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            var item2 = new $example.GeometryTestEntity({
+                Name: 'Item2Name',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygonWithHole,
+                GeometryMultiPoint: mPoint,
+                GeometryMultiLineString: mLineString,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            context.GeometryTestEntities.add(item);
+            context.GeometryTestEntities.add(item2);
+
+            var itemsToSave = [item, item2];
+            context.saveChanges(function () {
+                context.GeometryTestEntities.toArray(function (items) {
+
+                    equal(items.length, 2, 'result length');
+                    for (var i = 0; i < items.length; i++) {
+                        var resItem = items[i];
+                        var refItem = itemsToSave[i];
+
+                        equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                        equal(resItem.Name, 'Item' + (i + 1) + 'Name', 'itemName');
+
+                        deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                        deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                        deepEqual(resItem.GeometryPolygon.coordinates, (i == 0 ? polygon : polygonWithHole).coordinates, 'GeometryPolygon data');
+                        deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
+                        deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
+                        deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                        deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                    }
+
+                    context.GeometryTestEntities.remove(items[0]);
+                    context.GeometryTestEntities.remove(items[1]);
+                    context.saveChanges(function () {
+                        if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                        else start();
+                    });
+                });
+            });
+
+        });
+    });
+
+    test("Modify GeometryObjects", 20, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var point = new $data.GeometryPoint([1, 5]);
+            var lString = new $data.GeometryLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeometryMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeometryMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeometryMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeometryCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeometryTestEntity({
+                Name: 'ItemName',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygon,
+                GeometryMultiPoint: null,
+                GeometryMultiLineString: undefined,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            context.GeometryTestEntities.add(item);
+
+            context.saveChanges(function () {
+                context.GeometryTestEntities.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length');
+                    var resItem = items[0];
+                    var refItem = item;
+
+                    equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                    equal(resItem.Name, 'ItemName', 'itemName');
+
+                    deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                    deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                    deepEqual(resItem.GeometryPolygon.coordinates, polygon.coordinates, 'GeometryPolygon data');
+                    deepEqual(resItem.GeometryMultiPoint, null, 'GeometryMultiPoint data');
+                    ok(!resItem.GeometryMultiLineString, 'GeometryMultiLineString data');
+                    deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                    deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                    context.GeometryTestEntities.attach(resItem);
+                    resItem.Name = 'Item updated';
+                    resItem.GeometryPolygon = polygonWithHole;
+                    resItem.GeometryMultiPoint = mPoint;
+                    resItem.GeometryMultiLineString = mLineString;
+
+                    context.saveChanges(function () {
+                        context.GeometryTestEntities.toArray(function (itemsup) {
+
+                            equal(itemsup.length, 1, 'result length');
+                            var refItem = resItem;
+                            var resItem = itemsup[0];
+
+                            equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                            equal(resItem.Name, 'Item updated', 'itemName updated');
+
+                            deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                            deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                            deepEqual(resItem.GeometryPolygon.coordinates, polygonWithHole.coordinates, 'GeometryPolygon data');
+                            deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
+                            deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
+                            deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                            deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                            context.GeometryTestEntities.remove(resItem);
+                            context.saveChanges(function () {
+                                if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                                else start();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    
+}
+
+function GeoTestsFuncCompile(providerConfig, msg) {
+    test("Geo functions compile", 1, function () {
+        if (providerConfig.name != "oData") { ok(true, "Not supported"); return; }
+        expect(5);
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            var q = context.GeoTestEntities.filter(function (it) { it.GeographyPoint.distance(this.location) < 50.16 }, { location: new $data.GeographyPoint(1, 5) }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(geo.distance(GeographyPoint,geography'POINT(1 5)') lt 50.16)");
+            q = context.GeoTestEntities.filter(function (it) { 50.16 > it.GeographyPoint.distance(this.location) }, { location: new $data.GeographyPoint(1, 5) }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(50.16 gt geo.distance(GeographyPoint,geography'POINT(1 5)'))");
+
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, -0.5], [101.0, 0.0], [101.0, 1.0], [100.5, 1.5], [100.0, -0.5]]
+            ]);
+            q = context.GeoTestEntities.filter(function (it) { it.GeographyPoint.intersects(this.polygon) }, { polygon: polygon }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=geo.intersects(GeographyPoint,geography'POLYGON((100 -0.5,101 0,101 1,100.5 1.5,100 -0.5))')");
+
+
+            q = context.GeoTestEntities.filter(function (it) { it.GeographyLineString.length() > 50.36 }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(geo.length(GeographyLineString) gt 50.36)");
+            q = context.GeoTestEntities.filter(function (it) { 50.36 < it.GeographyLineString.length() }).toTraceString();
+            equal(q.queryText, "/GeoTestEntities?$filter=(50.36 lt geo.length(GeographyLineString))");
+
+        });
+    });
 }

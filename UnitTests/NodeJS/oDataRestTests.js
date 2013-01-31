@@ -19,7 +19,7 @@ $data.Class.define('$example.Order', $data.Entity, null, {
 $data.Class.define('$example.Place', $data.Entity, null, {
     Id: { type: 'string', key: true, computed: true },
     Name: { type: 'string' },
-    Location: { type: 'geo' }
+    Location: { type: 'GeographyPoint' }
 });
 
 $data.Class.define('$example.TestItem', $data.Entity, null, {
@@ -28,12 +28,58 @@ $data.Class.define('$example.TestItem', $data.Entity, null, {
     Index: { type: 'int' }
 });
 
+$data.Class.define('$example.TestItemGuid', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' }
+});
+
+$data.Class.define('$example.TestItemComputed', $data.Entity, null, {
+    Id: { type: 'guid', key: true, required: true },
+    Name: { type: 'string' },
+    Index: { type: 'int' },
+    GuidField: { type: 'guid' },
+    DateField: { type: 'date' },
+    BoolField: { type: 'bool' },
+    ObjectField: { type: 'object' }
+});
+
+$data.Class.define('$example.GeoTestEntity', $data.Entity, null, {
+    Id: { type: 'string', key: true, computed: true },
+    Name: { type: 'string' },
+    GeographyPoint: { type: 'GeographyPoint' },
+    GeographyLineString: { type: 'GeographyLineString' },
+    GeographyPolygon: { type: 'GeographyPolygon' },
+    GeographyMultiPoint: { type: 'GeographyMultiPoint' },
+    GeographyMultiLineString: { type: 'GeographyMultiLineString' },
+    GeographyMultiPolygon: { type: 'GeographyMultiPolygon' },
+    GeographyCollection: { type: 'GeographyCollection' },
+});
+
+$data.Class.define('$example.GeometryTestEntity', $data.Entity, null, {
+    Id: { type: 'string', key: true, computed: true },
+    Name: { type: 'string' },
+    GeometryPoint: { type: 'GeometryPoint' },
+    GeometryLineString: { type: 'GeometryLineString' },
+    GeometryPolygon: { type: 'GeometryPolygon' },
+    GeometryMultiPoint: { type: 'GeometryMultiPoint' },
+    GeometryMultiLineString: { type: 'GeometryMultiLineString' },
+    GeometryMultiPolygon: { type: 'GeometryMultiPolygon' },
+    GeometryCollection: { type: 'GeometryCollection' },
+});
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     People: { type: $data.EntitySet, elementType: $example.Person },
     Orders: { type: $data.EntitySet, elementType: $example.Order },
     Places: { type: $data.EntitySet, elementType: $example.Place },
     TestItems: { type: $data.EntitySet, elementType: $example.TestItem },
+    TestItemGuids: { type: $data.EntitySet, elementType: $example.TestItemGuid },
+    TestItemComputeds: { type: $data.EntitySet, elementType: $example.TestItemComputed },
+    GeoTestEntities: { type: $data.EntitySet, elementType: $example.GeoTestEntity },
+    GeometryTestEntities: { type: $data.EntitySet, elementType: $example.GeometryTestEntity },
     FuncStrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncStrParam', returnType: $data.String, params: [{ a: $data.String }] }),
+    FuncGuidParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGuidParam', returnType: $data.Guid, params: [{ a: $data.Guid }] }),
     FuncIntParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncIntParam', returnType: $data.Integer, params: [{ a: $data.Integer }] }),
     FuncNumParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncNumParam', returnType: $data.Number, params: [{ a: $data.Number }] }),
     FuncObjParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncObjParam', returnType: $data.Object, params: [{ a: $data.Object }] }),
@@ -41,7 +87,8 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
     FuncArrParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncArrParam', returnType: $data.Object, params: [{ a: $data.Array }] }),
     FuncBoolParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncBoolParam', returnType: $data.Boolean, params: [{ a: $data.Boolean }] }),
     FuncDateParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncDateParam', returnType: $data.Date, params: [{ a: $data.Date }] }),
-    FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.Geography, params: [{ a: $data.Geography }] }),
+    FuncGeographyParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeographyParam', returnType: $data.GeographyPoint, params: [{ a: $data.GeographyPoint }] }),
+    FuncGeometryParam: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncGeometryParam', returnType: $data.GeometryPoint, params: [{ a: $data.GeometryPoint }] }),
 
     ATables: {
         type: $data.EntitySet,
@@ -75,25 +122,30 @@ $example.Context.deleteData = function (ctx, callback) {
             ctx.Orders.toArray(function (o) {
                 ctx.Places.toArray(function (pl) {
                     ctx.TestItems.toArray(function (t) {
-                        for (var i = 0; i < p.length; i++) {
-                            ctx.People.remove(p[i]);
-                        }
-                        for (var i = 0; i < o.length; i++) {
-                            ctx.Orders.remove(o[i]);
-                        }
-                        for (var i = 0; i < pl.length; i++) {
-                            ctx.Places.remove(pl[i]);
-                        }
-                        for (var i = 0; i < t.length; i++) {
-                            ctx.TestItems.remove(t[i]);
-                        }
-                        ctx.saveChanges(function () {
-                            if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables ||
-                                pl.length >= $example.Context.generateTestData.itemsInTables || t.length >= $example.Context.generateTestData.itemsInTables) {
-                                $example.Context.deleteData(ctx, callback);
-                            } else {
-                                callback.success();
+                        ctx.TestItemGuids.toArray(function (tg) {
+                            for (var i = 0; i < p.length; i++) {
+                                ctx.People.remove(p[i]);
                             }
+                            for (var i = 0; i < o.length; i++) {
+                                ctx.Orders.remove(o[i]);
+                            }
+                            for (var i = 0; i < pl.length; i++) {
+                                ctx.Places.remove(pl[i]);
+                            }
+                            for (var i = 0; i < t.length; i++) {
+                                ctx.TestItems.remove(t[i]);
+                            }
+                            for (var i = 0; i < tg.length; i++) {
+                                ctx.TestItemGuids.remove(tg[i]);
+                            }
+                            ctx.saveChanges(function () {
+                                if (o.length >= $example.Context.generateTestData.itemsInTables || p.length >= $example.Context.generateTestData.itemsInTables ||
+                                    pl.length >= $example.Context.generateTestData.itemsInTables || t.length >= $example.Context.generateTestData.itemsInTables) {
+                                    $example.Context.deleteData(ctx, callback);
+                                } else {
+                                    callback.success();
+                                }
+                            });
                         });
                     });
                 });
@@ -106,7 +158,8 @@ $example.Context.generateTestData = function (ctx, callback) {
         for (var i = 0; i < $example.Context.generateTestData.itemsInTables; i++) {
             ctx.People.add({ Name: 'Person' + i, Description: 'desc' + i, Age: 10 + i });
             ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2, Data: { a: 5, b: i } });
-            ctx.Places.add({ Name: 'Places' + i, Location: new $data.Geography(123.15697, i) });
+            ctx.Places.add({ Name: 'Places' + i, Location: new $data.GeographyPoint(123.15697, i) });
+            ctx.TestItemGuids.add({ Id: $data.Guid.NewGuid(), Name: 'name' + i, Index: i, GuidField: $data.Guid.NewGuid() });
         }
 
         ctx.saveChanges(callback);
@@ -115,8 +168,16 @@ $example.Context.generateTestData = function (ctx, callback) {
 
 $example.Context.generateTestData.serviceurl = '/testservice';
 $example.Context.generateTestData.itemsInTables = 10;
-$example.Context.getContext = function () {
-    var ctx = new $example.Context({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.serviceurl, serviceUrl: $example.Context.generateTestData.serviceurl, user: 'asd', password: 'asd' });
+$example.Context.getContext = function (cfg) {
+    var config = $data.typeSystem.extend({
+        name: 'oData',
+        oDataServiceHost: $example.Context.generateTestData.serviceurl,
+        serviceUrl: $example.Context.generateTestData.serviceurl,
+        user: 'asd',
+        password: 'asd'
+    }, cfg || {});
+
+    var ctx = new $example.Context(config);
     return ctx;
 };
 
@@ -200,6 +261,34 @@ test("REST - GET ById", 4, function () {
                 equal(data.Name, person.Name, 'Name field failed');
                 equal(data.Description, person.Description, 'Description field failed');
                 equal(data.Age, person.Age, 'Age field failed');
+
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+            });
+
+        });
+    });
+});
+test("REST - GET ById guid", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (p) {
+            var item = p[0];
+
+            OData.request({
+                requestUri: $example.Context.generateTestData.serviceurl + "/TestItemGuids(guid'" + item.Id + "')",
+                method: 'GET',
+                data: undefined,
+                user: 'asd',
+                password: 'asd'
+            }, function (data) {
+
+                equal(data.Id, item.Id.value, 'Id field failed');
+                equal(data.Name, item.Name, 'Name field failed');
+                equal(data.Index, item.Index, 'Index field failed');
 
                 start();
             }, function () {
@@ -975,7 +1064,7 @@ test("Save Geography", 5, function () {
 
     var context = $example.Context.getContext();
     $example.Context.deleteData(context, function () {
-        var place = new $example.Place({ Name: 'Headquarter', Location: new $data.Geography(-44.001536, 44.35433) });
+        var place = new $example.Place({ Name: 'Headquarter', Location: new $data.GeographyPoint(-44.001536, 44.35433) });
 
         context.Places.add(place);
 
@@ -987,7 +1076,7 @@ test("Save Geography", 5, function () {
                     equal(places.length, 1, 'result length failed');
                     equal(places[0].Id, place.Id, 'loaded Id failed');
 
-                    equal(places[0].Location instanceof $data.Geography, true, 'Geo type type failed');
+                    equal(places[0].Location instanceof $data.GeographyPoint, true, 'Geo type type failed');
                     equal(places[0].Location.longitude, -44.001536, 'Geo type longitude failed');
                     equal(places[0].Location.latitude, 44.35433, 'Geo type longitude failed');
 
@@ -1012,7 +1101,7 @@ test("Modify Geography", 4, function () {
             var place = places[0];
 
             context.attach(place);
-            place.Location = new $data.Geography(23.153, -16.138135);
+            place.Location = new $data.GeographyPoint(23.153, -16.138135);
             place.Name = 'Jay location';
 
             context.saveChanges(function () {
@@ -1020,7 +1109,7 @@ test("Modify Geography", 4, function () {
 
                     equal(placeRes.Id, place.Id, 'loaded Id failed');
 
-                    equal(placeRes.Location instanceof $data.Geography, true, 'Geo type type failed');
+                    equal(placeRes.Location instanceof $data.GeographyPoint, true, 'Geo type type failed');
                     equal(placeRes.Location.longitude, 23.153, 'Geo type longitude failed');
                     equal(placeRes.Location.latitude, -16.138135, 'Geo type longitude failed');
 
@@ -1036,7 +1125,7 @@ test("Filter Geography equal", 3, function () {
 
     var context = $example.Context.getContext();
     $example.Context.generateTestData(context, function () {
-        context.Places.filter(function (p) { return p.Location == this.geo }, { geo: new $data.Geography(123.15697, 1) }).toArray(function (places) {
+        context.Places.filter(function (p) { return p.Location == this.geo }, { geo: new $data.GeographyPoint(123.15697, 1) }).toArray(function (places) {
             equal(places.length, 1, 'filter for Geography ?!');
             equal(places[0].Location.longitude, 123.15697, 'Location.longitude failed');
             equal(places[0].Location.latitude, 1, 'Location.latitude failed');
@@ -1051,7 +1140,7 @@ test("Filter Geography not equal", 19, function () {
 
     var context = $example.Context.getContext();
     $example.Context.generateTestData(context, function () {
-        context.Places.filter(function (p) { return p.Location != this.geo }, { geo: new $data.Geography(123.15697, 1) }).toArray(function (places) {
+        context.Places.filter(function (p) { return p.Location != this.geo }, { geo: new $data.GeographyPoint(123.15697, 1) }).toArray(function (places) {
             equal(places.length, 9, 'not filter for Geography ?!');
             for (var i = 0; i < 9; i++) {
                 equal(places[i].Location.longitude, 123.15697, 'Location.longitude failed');
@@ -1060,6 +1149,416 @@ test("Filter Geography not equal", 19, function () {
 
 
             start();
+        });
+    });
+});
+
+test("Save GeographyObjects", 19, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.GeoTestEntities.removeAll(function () {
+
+            var point = new $data.GeographyPoint([1, 5]);
+            var lString = new $data.GeographyLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeographyMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeographyMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeographyMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeographyCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeoTestEntity({
+                Name: 'Item1Name',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygon,
+                GeographyMultiPoint: mPoint,
+                GeographyMultiLineString: mLineString,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            var item2 = new $example.GeoTestEntity({
+                Name: 'Item2Name',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygonWithHole,
+                GeographyMultiPoint: mPoint,
+                GeographyMultiLineString: mLineString,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            context.GeoTestEntities.add(item);
+            context.GeoTestEntities.add(item2);
+
+            var itemsToSave = [item, item2];
+            context.saveChanges(function () {
+                context.GeoTestEntities.toArray(function (items) {
+
+                    equal(items.length, 2, 'result length');
+                    for (var i = 0; i < items.length; i++) {
+                        var resItem = items[i];
+                        var refItem = itemsToSave[i];
+
+                        equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                        equal(resItem.Name, 'Item' + (i+1) + 'Name', 'itemName');
+
+                        deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                        deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                        deepEqual(resItem.GeographyPolygon.coordinates, (i == 0 ? polygon : polygonWithHole).coordinates, 'GeographyPolygon data');
+                        deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
+                        deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
+                        deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                        deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                    }
+
+                    start();
+                });
+            });
+
+        });
+    });
+});
+
+test("Modify GeographyObjects", 20, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.GeoTestEntities.removeAll(function () {
+
+            var point = new $data.GeographyPoint([1, 5]);
+            var lString = new $data.GeographyLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeographyPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeographyMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeographyMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeographyMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeographyCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeoTestEntity({
+                Name: 'ItemName',
+                GeographyPoint: point,
+                GeographyLineString: lString,
+                GeographyPolygon: polygon,
+                GeographyMultiPoint: null,
+                GeographyMultiLineString: undefined,
+                GeographyMultiPolygon: mPolygon,
+                GeographyCollection: collection,
+            });
+
+            context.GeoTestEntities.add(item);
+
+            context.saveChanges(function () {
+                context.GeoTestEntities.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length');
+                    var resItem = items[0];
+                    var refItem = item;
+
+                    equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                    equal(resItem.Name, 'ItemName', 'itemName');
+
+                    deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                    deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                    deepEqual(resItem.GeographyPolygon.coordinates, polygon.coordinates, 'GeographyPolygon data');
+                    deepEqual(resItem.GeographyMultiPoint, null, 'GeographyMultiPoint data');
+                    deepEqual(resItem.GeographyMultiLineString, null, 'GeographyMultiLineString data');
+                    deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                    deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                    context.GeoTestEntities.attach(resItem);
+                    resItem.Name = 'Item updated';
+                    resItem.GeographyPolygon = polygonWithHole;
+                    resItem.GeographyMultiPoint = mPoint;
+                    resItem.GeographyMultiLineString = mLineString;
+
+                    context.saveChanges(function () {
+                        context.GeoTestEntities.toArray(function (itemsup) {
+
+                            equal(itemsup.length, 1, 'result length');
+                            var refItem = resItem;
+                            var resItem = itemsup[0];
+
+                            equal(resItem instanceof $example.GeoTestEntity, true, 'item instance');
+                            equal(resItem.Name, 'Item updated', 'itemName updated');
+
+                            deepEqual(resItem.GeographyPoint.coordinates, point.coordinates, 'GeographyPoint data');
+                            deepEqual(resItem.GeographyLineString.coordinates, lString.coordinates, 'GeographyLineString data');
+                            deepEqual(resItem.GeographyPolygon.coordinates, polygonWithHole.coordinates, 'GeographyPolygon data');
+                            deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
+                            deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
+                            deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
+                            deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+test("Save GeometryObjects", 19, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.GeometryTestEntities.removeAll(function () {
+
+            var point = new $data.GeometryPoint([1, 5]);
+            var lString = new $data.GeometryLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeometryMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeometryMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeometryMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeometryCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeometryTestEntity({
+                Name: 'Item1Name',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygon,
+                GeometryMultiPoint: mPoint,
+                GeometryMultiLineString: mLineString,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            var item2 = new $example.GeometryTestEntity({
+                Name: 'Item2Name',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygonWithHole,
+                GeometryMultiPoint: mPoint,
+                GeometryMultiLineString: mLineString,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            context.GeometryTestEntities.add(item);
+            context.GeometryTestEntities.add(item2);
+
+            var itemsToSave = [item, item2];
+            context.saveChanges(function () {
+                context.GeometryTestEntities.toArray(function (items) {
+
+                    equal(items.length, 2, 'result length');
+                    for (var i = 0; i < items.length; i++) {
+                        var resItem = items[i];
+                        var refItem = itemsToSave[i];
+
+                        equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                        equal(resItem.Name, 'Item' + (i + 1) + 'Name', 'itemName');
+
+                        deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                        deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                        deepEqual(resItem.GeometryPolygon.coordinates, (i == 0 ? polygon : polygonWithHole).coordinates, 'GeometryPolygon data');
+                        deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
+                        deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
+                        deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                        deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                    }
+
+                    start();
+                });
+            });
+
+        });
+    });
+});
+
+test("Modify GeometryObjects", 20, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    context.onReady(function () {
+        context.GeometryTestEntities.removeAll(function () {
+
+            var point = new $data.GeometryPoint([1, 5]);
+            var lString = new $data.GeometryLineString([[1, 2], [3, -4.34], [-5, 6.15]]);
+            var polygon = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]]
+            ]);
+            var polygonWithHole = new $data.GeometryPolygon([
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+            ]);
+            var mPoint = new $data.GeometryMultiPoint([[100.0, 0.0], [101.0, 1.0]]);
+            var mLineString = new $data.GeometryMultiLineString([
+                  [[100.0, 0.0], [101.0, 1.0]],
+                  [[102.0, 2.0], [103.0, 3.0]]
+            ]);
+            var mPolygon = new $data.GeometryMultiPolygon([
+                [
+                    [[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]
+                ],
+                [
+                    [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                    [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]
+                ]
+            ]);
+            var collection = new $data.GeometryCollection({
+                coordinates: [
+                    {
+                        "type": "Point",
+                        "coordinates": [100.0, 0.0]
+                    },
+                    {
+                        "type": "LineString",
+                        "coordinates": [[101.0, 0.0], [102.0, 1.0]]
+                    }
+                ]
+            });
+
+            var item = new $example.GeometryTestEntity({
+                Name: 'ItemName',
+                GeometryPoint: point,
+                GeometryLineString: lString,
+                GeometryPolygon: polygon,
+                GeometryMultiPoint: null,
+                GeometryMultiLineString: undefined,
+                GeometryMultiPolygon: mPolygon,
+                GeometryCollection: collection,
+            });
+
+            context.GeometryTestEntities.add(item);
+
+            context.saveChanges(function () {
+                context.GeometryTestEntities.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length');
+                    var resItem = items[0];
+                    var refItem = item;
+
+                    equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                    equal(resItem.Name, 'ItemName', 'itemName');
+
+                    deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                    deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                    deepEqual(resItem.GeometryPolygon.coordinates, polygon.coordinates, 'GeometryPolygon data');
+                    deepEqual(resItem.GeometryMultiPoint, null, 'GeometryMultiPoint data');
+                    deepEqual(resItem.GeometryMultiLineString, null, 'GeometryMultiLineString data');
+                    deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                    deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                    context.GeometryTestEntities.attach(resItem);
+                    resItem.Name = 'Item updated';
+                    resItem.GeometryPolygon = polygonWithHole;
+                    resItem.GeometryMultiPoint = mPoint;
+                    resItem.GeometryMultiLineString = mLineString;
+
+                    context.saveChanges(function () {
+                        context.GeometryTestEntities.toArray(function (itemsup) {
+
+                            equal(itemsup.length, 1, 'result length');
+                            var refItem = resItem;
+                            var resItem = itemsup[0];
+
+                            equal(resItem instanceof $example.GeometryTestEntity, true, 'item instance');
+                            equal(resItem.Name, 'Item updated', 'itemName updated');
+
+                            deepEqual(resItem.GeometryPoint.coordinates, point.coordinates, 'GeometryPoint data');
+                            deepEqual(resItem.GeometryLineString.coordinates, lString.coordinates, 'GeometryLineString data');
+                            deepEqual(resItem.GeometryPolygon.coordinates, polygonWithHole.coordinates, 'GeometryPolygon data');
+                            deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
+                            deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
+                            deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
+                            deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+
+                            start();
+                        });
+                    });
+                });
+            });
         });
     });
 });
@@ -1113,5 +1612,491 @@ test("Bugfix delete test", 1, function () {
             });
         });
 
+    });
+});
+
+test("Save Guid", 3, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.deleteData(context, function () {
+        var item = new $example.TestItemGuid({ Id: $data.Guid.NewGuid(), Name: 'item1' });
+
+        context.TestItemGuids.add(item);
+
+        context.saveChanges({
+            success: function () {
+
+                context.TestItemGuids.toArray(function (items) {
+
+                    equal(items.length, 1, 'result length failed');
+                    equal(items[0].Id.valueOf(), item.Id.valueOf(), 'loaded Id failed');
+
+                    equal(items[0].Name, 'item1', 'Name failed');
+
+                    start();
+                });
+            },
+            error: function (ex) {
+                ok(false, 'save error occured: ' + ex);
+                start();
+            }
+        })
+
+    });
+});
+
+test("Modify Guid - Filter Guid", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.attach(item);
+            item.GuidField = $data.parseGuid('12345678-1234-1234-1234-123412341234');
+            item.Name = 'Jay location';
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.GuidField == this.Guid', { Guid: $data.parseGuid('12345678-1234-1234-1234-123412341234') }).single(null, null, function (itemRes) {
+
+                    equal(itemRes.Id.valueOf(), item.Id.valueOf(), 'loaded Id failed');
+                    equal(itemRes.GuidField.valueOf(), item.GuidField.valueOf(), 'loaded GuidField failed');
+
+                    start();
+                });
+            });
+        });
+    });
+});
+
+test("Delete item with guid key", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.TestItemGuids.remove(item);
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.Id == this.Guid', { Guid: item.Id }).length(function (cnt) {
+                    equal(cnt, 0, 'delete failed');
+                    context.TestItemGuids.length(function (count) {
+                        equal(count, items.length - 1, 'delete failed all result');
+                        start();
+                    });
+                });
+            });
+        });
+    });
+});
+
+test("Delete item by guid", 2, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.TestItemGuids.toArray(function (items) {
+            var item = items[0];
+
+            context.TestItemGuids.remove({ Id: item.Id });
+
+            context.saveChanges(function () {
+                context.TestItemGuids.filter('it.Id == this.Guid', { Guid: item.Id }).length(function (cnt) {
+                    equal(cnt, 0, 'delete failed');
+                    context.TestItemGuids.length(function (count) {
+                        equal(count, items.length - 1, 'delete failed all result');
+                        start();
+                    });
+                });
+            });
+        });
+    });
+});
+
+$data.Class.define('$example.ComplexT', $data.Entity, null, {
+    Name: { type: 'string' },
+    Description: { type: 'string' },
+    Age: { type: 'int' },
+    Created: { type: 'date' }
+});
+
+$data.Class.define('$example.ComplexTWithComplex', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: '$example.ComplexT' }
+});
+
+$data.Class.define('$example.ComplexTWithArrayComplex', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: 'Array', elementType: '$example.ComplexT' }
+});
+
+$data.Class.define('$example.ComplexTWithCC', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex2: { type: '$example.ComplexTWithComplex' }
+});
+
+$data.Class.define('$example.ComplexTWithCCAndArrayC', $data.Entity, null, {
+    Title: { type: 'string' },
+    Complex: { type: '$example.ComplexT' },
+    Complex2Arr: { type: 'Array', elementType: '$example.ComplexTWithComplex' }
+});
+
+$data.Class.define('$example.FuncContext', $data.EntityContext, null, {
+    People: { type: $data.EntitySet, elementType: $example.Person },
+    Orders: { type: $data.EntitySet, elementType: $example.Order },
+    FuncComplexRes: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexRes', returnType: $example.ComplexT, params: [{ a: $data.String }] }),
+    FuncComplexResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexResArray', returnType: $data.Queryable, elementType: $example.ComplexT, params: [{ a: $data.String }] }),
+    FuncComplex2Res: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex2Res', returnType: $example.ComplexTWithComplex, params: [{ a: $data.String }] }),
+    FuncComplex2ResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex2ResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithComplex, params: [{ a: $data.String }] }),
+    FuncComplex3Res: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex3Res', returnType: $example.ComplexTWithCC, params: [{ a: $data.String }] }),
+    FuncComplex3ResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplex3ResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithCC, params: [{ a: $data.String }] }),
+    FuncComplexWithArrayComplexRes: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexWithArrayComplexRes', returnType: $example.ComplexTWithArrayComplex, params: [{ a: $data.String }] }),
+    FuncComplexWithArrayComplexResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexWithArrayComplexResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithArrayComplex, params: [{ a: $data.String }] }),
+    FuncComplexMultiRes: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexMultiRes', returnType: $example.ComplexTWithCCAndArrayC, params: [{ a: $data.String }] }),
+    FuncComplexMultiResArray: $data.EntityContext.generateServiceOperation({ serviceName: 'FuncComplexMultiResArray', returnType: $data.Queryable, elementType: $example.ComplexTWithCCAndArrayC, params: [{ a: $data.String }] })
+});
+
+
+$example.Context.generateTestData.funcserviceurl = '/funcservice';
+$example.FuncContext.getContext = function () {
+    var ctx = new $example.FuncContext({ name: 'oData', oDataServiceHost: $example.Context.generateTestData.funcserviceurl, serviceUrl: $example.Context.generateTestData.funcserviceurl, user: 'asd', password: 'asd' });
+    return ctx;
+};
+
+test("FunctionImport - FuncComplexRes", 5, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexRes('Hello World', function (ret) {
+            equal(ret instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+            equal(ret.Name, 'Hello World', 'Name failed');
+            equal(ret.Description, 'desc', 'Description failed');
+            equal(ret.Age, 42, 'Age failed');
+            equal(ret.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplexResArray", 25, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexResArray('Hello World', function (result) {
+            for (var i = 0; i < 5; i++) {
+                var ret = result[i];
+                equal(ret instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+                equal(ret.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Description, 'desc', 'Description failed');
+                equal(ret.Age, i, 'Age failed');
+                equal(ret.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+            start();
+        });
+    });
+});
+
+test("FunctionImport - FuncComplex2Res", 7, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex2Res('Hello World', function (ret) {
+            equal(ret instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+            equal(ret.Title, 'Hello World', 'Title failed');
+
+            equal(ret.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+            equal(ret.Complex.Name, 'Hello World', 'Name failed');
+            equal(ret.Complex.Description, 'desc', 'Description failed');
+            equal(ret.Complex.Age, 42, 'Age failed');
+            equal(ret.Complex.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplex2ResArray", 35, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex2ResArray('Hello World', function (result) {
+            for (var i = 0; i < 5; i++) {
+                var ret = result[i];
+                equal(ret instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+                equal(ret.Title, 'Hello World' + i, 'Title failed');
+
+                equal(ret.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+                equal(ret.Complex.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Complex.Description, 'desc', 'Description failed');
+                equal(ret.Complex.Age, i, 'Age failed');
+                equal(ret.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+            start();
+        });
+    });
+});
+
+test("FunctionImport - FuncComplex3Res", 9, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex3Res('Hello World', function (ret) {
+            equal(ret instanceof $example.ComplexTWithCC, true, 'result is $example.ComplexTWithCC');
+            equal(ret.Title, 'Hello World', 'Title failed');
+
+            equal(ret.Complex2 instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+            equal(ret.Complex2.Title, 'Hello World', 'Title failed');
+
+            equal(ret.Complex2.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+            equal(ret.Complex2.Complex.Name, 'Hello World', 'Name failed');
+            equal(ret.Complex2.Complex.Description, 'desc', 'Description failed');
+            equal(ret.Complex2.Complex.Age, 42, 'Age failed');
+            equal(ret.Complex2.Complex.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplex3ResArray", 45, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplex3ResArray('Hello World', function (result) {
+            for (var i = 0; i < 5; i++) {
+                var ret = result[i];
+                equal(ret instanceof $example.ComplexTWithCC, true, 'result is $example.ComplexTWithCC');
+                equal(ret.Title, 'Hello World' + i, 'Title failed');
+
+                equal(ret.Complex2 instanceof $example.ComplexTWithComplex, true, 'result is $example.ComplexTWithComplex');
+                equal(ret.Complex2.Title, 'Hello World' + i, 'Title failed');
+
+                equal(ret.Complex2.Complex instanceof $example.ComplexT, true, 'result is $example.ComplexT');
+                equal(ret.Complex2.Complex.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Complex2.Complex.Description, 'desc', 'Description failed');
+                equal(ret.Complex2.Complex.Age, i, 'Age failed');
+                equal(ret.Complex2.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+            start();
+        });
+    });
+
+});
+
+test("FunctionImport - FuncComplexWithArrayComplexRes", 28, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexWithArrayComplexRes('Hello World', function (result) {
+            equal(result instanceof $example.ComplexTWithArrayComplex, true, 'result is $example.ComplexTWithArrayComplex');
+            equal(result.Title, 'Hello World', 'Title failed');
+            equal(result.Complex instanceof Array, true, 'result.Complex is Array');
+
+            for (var i = 0; i < 5; i++) {
+                var ret = result.Complex[i];
+                equal(ret instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                equal(ret.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Description, 'desc', 'Description failed');
+                equal(ret.Age, i, 'Age failed');
+                equal(ret.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+
+
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplexWithArrayComplexResArray", 140, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexWithArrayComplexResArray('Hello World', function (resultArr) {
+            for (var i = 0; i < 5; i++) {
+                var result = resultArr[i];
+                equal(result instanceof $example.ComplexTWithArrayComplex, true, 'result is $example.ComplexTWithArrayComplex');
+                equal(result.Title, 'Hello World' + i, 'Title failed');
+                equal(result.Complex instanceof Array, true, 'result.Complex is Array');
+
+                for (var j = 0; j < 5; j++) {
+                    var ret = result.Complex[j];
+                    equal(ret instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                    equal(ret.Name, 'Hello World' + i + j, 'Name failed');
+                    equal(ret.Description, 'desc', 'Description failed');
+                    equal(ret.Age, i + j, 'Age failed');
+                    equal(ret.Created.valueOf(), new Date((2000 + i + j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+                }
+            }
+            start();
+        });
+    });
+});
+
+test("FunctionImport - FuncComplexMultiRes", 44, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexMultiRes('Hello World', function (result) {
+            equal(result instanceof $example.ComplexTWithCCAndArrayC, true, 'result is $example.ComplexTWithCCAndArrayC');
+            equal(result.Title, 'Hello World', 'Title failed');
+            equal(result.Complex2Arr instanceof Array, true, 'result.Complex is Array');
+            equal(result.Complex instanceof $example.ComplexT, true, 'result.Complex is $exampleSrv.ComplexT');
+
+            equal(result.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+            equal(result.Complex.Name, 'Hello World', 'Name failed');
+            equal(result.Complex.Description, 'desc', 'Description failed');
+            equal(result.Complex.Age, 42, 'Age failed');
+            equal(result.Complex.Created.valueOf(), new Date('2000/01/01 01:01:01').valueOf(), 'Created failed');
+
+            for (var i = 0; i < 5; i++) {
+                var ret = result.Complex2Arr[i];
+                equal(ret instanceof $example.ComplexTWithComplex, true, 'ret is $example.ComplexTWithComplex');
+                equal(ret.Title, 'Hello World', 'Name failed');
+
+
+                equal(ret.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                equal(ret.Complex.Name, 'Hello World' + i, 'Name failed');
+                equal(ret.Complex.Description, 'desc', 'Description failed');
+                equal(ret.Complex.Age, i, 'Age failed');
+                equal(ret.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+            }
+
+
+            start();
+        });
+    });
+});
+test("FunctionImport - FuncComplexMultiResArray", 220, function () {
+    stop();
+
+    var context = $example.FuncContext.getContext();
+    context.onReady(function () {
+        context.FuncComplexMultiResArray('Hello World', function (resultArr) {
+            for (var i = 0; i < 5; i++) {
+                var result = resultArr[i];
+                equal(result instanceof $example.ComplexTWithCCAndArrayC, true, 'result is $example.ComplexTWithCCAndArrayC');
+                equal(result.Title, 'Hello World' + i, 'Title failed');
+                equal(result.Complex2Arr instanceof Array, true, 'result.Complex is Array');
+                equal(result.Complex instanceof $example.ComplexT, true, 'result.Complex is $exampleSrv.ComplexT');
+
+                equal(result.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                equal(result.Complex.Name, 'Hello World' + i, 'Name failed');
+                equal(result.Complex.Description, 'desc', 'Description failed');
+                equal(result.Complex.Age, i, 'Age failed');
+                equal(result.Complex.Created.valueOf(), new Date((2000 + i).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+
+                for (var j = 0; j < 5; j++) {
+                    var ret = result.Complex2Arr[j];
+                    equal(ret instanceof $example.ComplexTWithComplex, true, 'ret is $example.ComplexTWithComplex');
+                    equal(ret.Title, 'Hello World', 'Name failed');
+
+
+                    equal(ret.Complex instanceof $example.ComplexT, true, 'ret is $example.ComplexT');
+                    equal(ret.Complex.Name, 'Hello World' + i + j, 'Name failed');
+                    equal(ret.Complex.Description, 'desc', 'Description failed');
+                    equal(ret.Complex.Age, i + j, 'Age failed');
+                    equal(ret.Complex.Created.valueOf(), new Date((2000 + i + j).toString() + '/01/01 01:01:01').valueOf(), 'Created failed');
+                }
+            }
+            start();
+        });
+    });
+});
+
+test("REST - GET JSONP", 9, function () {
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context = $example.Context.getContext({ oDataServiceHost: ('http://' + location.host + $example.Context.generateTestData.serviceurl).replace('3001', '3002'), enableJSONP: true });
+        context.onReady(function () {
+            context.Orders.toArray(function (orders) {
+                var order = orders[0];
+
+                equal(order.Date instanceof Date, true, 'date result failed');
+                ok(order.Date > new Date(1980), true, 'date result value failed');
+                equal(typeof order.Completed, 'boolean', 'bool result failed');
+                equal(typeof order.Value, 'number', 'int result failed');
+                equal(typeof order.Id, 'string', 'id result failed');
+                notEqual(order.Id.indexOf("'"), 0, 'id result failed');
+
+                equal(typeof order.Data, 'object', 'Data result failed');
+                equal(typeof order.Data.a, 'number', 'Data.a result failed');
+                equal(typeof order.Data.b, 'number', 'Data.b result failed');
+
+                start();
+            });
+        });
+    });
+});
+
+test("REST - load all fields on create - single", 7, function () {
+
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        var item = new $example.TestItemComputed({ Id: $data.parseGuid('c33bd325-afa9-4941-b21b-bf398f8a2dac'), Name: 'testName' });
+
+        context.add(item);
+
+        context.saveChanges(function () {
+            //item props
+            equal(item.Id.value, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
+            equal(item.Name, 'testName', 'Name property');
+            equal(item.Index, 42, 'Index property');
+            equal(item.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
+            equal(item.BoolField, true, 'BoolField property');
+            deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
+
+            $example.TestItemComputed.removeAll().then(function () {
+                start();
+            });
+        });
+    });
+});
+
+test("REST - load all fields on create - batch", 14, function () {
+
+    stop();
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        var item = new $example.TestItemComputed({ Id: $data.parseGuid('c33bd325-afa9-4941-b21b-bf398f8a2dac'), Name: 'testName' });
+        var item2 = new $example.TestItemComputed({ Id: $data.parseGuid('7eeb43b5-752f-4fc6-8f77-665e1ad48a9b') }); 2
+
+        context.add(item);
+        context.add(item2);
+
+        context.saveChanges(function () {
+            //item props
+            equal(item.Id.value, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
+            equal(item.Name, 'testName', 'Name property');
+            equal(item.Index, 42, 'Index property');
+            equal(item.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
+            equal(item.BoolField, true, 'BoolField property');
+            deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
+
+            equal(item2.Id.value, '7eeb43b5-752f-4fc6-8f77-665e1ad48a9b', 'GuidField property');
+            equal(item2.Name, 'default Name', 'Name property');
+            equal(item2.Index, 42, 'Index property');
+            equal(item2.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item2.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
+            equal(item2.BoolField, true, 'BoolField property');
+            deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
+
+            $example.TestItemComputed.removeAll().then(function () {
+                start();
+            });
+        });
     });
 });

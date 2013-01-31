@@ -1,7 +1,8 @@
 $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (query, includes) {
+    constructor: function (query, context) {
         this._query = query;
-        this._includes = includes;
+        this.sqlContext = context;
+        this._sqlBuilder = Container.createSqlBuilder(context.sets, context.entityContext);
     },
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
@@ -99,36 +100,40 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = this._query.defaultType;
         var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
-
-        this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
-        if (this._includes) {
-            this._includes.forEach(function (include) {
-                var includes = include.name.split('.');
-                var association = null;
-                var tmpStorageModel = storageModel;
-                for (var i = 0; i < includes.length; i++) {
-                    builder.selectModelBinderProperty(includes[i]);
-                    association = tmpStorageModel.Associations[includes[i]];
-                    tmpStorageModel = this._query.context._storageModel.getStorageModel(association.ToType);
-                }
-
-                builder.modelBinderConfig['$selector'] = 'json:' + include.name;
-                if (association.ToMultiplicity === '*') {
-                    builder.modelBinderConfig['$type'] = $data.Array;
-                    builder.selectModelBinderProperty('$item');
-                    builder.modelBinderConfig['$type'] = include.type;
-                    this._addPropertyToModelBinderConfig(include.type, builder);
-                    builder.popModelBinderProperty();
-                } else {
-                    builder.modelBinderConfig['$type'] = include.type;
-                    this._addPropertyToModelBinderConfig(include.type, builder);
-                }
-
-                for (var i = 0; i < includes.length; i++) {
-                    builder.popModelBinderProperty();
-                }
-            }, this);
+        
+        var needPrefix = this.sqlContext.infos.filter(function (i) { return i.IsMapped; }).length > 1;
+        if (needPrefix) {
+            this.currentObjectFieldName = this._sqlBuilder.getExpressionAlias(this.sqlContext.sets[0]);
         }
+        this._addPropertyToModelBinderConfig(this._query.defaultType, builder);
+        this.sqlContext.infos.forEach(function (info, infoIndex) {
+            if (infoIndex > 0 && info.IsMapped) {
+                var pathFragments = info.NavigationPath.split('.');
+                pathFragments.shift();
+                pathFragments.forEach(function (pathFragment, index) {
+                    if (!pathFragment) { return; }
+                    if (!builder.modelBinderConfig[pathFragment]) {
+                        builder.selectModelBinderProperty(pathFragment);
+                        var isArray = false;
+                        if (info.Association.associationInfo.ToMultiplicity === '*' && pathFragments.length - 1 === index) {
+                            builder.modelBinderConfig['$type'] = $data.Array;
+                            builder.selectModelBinderProperty('$item');
+                            isArray = true;
+                        }
+
+                        builder.modelBinderConfig['$type'] = this.sqlContext.sets[infoIndex].elementType;
+                        this.currentObjectFieldName = this._sqlBuilder.getExpressionAlias(this.sqlContext.sets[infoIndex]);
+                        this._addPropertyToModelBinderConfig(this.sqlContext.sets[infoIndex].elementType, builder);
+                        if (isArray) { builder.popModelBinderProperty(); }
+                    } else {
+                        builder.selectModelBinderProperty(pathFragment);
+                    }
+                }, this);
+                for (var i = 0; i < pathFragments.length; i++) {
+                    builder.popModelBinderProperty();
+                }
+            }
+        }, this);
     },
     VisitProjectionExpression: function (expression, builder) {
         this.hasProjection = true;
@@ -141,14 +146,20 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     VisitParametricQueryExpression: function (expression, builder) {
         if (expression.expression instanceof $data.Expressions.EntityExpression) {
             this.VisitEntityAsProjection(expression.expression, builder);
+            builder.modelBinderConfig['$keys'].unshift('rowid$$');
+        } else if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
+            this.currentObjectFieldName = this._sqlBuilder.getExpressionAlias(expression.expression);
+            this.VisitEntitySetAsProjection(expression.expression, builder);
+            builder.modelBinderConfig['$keys'] = ['rowid$$'];
+        } else if (expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
+            this.VisitEntityAsProjection(expression.expression, builder);
         } else {
+            builder.modelBinderConfig['$keys'] = ['rowid$$'];
             this.Visit(expression.expression, builder);
             if (expression.expression instanceof $data.Expressions.EntityFieldExpression) {
                 builder.modelBinderConfig['$source'] = 'd';
-                builder.modelBinderConfig['$keys'] = ['rowid$$'];
             }
         }
-
     },
     VisitConstantExpression: function (expression, builder) {
         builder.modelBinderConfig['$type'] = expression.type;
@@ -159,7 +170,16 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         builder.modelBinderConfig['$type'] = expression.entityType;
         this._addPropertyToModelBinderConfig(expression.entityType, builder);
     },
-
+    VisitEntitySetAsProjection: function (expression, builder) {
+        builder.modelBinderConfig['$type'] = $data.Array;
+        builder.selectModelBinderProperty('$item');
+        builder.modelBinderConfig['$type'] = expression.elementType;
+        this._addPropertyToModelBinderConfig(expression.elementType, builder);
+        builder.popModelBinderProperty();
+    },
+    VisitComplexTypeExpression: function (expression, builder) {
+        return expression;
+    },
     VisitEntityFieldExpression: function (expression, builder) {
         this.Visit(expression.source, builder);
         this.Visit(expression.selector, builder);
@@ -167,7 +187,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     VisitMemberInfoExpression: function (expression, builder) {
         if (expression.memberDefinition instanceof $data.MemberDefinition) {
             builder.modelBinderConfig['$type'] = expression.memberDefinition.type;
-            if (expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
+            if (expression.memberDefinition.storageModel && expression.memberName in expression.memberDefinition.storageModel.ComplexTypes) {
                 this._addPropertyToModelBinderConfig(Container.resolveType(expression.memberDefinition.type), builder);
             } else {
                 builder.modelBinderConfig['$source'] = this.currentObjectFieldName;
@@ -198,11 +218,6 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         builder.modelBinderConfig['$type'] = undefined;
     },
     VisitObjectLiteralExpression: function (expression, builder) {
-        if (this.currentObjectFieldName) {
-            builder.modelBinderConfig['$keys'] = [this.currentObjectFieldName + '__rowid$$'];
-        } else {
-            builder.modelBinderConfig['$keys'] = ['rowid$$'];
-        }
         builder.modelBinderConfig['$type'] = $data.Object;
         expression.members.forEach(function (of) {
             this.Visit(of, builder);
@@ -218,9 +233,12 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         }
         this.currentObjectFieldName += expression.fieldName;
 
-        if (expression.expression instanceof $data.Expressions.EntityExpression) {
+        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
             this.VisitEntityAsProjection(expression.expression, builder);
-        } else {
+        } else if(expression.expression instanceof $data.Expressions.EntitySetExpression){
+            this.VisitEntitySetAsProjection(expression.expression, builder);
+        }
+        else {
             this.Visit(expression.expression, builder);
         }
 

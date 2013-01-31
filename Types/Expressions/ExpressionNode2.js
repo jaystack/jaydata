@@ -58,6 +58,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Filter: "Filter",
     First: "First",
     Count: "Count",
+    InlineCount: "InlineCount",
     Single: "Single",
     Some: "Some",
     Every: "Every",
@@ -79,8 +80,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Skip: "Skip",
     OrderBy: "OrderBy",
     OrderByDescending: "OrderByDescending",
-    Include: "Include",
-    Count: "Count"
+    Include: "Include"
 });
 
 $data.BinaryOperator = function () {

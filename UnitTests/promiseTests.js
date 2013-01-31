@@ -145,6 +145,8 @@ function promiseTests(providerConfig) {
             equalValue = equalValue == undefined ? db.getType().name : equalValue;
             notEqual(equalValue, undefined, 'equalValue then failed');
             equal(db.getType().name, equalValue, 'load then failed');
+
+            return db;
         });
 
         readyPromise.then(function (db) {
@@ -186,6 +188,8 @@ function promiseTests(providerConfig) {
                     equalValue = equalValue == undefined ? users[0].LoginName : equalValue;
                     notEqual(equalValue, undefined, 'equalValue then failed');
                     equal(users[0].LoginName, equalValue, 'load then failed');
+
+                    return users;
                 })
                 .then(function (users) {
                     start();

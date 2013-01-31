@@ -3,10 +3,10 @@
 <head>
     <title>JayData unit tests</title>
 
-    <link rel="stylesheet" href="Scripts/qunit.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
     
-    <script type="text/javascript" src="Scripts/qunit.js"></script>
-    <script type="text/javascript" src="Scripts/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
+    <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
     <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
     
@@ -18,9 +18,15 @@
     <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
     <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
     <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
+    <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
+    <script type="text/javascript" src="TypeSystem/Trace/Logger.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/SimpleBase.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Geospatial.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Geography.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Geometry.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Guid.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/EdmTypes.js"></script>
+    <script type="text/javascript" src="TypeSystem/Extensions.js"></script>
     <!--*******************************Expressions****************************************-->
     <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
     <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
@@ -98,11 +104,14 @@
     <script type="text/javascript" src="Types/AuthEntityContext.js"></script>
     <script type="text/javascript" src="Types/EntityState.js"></script>
     <script type="text/javascript" src="Types/EntityStateManager.js"></script>
+    <script type="text/javascript" src="Types/ItemStore.js"></script>
     <script type="text/javascript" src="Types/Exception.js"></script>
     <script type="text/javascript" src="Types/StorageProviderLoader.js"></script>
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
 
     <script type="text/javascript" src="Types/EntityWrapper.js"></script>
+    <script type="text/javascript" src="JaySvcUtil/JaySvcUtil.js"></script>
+    <script type="text/javascript" src="Types/JayStorm.js"></script>
 
     <!--******************************* Ajax*********************************************-->    
     <script type="text/javascript" src="Types/Ajax/jQueryAjaxWrapper.js"></script>

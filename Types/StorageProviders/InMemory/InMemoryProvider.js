@@ -4,20 +4,25 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
             source: null,
-            persistentData:false,
-            localStoreName:'JayData_InMemory_Provider'
+            persistentData: false,
+            //obsolate
+            localStoreName: 'JayData_InMemory_Provider',
+            databaseName: 'JayData_InMemory_Provider'
         }, cfg);
+
+        if (this.providerConfiguration.databaseName === 'JayData_InMemory_Provider')
+            this.providerConfiguration.databaseName = this.providerConfiguration.localStoreName;
     },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
         var setKeys = [];
         for(var i in this.context._entitySetReferences){
-            setKeys.push(this.context._entitySetReferences[i].collectionName);
+            setKeys.push(this.context._entitySetReferences[i].tableName);
         }
         var localStorageData = null;
         if(this.providerConfiguration.persistentData && window.localStorage){
-            var localStoreName = this.providerConfiguration.localStoreName || "JayData_InMemory_Provider";
+            var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             var that = this;
             localStorageData = JSON.parse(window.localStorage.getItem(localStoreName),
                 function(key, value){
@@ -35,39 +40,39 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         for(var index = 0;index<this.context._storageModel.length;index++){
             var storageModel = this.context._storageModel[index];
             //Create store for EntitySet
-            this.providerConfiguration.source[storageModel.ItemName] = [];
+            this.providerConfiguration.source[storageModel.TableName] = [];
             //Check primary key
             var keys = storageModel.LogicalType.memberDefinitions.getKeyProperties();
             var computedKeys = keys.filter(function(key){return key.computed});
             if(computedKeys.length>1){
-                Guard.raise(new Exception('More than one computed field not supported in '+storageModel.ItemName+' entity set.'));
+                Guard.raise(new Exception('More than one computed field not supported in ' + storageModel.TableName + ' entity set.'));
             }
             var isIntegerPk = false;
             if(computedKeys.length === 1){
                 var resolvedType = Container.resolveType(computedKeys[0].type);
                 if(resolvedType === $data.Integer){
-                    this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName] = 0;
+                    this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = 0;
                     isIntegerPk = true;
                 }else if (resolvedType === $data.Guid){
 
                 }else{
-                    Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!'));
+                    Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!', 'ComputedKeyFieldError'));
                 }
             }
             //validate init data
-            if(tempSource[storageModel.ItemName]){
-                for(var i=0;i<tempSource[storageModel.ItemName].length;i++){
-                    var entity = tempSource[storageModel.ItemName][i];
+            if (tempSource[storageModel.TableName]) {
+                for (var i = 0; i < tempSource[storageModel.TableName].length; i++) {
+                    var entity = tempSource[storageModel.TableName][i];
                     if(entity instanceof storageModel.LogicalType){
                         if(isIntegerPk){
                             var keyValue = entity[computedKeys[0].name]
-                            if(keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName]){
-                                this.providerConfiguration.source['inmemory_sequence'][storageModel.ItemName] = keyValue;
+                            if (keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName]) {
+                                this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = keyValue;
                             }
                         }
-                        this.providerConfiguration.source[storageModel.ItemName].push(entity);
+                        this.providerConfiguration.source[storageModel.TableName].push(entity);
                     }else{
-                        Guard.raise(new Exception('Invalid element in source: '+storageModel.ItemName));
+                        Guard.raise(new Exception('Invalid element in source: ' + storageModel.TableName));
                     }
                 }
             }
@@ -84,7 +89,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             callBack.error(e);
             return;
         }
-        var sourceName = query.context.getEntitySetFromElementType(query.defaultType).collectionName;
+        var sourceName = query.context.getEntitySetFromElementType(query.defaultType).tableName;
         var result = [].concat(this.providerConfiguration.source[sourceName] || []);
         if (sql.$filter && !sql.$every)
             result = result.filter(sql.$filter);
@@ -141,17 +146,17 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             switch (item.data.entityState) {
                 case $data.EntityState.Added:
                     this._save_add_processPk(item);
-                    this.providerConfiguration.source[item.entitySet.collectionName].push(item.data);
+                    this.providerConfiguration.source[item.entitySet.tableName].push(item.data);
                     break;
                 case $data.EntityState.Deleted:
-                    var collection = this.providerConfiguration.source[item.entitySet.name];
+                    var collection = this.providerConfiguration.source[item.entitySet.tableName];
                     var entity = this._save_getEntity(item, collection);
                     var idx = collection.indexOf(entity);
                     collection.splice(idx, 1);
                     break;
                 case $data.EntityState.Modified:
                     if(item.data.changedProperties && item.data.changedProperties.length>0){
-                        var collection = this.providerConfiguration.source[item.entitySet.name];
+                        var collection = this.providerConfiguration.source[item.entitySet.tableName];
                         var entity = this._save_getEntity(item, collection);
                         for(var j=0;j<item.data.changedProperties.length;j++){
                             var field = item.data.changedProperties[j];
@@ -166,7 +171,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             }
         }
         if(this.providerConfiguration.persistentData && window.localStorage){
-            var localStoreName = this.providerConfiguration.localStoreName || "JayData_InMemory_Provider";
+            var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             localStorageData = window.localStorage.setItem(localStoreName, JSON.stringify(this.providerConfiguration.source));
         }
         callBack.success();
@@ -179,9 +184,9 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             if(keyResolveType === $data.Guid){
                 item.data[key.name] = $data.Guid.NewGuid();
             } else if(keyResolveType === $data.Integer){
-                var sequenceValue = this.providerConfiguration.source['inmemory_sequence'][item.entitySet.collectionName];
+                var sequenceValue = this.providerConfiguration.source['inmemory_sequence'][item.entitySet.tableName];
                 item.data[key.name] = sequenceValue+1;
-                this.providerConfiguration.source['inmemory_sequence'][item.entitySet.collectionName] = sequenceValue+1;
+                this.providerConfiguration.source['inmemory_sequence'][item.entitySet.tableName] = sequenceValue + 1;
             }else{
                 Guard.raise(new Exception("Not supported data type!"))
             }
@@ -212,7 +217,12 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         var compiled = this._compile(queryable);
         return compiled;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object], writable: false },
+    supportedDataTypes: {
+        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Guid, $data.GeographyPoint,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
 
     supportedBinaryOperators: {
         value: {
@@ -234,16 +244,72 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
 
     supportedUnaryOperators: {
         value: {
+            not: { mapTo: '!' }
         }
     },
 
     supportedFieldOperations: {
         value: {
+            contains: {
+                mapTo: "$data.StringFunctions.contains(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
 
+            startsWith: {
+                mapTo: "$data.StringFunctions.startsWith(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
+
+            endsWith: {
+                mapTo: "$data.StringFunctions.endsWith(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
+            length: {
+                dataType: "number",
+                propertyFunction: true
+            },
+            substr: {
+                mapTo: "substr(",
+                rightValue: ")",
+                dataType: "string",
+                parameters: [{ name: "startFrom", dataType: "number" }, { name: "length", dataType: "number" }],
+                propertyFunction: true
+            },
+            toLowerCase: {
+                dataType: "string", mapTo: "toLowerCase()",
+                propertyFunction: true
+            },
+            toUpperCase: {
+                dataType: "string", mapTo: "toUpperCase()",
+                propertyFunction: true
+            },
+            'trim': {
+                dataType: $data.String,
+                mapTo: 'trim()',
+                propertyFunction: true
+            },
+            'ltrim': {
+                dataType: $data.String,
+                mapTo: 'trimLeft()',
+                propertyFunction: true
+            },
+            'rtrim': {
+                dataType: $data.String,
+                mapTo: 'trimRight()',
+                propertyFunction: true
+            }
         },
         enumerable: true,
         writable: true
     },
+    
+
     supportedSetOperations: {
         value: {
             filter: {},
@@ -268,24 +334,52 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             fromDb: {
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : undefined; },
+                '$data.Date': function (dbData) { return dbData; },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return JSON.parse(o); },
-                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return JSON.parse(o); },
-                '$data.Guid': function (guid) { return guid; }
+                '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
+                '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
+                '$data.Guid': function (guid) { return typeof guid === 'string' ? $data.parseGuid(guid) : guid; },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
-                '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
-                '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
-                '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
-                '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
+                '$data.Number': function (number) { return number; },
+                '$data.Date': function (date) { return date; },
+                '$data.String': function (text) { return text; },
+                '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
-                '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); },
-                '$data.Guid': function (guid) { return guid; }
+                '$data.Object': function (o) { return o; },
+                '$data.Array': function (o) { return o; },
+                '$data.Guid': function (guid) { return guid ? guid.value : guid; },
+                '$data.GeographyPoint': function (g) { if (g) { return g; } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return g; } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return g; } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return g; } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return g; } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return g; } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return g; } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return g; } return g; }
             }
         }
     }

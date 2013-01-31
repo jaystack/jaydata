@@ -953,12 +953,25 @@
         return null;
     };
 
+    var headerKeysForRead = ['Content-Length', 'Connection', 'Content-Type', 'Accept', 'DataServiceVersion', 'MaxDataServiceVersion', 'Etag', 'Location', 'Content-Id', 'If-Match', 'Authorization'];
+    odata.headerKeysForRead = headerKeysForRead;
+
     var readResponseHeaders = function (xhr, headers) {
         /// <summary>Reads response headers into array.</summary>
         /// <param name="xhr" type="XMLHttpRequest">HTTP request with response available.</param>
         /// <param name="headers" type="Array">Target array to fill with name/value pairs.</param>
 
         var responseHeaders = xhr.getAllResponseHeaders().split(/\r?\n/);
+        //FF CORS fix
+        if (responseHeaders.length === 1 && responseHeaders[0] === '' && xhr.status > 0) {
+            for (var i = 0; i < headerKeysForRead.length; i++) {
+                var headerKey = headerKeysForRead[i];
+                var headerValue = xhr.getResponseHeader(headerKey);
+                if (headerValue) {
+                    responseHeaders.push(headerKey + ': ' + headerValue);
+                }
+            }
+        }
         var i, len;
         for (i = 0, len = responseHeaders.length; i < len; i++) {
             if (responseHeaders[i]) {

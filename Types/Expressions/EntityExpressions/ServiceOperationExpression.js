@@ -1,5 +1,5 @@
 $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionNode, null, {
-    constructor: function (source, selector, params, cfg) {
+    constructor: function (source, selector, params, cfg, bindedEntity) {
         ///<signature>
         ///<param name="source" type="$data.Expressions.EntityContextExpression" />
         ///<param name="selector" type="$data.Expressions.MemberInfoExpression" />
@@ -13,6 +13,7 @@ $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionN
         this.selector = selector
         this.params = params
         this.cfg = cfg;
+        this.bindedEntity = bindedEntity;
 
         function findContext() {
             //TODO: use source from function parameter and return a value at the end of the function
@@ -28,7 +29,7 @@ $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionN
         var c = findContext();
         switch (true) {
             case this.source instanceof $data.Expressions.EntityContextExpression:
-                this.elementType = cfg.elementType ? Container.resolveType(cfg.elementType) : Container.resolveType(cfg.returnType);
+                this.elementType = cfg.elementType ? Container.resolveType(cfg.elementType) : (this.elementType ? Container.resolveType(cfg.returnType) : null);
                 this.storageModel = cfg.elementType ? c.instance._storageModel.getStorageModel(Container.resolveType(cfg.elementType)) : null;
                 break;
             default:

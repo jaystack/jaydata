@@ -94,19 +94,19 @@ $(document).ready(function () {
             equal(q.queryText, select + "WHERE ((substr(username, 1, 5)) = 'hello')", 'strlen statement');
 
             q = context.MyFriends.filter(function (f) { return f.name.contains('Viktor') }).toTraceString();
-            equal(q.queryText, select + "WHERE (((uid = me()) OR (uid IN (SELECT uid2 FROM friend WHERE (uid1 = me())))) AND (strpos(name, 'Viktor') >= 0))", 'contains statement');
+            equal(q.queryText, select + "WHERE ((uid IN (SELECT uid2 FROM friend WHERE (uid1 = me()))) AND (strpos(name, 'Viktor') >= 0))", 'contains statement');
 
             q = context.MyFriends.filter(function (f) { return f.name.startsWith('Viktor') }).toTraceString();
-            equal(q.queryText, select + "WHERE (((uid = me()) OR (uid IN (SELECT uid2 FROM friend WHERE (uid1 = me())))) AND (strpos(name, 'Viktor') = 0))", 'startsWith statement');
+            equal(q.queryText, select + "WHERE ((uid IN (SELECT uid2 FROM friend WHERE (uid1 = me()))) AND (strpos(name, 'Viktor') = 0))", 'startsWith statement');
 
             q = context.MyFriends.filter(function (f) { return f.name.strpos('Viktor') > 0 }).toTraceString();
-            equal(q.queryText, select + "WHERE (((uid = me()) OR (uid IN (SELECT uid2 FROM friend WHERE (uid1 = me())))) AND ((strpos(name, 'Viktor')) > 0))", 'strpos statement');
+            equal(q.queryText, select + "WHERE ((uid IN (SELECT uid2 FROM friend WHERE (uid1 = me()))) AND ((strpos(name, 'Viktor')) > 0))", 'strpos statement');
 
             q = context.MyFriends.filter(function (f) { return f.name.strlen() > 12 }).toTraceString();
-            equal(q.queryText, select + "WHERE (((uid = me()) OR (uid IN (SELECT uid2 FROM friend WHERE (uid1 = me())))) AND ((strlen(name)) > 12))", 'strlen statement');
+            equal(q.queryText, select + "WHERE ((uid IN (SELECT uid2 FROM friend WHERE (uid1 = me()))) AND ((strlen(name)) > 12))", 'strlen statement');
 
             q = context.MyFriends.filter(function (f) { return f.name.substr(6, 4) == 'Aron' }).toTraceString();
-            equal(q.queryText, select + "WHERE (((uid = me()) OR (uid IN (SELECT uid2 FROM friend WHERE (uid1 = me())))) AND ((substr(name, 6, 4)) = 'Aron'))", 'substr statement');
+            equal(q.queryText, select + "WHERE ((uid IN (SELECT uid2 FROM friend WHERE (uid1 = me()))) AND ((substr(name, 6, 4)) = 'Aron'))", 'substr statement');
 
 
         });
@@ -241,12 +241,18 @@ $(document).ready(function () {
             stop(1);
 
             context.Pages.filter(function (p) { return p.name == 'JayData'; })
-            .toArray(function (Pages) {
-                start(1);
-                equal(Pages.length, 1, 'result count');
-                equal(Pages[0].page_id, 315494325176794, 'page identity');
-                equal(Pages[0].type, "SOFTWARE", "page category length");
-                equal(Pages[0].pic_cover.cover_id, 342871709105722, "pic cover object length");
+            .toArray({
+                success: function (Pages) {
+                    start(1);
+                    equal(Pages.length, 2, 'result count');
+                    equal(Pages[0].page_id, 315494325176794, 'page identity');
+                    equal(Pages[0].type, "SOFTWARE", "page category length");
+                    equal(Pages[0].pic_cover.cover_id, 342871709105722, "pic cover object length");
+                },
+                error: function (e) {
+                    ok(false, 'Error: ' + e);
+                    start();
+                }
             });
 
         });

@@ -13,6 +13,21 @@ $data.Class.define('$data.JayService.OData.Defaults', null, null, null, {
 
 $data.Class.define('$data.JayService.OData.Utils', null, null, null, {
     getHeaderValue: function (headers, name) {
+        ///	<signature>
+        ///     <summary>Read value from header object</summary>
+        ///     <description>Read value from header object</description>
+        ///     <param name="headers" type="Object" />
+        ///     <param name="name" type="String" />
+        ///     <return type="String" />
+        ///	</signature>
+        ///	<signature>
+        ///     <summary>Read value from header object</summary>
+        ///     <description>Read value from header object</description>
+        ///     <param name="headers" type="Array" />
+        ///     <param name="name" type="String" />
+        ///     <return type="String" />
+        ///	</signature>
+
         for (var key in headers) {
             if (key.toLowerCase() === name.toLowerCase())
                 return headers[key];
@@ -72,14 +87,39 @@ $data.Class.define('$data.JayService.OData.Utils', null, null, null, {
             var resolvedType = Container.resolveType(memDef.type);
             if (withoutConvert)
                 result[memDef.name] = value;
-            else
-                result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
+            else {
+                switch (resolvedType) {
+                    case $data.String:
+                    case $data.ObjectID:
+                        result[memDef.name] = value.slice(1, value.length - 1);
+                        break;
+                    case $data.Guid:
+                        result[memDef.name] = value.slice(5, value.length - 1);
+                        break;
+                    default:
+                        result[memDef.name] = value;
+                        break;
+                }
+
+
+                //result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
+            }
         }
 
         return result;
     },
 
     simpleBodyReader: function (options) {
+        ///	<signature>
+        ///     <summary>Express and Connect middleware for read data to req.body when a contentType is multipart/mixed or application/atom+xml</summary>
+        ///     <description>Express and Connect middleware for read data to req.body when a contentType is multipart/mixed or application/atom+xml</description>
+        ///     <param name="options" type="Object">
+        ///         { 
+        ///             contentTypes: [] //list of contentTypes for read
+        ///         }
+        ///     </param>
+        ///     <return type="function" />
+        ///	</signature>
 
         var options = $data.typeSystem.extend({
             contentTypes: [

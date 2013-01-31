@@ -344,7 +344,7 @@
                 equal(result[0].country.code, 'US', 'result item complex value');
                 equal(result[0].admin1.type, 'District', 'result item complex value');
                 equal(result[0].centroid.latitude, '38.899101', 'result item complex value');
-                equal(result[0].boundingBox.northEast.latitude, '39.003750', 'result item complex value');
+                equal(result[0].boundingBox.northEast.latitude, '38.995960', 'result item complex value');
             });
         });
 

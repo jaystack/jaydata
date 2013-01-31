@@ -7,16 +7,30 @@ $data.Entity.extend('$test.Item', {
     ForeignKey: { type: 'id' }
 });
 
+$data.Entity.extend('$test.ConvertItem', {
+    Id: { type: 'id', computed: true, key: true },
+    Key: { type: 'string' },
+    Value: { type: 'string' },
+    Rank: { type: 'string', converter: {
+            mongoDB: {
+                fromDb: function(value, memberDefinition, context, type){
+                    return 'Rank #' + value;
+                }
+            }
+        }
+    }
+});
+
 $data.Entity.extend('$test.ComplexValue', {
     Value: { type: 'string' },
     Rank: { type: 'int' }
 });
 
-/*$data.Entity.extend('$test.MoreComplexValue', {
+$data.Entity.extend('$test.MoreComplexValue', {
     Value: { type: 'string' },
     Rank: { type: 'int' },
     Child: { type: '$test.ComplexValue' }
-});*/
+});
 
 $data.Entity.extend('$test.ComplexItem', {
     Id: { type: 'id', computed: true, key: true },
@@ -24,12 +38,12 @@ $data.Entity.extend('$test.ComplexItem', {
     Value: { type: '$test.ComplexValue' }
 });
 
-/*$data.Entity.extend('$test.MoreComplexItem', {
+$data.Entity.extend('$test.MoreComplexItem', {
     Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
     Value: { type: '$test.MoreComplexValue' },
     ValueChild: { type: '$test.ComplexValue' }
-});*/
+});
 
 $data.Entity.extend('$test.ObjectItem', {
     Id: { type: 'id', computed: true, key: true },
@@ -58,6 +72,13 @@ $data.Entity.extend('$test.ArrayComplexItem', {
     Rank: { type: 'int' }
 });
 
+$data.Entity.extend('$test.ArrayMoreComplexItem', {
+    Id: { type: 'string', computed: true, key: true },
+    Key: { type: 'string' },
+    Values: { type: 'Array', elementType: '$test.MoreComplexValue' },
+    Rank: { type: 'int' }
+});
+
 $data.Entity.extend('$test.CappedItem', {
     Id: { type: 'id', computed: true, key: true },
     Key: { type: 'string' },
@@ -65,13 +86,23 @@ $data.Entity.extend('$test.CappedItem', {
     Rank: { type: 'int' }
 });
 
+$data.Entity.extend('$test.CustomKey', {
+    Id: { type: 'string', key: true },
+    Key: { type: 'string' },
+    Value: { type: 'string' },
+    Rank: { type: 'int' }
+});
+
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
+    ConvertItems: { type: $data.EntitySet, elementType: $test.ConvertItem },
     ComplexItems: { type: $data.EntitySet, elementType: $test.ComplexItem },
-    //MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
+    MoreComplexItems: { type: $data.EntitySet, elementType: $test.MoreComplexItem },
     ObjectItems: { type: $data.EntitySet, elementType: $test.ObjectItem },
     ArrayItems: { type: $data.EntitySet, elementType: $test.ArrayItem },
     ArrayIDs: { type: $data.EntitySet, elementType: $test.ArrayID },
     ArrayComplexItems: { type: $data.EntitySet, elementType: $test.ArrayComplexItem },
-    CappedItems: { type: $data.EntitySet, elementType: $test.CappedItem, tableOptions: { capped: true, size: 10 * 1024, max: 10 } }
+    ArrayMoreComplexItems: { type: $data.EntitySet, elementType: $test.ArrayMoreComplexItem },
+    CappedItems: { type: $data.EntitySet, elementType: $test.CappedItem, tableOptions: { capped: true, size: 10 * 1024, max: 10 } },
+    CustomKeys: { type: $data.EntitySet, elementType: $test.CustomKey }
 });

@@ -1,11 +1,26 @@
 ﻿$data.Class.define('$data.JayService.OData.BatchProcessor', null, null, {
     constructor: function (context, baseUrl) {
+        ///	<signature>
+        ///     <summary>Process OData standard batch requests</summary>
+        ///     <description>Process OData standard batch requests</description>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        ///     <param name="baseUrl" type="String">Service url</param>
+        /// </signature>
+
         this.context = context;
         this.baseUrl = baseUrl;
         this.Q = require('q');
         this.queryHelper = require('qs');
     },
     process: function (request, response) {
+        ///	<signature>
+        ///     <summary>Process OData standard batch requests</summary>
+        ///     <description>Process OData standard batch requests</description>
+        ///     <param name="request" type="Object"/>
+        ///     <param name="response" type="Object"/>
+        ///     <return type="function" />
+        /// </signature>
+
         //processRequest
         var self = this;
         var reqWrapper = {
@@ -32,7 +47,7 @@
                                 if (result) batchResult.push({ __changeRequests: result });
                                 saveSuccess();
                             },
-                            error: function () { cbWrapper.error(batchResult) }
+                            error: function (e) { cbWrapper.error(e === 'Authorization failed' ? e : batchResult) }
                         });
 
                     } else {
@@ -41,7 +56,7 @@
                                 if (result) batchResult.push(result);
                                 saveSuccess();
                             },
-                            error: function () { cbWrapper.error(batchResult) }
+                            error: function (e) { cbWrapper.error(e === 'Authorization failed' ? e : batchResult) }
                         });
 
                     }
@@ -52,7 +67,7 @@
             saveSuccess();
 
         } else {
-            cbWrapper.error();
+            cbWrapper.error(new Exception('Parse request failed', 'Bad Request'));
         }
 
         //processResponse
@@ -137,7 +152,7 @@
             success: function () {
                 callback.success(referenceData);
             },
-            error: function () { callback.error(); }
+            error: function (e) { callback.error(e); }
         });
     },
     _processBatchRead: function (getBatchrequest, req, res, callback) {

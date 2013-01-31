@@ -1,51 +1,4 @@
-﻿var genx = require('jaydata-genx');
-var parseXML = require("libxmljs").parseXmlString;  //https://github.com/polotek/libxmljs
-
-$data.Class.define('$data.GenxXMLCreator', null, null, {
-    constructor: function () {
-        this.writer = new genx.Writer();
-    },
-    startDocument: function () {
-        return this.writer.startDocument.apply(this.writer, arguments);
-    },
-    endDocument: function () {
-        return this.writer.endDocument.apply(this.writer, arguments);
-    },
-
-    startElement: function () {
-        return this.writer.startElement.apply(this.writer, arguments);
-    },
-    endElement: function () {
-        return this.writer.endElement.apply(this.writer, arguments);
-    },
-    endElementInline: function () {
-        if (typeof this.writer.endElementInline === 'function') {
-            return this.writer.endElementInline.apply(this.writer, arguments);
-        } else {
-            return this.endElement();
-        }
-
-    },
-
-    addAttribute: function () {
-        return this.writer.addAttribute.apply(this.writer, arguments);
-    },
-
-    addText: function () {
-        return this.writer.addText.apply(this.writer, arguments);
-    },
-
-    declareNamespace: function (schema, schemaName) {
-        return this.writer.declareNamespace.apply(this.writer, arguments);
-    },
-    declareElement: function (namespace, elementName) {
-        return this.writer.declareElement.apply(this.writer, arguments);
-    },
-    declareAttribute: function (namespace, elementName) {
-        return this.writer.declareAttribute.apply(this.writer, arguments);
-    }
-});
-
+﻿var xmldom = require('xmldom');
 
 $data.Class.define('$data.oDataServer.MetaDataGeneratorRole', null, null, {
     constructor: function (typeName, entitySetName, multiplicity) {
@@ -70,6 +23,75 @@ $data.Class.define('$data.oDataServer.MetaDataGeneratorAssoctiation', null, null
 
 $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
     constructor: function (config, context) {
+        ///	<signature>
+        ///     <summary>Generator for standard OData Metadata from context</summary>
+        ///     <description>Generator for standard OData Metadata from context</description>
+        ///     <param name="config" type="Object">
+        ///         configurable                defaultValue 
+        ///         -----------------------------------------
+        ///         version:                    'V2',
+        ///         maxVersion:                 'V2',
+        ///         dsVersion:                  'V1',
+        ///         extended:                   true,
+        ///         edmTypeMapping:             true,
+        ///         
+        ///         edmx:                       'http://schemas.microsoft.com/ado/2007/06/edmx',
+        ///         m:                          'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+        ///         d:                          'http://schemas.microsoft.com/ado/2007/08/dataservices',
+        ///         namespace:                  'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         
+        ///         nsV1:                       'http://schemas.microsoft.com/ado/2006/04/edm',
+        ///         nsV2:                       'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         nsV3:                       'http://schemas.microsoft.com/ado/2009/11/edm',
+        ///         
+        ///         V1:                         '1.0',
+        ///         V2:                         '2.0',
+        ///         V3:                         '3.0',
+        ///         
+        ///         xmlHead:                    '&#60;?xml version="1.0" encoding="UTF-8" standalone="yes" ?&#62;',
+        ///         
+        ///         customPropertyNS:           'http://jaydata.org/extendedproperties',
+        ///         customPropertyNSName:       'Jay',
+        ///         
+        ///         contextNamespace:           context.namespace || 'MyContext'
+        ///     </param>
+        ///     <param name="context" type="$data.EntityContext">Context instance</param>
+        /// </signature>
+        ///	<signature>
+        ///     <summary>Transform class for JSON verbose format</summary>
+        ///     <description>Transform class for JSON verbose format</description>
+        ///     <param name="config" type="Object">
+        ///         configurable                defaultValue 
+        ///         -----------------------------------------
+        ///         version:                    'V2',
+        ///         maxVersion:                 'V2',
+        ///         dsVersion:                  'V1',
+        ///         extended:                   true,
+        ///         edmTypeMapping:             true,
+        ///         
+        ///         edmx:                       'http://schemas.microsoft.com/ado/2007/06/edmx',
+        ///         m:                          'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+        ///         d:                          'http://schemas.microsoft.com/ado/2007/08/dataservices',
+        ///         namespace:                  'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         
+        ///         nsV1:                       'http://schemas.microsoft.com/ado/2006/04/edm',
+        ///         nsV2:                       'http://schemas.microsoft.com/ado/2008/09/edm',
+        ///         nsV3:                       'http://schemas.microsoft.com/ado/2009/11/edm',
+        ///         
+        ///         V1:                         '1.0',
+        ///         V2:                         '2.0',
+        ///         V3:                         '3.0',
+        ///         
+        ///         xmlHead:                    '&#60;?xml version="1.0" encoding="UTF-8" standalone="yes" ?&#62;',
+        ///         
+        ///         customPropertyNS:           'http://jaydata.org/extendedproperties',
+        ///         customPropertyNSName:       'Jay',
+        ///         
+        ///         contextNamespace:           context.namespace || 'MyContext'
+        ///     </param>
+        ///     <param name="context" type="function">Context type</param>
+        /// </signature>
+
         var _context = context;
         if (_context instanceof $data.EntityContext)
             _context = _context.getType();
@@ -107,17 +129,19 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }, config);
     },
     generateMetadataXml: function () {
-        var xml = new $data.GenxXMLCreator();
+        ///	<signature>
+        ///     <summary>Convert $metadata XML from context</summary>
+        ///     <description>Convert $metadata XML from context</description>
+        ///     <return type="string" />
+        /// </signature>
+        var xml = new $data.Xml.XmlCreator();
         var xmlResult = this.cfg.xmlHead;
-
-        xml.writer.on('data', function (data) {
-            xmlResult += data;
-        });
 
         xml.startDocument();
         this._buildEdmx(xml);
         xml.endDocument();
 
+        xmlResult += xml.getXmlString();
         return xmlResult;
     },
 
@@ -645,7 +669,21 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
             '$data.ObjectID': 'Edm.String',
-            '$data.Geography': 'Edm.GeographyPoint'
+            '$data.GeographyPoint': 'Edm.GeographyPoint',
+            '$data.GeographyLineString': 'Edm.GeographyLineString',
+            '$data.GeographyPolygon': 'Edm.GeographyPolygon',
+            '$data.GeographyMultiPoint': 'Edm.GeographyMultiPoint',
+            '$data.GeographyMultiLineString': 'Edm.GeographyMultiLineString',
+            '$data.GeographyMultiPolygon': 'Edm.GeographyMultiPolygon',
+            '$data.GeographyCollection': 'Edm.GeographyCollection',
+            '$data.GeometryPoint': 'Edm.GeometryPoint',
+            '$data.GeometryLineString': 'Edm.GeometryLineString',
+            '$data.GeometryPolygon': 'Edm.GeometryPolygon',
+            '$data.GeometryMultiPoint': 'Edm.GeometryMultiPoint',
+            '$data.GeometryMultiLineString': 'Edm.GeometryMultiLineString',
+            '$data.GeometryMultiPolygon': 'Edm.GeometryMultiPolygon',
+            '$data.GeometryCollection': 'Edm.GeometryCollection',
+            '$data.Guid': 'Edm.Guid'
         }
     },
 
@@ -673,7 +711,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         for (var i = 0; i < allMembers.length; i++) {
             var member = allMembers[i];
 
-            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.ServiceBase || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
+            if (member.kind !== 'method' || member.name === 'getType' || member.name === 'constructor' || member.definedBy === $data.Base || member.definedBy === $data.ServiceBase || member.definedBy === $data.EntityContext /*!this.context.prototype.hasOwnProperty(member.name)*/) {
                 continue;
             }
 
@@ -738,7 +776,21 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
 
 
 $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
+    constructor: function () {
+        ///	<signature>
+        ///     <summary>VSDoc annotation parser</summary>
+        ///     <description>VSDoc annotation parser</description>
+        /// </signature>
+    },
     parseFromMethod: function (method, target) {
+        ///	<signature>
+        ///     <summary>Parse VSDoc annotation from function</summary>
+        ///     <description>Parse VSDoc annotation from function</description>
+        ///     <param name="method" type="function" />
+        ///     <param name="target" type="Object">output object</param>
+        ///     <returns type="Object"/>
+        /// </signature>
+
         var lines = method.toString().split('\n');
         var commentLines = [];
         for (var i = 1, l = lines.length; i < l; i++) {
@@ -755,21 +807,21 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
 
         var xmlString = '<root>' + commentLines.join('\n') + '</root>';
 
-        var xml = parseXML(xmlString);
+        var xml = (new xmldom.DOMParser()).parseFromString(xmlString, 'application/xml');
 
         var resultDef = target || {};
 
         for (var defName in this.supportedFunctionDefinitisons) {
             var def = this.supportedFunctionDefinitisons[defName];
             var fieldName = def.fieldName || defName;
-            var elements = xml.find('//' + (def.elementName || defName));
+            var elements = xml.getElementsByTagName(def.elementName || defName);
             if (def.single) {
                 if (def.attrValue) {
                     if (elements.length === 0)
                         continue;
-                    var attr = elements[0].attr(def.attrValue);
+                    var attr = elements[0].getAttribute(def.attrValue);
                     if (attr)
-                        resultDef[fieldName] = resultDef[fieldName] || attr.value();
+                        resultDef[fieldName] = resultDef[fieldName] || attr;
                 } else {
                     if (elements.length > 0)
                         resultDef[fieldName] = resultDef[fieldName] || true;
@@ -828,12 +880,12 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
                         if (i === 0)
                             this.params = [];
 
-                        var nameAttr = xmlDomElements[i].attr('name');
-                        var typeAttr = xmlDomElements[i].attr('type');
+                        var nameAttr = xmlDomElements[i].getAttribute('name');
+                        var typeAttr = xmlDomElements[i].getAttribute('type');
                         if (nameAttr && typeAttr) {
                             var param = {};
-                            param['name'] = nameAttr.value();
-                            param['type'] = typeAttr.value();
+                            param['name'] = nameAttr;
+                            param['type'] = typeAttr;
                             this.params.push(param);
                         }
 
@@ -845,6 +897,11 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
 });
 
 Function.prototype.annotateFromVSDoc = function () {
+    ///	<signature>
+    ///     <summary>Parse current constructor function public function's annotations and decorate it with used variables</summary>
+    ///     <description>Parse current constructor function public function's annotations and decorate it with used variables</description>
+    /// </signature>
+
     if (this.prototype) {
         var parser = new $data.oDataServer.serviceDefinitionParser();
         for (var funcName in this.prototype) {

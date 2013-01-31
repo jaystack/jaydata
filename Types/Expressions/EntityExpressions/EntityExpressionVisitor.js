@@ -207,6 +207,15 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         return expression;
     },
 
+    VisitInlineCountExpression: function (expression, context) {
+        var source = this.Visit(expression.source, context);
+        var selector = this.Visit(expression.selector, context);
+        if (source !== expression.source || selector !== expression.selector) {
+            return Container.createInlineCountExpression(source, selector, expression.params, expression.instance);
+        }
+        return expression;
+    },
+
     VisitFilterExpression: function (expression, context) {
         var source = this.Visit(expression.source, context);
         var selector = this.Visit(expression.selector, context);

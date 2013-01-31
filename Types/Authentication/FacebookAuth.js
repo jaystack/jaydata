@@ -43,13 +43,15 @@ $data.Class.define("$data.Authentication.FacebookAuth", $data.Authentication.Aut
             return;
         var _this = this;
 
-        if (cfg.url && this.Authenticated) {
-            var andChar = '?';
-            if (cfg.url.indexOf(andChar) > 0)
-                andChar = '&';
+        if (cfg.url.indexOf('access_token=') === -1) {
+            if (cfg.url && this.Authenticated) {
+                var andChar = '?';
+                if (cfg.url.indexOf(andChar) > 0)
+                    andChar = '&';
 
-            if (this.configuration.access_token)
-                cfg.url = cfg.url + andChar + 'access_token=' + this.configuration.access_token;
+                if (this.configuration.access_token)
+                    cfg.url = cfg.url + andChar + 'access_token=' + this.configuration.access_token;
+            }
         }
 
         $data.ajax(cfg);

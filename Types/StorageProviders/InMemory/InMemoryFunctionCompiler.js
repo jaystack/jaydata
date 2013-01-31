@@ -71,6 +71,39 @@ $C('$data.storageProviders.InMemory.InMemoryFunctionCompiler', $data.Expressions
     VisitObjectFieldExpression: function (expression, context) {
         context.data += expression.fieldName + ': ';
         this.Visit(expression.expression, context);
+    },
+    VisitEntityFieldOperationExpression: function (expression, context) {
+        Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
+
+        //TODO refactor!
+        var opDef = expression.operation.memberDefinition;
+        if (opDef.propertyFunction) {
+            this.Visit(expression.source, context);
+            context.data += '.';
+        }
+
+        var opName = opDef.mapTo || opDef.name;
+        context.data += opName;
+        var paramCounter = 0;
+        var params = opDef.parameters || [];
+
+        var args = params.map(function (item, index) {
+            if (item.name === "@expression") {
+                return expression.source;
+            } else {
+                return expression.parameters[paramCounter++]
+            };
+        });
+
+        args.forEach(function (arg, index) {
+            if (arg) {
+                if (index > 0) {
+                    context.data += ",";
+                };
+                this.Visit(arg, context);
+            }
+        }, this);
+        context.data += opDef.rightValue || "";
     }
 });
 

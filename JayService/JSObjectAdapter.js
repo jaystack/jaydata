@@ -17,6 +17,14 @@ Function.prototype.curry = function () {
 
 $data.Class.define("$data.JSObjectAdapter", null, null, {
     constructor: function (type, instanceFactory) {
+        ///	<signature>
+        ///     <summary>Express and Connect middleware for handle webrequests</summary>
+        ///     <description>Express and Connect middleware for handle webrequests</description>
+        ///     <param name="type" type="function">Service class type</param>
+        ///     <param name="instanceFactory" type="function">Service class instance factory</param>
+        ///     <return type="function" />
+        ///	</signature>
+
         var url = require('url');
         var q = require('q');
         var route = {};
@@ -38,6 +46,11 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
     },
 
     handleRequest: function (req, res, next) {
+        ///	<signature>
+        ///     <summary>request handler middleware for webrequests</summary>
+        ///     <description>Prepare execution context and invoke the called Service method or standard OData endpoint</description>
+        ///	</signature>
+
         var self = this;
 
         var serviceInstance = this.instanceFactory(req, res);
@@ -95,7 +108,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         } else {
             _v = this.promiseHelper.fcall(function () {
                 if (req.method === 'GET') {
-                    var serviceDef = new $data.JayStorm.ServiceDefinitionXml();
+                    var serviceDef = new $data.oDataServer.ServiceDefinitionXml();
                     return new $data.XmlResult(serviceDef.convertToResponse(serviceInstance, req.fullRoute));
                 } else {
                     return new $data.EmptyServiceResult(405);
@@ -105,6 +118,8 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 
         this.promiseHelper.when(_v)
         .then(function (value) {
+            if (res._header || res._headerSent) return;
+            
             if (!(value instanceof $data.ServiceResult)) {
                 if (member.hasOwnProperty('resultType')){
                     if (typeof member.resultType === 'string') member.resultType = Container.resolveType(member.resultType);
@@ -125,6 +140,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 res.end();
             }
         }).fail(function (err) {
+            if (err === 'Authorization failed') {
+                res.statusCode = 401;
+            }
             next(err);
         });
     },
@@ -174,7 +192,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             memberContext.paramBinders = [];
             for (var i = 0; i < params.length; i++) {
                 var param = params[i];
-                memberContext.paramBinders.push($data.JayService.ArgumentBinder.defaultBinder.curry(null, param.name || param, { type: param.type ? Container.resolveType(param.type) : undefined }));
+                memberContext.paramBinders.push($data.ArgumentBinder.defaultBinder.curry(null, param.name || param, { type: param.type ? Container.resolveType(param.type) : undefined }));
             }
         }
 

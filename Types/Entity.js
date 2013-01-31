@@ -74,6 +74,24 @@ $data.Event = Event = $data.Class.define("$data.Event", null, null, {
                 });
             }
         };
+        this.fireCancelAble = function (eventData, snder) {
+            var snd = snder || sender || this;
+            //eventData.eventName = name;
+            ///<value name="subscriberList type="Array" />
+            var isValid = true;
+            if (subscriberList) {
+                subscriberList.forEach(function (subscriber) {
+                    ///<param name="subscriber" type="EventSubscriber" />
+                    try {
+                        isValid = isValid && (subscriber.handler.call(subscriber.thisArg, snd, eventData, subscriber.state) === false ? false : true);
+                    } catch (ex) {
+                        console.log("unhandled exception in event handler. exception suppressed");
+                        console.dir(ex);
+                    }
+                });
+            }
+            return isValid;
+        };
     }
 });
 
@@ -152,13 +170,44 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             for (var i in initData) {
                 if (memDefNames.indexOf(i) > -1) {
                     var type = Container.resolveType(typeMemDefs.getMember(i).type);
-                    if (type === $data.Date && typeof initData[i] === 'string')
-                        this.initData[i] = new Date(initData[i]);
-                    else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
-                        this.initData[i] = new $data.Geography(initData[i]);
-                    else {
+                    if (!Object.isNullOrUndefined(initData[i])) {
+                        if (type === $data.Date && typeof initData[i] === 'string')
+                            this.initData[i] = new Date(initData[i]);
+                        else if (type === $data.GeographyPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeographyPoint))
+                            this.initData[i] = new $data.GeographyPoint(initData[i]);
+                        else if(type === $data.GeographyLineString && !(initData[i] instanceof $data.GeographyLineString))
+                            this.initData[i] = new $data.GeographyLineString(initData[i]);
+                        else if (type === $data.GeographyPolygon && !(initData[i] instanceof $data.GeographyPolygon))
+                            this.initData[i] = new $data.GeographyPolygon(initData[i]);
+                        else if (type === $data.GeographyMultiPoint && !(initData[i] instanceof $data.GeographyMultiPoint))
+                            this.initData[i] = new $data.GeographyMultiPoint(initData[i]);
+                        else if (type === $data.GeographyMultiLineString && !(initData[i] instanceof $data.GeographyMultiLineString))
+                            this.initData[i] = new $data.GeographyMultiLineString(initData[i]);
+                        else if (type === $data.GeographyMultiPolygon && !(initData[i] instanceof $data.GeographyMultiPolygon))
+                            this.initData[i] = new $data.GeographyMultiPolygon(initData[i]);
+                        else if (type === $data.GeographyCollection && !(initData[i] instanceof $data.GeographyCollection))
+                            this.initData[i] = new $data.GeographyCollection(initData[i]);
+                        else if (type === $data.GeometryPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeometryPoint))
+                            this.initData[i] = new $data.GeometryPoint(initData[i]);
+                        else if (type === $data.GeometryLineString && !(initData[i] instanceof $data.GeometryLineString))
+                            this.initData[i] = new $data.GeometryLineString(initData[i]);
+                        else if (type === $data.GeometryPolygon && !(initData[i] instanceof $data.GeometryPolygon))
+                            this.initData[i] = new $data.GeometryPolygon(initData[i]);
+                        else if (type === $data.GeometryMultiPoint && !(initData[i] instanceof $data.GeometryMultiPoint))
+                            this.initData[i] = new $data.GeometryMultiPoint(initData[i]);
+                        else if (type === $data.GeometryMultiLineString && !(initData[i] instanceof $data.GeometryMultiLineString))
+                            this.initData[i] = new $data.GeometryMultiLineString(initData[i]);
+                        else if (type === $data.GeometryMultiPolygon && !(initData[i] instanceof $data.GeometryMultiPolygon))
+                            this.initData[i] = new $data.GeometryMultiPolygon(initData[i]);
+                        else if (type === $data.GeometryCollection && !(initData[i] instanceof $data.GeometryCollection))
+                            this.initData[i] = new $data.GeometryCollection(initData[i]);
+                        else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
+                            this.initData[i] = initData[i] ? $data.parseGuid(initData[i]) : undefined;
+                        else {
+                            this.initData[i] = initData[i];
+                        }
+                    } else {
                         this.initData[i] = initData[i];
-
                     }
                 }
             }
@@ -239,6 +288,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="value" />
 
         //if (origValue == value) return;
+        value = this.typeConversion(memberDefinition, value);
         var eventData = null;
         if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
             var origValue = this[memberDefinition.name];
@@ -292,6 +342,61 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             }
         }
     },
+    typeConversion: function (memberDefinition, value) {
+        var convertedValue = value;
+        
+        if (typeof value === 'string' && !memberDefinition.concurrencyMode) {
+            switch (Container.resolveName(memberDefinition.type)) {
+                case '$data.Guid':
+                    if (value === '') return undefined;
+                    convertedValue = $data.parseGuid(value);
+                    break;
+                case '$data.Integer':
+                    if (value === '') return undefined;
+                    convertedValue = parseInt(value);
+                    if (isNaN(convertedValue))
+                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', [memberDefinition, value]));
+                    break;
+                case '$data.Number':
+                    if (value === '') return undefined;
+                    convertedValue = parseFloat(value);
+                    if (isNaN(convertedValue))
+                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', [memberDefinition, value]));
+                    break;
+                case '$data.Date':
+                    if (value === '') return undefined;
+                    convertedValue = new Date(value);
+                    if (isNaN(convertedValue.valueOf()))
+                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', [memberDefinition, value]));
+                    break;
+                case '$data.Boolean':
+                    if (value === '') return undefined;
+                    switch (value.toLowerCase()) {
+                        case 'true': 
+                            convertedValue = true;
+                            break;
+                        case 'false': 
+                            convertedValue = false;
+                            break;
+                        default:
+                            throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Boolean', [memberDefinition, value]));
+                    }
+                    break;
+                case '$data.Object':
+                    if (value === '') return undefined;
+                    try {
+                        convertedValue = JSON.parse(value);
+                    } catch (e) {
+                        throw Guard.raise(new Exception('TypeError: ', e.toString(), [memberDefinition, value]));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return convertedValue;
+    },
 
     // protected
     retrieveProperty: function (memberDefinition) {
@@ -317,8 +422,9 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// </param>
         /// <returns>value associated for [i]memberDefinition[/i]</returns>
 
+        callback = $data.typeSystem.createCallbackSetting(callback);
         if (this[memberDefinition.name] != undefined) {
-            callback(this[memberDefinition.name]);
+            callback.success(this[memberDefinition.name]);
             return;
         }
 
@@ -333,7 +439,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="value" />
         /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
-        callback();
+        
+        callback = $data.typeSystem.createCallbackSetting(callback);
+        var pHandler = new $data.PromiseHandler();
+        callBack = pHandler.createCallback(callback);
+        callback.success(this[memberDefinition.name]);
+        return pHandler.getPromise();
     },
 
     isValid: function () {
@@ -370,7 +481,9 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         notMapped: true,
         enumerable: false
     },
-    entityState: { dataType: "integer", storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false }/*,
+
+    entityState: { dataType: "integer", storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false },
+    /*
     toJSON: function () {
         if (this.context) {
             var itemType = this.getType();
@@ -390,10 +503,133 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
         return this;
     }   */
+    //,
+  
+    //onReady: function (callback) {
+    //    this.__onReadyList = this.__onReadyList || [];
+    //    this.__onReadyList.push(callback);
+    //},
+
+    remove: function () {
+        if ($data.ItemStore && 'EntityInstanceRemove' in $data.ItemStore)
+            return $data.ItemStore.EntityInstanceRemove.apply(this, arguments);
+        else
+            throw 'not implemented'; //todo
+    },
+    save: function () {
+        if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
+            return $data.ItemStore.EntityInstanceSave.apply(this, arguments);
+        else
+            throw 'not implemented'; //todo
+    },
+    refresh: function () {
+        if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
+            return $data.ItemStore.EntityInstanceRefresh.apply(this, arguments);
+        else
+            throw 'not implemented'; //todo
+    },
+    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true }
+ 
 }, {
     //create get_[property] and set_[property] functions for properties
     __setPropertyfunctions: { value: true, notMapped: true, enumerable: false, storeOnObject: true },
     //copy public properties to current instance
-    __copyPropertiesToInstance: { value: false, notMapped: true, enumerable: false, storeOnObject: true }
+    __copyPropertiesToInstance: { value: false, notMapped: true, enumerable: false, storeOnObject: true },
+
+    inheritedTypeProcessor: function (type) {
+        if ($data.ItemStore && 'EntityInheritedTypeProcessor' in $data.ItemStore)
+            $data.ItemStore.EntityInheritedTypeProcessor.apply(this, arguments);
+    },
+
+
+    //Type Events
+    addEventListener: function(eventName, fn) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            this[delegateName] = new $data.Event(eventName, this);
+        }
+        this[delegateName].attach(fn);
+    },
+    removeEventListener: function(eventName, fn) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            return;
+        }
+        this[delegateName].detach(fn);
+    },
+    raiseEvent: function(eventName, data) {
+        var delegateName = "on" + eventName;
+        if (!(delegateName in this)) {
+            return;
+        }
+        this[delegateName].fire(data);
+    }
 });
+
+
+$data.define = function (name, definition) {
+    if (!definition) {
+        throw new Error("json object type is not supported yet");
+    }
+    var _def = {};
+    var hasKey = false;
+    var keyFields = [];
+    Object.keys(definition).forEach(function (fieldName) {
+        var propDef = definition[fieldName];
+        if (typeof propDef === 'object' && ("type" in propDef || "get" in propDef || "set" in propDef)) {
+
+            _def[fieldName] = propDef;
+            if (propDef.key) {
+                keyFields.push(propDef);
+            }
+
+            if (("get" in propDef || "set" in propDef) && (!('notMapped' in propDef) || propDef.notMapped === true)) {
+                propDef.notMapped = true;
+                propDef.storeOnObject = true;
+            }
+            if ("get" in propDef && !("set" in propDef)) {
+                propDef.set = function () { };
+            } else if ("set" in propDef && !("get" in propDef)) {
+                propDef.get = function () { };
+            }
+
+        } else {
+            _def[fieldName] = { type: propDef };
+        }
+    });
+
+    if (keyFields.length < 1) {
+        var keyProp;
+        switch (true) {
+            case "id" in _def:
+                keyProp = "id";
+                break;
+            case "Id" in _def:
+                keyProp = "Id"
+                break;
+            case "ID" in _def:
+                keyProp = "ID"
+                break;
+        }
+        if (keyProp) {
+            _def[keyProp].key = true;
+            var propTypeName = $data.Container.resolveName(_def[keyProp].type);
+            _def[keyProp].computed = true;
+            //if ("$data.Number" === propTypeName || "$data.Integer" === propTypeName) {
+            //}
+        } else {
+            _def.Id = { type: "int", key: true, computed: true }
+        }
+    }
+
+
+    var entityType = $data.Entity.extend(name, _def);
+    return entityType;
+}
+$data.implementation = function (name) {
+    return Container.resolveType(name);
+};
+
+
+
 
