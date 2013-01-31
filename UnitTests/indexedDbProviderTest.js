@@ -662,7 +662,7 @@
         stop(1);
         context.onReady(function () {
 
-            for (var i = 0; i < 1000; i++) {
+            for (var i = 0; i < 10000; i++) {
                 var item1 = new idbexample.idbTestItem1({
                     i0: i,
                     b0: true,
@@ -683,11 +683,14 @@
             }
             context.saveChanges({
                 success: function () {
-                    context.Items1.where(function (item) { return item.i0 <= 20 && (item.i0 > 15 || item.i0 <= 100) && item.i0>95; }, {a:20}).toArray(function () {
+                    console.log("Start: ", new Date());
+                    //context.Items1.where(function (item) { return item.i0 > this.a && (item.i0 > 15 || item.i0 <= 100) && item.i0>95; }, {a:20}).toArray(function () {
+                    context.Items1.where(function (item) { return item.i0 > this.a && item.i0 < 40; }, { a: 20 }).toArray(function () {
                         ok(true);
+                        console.log("End: ", new Date());
                         close(context);
                     });
-
+                    
                 }
             });
         });
