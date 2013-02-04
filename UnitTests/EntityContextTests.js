@@ -96,41 +96,41 @@
     });
     module("Context initialize");
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
-		test('Crate context', 1, function () {
-			stop(1);
-			$C('$t.EntityContextTest.TestItem', $data.Entity, null, {
-				Id: { dataType: $data.Integer, key: true, computed: true },
-				Str1: { dataType: $data.String },
-				Num1: { dataType: $data.Number },
-				Blob1: { dataType: $data.Blob },
-				Bool1: { dataType: $data.Boolean },
-				Date1: { dataType: $data.Date }
-			});
-			$C('$t.EntityContextTest.TestItemFromString', $data.Entity, null, {
-				Id: { dataType: '$data.Integer', key: true, computed: true },
-				Str1: { dataType: '$data.String' },
-				Num1: { dataType: '$data.Number' },
-				Blob1: { dataType: '$data.Blob' },
-				Bool1: { dataType: '$data.Boolean' },
-				Date1: { dataType: '$data.Date' }
-			});
-			$C('$t.EntityContextTest.DataTypeContext', $data.EntityContext, null, {
-				TestTable1: { dataType: '$data.EntitySet', elementType: '$t.EntityContextTest.TestItemFromString' },
-				TestTable2: { dataType: $data.EntitySet, elementType: $t.EntityContextTest.TestItem }
-			});
-			try{
-				var cnt = new $t.EntityContextTest.DataTypeContext({ name: 'sqLite' });
-				cnt.onReady(function (db) {
-					start(1);
-					ok(db, "Db create faild");
-					console.dir(db);
-				});
-			}catch(e){
-				start(1);
-        		ok(false, "Db create faild");
-			}
-		});
-	}
+        test('Crate context', 1, function () {
+            stop(1);
+            $C('$t.EntityContextTest.TestItem', $data.Entity, null, {
+                Id: { dataType: $data.Integer, key: true, computed: true },
+                Str1: { dataType: $data.String },
+                Num1: { dataType: $data.Number },
+                Blob1: { dataType: $data.Blob },
+                Bool1: { dataType: $data.Boolean },
+                Date1: { dataType: $data.Date }
+            });
+            $C('$t.EntityContextTest.TestItemFromString', $data.Entity, null, {
+                Id: { dataType: '$data.Integer', key: true, computed: true },
+                Str1: { dataType: '$data.String' },
+                Num1: { dataType: '$data.Number' },
+                Blob1: { dataType: '$data.Blob' },
+                Bool1: { dataType: '$data.Boolean' },
+                Date1: { dataType: '$data.Date' }
+            });
+            $C('$t.EntityContextTest.DataTypeContext', $data.EntityContext, null, {
+                TestTable1: { dataType: '$data.EntitySet', elementType: '$t.EntityContextTest.TestItemFromString' },
+                TestTable2: { dataType: $data.EntitySet, elementType: $t.EntityContextTest.TestItem }
+            });
+            try {
+                var cnt = new $t.EntityContextTest.DataTypeContext({ name: 'sqLite' });
+                cnt.onReady(function (db) {
+                    start(1);
+                    ok(db, "Db create faild");
+                    console.dir(db);
+                });
+            } catch (e) {
+                start(1);
+                ok(false, "Db create faild");
+            }
+        });
+    }
     //test('Crate context 2', 1, function () {
     //    stop(1);
     //    function registerEdmTypes() {
@@ -1503,8 +1503,8 @@
 
     test('multiple onready test', function () {
         var run = 5;
-        stop(run*2);
-        expect((run*2*2)+1);
+        stop(run * 2);
+        expect((run * 2 * 2) + 1);
 
         var initCounter = 0;
         var slowProvider = $data.Class.define('slowProvider', $data.StorageProviderBase, null, {
@@ -1555,7 +1555,7 @@
     test('multiple onready fail test', function () {
         var run = 5;
         stop(run + 1);
-        expect((run*2) + 1);
+        expect((run * 2) + 1);
 
         var ctx = new $news.Types.NewsContext({ name: 'nothing' });
 
@@ -1592,7 +1592,7 @@
     test('multiple onready fail initializeStore test', function () {
         var run = 5;
         stop(run * 2);
-        expect((run * 2 * 2) +1);
+        expect((run * 2 * 2) + 1);
         var initCounter = 0;
         var slowErrorProvider = $data.Class.define('slowErrorProvider', $data.StorageProviderBase, null, {
             initializeStore: function (callBack) {
@@ -1646,4 +1646,713 @@
         });
 
     });
+
+    (function () {
+        module("Entity_Action_compile");
+
+        $data.Class.define('Tests.ActionContextTest_1', $data.EntityContext, null, {
+            Categories: {
+                type: $data.EntitySet,
+                elementType: $data.Entity.extend('Tests.CategoryWithAction', {
+                    'Id': { 'key': true, 'type': 'Edm.Int32', 'nullable': false, 'required': true },
+                    'Name': { 'type': 'Edm.String' },
+                    'Description': { 'type': 'Edm.String' },
+                    'NameIndex': { 'type': 'Edm.Int32' },
+                    'Topic': { 'type': 'Tests.Topic', inverseProperty: 'Categories' },
+                    'AppendDescription': { type: $data.ServiceAction, returnType: 'Edm.String', IsBindable: true, IsAlwaysBindable: true, params: [{ name: 'value', type: 'Edm.String' }] },
+                    'NameStart': { type: $data.ServiceAction, returnType: 'Edm.String', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params: [{ name: 'value', type: 'Edm.Int32' }] },
+                    'ManyParamFunc': {
+                        type: $data.ServiceAction, returnType: 'Edm.String', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params:
+                            [
+                                { name: 'p1', type: '$data.Object' },
+                                { name: 'p2', type: 'Edm.Int32' },
+                                { name: 'p3', type: 'Edm.Boolean' },
+                                { name: 'p4', type: 'Edm.String' },
+                                { name: 'p5', type: 'Edm.DateTime' }
+                            ]
+                    }
+                }),
+                actions: {
+                    'MostRecent': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: 'Tests.CategoryWithAction', IsBindable: true, IsAlwaysBindable: true, params: [{ name: 'Contains', type: 'Edm.String' }] },
+                    'LastModifiedName': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: 'Edm.String', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params: [] },
+                    'Lasts': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: $data.Queryable, elementType: 'Tests.CategoryWithAction', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params: [{ name: 'Top', type: 'Edm.Int32' }] }
+                }
+            },
+            Topics: {
+                type: $data.EntitySet,
+                elementType: $data.Entity.extend('Tests.Topic', {
+                    'Id': { 'key': true, 'type': 'Edm.Int32', 'nullable': false, 'required': true },
+                    'Name': { 'type': 'Edm.String' },
+                    'Description': { 'type': 'Edm.String' },
+                    'Categories': { 'type': 'Array', elementType: 'Tests.CategoryWithAction', inverseProperty: 'Topic' }
+                })
+            },
+            GetDoubledName: { type: $data.ServiceOperation, returnType: 'Edm.String', IsBindable: false, IsSideEffecting: false, params: [{ name: 'name', type: 'Edm.String' }] },
+            AnOtherFunction: { type: $data.ServiceOperation, returnType: 'Edm.String', params: [{ name: 'value', type: 'Edm.String' }] },
+            ManyParamFunc: {
+                type: $data.ServiceOperation, returnType: 'Edm.String', IsSideEffecting: false, params:
+                    [
+                        { name: 'p1', type: '$data.Object' },
+                        { name: 'p2', type: 'Edm.Int32' },
+                        { name: 'p3', type: 'Edm.Boolean' },
+                        { name: 'p4', type: 'Edm.String' },
+                        { name: 'p5', type: 'Edm.DateTime' }
+                    ]
+            }
+        });
+
+        function checkUrlTextAndHookResult(name, expectN, fn, expected, resPayload, reqPayLoad) {
+            test(name, expectN + 3, function () {
+                stop();
+                var context = new Tests.ActionContextTest_1({ name: 'oData', oDataServiceHost: '/api' });
+                context.onReady(function () {
+                    start();
+                    var orig_prepareRequest = context.prepareRequest;
+                    context.prepareRequest = function (req) {
+                        stop();
+                        req[2] = function (err) {
+                            equal(err.request.requestUri, expected, 'request url');
+                            equal(err.request.method, reqPayLoad ? 'POST' : 'GET', 'request method');
+                            deepEqual(err.request.data, reqPayLoad, 'request payload');
+
+                            req[1](resPayload);
+
+                            context.prepareRequest = orig_prepareRequest;
+                            start();
+                        }
+                    }
+                    fn(context);
+                });
+            });
+        }
+
+        test('Collection Queryable result compile', 1, function () {
+            var context = new Tests.ActionContextTest_1({ name: 'oData', oDataServiceHost: '/api' });
+            context.onReady(function () {
+                var q = context.Categories.Lasts(5).toTraceString();
+                equal(q.queryText, '/Categories/Lasts?Top=5', 'Lasts Collection action queryText');
+            });
+        });
+        test('Collection Queryable result compile - object param', 1, function () {
+            var context = new Tests.ActionContextTest_1({ name: 'oData', oDataServiceHost: '/api' });
+            context.onReady(function () {
+                var q = context.Categories.Lasts({ Top: 5 }).toTraceString();
+                equal(q.queryText, '/Categories/Lasts?Top=5', 'Lasts Collection action queryText');
+            });
+        });
+
+        checkUrlTextAndHookResult('Collection Entity result', 4, function (context) {
+            var p = context.Categories.MostRecent().then(function (data) {
+
+                ok(data instanceof Tests.CategoryWithAction, 'MostRecent, resultType');
+                equal(data.Name, 'Sport', 'MostRecent, Name');
+                equal(data.Description, 'desc', 'MostRecent, Description');
+
+            });
+            ok(p.then, 'MostRecent, promise returned');
+        }, '/api/Categories/MostRecent', { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } });
+
+        checkUrlTextAndHookResult('Collection Entity result with param', 4, function (context) {
+            var p = context.Categories.MostRecent('Hello', function (data) {
+                ok(data instanceof Tests.CategoryWithAction, 'MostRecent, resultType');
+                equal(data.Name, 'Sport', 'MostRecent, Name');
+                equal(data.Description, 'desc', 'MostRecent, Description');
+            });
+
+            ok(p.then, 'MostRecent, promise returned');
+        }, "/api/Categories/MostRecent?Contains='Hello'", { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } });
+
+        checkUrlTextAndHookResult('Collection Entity result with param - object param', 4, function (context) {
+            var p = context.Categories.MostRecent({ Contains: 'Hello' }, function (data) {
+                ok(data instanceof Tests.CategoryWithAction, 'MostRecent, resultType');
+                equal(data.Name, 'Sport', 'MostRecent, Name');
+                equal(data.Description, 'desc', 'MostRecent, Description');
+            });
+
+            ok(p.then, 'MostRecent, promise returned');
+        }, "/api/Categories/MostRecent?Contains='Hello'", { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } });
+
+        checkUrlTextAndHookResult('Collection Queryable result inline', 6, function (context) {
+            var p = context.Categories.Lasts(5, function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+            ok(p.then, 'Lasts, promise returned');
+        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection Queryable result inline - object param', 6, function (context) {
+            var p = context.Categories.Lasts({ Top: 5 }, function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+            ok(p.then, 'Lasts, promise returned');
+        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection Queryable result - toArray', 6, function (context) {
+            var q = context.Categories.Lasts(5);
+
+            q.toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            })
+
+            ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
+        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection Queryable result - toArray - object param', 6, function (context) {
+            var q = context.Categories.Lasts({ Top: 5 });
+
+            q.toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            })
+
+            ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
+        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection Queryable result with filter', 6, function (context) {
+            var q = context.Categories.Lasts(5).filter(function (c) { return c.Name == 'World'; });
+
+            q.toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            })
+
+            ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
+        }, "/api/Categories/Lasts?Top=5&$filter=(Name eq 'World')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection Queryable result with filter - object param', 6, function (context) {
+            var q = context.Categories.Lasts({ Top: 5 }).filter(function (c) { return c.Name == 'World'; });
+
+            q.toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            })
+
+            ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
+        }, "/api/Categories/Lasts?Top=5&$filter=(Name eq 'World')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection String result', 1, function (context) {
+            context.Categories.LastModifiedName(function (data) {
+                equal(data, 'Hello World!', 'LastModifiedName');
+            });
+        }, '/api/Categories/LastModifiedName', { LastModifiedName: 'Hello World!' });
+
+        checkUrlTextAndHookResult('Entity Action', 1, function (context) {
+            var item = new Tests.CategoryWithAction({ Id: 1 });
+            context.Categories.attach(item);
+
+            item.AppendDescription(' World!').then(function (data) {
+                equal(data, 'Hello World!', 'AppendDescription');
+            });
+        }, "/api/Categories(1)/AppendDescription", { AppendDescription: 'Hello World!' }, { value: ' World!' });
+
+        checkUrlTextAndHookResult('Entity Action - object param', 1, function (context) {
+            var item = new Tests.CategoryWithAction({ Id: 1 });
+            context.Categories.attach(item);
+
+            item.AppendDescription({ value: ' World!' }).then(function (data) {
+                equal(data, 'Hello World!', 'AppendDescription');
+            });
+        }, "/api/Categories(1)/AppendDescription", { AppendDescription: 'Hello World!' }, { value: ' World!' });
+
+        checkUrlTextAndHookResult('Entity Function in $filter - const param', 5, function (context) {
+
+            context.Categories.filter(function (c) { return c.NameStart(5) == 'Hello' }).toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+        }, "/api/Categories?$filter=(NameStart(value=5) eq 'Hello')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Entity Function in $filter - const param - object param', 5, function (context) {
+
+            context.Categories.filter(function (c) { return c.NameStart({ value: 5 }) == 'Hello' }).toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+        }, "/api/Categories?$filter=(NameStart(value=5) eq 'Hello')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Entity Function in $filter - property param', 5, function (context) {
+
+            context.Categories.filter(function (c) { return c.NameStart(c.NameIndex) == 'Hello' }).toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+        }, "/api/Categories?$filter=(NameStart(value=NameIndex) eq 'Hello')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Entity Function in $filter - property param - object param', 5, function (context) {
+
+            context.Categories.filter(function (c) { return c.NameStart({ value: c.NameIndex }) == 'Hello' }).toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.CategoryWithAction, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+        }, "/api/Categories?$filter=(NameStart(value=NameIndex) eq 'Hello')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Collection Function in $filter - property param', 5, function (context) {
+
+            context.Topics.filter(function (c) { return c.Categories.LastModifiedName() == 'Hello' }).toArray(function (data) {
+                ok(Array.isArray(data), 'Lasts, result param');
+                equal(data.length, 2, 'Lasts, result length');
+                ok(data[0] instanceof Tests.Topic, 'Lasts, resultType');
+                equal(data[0].Name, 'Sport', 'Lasts, Name');
+                equal(data[0].Description, 'desc', 'Lasts, Description');
+            });
+
+        }, "/api/Topics?$filter=(Categories/LastModifiedName() eq 'Hello')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.GetDoubledName(it.Name) == 'SportSport' }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=(GetDoubledName(name=Name) eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter - object param', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.GetDoubledName({ name: it.Name }) == 'SportSport' }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=(GetDoubledName(name=Name) eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter from string', 4, function (context) {
+
+            var p = context.Categories.filter("$context.GetDoubledName(it.Name) == 'SportSport'").toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=(GetDoubledName(name=Name) eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter from string - object param', 4, function (context) {
+
+            var p = context.Categories.filter("$context.GetDoubledName({ name: it.Name }) == 'SportSport'").toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=(GetDoubledName(name=Name) eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter inverse', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return 'SportSport' == $context.GetDoubledName(it.Name) }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=('SportSport' eq GetDoubledName(name=Name))", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter inverse - object param', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return 'SportSport' == $context.GetDoubledName({ name: it.Name }) }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=('SportSport' eq GetDoubledName(name=Name))", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter more filter', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.Name == 'Sport' || ($context.GetDoubledName(it.Name) == 'SportSport' && it.Description == 'desc') }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=((Name eq 'Sport') or ((GetDoubledName(name=Name) eq 'SportSport') and (Description eq 'desc')))", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter more filter - object param', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.Name == 'Sport' || ($context.GetDoubledName({ name: it.Name }) == 'SportSport' && it.Description == 'desc') }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=((Name eq 'Sport') or ((GetDoubledName(name=Name) eq 'SportSport') and (Description eq 'desc')))", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $orderby', 4, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.GetDoubledName(it.Name) }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$orderby=GetDoubledName(name=Name) desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $orderby - object param', 4, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.GetDoubledName({ name: it.Name }) }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$orderby=GetDoubledName(name=Name) desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $orderby - const param - object param', 4, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.GetDoubledName({ name: 'Sport' }) }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$orderby=GetDoubledName(name='Sport') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter const param', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.GetDoubledName('Sport') == 'SportSport' }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=(GetDoubledName(name='Sport') eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter const param - object param', 4, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.GetDoubledName({ name: 'Sport' }) == 'SportSport' }).toArray().then(function (datas) {
+
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+
+            });
+            ok(p.then, 'Category, promise returned');
+        }, "/api/Categories?$filter=(GetDoubledName(name='Sport') eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter exception', 2, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.AnOtherFunction('Sport') == 'SportSport' }).toArray().fail(function (ex) {
+                expect(1);
+                start();
+                equal(ex.message, "Context 'ActionContextTest_1' Operation 'AnOtherFunction' is not supported by the provider");
+            });
+        }, "/api/Categories?$filter=(GetDoubledName(name='Sport') eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter exception - object param', 2, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.AnOtherFunction({ name: 'Sport' }) == 'SportSport' }).toArray().fail(function (ex) {
+                expect(1);
+                start();
+                equal(ex.message, "Context 'ActionContextTest_1' Operation 'AnOtherFunction' is not supported by the provider");
+            });
+        }, "/api/Categories?$filter=(GetDoubledName(name='Sport') eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context function call in $filter exception 2', 2, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.onReady() == 'SportSport' }).toArray().fail(function (ex) {
+                expect(1);
+                start();
+                equal(ex.message, "Context 'ActionContextTest_1' Operation 'onReady' is not supported by the provider");
+            });
+        }, "/api/Categories?$filter=(GetDoubledName(name='Sport') eq 'SportSport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation param resolve', 1, function (context) {
+
+            var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, false, 'Hello', new Date('2000/01/02')).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation param resolve 2', 1, function (context) {
+
+            var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, false).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation param resolve 3', 1, function (context) {
+
+            var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, null, undefined, new Date('2000/01/02')).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation param resolve - object param', 1, function (context) {
+
+            var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: new Date('2000/01/02') }).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation param resolve 2 - object param', 1, function (context) {
+
+            var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false }).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation param resolve 3 - object param', 1, function (context) {
+
+            var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: null, p4: undefined, p5: new Date('2000/01/02') }).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation in $filter param resolve', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.ManyParamFunc({ a: 42, b: 'World' }, 15, false, 'Hello', date) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $filter param resolve 2', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.ManyParamFunc({ a: 42, b: 'World' }, 15, false) == 'Sport' }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false) eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $filter param resolve 3', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.ManyParamFunc({ a: 42, b: 'World' }, 15, null, undefined, date) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $filter param resolve - object param', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: date }) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $filter param resolve 2 - object param', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false }) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false) eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $filter param resolve 3 - object param', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return $context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: null, p4: undefined, p5: date }) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $orderby param resolve', 3, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.ManyParamFunc({ a: 42, b: 'World' }, 15, false, 'Hello', date) }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $orderby param resolve 2', 3, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.ManyParamFunc({ a: 42, b: 'World' }, 15, false) }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false) desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $orderby param resolve 3', 3, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.ManyParamFunc({ a: 42, b: 'World' }, 15, null, undefined, date) }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $orderby param resolve - object param', 3, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: date }) }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $orderby param resolve 2 - object param', 3, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false }) }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false) desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Context Operation in $orderby param resolve 3 - object param', 3, function (context) {
+
+            var p = context.Categories.orderByDescending(function (it) { return $context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: null, p4: undefined, p5: date }) }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Entity Operation in $filter param resolve', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.ManyParamFunc({ a: 42, b: 'World' }, 15, false, 'Hello', date) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Entity Operation in $filter param resolve 2', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.ManyParamFunc({ a: 42, b: 'World' }, 15, false) == 'Sport' }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false) eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Entity Operation in $filter param resolve 3', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.ManyParamFunc({ a: 42, b: 'World' }, 15, null, undefined, date) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Entity Operation in $filter param resolve - object param', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: date }) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Entity Operation in $filter param resolve 2 - object param', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false }) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false) eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+        checkUrlTextAndHookResult('Entity Operation in $filter param resolve 3 - object param', 3, function (context) {
+
+            var p = context.Categories.filter(function (it) { return it.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: null, p4: undefined, p5: date }) == 'Sport' }, { date: new Date('2000/01/02') }).toArray().then(function (datas) {
+                var data = datas[0];
+                ok(data instanceof Tests.CategoryWithAction, 'Category, resultType');
+                equal(data.Name, 'Sport', 'Category, Name');
+                equal(data.Description, 'desc', 'Category, Description');
+            });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+
+    })();
 });

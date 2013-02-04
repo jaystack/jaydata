@@ -115,7 +115,7 @@
     },
     _buildParametricQueryExpression: function (expression, frameType) {
 
-        var constantResolver = Container.createConstantValueResolver(undefined, window);
+        var constantResolver = Container.createConstantValueResolver(undefined, window, this.scopeContext);
         var parameterProcessor = Container.createParameterResolverVisitor();
 
         var exp = parameterProcessor.Visit(expression, constantResolver);

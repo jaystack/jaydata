@@ -89,6 +89,26 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 result = Container.createFrameOperationExpression(exp, member, args);
                 return result;
                 
+            case exp instanceof $data.Expressions.EntityExpression:
+                var operation = this.scopeContext.resolveTypeOperations(member.value, exp, context.frameType);
+                if (!operation) {
+                    Guard.raise("Unknown entity function operation: " + member.getJSON());
+                }
+
+                member = Container.createMemberInfoExpression(operation);
+                result = Container.createEntityFunctionOperationExpression(exp, member, args);
+                return result;
+                break;
+            case exp instanceof $data.Expressions.EntityContextExpression:
+                var operation = this.scopeContext.resolveContextOperations(member.value, exp, context.frameType);
+                if (!operation) {
+                    Guard.raise("Unknown entity function operation: " + member.getJSON());
+                }
+
+                member = Container.createMemberInfoExpression(operation);
+                result = Container.createContextFunctionOperationExpression(exp, member, args);
+                return result;
+                break;
             default:
                 Guard.raise("VisitCall: Only fields can have operations: " + expression.getType().name);
                 //TODO we must not alter the visited tree

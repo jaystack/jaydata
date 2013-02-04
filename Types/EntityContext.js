@@ -208,6 +208,8 @@ $data.Class.define('$data.EntityContext', null, null,
             sm.eventHandlers = storageModel.EventHandlers;
             this._entitySetReferences[storageModel.LogicalType.name] = sm;
 
+            this._initializeActions(sm, ctor, ctor.getMemberDefinition(storageModel.ItemName));
+
             storageModel.EntitySetReference = sm;
         }
         //}, this);
@@ -353,6 +355,23 @@ $data.Class.define('$data.EntityContext', null, null,
             storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, null, dbEntityInstanceDefinition, dbEntityClassDefinition);
         }
         //}, this);
+    },
+    _initializeActions: function (es, ctor, esDef) {
+        if (esDef && esDef.actions) {
+            var actionKeys = Object.keys(esDef.actions);
+            for (var i = 0; i < actionKeys.length; i++) {
+                var actionName = actionKeys[i];
+                var action = esDef.actions[actionName];
+                if (typeof action === 'function') {
+                    es[actionName] = action;
+                } else {
+                    var actionDef = $data.MemberDefinition.translateDefinition(action, actionName, ctor);
+                    if (actionDef instanceof $data.MemberDefinition && actionDef.kind === $data.MemberTypes.method) {
+                        es[actionName] = actionDef.method;
+                    }
+                }
+            }
+        }
     },
     _buildDbType_navigationPropertyComplite: function (memDef, memDefResolvedDataType, storageModel) {
         if (!memDef.inverseProperty) {
@@ -971,7 +990,20 @@ $data.Class.define('$data.EntityContext', null, null,
                 for (var j = 0; j < entity.data.getType().memberDefinitions.getPublicMappedProperties().length; j++) {
                     var memDef = entity.data.getType().memberDefinitions.getPublicMappedProperties()[j];
 
-                    if (memDef.required && !memDef.computed && !entity.data[memDef.name]) entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+                    var memDefType = Container.resolveType(memDef.type);
+                    if (memDef.required && !memDef.computed && !entity.data[memDef.name]) {
+                        switch (memDefType) {
+                            case $data.String:
+                            case $data.Number:
+                            case $data.Integer:
+                            case $data.Date:
+                            case $data.Boolean:
+                                entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
                 //}, this);
             }
@@ -1459,6 +1491,13 @@ $data.Class.define('$data.EntityContext', null, null,
     resolveSetOperations: function (operation, expression, frameType) {
         return this.storageProvider.resolveSetOperations(operation, expression, frameType);
     },
+    resolveTypeOperations: function (operation, expression, frameType) {
+        return this.storageProvider.resolveTypeOperations(operation, expression, frameType);
+    },
+    resolveContextOperations: function (operation, expression, frameType) {
+        return this.storageProvider.resolveContextOperations(operation, expression, frameType);
+    },
+
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
         if(typeof console !== 'undefined' && console.log)
             console.log('Obsolate: _generateServiceOperationQueryable, $data.EntityContext');
@@ -1580,12 +1619,13 @@ $data.Class.define('$data.EntityContext', null, null,
             fn = function () {
                 var context = this;
 
-                var bindedEntity = {};
+                var bindedEntity;
                 if (this instanceof $data.Entity) {
                     if (this.context) {
                         context = this.context;
                     } else {
                         Guard.raise('entity not attached into context');
+                        return;
                     }
 
                     bindedEntity = {
@@ -1608,7 +1648,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
 
                 var ec = Container.createEntityContextExpression(context);
-                var memberdef = (bindedEntity.data || context).getType().getMemberDefinition(cfg.serviceName);
+                var memberdef = (bindedEntity ? bindedEntity.data : context).getType().getMemberDefinition(cfg.serviceName);
                 var es = Container.createServiceOperationExpression(ec,
                         Container.createMemberInfoExpression(memberdef),
                         paramConstExpression,

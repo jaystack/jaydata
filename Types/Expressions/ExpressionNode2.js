@@ -69,6 +69,8 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     EntityMember: "EntityMember",
     EntityFieldOperation: "EntityFieldOperation",
     FrameOperation: "FrameOperation",
+    EntityFunctionOperation: "EntityFunctionOperation",
+    ContextFunctionOperation: "ContextFunctionOperation",
     EntityBinary: "EntityBinary",
     Code: "Code",
     ParametricQuery: "ParametricQuery",

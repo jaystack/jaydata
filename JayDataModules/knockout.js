@@ -245,7 +245,7 @@
             //TODO rename classes to reflex variable names
             //TODO engage localValueResolver here
             //var globalVariableResolver = Container.createGlobalContextProcessor(window);
-            var constantResolver = Container.createConstantValueResolver(expression.parameters, window);
+            var constantResolver = Container.createConstantValueResolver(expression.parameters, window, this.scopeContext);
             var parameterProcessor = Container.createParameterResolverVisitor();
 
             jsCodeTree = parameterProcessor.Visit(jsCodeTree, constantResolver);
@@ -289,6 +289,9 @@
             var observables = expression.expression.observables;
             if (observables && observables.length > 0) {
                 observables.forEach(function (obsObj) {
+                    if (!obsObj)
+                        return;
+
                     obsObj.observable.subscribe(function () {
                         if (!obsObj.skipExecute) {
                             var preparator = Container.createQueryExpressionCreator(self);
