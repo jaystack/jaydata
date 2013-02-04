@@ -662,7 +662,7 @@
         stop(1);
         context.onReady(function () {
 
-            for (var i = 0; i < 10000; i++) {
+            for (var i = 0; i < 1000; i++) {
                 var item1 = new idbexample.idbTestItem1({
                     i0: i,
                     b0: true,

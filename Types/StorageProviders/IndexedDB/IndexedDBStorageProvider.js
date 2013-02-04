@@ -455,7 +455,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks(openCallbacks);
     },
     _compile: function (query, params) {
-        var compiler = Container.createIndexedDBCompiler();
+        var compiler = Container.createIndexedDBCompiler(this.db);
         var compiledQuery = compiler.compile(query);
         
         return compiledQuery;
