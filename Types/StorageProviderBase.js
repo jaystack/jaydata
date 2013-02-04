@@ -255,6 +255,13 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         return result;
     },
 
+    resolveTypeOperations: function (operation, expression, frameType) {
+        Guard.raise(new Exception("Entity '" + expression.entityType.name + "' Operation '" + operation + "' is not supported by the provider"));
+    },
+
+    resolveContextOperations: function (operation, expression, frameType) {
+        Guard.raise(new Exception("Context '" + expression.instance.getType().name + "' Operation '" + operation + "' is not supported by the provider"));
+    },
 
     makePhysicalTypeDefinition: function (entityDefinition, association) {
     }

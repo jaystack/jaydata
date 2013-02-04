@@ -7,3 +7,11 @@ $C('$data.Expressions.FrameOperationExpression', $data.Expressions.ExpressionNod
     nodeType: { value: $data.Expressions.ExpressionType.FrameOperation }
 
 });
+
+$C('$data.Expressions.EntityFunctionOperationExpression', $data.Expressions.FrameOperationExpression, null, {
+    nodeType: { value: $data.Expressions.ExpressionType.EntityFunctionOperation }
+});
+
+$C('$data.Expressions.ContextFunctionOperationExpression', $data.Expressions.FrameOperationExpression, null, {
+    nodeType: { value: $data.Expressions.ExpressionType.ContextFunctionOperation }
+});

@@ -1,6 +1,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-                xmlns:edm="http://schemas.microsoft.com/ado/2008/09/edm" 
+                xmlns:edm="@@VERSIONNS@@" 
                 xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" 
+                xmlns:metadata="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" 
                 xmlns:annot="http://schemas.microsoft.com/ado/2009/02/edm/annotation" 
                 xmlns:exsl="http://exslt.org/common" 
                 xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl">
@@ -47,13 +48,20 @@
     </xsl:if></xsl:for-each>
     </xsl:otherwise>
     </xsl:choose>
+    <xsl:variable name="currentName"><xsl:value-of select="concat(../@Namespace,'.',@Name)"/></xsl:variable>
+    <xsl:for-each select="//edm:FunctionImport[@IsBindable and edm:Parameter[1]/@Type = $currentName]"><xsl:if test="position() = 1">,
+    </xsl:if>
+      <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
+    </xsl:if>
+    </xsl:for-each>
   });
   
 </xsl:for-each>
 
 <xsl:for-each select="//edm:EntityContainer">
   <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$ContextBaseClass"  />.extend('<xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)"/>', {
-    <xsl:for-each select="edm:EntitySet | edm:FunctionImport">
+    <!--or (@IsBindable = 'true' and (@IsAlwaysBindable = 'false' or @m:IsAlwaysBindable = 'false' or @metadata:IsAlwaysBindable = 'false'))-->
+    <xsl:for-each select="edm:EntitySet | edm:FunctionImport[not(@IsBindable) or @IsBindable = 'false']">
       <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
     </xsl:if>
     </xsl:for-each>
@@ -63,7 +71,7 @@
   $data.generatedContexts.push(<xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />);
   <xsl:if test="$AutoCreateContext = 'true'">
   /*Context Instance*/
-  <xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />( { name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />' });
+  <xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />({ name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />' });
 </xsl:if>
 
 </xsl:for-each>
@@ -74,34 +82,53 @@
 
   <xsl:template match="edm:Key"></xsl:template>
 
-  <xsl:template match="edm:FunctionImport">'<xsl:value-of select="@Name"/>': $data.EntityContext.generateServiceOperation({ serviceName:'<xsl:value-of select="@Name"/>', returnType: <xsl:apply-templates select="." mode="render-return-config" />, <xsl:apply-templates select="." mode="render-elementType-config" />params: [<xsl:for-each select="edm:Parameter">{ <xsl:value-of select="@Name"/>: '<xsl:apply-templates select="@Type" mode="render-functionImport-type" />' }<xsl:if test="position() != last()">,</xsl:if>
-    </xsl:for-each>], method: '<xsl:value-of select="@m:HttpMethod"/>' })</xsl:template>
-
-  <xsl:template match="@Type | @ReturnType" mode="render-functionImport-type">
-    <xsl:variable name="curr" select="."/>
+  <xsl:template match="edm:FunctionImport">
+    <xsl:text>'</xsl:text>
+    <xsl:value-of select="@Name"/>
+    <xsl:text>': { type: </xsl:text>
     <xsl:choose>
-      <xsl:when test="//edm:Schema[starts-with($curr, @Namespace)]"> 
-        <xsl:value-of select="concat($DefaultNamespace,$curr)" />
+      <xsl:when test="@IsBindable = 'true'">
+        <xsl:text>$data.ServiceAction</xsl:text>
       </xsl:when>
-      <xsl:otherwise> 
-        <xsl:value-of select="$curr"/>
+      <xsl:otherwise>
+        <xsl:text>$data.ServiceOperation</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
 
+    <xsl:apply-templates select="@*" mode="FunctionImport-mode"/>
+
+    <xsl:variable name="IsBindable">
+      <xsl:value-of select="@IsBindable"/>
+    </xsl:variable>
+    <xsl:text>, params: [</xsl:text>
+    <xsl:for-each select="edm:Parameter[($IsBindable = 'true' and position() > 1) or (($IsBindable = 'false' or $IsBindable = '') and position() > 0)]">
+      <xsl:text>{ name: '</xsl:text>
+      <xsl:value-of select="@Name"/>
+      <xsl:text>', type: '</xsl:text>
+      <xsl:apply-templates select="@Type" mode="render-functionImport-type" />
+      <xsl:text>' }</xsl:text>
+      <xsl:if test="position() != last()">, </xsl:if>
+    </xsl:for-each>    
+    <xsl:text>]</xsl:text>
+
+    <xsl:text> }</xsl:text>
   </xsl:template>
   
-  <xsl:template match="edm:FunctionImport" mode="render-return-config">
+  <xsl:template match="@ReturnType" mode="FunctionImport-mode">
+    <xsl:text>, returnType: </xsl:text>
     <xsl:choose>
-      <xsl:when test="not(@ReturnType)">null</xsl:when>
-      <xsl:when test="starts-with(@ReturnType, 'Collection')">$data.Queryable</xsl:when>
-      <xsl:otherwise> '<xsl:apply-templates select="@ReturnType" mode="render-functionImport-type" />' </xsl:otherwise>
+      <xsl:when test="not(.)">null</xsl:when>
+      <xsl:when test="starts-with(., 'Collection')">$data.Queryable</xsl:when>
+      <xsl:otherwise>
+        <xsl:text>'</xsl:text>
+        <xsl:apply-templates select="." mode="render-functionImport-type" />
+        <xsl:text>'</xsl:text>
+      </xsl:otherwise>
     </xsl:choose>
-  </xsl:template>
-  
-  <xsl:template match="edm:FunctionImport" mode="render-elementType-config">
-    <xsl:if test="starts-with(@ReturnType, 'Collection')">
-      <xsl:variable name="len" select="string-length(@ReturnType)-12"/>
-      <xsl:variable name="curr" select="substring(@ReturnType,12,$len)"/>
+
+    <xsl:if test="starts-with(., 'Collection')">
+      <xsl:variable name="len" select="string-length(.)-12"/>
+      <xsl:variable name="curr" select="substring(.,12,$len)"/>
       <xsl:variable name="ElementType" >
         <xsl:choose>
           <xsl:when test="//edm:Schema[starts-with($curr, @Namespace)]">
@@ -111,10 +138,64 @@
             <xsl:value-of select="$curr" />
           </xsl:otherwise>
         </xsl:choose>
-      </xsl:variable>elementType: '<xsl:value-of select="$ElementType"/>', </xsl:if>
+      </xsl:variable>
+      <xsl:text>, elementType: '</xsl:text>
+      <xsl:value-of select="$ElementType"/>
+      <xsl:text>'</xsl:text>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="@Name" mode="FunctionImport-mode"></xsl:template>
+  <xsl:template match="@m:HttpMethod" mode="FunctionImport-mode">
+    <xsl:text>, method: '</xsl:text>
+    <xsl:value-of select="."/>
+    <xsl:text>'</xsl:text>
+  </xsl:template>
+  <xsl:template match="@IsBindable | @IsSideEffecting | @IsAlwaysBindable | @m:IsAlwaysBindable | @metadata:IsAlwaysBindable | @IsComposable" mode="FunctionImport-mode">
+    <xsl:text>, </xsl:text>
+    <xsl:call-template name="GetAttributeName">
+      <xsl:with-param name="Name" select="name()" />
+    </xsl:call-template>
+    <xsl:text>: </xsl:text>
+    <xsl:value-of select="."/>
+  </xsl:template>
+  <xsl:template match="@*" mode="FunctionImport-mode">
+    <xsl:text>, '</xsl:text>
+    <xsl:call-template name="GetAttributeName">
+      <xsl:with-param name="Name" select="name()" />
+    </xsl:call-template>
+    <xsl:text>': '</xsl:text>
+    <xsl:value-of select="."/>        
+    <xsl:text>'</xsl:text>
+  </xsl:template>
+  <xsl:template name="GetAttributeName">
+    <xsl:param name="Name" />
+    <xsl:choose>
+      <xsl:when test="contains($Name, ':')">
+        <xsl:value-of select="substring-after($Name, ':')"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$Name"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="edm:EntitySet">'<xsl:value-of select="@Name"/>': { type: <xsl:value-of select="$EntitySetBaseClass"  />, elementType: <xsl:value-of select="concat($DefaultNamespace,@EntityType)"/> }</xsl:template>
+  <xsl:template match="edm:EntitySet">'<xsl:value-of select="@Name"/>': { type: <xsl:value-of select="$EntitySetBaseClass"  />, elementType: <xsl:value-of select="concat($DefaultNamespace,@EntityType)"/><xsl:text> </xsl:text><xsl:apply-templates select="." mode="Collection-Actions" />}</xsl:template>
+
+  <xsl:template match="edm:EntitySet" mode="Collection-Actions">
+    <xsl:variable name="CollectionType" select="concat('Collection(', @EntityType, ')')" />
+    <xsl:for-each select="//edm:FunctionImport[edm:Parameter[1]/@Type = $CollectionType]">
+      <xsl:if test="position() = 1">
+        <xsl:text>, actions: { 
+        </xsl:text>
+      </xsl:if>
+        <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
+        </xsl:if>
+      <xsl:if test="position() = last()">
+        <xsl:text>
+      }</xsl:text>
+      </xsl:if>
+    </xsl:for-each>
+  </xsl:template>
   
   <xsl:template match="edm:Property | edm:NavigationProperty">
     <property>

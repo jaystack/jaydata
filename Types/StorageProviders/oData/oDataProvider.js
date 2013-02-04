@@ -130,6 +130,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
+                data: sql.postData,
                 enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
@@ -609,6 +610,51 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 }
         }
     },
+    resolveTypeOperations: function (operation, expression, frameType) {
+        var memDef = expression.entityType.getMemberDefinition(operation);
+        if (!memDef ||
+            !memDef.method ||
+            memDef.method.IsSideEffecting !== false ||
+            !memDef.method.returnType ||
+            !(frameType === $data.Expressions.FilterExpression || frameType === $data.Expressions.OrderExpression))
+        {
+            Guard.raise(new Exception("Entity '" + expression.entityType.name + "' Operation '" + operation + "' is not supported by the provider"));
+        }
+
+        return memDef;
+    },
+    resolveSetOperations: function (operation, expression, frameType) {
+        if (expression) {
+            var esDef = expression.storageModel.EntitySetReference.entityContext.getType().getMemberDefinition(expression.storageModel.ItemName);
+            if (esDef && esDef.actions && esDef.actions[operation]) {
+                var memDef = $data.MemberDefinition.translateDefinition(esDef.actions[operation], operation, this.getType());
+                if (!memDef ||
+                    !memDef.method ||
+                    memDef.method.IsSideEffecting !== false ||
+                    !memDef.method.returnType ||
+                    !(frameType === $data.Expressions.FilterExpression || frameType === $data.Expressions.OrderExpression)) {
+
+                    Guard.raise(new Exception("Collection '" + expression.storageModel.ItemName + "' Operation '" + operation + "' is not supported by the provider"));
+                }
+
+                return memDef;
+            }
+        }
+        return $data.StorageProviderBase.prototype.resolveSetOperations.apply(this, arguments);
+
+    },
+    resolveContextOperations: function (operation, expression, frameType) {
+        var memDef = this.context.getType().getMemberDefinition(operation);
+        if (!memDef ||
+            !memDef.method ||
+            memDef.method.IsSideEffecting !== false ||
+            !memDef.method.returnType ||
+            !(frameType === $data.Expressions.FilterExpression || frameType === $data.Expressions.OrderExpression)) {
+            Guard.raise(new Exception("Context '" + expression.instance.getType().name + "' Operation '" + operation + "' is not supported by the provider"));
+        }
+        return memDef;
+    },
+
     getEntityKeysValue: function (entity) {
         var result = [];
         var keyValue = undefined;

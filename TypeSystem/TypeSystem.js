@@ -100,6 +100,11 @@
             value: function (value, callback) { return this.setProperty(pd, value, callback); }
         };
     };
+    MemberDefinition.translateDefinition = function (memDef, name, holder) {
+        var memberDefinition = new MemberDefinition(memDef, holder);
+        memberDefinition.name = name;
+        return memberDefinition;
+    };
 
     MemberDefinition.prototype.toJSON = function () {
         var alma = {};
@@ -192,7 +197,6 @@
     };
     MemberDefinitionCollection.prototype.constructor = MemberDefinitionCollection;
     $data.MemberDefinitionCollection = window["MemberDefinitionCollection"] = MemberDefinitionCollection;
-
 
     function ClassEngineBase() {
         this.classNames = {};
@@ -530,7 +534,7 @@
             this.addProperty(holder, memberDefinition.name, pd, propagation);
 
             //if lazyload TODO
-            if (!memberDefinition.classMember && classFunction.__setPropertyfunctions == true && 
+            if (!memberDefinition.classMember && classFunction.__setPropertyfunctions == true && memberDefinition.withoutGetSetMethod !== true &&
                 !('get_' + memberDefinition.name in holder || 'set_' + memberDefinition.name in holder)) {
                 var pdGetMethod = memberDefinition.createGetMethod();
                 this.addProperty(holder, 'get_' + memberDefinition.name, pdGetMethod, propagation);
@@ -545,7 +549,6 @@
             ///<param name="memberDefinition" type="MemberDefinition" />
             memberCollectionName = memberCollectionName || 'memberDefinitions';
             classFunction[memberCollectionName] = classFunction[memberCollectionName] || new MemberDefinitionCollection();
-
             classFunction[memberCollectionName].setMember(memberDefinition);
 
             switch (memberDefinition.kind) {
@@ -567,8 +570,7 @@
             var t = this;
             for (var item in memberListDefinition) {
                 if (memberListDefinition.hasOwnProperty(item)) {
-                    var memberDefinition = new MemberDefinition(memberListDefinition[item], classFunction);
-                    memberDefinition.name = item;
+                    var memberDefinition = MemberDefinition.translateDefinition(memberListDefinition[item], item, classFunction);
                     memberDefinition.classMember = true;
                     t.buildMember(classFunction, memberDefinition, undefined, 'staticDefinitions');
                 }
@@ -582,9 +584,7 @@
             var t = this;
             for (var item in memberListDefinition) {
                 if (memberListDefinition.hasOwnProperty(item)) {
-                    var memberDefinition = new MemberDefinition(memberListDefinition[item], classFunction);
-
-                    memberDefinition.name = item;
+                    var memberDefinition = MemberDefinition.translateDefinition(memberListDefinition[item], item, classFunction);
                     t.buildMember(classFunction, memberDefinition);
                 }
             }
@@ -974,8 +974,7 @@
                 type: _type
             };
 
-            var memberDefinition = new MemberDefinition(propDef, this);
-            memberDefinition.name = name;
+            var memberDefinition = MemberDefinition.translateDefinition(propDef, name, this);
             $data.Class.buildMember(this, memberDefinition);
 
             this.memberDefinitions.clearCache();
@@ -983,8 +982,7 @@
             return this;
         },
         addMember: function (name, definition, isClassMember) {
-            var memberDefinition = new MemberDefinition(definition, this);
-            memberDefinition.name = name;
+            var memberDefinition = MemberDefinition.translateDefinition(definition, name, this);
 
             if (isClassMember) {
                 memberDefinition.classMember = true;
@@ -1008,6 +1006,31 @@
         storeProperty: storeProperty,
         retrieveProperty: retrieveProperty
     });
+
+
+    //override after typeSystem initialized
+    MemberDefinition.translateDefinition = function (memDef, name, classFunction) {
+        var holder = classFunction;
+        var memberDefinition;
+        if (memDef.type && Container.isTypeRegistered(memDef.type)) {
+            holder = Container.resolveType(memDef.type);
+
+            if (typeof holder.translateDefinition === 'function') {
+                memberDefinition = holder.translateDefinition.apply(holder, arguments);
+                memberDefinition.name = memberDefinition.name || name;
+            } else {
+                holder = classFunction;
+            }
+        }
+
+        if (!(memberDefinition instanceof MemberDefinition)) {
+            memberDefinition = new MemberDefinition(memberDefinition || memDef, holder);
+            memberDefinition.name = name;
+        }
+
+        return memberDefinition;
+    };
+
 
     $data.Class.ConstructorParameter = ConstructorParameter = $data.Class.define('ConstructorParameter', null, null, {
         constructor: function (paramIndex) {

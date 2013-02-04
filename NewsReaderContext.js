@@ -92,6 +92,7 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     TestTable2: { type: $data.EntitySet, elementType: $news.Types.TestItemGuid },
     TestItemGroups: { type: $data.EntitySet, elementType: $news.Types.TestItemGroup },
 
+    /*
     PrefilteredLocation: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocation', returnType: $news.Types.Location, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     PrefilteredLocations: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredLocations', returnType: $data.Queryable, elementType: '$news.Types.Location', params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     PrefilteredArticlesCount: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticlesCount', returnType: $data.Integer, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
@@ -101,6 +102,16 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
     PrefilteredArticle: $data.EntityContext.generateServiceOperation({ serviceName: 'PrefilteredArticle', returnType: $news.Types.Article, params: [{ minId: $data.Integer }, { startsWith: $data.String }] }),
     CreateCategory: $data.EntityContext.generateServiceOperation({ serviceName: 'CreateCategory', returnType: null, params: [{ title: $data.String }], method: 'POST' }),
     GetCollection: $data.EntityContext.generateServiceOperation({ serviceName: 'GetCollection', returnType: $data.Queryable, elementType: $data.Integer, params: [] })
+    */
+    PrefilteredLocation: { type: $data.ServiceOperation, returnType: $news.Types.Location, params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    PrefilteredLocations: { type: $data.ServiceOperation, returnType: $data.Queryable, elementType: '$news.Types.Location', params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    PrefilteredArticlesCount: { type: $data.ServiceOperation, returnType: $data.Integer, params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    PrefilteredArticlesId: { type: $data.ServiceOperation, returnType: '$data.Queryable', elementType: $data.Integer, params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    PrefilteredArticles: { type: $data.ServiceOperation, returnType: '$data.Queryable', elementType: '$news.Types.Article', params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    PrefilteredArticleList: { type: $data.ServiceOperation, returnType: $data.Queryable, elementType: $news.Types.Article, params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    PrefilteredArticle: { type: $data.ServiceOperation, returnType: $news.Types.Article, params: [{ name: 'minId', type: $data.Integer }, { name: 'startsWith', type: $data.String }] },
+    CreateCategory: { type: $data.ServiceOperation, returnType: null, params: [{ name: 'title', type: $data.String }], method: 'POST' },
+    GetCollection: { type: $data.ServiceOperation, returnType: $data.Queryable, elementType: $data.Integer, params: [] }
 
 }, null);
 

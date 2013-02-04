@@ -245,7 +245,7 @@
             //TODO rename classes to reflex variable names
             //TODO engage localValueResolver here
             //var globalVariableResolver = Container.createGlobalContextProcessor(window);
-            var constantResolver = Container.createConstantValueResolver(expression.parameters, window);
+            var constantResolver = Container.createConstantValueResolver(expression.parameters, window, this.scopeContext);
             var parameterProcessor = Container.createParameterResolverVisitor();
 
             jsCodeTree = parameterProcessor.Visit(jsCodeTree, constantResolver);
