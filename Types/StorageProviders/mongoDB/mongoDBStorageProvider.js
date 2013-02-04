@@ -1255,7 +1255,12 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         return serializableObject;
     },
     
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.Geography, $data.Guid], writable: false },
+    supportedDataTypes: {
+        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.GeographyPoint, $data.Guid,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
     
     supportedBinaryOperators: {
         value: {
@@ -1442,7 +1447,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
                 '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
-                '$data.Geography': function (g) { if (g) { return new $data.Geography(g[0], g[1]); } return g; },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; },
                 "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
             },
             toDb: {
@@ -1471,7 +1489,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(id, 'base64').toString('ascii'));
                     }else return id;
                 },
-                '$data.Geography': function (g) { return g ? [g.longitude, g.latitude] : g; },
+                '$data.GeographyPoint': function (g) { return g; },
+                '$data.GeographyLineString': function (g) { return g; },
+                '$data.GeographyPolygon': function (g) { return g; },
+                '$data.GeographyMultiPoint': function (g) { return g; },
+                '$data.GeographyMultiLineString': function (g) { return g; },
+                '$data.GeographyMultiPolygon': function (g) { return g; },
+                '$data.GeographyCollection': function (g) { return g; },
+                '$data.GeometryPoint': function (g) { return g; },
+                '$data.GeometryLineString': function (g) { return g; },
+                '$data.GeometryPolygon': function (g) { return g; },
+                '$data.GeometryMultiPoint': function (g) { return g; },
+                '$data.GeometryMultiLineString': function (g) { return g; },
+                '$data.GeometryMultiPolygon': function (g) { return g; },
+                '$data.GeometryCollection': function (g) { return g; },
                 "$data.Guid": function (g) { return g ? g.value : g; }
             }
         }

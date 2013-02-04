@@ -27,7 +27,10 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
 	$(TYPESYSTEM_DIR)/Trace/Trace.js\
 	$(TYPESYSTEM_DIR)/Trace/Logger.js\
+	$(TYPESYSTEM_DIR)/Types/SimpleBase.js\
+	$(TYPESYSTEM_DIR)/Types/GeoSpatial.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
+	$(TYPESYSTEM_DIR)/Types/Geometry.js\
 	$(TYPESYSTEM_DIR)/Types/Guid.js\
 	$(TYPESYSTEM_DIR)/Types/EdmTypes.js\
 	$(TYPESYSTEM_DIR)/Extensions.js\

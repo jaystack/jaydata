@@ -1010,4 +1010,117 @@
             });
         });
     });
+
+    $data.Entity.extend('$example.FilterTypeTest', {
+        Id: { type: 'int', key: true, computed: true },
+        Name: { type: 'string' },
+        propDate: { type: 'date' },
+        propBool: { type: 'bool' },
+        propNum: { type: 'number' },
+        propInt: { type: 'int' },
+        propGuid: { type: 'guid' }
+    });
+
+    $data.EntityContext.extend('$example.FilterTypeContext', {
+        Entities: { type: $data.EntitySet, elementType: $example.FilterTypeTest }
+    });
+
+    test('filter types', 18, function () {
+        stop(1);
+
+        var memoryContext = new $example.FilterTypeContext({ name: 'InMemory' });
+        memoryContext.onReady(function () {
+
+            var item = new $example.FilterTypeTest({
+                Name: 'name',
+                propDate: new Date('2000/01/01'),
+                propBool: true,
+                propNum: 3.14,
+                propInt: 42,
+                propGuid: new $data.Guid('c1736305-189b-436c-ac2d-09a76eb9de1b')
+            });
+            memoryContext.Entities.add(item);
+            var item2 = new $example.FilterTypeTest({
+                Name: 'name2',
+                propDate: new Date('2013/01/01'),
+                propBool: false,
+                propNum: 4.14,
+                propInt: 56,
+                propGuid: new $data.Guid('c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2')
+            });
+            memoryContext.Entities.add(item2);
+
+            memoryContext.saveChanges(function () {
+
+
+                //string
+                var q = memoryContext.Entities.filter(function (o) { return o.Name == 'name'; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.Name == 'name');\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter string result length failed');
+                    equal(r[0].Name, 'name', 'filter string result[0] name failed');
+                });
+
+                //date
+                var q = memoryContext.Entities.filter(function (o) { return o.propDate < this.date; }, { date: new Date('2005/01/01') });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), ("function anonymous(o) {\n return (o.propDate < new Date(Date.parse('" + (new Date('2005/01/01')).toISOString() + "')));\n}").replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter date result length failed');
+                    equal(r[0].Name, 'name', 'filter date result[0] name failed');
+                });
+
+                //bool
+                var q = memoryContext.Entities.filter(function (o) { return o.propBool == false; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propBool == false);\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter bool result length failed');
+                    equal(r[0].Name, 'name2', 'filter bool result[0] name failed');
+                });
+
+                //number
+                var q = memoryContext.Entities.filter(function (o) { return o.propNum < 4.1; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propNum < 4.1);\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter number result length failed');
+                    equal(r[0].Name, 'name', 'filter number result[0] name failed');
+                });
+
+                //int
+                var q = memoryContext.Entities.filter(function (o) { return o.propInt > 50; });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propInt > 50);\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter number result length failed');
+                    equal(r[0].Name, 'name2', 'filter number result[0] name failed');
+                });
+
+                //guid
+                var q = memoryContext.Entities.filter(function (o) { return o.propGuid == this.guid; }, { guid: new $data.Guid('c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2') });
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propGuid == 'c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2');\n}".replace(/[\n ]/g, ''));
+
+                stop();
+                q.toArray(function (r) {
+                    start();
+                    equal(r.length, 1, 'filter number result length failed');
+                    equal(r[0].Name, 'name2', 'filter number result[0] name failed');
+                });
+
+                start();
+            });
+        });
+    });
 });

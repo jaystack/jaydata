@@ -50,7 +50,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         return connection;
     },
     //$data.Array, 
-    supportedDataTypes: { value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid], writable: false },
+    supportedDataTypes: {
+        value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid, $data.GeographyPoint,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
     fieldConverter: {
         value: {
             fromDb: {
@@ -64,7 +69,21 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     if (arguments.length == 0) return [];
                     return arguments[0] ? JSON.parse(arguments[0]) : undefined;
                 },
-                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(JSON.parse(g)); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(JSON.parse(g)); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(JSON.parse(g)); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(JSON.parse(g)); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(JSON.parse(g)); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(JSON.parse(g)); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(JSON.parse(g)); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(JSON.parse(g)); } return g; }
             },
             toDb: {
                 "$data.Integer": function (number) { return number; },
@@ -75,7 +94,21 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 "$data.Blob": function (blob) { return blob; },
                 "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
                 "$data.Guid": function (g) { return g ? g.value : g; },
-                "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; }
+                "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; },
+                '$data.GeographyPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return JSON.stringify(g); } return g; }
             }
         }
     },
@@ -707,6 +740,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 case $data.Guid:
                 case "text":
                 case "string":
+                case $data.GeographyPoint:
+                case $data.GeographyLineString:
+                case $data.GeographyPolygon:
+                case $data.GeographyMultiPoint:
+                case $data.GeographyMultiLineString:
+                case $data.GeographyMultiPolygon:
+                case $data.GeographyCollection:
+                case $data.GeometryPoint:
+                case $data.GeometryLineString:
+                case $data.GeometryPolygon:
+                case $data.GeometryMultiPoint:
+                case $data.GeometryMultiLineString:
+                case $data.GeometryMultiPolygon:
+                case $data.GeometryCollection:
                     this.buildFieldNameAndType("TEXT");
                     break;
                 case $data.Boolean:

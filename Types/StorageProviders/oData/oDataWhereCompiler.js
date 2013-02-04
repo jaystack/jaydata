@@ -48,10 +48,23 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
             context.data = temp + context.data.replace(/\(/g, '').replace(/\)/g, '');
         } else {
             this.Visit(expression.left, context);
+
+            //REFACTOR
+            if (expression.right instanceof $data.Expressions.EntityFieldOperationExpression && expression.right.operation.memberDefinition &&
+                expression.right.operation.memberDefinition.fixedDataType === 'decimal' && context.data.substring(context.data.length - 1) === 'm') {
+                context.data = context.data.substring(0, context.data.length - 1);
+            }
+
             context.data += " ";
             context.data += expression.resolution.mapTo;
             context.data += " ";
             this.Visit(expression.right, context);
+
+            //REFACTOR
+            if (expression.left instanceof $data.Expressions.EntityFieldOperationExpression && expression.left.operation.memberDefinition &&
+                expression.left.operation.memberDefinition.fixedDataType === 'decimal' && context.data.substring(context.data.length-1) === 'm') {
+                context.data = context.data.substring(0, context.data.length - 1);
+            }
         };
         context.data += ")";
 

@@ -31,6 +31,8 @@
             this.req = null;
             this.lexer = null;
             this.builder = new $data.oDataParser.RequestExpressionBuilder();
+
+            this.reservedNs = ['geo'];
         },
         parse: function (req) {
             ///<param name="req" type="$data.oDataParser.QueryRequest" />
@@ -136,7 +138,9 @@
                 //Math
                 "round", "floor", "ceiling",
                 //Type
-                "IsOf"
+                "IsOf",
+                //Geo
+                "geo.distance", "geo.intersects", "geo.length"
             ]
         },
         functionTypes: {
@@ -148,9 +152,12 @@
                 //Math
                 "number", "number", "number",
                 //Type
-                "boolean"
+                "boolean",
+                //Geo
+                "number", "boolean", "number"
             ]
         },
+        reservedNs: {},
         parseExpr: function () {
             //bnf: Expr               : OrExpr;
             return this.parseOrExpr();
@@ -298,6 +305,7 @@
             if (expr = this.parseBoolLiteral()) return expr;
             if (expr = this.parseNumberLiteral()) return expr;
             if (expr = this.parseGeographyLiteral()) return expr;
+            if (expr = this.parseGeometryLiteral()) return expr;
             return null;
         },
         parseDatetimeLiteral: function () {
@@ -313,7 +321,7 @@
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
             var d;
             try {
-                d = new Date(token.value)
+                d = new Date(token.value);
             } catch (e) {
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
             }
@@ -329,7 +337,7 @@
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid guid format.", "parseGuidLiteral");
             var d;
             try {
-                d = $data.parseGuid(token.value)
+                d = $data.parseGuid(token.value);
             } catch (e) {
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid guid format.", "parseGuidLiteral");
             }
@@ -410,22 +418,40 @@
             return this.builder.buildConstant(n, "number");
         },
         parseGeographyLiteral: function () {
-            if (this.lexer.token.value != "POINT")
+            if (this.lexer.token.value != "geography")
                 return null;
 
             this.lexer.nextToken();
-            if (this.lexer.token.value != ASCII.LPAREN)
-                $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected '('.", "parseGeographyLiteral");
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geography format.", "parseGeographyLiteral");
+            var g;
+            try {
+                g = $data.Geography.parseFromString(token.value);
+            } catch (e) {
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geography format.", "parseGeographyLiteral");
+            }
 
             this.lexer.nextToken();
-            var long = this.parseGeographyArg();
-            var lati = this.parseGeographyArg();
+            return this.builder.buildConstant(g, "geography");
+        },
+        parseGeometryLiteral: function () {
+            if (this.lexer.token.value != "geometry")
+                return null;
 
-            if (this.lexer.token.value != ASCII.RPAREN)
-                $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected ')'.", "parseGeographyLiteral");
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geometry format.", "parseGeometryLiteral");
+            var g;
+            try {
+                g = $data.Geometry.parseFromString(token.value);
+            } catch (e) {
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geometry format.", "parseGeometryLiteral");
+            }
 
-            this.lexer.nextToken()
-            return this.builder.buildConstant(new $data.Geography(long.value, lati.value), "geography");
+            this.lexer.nextToken();
+            return this.builder.buildConstant(g, "geometry");
         },
         parseGeographyArg: function () {
             var exp = this.parseExpr();
@@ -477,6 +503,22 @@
             if (token.tokenType != TokenType.WORD)
                 return;
             var name = token.value;
+            for (var i = 0; i < this.reservedNs.length; i++) {
+                if (this.reservedNs[i] == name) {
+
+                    this.lexer.nextToken();
+                    token = this.lexer.token;
+                    if (token.tokenType != TokenType.CHAR)
+                        $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected '.'.", "parseFunctionName");
+
+                    this.lexer.nextToken();
+                    token = this.lexer.token;
+                    if (token.tokenType != TokenType.WORD)
+                        return;
+                    name = name + '.' + token.value;
+                }
+            }
+
             for (var i = 0; i < this.functionNames.length; i++) {
                 if (this.functionNames[i] == name) {
                     this.lexer.nextToken();
