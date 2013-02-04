@@ -24,7 +24,7 @@
     function x_test() { };
 
     module('indexedDbProviderTest');
-    test('storageProvider_finds_interfaces', function () {
+   /* test('storageProvider_finds_interfaces', function () {
         expect(4);
         stop(1);
         $data.StorageProviderLoader.load(['indexedDb'], function () {
@@ -537,7 +537,7 @@
             }
         }
         );
-    });
+    });*/
 
     $data.Class.define("idbexample.idbTestItem1", $data.Entity, null, {
         Id: { type: "int", key: true, computed: true },
@@ -563,7 +563,7 @@
         Items1: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem1 },
         Items2: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem2 }
     }, null);
-
+    /*
     test('many data test', function () {
         var dataNumber = 1000;
         expect((6 + 6) * dataNumber + 6);
@@ -652,11 +652,11 @@
             });
         });
     });
-
+    */
     test('almafa', function () {
         var context = new idbexample.idbContext({
             name: 'indexedDb',
-            databaseName: 'idbexample_idbContext',
+            databaseName: 'idbexample_idbContext1',
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
@@ -684,13 +684,31 @@
             context.saveChanges({
                 success: function () {
                     console.log("Start: ", new Date());
-                    //context.Items1.where(function (item) { return item.i0 > this.a && (item.i0 > 15 || item.i0 <= 100) && item.i0>95; }, {a:20}).toArray(function () {
-                    context.Items1.where(function (item) { return item.i0 > this.a && item.i0 < 40; }, { a: 20 }).toArray(function () {
-                        ok(true);
-                        console.log("End: ", new Date());
+                    $.when(
+                            context.Items1.where(function (item) { return item.i0 == this.a; }, { a: 40 }).toArray(function (result) {
+                                ok(true);
+                                console.log("1End: ", new Date());
+                            }),
+                            context.Items1.where(function (item) { return item.i0 == this.a && item.i0 == 20; }, { a: 40 }).toArray(function (result) {
+                                ok(true);
+                                console.log("2End: ", new Date());
+                            }),
+                            context.Items1.where(function (item) { return item.i0 == this.a || item.i0 == 20; }, { a: 40 }).toArray(function (result) {
+                                ok(true);
+                                console.log("3End: ", new Date());
+                            }),
+                            context.Items1.where(function (item) { return item.i0 < this.a && item.i0 > 20; }, { a: 40 }).toArray(function (result) {
+                                ok(true);
+                                console.log("4End: ", new Date());
+                            }),
+                            context.Items1.where(function (item) { return item.i0 > this.a && item.i0 > 15 || item.i0 <= 100 && item.i0 > 95; }, { a: 20 }).toArray(function (result) {
+                                ok(true);
+                                console.log("5End: ", new Date());
+
+                            })
+                    ).then(function () {
                         close(context);
                     });
-                    
                 }
             });
         });

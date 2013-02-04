@@ -47,9 +47,19 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     supportedSetOperations: {
         value: {
+            filter: {},
+            map: {},
             length: {},
+            forEach: {},
             toArray: {},
-            forEach: {}
+            single: {},
+            some: {},
+            //every: {},
+            take: {},
+            skip: {},
+            orderBy: {},
+            orderByDescending: {},
+            first: {}
         },
         enumerable: true,
         writable: true
@@ -332,18 +342,19 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
 
-        if (self.originalContext && self.providerConfiguration.memoryOperations) {
-            self.operationProvider = new self.originalContext({ name: 'InMemory' });
-            self.operationProvider.onReady({
-                success: function () {
-                    self.supportedBinaryOperators = self.operationProvider.storageProvider.supportedBinaryOperators;
-                    self.supportedSetOperations = self.operationProvider.storageProvider.supportedSetOperations;
-                    self.supportedFieldOperations = self.operationProvider.storageProvider.supportedFieldOperations;
-                    self.supportedUnaryOperators = self.operationProvider.storageProvider.supportedUnaryOperators;
-                    callBack.success();
-                },
-                error: callBack.error
-            });
+        if (false && self.originalContext && self.providerConfiguration.memoryOperations) {
+            //never run 
+            //self.operationProvider = new self.originalContext({ name: 'InMemory' });
+            //self.operationProvider.onReady({
+            //    success: function () {
+            //        self.supportedBinaryOperators = self.operationProvider.storageProvider.supportedBinaryOperators;
+            //        self.supportedSetOperations = self.operationProvider.storageProvider.supportedSetOperations;
+            //        self.supportedFieldOperations = self.operationProvider.storageProvider.supportedFieldOperations;
+            //        self.supportedUnaryOperators = self.operationProvider.storageProvider.supportedUnaryOperators;
+            //        callBack.success();
+            //    },
+            //    error: callBack.error
+            //});
         } else {
             callBack.success();
         }
@@ -454,9 +465,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         else
             self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks(openCallbacks);
     },
-    _compile: function (query, params) {
-        var compiler = Container.createIndexedDBCompiler(this.db);
-        var compiledQuery = compiler.compile(query);
+    _compile: function (query, callback) {
+        var compiler = Container.createIndexedDBCompiler(this);
+        var compiledQuery = compiler.compile(query, {
+            success: function (compiledQuery) {
+                callback.success(compiledQuery);
+            }
+        });
         
         return compiledQuery;
     },
@@ -467,69 +482,24 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         return compiledExpression;
     },
     executeQuery: function (query, callBack) {
+        var start = new Date().getTime();
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
 
-        var compiledExpression = this._compile(query);
-        var executor = Container.createIndexedDBExpressionExecutor(this);
-        executor.runQuery(compiledExpression);
-
-        // Creating read only transaction for query. Results are passed in transaction's oncomplete event
-        var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
-        var store = self.db.transaction([entitySet.tableName], self.IDBTransactionType.READ_ONLY).setCallbacks({
-            onerror: callBack.error,
-            onabort: callBack.error,
-            oncomplete: function (event) {
-                if (self.operationProvider) {
-                    self.operationProvider.storageProvider.providerConfiguration.source[entitySet.tableName] = query.rawDataList;
-                    self.operationProvider.storageProvider.executeQuery(query, {
-                        success: function (query) {
-                            if (query.expression.nodeType === $data.Expressions.ExpressionType.Count) {
-                                query.rawDataList[0] = { cnt: query.rawDataList[0] };
-                            }
-                            callBack.success(query);
-                        },
-                        error: callBack.error
-                    });
-                } else {
-                    callBack.success(query);
-                }
-            }
-        }).objectStore(entitySet.tableName);
-        var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
-        modelBinderCompiler.Visit(query.expression);
-
-        if (self.operationProvider) {
-            store.openCursor().onsuccess = function (event) {
-                // We currently support only toArray() so let's just dump all data
-                var cursor = event.target.result;
-                if (cursor) {
-                    var value = cursor.value;
-                    query.rawDataList.push(cursor.value);
-                    cursor['continue']();
-                }
-            };
-        } else {
-            switch (query.expression.nodeType) {
-                case $data.Expressions.ExpressionType.Count:
-                    store.count().onsuccess = function (event) {
-                        var count = event.target.result;
-                        query.rawDataList.push({ cnt: count });
+        this._compile(query, {
+            success: function (expression) {
+                var executor = Container.createIndexedDBExpressionExecutor(self);
+                executor.runQuery(expression, {
+                    success: function (result) {
+                        var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
+                        modelBinderCompiler.Visit(query.expression);
+                        query.rawDataList = result;
+                        console.log("execute Query in milliseconds:", new Date().getTime() - start);
+                        callBack.success(query);
                     }
-                    break;
-                default:
-                    store.openCursor().onsuccess = function (event) {
-                        // We currently support only toArray() so let's just dump all data
-                        var cursor = event.target.result;
-                        if (cursor) {
-                            var value = cursor.value;
-                            query.rawDataList.push(cursor.value);
-                            cursor['continue']();
-                        }
-                    };
-                    break;
+                });
             }
-        };
+        });
     },
     _getKeySettings: function (memDef) {
         /// <summary>

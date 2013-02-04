@@ -1,19 +1,57 @@
 $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (db) {
-        this.db = db;
+    constructor: function (provider) {
+        this.db = provider.db;
+        this.provider = provider;
     },
-    compile: function (query) {
+    compile: function (query, callback) {
+        var start = new Date().getTime();
         this.subqueryIndex = 0;
         var ctx = {};
         var newExpression = this.Visit(query.expression, ctx);
-        console.log("Context ", ctx, newExpression.source.selector.expression);
-        indexMonitor = Container.createPhysicalIndexSearch();
-        newExpression = indexMonitor.Visit(newExpression, { db: this.db });
-        return { context: query.context, defaultType: query.defaultType, expression: newExpression };
-    },
 
+        //search new indexes
+        var newIndexContext = { db: this.db };
+        indexMonitor = Container.createPhysicalIndexSearch();
+        newExpression = indexMonitor.Visit(newExpression, newIndexContext);
+
+        //createIndexes
+        this.createNewIndexes(newIndexContext, {
+            success: function () {
+                console.log("Compiler in milliseconds: ", new Date().getTime() - start);
+                callback.success({ context: query.context, defaultType: query.defaultType, expression: newExpression });
+            }
+        });
+    },
+    createNewIndexes: function (ctx, callback) {
+        if (ctx.newIndexes && ctx.newIndexes.length > 0) {
+            var self = this;
+            this.provider.db.close();
+            var newVersion = this.provider.db.version || 0;
+            //close db and reopen it with incrased version number
+            this.provider.indexedDB.open(this.provider.providerConfiguration.databaseName, ++newVersion).setCallbacks({
+                onupgradeneeded: function (event) {
+                    var writeTran = event.target.transaction;
+                    for (var i = 0; i < ctx.newIndexes.length; i++) {
+                        var expression = ctx.newIndexes[i];
+                        writeObjectStore = writeTran.objectStore(expression.newIndex.field.objectStoreName);
+                        if (!writeObjectStore.indexNames.contains(expression.newIndex.field.name)) {
+                            writeObjectStore.createIndex(expression.newIndex.field.name, expression.newIndex.field.name, { unique: false });
+                        }
+                        expression.suggestedIndex = expression.newIndex;
+                        expression.newIndex = null;
+                    }
+                    writeTran.db.close();
+                    self.provider.indexedDB.open(self.provider.providerConfiguration.databaseName).onsuccess = function (e) {
+                        self.provider.db = e.target.result;
+                        callback.success();
+                    }
+                }
+            });
+        } else {
+            callback.success();
+        }
+    },
     VisitSimpleBinaryExpression: function (expression, context) {
-        console.log("operator: " + expression.operator);
         var origType = context.parentNodeType;
 
         context.parentNodeType = expression.nodeType;
@@ -68,10 +106,10 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         if (!context.objectStoresName.some(function (it) { return it == tName; })) {
             context.objectStoresName.push(tName);
         }
-        console.log(context);
+        //console.log(context);
     },
     VisitParametricQueryExpression: function (expression, context) {
-        context.tran = context.db.transaction([context.objectStoresName], "readwrite");
+        context.tran = context.db.transaction([context.objectStoresName], "readonly");
         this.Visit(expression.expression, context);
     },
     VisitIndexedDBPhysicalAndFilterExpression: function (expression, context) {
@@ -80,11 +118,13 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         context.objectStores = context.objectStores || {};
         var i = 0;
         var filter = expression.filters[i];
-        while (!suggestedIndex || !filter) {
+        while (filter && !suggestedIndex) {
             var filterValue = { value: null };
             this.Visit(filter.left, filterValue);
             this.Visit(filter.right, filterValue);
 
+            filterValue.nodeType = filter.nodeType;
+            filterValue.index = i;
             filter.filterValue = filterValue;
 
             if (filterValue.field) {
@@ -106,8 +146,9 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         }
         expression.suggestedIndex = suggestedIndex;
         expression.newIndex = newIndex;
-        if (newIndex) {
-
+        if (newIndex && !suggestedIndex) {
+            context.newIndexes = context.newIndexes || [];
+            context.newIndexes.push(expression);
         }
     },
     VisitEntityFieldExpression: function (expression, context) {

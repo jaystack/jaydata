@@ -2,7 +2,8 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
     constructor: function (provider) {
         this.provider = provider;
     },
-    runQuery: function (query) {
+    runQuery: function (query, callback) {
+        var start = new Date().getTime();
         this.entitySet = query.context.getEntitySetFromElementType(query.defaultType);
         this.tran = this.provider.db.transaction([this.entitySet.tableName], this.provider.IDBTransactionType.READ_ONLY);
         this.objectStore = this.tran.objectStore(this.entitySet.tableName);
@@ -13,15 +14,43 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
             callback: {}
         };
         ctx.callback.success = function (result) {
-            console.log("OK: ", ctx, ctx.result);
+            console.log("Executor in milliseconds : ", new Date().getTime() - start);
+            callback.success(ctx.result);
         };
         this.Visit(query.expression, ctx);
+    },
+    VisitCountExpression: function (expression, context) {
+        var req = context.objectStore.count();
+        req.onsuccess = function (e) {
+            context.result = { cnt: e.target.result };
+            context.callback.success();
+        }
+
+    },
+    VisitToArrayExpression: function (expression, context) {
+        if (expression.source instanceof $data.Expressions.EntitySetExpression) {
+            context.result = [];
+            context.objectStore.openCursor().onsuccess = function (event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    context.result.push(cursor.value);
+                    cursor.continue();
+                }
+                else {
+                    context.callback.success();
+                }
+            };
+        }
+        else {
+            this.Visit(expression.spurce, context);
+        }
     },
     VisitParametricQueryExpression: function (expression, context) {
         var tmpCallback = context.callback;
         context.callback = {
             success: function (eResult) {
                 context.result = eResult || expression.expression.resultSet;
+                context.result = context.result.objects;
                 tmpCallback.success();
             }
         };
@@ -29,179 +58,117 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
     },
     VisitIndexedDBPhysicalAndFilterExpression: function (expression, context) {
         var self = this;
-        var idx = 0;
-        var indexname = null;
-        var createIndexId = null;
-
-        //find index name, and suggest id of filter for new index
-        while (expression.filters[idx] && !indexname) {
-            var filter = expression.filters[idx];
-            if (this.objectStore.indexNames.contains(filter.left.selector.memberName)) {
-                var c = {};
-                var c1 = {};
-                this.Visit(filter.left, c);
-                this.Visit(filter.right, c1);
-                filter.constValue = c.value || c1.value;
-                if (filter.constValue) {
-                    indexname = filter.left.selector.memberName;
-                }
-                else {
-                    idx++;
-                }
-            } else {
-                if (filter.nodeType !== "notEqual" && filter.nodeType !== "notEqualTyped") {
-                    var c = {};
-                    var c1 = {};
-                    this.Visit(filter.left, c);
-                    this.Visit(filter.right, c1);
-                    filter.constValue = c.value || c1.value;
-                    if (filter.constValue) {
-                        createIndexId = idx;
-                    }
-                }
-                idx++;
+        var cursor;
+        if (expression.suggestedIndex) {
+            var keyRange = undefined;
+            switch (expression.suggestedIndex.nodeType) {
+                case "equal":
+                    keyRange = self.provider.IDBKeyRange.only(expression.suggestedIndex.value);
+                    break;
+                case "equalTyped":
+                    keyRange = self.provider.IDBKeyRange.only(expression.suggestedIndex.value);
+                    break;
+                case "greaterThan":
+                    keyRange = self.provider.IDBKeyRange.lowerBound(expression.suggestedIndex.value, true);
+                    break;
+                case "greaterThanOrEqual":
+                    keyRange = self.provider.IDBKeyRange.lowerBound(expression.suggestedIndex.value, false);
+                    break;
+                case "lessThan":
+                    keyRange = self.provider.IDBKeyRange.upperBound(expression.suggestedIndex.value, true);
+                    break;
+                case "lessThenOrEqual":
+                    keyRange = self.provider.IDBKeyRange.upperBound(expression.suggestedIndex.value, false);
+                    break;
+                default:
+                    alert("filter nodetype:" + expression.suggestedIndex.nodeType);
+                    break;
             }
-        }
-        var f = function () {
-            var cursor;
-            if (indexname) {
-                var keyRange = undefined;
-                switch (expression.filters[idx].nodeType) {
-                    case "equal":
-                        keyRange = self.provider.IDBKeyRange.only(expression.filters[idx].constValue);
-                        break;
-                    case "equalTyped":
-                        keyRange = self.provider.IDBKeyRange.only(expression.filters[idx].constValue);
-                        break;
-                    case "greaterThan":
-                        keyRange = self.provider.IDBKeyRange.upperBound(expression.filters[idx].constValue, true);
-                        break;
-                    case "greaterThanOrEqual":
-                        keyRange = self.provider.IDBKeyRange.upperBound(expression.filters[idx].constValue, false);
-                        break;
-                    case "lessThan":
-                        keyRange = self.provider.IDBKeyRange.lowerBound(expression.filters[idx].constValue, true);
-                        break;
-                    case "lessThenOrEqual":
-                        keyRange = self.provider.IDBKeyRange.lowerBound(expression.filters[idx].constValue, false);
-                        break;
-                    default:
-                        alert("filter nodetype:" + filter.nodeType);
-                        break;
-                }
-                expression.filters.splice(idx, 1);
-                cursor = self.objectStore.index(indexname).openCursor(keyRange);
-            } else {
-                cursor = self.objectStore.openCursor();
-            }
-
-            expression.resultSet = [];
-            cursor.onsuccess = function (event) {
-                var c = event.target.result;
-                if (c) {
-                    //console.log("key: ", c.key, "value: ", c.value);
-                    var i = 0;
-                    var addToResultSet = true;
-                    while (expression.filters[i]) {
-                        var filter = expression.filters[i++];
-
-                        var filterCtx = { instance: c.value, value: undefined };
-                        self.Visit(filter.left, filterCtx);
-                        var lValue = filterCtx.value;
-
-                        var filterCtx = { instance: c.value, value: undefined };
-                        self.Visit(filter.right, filterCtx);
-                        var rValue = filterCtx.value;
-                        switch (filter.nodeType) {
-                            case "equal":
-                                addToResultSet &= lValue == rValue;
-                                break;
-                            case "notEqual":
-                                addToResultSet &= lValue != rValue;
-                                break;
-                            case "equalTyped":
-                                addToResultSet &= lValue === rValue;
-                                break;
-                            case "notEqualTyped":
-                                addToResultSet &= lValue !== rValue;
-                                break;
-                            case "greaterThan":
-                                addToResultSet &= lValue > rValue;
-                                break;
-                            case "greaterThanOrEqual":
-                                addToResultSet &= lValue >= rValue;
-                                break;
-                            case "lessThan":
-                                addToResultSet &= lValue < rValue;
-                                break;
-                            case "lessThenOrEqual":
-                                addToResultSet &= lValue <= rValue;
-                                break;
-                            default:
-                                alert("filter nodetype:" + filter.nodeType);
-                                break;
-                        }
-                    }
-                    if (addToResultSet) {
-                        expression.resultSet.push({ pk: c.primaryKey, value: c.value });
-                    }
-                    c.continue();
-                }
-                else {
-                    context.callback.success();
-                }
-            }
-        }
-        //TODO: create index if needed, 2nd params need to update provider config
-        if (!indexname && true) {
-            idx = createIndexId;
-            this.provider.db.close();
-            var newVersion = this.provider.db.version || 0;
-            this.provider.indexedDB.open(this.provider.providerConfiguration.databaseName, ++newVersion).setCallbacks({
-                onupgradeneeded: function (event) {
-                    //var db = event.target.result;
-                    var writeTran = event.target.transaction;// db.transaction([self.entitySet.tableName], self.provider.IDBTransactionType.READ_WRITE);
-                    writeObjectStore = writeTran.objectStore(self.entitySet.tableName);
-                    writeObjectStore.createIndex(expression.filters[idx].left.selector.memberName, expression.filters[idx].left.selector.memberName, { unique: false });
-                    writeTran.db.close();
-                    self.provider.indexedDB.open(self.provider.providerConfiguration.databaseName).onsuccess = function (e) {
-                        indexname = expression.filters[idx].left.selector.memberName;
-                        self.provider.db = e.target.result;
-                        f();
-                    }
-
-
-                }
-            });
+            expression.filters.splice(expression.suggestedIndex.index, 1);
+            cursor = self.objectStore.index(expression.suggestedIndex.field.name).openCursor(keyRange);
         } else {
-            f();
+            cursor = self.objectStore.openCursor();
         }
 
+        expression.resultSet = { ids: [], objects: [] };
+        cursor.onsuccess = function (event) {
+            var c = event.target.result;
+            if (c) {
+                var i = 0;
+                var addToResultSet = true;
+                while (expression.filters[i]) {
+                    var filter = expression.filters[i++];
+
+                    var filterCtx = { instance: c.value, value: undefined };
+                    self.Visit(filter.left, filterCtx);
+                    var lValue = filterCtx.value;
+
+                    var filterCtx = { instance: c.value, value: undefined };
+                    self.Visit(filter.right, filterCtx);
+                    var rValue = filterCtx.value;
+                    switch (filter.nodeType) {
+                        case "equal":
+                            addToResultSet &= lValue == rValue;
+                            break;
+                        case "notEqual":
+                            addToResultSet &= lValue != rValue;
+                            break;
+                        case "equalTyped":
+                            addToResultSet &= lValue === rValue;
+                            break;
+                        case "notEqualTyped":
+                            addToResultSet &= lValue !== rValue;
+                            break;
+                        case "greaterThan":
+                            addToResultSet &= lValue > rValue;
+                            break;
+                        case "greaterThanOrEqual":
+                            addToResultSet &= lValue >= rValue;
+                            break;
+                        case "lessThan":
+                            addToResultSet &= lValue < rValue;
+                            break;
+                        case "lessThenOrEqual":
+                            addToResultSet &= lValue <= rValue;
+                            break;
+                        default:
+                            alert("filter nodetype:" + filter.nodeType);
+                            break;
+                    }
+                }
+                if (addToResultSet) {
+                    expression.resultSet.objects.push(c.value);
+                    expression.resultSet.ids.push(c.primaryKey);
+                }
+                c.continue();
+            }
+            else {
+                context.callback.success();
+            }
+        }
     },
     VisitIndexedDBLogicalAndFilterExpression: function (expression, context) {
         var tmpCalback = context.callback;
         context.callback = {};
         var self = this;
         context.callback.success = function (lResult) {
-            console.log("logical and right");
             context.callback = {
                 success: function (rResult) {
+                    var start = new Date().getTime();
+
                     var leftResult = lResult || expression.left.resultSet;
                     var rightResult = rResult || expression.right.resultSet;
+                    var largeList = leftResult.ids.length <= rightResult.ids.length ? rightResult : leftResult;
+                    var smallList = leftResult.ids.length > rightResult.ids.length ? rightResult : leftResult;
+                    var resultList = { ids: [], objects: [] };
+                    for (var i = 0; i < smallList.ids.length; i++) {
 
-                    var largeList = leftResult.length < rightResult.length ? rightResult : leftResult;
-                    var smallList = leftResult.length > rightResult.length ? rightResult : leftResult;
-                    var resultList = [];
-
-                    for (var i = 0; i < smallList.length; i++) {
-                        if (largeList.some(function (item) {
-                            return item.pk == smallList[i].pk;
-                        })) {
-                            resultList.push(smallList[i]);
+                        if (largeList.ids.indexOf(smallList.ids[i]) >= 0) {
+                            resultList.objects.push(smallList.objects[i]);
+                            resultList.ids.push(smallList.ids[i]);
                         }
                     }
-
-                    console.log("run logical and ");
+                    console.log("Logical and: ", new Date().getTime() - start);
                     tmpCalback.success(resultList);
                 }
             }
@@ -214,13 +181,23 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
         context.callback = {};
         var self = this;
         context.callback.success = function (lResult) {
-            console.log("logical or right");
             context.callback = {
                 success: function (rResult) {
+                    var start = new Date().getTime();
+
                     var leftResult = lResult || expression.left.resultSet;
                     var rightResult = rResult || expression.right.resultSet;
-                    console.log("run logical or ");
-                    tmpCalback.success(leftResult.concat(rightResult));
+                    var resultList = leftResult.ids.length <= rightResult.ids.length ? rightResult : leftResult;
+                    var smallList = leftResult.ids.length > rightResult.ids.length ? rightResult : leftResult;
+                    for (var i = 0; i < smallList.ids.length; i++) {
+
+                        if (resultList.ids.indexOf(smallList.ids[i]) < 0) {
+                            resultList.objects.push(smallList.objects[i]);
+                            resultList.ids.push(smallList.ids[i]);
+                        }
+                    }
+                    console.log("Logical Or: ", new Date().getTime() - start);
+                    tmpCalback.success(resultList);
                 }
             }
             self.Visit(expression.right, context);
