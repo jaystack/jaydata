@@ -1,1 +1,1 @@
-﻿<%@ WebService Language="C#" CodeBehind="~/App_Code/oDataDbDelete.cs" Class="oDataDbDelete" %>
+﻿<%@ WebService Language="C#" CodeBehind="~/Services/oDataDbDelete.cs" Class="oDataDbDelete" %>
