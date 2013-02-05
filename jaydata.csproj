@@ -231,6 +231,7 @@
     <Content Include="GPL-LICENSE.txt" />
     <Content Include="handlebars_examples.html" />
     <Content Include="index.html" />
+    <Content Include="jaydata.d.ts" />
     <Content Include="JayDataModules\deferred.js" />
     <Content Include="JayDataModules\errorhandler.js" />
     <Content Include="JayDataModules\formBinder.js" />
