@@ -23,7 +23,8 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
         });
     },
     createNewIndexes: function (ctx, callback) {
-        if (ctx.newIndexes && ctx.newIndexes.length > 0) {
+        //TODO: make safety
+        if (false && ctx.newIndexes && ctx.newIndexes.length > 0) {
             var self = this;
             this.provider.db.close();
             var newVersion = this.provider.db.version || 0;

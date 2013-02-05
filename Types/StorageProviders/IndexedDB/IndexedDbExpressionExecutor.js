@@ -19,38 +19,86 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
         };
         this.Visit(query.expression, ctx);
     },
-    VisitCountExpression: function (expression, context) {
-        var req = context.objectStore.count();
-        req.onsuccess = function (e) {
-            context.result = { cnt: e.target.result };
-            context.callback.success();
-        }
+    VisitProjectionExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+    },
+    VisitOrderExpression: function (expression, context) {
+        var tmpCallback = context.callback;
+        var self = this;
+        context.callback = {
+            success: function () {
+                var f = function (a, b) {
+                    var ctx = { instance: a };
+                    self.Visit(expression.selector.expression, ctx);
+                    var aValue = ctx.value;
 
+                    ctx.instance = b;
+                    self.Visit(expression.selector.expression, ctx);
+                    var bValue = ctx.value;
+
+                    var result = aValue == bValue ? 0 : aValue > bValue ? 1 : -1;
+                    if (expression.nodeType === "OrderByDescending") {
+                        result = result * -1;
+                    }
+                    return result;
+                }
+                context.result = context.result.sort(f);
+                tmpCallback.success();
+            }
+        };
+        this.Visit(expression.source, context);
+    },
+    VisitCountExpression: function (expression, context) {
+        var tmpCallback = context.callback;
+        context.callback = {
+            success: function () {
+                context.result = { cnt: context.result.length };
+                tmpCallback.success();
+            }
+        };
+        this.Visit(expression.source, context);
+    },
+    VisitFilterExpression: function (expression, context) {
+        this.Visit(expression.selector, context);
     },
     VisitToArrayExpression: function (expression, context) {
-        if (expression.source instanceof $data.Expressions.EntitySetExpression) {
-            context.result = [];
-            context.objectStore.openCursor().onsuccess = function (event) {
-                var cursor = event.target.result;
-                if (cursor) {
-                    context.result.push(cursor.value);
-                    cursor.continue();
+        this.Visit(expression.source, context);
+    },
+    VisitPagingExpression: function (expression, context) {
+        var tmp = context.callback;
+        var self = this;
+        context.callback = {
+            success: function () {
+                var v = {};
+                self.Visit(expression.amount, v);
+                switch(expression.nodeType){
+                    case "Skip": context.result = context.result.slice(v.value); break;
+                    case "Take": context.result = context.result.slice(0, v.value); break;
                 }
-                else {
-                    context.callback.success();
-                }
-            };
-        }
-        else {
-            this.Visit(expression.spurce, context);
-        }
+                tmp.success();
+            }
+        };
+        this.Visit(expression.source, context);
+    },
+    VisitEntitySetExpression: function (expression, context) {
+        context.result = context.result || [];
+        context.objectStore.openCursor().onsuccess = function (event) {
+            var cursor = event.target.result;
+            if (cursor) {
+                context.result.push(cursor.value);
+                cursor.continue();
+            }
+            else {
+                context.callback.success();
+            }
+        };
     },
     VisitParametricQueryExpression: function (expression, context) {
         var tmpCallback = context.callback;
         context.callback = {
             success: function (eResult) {
                 context.result = eResult || expression.expression.resultSet;
-                context.result = context.result.objects;
+                context.result = context.result ? context.result.objects : [];
                 tmpCallback.success();
             }
         };
