@@ -80,7 +80,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                 if (cfg.params) {
                     paramConstExpression = [];
                     //object as parameter
-                    if (arguments[0] && typeof arguments[0] === 'object' && cfg.params && cfg.params[0] && (Container.resolveType(cfg.params[0].type) !== $data.Object || cfg.params[0].name in arguments[0])) {
+                    if (arguments[0] && typeof arguments[0] === 'object' && cfg.params && cfg.params[0] && ((Container.resolveType(cfg.params[0].type) !== $data.Object || cfg.params[0].name in arguments[0]))) {
                         var argObj = arguments[0];
                         for (var i = 0; i < cfg.params.length; i++) {
                             var paramConfig = cfg.params[i];
@@ -92,6 +92,8 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                     //arg params
                     else {
                         for (var i = 0; i < cfg.params.length; i++) {
+                            if (typeof arguments[i] == 'function') break;
+
                             //TODO: check params type
                             var paramConfig = cfg.params[i];
                             if (paramConfig.name && paramConfig.type && arguments[i] !== undefined) {
