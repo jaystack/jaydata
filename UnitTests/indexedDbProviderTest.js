@@ -665,7 +665,7 @@
             for (var i = 0; i < maxItemNum; i++) {
                 var item1 = new idbexample.idbTestItem1({
                     i0: i,
-                    b0: true,
+                    b0: i % 2 ? true : false,
                     s0: 's0' + (maxItemNum - i),
                     n0: parseFloat('2.2' + i),
                     d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
@@ -673,7 +673,7 @@
                 var item2 = new idbexample.idbTestItem2({
                     Id: $data.Guid.NewGuid(),
                     i0: i,
-                    b0: false,
+                    b0: i % 2 ? true : false,
                     s0: 's0' + (maxItemNum - i),
                     n0: parseFloat('2.2' + i),
                     d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
@@ -683,34 +683,53 @@
             }
             context.saveChanges({
                 success: function () {
-                    console.log("Start: ", new Date());
-                    //context.Items1.filter("it.i0<10 && it.i0>=5").orderByDescending("it.s0").toArray(function (result) {
-                    //    equal(result.length, 5, "orderBy filter, result count error");
-                    //    equal(result[0].i0, 5, "orderBy filter, id error");
-                    //    equal(result[1].i0, 6, "orderBy filter, id error");
-                    //    close(context);
-                    //}); return;
+                    context.Items1.filter("it.i0<40").filter("it.i0>20").toArray(function (result) {
+                        equal(result.length, 19, "and between, result length");
+                        equal(result[0].i0, 21, "and between, 1st id");
+                        equal(result[18].i0, 39, "and between, last id");
+                        close(context);
+                    }); return;
                     $.when(
                             context.Items1.filter(function (item) { return item.i0 == this.a; }, { a: 40 }).toArray(function (result) {
-                                ok(true);
-                                console.log("1End: ", new Date());
+                                equal(result.length, 1, "param query result legth");
+                                equal(result[0].i0, 40, "item id error");
                             }),
                             context.Items1.filter(function (item) { return item.i0 == this.a && item.i0 == 20; }, { a: 40 }).toArray(function (result) {
-                                ok(true);
-                                console.log("2End: ", new Date());
+                                equal(result.length, 0, "and operator test");
                             }),
                             context.Items1.filter(function (item) { return item.i0 == this.a || item.i0 == 20; }, { a: 40 }).toArray(function (result) {
-                                ok(true);
-                                console.log("3End: ", new Date());
+                                equal(result.length, 2, "or operator test");
+                                equal(result[0].i0, 20, "or operator test item[0]");
+                                equal(result[1].i0, 40, "or operator test item[1]");
                             }),
                             context.Items1.filter(function (item) { return item.i0 < this.a && item.i0 > 20; }, { a: 40 }).toArray(function (result) {
-                                ok(true);
-                                console.log("4End: ", new Date());
+                                equal(result.length, 19, "and between, result length");
+                                equal(result[0].i0, 21, "and between, 1st id");
+                                equal(result[18].i0, 39, "and between, last id");
                             }),
                             context.Items1.filter(function (item) { return item.i0 > this.a && item.i0 > 15 || item.i0 <= 100 && item.i0 > 95; }, { a: 20 }).toArray(function (result) {
-                                ok(true);
-                                console.log("5End: ", new Date());
-
+                                equal(result.length, maxItemNum - 21, "length error");
+                                equal(result[0].i0, 21, "item id error");
+                            }),
+                            context.Items1.filter(function (item) { return item.i0 > this.a && (item.i0 > 15 || item.i0 <= 100) && item.i0 > 95; }, { a: 20 }).toArray(function (result) {
+                                equal(result.length, 904, "length error");
+                                equal(result[0].i0, 96, "item id error");
+                            }),
+                            context.Items1.filter("it.d0>this.d", { d: new Date("1980/01/01 12:13:14") }).toArray(function (result) {
+                                equal(result.length, 19, "date filter, length error");
+                                equal(result[0].i0, 981, "item id error");
+                            }),
+                            context.Items1.filter("it.d0>=this.d", { d: new Date("1980/01/01 12:13:14") }).toArray(function (result) {
+                                equal(result.length, 20, "date filter, length error");
+                                equal(result[0].i0, 980, "item id error");
+                            }),
+                            context.Items1.filter("it.b0==true").toArray(function (result) {
+                                equal(result.length, 500, "date filter, length error");
+                                equal(result[0].i0, 1, "item id error");
+                            }),
+                            context.Items1.filter("it.b0!=true").toArray(function (result) {
+                                equal(result.length, 500, "date filter, length error");
+                                equal(result[0].i0, 0, "item id error");
                             }),
                             context.Items1.length(function (result) {
                                 equal(result, maxItemNum, "Max item number");
@@ -770,6 +789,11 @@
                                 equal(result.length, 2, "order - skip - take filter, result count error");
                                 equal(result[0].i0, 7, "order - skip - take filter, id error");
                                 equal(result[1].i0, 6, "order - skip - take filter, id error");
+                            }),
+                            context.Items1.filter("it.i0<40").filter("it.i0>20").toArray(function (result) {
+                                equal(result.length, 19, "and between, result length");
+                                equal(result[0].i0, 21, "and between, 1st id");
+                                equal(result[18].i0, 39, "and between, last id");
                             })
                     ).then(function () {
                         close(context);

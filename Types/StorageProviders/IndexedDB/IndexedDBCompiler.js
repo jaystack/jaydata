@@ -52,6 +52,12 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
             callback.success();
         }
     },
+    VisitParametricQueryExpression: function (expression, context) {
+        var tempParentNodeType = context.nodeType;
+        context.nodeType = null;
+        this.Visit(expression.expression, context);
+        context.nodeType = tempParentNodeType;
+    },
     VisitSimpleBinaryExpression: function (expression, context) {
         var origType = context.parentNodeType;
 
