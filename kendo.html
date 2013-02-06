@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JayData unit tests</title>
+
+    <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
+    <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
+    <script type="text/javascript" src="Scripts/kendo.all.min.js"></script>
+    <script src="build/jaydata.js"></script>
+
+    <!--******************************* jsExtensions ****************************************-->
+    <script type="text/javascript" src="JayDataModules/deferred.js"></script>
+    <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
+    <script type="text/javascript" src="JayDataModules/template.js"></script>
+    <script type="text/javascript" src="JayDataModules/validate.js"></script>
+    <script type="text/javascript" src="JayDataModules/knockout.js"></script>
+    <script type="text/javascript" src="JayDataModules/kendo.js"></script>
+    <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
+    <script src="Scripts/datajs-1.1.0.js"></script>
+    <!--************************************************************************************-->
+    
+
+    <!--**********************************UNIT TESTS****************************************-->
+    <script>
+       
+
+        /*
+        Task.setStore('xxxx', { provider: 'oData', oDataServiceHost: 'x', tableName: 'xxx' });
+        Task.setStore('xxx3', { provider: 'webApi', dataSource: 'api/todos' });
+        Task.setStore('xxx2', { provider: 'webApi', apiUrl: 'api', tableName: 'todos' });
+        */
+        $data.define("Task", {
+            Todo: String,
+            Done: Boolean
+        });
+
+        var ds = $data("Task").getKendoDataSource({
+            pageSize: 5
+        });
+
+        $(function () {
+            $('#grid').kendoGrid({
+                dataSource: ds,
+                pageable: true,
+                editable: 'popup',
+                toolbar: ['create','update']
+            });
+        });
+
+        //var ds = Task.getKendoDataSource();
+
+
+        //$data("Task").save({ Todo: "sss" });
+    </script>    
+</head>
+<body>
+<!--    <div class="k-toolbar k-grid-toolbar">
+        <a class="k-button k-button-icontext k-add-button" href="#"><span class="k-icon k-add"></span>Add new record</a>
+    </div>
+
+    <div id="listView">
+
+    </div>-->
+
+<!--    <div id="pager">
+
+
+    </div>-->
+
+    <script type="text/x-kendo-tmpl" id="editTemplate">
+        <div class="product-view">
+            <dl>
+                <dt>Todo</dt>
+                <dd>
+                    <input type="text" data-bind="value:Todo" name="Todo" required="required" validationMessage="required" />
+                    <span data-for="ProductName" class="k-invalid-msg"></span>
+                </dd>
+                <dt>Completed</dt>
+                <dd>
+                    <input type="checkbox" data-bind="checked:Done" name="Done" />
+                </dd>
+                <dt>Id</dt>
+                <dd>
+                    <input type="text" data-bind="value:Id" name="Id" />
+                    <span data-for="ProductName" class="k-invalid-msg"></span>
+                </dd>
+            </dl>
+            <div class="edit-buttons">
+                <a class="k-button k-button-icontext k-update-button" href="\\#"><span class="k-icon k-update"></span>Save</a>
+                <a class="k-button k-button-icontext k-cancel-button" href="\\#"><span class="k-icon k-cancel"></span>Cancel</a>
+            </div>
+        </div>
+    </script>
+    <script>
+        //$data.service("/Services/emptyNewsReader.svc", function (f, t) {
+        //    var db = f();
+        //    var listView = $("#listView").kendoListView({
+        //        dataSource: db.Articles.asKendoDataSource(),
+        //        template: kendo.template('<div>${Title}</div>')
+        //    }).data("kendoListView");
+        //});
+
+        ////var listView = $("#listView").kendoListView({
+        ////    dataSource: ds,
+        ////    template: kendo.template('<div>${Id}, ${Todo}</div>'),
+        ////    editTemplate: kendo.template($('#editTemplate').html())
+        ////}).data("kendoListView");
+
+        ////$(".k-add-button").click(function () {
+        ////    alert("!");
+        ////    listView.add();
+        ////});
+        ////$("#pager").kendoPager({
+        ////    dataSource: ds
+        ////});
+    </script>
+    <div id="grid">
+
+    </div>
+</body>
+</html>
