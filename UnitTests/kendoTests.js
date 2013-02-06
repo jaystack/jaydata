@@ -10,7 +10,7 @@ $(document).ready(function () {
 function kendoTests(providerConfig) {
     module("kendo Tests");
 
-    test("kendo observable entity", 5/*11*/, function () {
+    test("kendo observable entity", 6/*11*/, function () {
         var article = new $news.Types.Article();
         stop(1);
         equal(Container.isTypeRegistered('$news.Types.ObservableArticle'), false, 'Observable article not exists failed');
@@ -22,6 +22,7 @@ function kendoTests(providerConfig) {
         //ok(article === kendoArticle.innerInstance, 'Inner instance reference failed');
         //equal(kendoArticle instanceof $news.Types.ObservableArticle, true, 'Observable type failed');
         equal(kendoArticle instanceof $data.Entity, false, 'Observable instance not subclass of $data.Entity failed');
+        equal(kendoArticle instanceof kendo.data.Model, true, 'Observable instance subclass of kendo.data.Model failed');
         //equal(kendoArticle instanceof $data.EntityWrapper, true, 'Observable instance subclass of $data.EntityWrapper failed');
 
         equal(kendoArticle._Id, undefined, "JITed property not exists 1");
@@ -31,6 +32,87 @@ function kendoTests(providerConfig) {
         equal(kendoArticle._Title, undefined, "JITed property not exists 2");
         //kendoArticle.Title();
         //equal(typeof kendoArticle._Title.subscribe, 'function', "JITed property exists 2");
+
+    });
+    test("asKendoDataSource", 5/*10*/, function () {
+
+        var task = $data.define("TTask", {
+            Todo: String,
+            Completed: Boolean
+        });
+
+        var dataSourceOptions = {};
+
+        ds = task.getKendoDataSource();
+
+        var item = ds.add({ Todo: 'x' });
+        console.log(item);
+        ds.sync();
+        stop(1);
+        ds.bind("change", function (e) {
+            start(1);
+            console.dir(arguments);
+            ok("ok");
+        });
+
+
+
+    });
+    test("asKendoModel", 5/*10*/, function () {
+        
+        var Address = $data.define("Address", {
+            City: String,
+            Street: String
+        });
+
+        kendoAddressType = Address.asKendoModelType();
+        var kendoObservable = new kendoAddressType({ City: "BP" });
+        ok(kendoObservable instanceof kendo.data.Model, "observable is kendo type");
+        equal(kendoObservable.get("City"), "BP");
+
+        var Person = $data.define("Person", {
+            Name: String,
+            Address: Address
+        });
+        
+        var kendoPersonType = Person.asKendoModelType();
+        kendoPerson = new kendoPersonType();
+        ok(!kendoPerson.Address, "complex type is not built");
+
+        var Person2 = $data.define("Person2", {
+            Name: String,
+            Address: { type: Address, nullable: false }
+        });
+        var kendoPersonType2 = Person2.asKendoModelType();
+        kendoPerson2 = new kendoPersonType2();
+        ok(kendoPerson2.Address, "complex type is built");
+        ok(kendoPerson2.Address instanceof kendo.data.Model, "ct is kendo model type");
+        var addressType = Address.asKendoModelType();
+        ok(kendoPerson2.Address instanceof addressType, "ct is kendoAddressType");
+
+        p3 = new kendoPersonType2({ Address: { City: "BP", Street: "Homorod" } });
+        ok(p3.Address instanceof addressType, "ct is kendoAddressType");
+
+        equal(p3.get("Address.City"), "BP");
+
+        var Customer = $data.define("Customer", {
+            CompanyName: String,
+            Contact: {type: Person, nullable: false }
+        });
+
+        kendoCustomer = Customer.asKendoModelType();
+        kC = new kendoCustomer({ CompanyName: "ABC", Contact: { Name: "Mr John", Address: { City: "NY", Street: "XX" } } });
+        equal(kC.CompanyName, "ABC", "simple field initialized");
+        kC.set("Contact.Address.City", "BP");
+        equal(kC.Contact.Address.City, "BP", "nested complext type changed all the way");
+
+        
+
+        //var jayInstance = kC.innerInstance();
+        //equal(jayInstance.changedProperties[0].name, "Contact", "complex prop change is delegate to root entity");
+
+
+        //kC.save();
 
     });
 
