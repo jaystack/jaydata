@@ -242,11 +242,11 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
         var entityPk = this.getType().memberDefinitions.getKeyProperties();
         for (var i = 0; i < entityPk.length; i++) {
-            if (this[entityPk[i].name] == entity[entityPk[i].name]) {
-                return true;
+            if (this[entityPk[i].name] != entity[entityPk[i].name]) {
+                return false;
             }
         }
-        return false;
+        return true;
     },
     //propertyChanging: { dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false },
 
