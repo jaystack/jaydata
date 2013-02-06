@@ -2153,6 +2153,19 @@
             });
         }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
 
+        checkUrlTextAndHookResult('Context Operation param resolve 4', 1, function (context) {
+
+            var p = context.ManyParamFunc().then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc", { ManyParamFunc: 'hello world' });
+        checkUrlTextAndHookResult('Context Operation param resolve 5', 1, function (context) {
+
+            var p = context.ManyParamFunc(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc", { ManyParamFunc: 'hello world' });
+
         checkUrlTextAndHookResult('Context Operation param resolve - object param', 1, function (context) {
 
             var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: new Date('2000/01/02') }).then(function (val) {
@@ -2173,6 +2186,13 @@
                 equal(val, "hello world");
             });
         }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+
+        checkUrlTextAndHookResult('Context Operation param resolve 4 - object param', 1, function (context) {
+
+            var p = context.ManyParamFunc({ p1: undefined }).then(function (val) {
+                equal(val, "hello world");
+            });
+        }, "/api/ManyParamFunc", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation in $filter param resolve', 3, function (context) {
 

@@ -96,15 +96,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
 
         if (sql.$map)
             result = result.map(sql.$map);
-
-        if (sql.$take !== undefined && sql.$skip !== undefined) {
-            result = result.slice(sql.$skip, sql.$skip + sql.$take);
-        } else if (sql.$take !== undefined && result.length > sql.$take) {
-            result = result.slice(0, sql.$take);
-        } else if (sql.$skip) {
-            result = result.slice(sql.$skip, result.length);
-        }
-
+        
         if (sql.$order && sql.$order.length > 0) {
             sql.$order.reverse();
             for (var i = 0, l = sql.$order.length; i < l; i++) {
@@ -121,6 +113,14 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                         return aVal === bVal ? 0 : (aVal < bVal ? 1 : -1);
                     });
             }
+        }
+
+        if (sql.$take !== undefined && sql.$skip !== undefined) {
+            result = result.slice(sql.$skip, sql.$skip + sql.$take);
+        } else if (sql.$take !== undefined && result.length > sql.$take) {
+            result = result.slice(0, sql.$take);
+        } else if (sql.$skip) {
+            result = result.slice(sql.$skip, result.length);
         }
 
         if (sql.$some)

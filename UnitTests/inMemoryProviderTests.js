@@ -541,6 +541,26 @@
 
     });
 
+
+    test('orderbyDescending with take', 2, function () {
+        stop(3);
+        var memoryContext = new $news.Types.NewsContext({ name: 'InMemory' });
+        memoryContext.onReady(function () {
+            start(1);
+            memoryContext.Tags.add(new $news.Types.Tag({ Title: 'a' }));
+            memoryContext.Tags.add(new $news.Types.Tag({ Title: 'b' }));
+            memoryContext.saveChanges(function () {
+                start(1);
+                memoryContext.Tags.orderByDescending("it.Title").take(1).toArray(function (result) {
+                    start(1);
+                    equal(result.length, 1, 'number of tags failed');
+                    equal(result[0].Title, "b", 'taking descending ordered element failed');
+                });
+            });
+
+        });
+    });
+
     test('int computed field',2, function(){
         stop(3);
         var memoryContext = new $news.Types.NewsContext({name: 'InMemory'});
