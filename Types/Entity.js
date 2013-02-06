@@ -126,8 +126,10 @@ var PropertyValidationEventData = $data.Class.define("PropertyValidationEventDat
     cancel: {}
 });
 
+//$data.EntityCreationOptions = $data.Class.define("$data.EntityCreationOptions", {
+//}
 $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
-    constructor: function (initData) {
+    constructor: function (initData, newInstanceOptions) {
         /// <description>
         ///     This class provide a light weight, object-relational interface between 
         ///     your javascript code and database.
@@ -153,15 +155,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <field name="changedProperties" type="Array">array of MemberDefinition</field>
 
         this.initData = {};
-        if (this.getType().__copyPropertiesToInstance) {
+        var thisType = this.getType();
+        if (thisType.__copyPropertiesToInstance) {
             $data.typeSystem.writePropertyValues(this);
         }
 
         var ctx = null;
         this.context = ctx;
 
-        if (arguments.length == 1 && typeof initData === "object") {
-            var typeMemDefs = this.getType().memberDefinitions;
+        if (typeof initData === "object") {
+            var typeMemDefs = thisType.memberDefinitions;
             var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
             //            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
             //                this.initData = initData;
@@ -186,9 +189,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                 }
             }
 
-            this.changedProperties = undefined;
-            this.entityState = undefined;
         }
+
+        if (newInstanceOptions && newInstanceOptions.entityBuilder) {
+            newInstanceOptions.entityBuilder(this, thisType.memberDefinitions.asArray(), thisType);
+        }
+
+        this.changedProperties = undefined;
+        this.entityState = undefined;
+
     },
     toString: function () {
         /// <summary>Returns a string that represents the current $data.Entity</summary>
