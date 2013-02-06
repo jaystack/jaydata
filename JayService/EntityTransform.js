@@ -267,9 +267,15 @@
                     }
                     return o;
                 },
-                '$data.Geography': function (o) {
+                '$data.GeographyPoint': function (o) {
                     if (o === undefined) {
-                        return new $data.Geography();
+                        return new $data.GeographyPoint();
+                    }
+                    return o;
+                },
+                '$data.GeometryPoint': function (o) {
+                    if (o === undefined) {
+                        return new $data.GeometryPoint();
                     }
                     return o;
                 },
@@ -278,7 +284,19 @@
                         return new $data.Guid();
                     }
                     return o;
-                }
+                },
+                '$data.GeographyLineString': function (o) { return o === undefined ? new $data.GeographyLineString() : o; },
+                '$data.GeographyPolygon': function (o) { return o === undefined ? new $data.GeographyPolygon() : o; },
+                '$data.GeographyMultiPoint': function (o) { return o === undefined ? new $data.GeographyMultiPoint() : o; },
+                '$data.GeographyMultiLineString': function (o) { return o === undefined ? new $data.GeographyMultiLineString() : o; },
+                '$data.GeographyMultiPolygon': function (o) { return o === undefined ? new $data.GeographyMultiPolygon() : o; },
+                '$data.GeographyCollection': function (o) { return o === undefined ? new $data.GeographyCollection() : o; },
+                '$data.GeometryLineString': function (o) { return o === undefined ? new $data.GeometryLineString() : o; },
+                '$data.GeometryPolygon': function (o) { return o === undefined ? new $data.GeometryPolygon() : o; },
+                '$data.GeometryMultiPoint': function (o) { return o === undefined ? new $data.GeometryMultiPoint() : o; },
+                '$data.GeometryMultiLineString': function (o) { return o === undefined ? new $data.GeometryMultiLineString() : o; },
+                '$data.GeometryMultiPolygon': function (o) { return o === undefined ? new $data.GeometryMultiPolygon() : o; },
+                '$data.GeometryCollection': function (o) { return o === undefined ? new $data.GeometryCollection() : o; }
             },
             toDb: {
                 '$data.ObjectID': function (id) {
@@ -308,12 +326,27 @@
                 '$data.Array': function (o) {
                     return JSON.stringify(o);
                 },
-                '$data.Geography': function (g) {
+                '$data.GeographyPoint': function (g) {
+                    return g;
+                },
+                '$data.GeometryPoint': function (g) {
                     return g;
                 },
                 '$data.Guid': function (g) {
                     return "guid'" + g.toString() + "'";
-                }
+                },
+                '$data.GeographyLineString': function (o) { return o; },
+                '$data.GeographyPolygon': function (o) { return o; },
+                '$data.GeographyMultiPoint': function (o) { return o; },
+                '$data.GeographyMultiLineString': function (o) { return o; },
+                '$data.GeographyMultiPolygon': function (o) { return o; },
+                '$data.GeographyCollection': function (o) { return o; },
+                '$data.GeometryLineString': function (o) { return o; },
+                '$data.GeometryPolygon': function (o) { return o; },
+                '$data.GeometryMultiPoint': function (o) { return o; },
+                '$data.GeometryMultiLineString': function (o) { return o; },
+                '$data.GeometryMultiPolygon': function (o) { return o; },
+                '$data.GeometryCollection': function (o) { return o; }
             }
         }
     },

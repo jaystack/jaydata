@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices m:DataServiceVersion="1.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+    <Schema Namespace="WebapiodataActions" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <EntityType Name="Category">
+        <Key>
+          <PropertyRef Name="Category_ID" />
+        </Key>
+        <Property Name="Category_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Category_Name" Type="Edm.String" />
+        <Property Name="Description" Type="Edm.String" />
+        <Property Name="Picture" Type="Edm.Binary" />
+        <NavigationProperty Name="Products" Relationship="WebapiodataActions.WebapiodataActions_Category_Products_WebapiodataActions_Product_ProductsPartner" ToRole="Products" FromRole="ProductsPartner" />
+      </EntityType>
+      <EntityType Name="Product">
+        <Key>
+          <PropertyRef Name="Product_ID" />
+        </Key>
+        <Property Name="Product_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Supplier_ID" Type="Edm.Int32" />
+        <Property Name="Category_ID" Type="Edm.Int32" />
+        <Property Name="Product_Name" Type="Edm.String" />
+        <Property Name="English_Name" Type="Edm.String" />
+        <Property Name="Quantity_Per_Unit" Type="Edm.String" />
+        <Property Name="Unit_Price" Type="Edm.Decimal" />
+        <Property Name="Units_In_Stock" Type="Edm.Int16" />
+        <Property Name="Units_On_Order" Type="Edm.Int16" />
+        <Property Name="Reorder_Level" Type="Edm.Int16" />
+        <Property Name="Discontinued" Type="Edm.Boolean" Nullable="false" />
+        <NavigationProperty Name="Category" Relationship="WebapiodataActions.WebapiodataActions_Product_Category_WebapiodataActions_Category_CategoryPartner" ToRole="Category" FromRole="CategoryPartner" />
+        <NavigationProperty Name="Order_Details" Relationship="WebapiodataActions.WebapiodataActions_Product_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartner" ToRole="Order_Details" FromRole="Order_DetailsPartner" />
+        <NavigationProperty Name="Supplier" Relationship="WebapiodataActions.WebapiodataActions_Product_Supplier_WebapiodataActions_Supplier_SupplierPartner" ToRole="Supplier" FromRole="SupplierPartner" />
+      </EntityType>
+      <EntityType Name="Order_Detail">
+        <Property Name="Order_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Product_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Unit_Price" Type="Edm.Decimal" Nullable="false" />
+        <Property Name="Quantity" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Discount" Type="Edm.Single" Nullable="false" />
+        <NavigationProperty Name="Product" Relationship="WebapiodataActions.WebapiodataActions_Order__Detail_Product_WebapiodataActions_Product_ProductPartner" ToRole="Product" FromRole="ProductPartner" />
+        <NavigationProperty Name="Order" Relationship="WebapiodataActions.WebapiodataActions_Order__Detail_Order_WebapiodataActions_Order_OrderPartner" ToRole="Order" FromRole="OrderPartner" />
+      </EntityType>
+      <EntityType Name="Order">
+        <Property Name="Order_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Customer_ID" Type="Edm.String" />
+        <Property Name="Employee_ID" Type="Edm.Int32" />
+        <Property Name="Ship_Name" Type="Edm.String" />
+        <Property Name="Ship_Address" Type="Edm.String" />
+        <Property Name="Ship_City" Type="Edm.String" />
+        <Property Name="Ship_Region" Type="Edm.String" />
+        <Property Name="Ship_Postal_Code" Type="Edm.String" />
+        <Property Name="Ship_Country" Type="Edm.String" />
+        <Property Name="Ship_Via" Type="Edm.Int32" />
+        <Property Name="Order_Date" Type="Edm.DateTime" />
+        <Property Name="Required_Date" Type="Edm.DateTime" />
+        <Property Name="Shipped_Date" Type="Edm.DateTime" />
+        <Property Name="Freight" Type="Edm.Decimal" />
+        <NavigationProperty Name="Customer" Relationship="WebapiodataActions.WebapiodataActions_Order_Customer_WebapiodataActions_Customer_CustomerPartner" ToRole="Customer" FromRole="CustomerPartner" />
+        <NavigationProperty Name="Employee" Relationship="WebapiodataActions.WebapiodataActions_Order_Employee_WebapiodataActions_Employee_EmployeePartner" ToRole="Employee" FromRole="EmployeePartner" />
+        <NavigationProperty Name="Order_Details" Relationship="WebapiodataActions.WebapiodataActions_Order_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartner" ToRole="Order_Details" FromRole="Order_DetailsPartner" />
+        <NavigationProperty Name="Shipper" Relationship="WebapiodataActions.WebapiodataActions_Order_Shipper_WebapiodataActions_Shipper_ShipperPartner" ToRole="Shipper" FromRole="ShipperPartner" />
+      </EntityType>
+      <EntityType Name="Customer">
+        <Property Name="Customer_ID" Type="Edm.String" />
+        <Property Name="Company_Name" Type="Edm.String" />
+        <Property Name="Contact_Name" Type="Edm.String" />
+        <Property Name="Contact_Title" Type="Edm.String" />
+        <Property Name="Address" Type="Edm.String" />
+        <Property Name="City" Type="Edm.String" />
+        <Property Name="Region" Type="Edm.String" />
+        <Property Name="Postal_Code" Type="Edm.String" />
+        <Property Name="Country" Type="Edm.String" />
+        <Property Name="Phone" Type="Edm.String" />
+        <Property Name="Fax" Type="Edm.String" />
+        <NavigationProperty Name="Orders" Relationship="WebapiodataActions.WebapiodataActions_Customer_Orders_WebapiodataActions_Order_OrdersPartner" ToRole="Orders" FromRole="OrdersPartner" />
+      </EntityType>
+      <EntityType Name="Employee">
+        <Property Name="Employee_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Last_Name" Type="Edm.String" />
+        <Property Name="First_Name" Type="Edm.String" />
+        <Property Name="Title" Type="Edm.String" />
+        <Property Name="Birth_Date" Type="Edm.DateTime" />
+        <Property Name="Hire_Date" Type="Edm.DateTime" />
+        <Property Name="Address" Type="Edm.String" />
+        <Property Name="City" Type="Edm.String" />
+        <Property Name="Region" Type="Edm.String" />
+        <Property Name="Postal_Code" Type="Edm.String" />
+        <Property Name="Country" Type="Edm.String" />
+        <Property Name="Home_Phone" Type="Edm.String" />
+        <Property Name="Extension" Type="Edm.String" />
+        <Property Name="Photo" Type="Edm.Binary" />
+        <Property Name="Notes" Type="Edm.String" />
+        <Property Name="Reports_To" Type="Edm.Int32" />
+        <NavigationProperty Name="Orders" Relationship="WebapiodataActions.WebapiodataActions_Employee_Orders_WebapiodataActions_Order_OrdersPartner" ToRole="Orders" FromRole="OrdersPartner" />
+      </EntityType>
+      <EntityType Name="Shipper">
+        <Property Name="Shipper_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Company_Name" Type="Edm.String" />
+        <NavigationProperty Name="Orders" Relationship="WebapiodataActions.WebapiodataActions_Shipper_Orders_WebapiodataActions_Order_OrdersPartner" ToRole="Orders" FromRole="OrdersPartner" />
+      </EntityType>
+      <EntityType Name="Supplier">
+        <Property Name="Supplier_ID" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Company_Name" Type="Edm.String" />
+        <Property Name="Contact_Name" Type="Edm.String" />
+        <Property Name="Contact_Title" Type="Edm.String" />
+        <Property Name="Address" Type="Edm.String" />
+        <Property Name="City" Type="Edm.String" />
+        <Property Name="Region" Type="Edm.String" />
+        <Property Name="Postal_Code" Type="Edm.String" />
+        <Property Name="Country" Type="Edm.String" />
+        <Property Name="Phone" Type="Edm.String" />
+        <Property Name="Fax" Type="Edm.String" />
+        <NavigationProperty Name="Products" Relationship="WebapiodataActions.WebapiodataActions_Supplier_Products_WebapiodataActions_Product_ProductsPartner" ToRole="Products" FromRole="ProductsPartner" />
+      </EntityType>
+      <Association Name="WebapiodataActions_Category_Products_WebapiodataActions_Product_ProductsPartner">
+        <End Type="WebapiodataActions.Product" Role="Products" Multiplicity="*" />
+        <End Type="WebapiodataActions.Category" Role="ProductsPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Product_Category_WebapiodataActions_Category_CategoryPartner">
+        <End Type="WebapiodataActions.Category" Role="Category" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Product" Role="CategoryPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Product_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartner">
+        <End Type="WebapiodataActions.Order_Detail" Role="Order_Details" Multiplicity="*" />
+        <End Type="WebapiodataActions.Product" Role="Order_DetailsPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Product_Supplier_WebapiodataActions_Supplier_SupplierPartner">
+        <End Type="WebapiodataActions.Supplier" Role="Supplier" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Product" Role="SupplierPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Order__Detail_Product_WebapiodataActions_Product_ProductPartner">
+        <End Type="WebapiodataActions.Product" Role="Product" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Order_Detail" Role="ProductPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Order__Detail_Order_WebapiodataActions_Order_OrderPartner">
+        <End Type="WebapiodataActions.Order" Role="Order" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Order_Detail" Role="OrderPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Order_Customer_WebapiodataActions_Customer_CustomerPartner">
+        <End Type="WebapiodataActions.Customer" Role="Customer" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Order" Role="CustomerPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Order_Employee_WebapiodataActions_Employee_EmployeePartner">
+        <End Type="WebapiodataActions.Employee" Role="Employee" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Order" Role="EmployeePartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Order_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartner">
+        <End Type="WebapiodataActions.Order_Detail" Role="Order_Details" Multiplicity="*" />
+        <End Type="WebapiodataActions.Order" Role="Order_DetailsPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Order_Shipper_WebapiodataActions_Shipper_ShipperPartner">
+        <End Type="WebapiodataActions.Shipper" Role="Shipper" Multiplicity="0..1" />
+        <End Type="WebapiodataActions.Order" Role="ShipperPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Customer_Orders_WebapiodataActions_Order_OrdersPartner">
+        <End Type="WebapiodataActions.Order" Role="Orders" Multiplicity="*" />
+        <End Type="WebapiodataActions.Customer" Role="OrdersPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Employee_Orders_WebapiodataActions_Order_OrdersPartner">
+        <End Type="WebapiodataActions.Order" Role="Orders" Multiplicity="*" />
+        <End Type="WebapiodataActions.Employee" Role="OrdersPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Shipper_Orders_WebapiodataActions_Order_OrdersPartner">
+        <End Type="WebapiodataActions.Order" Role="Orders" Multiplicity="*" />
+        <End Type="WebapiodataActions.Shipper" Role="OrdersPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="WebapiodataActions_Supplier_Products_WebapiodataActions_Product_ProductsPartner">
+        <End Type="WebapiodataActions.Product" Role="Products" Multiplicity="*" />
+        <End Type="WebapiodataActions.Supplier" Role="ProductsPartner" Multiplicity="0..1" />
+      </Association>
+    </Schema>
+    <Schema Namespace="MyContextNS" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <EntityContainer Name="context">
+        <EntitySet Name="Categories" EntityType="WebapiodataActions.Category" />
+        <EntitySet Name="Products" EntityType="WebapiodataActions.Product" />
+        <EntitySet Name="Order_Details" EntityType="WebapiodataActions.Order_Detail" />
+        <EntitySet Name="Orders" EntityType="WebapiodataActions.Order" />
+        <EntitySet Name="Customers" EntityType="WebapiodataActions.Customer" />
+        <EntitySet Name="Employees" EntityType="WebapiodataActions.Employee" />
+        <EntitySet Name="Shippers" EntityType="WebapiodataActions.Shipper" />
+        <EntitySet Name="Suppliers" EntityType="WebapiodataActions.Supplier" />
+        <FunctionImport Name="AppendDescription" ReturnType="Edm.String" IsBindable="true" m:IsAlwaysBindable="true">
+          <Parameter Name="bindingParameter" Type="WebapiodataActions.Category" />
+          <Parameter Name="value" Type="Edm.String" FixedLength="false" Unicode="false" />
+          <Parameter Name="date" Type="Edm.DateTime" Nullable="false" />
+        </FunctionImport>
+        <FunctionImport Name="GetFamily" ReturnType="Edm.String" IsBindable="true" m:IsAlwaysBindable="true">
+          <Parameter Name="bindingParameter" Type="WebapiodataActions.Category" />
+        </FunctionImport>
+        <FunctionImport Name="MostRecent" EntitySet="Orders" ReturnType="WebapiodataActions.Order" IsBindable="true" IsSideEffecting="false" m:IsAlwaysBindable="true">
+          <Parameter Name="orders" Type="Collection(WebapiodataActions.Order)" Mode="In"/>
+        </FunctionImport>
+        <FunctionImport Name="LastModified" EntitySet="Orders" ReturnType="WebapiodataActions.Order" IsBindable="true" IsSideEffecting="false" m:IsAlwaysBindable="true">
+          <Parameter Name="orders" Type="Collection(WebapiodataActions.Order)" Mode="In"/>
+        </FunctionImport>
+        <FunctionImport Name="LastFive" EntitySet="Orders" ReturnType="Collection(WebapiodataActions.Order)" IsBindable="true" IsSideEffecting="false" m:IsAlwaysBindable="true">
+          <Parameter Name="orders" Type="Collection(WebapiodataActions.Order)" Mode="In"/>
+        </FunctionImport>
+        <AssociationSet Name="WebapiodataActions_Category_Products_WebapiodataActions_Product_ProductsPartnerSet" Association="WebapiodataActions.WebapiodataActions_Category_Products_WebapiodataActions_Product_ProductsPartner">
+          <End Role="ProductsPartner" EntitySet="Categories" />
+          <End Role="Products" EntitySet="Products" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Product_Category_WebapiodataActions_Category_CategoryPartnerSet" Association="WebapiodataActions.WebapiodataActions_Product_Category_WebapiodataActions_Category_CategoryPartner">
+          <End Role="CategoryPartner" EntitySet="Products" />
+          <End Role="Category" EntitySet="Categories" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Product_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartnerSet" Association="WebapiodataActions.WebapiodataActions_Product_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartner">
+          <End Role="Order_DetailsPartner" EntitySet="Products" />
+          <End Role="Order_Details" EntitySet="Order_Details" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Product_Supplier_WebapiodataActions_Supplier_SupplierPartnerSet" Association="WebapiodataActions.WebapiodataActions_Product_Supplier_WebapiodataActions_Supplier_SupplierPartner">
+          <End Role="SupplierPartner" EntitySet="Products" />
+          <End Role="Supplier" EntitySet="Suppliers" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Order__Detail_Product_WebapiodataActions_Product_ProductPartnerSet" Association="WebapiodataActions.WebapiodataActions_Order__Detail_Product_WebapiodataActions_Product_ProductPartner">
+          <End Role="ProductPartner" EntitySet="Order_Details" />
+          <End Role="Product" EntitySet="Products" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Order__Detail_Order_WebapiodataActions_Order_OrderPartnerSet" Association="WebapiodataActions.WebapiodataActions_Order__Detail_Order_WebapiodataActions_Order_OrderPartner">
+          <End Role="OrderPartner" EntitySet="Order_Details" />
+          <End Role="Order" EntitySet="Orders" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Order_Customer_WebapiodataActions_Customer_CustomerPartnerSet" Association="WebapiodataActions.WebapiodataActions_Order_Customer_WebapiodataActions_Customer_CustomerPartner">
+          <End Role="CustomerPartner" EntitySet="Orders" />
+          <End Role="Customer" EntitySet="Customers" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Order_Employee_WebapiodataActions_Employee_EmployeePartnerSet" Association="WebapiodataActions.WebapiodataActions_Order_Employee_WebapiodataActions_Employee_EmployeePartner">
+          <End Role="EmployeePartner" EntitySet="Orders" />
+          <End Role="Employee" EntitySet="Employees" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Order_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartnerSet" Association="WebapiodataActions.WebapiodataActions_Order_Order__Details_WebapiodataActions_Order__Detail_Order__DetailsPartner">
+          <End Role="Order_DetailsPartner" EntitySet="Orders" />
+          <End Role="Order_Details" EntitySet="Order_Details" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Order_Shipper_WebapiodataActions_Shipper_ShipperPartnerSet" Association="WebapiodataActions.WebapiodataActions_Order_Shipper_WebapiodataActions_Shipper_ShipperPartner">
+          <End Role="ShipperPartner" EntitySet="Orders" />
+          <End Role="Shipper" EntitySet="Shippers" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Customer_Orders_WebapiodataActions_Order_OrdersPartnerSet" Association="WebapiodataActions.WebapiodataActions_Customer_Orders_WebapiodataActions_Order_OrdersPartner">
+          <End Role="OrdersPartner" EntitySet="Customers" />
+          <End Role="Orders" EntitySet="Orders" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Employee_Orders_WebapiodataActions_Order_OrdersPartnerSet" Association="WebapiodataActions.WebapiodataActions_Employee_Orders_WebapiodataActions_Order_OrdersPartner">
+          <End Role="OrdersPartner" EntitySet="Employees" />
+          <End Role="Orders" EntitySet="Orders" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Shipper_Orders_WebapiodataActions_Order_OrdersPartnerSet" Association="WebapiodataActions.WebapiodataActions_Shipper_Orders_WebapiodataActions_Order_OrdersPartner">
+          <End Role="OrdersPartner" EntitySet="Shippers" />
+          <End Role="Orders" EntitySet="Orders" />
+        </AssociationSet>
+        <AssociationSet Name="WebapiodataActions_Supplier_Products_WebapiodataActions_Product_ProductsPartnerSet" Association="WebapiodataActions.WebapiodataActions_Supplier_Products_WebapiodataActions_Product_ProductsPartner">
+          <End Role="ProductsPartner" EntitySet="Suppliers" />
+          <End Role="Products" EntitySet="Products" />
+        </AssociationSet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

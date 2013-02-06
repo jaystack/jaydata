@@ -1,238 +1,161 @@
-Function.prototype.toServiceOperation = function(config){
-    return new $data.FunctionImport(this, config);
-};
-
-$data.FunctionImport = function(fn, config){
-    Object.defineProperty(this, 'asFunction', { value: fn });
-    Object.getPrototypeOf(this).valueOf = function(){
-        return this.asFunction;
-    };
-    Object.getPrototypeOf(this).toString = function(){
-        return this.asFunction.toString();
-    };
-    Object.getPrototypeOf(this).call = function(){
-        return this.asFunction.call.apply(arguments[0], Array.prototype.slice.call(arguments, 1));
-    };
-    Object.getPrototypeOf(this).apply = function(scope, args){
-        return this.asFunction.apply(scope, args);
-    };
-    if (config) fn.extend(config);
-};
-
-$data.FunctionImport.prototype = {
-    toServiceOperation: function(config){
-        return new $data.FunctionImport(this.asFunction, config);
+$data.Class.define('$data.ServiceOperation', null, null, {}, {
+    translateDefinition: function (propertyDef, name, definedBy) {
+        propertyDef.serviceName = name;
+        var memDef = new $data.MemberDefinition(this.generateServiceOperation(propertyDef), this);
+        memDef.name = name;
+        return memDef;
     },
-    extend: function(extend){
-        for (var i in extend){
-            this[i] = extend[i];
-        }
-        
-        return this;
-    },
-    chain: function(before, after){
-        var fn = this;
-        
-        var ret = function(){
-            var chain = arguments.callee.chainFn;
-            var args = [];
-            if (arguments.length){
-                for (var i = 0; i < arguments.length; i++){
-                    args.push(arguments[i]);
+    generateServiceOperation: function (cfg) {
+
+        var fn;
+        if (cfg.serviceMethod) {
+            var returnType = cfg.returnType ? Container.resolveType(cfg.returnType) : {};
+            if (returnType.isAssignableTo && returnType.isAssignableTo($data.Queryable)) {
+                fn = cfg.serviceMethod;
+            } else {
+                fn = function () {
+                    var lastParam = arguments[arguments.length - 1];
+
+                    var pHandler = new $data.PromiseHandler();
+                    var cbWrapper;
+
+                    var args = arguments;
+                    if (typeof lastParam === 'function') {
+                        cbWrapper = pHandler.createCallback(lastParam);
+                        arguments[arguments.length - 1] = cbWrapper;
+                    } else {
+                        cbWrapper = pHandler.createCallback();
+                        arguments.push(cbWrapper);
+                    }
+
+                    try {
+                        var result = cfg.serviceMethod.apply(this, arguments);
+                        if (result !== undefined)
+                            cbWrapper.success(result);
+                    } catch (e) {
+                        cbWrapper.error(e);
+                    }
+
+                    return pHandler.getPromise();
                 }
             }
-            var argsCount = args.length;
-            var i = 0;
-            
-            var readyFn = function(){
-                if (args[args.length - 1] && args[args.length - 1].success && typeof args[args.length - 1].success === 'function'){
-                    var fn = args[args.length - 1].success;
-                    fn.apply(this, arguments);
-                }else return arguments.length ? arguments[0] : undefined;
+
+        } else {
+            fn = function () {
+                var context = this;
+                var memberdef;
+
+                var bindedEntity;
+                if (this instanceof $data.Entity || this instanceof $data.EntitySet) {
+                    var entitySet;
+                    if (this instanceof $data.Entity) {
+                        if (this.context) {
+                            context = this.context;
+                            entitySet = context.getEntitySetFromElementType(this.getType());
+                            if (!cfg.method && cfg.IsSideEffecting !== false) {
+                                cfg.method = 'POST'; //default Action method is POST
+                            }
+                        } else {
+                            Guard.raise('entity not attached into the context');
+                            return;
+                        }
+                    } else if (this instanceof $data.EntitySet) {
+                        context = this.entityContext;
+                        entitySet = this;
+
+                        var esDef = context.getType().getMemberDefinition(entitySet.name);
+                        memberdef = $data.MemberDefinition.translateDefinition(esDef.actions[cfg.serviceName], cfg.serviceName, entitySet.getType());
+                    }
+
+
+                    bindedEntity = {
+                        data: this,
+                        entitySet: entitySet
+                    };
+                }
+
+                var virtualEntitySet = cfg.elementType ? context.getEntitySetFromElementType(Container.resolveType(cfg.elementType)) : null;
+
+                var paramConstExpression = null;
+                if (cfg.params) {
+                    paramConstExpression = [];
+                    //object as parameter
+                    if (arguments[0] && typeof arguments[0] === 'object' && cfg.params && cfg.params[0] && ((Container.resolveType(cfg.params[0].type) !== $data.Object || cfg.params[0].name in arguments[0]))) {
+                        var argObj = arguments[0];
+                        for (var i = 0; i < cfg.params.length; i++) {
+                            var paramConfig = cfg.params[i];
+                            if (paramConfig.name && paramConfig.type && paramConfig.name in argObj) {
+                                paramConstExpression.push(Container.createConstantExpression(argObj[paramConfig.name], Container.resolveType(paramConfig.type), paramConfig.name));
+                            }
+                        }
+                    }
+                    //arg params
+                    else {
+                        for (var i = 0; i < cfg.params.length; i++) {
+                            if (typeof arguments[i] == 'function') break;
+
+                            //TODO: check params type
+                            var paramConfig = cfg.params[i];
+                            if (paramConfig.name && paramConfig.type && arguments[i] !== undefined) {
+                                paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(paramConfig.type), paramConfig.name));
+                            }
+                        }
+                    }
+                }
+
+                var ec = Container.createEntityContextExpression(context);
+                if (!memberdef) {
+                    if (bindedEntity && bindedEntity.data) {
+                        memberdef = bindedEntity.data.getType().getMemberDefinition(cfg.serviceName);
+                    } else {
+                        memberdef = context.getType().getMemberDefinition(cfg.serviceName);
+                    }
+                }
+                var es = Container.createServiceOperationExpression(ec,
+                        Container.createMemberInfoExpression(memberdef),
+                        paramConstExpression,
+                        cfg,
+                        bindedEntity);
+
+                //Get callback function
+                var clb = arguments[arguments.length - 1];
+                if (typeof clb !== 'function') {
+                    clb = undefined;
+                }
+
+                if (virtualEntitySet) {
+                    var q = Container.createQueryable(virtualEntitySet, es);
+                    if (clb) {
+                        es.isTerminated = true;
+                        return q._runQuery(clb);
+                    }
+                    return q;
+                }
+                else {
+                    var returnType = cfg.returnType ? Container.resolveType(cfg.returnType) : null;
+
+                    var q = Container.createQueryable(context, es);
+                    q.defaultType = returnType || $data.Object;
+
+                    if (returnType === $data.Queryable) {
+                        q.defaultType = Container.resolveType(cfg.elementType);
+                        if (clb) {
+                            es.isTerminated = true;
+                            return q._runQuery(clb);
+                        }
+                        return q;
+                    }
+                    es.isTerminated = true;
+                    return q._runQuery(clb);
+                }
             };
-            
-            var callbackFn = function(){
-                var fn = chain[i];
-                i++;
-                
-                var r = fn.apply(this, args);
-                if (typeof r === 'function'){
-                    var argsFn = arguments;
-                    args[argsCount] = (i < chain.length ? (function(){ return callbackFn.apply(this, argsFn); }) : (function(){ return readyFn.apply(this, argsFn); }));
-                    r.apply(this, args);
-                }else{
-                    if (i < chain.length){
-                        callbackFn.apply(this, arguments);
-                    }else readyFn(this, arguments);
-                }
-            }
-            
-            callbackFn();
         };
-        
-        if (!ret.chainFn) ret.chainFn = (before || []).concat([fn].concat(after || []));
-        
-        return ret;
-    },
-    before: function(on){
-        var ret = this;
-        
-        if (!this.chainFn) ret = ret.chain();
-        ret.chainFn.unshift(on);
-            
-        return ret;
-    },
-    after: function(on){
-        var ret = this;
-        
-        if (!this.chainFn) ret = ret.chain();
-        ret.chainFn.push(on);
-            
-        return ret;
-    },
-    asResult: function(type, config){
-        return this.extend({
-            resultType: type,
-            resultCfg: config
-        });
-    },
-    returns: function(type, elementType){
-        if (typeof type === 'string')
-            type = Container.resolveType(type);
-            
-        if (typeof elementType === 'string')
-            elementType = Container.resolveType(elementType);
 
-        return this.extend({
-            returnType: type,
-            elementType: elementType
-        });
-    },
-    params: function(params){
-        /*for (var p in params){
-            if (typeof params[p] === 'string')
-                params[p] = Container.resolveType(params[p]);
-        }*/
-        
-        return this.extend({
-            params: params
-        });
-    },
-    serviceName: function(serviceName){
-        return this.extend({
-            serviceName: serviceName
-        });
-    },
-    httpMethod: function(method){
-        return this.extend({
-            method: method
-        });
-    },
-    webGet: function(){
-        return this.httpMethod('GET');
-    },
-    webInvoke: function(){
-        return this.httpMethod('POST');
-    },
-    authorize: function(roles, callback){
-        var r = {};
-        if (roles instanceof Array){
-            for (var i = 0; i < roles.length; i++){
-                if (typeof roles[i] === 'string') r[roles[i]] = true;
-            }
-        }else r = roles;
-        
-        this.roles = r;
+        var params = cfg.params || [];
+        $data.typeSystem.extend(fn, cfg, { params: params });
 
-        var fn = this;
-        
-        ret = function(){
-            var pHandler = new $data.PromiseHandler();
-            var clbWrapper = pHandler.createCallback(callback);
-            var pHandlerResult = pHandler.getPromise();
-            var args = arguments;
-            
-            clbWrapper.success = clbWrapper.success.after(function(){
-                fn.apply(this, args);
-            });
-            
-            $data.Access.isAuthorized($data.Access.Execute, this.user, fn.roles, clbWrapper);
-            
-            return pHandlerResult;
-        };
-        
-        return ret;
-    },
-    toPromise: function(callback){
-        var fn = this;
-        
-        var ret = function(){
-            var pHandler = new $data.PromiseHandler();
-            var clbWrapper = pHandler.createCallback(callback);
-            var pHandlerResult = pHandler.getPromise();
-            
-            arguments[arguments.length++] = clbWrapper;
-            fn.apply(this, arguments);
-            
-            return pHandlerResult;
-        };
-        
-        return this;
-    }
-};
-
-$data.ServiceOperation = (function(){
-    var fn = arguments.callee;
-    
-    var virtualEntitySet = fn.elementType ? this.getEntitySetFromElementType(Container.resolveType(fn.elementType)) : null;
-    
-    var paramConstExpression = null;
-    if (fn.params) {
-        paramConstExpression = [];
-        for (var i = 0; i < fn.params.length; i++) {
-            //TODO: check params type
-            for (var name in fn.params[i]) {
-                paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(fn.params[i][name]), name));
-            }
-        }
-    }
-
-    var ec = Container.createEntityContextExpression(this);
-    var memberdef = this.getType().getMemberDefinition(fn.serviceName);
-    var es = Container.createServiceOperationExpression(ec,
-            Container.createMemberInfoExpression(memberdef),
-            paramConstExpression,
-            fn);
-
-    //Get callback function
-    var clb = arguments[arguments.length - 1];
-    if (typeof clb !== 'function') {
-        clb = undefined;
-    }
-
-    if (virtualEntitySet) {
-        var q = Container.createQueryable(virtualEntitySet, es);
-        if (clb) {
-            es.isTerminated = true;
-            return q._runQuery(clb);
-        }
-        return q;
-    }
-    else {
-        var returnType = Container.resolveType(fn.returnType);
-
-        var q = Container.createQueryable(this, es);
-        q.defaultType = returnType;
-
-        if (returnType === $data.Queryable) {
-            q.defaultType = Container.resolveType(fn.elementType);
-            if (clb) {
-                es.isTerminated = true;
-                return q._runQuery(clb);
-            }
-            return q;
-        }
-        es.isTerminated = true;
-        return q._runQuery(clb);
+        return fn;
     }
 });
+
+$data.Class.define('$data.ServiceAction', $data.ServiceOperation, null, {}, {});

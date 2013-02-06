@@ -165,4 +165,33 @@ $(document).ready(function () {
         tCont.A.map(function (it) { return { Id: it.Id, Id2: it.Id2, Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3 }; }),
         tCont.A.map(function (it) { return { Id: it.Id, Id2: it.Id2, Prop1: it.Prop1, Prop2: it.Prop2, Prop3: it.Prop3 }; }),
         tCont, true);
+
+
+    $data.Class.define('$test.TestGeoType', $data.Entity, null, {
+        Id: { type: 'int', key: true, computed: true },
+        Prop1: { type: 'GeographyPoint' },
+        Prop2: { type: 'GeographyPoint' },
+        Prop3: { type: 'GeometryPoint' },
+        Prop4: { type: 'GeometryPoint' },
+        Prop5: { type: 'GeographyPolygon' },
+        Prop6: { type: 'GeometryPolygon' },
+        Prop7: { type: 'GeographyLineString' },
+        Prop8: { type: 'GeometryLineString' }
+    });
+
+    $data.Class.define('$test.TContext2', $data.EntityContext, null, {
+        A: { type: $data.EntitySet, elementType: $test.TestGeoType }
+    });
+
+    var tCont2 = new $test.TContext2({ name: 'oData' });
+    
+    builderTest('field geography distance call', tCont2.A.filter(function (it) { return it.Prop1.distance(it.Prop2) < 4.5; }), tCont2);
+    builderTest('field geometry distance call', tCont2.A.filter(function (it) { return it.Prop3.distance(it.Prop4) > 42; }), tCont2);
+
+    builderTest('field geography intersects call', tCont2.A.filter(function (it) { return it.Prop1.intersects(it.Prop5); }), tCont2);
+    builderTest('field geometry intersects call', tCont2.A.filter(function (it) { return it.Prop3.intersects(it.Prop6); }), tCont2);
+
+    builderTest('field geography length call', tCont2.A.filter(function (it) { return it.Prop7.length(); }), tCont2);
+    builderTest('field geometry length call', tCont2.A.filter(function (it) { return it.Prop8.length(); }), tCont2);
+
 });

@@ -36,7 +36,7 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
 $data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
     Name: { type: 'string' },
-    Location: { type: 'geo' }
+    Location: { type: 'GeographyPoint' }
 });
 
 $data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
@@ -62,6 +62,30 @@ $data.Class.define('$exampleSrv.TestItemComputed', $data.Entity, null, {
     ObjectField: { type: 'object' }
 });
 
+$data.Class.define('$exampleSrv.GeoTestEntity', $data.Entity, null, {
+    Id: { type: 'id', key: true, computed: true },
+    Name: { type: 'string' },
+    GeographyPoint: { type: 'GeographyPoint' },
+    GeographyLineString: { type: 'GeographyLineString' },
+    GeographyPolygon: { type: 'GeographyPolygon' },
+    GeographyMultiPoint: { type: 'GeographyMultiPoint' },
+    GeographyMultiLineString: { type: 'GeographyMultiLineString' },
+    GeographyMultiPolygon: { type: 'GeographyMultiPolygon' },
+    GeographyCollection: { type: 'GeographyCollection' },
+});
+
+$data.Class.define('$exampleSrv.GeometryTestEntity', $data.Entity, null, {
+    Id: { type: 'id', key: true, computed: true },
+    Name: { type: 'string' },
+    GeometryPoint: { type: 'GeometryPoint' },
+    GeometryLineString: { type: 'GeometryLineString' },
+    GeometryPolygon: { type: 'GeometryPolygon' },
+    GeometryMultiPoint: { type: 'GeometryMultiPoint' },
+    GeometryMultiLineString: { type: 'GeometryMultiLineString' },
+    GeometryMultiPolygon: { type: 'GeometryMultiPolygon' },
+    GeometryCollection: { type: 'GeometryCollection' },
+});
+
 $exampleSrv.TestItemComputed.addEventListener('beforeCreate', function (sender, item) {
     if (!item.Name)
         item.Name = 'default Name';
@@ -80,6 +104,8 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
     TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
     TestItemGuids: { type: $data.EntitySet, elementType: $exampleSrv.TestItemGuid },
     TestItemComputeds: { type: $data.EntitySet, elementType: $exampleSrv.TestItemComputed },
+    GeoTestEntities: { type: $data.EntitySet, elementType: $exampleSrv.GeoTestEntity },
+    GeometryTestEntities: { type: $data.EntitySet, elementType: $exampleSrv.GeometryTestEntity },
     FuncStrParam: (function (a) {
         ///<param name="a" type="string"/>
         ///<returns type="string"/>
@@ -121,8 +147,13 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
         return a;
     }),
     FuncGeographyParam: (function (a) {
-        ///<param name="a" type="geo"/>
-        ///<returns type="geo"/>
+        ///<param name="a" type="GeographyPoint"/>
+        ///<returns type="GeographyPoint"/>
+        return a;
+    }),
+    FuncGeometryParam: (function (a) {
+        ///<param name="a" type="GeometryPoint"/>
+        ///<returns type="GeometryPoint"/>
         return a;
     }),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),

@@ -79,10 +79,17 @@
         return value;
     },
     '$data.Entity': function (config, value) { return new config.type(this.parseData(value)); },
-    '$data.Geography': function (config, value) {
-        if (/^POINT\(/.test(value)) {
-            var data = value.slice(6, value.length - 1).split(' ');
-            return new $data.Geography(data[0], data[1]);
+    '$data.GeographyPoint': function (config, value) {
+        if (/^geography'POINT\(/.test(value)) {
+            var data = value.slice(16, value.length - 2).split(' ');
+            return new $data.GeographyPoint(data);
+        }
+        return value;
+    },
+    '$data.GeometryPoint': function (config, value) {
+        if (/^geometry'POINT\(/.test(value)) {
+            var data = value.slice(16, value.length - 2).split(' ');
+            return new $data.GeometryPoint(data);
         }
         return value;
     },

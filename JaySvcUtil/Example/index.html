@@ -1,21 +1,32 @@
-﻿<!DOCTYPE HTML>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script src="../../Scripts/datajs-1.0.3.min.js"></script>
     <script src="../../build/jaydata.js"></script>
     <script src="../../JayDataModules/deferred.js"></script>
+    <script src="../../Types/EntityContext.js"></script>
+    <script src="../JaySvcUtil.js"></script>
     <script>
         $(function () {
-            //$data.MetadataLoader.xsltRepoUrl = '../';
+            $data.MetadataLoader.xsltRepoUrl = '../';
             $data.MetadataLoader.debugMode = true;
-            $data.MetadataLoader.load('../../Services/emptyNewsReader.svc', function (factory, ctxType, text) {
-                c = factory({ almafa: 'alma' });
-                c.onReady(function () {
-                    console.log(c.storageProvider.providerConfiguration.almafa);
+            $data.MetadataLoader.load('../../UnitTests/JaySvcUtil/$metadata.action.xml', {
+            //$data.MetadataLoader.load('../../Services/emptyNewsReader.svc', {
+            //$data.MetadataLoader.load('http://localhost:61358/api', {
+                success: function (factory, ctxType, text) {
+                    c = factory({ almafa: 'alma' });
+                    c.onReady(function () {
+                        console.log(c.storageProvider.providerConfiguration.almafa);
 
-                });
-                document.getElementById('asd').value = text;
+                    });
+                    document.getElementById('asd').value = text;
+                },
+                error: function (ex) {
+                    document.getElementById('asd').value = 'INVALID\r\n\r\n' + ex.data[1];
+                }
+            }, {
+                DefaultNamespace: ''
             });
 
 
