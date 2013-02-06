@@ -52,11 +52,19 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
             callback.success();
         }
     },
+
+    VisitFilterExpression: function (expression, context) {
+        var newSelector = this.Visit(expression.selector, context);
+        return Container.createFilterExpression(expression.source, newSelector);
+    },
+
     VisitParametricQueryExpression: function (expression, context) {
-        var tempParentNodeType = context.nodeType;
-        context.nodeType = null;
-        this.Visit(expression.expression, context);
-        context.nodeType = tempParentNodeType;
+        var tempParentNodeType = context.parentNodeType;
+        context.parentNodeType = null;
+        var newExp = this.Visit(expression.expression, context);
+        context.parentNodeType = tempParentNodeType;
+
+        return Container.createParametricQueryExpression(newExp, expression.parameters);
     },
     VisitSimpleBinaryExpression: function (expression, context) {
         var origType = context.parentNodeType;
@@ -162,7 +170,9 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         context.field = context.field || { name: expression.selector.memberName, objectStoreName: expression.source.storageModel.TableName };
     },
     VisitConstantExpression: function (expression, context) {
-        context.value = context.value || expression.value;
+        if (context) {
+            context.value = context.value || expression.value;
+        }
     },
     VisitIndexedDBLogicalAndFilterExpression: function (expression, context) {
         this.Visit(expression.left, context);

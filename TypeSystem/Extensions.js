@@ -7,6 +7,9 @@ $data.StringFunctions = {
         } else if (arguments.length == 1 && typeof this === 'string') {
             self = this;
             str = arguments[0];
+        } else if (this instanceof String) {
+            self = this.valueOf();
+            str = arguments[0];
         } else
             return false;;
 
@@ -20,6 +23,9 @@ $data.StringFunctions = {
         } else if (arguments.length == 1 && typeof this === 'string') {
             self = this;
             str = arguments[0];
+        } else if (this instanceof String) {
+            self = this.valueOf();
+            str = arguments[0];
         } else
             return false;
 
@@ -32,6 +38,9 @@ $data.StringFunctions = {
             str = arguments[1];
         } else if (arguments.length == 1 && typeof this === 'string') {
             self = this;
+            str = arguments[0];
+        } else if (this instanceof String) {
+            self = this.valueOf();
             str = arguments[0];
         } else
             return false;

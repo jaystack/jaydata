@@ -683,12 +683,9 @@
             }
             context.saveChanges({
                 success: function () {
-                    context.Items1.filter("it.i0<40").filter("it.i0>20").toArray(function (result) {
-                        equal(result.length, 19, "and between, result length");
-                        equal(result[0].i0, 21, "and between, 1st id");
-                        equal(result[18].i0, 39, "and between, last id");
-                        close(context);
-                    }); return;
+                    //context.Items1.filter("it.s0.length() <= 4").toArray(function (result) {
+                    //    equal(result.length, 11, "endsWith(), result length");
+                    //}); return;
                     $.when(
                             context.Items1.filter(function (item) { return item.i0 == this.a; }, { a: 40 }).toArray(function (result) {
                                 equal(result.length, 1, "param query result legth");
@@ -790,10 +787,28 @@
                                 equal(result[0].i0, 7, "order - skip - take filter, id error");
                                 equal(result[1].i0, 6, "order - skip - take filter, id error");
                             }),
-                            context.Items1.filter("it.i0<40").filter("it.i0>20").toArray(function (result) {
+                            context.Items1.filter("it.i0<40").filter("it.i0>20 && it.i0!=5").toArray(function (result) {
                                 equal(result.length, 19, "and between, result length");
                                 equal(result[0].i0, 21, "and between, 1st id");
                                 equal(result[18].i0, 39, "and between, last id");
+                            }),
+                            context.Items1.filter("it.i0<40").filter("it.i0>20 && it.i0!=5").map(function (item) { return {a:item.i0, b:item.s0} }).toArray(function (result) {
+                                equal(result.length, 19, "and between, result length");
+                                equal(result[0].a, 21, "and between, 1st id");
+                                equal(result[18].a, 39, "and between, last id");
+                                equal(typeof(result[0].b), 'string', "and between, last id");
+                            }),
+                            context.Items1.filter("it.s0.contains('111') == true").toArray(function (result) {
+                                equal(result.length, 1, "contains(), result length");
+                            }),
+                            context.Items1.filter("it.s0.startsWith('s01') == true").toArray(function (result) {
+                                equal(result.length, 112, "startsWith(), result length");
+                            }),
+                            context.Items1.filter("it.s0.endsWith('11') == true").toArray(function (result) {
+                                equal(result.length, 10, "endsWith(), result length");
+                            }),
+                            context.Items1.filter("it.s0.length() <= 4").toArray(function (result) {
+                                equal(result.length, 99, "endsWith(), result length");
                             })
                     ).then(function () {
                         close(context);

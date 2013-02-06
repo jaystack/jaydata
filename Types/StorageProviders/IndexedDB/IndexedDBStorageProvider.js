@@ -66,6 +66,10 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     supportedFieldOperations: {
         value: {
+            length: { mapTo: "length", dataType: 'number' },
+            startsWith: { mapTo: "$data.StringFunctions.startsWith", dataType: "boolean", parameters: [{ name: "p1", dataType: "string" }] },
+            endsWith: { mapTo: "$data.StringFunctions.endsWith", dataType: "boolean", parameters: [{ name: "p1", dataType: "string" }] },
+            contains: { mapTo: "$data.StringFunctions.contains", dataType: "boolean", parameters: [{ name: "p1", dataType: "string" }] },
         },
         enumerable: true,
         writable: true
@@ -472,7 +476,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 callback.success(compiledQuery);
             }
         });
-        
+
         return compiledQuery;
     },
     getTraceString: function (query) {
@@ -529,7 +533,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             // Setting key fields (composite key)
             settings.keys = keys;
         } else if (keys.length == 1) {
-                // Simple key
+            // Simple key
             settings.keyPath = keys[0];
         } else {
             Guard.raise(new Exception('No valid key found!'));

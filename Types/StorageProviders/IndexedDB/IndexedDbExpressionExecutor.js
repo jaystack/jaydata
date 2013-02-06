@@ -14,10 +14,28 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
             callback: {}
         };
         ctx.callback.success = function (result) {
+            ctx.result = result.objects || result;
             console.log("Executor in milliseconds : ", new Date().getTime() - start);
             callback.success(ctx.result);
         };
         this.Visit(query.expression, ctx);
+    },
+    VisitToArrayExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+    },
+    VisitFilterExpression: function (expression, context) {
+        this.Visit(expression.selector, context);
+    },
+    VisitParametricQueryExpression: function (expression, context) {
+        var tmpCallback = context.callback;
+        context.callback = {
+            success: function (eResult) {
+                //context.result = eResult || expression.expression.resultSet;
+                //context.result = context.result ? context.result.objects : [];
+                tmpCallback.success(eResult);
+            }
+        };
+        this.Visit(expression.expression, context);
     },
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.source, context);
@@ -26,7 +44,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
         var tmpCallback = context.callback;
         var self = this;
         context.callback = {
-            success: function () {
+            success: function (result) {
                 var f = function (a, b) {
                     var ctx = { instance: a };
                     self.Visit(expression.selector.expression, ctx);
@@ -42,8 +60,10 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                     }
                     return result;
                 }
-                context.result = context.result.sort(f);
-                tmpCallback.success();
+                var resultSet = { ids: [], objects: [] };
+                resultSet.objects = result.objects.sort(f);
+
+                tmpCallback.success(resultSet);
             }
         };
         this.Visit(expression.source, context);
@@ -51,62 +71,102 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
     VisitCountExpression: function (expression, context) {
         var tmpCallback = context.callback;
         context.callback = {
-            success: function () {
-                context.result = { cnt: context.result.length };
-                tmpCallback.success();
+            success: function (result) {
+                tmpCallback.success({ cnt: result.objects.length });
             }
         };
-        this.Visit(expression.source, context);
-    },
-    VisitFilterExpression: function (expression, context) {
-        this.Visit(expression.selector, context);
-    },
-    VisitToArrayExpression: function (expression, context) {
         this.Visit(expression.source, context);
     },
     VisitPagingExpression: function (expression, context) {
         var tmp = context.callback;
         var self = this;
         context.callback = {
-            success: function () {
+            success: function (result) {
                 var v = {};
                 self.Visit(expression.amount, v);
-                switch(expression.nodeType){
-                    case "Skip": context.result = context.result.slice(v.value); break;
-                    case "Take": context.result = context.result.slice(0, v.value); break;
+                var resultSet = { ids: [], objects: [] };
+                switch (expression.nodeType) {
+                    case "Skip": resultSet.ids = result.ids.slice(v.value); resultSet.objects = result.objects.slice(v.value); break;
+                    case "Take": resultSet.ids = result.ids.slice(0, v.value); resultSet.objects = result.objects.slice(0, v.value); break;
                 }
-                tmp.success();
+                tmp.success(resultSet);
             }
         };
         this.Visit(expression.source, context);
     },
     VisitEntitySetExpression: function (expression, context) {
-        context.result = context.result || [];
+        var resultSet = { ids: [], objects: [] };
         context.objectStore.openCursor().onsuccess = function (event) {
             var cursor = event.target.result;
             if (cursor) {
-                context.result.push(cursor.value);
+                resultSet.objects.push(cursor.value);
+                resultSet.ids.push(cursor.primaryKey);
                 cursor.continue();
             }
             else {
-                context.callback.success();
+                context.callback.success(resultSet);
             }
         };
     },
-    VisitParametricQueryExpression: function (expression, context) {
-        var tmpCallback = context.callback;
-        context.callback = {
-            success: function (eResult) {
-                context.result = eResult || expression.expression.resultSet;
-                context.result = context.result ? context.result.objects : [];
-                tmpCallback.success();
+
+    VisitIndexedDBLogicalAndFilterExpression: function (expression, context) {
+        var tmpCalback = context.callback;
+        context.callback = {};
+        var self = this;
+        context.callback.success = function (lResult) {
+            context.callback = {
+                success: function (rResult) {
+                    var start = new Date().getTime();
+
+                    var largeList = lResult.ids.length <= rResult.ids.length ? rResult : lResult;
+                    var smallList = lResult.ids.length > rResult.ids.length ? rResult : lResult;
+                    var resultList = { ids: [], objects: [] };
+                    for (var i = 0; i < smallList.ids.length; i++) {
+
+                        if (largeList.ids.indexOf(smallList.ids[i]) >= 0) {
+                            resultList.objects.push(smallList.objects[i]);
+                            resultList.ids.push(smallList.ids[i]);
+                        }
+                    }
+                    console.log("Logical and: ", new Date().getTime() - start);
+                    tmpCalback.success(resultList);
+                }
             }
-        };
-        this.Visit(expression.expression, context);
+            self.Visit(expression.right, context);
+        }
+        this.Visit(expression.left, context);
     },
+    VisitIndexedDBLogicalOrFilterExpression: function (expression, context) {
+        var tmpCalback = context.callback;
+        context.callback = {};
+        var self = this;
+        context.callback.success = function (lResult) {
+            context.callback = {
+                success: function (rResult) {
+                    var start = new Date().getTime();
+
+                    var resultList = lResult.ids.length <= rResult.ids.length ? rResult : lResult;
+                    var smallList = lResult.ids.length > rResult.ids.length ? rResult : lResult;
+                    for (var i = 0; i < smallList.ids.length; i++) {
+
+                        if (resultList.ids.indexOf(smallList.ids[i]) < 0) {
+                            resultList.objects.push(smallList.objects[i]);
+                            resultList.ids.push(smallList.ids[i]);
+                        }
+                    }
+                    console.log("Logical Or: ", new Date().getTime() - start);
+                    tmpCalback.success(resultList);
+                }
+            }
+            self.Visit(expression.right, context);
+        }
+        this.Visit(expression.left, context);
+    },
+
     VisitIndexedDBPhysicalAndFilterExpression: function (expression, context) {
         var self = this;
         var cursor;
+        var resultSet = { ids: [], objects: [] };
         if (expression.suggestedIndex) {
             var keyRange = undefined;
             switch (expression.suggestedIndex.nodeType) {
@@ -138,7 +198,6 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
             cursor = self.objectStore.openCursor();
         }
 
-        expression.resultSet = { ids: [], objects: [] };
         cursor.onsuccess = function (event) {
             var c = event.target.result;
             if (c) {
@@ -185,72 +244,15 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                     }
                 }
                 if (addToResultSet) {
-                    expression.resultSet.objects.push(c.value);
-                    expression.resultSet.ids.push(c.primaryKey);
+                    resultSet.objects.push(c.value);
+                    resultSet.ids.push(c.primaryKey);
                 }
                 c.continue();
             }
             else {
-                context.callback.success();
+                context.callback.success(resultSet);
             }
         }
-    },
-    VisitIndexedDBLogicalAndFilterExpression: function (expression, context) {
-        var tmpCalback = context.callback;
-        context.callback = {};
-        var self = this;
-        context.callback.success = function (lResult) {
-            context.callback = {
-                success: function (rResult) {
-                    var start = new Date().getTime();
-
-                    var leftResult = lResult || expression.left.resultSet;
-                    var rightResult = rResult || expression.right.resultSet;
-                    var largeList = leftResult.ids.length <= rightResult.ids.length ? rightResult : leftResult;
-                    var smallList = leftResult.ids.length > rightResult.ids.length ? rightResult : leftResult;
-                    var resultList = { ids: [], objects: [] };
-                    for (var i = 0; i < smallList.ids.length; i++) {
-
-                        if (largeList.ids.indexOf(smallList.ids[i]) >= 0) {
-                            resultList.objects.push(smallList.objects[i]);
-                            resultList.ids.push(smallList.ids[i]);
-                        }
-                    }
-                    console.log("Logical and: ", new Date().getTime() - start);
-                    tmpCalback.success(resultList);
-                }
-            }
-            self.Visit(expression.right, context);
-        }
-        this.Visit(expression.left, context);
-    },
-    VisitIndexedDBLogicalOrFilterExpression: function (expression, context) {
-        var tmpCalback = context.callback;
-        context.callback = {};
-        var self = this;
-        context.callback.success = function (lResult) {
-            context.callback = {
-                success: function (rResult) {
-                    var start = new Date().getTime();
-
-                    var leftResult = lResult || expression.left.resultSet;
-                    var rightResult = rResult || expression.right.resultSet;
-                    var resultList = leftResult.ids.length <= rightResult.ids.length ? rightResult : leftResult;
-                    var smallList = leftResult.ids.length > rightResult.ids.length ? rightResult : leftResult;
-                    for (var i = 0; i < smallList.ids.length; i++) {
-
-                        if (resultList.ids.indexOf(smallList.ids[i]) < 0) {
-                            resultList.objects.push(smallList.objects[i]);
-                            resultList.ids.push(smallList.ids[i]);
-                        }
-                    }
-                    console.log("Logical Or: ", new Date().getTime() - start);
-                    tmpCalback.success(resultList);
-                }
-            }
-            self.Visit(expression.right, context);
-        }
-        this.Visit(expression.left, context);
     },
     VisitConstantExpression: function (expression, context) {
         context.value = expression.value;
@@ -258,6 +260,35 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
     VisitEntityFieldExpression: function (expression, context) {
         if (context.instance) {
             context.value = context.instance[expression.selector.memberName];
+        }
+    },
+    VisitEntityFieldOperationExpression: function (expression, context) {
+        var ctx = { instance: context.instance };
+        this.Visit(expression.source, ctx);
+        var item = ctx.value;
+
+        var params = [];
+        for (var i = 0; i < expression.parameters.length; i++) {
+            ctx.value = null;
+            this.Visit(expression.parameters[i], ctx);
+            if (ctx.value !== null) {
+                params.push(ctx.value);
+            }
+        }
+
+        if (expression.compiledFn) {
+            context.value = expression.compiledFn(item, params);
+        } else {
+
+            if (item.hasOwnProperty(expression.operation.memberDefinition.mapTo)) {
+                context.value = item[expression.operation.memberDefinition.mapTo];
+            } else if (typeof item[expression.operation.memberDefinition.mapTo] === 'function') {
+                context.value = item[expression.operation.memberDefinition.mapTo](params);
+            } else {
+                var f = new Function("item", "params", "return " + expression.operation.memberDefinition.mapTo + ".apply(item,params);");
+                expression.compiledFn = f;
+                context.value = f(item, params);
+            }
         }
     }
 });
