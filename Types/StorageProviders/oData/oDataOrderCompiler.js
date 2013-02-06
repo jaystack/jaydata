@@ -83,7 +83,7 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
         var exprParams = [];
         var definedParams = expression.operation.memberDefinition.method.params;
         if (expression.parameters && expression.parameters[0] &&
-            expression.parameters[0].value && typeof expression.parameters[0].value === 'object' && definedParams && definedParams[0] &&
+            expression.parameters[0].value && typeof expression.parameters[0].value === 'object' && expression.parameters[0].value.constructor === $data.Object && definedParams && definedParams[0] &&
             (Container.resolveType(definedParams[0].type) !== $data.Object || definedParams[0].name in expression.parameters[0].value)) {
 
             if (expression.parameters[0] instanceof $data.Expressions.ObjectLiteralExpression) {

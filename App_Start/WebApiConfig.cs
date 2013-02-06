@@ -1,7 +1,11 @@
-﻿using System;
+﻿using JayData.NewsReader;
+using Microsoft.Data.Edm;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Spatial;
 using System.Web.Http;
+using System.Web.Http.OData.Builder;
 
 namespace jaydata
 {
@@ -14,6 +18,51 @@ namespace jaydata
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            var cset = modelBuilder.EntitySet<Category>("Categories");
+            cset.EntityType.HasKey(a => a.Id);
+
+            var aset = modelBuilder.EntitySet<Article>("Articles");
+            aset.EntityType.HasKey(a => a.Id);
+
+            var uset = modelBuilder.EntitySet<User>("Users");
+            uset.EntityType.HasKey(a => a.Id);
+
+            var tcset = modelBuilder.EntitySet<TagConnection>("TagConnections");
+            tcset.EntityType.HasKey(a => a.Id);
+
+            var tset = modelBuilder.EntitySet<Tag>("Tags");
+            tset.EntityType.HasKey(a => a.Id);
+
+            var upset = modelBuilder.EntitySet<UserProfile>("UserProfiles");
+            upset.EntityType.HasKey(a => a.Id);
+
+
+            var action = modelBuilder.Entity<Category>().Action("GetFirstArticleTitle");
+            action.Parameter<string>("contains");
+            action.Returns<string>();
+
+            //var action2 = modelBuilder.Entity<Category>().TransientAction("GetFirstArticleTitle2");
+            //action2.Parameter<string>("contains");
+            //action2.Returns<string>();
+
+            var action3 = modelBuilder.Entity<Category>().Collection.Action("GetFirstArticleTitle");
+            action3.Parameter<string>("contains");
+            action3.Returns<string>();
+
+            //var action4 = modelBuilder.Action("GetFirstArticleTitle4");
+            //action4.Parameter<string>("contains");
+            //action4.Returns<string>();
+
+            var action5 = modelBuilder.Entity<Category>().Action("LocationSwipe");
+            action5.Parameter<GeographyPoint>("Loc");
+            action5.Returns<GeographyPoint>();
+            
+            IEdmModel model = modelBuilder.GetEdmModel();
+            config.Routes.MapODataRoute(routeName: "OData", routePrefix: "odata", model: model);
+
         }
     }
 }

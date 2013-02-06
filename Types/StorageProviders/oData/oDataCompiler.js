@@ -35,6 +35,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             }
         }
         query.queryText = queryText;
+        query.postData = queryFragments.postData;
         
         return {
             queryText: queryText,

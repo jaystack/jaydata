@@ -1621,6 +1621,10 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 var bindedEntity;
                 if (this instanceof $data.Entity) {
+                    if (!cfg.method) {
+                        cfg.method = 'POST';
+                    }
+
                     if (this.context) {
                         context = this.context;
                     } else {

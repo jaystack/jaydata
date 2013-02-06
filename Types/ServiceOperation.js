@@ -52,11 +52,11 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                         if (this.context) {
                             context = this.context;
                             entitySet = context.getEntitySetFromElementType(this.getType());
-                            if (!cfg.method && cfg.IsSideEffecting !== false) {
-                                cfg.method = 'POST'; //default Action method is POST
-                            }
+                        } else if (this.storeToken && typeof this.storeToken.factory === 'function') {
+                            context = this.storeToken.factory();
+                            entitySet = context.getEntitySetFromElementType(this.getType());
                         } else {
-                            Guard.raise('entity not attached into the context');
+                            Guard.raise(new Exception("entity can't resolve context", 'Not Found!', entity));
                             return;
                         }
                     } else if (this instanceof $data.EntitySet) {
@@ -80,7 +80,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                 if (cfg.params) {
                     paramConstExpression = [];
                     //object as parameter
-                    if (arguments[0] && typeof arguments[0] === 'object' && cfg.params && cfg.params[0] && ((Container.resolveType(cfg.params[0].type) !== $data.Object || cfg.params[0].name in arguments[0]))) {
+                    if (arguments[0] && typeof arguments[0] === 'object' && arguments[0].constructor === $data.Object && cfg.params && cfg.params[0] && ((Container.resolveType(cfg.params[0].type) !== $data.Object || cfg.params[0].name in arguments[0]))) {
                         var argObj = arguments[0];
                         for (var i = 0; i < cfg.params.length; i++) {
                             var paramConfig = cfg.params[i];
@@ -158,4 +158,12 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
     }
 });
 
-$data.Class.define('$data.ServiceAction', $data.ServiceOperation, null, {}, {});
+$data.Class.define('$data.ServiceAction', $data.ServiceOperation, null, {}, {
+    generateServiceOperation: function (cfg) {
+        if (!cfg.method) {
+            cfg.method = 'POST'; //default Action method is POST
+        }
+
+        return $data.ServiceOperation.generateServiceOperation.apply(this, arguments);
+    }
+});

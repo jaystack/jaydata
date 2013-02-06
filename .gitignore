@@ -10,7 +10,6 @@ build
 /bin/*
 !bin/Antlr3.Runtime.dll
 !bin/EntityFramework.dll
-!bin/Newtonsoft.Json.dll
 !bin/System.Net.Http.dll
 !bin/System.Net.Http.WebRequest.dll
 !bin/System.Web.Optimization.dll

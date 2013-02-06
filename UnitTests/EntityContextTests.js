@@ -1675,7 +1675,7 @@
                 actions: {
                     'MostRecent': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: 'Tests.CategoryWithAction', IsBindable: true, IsAlwaysBindable: true, params: [{ name: 'Contains', type: 'Edm.String' }] },
                     'LastModifiedName': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: 'Edm.String', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params: [] },
-                    'Lasts': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: $data.Queryable, elementType: 'Tests.CategoryWithAction', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params: [{ name: 'Top', type: 'Edm.Int32' }] }
+                    'Lasts': { type: $data.ServiceAction, 'EntitySet': 'Categories', returnType: $data.Queryable, elementType: 'Tests.CategoryWithAction', IsBindable: true, IsSideEffecting: false, IsAlwaysBindable: true, params: [{ name: 'Top', type: 'Edm.Int32' }], method: 'GET' }
                 }
             },
             Topics: {
@@ -1697,7 +1697,8 @@
                         { name: 'p3', type: 'Edm.Boolean' },
                         { name: 'p4', type: 'Edm.String' },
                         { name: 'p5', type: 'Edm.DateTime' }
-                    ]
+                    ],
+                method: 'GET'
             }
         });
 
@@ -1713,7 +1714,7 @@
                         req[2] = function (err) {
                             equal(err.request.requestUri, expected, 'request url');
                             equal(err.request.method, reqPayLoad ? 'POST' : 'GET', 'request method');
-                            deepEqual(err.request.data, reqPayLoad, 'request payload');
+                            deepEqual(err.request.data, reqPayLoad === true ? undefined : reqPayLoad, 'request payload');
 
                             req[1](resPayload);
 
@@ -1750,7 +1751,7 @@
 
             });
             ok(p.then, 'MostRecent, promise returned');
-        }, '/api/Categories/MostRecent', { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } });
+        }, '/api/Categories/MostRecent', { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } }, true);
 
         checkUrlTextAndHookResult('Collection Entity result with param', 4, function (context) {
             var p = context.Categories.MostRecent('Hello', function (data) {
@@ -1760,7 +1761,7 @@
             });
 
             ok(p.then, 'MostRecent, promise returned');
-        }, "/api/Categories/MostRecent?Contains='Hello'", { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } });
+        }, "/api/Categories/MostRecent", { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } }, { Contains: 'Hello' });
 
         checkUrlTextAndHookResult('Collection Entity result with param - object param', 4, function (context) {
             var p = context.Categories.MostRecent({ Contains: 'Hello' }, function (data) {
@@ -1770,7 +1771,7 @@
             });
 
             ok(p.then, 'MostRecent, promise returned');
-        }, "/api/Categories/MostRecent?Contains='Hello'", { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } });
+        }, "/api/Categories/MostRecent", { MostRecent: { Id: 1, Name: 'Sport', Description: 'desc' } }, { Contains: 'Hello' });
 
         checkUrlTextAndHookResult('Collection Queryable result inline', 6, function (context) {
             var p = context.Categories.Lasts(5, function (data) {
@@ -1856,7 +1857,7 @@
             context.Categories.LastModifiedName(function (data) {
                 equal(data, 'Hello World!', 'LastModifiedName');
             });
-        }, '/api/Categories/LastModifiedName', { LastModifiedName: 'Hello World!' });
+        }, '/api/Categories/LastModifiedName', { LastModifiedName: 'Hello World!' }, true);
 
         checkUrlTextAndHookResult('Entity Action', 1, function (context) {
             var item = new Tests.CategoryWithAction({ Id: 1 });
