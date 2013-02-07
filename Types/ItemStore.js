@@ -468,7 +468,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
             if (!type.storeConfigs) {
                 type.storeConfigs = {
-                    stores: {},
+                    stores: {}
                 };
             }
             type.storeConfigs.stores[name] = defStoreConfig;
