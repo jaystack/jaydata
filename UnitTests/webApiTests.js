@@ -118,6 +118,28 @@ $(function () {
 
 });
 
+function T3WebapiBugfix(providerConfiguration) {
+
+    test('oData V3 date result', 1, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfiguration)).onReady(function (db) {
+            
+            var date = new Date("2013/02/07 14:22:17");
+            db.Articles.add({ Title: 'item title', Lead: 'item Lead', CreateDate: date });
+            db.saveChanges(function(){
+                db.Articles.toArray(function(items){
+                    var art = items[0];
+                    equal(art.CreateDate.valueOf(), date.valueOf(), 'saved and recived dates are equals');
+                    start();
+                });
+            });
+
+        });
+    });
+
+};
+
 
 function webApiTests(providerConfiguration, msg) {
     module("webapi test" + msg);

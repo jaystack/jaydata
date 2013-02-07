@@ -47,6 +47,13 @@ namespace JayData.Controllers.WebApiOData
             return movieToPatch;
         }
 
+        public Article Post(Article item)
+        {
+            db.Articles.Add(item);
+            db.SaveChanges();
+            return item;
+        }
+
         protected override void Dispose(bool disposing)
         {
             db.Dispose();

@@ -225,7 +225,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var that = this;
 
         var requestData = [request, function (data, response) {
-            if (response.statusCode > 200 && response.statusCode < 300) {
+            if (response.statusCode >= 200 && response.statusCode < 300) {
                 var item = convertedItem[0];
                 if (response.statusCode == 204) {
                     if (response.headers.ETag || response.headers.Etag || response.headers.etag) {
@@ -318,7 +318,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 var errors = [];
 
                 for (var i = 0; i < result.length; i++) {
-                    if (result[i].statusCode > 200 && result[i].statusCode < 300) {
+                    if (result[i].statusCode >= 200 && result[i].statusCode < 300) {
                         var item = convertedItem[i];
                         if (result[i].statusCode == 204) {
                             if (result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag) {
@@ -632,7 +632,20 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             fromDb: {
                 '$data.Integer': function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : dbData; },
+                '$data.Date': function (dbData) {
+                    if (dbData) {
+                        if (dbData.substring(0, 6) === '/Date(') {
+                            return new Date(parseInt(dbData.substr(6)));
+                        } else {
+                            //Safafi compatible
+                            if (dbData.indexOf('Z') === -1 && !dbData.match('T.*[+-]'))
+                                dbData += 'Z';
+                            return new Date(dbData);
+                        }
+                    } else {
+                        return dbData;
+                    }
+                },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
