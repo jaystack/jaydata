@@ -94,9 +94,15 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
         if (entity instanceof $data.Entity) {
             var type = entity.getType();
-            return validStoreAlias || entity.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
+            return validStoreAlias ||
+                //entity
+                entity.storeToken ||
+                //type
+                type.storeToken;
         } else {
-            return validStoreAlias || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined) || entity.storeToken;
+            return validStoreAlias ||
+                //type
+                entity.storeToken;
         }
     },
     _getStoreContext: function (aliasOrToken, type, nullIfInvalid) {
@@ -123,18 +129,27 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         });
     },
     _getContextPromise: function (aliasOrToken, type) {
+        /*Token*/
         if (aliasOrToken && 'object' === typeof aliasOrToken && 'function' === typeof aliasOrToken.factory) {
             return aliasOrToken.factory(type);
         } else if (aliasOrToken && 'object' === typeof aliasOrToken && 'object' === typeof aliasOrToken.args && 'string' === typeof aliasOrToken.typeName) {
             var type = Container.resolveType(aliasOrToken.typeName);
             return new type(JSON.parse(JSON.stringify(aliasOrToken.args)));
-        } else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken]) {
+        }
+        /*resolve alias from type (constructor options)*/
+        else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken]) {
             return this._getDefaultItemStoreFactory(type, type.storeConfigs.stores[aliasOrToken]);
-        } else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
+        }
+        /*resolve alias from ItemStore (factories)*/
+        else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
             return this.itemStoreConfig.aliases[aliasOrToken](type);
-        } else if (aliasOrToken && 'function' === typeof aliasOrToken) {
+        }
+        /*token is factory*/
+        else if (aliasOrToken && 'function' === typeof aliasOrToken) {
             return aliasOrToken();
-        } else {
+        }
+        /*default no hint*/
+        else {
             return this.itemStoreConfig.aliases[this.itemStoreConfig['default']](type);
         }
 
@@ -454,7 +469,6 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             if (!type.storeConfigs) {
                 type.storeConfigs = {
                     stores: {},
-                    'default': name
                 };
             }
             type.storeConfigs.stores[name] = defStoreConfig;
