@@ -1011,7 +1011,7 @@
                 if (db.objectStoreNames.contains("todo")) {
                     event.target.transaction.db.deleteObjectStore("todo");
                 }
-                var objectStore = db.createObjectStore("todo", { keyPath: ["text","text2"], multiKey:false });
+                var objectStore = db.createObjectStore("todo", { keyPath: "id" });
             }
             request.onsuccess = function (e) {
                 var v = 3;
