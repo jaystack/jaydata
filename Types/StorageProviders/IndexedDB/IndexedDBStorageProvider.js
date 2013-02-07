@@ -41,8 +41,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             lessThenOrEqual: { mapTo: ' <= ', dataType: $data.Boolean },
 
             or: { mapTo: ' || ', dataType: $data.Boolean },
-            and: { mapTo: ' && ', dataType: $data.Boolean }
-            //'in': { mapTo: ' in ', dataType: $data.Boolean, resolvableType: [$data.Array, $data.Queryable] }
+            and: { mapTo: ' && ', dataType: $data.Boolean },
+            'in': { mapTo: ' in ', dataType: $data.Boolean, resolvableType: [$data.Array] }
         }
     },
     supportedSetOperations: {
@@ -53,8 +53,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             forEach: {},
             toArray: {},
             single: {},
-            //some: {},
-            //every: {},
+            some: {},
+            every: {},
             take: {},
             skip: {},
             orderBy: {},
@@ -67,9 +67,15 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     supportedFieldOperations: {
         value: {
             length: { mapTo: "length", dataType: 'number' },
-            startsWith: { mapTo: "$data.StringFunctions.startsWith", dataType: "boolean", parameters: [{ name: "p1", dataType: "string" }] },
-            endsWith: { mapTo: "$data.StringFunctions.endsWith", dataType: "boolean", parameters: [{ name: "p1", dataType: "string" }] },
-            contains: { mapTo: "$data.StringFunctions.contains", dataType: "boolean", parameters: [{ name: "p1", dataType: "string" }] },
+            startsWith: { mapTo: "$data.StringFunctions.startsWith", dataType: $data.Boolean, parameters: [{ name: "p1", dataType: "string" }] },
+            endsWith: { mapTo: "$data.StringFunctions.endsWith", dataType: $data.Boolean, parameters: [{ name: "p1", dataType: "string" }] },
+            contains: { mapTo: "$data.StringFunctions.contains", dataType: $data.Boolean, parameters: [{ name: "p1", dataType: "string" }] },
+            substr: { mapTo: "substr", dataType: $data.String, parameters: [{ name: "startFrom", dataType: "number" }, { name: "length", dataType: "number" }] },
+            toLowerCase: { mapTo: "toLowerCase", dataType: $data.String },
+            toUpperCase: { mapTo: "toUpperCase", dataType: $data.String },
+            trim: { mapTo: 'trim', dataType: $data.String },
+            ltrim: { mapTo: 'trimLeft', dataType: $data.String },
+            rtrim: { mapTo: 'trimRight', dataType: $data.String }
         },
         enumerable: true,
         writable: true
@@ -498,7 +504,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
                         modelBinderCompiler.Visit(query.expression);
                         query.rawDataList = result;
-                        console.log("execute Query in milliseconds:", new Date().getTime() - start);
+                        $data.Trace.log("execute Query in milliseconds:", new Date().getTime() - start);
                         callBack.success(query);
                     }
                 });

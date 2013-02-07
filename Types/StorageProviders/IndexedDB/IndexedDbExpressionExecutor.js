@@ -15,7 +15,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
         };
         ctx.callback.success = function (result) {
             ctx.result = result.objects || result;
-            console.log("Executor in milliseconds : ", new Date().getTime() - start);
+            $data.Trace.log("Executor in milliseconds : ", new Date().getTime() - start);
             callback.success(ctx.result);
         };
         this.Visit(query.expression, ctx);
@@ -128,7 +128,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                             resultList.ids.push(smallList.ids[i]);
                         }
                     }
-                    console.log("Logical and: ", new Date().getTime() - start);
+                    $data.Trace.log("Logical and: ", new Date().getTime() - start);
                     tmpCalback.success(resultList);
                 }
             }
@@ -154,7 +154,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                             resultList.ids.push(smallList.ids[i]);
                         }
                     }
-                    console.log("Logical Or: ", new Date().getTime() - start);
+                    $data.Trace.log("Logical Or: ", new Date().getTime() - start);
                     tmpCalback.success(resultList);
                 }
             }
@@ -238,6 +238,13 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                         case "lessThenOrEqual":
                             addToResultSet &= lValue <= rValue;
                             break;
+                        case "in":
+                            if (rValue instanceof Array) {
+                                addToResultSet &= rValue.indexOf(lValue) >= 0;
+                            } else {
+                                throw new Exception("Not supported");
+                            }
+                            break;
                         default:
                             alert("filter nodetype:" + filter.nodeType);
                             break;
@@ -275,19 +282,22 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                 params.push(ctx.value);
             }
         }
-
-        if (expression.compiledFn) {
-            context.value = expression.compiledFn(item, params);
-        } else {
-
-            if (item.hasOwnProperty(expression.operation.memberDefinition.mapTo)) {
-                context.value = item[expression.operation.memberDefinition.mapTo];
-            } else if (typeof item[expression.operation.memberDefinition.mapTo] === 'function') {
-                context.value = item[expression.operation.memberDefinition.mapTo](params);
+        if (item === null || item === undefined) {
+            context.value = item;
+        }
+        else {
+            if (expression.compiledFn) {
+                context.value = expression.compiledFn(item, params);
             } else {
-                var f = new Function("item", "params", "return " + expression.operation.memberDefinition.mapTo + ".apply(item,params);");
-                expression.compiledFn = f;
-                context.value = f(item, params);
+                if (item.hasOwnProperty(expression.operation.memberDefinition.mapTo)) {
+                    context.value = item[expression.operation.memberDefinition.mapTo];
+                } else if (typeof item[expression.operation.memberDefinition.mapTo] === 'function') {
+                    context.value = item[expression.operation.memberDefinition.mapTo].apply(item, params);
+                } else {
+                    var f = new Function("item", "params", "return " + expression.operation.memberDefinition.mapTo + ".apply(item,params);");
+                    expression.compiledFn = f;
+                    context.value = f(item, params);
+                }
             }
         }
     }

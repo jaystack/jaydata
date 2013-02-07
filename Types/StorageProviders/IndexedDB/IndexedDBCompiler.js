@@ -4,6 +4,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
         this.provider = provider;
     },
     compile: function (query, callback) {
+        this.defaultType = query.defaultType;
         var start = new Date().getTime();
         this.subqueryIndex = 0;
         var ctx = {};
@@ -15,14 +16,14 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
         newExpression = indexMonitor.Visit(newExpression, newIndexContext);
 
         //createIndexes
-        this.createNewIndexes(newIndexContext, {
+        this._createNewIndexes(newIndexContext, {
             success: function () {
-                console.log("Compiler in milliseconds: ", new Date().getTime() - start);
+                $data.Trace.log("Compiler in milliseconds: ", new Date().getTime() - start);
                 callback.success({ context: query.context, defaultType: query.defaultType, expression: newExpression });
             }
         });
     },
-    createNewIndexes: function (ctx, callback) {
+    _createNewIndexes: function (ctx, callback) {
         //TODO: make safety
         if (false && ctx.newIndexes && ctx.newIndexes.length > 0) {
             var self = this;
@@ -34,7 +35,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
                     var writeTran = event.target.transaction;
                     for (var i = 0; i < ctx.newIndexes.length; i++) {
                         var expression = ctx.newIndexes[i];
-                        writeObjectStore = writeTran.objectStore(expression.newIndex.field.objectStoreName);
+                        var writeObjectStore = writeTran.objectStore(expression.newIndex.field.objectStoreName);
                         if (!writeObjectStore.indexNames.contains(expression.newIndex.field.name)) {
                             writeObjectStore.createIndex(expression.newIndex.field.name, expression.newIndex.field.name, { unique: false });
                         }
@@ -52,7 +53,10 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
             callback.success();
         }
     },
+    _buildNavigationTree: function (expression, context) {
 
+        return expression;
+    },
     VisitFilterExpression: function (expression, context) {
         var newSelector = this.Visit(expression.selector, context);
         return Container.createFilterExpression(expression.source, newSelector);
@@ -73,47 +77,59 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
         var nLeft = this.Visit(expression.left, context);
         var nRight = this.Visit(expression.right, context);
         context.parentNodeType = origType;
-
-        switch (expression.nodeType) {
-            case "and":
-                if (nLeft instanceof Array && nRight instanceof Array) {
-                    var filters = nLeft.concat(nRight);
-                    if (context.parentNodeType == "and") {
-                        return filters;
+        if (context.navProp) {
+            var newExp = this._buildNavigationTree(expression, context);
+            context.navProp = undefined;
+            return newExp;
+        } else {
+            switch (expression.nodeType) {
+                case "and":
+                    if (nLeft instanceof Array && nRight instanceof Array) {
+                        var filters = nLeft.concat(nRight);
+                        if (context.parentNodeType == "and") {
+                            return filters;
+                        }
+                        return Container.createIndexedDBPhysicalAndFilterExpression(filters);
+                    } else {
+                        if (nLeft instanceof Array) {
+                            nLeft = Container.createIndexedDBPhysicalAndFilterExpression(nLeft);
+                        }
+                        if (nRight instanceof Array) {
+                            nRight = Container.createIndexedDBPhysicalAndFilterExpression(nRight);
+                        }
+                        return Container.createIndexedDBLogicalAndFilterExpression(nLeft, nRight);
                     }
-                    return Container.createIndexedDBPhysicalAndFilterExpression(filters);
-                } else {
+                    break;
+                case "or":
                     if (nLeft instanceof Array) {
                         nLeft = Container.createIndexedDBPhysicalAndFilterExpression(nLeft);
                     }
                     if (nRight instanceof Array) {
                         nRight = Container.createIndexedDBPhysicalAndFilterExpression(nRight);
                     }
-                    return Container.createIndexedDBLogicalAndFilterExpression(nLeft, nRight);
-                }
-                break;
-            case "or":
-                if (nLeft instanceof Array) {
-                    nLeft = Container.createIndexedDBPhysicalAndFilterExpression(nLeft);
-                }
-                if (nRight instanceof Array) {
-                    nRight = Container.createIndexedDBPhysicalAndFilterExpression(nRight);
-                }
 
-                return Container.createIndexedDBLogicalOrFilterExpression(nLeft, nRight);
-                break;
-            default:
-                if (!context.parentNodeType) {
-                    return Container.createIndexedDBPhysicalAndFilterExpression([expression]);
-                }
-                return [expression];
-                break;
+                    return Container.createIndexedDBLogicalOrFilterExpression(nLeft, nRight);
+                    break;
+                default:
+                    if (!context.parentNodeType) {
+                        return Container.createIndexedDBPhysicalAndFilterExpression([expression]);
+                    }
+                    return [expression];
+                    break;
+            }
         }
-
+    },
+    VisitEntityExpression: function (expression, context) {
+        if (expression.entityType !== this.defaultType) {
+            context.navProp = true;
+        }
+        return expression;
     }
-
 }, {});
-
+$C('$data.storageProviders.IndexedDB.NavigationFilterBuilder', $data.Expressions.EntityExpressionVisitor, null, {
+    VisitEntityFieldExpression: function () { },
+    VisitEntityExpression: function () { }
+});
 $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.EntityExpressionVisitor, null, {
     VisitEntitySetExpression: function (expression, context) {
         var tName = expression.storageModel.TableName;
@@ -121,7 +137,6 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         if (!context.objectStoresName.some(function (it) { return it == tName; })) {
             context.objectStoresName.push(tName);
         }
-        //console.log(context);
     },
     VisitParametricQueryExpression: function (expression, context) {
         context.tran = context.db.transaction([context.objectStoresName], "readonly");
