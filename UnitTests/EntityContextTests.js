@@ -1503,8 +1503,8 @@
 
     test('multiple onready test', function () {
         var run = 5;
-        stop(run * 2);
-        expect((run * 2 * 2) + 1);
+        stop((run * 2) + 1);
+        expect((run * 2 * 2) + 2);
 
         var initCounter = 0;
         var slowProvider = $data.Class.define('slowProvider', $data.StorageProviderBase, null, {
@@ -1549,13 +1549,18 @@
             }
         });
 
+        ctx.ready.then(function () {
+            ok(true, 'ready.then called');
+            start();
+        });
+
     });
 
 
     test('multiple onready fail test', function () {
         var run = 5;
-        stop(run + 1);
-        expect((run * 2) + 1);
+        stop(run + 2);
+        expect((run * 2) + 2);
 
         var ctx = new $news.Types.NewsContext({ name: 'nothing' });
 
@@ -1586,13 +1591,17 @@
             }
         });
 
+        ctx.ready.fail(function () {
+            ok(true, 'ready.fail called');
+            start();
+        });
     });
 
 
     test('multiple onready fail initializeStore test', function () {
         var run = 5;
-        stop(run * 2);
-        expect((run * 2 * 2) + 1);
+        stop((run * 2) + 1);
+        expect((run * 2 * 2) + 2);
         var initCounter = 0;
         var slowErrorProvider = $data.Class.define('slowErrorProvider', $data.StorageProviderBase, null, {
             initializeStore: function (callBack) {
@@ -1643,6 +1652,32 @@
                     });
                 }
             }
+        });
+
+        ctx.ready.fail(function () {
+            ok(true, 'ready.fail called');
+            start();
+        });
+
+    });
+
+    test('Entity context ready property tests', 3, function () {
+        stop(3);
+        var context = new $news.Types.NewsContext({ name: 'oData' });
+
+        context.ready.then(function (ctx) {
+            equal(ctx instanceof $data.EntityContext, true, 'contex is ready');
+            start();
+        });
+
+        context.ready.then(function (ctx) {
+            equal(ctx instanceof $data.EntityContext, true, 'contex is ready other');
+            start();
+        });
+
+        context.onReady().then(function (ctx) {
+            equal(ctx instanceof $data.EntityContext, true, 'contex is ready in onReady()');
+            start();
         });
 
     });
