@@ -156,11 +156,13 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ODataInheritance\CarsController.cs" />
     <Compile Include="Controllers\WebApiOData\ArticlesController.cs" />
     <Compile Include="Controllers\WebApiOData\CategoriesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ODataInheritance\ODataInheritanceModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DummyBasicAuthModule.cs" />
     <Compile Include="Services\emptyNewsReaderV3.svc.cs">
@@ -328,6 +330,7 @@
     <Content Include="test_JayData_nuget_prov.html" />
     <Content Include="test_Node.js" />
     <Content Include="test_odata.html" />
+    <Content Include="UnitTests\dataServiceVersionTests.js" />
     <Content Include="UnitTests\webApiTests.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
@@ -704,7 +707,6 @@
   <ItemGroup>
     <Folder Include="App_Code\" />
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

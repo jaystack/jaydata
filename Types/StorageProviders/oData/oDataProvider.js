@@ -13,17 +13,37 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             oDataServiceHost: "/odata.svc",
             serviceUrl: "",
             maxDataServiceVersion: '2.0',
+            dataServiceVersion: undefined,
+            setDataServiceVersionToMax: true,
             user: null,
             password: null,
             withCredentials: false,
-            enableJSONP: false
+            enableJSONP: false,
+            UpdateMethod: 'PATCH'
         }, cfg);
+
+        this.fixkDataServiceVersions(cfg);
+
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
         if (this.context && this.context._buildDbType_modifyInstanceDefinition && this.buildDbType_modifyInstanceDefinition) {
             this.context._buildDbType_modifyInstanceDefinition = this.buildDbType_modifyInstanceDefinition;
         }
+    },
+    fixkDataServiceVersions: function (cfg) {
+        if (this.providerConfiguration.dataServiceVersion > this.providerConfiguration.maxDataServiceVersion) {
+            this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+        }
+        
+        if (this.providerConfiguration.setDataServiceVersionToMax === true) {
+            this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+        }
+
+        if ((cfg && !cfg.UpdateMethod && this.providerConfiguration.dataServiceVersion < '3.0') || !this.providerConfiguration.dataServiceVersion) {
+            this.providerConfiguration.UpdateMethod = 'MERGE';
+        }
+
     },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -152,6 +172,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         ];
 
+        if (this.providerConfiguration.dataServiceVersion) {
+            requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+        }
+
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {
         //    requestData[0].user = this.providerConfiguration.user;
@@ -196,6 +220,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                     }
                 };
+                if (this.providerConfiguration.dataServiceVersion) {
+                    request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+                }
+
                 //request.headers = { "Content-Id": convertedItem.length };
                 switch (independentBlocks[index][i].data.entityState) {
                     case $data.EntityState.Unchanged: continue; break;
@@ -205,7 +233,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Modified:
-                        request.method = "MERGE";
+                        request.method = this.providerConfiguration.UpdateMethod;
                         request.requestUri += independentBlocks[index][i].entitySet.tableName;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
@@ -275,7 +303,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             for (var i = 0; i < independentBlocks[index].length; i++) {
                 convertedItem.push(independentBlocks[index][i].data);
                 var request = {};
-                request.headers = { "Content-Id": convertedItem.length };
+                request.headers = {
+                    "Content-Id": convertedItem.length,
+                    MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
+                };
                 switch (independentBlocks[index][i].data.entityState) {
                     case $data.EntityState.Unchanged: continue; break;
                     case $data.EntityState.Added:
@@ -284,7 +315,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         request.data = this.save_getInitData(independentBlocks[index][i], convertedItem);
                         break;
                     case $data.EntityState.Modified:
-                        request.method = "MERGE";
+                        request.method = this.providerConfiguration.UpdateMethod;
                         request.requestUri = independentBlocks[index][i].entitySet.tableName;
                         request.requestUri += "(" + this.getEntityKeysValue(independentBlocks[index][i]) + ")";
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
@@ -297,6 +328,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         this.save_addConcurrencyHeader(independentBlocks[index][i], request.headers);
                         break;
                     default: Guard.raise(new Exception("Not supported Entity state"));
+                }
+
+                if (this.providerConfiguration.dataServiceVersion) {
+                    request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
                 }
                 batchRequests.push(request);
             }
@@ -359,6 +394,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }, function (e) {
             callBack.error(new Exception((e.response || {}).body, e.message, e));
         }, OData.batchHandler];
+
+        if (this.providerConfiguration.dataServiceVersion) {
+            requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+        }
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {

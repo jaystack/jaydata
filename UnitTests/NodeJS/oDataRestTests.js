@@ -174,7 +174,8 @@ $example.Context.getContext = function (cfg) {
         oDataServiceHost: $example.Context.generateTestData.serviceurl,
         serviceUrl: $example.Context.generateTestData.serviceurl,
         user: 'asd',
-        password: 'asd'
+        password: 'asd',
+        maxDataServiceVersion: '3.0'
     }, cfg || {});
 
     var ctx = new $example.Context(config);

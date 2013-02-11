@@ -1,4 +1,5 @@
-﻿using JayData.NewsReader;
+﻿using JayData.Models.ODataInheritance;
+using JayData.NewsReader;
 using Microsoft.Data.Edm;
 using System;
 using System.Collections.Generic;
@@ -62,6 +63,21 @@ namespace jaydata
             
             IEdmModel model = modelBuilder.GetEdmModel();
             config.Routes.MapODataRoute(routeName: "OData", routePrefix: "odata", model: model);
+
+
+
+            ODataConventionModelBuilder modelBuilderInheriance = new ODataConventionModelBuilder();
+            var car = modelBuilderInheriance.EntitySet<Car>("Cars");
+            car.EntityType.DerivesFrom<Vehicle>();
+            var carAction = car.EntityType.Collection.Action("Reset");
+            carAction.Returns<bool>();
+
+            var bike = modelBuilderInheriance.EntitySet<Bike>("Bikes");
+            bike.EntityType.DerivesFrom<Vehicle>();
+            var ship = modelBuilderInheriance.EntitySet<Ship>("Ships");
+
+            IEdmModel modelInheritance = modelBuilderInheriance.GetEdmModel();
+            config.Routes.MapODataRoute(routeName: "ODataInheritance", routePrefix: "odatainheritance", model: modelInheritance);
 
         }
     }

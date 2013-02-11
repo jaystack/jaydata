@@ -68,6 +68,7 @@
                     self.ReadFromEntitySet(req, config, cbWrapper);
                     break;
                 case 'MERGE': //U
+                case 'PATCH': 
                     if (req.body) {
                         var bodyData = req.body;
                         var bodyContentType = $data.JayService.OData.Utils.getHeaderValue(req.headers, 'Content-Type');
@@ -260,6 +261,7 @@
                 }
             },
             'MERGE': true,
+            'PATCH': true,
             'DELETE': { _isAllowed: true, $batchDelete: true }
 
         }

@@ -170,4 +170,119 @@ function metadataTests(providerConfig, msg) {
         });
 
     });
+
+    test('Inhertiance test', 9, function () {
+        stop();
+
+        $data.service('/odatainheritance', { DefaultNamespace: '' }, function (f, type) {
+
+            var context = f();
+            context.onReady(function () {
+
+                equals(context.Vehicle instanceof $data.EntitySet, false, 'Vehicle entitySet');
+
+                equals(context.Cars instanceof $data.EntitySet, true, 'Car entitySet');
+                equal(context.Cars.elementType.isAssignableTo($data.Entity), true, 'Car is $data.Entity');
+                equal(context.Cars.elementType.isAssignableTo(JayData.Models.ODataInheritance.Vehicle), true, 'Car is Vehicle');
+
+                equals(context.Ships instanceof $data.EntitySet, true, 'Ship entitySet');
+                equal(context.Ships.elementType.isAssignableTo($data.Entity), true, 'Ship is $data.Entity');
+                equal(context.Ships.elementType.isAssignableTo(JayData.Models.ODataInheritance.Ship), true, 'Ship is Vehicle');
+
+                context.Cars.Reset(function () {
+                    context.Cars.toArray(function (res) {
+                        var car = res[0];
+
+                        equal(car instanceof JayData.Models.ODataInheritance.Car, true, 'result is Car');
+                        equal(car instanceof JayData.Models.ODataInheritance.Vehicle, true, 'result is Vehicle');
+
+                        start();
+                    });
+                });
+            });
+
+        });
+    });
+
+    test('Inhertiance CRUD', 19, function () {
+        stop();
+
+        $data.service('/odatainheritance', { DefaultNamespace: '' }, function (f, type) {
+
+            var context = f({ dataServiceVersion: '3.0' });
+            context.onReady(function () {
+                context.Cars.Reset()
+                 //Read
+                .then(function () {
+                    return context.Cars.toArray(function (res) {
+                        equal(res.length, 4, 'result count');
+                        equal(res[0] instanceof JayData.Models.ODataInheritance.Vehicle, true, 'result[0] is Vehicle');
+                    });
+                })
+                //Create
+                .then(function () {
+                    var car = new JayData.Models.ODataInheritance.Car({ Id: 42, Speed: 42, Weight: 420, Doors: 2, Color: 'Yellow' });
+
+                    equal(car.Id, 42, 'Id');
+                    equal(car.Speed, 42, 'Speed');
+                    equal(car.Weight, 420, 'Weight');
+                    equal(car.Doors, 2, 'Doors');
+                    equal(car.Color, 'Yellow', 'Color');
+
+                    context.Cars.add(car);
+                    return context.saveChanges().then(function () {
+                        return context.Cars.single(function (c) { return c.Id == 42 }).then(function (savedCar) {
+                            equal(savedCar.Id, 42, 'savedCar Id');
+                            equal(savedCar.Speed, 42, 'savedCar Speed');
+                            equal(savedCar.Weight, 420, 'savedCar Weight');
+                            equal(savedCar.Doors, 2, 'savedCar Doors');
+                            equal(savedCar.Color, 'Yellow', 'savedCar Color');
+
+                            return context.Cars.toArray(function (res) {
+                                equal(res.length, 5, 'result count');
+                            });
+                        });
+                    });
+
+                })
+                //Update
+                .then(function () {
+                    return context.Cars.single(function (c) { return c.Id == 42 }).then(function (car) {
+                        context.attach(car);
+                        car.Doors = 5;
+                        car.Color = 'LightGreen';
+
+                        return context.saveChanges().then(function () {
+                            return context.Cars.single(function (c) { return c.Id == 42 }).then(function (updated) {
+                                equal(updated.Id, 42, 'updated Id');
+                                equal(updated.Speed, 42, 'updated Speed');
+                                equal(updated.Weight, 420, 'updated Weight');
+                                equal(updated.Doors, 5, 'updated Doors');
+                                equal(updated.Color, 'LightGreen', 'updated Color');
+
+                            });
+                        });
+
+                    });
+                })
+                //Delete
+                .then(function () {
+                    context.Cars.remove({ Id: 42 });
+                    return context.saveChanges().then(function () {
+                        return context.Cars.toArray(function (res) {
+                            equal(res.length, 4, 'result count');
+                        });
+                    });
+                })
+                .then(function () {
+                    start();
+                })
+                .fail(function (e) {
+                    ok(false, 'Error ' + e);
+                    start();
+                })
+            });
+
+        });
+    });
 }

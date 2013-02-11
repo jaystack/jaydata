@@ -21,6 +21,7 @@
   <xsl:param name="EntitySetBaseClass"/>
   <xsl:param name="CollectionBaseClass"/>
   <xsl:param name="DefaultNamespace"/>
+  <xsl:param name="MaxDataserviceVersion"/>
 
   <xsl:template match="/">
 
@@ -33,10 +34,20 @@
 <xsl:for-each select="//edm:EntityType | //edm:ComplexType" xml:space="default">
   <xsl:message terminate="no">Info: generating type <xsl:value-of select="concat(../@Namespace, '.', @Name)"/>
 </xsl:message>
+  <xsl:variable name="BaseType">
+    <xsl:choose>
+      <xsl:when test="@BaseType">
+        <xsl:value-of select="@BaseType"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$EntityBaseClass"  />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
   <xsl:variable name="props">
     <xsl:apply-templates select="*" />
   </xsl:variable>
-  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$EntityBaseClass"  />.extend('<xsl:value-of select="concat($DefaultNamespace,../@Namespace)"/>.<xsl:value-of select="@Name"/>', {
+  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$BaseType"  />.extend('<xsl:value-of select="concat($DefaultNamespace,../@Namespace)"/>.<xsl:value-of select="@Name"/>', {
     <xsl:choose><xsl:when test="function-available('msxsl:node-set')">
     <xsl:for-each select="msxsl:node-set($props)/*">
       <xsl:value-of select="."/><xsl:if test="position() != last()">,
@@ -71,7 +82,7 @@
   $data.generatedContexts.push(<xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />);
   <xsl:if test="$AutoCreateContext = 'true'">
   /*Context Instance*/
-  <xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />({ name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />' });
+  <xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$ContextInstanceName" /> = new <xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)" />({ name:'oData', oDataServiceHost: '<xsl:value-of select="$SerivceUri" />', maxDataServiceVersion: '<xsl:value-of select="$MaxDataserviceVersion" />' });
 </xsl:if>
 
 </xsl:for-each>

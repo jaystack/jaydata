@@ -131,6 +131,7 @@
                     setInfo.set.add(entity);
                     break;
                 case 'MERGE':
+                case 'PATCH':
                     var entity = new itemType(changeRequest.data);
                     referenceData[refId].resultObject = entity;
 
@@ -229,6 +230,7 @@
                     }
                     break;
                 case "MERGE":
+                case "PATCH":
                 case "DELETE":
                     response.statusName = 'No Content';
                     response.statusCode = 204;
