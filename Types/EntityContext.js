@@ -233,6 +233,9 @@ $data.Class.define('$data.EntityContext', null, null,
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                    if (item.indices) {
+                        storageModel.indices = item.indices;
+                    }
                     if (item.beforeCreate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeCreate = item.beforeCreate;

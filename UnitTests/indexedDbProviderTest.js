@@ -560,7 +560,7 @@
     }, null);
 
     $data.Class.define('idbexample.idbContext', $data.EntityContext, null, {
-        Items1: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem1 },
+        Items1: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem1, indices: [{ name: 'index0', key: 'i0', unique: false }, {name:'i2', key:'s0', unique:false}] },
         Items2: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem2 }
     }, null);
 
@@ -983,12 +983,8 @@
         });
     });
 
-    test('multikey index', function () {
-
-
+   /* test('multikey index', function () {
         stop(1);
-
-
         var html5rocks = {};
         window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB;
 
@@ -1077,110 +1073,6 @@
             };
         };
 
-
-
-
-
         html5rocks.indexedDB.open();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*
-        var context = new $news.Types.NewsContext({
-            name: 'indexedDb',
-            databaseName: 'idbtest_navigation',
-            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
-        });
-
-        stop(2);
-        context.onReady(function () {
-            close(context);
-            context = new $news.Types.NewsContext({
-                name: 'indexedDb',
-                databaseName: 'idbtest_navigation',
-                dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
-            });
-            context.onReady(function () {
-
-
-
-                var self = this;
-                context.storageProvider.db.close();
-                var newVersion = context.storageProvider.db.version || 0;
-                //close db and reopen it with incrased version number
-                context.storageProvider.indexedDB.open(context.storageProvider.providerConfiguration.databaseName, ++newVersion).setCallbacks({
-                    onupgradeneeded: function (event) {
-                        var writeTran = event.target.transaction;
-                        writeTran.db.deleteObjectStore("Users");
-                        writeTran.db.createObjectStore("Users", { keyPath: ["LoginName", "Email"] }, true);
-                        //var writeObjectStore = writeTran.objectStore("Users");
-                        //if (!writeObjectStore.indexNames.contains('t1')) {
-                        //    writeObjectStore.createIndex("t1", ['LoginName','Email'], { unique: true, multiEntry:false });
-                        //}
-                        writeTran.db.close();
-                        context.storageProvider.indexedDB.open(context.storageProvider.providerConfiguration.databaseName).onsuccess = function (e) {
-                            context.storageProvider.db = e.target.result;
-
-                            $news.Types.NewsContext.generateTestData(context, function () {
-                                console.log("lkjlJ");
-                                context.Users.length(function (result) {
-                                    equal(result, 6, "param query result legth");
-                                    context.Users.add(new $news.Types.User({ LoginName: "Usr1", Email: "usr1@company.com"}));
-                                    context.saveChanges({
-                                        success: function () {
-                                            context.Users.toArray(function (result2) {
-                                                equal(result2.length, 6, "param query result legth");
-                                                console.log(result2);
-                                                start(1);
-                                            });
-                                            ok(false);
-                                            
-                                        },
-                                        error: function () {
-                                            ok(true);
-                                            start(1);
-                                        }
-                                    });
-                                    //close(context);
-                                });
-                                //$.when(
-
-                                //).then(function () {
-                                //    close(context);
-                                //}).fail(function () {
-                                //    ok(false, JSON.stringify(arguments));
-                                //    close(context);
-                                //});
-                            });
-
-
-
-
-                        }
-                    }
-                });
-            });
-
-        });*/
-    });
+    });*/
 });

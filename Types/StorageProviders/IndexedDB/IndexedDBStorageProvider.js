@@ -210,7 +210,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 throw error;
             }
         }
-
+        contextStore.indices = setDefinition.indices;
         contextStore.keyFields = keyFields;
         return contextStore;
     },
@@ -251,7 +251,12 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         settings.key.push(storeDef.keyFields[i].name);
                     }
                 }
-                db.createObjectStore(storeDef.storeName, settings);
+                var objStore = db.createObjectStore(storeDef.storeName, settings);
+                if (storeDef.indices) {
+                    for (var idx = 0; idx < storeDef.indices.length; idx++) {
+                        objStore.createIndex(storeDef.indices[idx].name, storeDef.indices[idx].key, { unique: storeDef.indices[idx].unique });
+                    }
+                }
             }
         }
     },
@@ -280,200 +285,68 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
 
-        this.initializeMemoryStore({
-            success: function () {
-                var objectStoreDefinitions;
-                try {
-                    objectStoreDefinitions = self._getObjectStoreDefinitions();
-                } catch (e) {
-                    console.log(objectStoreDefinitions);
-                    callBack.error(e);
+        var objectStoreDefinitions;
+        try {
+            objectStoreDefinitions = this._getObjectStoreDefinitions();
+        } catch (e) {
+            console.log(objectStoreDefinitions);
+            callBack.error(e);
+            return;
+        }
+        this.indexedDB.open(this.providerConfiguration.databaseName).setCallbacks({
+            onsuccess: function (e) {
+                var db = e.target.result;
+                db.onversionchange = function (event) {
+                    return event.target.close();
+                };
+
+                var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+                //oldAPI
+                if (db.setVersion) {
+                    if (db.version === "" || hasTableChanges) {
+                        db.setVersion(parseInt(db.version) || 1).setCallbacks({
+                            onsuccess: function (e) {
+                                var db = e.target.result
+                                self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
+                                    self.db = e.target.db;
+                                    callBack.success(self.context);
+                                });
+                            },
+                            onerror: function () {
+                                var v = arguments;
+                            },
+                            onblocked: function () {
+                                var v = arguments;
+                            }
+                        });
+                        return;
+                    };
+                } else if (hasTableChanges) {
+                    //newVersionAPI
+                    db.close();
+                    var version = parseInt(db.version) + 1;
+                    self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
+                        onsuccess: function (e) {
+                            self.db = e.target.result;
+                            callBack.success(self.context);
+                        },
+                        onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
+                        onerror: callBack.error,
+                        onabort: callBack.error,
+                        onblocked: callBack.error
+                    });
                     return;
                 }
-                self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks({
-                    onsuccess: function (e) {
-                        var db = e.target.result;
-                        db.onversionchange = function (event) {
-                            return event.target.close();
-                        };
 
-                        var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
-                        //oldAPI
-                        if (db.setVersion) {
-                            if (db.version === "" || hasTableChanges) {
-                                db.setVersion(parseInt(db.version) || 1).setCallbacks({
-                                    onsuccess: function (e) {
-                                        var db = e.target.result
-                                        self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
-                                            self.db = e.target.db;
-                                            callBack.success(self.context);
-                                        });
-                                    },
-                                    onerror: function () {
-                                        var v = arguments;
-                                    },
-                                    onblocked: function () {
-                                        var v = arguments;
-                                    }
-                                });
-                                return;
-                            };
-                        } else if (hasTableChanges) {
-                            //newVersionAPI
-                            db.close();
-                            var version = parseInt(db.version) + 1;
-                            self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
-                                onsuccess: function (e) {
-                                    self.db = e.target.result;
-                                    callBack.success(self.context);
-                                },
-                                onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
-                                onerror: callBack.error,
-                                onabort: callBack.error,
-                                onblocked: callBack.error
-                            });
-                            return;
-                        }
-
-                        self.db = db;
-                        callBack.success(self.context);
-                    },
-                    //newVersionAPI
-                    onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
-                    onerror: callBack.error,
-                    onabort: callBack.error,
-                    onblocked: callBack.error
-                });
+                self.db = db;
+                callBack.success(self.context);
             },
-            error: callBack.error
-        });
-    },
-    initializeMemoryStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var self = this;
-
-        if (false && self.originalContext && self.providerConfiguration.memoryOperations) {
-            //never run 
-            //self.operationProvider = new self.originalContext({ name: 'InMemory' });
-            //self.operationProvider.onReady({
-            //    success: function () {
-            //        self.supportedBinaryOperators = self.operationProvider.storageProvider.supportedBinaryOperators;
-            //        self.supportedSetOperations = self.operationProvider.storageProvider.supportedSetOperations;
-            //        self.supportedFieldOperations = self.operationProvider.storageProvider.supportedFieldOperations;
-            //        self.supportedUnaryOperators = self.operationProvider.storageProvider.supportedUnaryOperators;
-            //        callBack.success();
-            //    },
-            //    error: callBack.error
-            //});
-        } else {
-            callBack.success();
-        }
-    },
-
-    _initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var self = this;
-
-
-        var initDb = function (db) {
-            db.onversionchange = function (event) {
-                var ret = event.target.close();
-                return ret;
-            };
-            var newSequences = [];
-            self.context._storageModel.forEach(function (memDef) {
-                function createStore() {
-                    /// <summary>
-                    /// Creates a store for 'memDef'
-                    /// </summary>
-                    var osParam = {};
-                    var keySettings = self._getKeySettings(memDef);
-                    if (self.newVersionAPI) {
-                        if (keySettings.autoIncrement)
-                            newSequences.push(memDef.TableName);
-                    } else {
-                        osParam.autoIncrement = keySettings.autoIncrement;
-                    }
-                    if (keySettings.keyPath !== undefined)
-                        osParam.keyPath = keySettings.keyPath;
-                    db.createObjectStore(memDef.TableName, osParam);
-                }
-                if (db.objectStoreNames.contains(memDef.TableName)) {
-                    // ObjectStore already present.
-                    if (self.providerConfiguration.dbCreation === $data.storageProviders.DbCreationType.DropAllExistingTables) {
-                        // Force drop and recreate object store
-                        db.deleteObjectStore(memDef.TableName);
-                        createStore();
-                    }
-                } else {
-                    // Store does not exists yet, we need to create it
-                    createStore();
-                }
-            });
-            if (newSequences.length > 0 && !db.objectStoreNames.contains(self.sequenceStore)) {
-                // Sequence store does not exists yet, we create it
-                db.createObjectStore(self.sequenceStore, { keyPath: 'store' });
-                newSequences = [];
-            }
-            return newSequences;
-        }
-        var newSequences = null;
-        // Creating openCallbacks settings for both type of db.open() method
-        var openCallbacks = {
-            onupgradeneeded: function (event) {
-                newSequences = initDb(event.target.result);
-            },
+            //newVersionAPI
+            onupgradeneeded: this.onupgradeneeded(objectStoreDefinitions),
             onerror: callBack.error,
-            onblocked: callBack.error,
-            onsuccess: function (event) {
-                self.db = event.target.result;
-                self.db.onversionchange = function (event) {
-                    event.target.close();
-                }
-                if (self.newVersionAPI) {
-                    if (newSequences && newSequences.length > 0) {
-                        var store = self.db.transaction([self.sequenceStore], self.IDBTransactionType.READ_WRITE).setCallbacks({
-                            onerror: callBack.error,
-                            oncomplete: function () {
-                                callBack.success(self.context);
-                            }
-                        }).objectStore(self.sequenceStore);
-                        switch (self.providerConfiguration.dbCreation) {
-                            case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                            case $data.storageProviders.DbCreationType.DropTableIfChanged:
-                                // Clearing all data
-                                store.clear();
-                                break;
-                            default:
-                                // Removing data for newly created stores, if they previously existed
-                                newSequences.forEach(function (item) {
-                                    store['delete'](item);
-                                });
-                                break;
-                        }
-                    }
-                    callBack.success(self.context);
-                }
-                else {
-                    // Calling setVersion on webkit
-                    var versionRequest = self.db.setVersion(self.providerConfiguration.version.toString()).setCallbacks({
-                        onerror: callBack.error,
-                        onblocked: callBack.error,
-                        onsuccess: function (event) {
-                            initDb(self.db);
-                            versionRequest.result.oncomplete = function (evt) {
-                                callBack.success(self.context);
-                            }
-                        }
-                    });
-                }
-            }
-        };
-        // For Firefox we need to pass the version here
-        if (self.newVersionAPI)
-            self.indexedDB.open(self.providerConfiguration.databaseName, parseInt(self.providerConfiguration.version, 10)).setCallbacks(openCallbacks);
-        else
-            self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks(openCallbacks);
+            onabort: callBack.error,
+            onblocked: callBack.error
+        });
     },
     _compile: function (query, callback) {
         var compiler = Container.createIndexedDBCompiler(this);
