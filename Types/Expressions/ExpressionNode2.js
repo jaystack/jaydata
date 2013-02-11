@@ -86,7 +86,8 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
 
     IndexedPhysicalAnd:"IndexedDBPhysicalAndFilterExpression",
     IndexedLogicalAnd:"IndexedDBLogicalAndFilterExpression",
-    IndexedLogicalOr:"IndexedDBLogicalOrFilterExpression"
+    IndexedLogicalOr: "IndexedDBLogicalOrFilterExpression",
+    IndexedLogicalIn: "IndexedDBLogicalInFilterExpression"
 });
 
 $data.BinaryOperator = function () {

@@ -100,7 +100,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
             var cursor = event.target.result;
             if (cursor) {
                 resultSet.objects.push(cursor.value);
-                resultSet.ids.push(cursor.primaryKey);
+                resultSet.ids.push(JSON.stringify(cursor.primaryKey));
                 cursor.continue();
             }
             else {
@@ -252,7 +252,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                 }
                 if (addToResultSet) {
                     resultSet.objects.push(c.value);
-                    resultSet.ids.push(c.primaryKey);
+                    resultSet.ids.push(JSON.stringify(c.primaryKey));
                 }
                 c.continue();
             }

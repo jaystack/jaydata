@@ -181,19 +181,24 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
     //}
     //console.log("Original");
     //console.log(Date());
-    context.saveChanges(function (count) {
-        console.log("Success upload testdb for: " + count + " items");
-        if (callBack) {
-            callBack(count);
+    context.saveChanges({
+        success: function (count) {
+            console.log("Success upload testdb for: " + count + " items");
+            if (callBack) {
+                callBack(count);
+            }
+            //    console.log(Date());
+            //    for (var t = 0; t < 50000; t++) {
+            //        $news.context.Users.add(new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com", Profile: null }));
+            //    }
+            //    console.log(t + " users");
+            //    console.log("START: " + Date());
+            //    $news.context.saveChanges(function () {
+            //        console.log("END: " + Date());
+            //    });
+        },
+        error: function () {
+            console.log("Generate test data ERROR: ",arguments);
         }
-        //    console.log(Date());
-        //    for (var t = 0; t < 50000; t++) {
-        //        $news.context.Users.add(new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com", Profile: null }));
-        //    }
-        //    console.log(t + " users");
-        //    console.log("START: " + Date());
-        //    $news.context.saveChanges(function () {
-        //        console.log("END: " + Date());
-        //    });
     });
 }

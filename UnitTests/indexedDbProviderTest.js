@@ -551,7 +551,7 @@
 
     $data.Class.define("idbexample.idbTestItem2", $data.Entity, null, {
         Id: { type: "guid", key: true, required: true },
-        i0: { type: "int" },
+        i0: { type: "int", key:true },
         b0: { type: "boolean" },
         s0: { type: "string" },
         blob: { type: "blob" },
@@ -661,6 +661,7 @@
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
+        var item2_500_guid = "";
         context.onReady(function () {
             var maxItemNum = 1000;
             for (var i = 0; i < maxItemNum; i++) {
@@ -679,13 +680,17 @@
                     n0: parseFloat('2.2' + i),
                     d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
                 });
+                if (i == 500) {
+                    item2_500_guid = item2.Id.value;
+                }
                 context.Items1.add(item1);
                 context.Items2.add(item2);
             }
             context.saveChanges({
                 success: function () {
-                    //context.Items1.filter("it.s0.length() <= 4").toArray(function (result) {
-                    //    equal(result.length, 11, "endsWith(), result length");
+                    //context.Items2.filter("(it.Id == this.i && it.i0==500) || (it.i0 == 500 && it.i0 != 501)", { i: item2_500_guid }).toArray(function (result) {
+                    //    equal(result.length, 1, "endsWith(), result length");
+                    //    close(context);
                     //}); return;
                     subQuery = context.Items2.filter("it.i0<10").select(function (item) { return item.i0; });
                     $.when(
@@ -734,6 +739,9 @@
                                 equal(result, maxItemNum, "Max item number");
                             }),
                             context.Items1.filter("it.i0<10 && it.i0>=5").length(function (result) {
+                                equal(result, 5, "Max item number");
+                            }),
+                            context.Items1.filter("10>it.i0 && 5<=it.i0").length(function (result) {
                                 equal(result, 5, "Max item number");
                             }),
                             context.Items1.filter("it.i0<10 && it.i0>=5").forEach(function (item, idx, result) {
@@ -811,11 +819,17 @@
                             context.Items1.filter("it.s0.length() <= 4").toArray(function (result) {
                                 equal(result.length, 99, "length(), result length");
                             }),
+                            context.Items1.filter("4 >= it.s0.length()").toArray(function (result) {
+                                equal(result.length, 99, "length(), result length");
+                            }),
                             context.Items1.filter("it.s0.substr(2,2) == '99'").toArray(function (result) {
                                 equal(result.length, 11, "substr(), result length");
                             }),
                             context.Items1.filter("it.s0 in ['s01','s02']").toArray(function (result) {
                                 equal(result.length, 2, "in(), result length");
+                            }),
+                            context.Items2.filter("(it.Id == this.i && it.i0==500) || (it.i0 == 500 && it.i0 != 501)", { i: item2_500_guid }).toArray(function (result) {
+                                equal(result.length, 1, "multiple key, result length");
                             })
                             //context.Items1.filter("it.s0 in this.subQuery", {subQuery: subQuery}).toArray(function (result) {
                             //    equal(result.length, 2, "substr(), result length");
@@ -835,14 +849,18 @@
     test('indexed db navigation tests', function () {
         var context = new $news.Types.NewsContext({
             name: 'indexedDb',
-            databaseName: 'idbtest_navigation',
+            databaseName: 'idbtest_navigation2',
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {
 
             $news.Types.NewsContext.generateTestData(context, function () {
-                context.Articles.filter(function (item) { return item.Category.Title == this.a; }, { a: 'Sport' }).toArray(function (result) {
+                context.Articles.filter(function (item) { return item in [1, 2, 34]; }, { a: 'sport' }).toArray(function (result) {
+                    equal(result.length, 1, "param query result legth");
+                    close(context);
+                });
+                context.Articles.filter(function (item) { return item.Author.Profile.FullName == this.a; }, { a: 'Full Name2' }).toArray(function (result) {
                     equal(result.length, 1, "param query result legth");
                     close(context);
                 }); return;
@@ -982,8 +1000,8 @@
             });
         });
     });
-
-   /* test('multikey index', function () {
+    /*
+    test('multikey index', function () {
         stop(1);
         var html5rocks = {};
         window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB;
