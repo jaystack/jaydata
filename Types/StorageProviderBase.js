@@ -9,7 +9,7 @@ $data.storageProviders = {
 $data.ConcurrencyMode = { Fixed: 'fixed', None: 'none' };
 $data.Class.define('$data.StorageProviderBase', null, null,
 {
-    constructor: function (schemaConfiguration) {
+    constructor: function (schemaConfiguration, context) {
         this.providerConfiguration = schemaConfiguration || {};
     },
     providers: {},

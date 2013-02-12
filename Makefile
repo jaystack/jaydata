@@ -21,6 +21,7 @@ TYPE_SYSTEM_CLIENT = $(TYPESYSTEM_DIR)/initializeJayDataClient.js
 TYPE_SYSTEM_NPM = TypeSystem/initializeJayData.js
 
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
+	$(TYPESYSTEM_DIR)/initializeJayDataPro.js\
 	$(TYPESYSTEM_DIR)/utils.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
 	$(TYPESYSTEM_DIR)/JayLint.js\
