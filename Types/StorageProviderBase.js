@@ -162,6 +162,112 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         }
     },
 
+    buildDbType_modifyInstanceDefinition: function (instanceDefinition, storageModel) {
+        var buildDbType_copyPropertyDefinition = function (propertyDefinition, refProp) {
+            var cPropertyDef;
+            if (refProp) {
+                cPropertyDef = JSON.parse(JSON.stringify(instanceDefinition[refProp]));
+                cPropertyDef.kind = propertyDefinition.kind;
+                cPropertyDef.name = propertyDefinition.name;
+                cPropertyDef.notMapped = false;
+            } else {
+                cPropertyDef = JSON.parse(JSON.stringify(propertyDefinition));
+            }
+
+            cPropertyDef.dataType = Container.resolveType(propertyDefinition.dataType);
+            cPropertyDef.type = cPropertyDef.dataType;
+            cPropertyDef.key = false;
+            cPropertyDef.computed = false;
+            return cPropertyDef;
+        };
+        var buildDbType_createConstrain = function (foreignType, dataType, propertyName, prefix) {
+            var constrain = new Object();
+            constrain[foreignType.name] = propertyName;
+            constrain[dataType.name] = prefix + '__' + propertyName;
+            return constrain;
+        };
+
+        if (storageModel.Associations) {
+            storageModel.Associations.forEach(function (association) {
+                var addToEntityDef = false;
+                var foreignType = association.FromType;
+                var dataType = association.ToType;
+                var foreignPropName = association.ToPropertyName;
+
+                association.ReferentialConstraint = association.ReferentialConstraint || [];
+
+                if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
+                    foreignType = association.ToType;
+                    dataType = association.FromType;
+                    foreignPropName = association.FromPropertyName;
+                    addToEntityDef = true;
+                }
+
+                foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d) {
+                    if (addToEntityDef) {
+                        instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+                    }
+                    association.ReferentialConstraint.push(buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName));
+                }, this);
+            }, this);
+        }
+        //Copy complex type properties
+        if (storageModel.ComplexTypes) {
+            storageModel.ComplexTypes.forEach(function (complexType) {
+                complexType.ReferentialConstraint = complexType.ReferentialConstraint || [];
+
+                complexType.ToType.memberDefinitions.getPublicMappedProperties().forEach(function (d) {
+                    instanceDefinition[complexType.FromPropertyName + '__' + d.name] = buildDbType_copyPropertyDefinition(d);
+                    complexType.ReferentialConstraint.push(buildDbType_createConstrain(complexType.ToType, complexType.FromType, d.name, complexType.FromPropertyName));
+                }, this);
+            }, this);
+        }
+    },
+    buildDbType_generateConvertToFunction: function (storageModel) {
+        return function (logicalEntity) {
+            var dbInstance = new storageModel.PhysicalType();
+            dbInstance.entityState = logicalEntity.entityState;
+
+            //logicalEntity.changedProperties.forEach(function(memberDef){
+            //}, this);
+            storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (property) {
+                dbInstance[property.name] = logicalEntity[property.name];
+            }, this);
+
+            if (storageModel.Associations) {
+                storageModel.Associations.forEach(function (association) {
+                    if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
+                        var complexInstance = logicalEntity[association.FromPropertyName];
+                        if (complexInstance !== undefined) {
+                            association.ReferentialConstraint.forEach(function (constrain) {
+                                if (complexInstance !== null) {
+                                    dbInstance[constrain[association.From]] = complexInstance[constrain[association.To]];
+                                } else {
+                                    dbInstance[constrain[association.From]] = null;
+                                }
+                            }, this);
+                        }
+                    }
+                }, this);
+            }
+            if (storageModel.ComplexTypes) {
+                storageModel.ComplexTypes.forEach(function (cmpType) {
+                    var complexInstance = logicalEntity[cmpType.FromPropertyName];
+                    if (complexInstance !== undefined) {
+                        cmpType.ReferentialConstraint.forEach(function (constrain) {
+                            if (complexInstance !== null) {
+                                dbInstance[constrain[cmpType.From]] = complexInstance[constrain[cmpType.To]];
+                            } else {
+                                dbInstance[constrain[cmpType.From]] = null;
+                            }
+                        }, this);
+                    }
+                }, this);
+            }
+            return dbInstance;
+        };
+    },
+
     supportedFieldOperations: {
         value: {
             length: { dataType: "number", allowedIn: "filter, map" },

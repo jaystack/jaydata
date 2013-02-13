@@ -551,7 +551,7 @@
 
     $data.Class.define("idbexample.idbTestItem2", $data.Entity, null, {
         Id: { type: "guid", key: true, required: true },
-        i0: { type: "int", key:true },
+        i0: { type: "int", key: true },
         b0: { type: "boolean" },
         s0: { type: "string" },
         blob: { type: "blob" },
@@ -560,7 +560,7 @@
     }, null);
 
     $data.Class.define('idbexample.idbContext', $data.EntityContext, null, {
-        Items1: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem1, indices: [{ name: 'index0', key: 'i0', unique: false }, {name:'i2', key:'s0', unique:false}] },
+        Items1: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem1, indices: [{ name: 'index0', keys: ['i0'], unique: false }, { name: 'i2', keys: ['s0'], unique: false }] },
         Items2: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem2 }
     }, null);
 
@@ -688,7 +688,7 @@
             }
             context.saveChanges({
                 success: function () {
-                    //context.Items2.filter("(it.Id == this.i && it.i0==500) || (it.i0 == 500 && it.i0 != 501)", { i: item2_500_guid }).toArray(function (result) {
+                    //context.Items2.toArray(function (result) {
                     //    equal(result.length, 1, "endsWith(), result length");
                     //    close(context);
                     //}); return;
@@ -846,21 +846,24 @@
         });
     });
 
-    test('indexed db navigation tests', function () {
+    /*test('indexed db navigation tests', function () {
         var context = new $news.Types.NewsContext({
             name: 'indexedDb',
-            databaseName: 'idbtest_navigation2',
+            databaseName: 'idbtest_navigation',
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {
-
             $news.Types.NewsContext.generateTestData(context, function () {
-                context.Articles.filter(function (item) { return item in [1, 2, 34]; }, { a: 'sport' }).toArray(function (result) {
-                    equal(result.length, 1, "param query result legth");
-                    close(context);
-                });
-                context.Articles.filter(function (item) { return item.Author.Profile.FullName == this.a; }, { a: 'Full Name2' }).toArray(function (result) {
+                //context.Articles.filter(function (item) { return item in (item.Category.Title>'kjhkjh'); }, { a: 'sport' }).toArray(function (result) {
+                //    equal(result.length, 1, "param query result legth");
+                //    close(context);
+                //}); return;
+                //context.Articles.filter(function (item) { return item.Author.Profile.FullName == this.a; }, { a: 'Full Name2' }).toArray(function (result) {
+                //    equal(result.length, 1, "param query result legth");
+                //    close(context);
+                //}); return;
+                context.Articles.toArray(function (result) {
                     equal(result.length, 1, "param query result legth");
                     close(context);
                 }); return;
@@ -1000,7 +1003,7 @@
             });
         });
     });
-    /*
+    
     test('multikey index', function () {
         stop(1);
         var html5rocks = {};

@@ -17,7 +17,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         this.newVersionAPI = !!(window.IDBFactory && IDBFactory.prototype.deleteDatabase);
         this.sequenceStore = '__jayData_sequence';
         this.SqlCommands = [];
-        this.context = {};
+        this.context = ctxInstance;
         this.providerConfiguration = $data.typeSystem.extend({
             databaseName: 'JayDataDemo',
             version: 1,
@@ -28,6 +28,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
 
         if (ctxInstance)
             this.originalContext = ctxInstance.getType();
+
+        if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
+            this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
+        }
+        if (this.context && this.context._buildDbType_modifyInstanceDefinition && this.buildDbType_modifyInstanceDefinition) {
+            this.context._buildDbType_modifyInstanceDefinition = this.buildDbType_modifyInstanceDefinition;
+        }
     },
     supportedBinaryOperators: {
         value: {
@@ -252,9 +259,15 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     }
                 }
                 var objStore = db.createObjectStore(storeDef.storeName, settings);
-                if (storeDef.indices) {
+                if (storeDef.indices && storeDef.indices.length > 0) {
                     for (var idx = 0; idx < storeDef.indices.length; idx++) {
-                        objStore.createIndex(storeDef.indices[idx].name, storeDef.indices[idx].key, { unique: storeDef.indices[idx].unique });
+                        var idx_name = storeDef.indices[idx].name;
+                        var idx_keys = storeDef.indices[idx].keys;
+                        var idx_unique = storeDef.indices[idx].unique;
+                        if (!idx_keys || (idx_keys && idx_keys.length < 1)) { throw new Exception("Index create error: Keys field is required!"); }
+                        if (typeof idx_keys[0] !== "string") { idx_keys = idx_keys.map(function (k) { return k.fieldName; }); }
+                        if (typeof idx_keys[0] !== "string") { throw new Exception("Index create error: type of fieldName property must be string!"); }
+                        objStore.createIndex(idx_name, idx_keys, { unique: idx_unique });
                     }
                 }
             }

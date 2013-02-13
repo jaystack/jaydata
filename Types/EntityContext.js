@@ -215,14 +215,9 @@ $data.Class.define('$data.EntityContext', null, null,
         //}, this);
     },
     _initializeStorageModel: function () {
-
-        //this.getType().memberDefinitions.asArray().forEach(function (item) {
         var _memDefArray = this.getType().memberDefinitions.asArray();
         for (var i = 0; i < _memDefArray.length; i++) {
             var item = _memDefArray[i];
-
-
-
             if ('dataType' in item) {
                 var itemResolvedDataType = Container.resolveType(item.dataType);
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
@@ -272,12 +267,10 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
             }
         }
-        //}, this);
 
         if (typeof intellisense !== 'undefined')
             return;
 
-        //this._storageModel.forEach(function (storageModel) {
         for (var i = 0; i < this._storageModel.length; i++) {
             var storageModel = this._storageModel[i];
 
@@ -286,7 +279,6 @@ $data.Class.define('$data.EntityContext', null, null,
 
             storageModel.Associations = storageModel.Associations || [];
             storageModel.ComplexTypes = storageModel.ComplexTypes || [];
-            //storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
             for (var j = 0; j < storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().length; j++) {
                 var memDef = storageModel.LogicalType.memberDefinitions.getPublicMappedProperties()[j];
                 ///<param name="memDef" type="MemberDefinition">Member definition instance</param>
@@ -304,10 +296,9 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 this._buildDbType_navigationPropertyComplite(memDef, memDefResolvedDataType, storageModel);
 
-
-
                 //var memDef_dataType = this.getDataType(memDef.dataType);
-                if ((memDefResolvedDataType === $data.Array || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet))) && (memDef.inverseProperty && memDef.inverseProperty !== '$$unbound')) {
+                if ((memDefResolvedDataType === $data.Array || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet))) &&
+                    (memDef.inverseProperty && memDef.inverseProperty !== '$$unbound')) {
                     this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
                 } else {
                     if (memDef.inverseProperty) {
@@ -348,7 +339,6 @@ $data.Class.define('$data.EntityContext', null, null,
                     }
                 }
             }
-            //}, this);
             this._buildDbType_modifyInstanceDefinition(dbEntityInstanceDefinition, storageModel, this);
             var dbEntityClassDefinition = {};
             dbEntityClassDefinition.convertTo = this._buildDbType_generateConvertToFunction(storageModel, this);
@@ -357,7 +347,6 @@ $data.Class.define('$data.EntityContext', null, null,
             //create physical type
             storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, null, dbEntityInstanceDefinition, dbEntityClassDefinition);
         }
-        //}, this);
     },
     _initializeActions: function (es, ctor, esDef) {
         if (esDef && esDef.actions) {
@@ -389,10 +378,6 @@ $data.Class.define('$data.EntityContext', null, null,
                         if ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === Container.resolveType(storageModel.LogicalType)))
                             refMemDefs.push(m);
                     }
-
-                    //refMemDefs = refStorageModel.LogicalType.memberDefinitions.getPublicMappedProperties().filter(function (m) {
-                    //    return ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === Container.resolveType(storageModel.LogicalType)))
-                    //});
                 }
             } else {
                 var refStorageModel = this._storageModel.getStorageModel(memDefResolvedDataType);
@@ -406,16 +391,6 @@ $data.Class.define('$data.EntityContext', null, null,
                         else if ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === storageModel.LogicalType))
                             refMemDefs.push(m);
                     }
-
-
-                    //refMemDefs = refStorageModel.LogicalType.memberDefinitions.getPublicMappedProperties().filter(function (m) {
-                    //    if (m.elementType) {
-                    //        return ((m.inverseProperty == memDef.name) && (Container.resolveType(m.elementType) === storageModel.LogicalType))
-                    //    } else {
-                    //        return ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === storageModel.LogicalType))
-                    //    }
-
-                    //});
                 }
             }
             if (refMemDefs) {
