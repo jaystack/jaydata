@@ -211,20 +211,20 @@
         asyncFailedCallback('save failed'));
     });
 
-    asyncTest("Insert empty entity", 1, function () {
-        raises(function () {
-                var blog = new $blog.Types.Blog();
-                $blog.Context.Blogs.add(blog);
-                $blog.Context.saveChanges().then(function () {
-                    verifyCount('SELECT COUNT(*) AS count FROM Blogs', 0).then(start, asyncFailedCallback('failed to verify'));
-                },
-                asyncFailedCallback('save failed'));
-            }, function (ex) {
-                start();
-                return ex.message && ex.message == 'None of the fields contain values in the entity to be saved.';
-            },
-            'Exception expected');
-    });
+    //asyncTest("Insert empty entity", 1, function () {
+    //    raises(function () {
+    //            var blog = new $blog.Types.Blog();
+    //            $blog.Context.Blogs.add(blog);
+    //            $blog.Context.saveChanges().then(function () {
+    //                verifyCount('SELECT COUNT(*) AS count FROM Blogs', 0).then(start, asyncFailedCallback('failed to verify'));
+    //            },
+    //            asyncFailedCallback('save failed'));
+    //        }, function (ex) {
+    //            start();
+    //            return ex.message && ex.message == 'None of the fields contain values in the entity to be saved.';
+    //        },
+    //        'Exception expected');
+    //});
 
 
     asyncTest("Update record", 1, function () {
