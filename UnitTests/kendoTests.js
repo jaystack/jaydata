@@ -10,11 +10,8 @@ $(document).ready(function () {
 function kendoTests(providerConfig) {
     module("kendo Tests");
 
-    test("kendo observable entity", 6/*11*/, function () {
+    test("kendo observable entity", 5/*11*/, function () {
         var article = new $news.Types.Article();
-        stop(1);
-        equal(Container.isTypeRegistered('$news.Types.ObservableArticle'), false, 'Observable article not exists failed');
-        start();
         equal(typeof article.asKendoObservable, 'function', 'Entity observable convert function failed');
 
         var kendoArticle = article.asKendoObservable();
@@ -34,7 +31,7 @@ function kendoTests(providerConfig) {
         //equal(typeof kendoArticle._Title.subscribe, 'function', "JITed property exists 2");
 
     });
-    test("asKendoDataSource", 5/*10*/, function () {
+    test("asKendoDataSource", 1/*10*/, function () {
 
         var task = $data.define("TTask", {
             Todo: String,
@@ -43,29 +40,30 @@ function kendoTests(providerConfig) {
 
         var dataSourceOptions = {};
 
-        ds = task.getKendoDataSource();
+        ds = task.asKendoDataSource();
 
         var item = ds.add({ Todo: 'x' });
         console.log(item);
         ds.sync();
         stop(1);
         ds.bind("change", function (e) {
-            start(1);
-            console.dir(arguments);
-            ok("ok");
+            if (e.action === "sync") {
+                start(1);
+                ok("ok");
+            }
         });
 
 
 
     });
-    test("asKendoModel", 5/*10*/, function () {
+    test("asKendoModel", 10, function () {
         
         var Address = $data.define("Address", {
             City: String,
             Street: String
         });
 
-        kendoAddressType = Address.asKendoModelType();
+        kendoAddressType = Address.asKendoModel();
         var kendoObservable = new kendoAddressType({ City: "BP" });
         ok(kendoObservable instanceof kendo.data.Model, "observable is kendo type");
         equal(kendoObservable.get("City"), "BP");
@@ -75,7 +73,7 @@ function kendoTests(providerConfig) {
             Address: Address
         });
         
-        var kendoPersonType = Person.asKendoModelType();
+        var kendoPersonType = Person.asKendoModel();
         kendoPerson = new kendoPersonType();
         ok(!kendoPerson.Address, "complex type is not built");
 
@@ -83,11 +81,11 @@ function kendoTests(providerConfig) {
             Name: String,
             Address: { type: Address, nullable: false }
         });
-        var kendoPersonType2 = Person2.asKendoModelType();
+        var kendoPersonType2 = Person2.asKendoModel();
         kendoPerson2 = new kendoPersonType2();
         ok(kendoPerson2.Address, "complex type is built");
         ok(kendoPerson2.Address instanceof kendo.data.Model, "ct is kendo model type");
-        var addressType = Address.asKendoModelType();
+        var addressType = Address.asKendoModel();
         ok(kendoPerson2.Address instanceof addressType, "ct is kendoAddressType");
 
         p3 = new kendoPersonType2({ Address: { City: "BP", Street: "Homorod" } });
@@ -100,7 +98,7 @@ function kendoTests(providerConfig) {
             Contact: {type: Person, nullable: false }
         });
 
-        kendoCustomer = Customer.asKendoModelType();
+        kendoCustomer = Customer.asKendoModel();
         kC = new kendoCustomer({ CompanyName: "ABC", Contact: { Name: "Mr John", Address: { City: "NY", Street: "XX" } } });
         equal(kC.CompanyName, "ABC", "simple field initialized");
         kC.set("Contact.Address.City", "BP");
@@ -208,7 +206,7 @@ function kendoTests(providerConfig) {
         equal(article.CreateDate, kendoArticle.get('CreateDate'), 'dateTime property kendo change equal failed');
     });
 
-    test("kendo observable entity property changing array", 9/*12*/, function () {
+    test("kendo observable entity property changing array", 8/*12*/, function () {
         var article = new $news.Types.Article();
         var kendoArticle = article.asKendoObservable();
         equal(article.Tags, kendoArticle.get('Tags'), 'array property equal failed');
@@ -224,7 +222,7 @@ function kendoTests(providerConfig) {
         article.Tags.push(new $news.Types.Tag({ Id: 3, Title: 'hello3' }));
         //deepEqual(article.Tags, kendoArticle.get('Tags'), 'array property push equal failed');
         equal(article.Tags.length, 2, 'array property length equal failed');
-        equal(article.Tags.length, kendoArticle.get('Tags').length, 'array property length equal failed');
+        //equal(article.Tags.length, kendoArticle.get('Tags').length, 'array property length equal failed');
 
         notEqual(kendoArticle.Tags.push, undefined, "Array property is kendoObservalble instead of kendoObservableArray!")
         kendoArticle.Tags.push(new $news.Types.Tag({ Id: 4, Title: 'hello4' }));

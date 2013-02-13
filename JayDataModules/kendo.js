@@ -9,27 +9,24 @@
         }
     });
 
+
+    var kendoTypeMap = {
+        "$data.Blob": "string",
+        "$data.String": "string",
+        "$data.Boolean": "boolean",
+        "$data.Integer": "number",
+        "$data.Number": "number",
+        "$data.Date": "date"
+    }
+
     $data.Entity.inheritedTypeProcessor = function (type) {
 
         var memberDefinitions = type.memberDefinitions;
 
-        function getKendoTypeName(jayDataTypeName) {
-            jayDataTypeName = $data.Container.resolveName(jayDataTypeName);
-            switch (jayDataTypeName) {
-                case "$data.Blob":
-                case "$data.String":
-                    return "string";
-                case "$data.Boolean":
-                    return "boolean";
-                case "$data.Integer":
-                case "$data.Number":
-                    return "number";
-                case "$data.Date":
-                    return "date";
-                default:
-                    return 'object'; // TODO ???
-            }
+        function getKendoTypeName(canonicType, pd) {
+            return kendoTypeMap[canonicType] || 'object';
         };
+
 
 
         function createKendoModel(options) {
@@ -37,18 +34,39 @@
             var memberDefinitions = type.memberDefinitions,
                 fields = {};
             //debugger;
+            function getNullable(canonicType, pd) {
+                if (canonicType === "$data.Boolean") {
+                    //grid validation errs on requied/nonnull bools
+                    return true;
+                }
+                return pd.required !== true;
+            };
+
+            function getRequired(canonicType, pd) {
+                if ("$data.Boolean" === canonicType) {
+                    return false;
+                }
+                return pd.required || "nullable" in pd ? !(pd.nullable) : false;
+            }
+
             memberDefinitions
                 .getPublicMappedProperties()
                 .forEach(function (pd) {
+                    var canonicType = $data.Container.resolveName(pd.type);
                     //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
                     fields[pd.name] = {
-                        type: getKendoTypeName(pd.type),
+                        //TODO
+                        type: getKendoTypeName(canonicType, pd),
+                        nullable: getNullable(canonicType, pd),
+                        defaultValue: pd.defaultValue,
+                        //nullable: false,
                         //nullable:  "nullable" in pd ? pd.nullable : true,
                         editable: !pd.computed,
-                        //defaultValue: undefined,
-                        defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
+                        //defaultValue: true,
+                        //defaultValue: 'abc',
+                        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
                         validation: {
-                            required: pd.required || "nullable" in pd ? !(pd.nullable) : false
+                            required: getRequired(canonicType, pd)
                         }
                     }
 
@@ -56,19 +74,20 @@
                 });
 
             function setInitialValue(obj, memDef) {
-                if (!obj[memDef.name]) {
-                    function getDefault() {
-                        switch ($data.Container.resolveType(memDef.type)) {
-                            case $data.Number: return 0.0;
-                            case $data.Integer: return 0;
-                            case $data.Date: return new Date();
-                            case $data.Boolean: return false;
-                        }
-                    }
+                return;
+                //if (!obj[memDef.name]) {
+                //    function getDefault() {
+                //        switch ($data.Container.resolveType(memDef.type)) {
+                //            case $data.Number: return 0.0;
+                //            case $data.Integer: return 0;
+                //            case $data.Date: return new Date();
+                //            case $data.Boolean: return false;
+                //        }
+                //    }
 
-                    obj[memDef.name] = getDefault();
+                //    obj[memDef.name] = getDefault();
 
-                }
+                //}
             }
 
             //console.dir(memberDefinitions.getPublicMappedMethods());
@@ -143,7 +162,7 @@
                         var jay = this;
                         var newValue = propinfo.newValue;
                         if (!jay.changeFromKendo) {
-                            newValue = newValue.asKendoObservable ? newValue.asKendoObservable() : newValue
+                            newValue = newValue ? (newValue.asKendoObservable ? newValue.asKendoObservable() : newValue) : newValue;
                             jayInstance.changeFromJay = true;
                             self.set(propinfo.propertyName, propinfo.newValue);
                             delete jayInstance.changeFromJay;
@@ -175,15 +194,6 @@
                         options.newInstanceCallback(jayInstance);
                     }
 
-
-                    //var self = this;
-
-                    //this.save = function () {
-                    //    return self.innerInstance().save();
-                    //};
-                    //this.remove = function () {
-                    //    return self.innerInstance().remove();
-                    //};
                 },
                 save: function () {
                     //console.log("item.save", this, arguments);
@@ -206,6 +216,7 @@
                     console.warn("entity with multiple keys not supported");
                     break;
             }
+            console.log("md", modelDefinition);
 
             var returnValue = kendo.data.Model.define($data.kendo.BaseModelType, modelDefinition);
 
@@ -242,10 +253,33 @@
             return kendoObservable;
         }
 
+        function r(value){
+            return value || '';
+        }
+        function registerStoreAlias(type, options) {
+            if (!options.provider) return;
+            var key = r(options.databaseName) + r(options.tableName) + r(options.url) + r(options.apiUrl) + r(options.oDataServiceHost);
+            var storeDef = {
+                provider: options.provider,
+                databaseName: options.databaseName,
+                tableName: options.tableName,
+                dataSource: options.url,
+                apiUrl: options.apiUrl,
+                oDataServiceHost: options.oDataServiceHost
+            };
+            Object.keys(storeDef).forEach(function (k) {
+                delete options[k];
+            });
+
+            type.setStore(key, storeDef);
+            return key;
+        }
+
         type.asKendoDataSource = function (options, modelOptions, storeAlias) {
             options = options || {};
             var mOptions = modelOptions || {};
-            var token = $data.ItemStore._getStoreAlias(type, storeAlias);
+            var salias = registerStoreAlias(type, options) || storeAlias;
+            var token = $data.ItemStore._getStoreAlias(type, salias);
             var ctx = $data.ItemStore._getContextPromise(token, type);
             var set = ctx.getEntitySetFromElementType(type);
             return set.asKendoDataSource(options, mOptions);
@@ -259,15 +293,20 @@
         //console.log('col', this, arguments);
         var result = [];
         columns = columns || {};
+        var showComplex = columns['$showComplexFields'] === true;
+        delete columns['$showComplexFields'];
+
         this.defaultType
             .memberDefinitions
             .getPublicMappedProperties()
             .forEach(function (pd) {
                 //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
-                var col = (columns[pd.name] ? columns[pd.name] : {});
-                var colD = { field: pd.name };
-                $.extend(colD, col)
-                result.push(colD);
+                if (showComplex || kendoTypeMap[$data.Container.resolveName(pd.type)]) {
+                    var col = columns[pd.name] || {};
+                    var colD = { field: pd.name };
+                    $.extend(colD, col)
+                    result.push(colD);
+                }
                 //}
             });
 
@@ -578,7 +617,6 @@
         ds.serverPaging = ds.serverPaging || true;
         ds.serverFiltering = ds.serverFiltering || true;
         ds.serverSorting = ds.serverSorting || true;
-        alert(jayDataSource.defaultPageSize);
         ds.pageSize = ds.pageSize === undefined ? $data.kendo.defaultPageSize : ds.pageSize;
 
         var TransportClass = self.asKendoRemoteTransportClass(model);
