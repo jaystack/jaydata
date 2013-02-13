@@ -19,6 +19,7 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
             //console.log(query);
         }*/
         this.connection.open({
+            error: errorhandler,
             success: function (tran) {
                 var single = false;
                 if (!(query instanceof Array)) {
