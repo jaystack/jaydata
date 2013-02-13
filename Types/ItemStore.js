@@ -87,16 +87,11 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         return entity;
     },
     _getStoreAlias: function (entity, storeAlias) {
-        var validStoreAlias = undefined;
-        if (typeof storeAlias === 'string') {
-            validStoreAlias = storeAlias;
-        }
-
         if (entity instanceof $data.Entity) {
             var type = entity.getType();
-            return validStoreAlias || entity.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
+            return storeAlias || entity.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
         } else {
-            return validStoreAlias || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined) || entity.storeToken;
+            return storeAlias || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined) || entity.storeToken;
         }
     },
     _getStoreContext: function (aliasOrToken, type, nullIfInvalid) {
