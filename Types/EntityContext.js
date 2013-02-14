@@ -13,7 +13,7 @@ $data.Class.define('$data.StorageModel', null, null, {
     TableOptions: { value: undefined },
     ComplexTypes: {},
     Associations: {},
-    EntitySetReference: {}
+    ContextType: {}
 }, null);
 $data.Class.define('$data.Association', null, null, {
     constructor: function (initParam) {
@@ -187,9 +187,8 @@ $data.Class.define('$data.EntityContext', null, null,
 
             this._initializeActions(sm, ctor, ctor.getMemberDefinition(storageModel.ItemName));
 
-            storageModel.EntitySetReference = sm;
         }
-        //}, this);
+
     },
 
     _initStorageModelSync: function() {
@@ -210,6 +209,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                    storageModel.ContextType = this.getType();
                     if (item.beforeCreate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeCreate = item.beforeCreate;
@@ -525,7 +525,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
 
-        association = this._addAssociationElement(storageModel.LogicalType,
+        var association = this._addAssociationElement(storageModel.LogicalType,
                                                  memDef.required ? "0..1" : "1",
                                                  memDef.name,
                                                  refereedStorageModel.LogicalType,
@@ -1421,7 +1421,8 @@ $data.Class.define('$data.EntityContext', null, null,
             //});
             filterFunc += "; }"
 
-            return storageModel.EntitySetReference
+            var entitySet = this.getEntitySetFromElementType(entity.getType());
+            return entitySet
                 .map('function (e) { return e.' + memberDefinition.name + ' }')
                 .single(filterFunc, filterParams, callback);
         } else {
