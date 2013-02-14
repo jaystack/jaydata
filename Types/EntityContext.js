@@ -638,8 +638,10 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         return result;
     },
-    executeQuery: function (queryable, callBack) {
+    executeQuery: function (queryable, callBack, transaction) {
         var query = new $data.Query(queryable.expression, queryable.defaultType, this);
+        query.transaction = transaction;
+
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var that = this;
         var clbWrapper = {};
@@ -679,7 +681,7 @@ $data.Class.define('$data.EntityContext', null, null,
             }
             
             var readyFn = function () {
-                callBack.success(successResult);
+                callBack.success(successResult, query.transaction);
             };
             
             var i = 0;
@@ -754,7 +756,7 @@ $data.Class.define('$data.EntityContext', null, null,
             });
         }else authorizedFn();
     },
-    saveChanges: function (callback) {
+    saveChanges: function (callback, transaction) {
         /// <signature>
         ///     <summary>
         ///         Saves the changes made to the context.
@@ -953,7 +955,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var ctx = this;
         if (changedEntities.length == 0) {
             this.stateManager.trackedEntities.length = 0;
-            clbWrapper.success(0);
+            clbWrapper.success(0, transaction);
             return pHandlerResult;
         }
 
@@ -1047,10 +1049,10 @@ $data.Class.define('$data.EntityContext', null, null,
                         ctx._postProcessSavedItems(clbWrapper, changedEntities);
                     },
                     error: clbWrapper.error
-                }, changedEntities);
+                }, changedEntities, transaction);
             }else if (cancelEvent){
                 clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
-            }else clbWrapper.success(0);
+            } else clbWrapper.success(0, transaction);
             
             /*else if (cancelEvent) clbWrapper.error(new $data.Exception('saveChanges cancelled from event [' + cancelEvent + ']'));
             else Guard.raise('No changed entities');*/
