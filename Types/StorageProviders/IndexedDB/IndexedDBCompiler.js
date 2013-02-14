@@ -136,6 +136,9 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
                     if (nLeft instanceof $data.storageProviders.IndexedDB.IndexedDBPhysicalAndFilterExpression || nRight instanceof $data.storageProviders.IndexedDB.IndexedDBPhysicalAndFilterExpression) {
                         return Container.createIndexedDBLogicalInFilterExpression(nLeft, nRight);
                     }
+                    if (context.parentNodeType !== 'and') {
+                        return Container.createIndexedDBPhysicalAndFilterExpression([expression]);
+                    }
                     return [expression];
                     break;
                 default:

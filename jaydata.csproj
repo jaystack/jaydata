@@ -328,7 +328,6 @@
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
-    <Content Include="UnitTests\indexedDbCompilerTests.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
     <Content Include="README.md" />

@@ -231,7 +231,9 @@ $data.Class.define('$data.StorageProviderBase', null, null,
             //logicalEntity.changedProperties.forEach(function(memberDef){
             //}, this);
             storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (property) {
-                dbInstance[property.name] = logicalEntity[property.name];
+                if (logicalEntity[property.name] !== undefined) {
+                    dbInstance[property.name] = logicalEntity[property.name];
+                }
             }, this);
 
             if (storageModel.Associations) {
