@@ -643,7 +643,7 @@ $data.Class.define('$data.EntityContext', null, null,
         
         return pHandler.getPromise();
     },
-    ready: {},
+    ready: { type: $data.Promise },
     getEntitySetFromElementType: function (elementType) {
         /// <signature>
         ///     <summary>Gets the matching EntitySet for an element type.</summary>
