@@ -377,28 +377,37 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         executor.runQuery(compiledExpression);
         return compiledExpression;
     },
-    executeQuery: function (query, callBack, tran) {
-        if (!query.tran) {
-            query.tran = this.context.tran;
-        }
+    executeQuery: function (query, callBack) {
+        var self = this;
         var start = new Date().getTime();
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var self = this;
 
-        this._compile(query, {
-            success: function (expression) {
-                var executor = Container.createIndexedDBExpressionExecutor(self);
-                executor.runQuery(expression, {
-                    success: function (result) {
-                        var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
-                        modelBinderCompiler.Visit(query.expression);
-                        query.rawDataList = result;
-                        $data.Trace.log("execute Query in milliseconds:", new Date().getTime() - start);
-                        callBack.success(query, query.tran);
-                    }
-                });
-            }
-        });
+        var doQuery = function () {
+            self._compile(query, {
+                success: function (expression) {
+                    var executor = Container.createIndexedDBExpressionExecutor(self, query.transaction);
+                    executor.runQuery(expression, {
+                        success: function (result) {
+                            var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
+                            modelBinderCompiler.Visit(query.expression);
+                            query.rawDataList = result;
+                            $data.Trace.log("execute Query in milliseconds:", new Date().getTime() - start);
+                            callBack.success(query);
+                        }
+                    });
+                }
+            });
+        };
+
+        if (!query.transaction) {
+            this.context.beginTransaction(function (tran) {
+                query.transaction = tran;
+                doQuery();
+            });
+        }
+        else {
+            doQuery();
+        }
     },
     _getKeySettings: function (memDef) {
         /// <summary>
@@ -436,62 +445,86 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         return settings;
     },
 
-    _beginTran: function (tableList, callBack) {
-        var transaction = this.db.transaction(tableList ? tableList : this.db.objectStoreNames, this.IDBTransactionType.READ_WRITE);
-        return transaction;
+    _beginTran: function (tableList, isWrite, callBack) {
+        var self = this;
+        setTimeout(function () {
+            callBack = $data.typeSystem.createCallbackSetting(callBack);
+            try{
+                var transaction = self.db.transaction(tableList ? tableList : self.db.objectStoreNames, isWrite ? self.IDBTransactionType.READ_WRITE : self.IDBTransactionType.READ_ONLY);
+                callBack.success(transaction);
+            } catch (e) {
+                callBack.error(e);
+            }
+        }, 0);
     },
 
     saveChanges: function (callBack, changedItems, tran) {
         var self = this;
-        setTimeout(function () {
-            // Building independent blocks and processing them sequentially
-            var independentBlocks = self.buildIndependentBlocks(changedItems);
-            var objectStoreNames = [];
-            for (var i = 0; i < independentBlocks.length; i++) {
-                for (var j = 0; j < independentBlocks[i].length; j++) {
-                    if (objectStoreNames.indexOf(independentBlocks[i][j].entitySet.tableName) < 0) {
-                        objectStoreNames.push(independentBlocks[i][j].entitySet.tableName);
-                    }
+        // Building independent blocks and processing them sequentially
+        var independentBlocks = this.buildIndependentBlocks(changedItems);
+        var objectStoreNames = [];
+        for (var i = 0; i < independentBlocks.length; i++) {
+            for (var j = 0; j < independentBlocks[i].length; j++) {
+                if (objectStoreNames.indexOf(independentBlocks[i][j].entitySet.tableName) < 0) {
+                    objectStoreNames.push(independentBlocks[i][j].entitySet.tableName);
                 }
             }
-            if (objectStoreNames.length < 1) { callBack.success(); return; }
-            console.log(objectStoreNames);
-            var transaction = tran ? tran : self.db.transaction(objectStoreNames, self.IDBTransactionType.READ_WRITE);
-            transaction.setCallbacks({
-                onerror: function (event) {
-                    callBack.error(event);
-                },
-                onabort: function () {
-                    callBack.error();
-                }
+        }
+        if (objectStoreNames.length < 1) { callBack.success(tran); return; }
+
+        if (tran) {
+            this._saveChangesWithTran(callBack, independentBlocks, tran);
+        } else {
+
+
+            this.context.beginTransaction(objectStoreNames, true, function (transaction) {
+                self._saveChangesWithTran(callBack, independentBlocks, transaction);
             });
+        };
+    },
+    _saveChangesWithTran: function (callBack, independentBlocks, transaction) {
+        var self = this;
 
-            var doSave = function () {
-                if (independentBlocks.length == 0) {
-                    callBack.success();
-                }
-                else {
-                    var currentBlock = independentBlocks.shift();
-                    var itemCount = currentBlock.length;
-                    var hasError = false;
-                    self._saveIndependentBlock(currentBlock, transaction, {
-                        success: function () {
-                            if (--itemCount < 1 && !hasError) {
-                                doSave();
-                            }
-                        },
-                        error: function (error) {
-                            hasError = false;
-                            itemCount = 0;
-                            transaction.hasError = true;
-                            transaction.abort();
-                        }
-                    });
-                }
+        var doSave = function () {
+            if (independentBlocks.length == 0) {
+                transaction.onerror.detach(t1);
+                transaction.onabort.detach(t2);
+                callBack.success(transaction);
             }
-            doSave();
-
-        }, 0);
+            else {
+                var currentBlock = independentBlocks.shift();
+                var itemCount = currentBlock.length;
+                var hasError = false;
+                self._saveIndependentBlock(currentBlock, transaction, {
+                    success: function () {
+                        if (--itemCount < 1 && !hasError) {
+                            doSave();
+                        }
+                    },
+                    error: function (error) {
+                        hasError = false;
+                        itemCount = 0;
+                        transaction.hasError = true;
+                        transaction.abort();
+                    }
+                });
+            }
+        }
+        var t1 = null;
+        var t2 = null;
+        var tranError = function (sender, event) {
+            this.onerror.detach(t1);
+            callBack.error(transaction);
+        };
+        var tranAbort = function (sender, event) {
+            this.onabort.detach(t2);
+            callBack.error(transaction);
+        };
+        t1 = tranError;
+        t2 = tranAbort;
+        transaction.onerror.attach(tranError);
+        transaction.onabort.attach(tranAbort);
+        doSave();
     },
     _saveIndependentBlock: function (items, tran, callBack) {
         var self = this;
@@ -518,9 +551,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 callBack.success();
                 return;
             }
-            var store = tran.objectStore(item.entitySet.tableName);
-
             try {
+                var store = tran.transaction.objectStore(item.entitySet.tableName);
                 switch (item.data.entityState) {
                     case $data.EntityState.Added:
                         var request = null;

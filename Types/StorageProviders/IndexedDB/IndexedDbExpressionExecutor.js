@@ -1,11 +1,12 @@
 $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (provider) {
+    constructor: function (provider, tran) {
         this.provider = provider;
+        this.tran = tran.transaction;
     },
     runQuery: function (query, callback) {
         var start = new Date().getTime();
         this.entitySet = query.context.getEntitySetFromElementType(query.defaultType);
-        this.tran = this.provider.db.transaction([this.entitySet.tableName], this.provider.IDBTransactionType.READ_ONLY);
+        //this.tran = query.transaction;// this.provider.db.transaction([this.entitySet.tableName], this.provider.IDBTransactionType.READ_ONLY);
         this.objectStore = this.tran.objectStore(this.entitySet.tableName);
 
         var ctx = {

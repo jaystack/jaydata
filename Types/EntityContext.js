@@ -208,30 +208,50 @@ $data.Class.define('$data.EntityContext', null, null,
                 break;
             default: throw new Exception("Begin tran is async function!"); break;
         }
-        
+
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var tran = this.storageProvider._beginTran(tables);
-        var tranWrapper = new (function () {
-            this.create = (new Date()).getTime();
-            this.transaction = tran;
-            this.oncomplete = null;
-            this.onsuccess = null;
-            var self = this;
-            tran.oncomplete = function () {
-                console.log("onComplete: ", self.create);
-                if (self.oncomplete) {
-                    self.oncomplete(arguments);
-                }
-            };
-            tran.onsuccess = function () {
-                console.log("onsuccess: ", self.create);
-                if (self.onsuccess) {
-                    self.onsuccess(arguments);
-                }
-            };
-            console.log("create: ", this.create);
-        })();
-        callBack.success(tranWrapper);
+        this.storageProvider._beginTran(tables, isWrite, function (tran) {
+            var tranWrapper = new (function () {
+                var self = this;
+                this.create = (new Date()).getTime();
+                this.transaction = tran;
+                this.oncomplete = new $data.Event("oncomplete", this);
+                this.onerror = new $data.Event("onerror", this);
+                this.onabort = new $data.Event("onabort", this);
+                this.abort = function () {
+                    console.log("tranWrapper onabort: ", self.create);
+                    tran.abort();
+                };
+                
+                tran.oncomplete = function () {
+                    console.log("oncomplete: ", self.create);
+                    if (self.oncomplete) {
+                        self.oncomplete.fire(arguments, self);
+                    }
+                };
+                tran.onerror = function () {
+                    console.log("onerror: ", self.create);
+                    if (self.onerror) {
+                        self.onerror.fire(arguments, self);
+                    }
+                };
+                tran.onabort = function () {
+                    console.log("onabort: ", self.create);
+                    if (self.onabort) {
+                        self.onabort.fire(arguments, self);
+                    }
+                };
+                tran.onblocked = function () {
+                    console.log("onblocked: ", self.create);
+                    if (self.onabort) {
+                        self.onabort.fire(arguments, self);
+                    }
+                };
+                console.log("create: ", this.create);
+            })();
+            callBack.success(tranWrapper);
+        });
+
     },
     getDataType: function (dataType) {
         // Obsolate
@@ -728,11 +748,11 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 successResult = query.result;
             }
-            
+
             var readyFn = function () {
                 callBack.success(successResult, query.transaction);
             };
-            
+
             var i = 0;
             var sets = query.getEntitySets();
 
@@ -803,7 +823,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 success: authorizedFn,
                 error: clbWrapper.error
             });
-        }else authorizedFn();
+        } else authorizedFn();
     },
     saveChanges: function (callback, transaction) {
         /// <signature>
@@ -1094,15 +1114,15 @@ $data.Class.define('$data.EntityContext', null, null,
             if (changedEntities.length) {
                 //console.log('changedEntities: ', changedEntities.map(function(it){ return it.data.initData; }));
                 ctx.storageProvider.saveChanges({
-                    success: function () {
-                        ctx._postProcessSavedItems(clbWrapper, changedEntities);
+                    success: function (tran) {
+                        ctx._postProcessSavedItems(clbWrapper, changedEntities, tran);
                     },
                     error: clbWrapper.error
                 }, changedEntities, transaction);
-            }else if (cancelEvent){
+            } else if (cancelEvent) {
                 clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
             } else clbWrapper.success(0, transaction);
-            
+
             /*else if (cancelEvent) clbWrapper.error(new $data.Exception('saveChanges cancelled from event [' + cancelEvent + ']'));
             else Guard.raise('No changed entities');*/
         };
@@ -1240,7 +1260,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
 
     prepareRequest: function () { },
-    _postProcessSavedItems: function (callBack, changedEntities) {
+    _postProcessSavedItems: function (callBack, changedEntities, transaction) {
         if (this.ChangeCollector && this.ChangeCollector instanceof $data.Notifications.ChangeCollectorBase)
             this.ChangeCollector.processChangedData(changedEntities);
 
@@ -1321,7 +1341,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 ctx.stateManager.reset();
             }
 
-            callBack.success(changedEntities.length);
+            callBack.success(changedEntities.length, transaction);
         };
 
         var callbackFn = function () {

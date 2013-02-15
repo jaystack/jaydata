@@ -284,7 +284,7 @@
         };
 
         var esExecuteQuery = $data.EntityContext.prototype.executeQuery;
-        $data.EntityContext.prototype.executeQuery = function (expression, on_ready) {
+        $data.EntityContext.prototype.executeQuery = function (expression, on_ready, transaction) {
             var self = this;
             var observables = expression.expression.observables;
             if (observables && observables.length > 0) {
@@ -297,13 +297,13 @@
                             var preparator = Container.createQueryExpressionCreator(self);
                             var newExpression = preparator.Visit(expression.expression.baseExpression);
 
-                            esExecuteQuery.call(self, Container.createQueryable(expression, newExpression), on_ready);
+                            esExecuteQuery.call(self, Container.createQueryable(expression, newExpression), on_ready, transaction);
                         }
                     });
                 });
             }
 
-            esExecuteQuery.call(self, expression, on_ready);
+            esExecuteQuery.call(self, expression, on_ready, transaction);
         };
 
         /* Observable Query End*/
@@ -387,12 +387,12 @@
         };
 
         var queryableToArray = $data.Queryable.prototype.toArray;
-        $data.Queryable.prototype.toArray = function (onResult_items) {
+        $data.Queryable.prototype.toArray = function (onResult_items, transaction) {
             if (ko.isObservable(onResult_items)) {
                 if (typeof onResult_items.push !== 'undefined') {
                     var callBack = $data.typeSystem.createCallbackSetting();
 
-                    return this.toArray(function (results) {
+                    return this.toArray(function (results, tran) {
                         onResult_items([]);
                         results.forEach(function (result, idx) {
                             if (result instanceof $data.Entity) {
@@ -401,12 +401,12 @@
                                 callBack.error('Not Implemented: Observable result has anonymous objects');
                             }
                         });
-                    });
+                    }, transaction);
                 } else {
-                    return queryableToArray.call(this, function (result) { onResult_items(result); });
+                    return queryableToArray.call(this, function (result, tran) { onResult_items(result); }, transaction);
                 }
             } else {
-                return queryableToArray.call(this, onResult_items);
+                return queryableToArray.call(this, onResult_items, transaction);
             }
         }
         /* Observable entities End*/

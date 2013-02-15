@@ -13,6 +13,7 @@
     });
 
     function close(context) {
+        console.log("!!close context!!");
         context.storageProvider.db.close();
         var startClb = function (event) { start(1); running = false; }
         start();
@@ -378,7 +379,7 @@
     });
 
     test('indexedDbProvider_openDbInsertSingleKeyCRUD_external_tran', function () {
-        expect(16);
+        expect(4);
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },
             Name: { dataType: 'string' },
@@ -401,25 +402,25 @@
                         ok(false, 'empty db');
                         close(context);
                     },
-                    success: function (result, tran) {
-                        //start();
+                    success: function (result, tranBack) {
+                        deepEqual(tranBack, tran, "In/Out transactions are not same after query!");
                         equal(result.length, 0, 'empty db');
-                        var p = new indexedDbProviderTest_Person({Id:1, Name: 'user', Desc: 'some text' });
-                        equal(p.Id, undefined, 'id undefined');
+                        var p = new indexedDbProviderTest_Person({ Id: 1, Name: 'user', Desc: 'some text' });
                         context.Persons.add(p);
 
                         context.beginTransaction(true, function (tran2) {
                             console.log("tran2 OK");
                             context.saveChanges({
-                                success: function () {
+                                success: function (result, tranBack2) {
+                                    deepEqual(tranBack2, tran2, "In/Out transactions are not same after save!");
                                     ok(true, 'save');
-                                    console.log("arguments");
+                                    console.log(arguments);
                                     close(context);
                                 },
                                 error: function () {
                                     //start();
                                     ok(false, 'entity insert without id fail');
-                                    console(context);
+                                    close(context);
                                 }
                             }, tran2);
                         });
@@ -430,6 +431,154 @@
         });
     });
 
+    test('indexedDbProvider_openDbInsertSingleKeyCRUD_same_tran', function () {
+        expect(16);
+        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+            Id: { dataType: 'int', key: true },
+            Name: { dataType: 'string' },
+            Desc: { dataType: 'string' }
+        }, null);
+        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        }, null);
+        var context = new indexedDbProviderTest_Context({
+            name: 'indexedDb',
+            databaseName: 'indexedDbProvider_openDbInsertSingleKeyCRUD_same_tran',
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        });
+        stop(1);
+        context.onReady(function () {
+            context.beginTransaction(true, function (tran) {
+                context.Persons.toArray({
+                    error: function (tran) {
+                        ok(false, 'empty db');
+                        close(context);
+                    },
+                    success: function (result, tran2) {
+                        deepEqual(tran2, tran, 'transactions equality error');
+                        equal(result.length, 0, 'empty db');
+                        var p = new indexedDbProviderTest_Person({ Name: 'user', Desc: 'some text' });
+                        equal(p.Id, undefined, 'id undefined');
+                        context.Persons.add(p);
+                        context.saveChanges({
+                            success: function (count, tran3) {
+                                deepEqual(tran3, tran, 'transactions equality error');
+                                ok(false, 'entity insert without id fail');
+                                close(context);
+                            },
+                            error: function (tran3) {
+                                deepEqual(tran3, tran, 'transactions equality error');
+                                ok(true, 'entity insert without id fail');
+                                p.Id = 1;
+                                context.saveChanges({
+                                    error: function (tran4) {
+                                        deepEqual(tran3, tran, 'transactions equality error');
+                                        ok(false, 'entity insert with id success');
+                                        close(context);
+                                    },
+                                    success: function (changedItems,tran4) {
+                                        notDeepEqual(tran4, tran, 'transactions equality error');
+                                        equal(changedItems, 1, 'entity insert with id success');
+                                        context.Persons.toArray({
+                                            error: function (tran5) {
+                                                deepEqual(tran5, tran4, 'transactions equality error');
+                                                ok(false, 'entity query');
+                                                close(context);
+                                            },
+                                            success: function (result,tran5) {
+                                                deepEqual(tran5, tran4, 'transactions equality error');
+                                                equal(result.length, 1, 'entity query');
+                                                p = result[0];
+                                                equal(p.Id, 1, 'entity query');
+                                                equal(p.Name, 'user', 'entity query');
+                                                context.Persons.attach(p);
+                                                p.Name = 'modifiedUser';
+                                                context.saveChanges({
+                                                    error: function (tran6) {
+                                                        deepEqual(tran6, tran4, 'transactions equality error');
+                                                        ok(false, 'entity update');
+                                                        close(context);
+                                                    },
+                                                    success: function (changedItems, tran6) {
+                                                        deepEqual(tran6, tran4, 'transactions equality error');
+                                                        equal(changedItems, 1, 'entity update');
+                                                        context.Persons.toArray({
+                                                            error: function (tran7) {
+                                                                deepEqual(tran7, tran4, 'transactions equality error');
+                                                                ok(false, 'entity update');
+                                                                close(context);
+                                                            },
+                                                            success: function (result, tran7) {
+                                                                deepEqual(tran7, tran4, 'transactions equality error');
+                                                                equal(result.length, 1, 'entity update');
+                                                                p = result[0];
+                                                                equal(p.Id, 1, 'entity update');
+                                                                equal(p.Name, 'modifiedUser', 'entity update');
+                                                                equal(p.Desc, 'some text', 'entity update');
+                                                                context.Persons.attach(p);
+                                                                p.Id = 2;
+                                                                context.saveChanges({
+                                                                    success: function (tran8) {
+                                                                        deepEqual(tran8, tran4, 'transactions equality error');
+                                                                        ok(false, 'invalid entity update fail');
+                                                                        close(context);
+                                                                    },
+                                                                    error: function (tran8) {
+                                                                        deepEqual(tran8, tran4, 'transactions equality error');
+                                                                        ok(true, 'invalid entity update fail');
+                                                                        context.Persons.remove(p);
+                                                                        context.saveChanges({
+                                                                            success: function (tran9) {
+                                                                                notDeepEqual(tran9, tran4, 'transactions equality error');
+                                                                                ok(false, 'invalid entity delete fail');
+                                                                                close(context);
+                                                                            },
+                                                                            error: function (tran9) {
+                                                                                notDeepEqual(tran9, tran4, 'transactions equality error');
+                                                                                ok(true, 'invalid entity delete fail');
+                                                                                p.Id = 1;
+                                                                                context.saveChanges({
+                                                                                    error: function (tran10) {
+                                                                                        notDeepEqual(tran10, tran9, 'transactions equality error');
+                                                                                        ok(false, 'entity delete');
+                                                                                        //close(context);
+                                                                                    },
+                                                                                    success: function (changedItems, tran10) {
+                                                                                        notDeepEqual(tran10, tran9, 'transactions equality error');
+                                                                                        equal(changedItems, 1, 'entity delete');
+                                                                                        context.Persons.toArray({
+                                                                                            error: function (tran11) {
+                                                                                                deepEqual(tran11, tran10, 'transactions equality error');
+                                                                                                ok(false, 'entity delete');
+                                                                                                close(context);
+                                                                                            },
+                                                                                            success: function (result, tran11) {
+                                                                                                deepEqual(tran11, tran10, 'transactions equality error');
+                                                                                                equal(result.length, 0, 'entity delete');
+                                                                                                close(context);
+                                                                                            }
+                                                                                        }, tran10);
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }, tran7);
+                                                            }
+                                                        }, tran6);
+                                                    }
+                                                }, tran5);
+                                            }
+                                        },tran4);
+                                    }
+                                });
+                            }
+                        }, tran2);
+                    }
+                }, tran);
+            });
+        });
+    });
 
     test('indexedDbProvider_count', function () {
         expect(2);
