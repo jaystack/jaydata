@@ -135,7 +135,7 @@ $data.Class.define('$data.Queryable', null, null,
         return this.map(projection, thisArg, mappedTo);
     },
 
-    length: function (onResult) {
+    length: function (onResult, transaction) {
 		///	<summary>Returns the number of entities (or projected object) in a query as the callback parameter.</summary>
         ///	<param name="onResult" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
@@ -169,20 +169,20 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(countExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
 		
         return pHandler.getPromise();
     },
-	count: function (onResult) {
+	count: function (onResult, transaction) {
 		///<summary>Count is a convenience alias for C# developers. Use length instead.</summary>
 		///<returns type="$data.Integer" />
-        return this.length(onResult);
+	    return this.length(onResult, transaction);
     },
 
-    forEach: function (iterator) {
+	forEach: function (iterator, transaction) {
 		///	<summary>Calls the iterator function for all entity (or projected object) in the query.</summary>
         ///	<param name="iterator" type="Function">Iterator function</param>
         ///	<returns type="$data.Promise" />
@@ -209,7 +209,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(forEachExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -217,7 +217,7 @@ $data.Class.define('$data.Queryable', null, null,
         return pHandler.getPromise();
     },
 
-    toArray: function (onResult_items) {
+	toArray: function (onResult_items, transaction) {
 		///	<summary>Returns the query result as the callback parameter.</summary>
         ///	<param name="onResult_items" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
@@ -261,7 +261,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(toArrayExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -269,7 +269,7 @@ $data.Class.define('$data.Queryable', null, null,
         return pHandler.getPromise();
     },
 
-    single: function (filterPredicate, thisArg, onResult) {
+	single: function (filterPredicate, thisArg, onResult, transaction) {
 		///	<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
         ///	<param name="onResult_items" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
@@ -317,7 +317,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(singleExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -325,7 +325,7 @@ $data.Class.define('$data.Queryable', null, null,
         return pHandler.getPromise();
     },
 
-    some: function (filterPredicate, thisArg, onResult) {
+	some: function (filterPredicate, thisArg, onResult, transaction) {
         ///	<summary>Filters a set of entities using a boolean expression and returns true if the query has any result element.</summary>
         ///	<param name="filterPredicate" type="Function">Filter function</param>
         ///	<param name="thisArg" type="Function">The query parameters for filter function</param>
@@ -375,7 +375,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(someExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -383,7 +383,7 @@ $data.Class.define('$data.Queryable', null, null,
         return pHandler.getPromise();
     },
 
-    every: function (filterPredicate, thisArg, onResult) {
+	every: function (filterPredicate, thisArg, onResult, transaction) {
         ///	<summary>Filters a set of entities using a boolean expression and returns true if all elements of the EntitySet is in the result set.</summary>
         ///	<param name="filterPredicate" type="Function">Filter function</param>
         ///	<param name="thisArg" type="Function">The query parameters for filter function</param>
@@ -433,7 +433,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(everyExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -569,7 +569,7 @@ $data.Class.define('$data.Queryable', null, null,
         return q;
     },
 
-    first: function (filterPredicate, thisArg, onResult) {
+    first: function (filterPredicate, thisArg, onResult, transaction) {
 		///	<summary>Filters a set of entities using a boolean expression and returns the first element.</summary>
         ///	<param name="onResult_items" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
@@ -614,7 +614,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(firstExpression);
             q.entityContext.log({ event: "EntityExpression", data: expression });
 
-            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper);
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -652,7 +652,7 @@ $data.Class.define('$data.Queryable', null, null,
         return Container.createQueryable(this, inlineCountExp);
     },
 
-    removeAll: function (onResult) {
+    removeAll: function (onResult, transaction) {
         ///	<summary>Delete the query result and returns the number of deleted entities in a query as the callback parameter.</summary>
         ///	<param name="onResult" type="Function">A callback function</param>
         ///	<returns type="$data.Promise" />
@@ -686,7 +686,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(batchDeleteExpression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
@@ -695,7 +695,7 @@ $data.Class.define('$data.Queryable', null, null,
     },
 
 
-    _runQuery: function (onResult_items) {
+    _runQuery: function (onResult_items, transaction) {
         var pHandler = new $data.PromiseHandler();
         var cbWrapper = pHandler.createCallback(onResult_items);
 
@@ -704,7 +704,7 @@ $data.Class.define('$data.Queryable', null, null,
             var expression = preparator.Visit(this.expression);
             this.entityContext.log({ event: "EntityExpression", data: expression });
 
-            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper);
+            this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper, transaction);
         } catch (e) {
             cbWrapper.error(e);
         }
