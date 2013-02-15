@@ -432,7 +432,7 @@
     });
 
     test('indexedDbProvider_openDbInsertSingleKeyCRUD_same_tran', function () {
-        expect(16);
+        expect(26);
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },
             Name: { dataType: 'string' },
@@ -519,22 +519,22 @@
                                                                 p.Id = 2;
                                                                 context.saveChanges({
                                                                     success: function (tran8) {
-                                                                        deepEqual(tran8, tran4, 'transactions equality error');
+                                                                        notDeepEqual(tran8, tran4, 'transactions equality error');
                                                                         ok(false, 'invalid entity update fail');
                                                                         close(context);
                                                                     },
                                                                     error: function (tran8) {
-                                                                        deepEqual(tran8, tran4, 'transactions equality error');
+                                                                        notDeepEqual(tran8, tran4, 'transactions equality error');
                                                                         ok(true, 'invalid entity update fail');
                                                                         context.Persons.remove(p);
                                                                         context.saveChanges({
                                                                             success: function (tran9) {
-                                                                                notDeepEqual(tran9, tran4, 'transactions equality error');
+                                                                                notDeepEqual(tran9, tran8, 'transactions equality error');
                                                                                 ok(false, 'invalid entity delete fail');
                                                                                 close(context);
                                                                             },
                                                                             error: function (tran9) {
-                                                                                notDeepEqual(tran9, tran4, 'transactions equality error');
+                                                                                notDeepEqual(tran9, tran8, 'transactions equality error');
                                                                                 ok(true, 'invalid entity delete fail');
                                                                                 p.Id = 1;
                                                                                 context.saveChanges({
@@ -563,7 +563,7 @@
                                                                             }
                                                                         });
                                                                     }
-                                                                }, tran7);
+                                                                });
                                                             }
                                                         }, tran6);
                                                     }
