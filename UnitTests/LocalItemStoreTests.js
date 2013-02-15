@@ -638,7 +638,7 @@
     });
 
     test('return $data.service in factory', 5, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined' ) { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -769,7 +769,7 @@
     });
 
     test('return $data.initService business in factory', 1, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -798,7 +798,7 @@
     });
 
     test('return $data.initService open in factory', 1, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
