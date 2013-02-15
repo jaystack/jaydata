@@ -221,11 +221,13 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         var memDefs = contextType.memberDefinitions.getPublicMappedProperties();
         for (var i = 0; i < memDefs.length; i++) {
             var memDef = memDefs[i];
-            var memDefType = Container.resolveType(memDef.type);
-            if (memDefType.isAssignableTo && memDefType.isAssignableTo($data.EntitySet)) {
-                var elementType = Container.resolveType(memDef.elementType);
-                if (elementType.name === name) {
-                    return elementType;
+            if (memDef.type) {
+                var memDefType = Container.resolveType(memDef.type);
+                if (memDefType.isAssignableTo && memDefType.isAssignableTo($data.EntitySet)) {
+                    var elementType = Container.resolveType(memDef.elementType);
+                    if (elementType.name === name) {
+                        return elementType;
+                    }
                 }
             }
         }
