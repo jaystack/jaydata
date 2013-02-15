@@ -70,6 +70,8 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Spatial, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -163,6 +165,30 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ODataInheritance\ODataInheritanceModels.cs" />
+    <Compile Include="Models\TaskManager\Category.cs">
+      <DependentUpon>TaskManagerModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TaskManager\Developer.cs">
+      <DependentUpon>TaskManagerModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TaskManager\Task.cs">
+      <DependentUpon>TaskManagerModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TaskManager\TaskManagerModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TaskManagerModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TaskManager\TaskManagerModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TaskManagerModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TaskManager\TaskManagerModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TaskManagerModel.edmx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DummyBasicAuthModule.cs" />
     <Compile Include="Services\emptyNewsReaderV3.svc.cs">
@@ -175,9 +201,16 @@
     <Compile Include="Services\oDataDbDelete.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Services\TaskManagerService.svc.cs">
+      <DependentUpon>TaskManagerService.svc</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="App_Data\TaskManagerDatabase.mdf" />
+    <Content Include="App_Data\TaskManagerDatabase_log.ldf">
+      <DependentUpon>TaskManagerDatabase.mdf</DependentUpon>
+    </Content>
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -238,6 +271,7 @@
     <Content Include="Global.asax" />
     <Content Include="GPL-LICENSE.txt" />
     <Content Include="handlebars_examples.html" />
+    <Content Include="idbtest.html" />
     <Content Include="index.html" />
     <Content Include="jaydata.d.ts" />
     <Content Include="JayDataModules\deferred.js" />
@@ -297,6 +331,7 @@
     <Content Include="JaySvcUtil\Example\index.html" />
     <Content Include="JaySvcUtil\JayDataContextGenerator.xslt" />
     <Content Include="JaySvcUtil\JaySvcUtil.js" />
+    <Content Include="kendo.html" />
     <Content Include="licences.txt" />
     <Content Include="LocalItemStore.html" />
     <Content Include="MIT-LICENSE.txt" />
@@ -320,6 +355,7 @@
     <Content Include="Services\emptyNewsReader.svc" />
     <Content Include="Services\oDataDbDelete.asmx" />
     <Content Include="Services\Protected\emptyNewsReader.svc" />
+    <Content Include="Services\TaskManagerService.svc" />
     <Content Include="test.html" />
     <Content Include="test_cdn_JayData.html" />
     <Content Include="test_Handlebars.html" />
@@ -347,6 +383,23 @@
     <Content Include="JayService\provision\tmp\R" />
     <Content Include="JayService\provision\tmp\Shutdown.json" />
     <Content Include="JayService\provision\tokens" />
+    <EntityDeploy Include="Models\TaskManager\TaskManagerModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>TaskManagerModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\TaskManager\TaskManagerModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>TaskManagerModel.edmx</DependentUpon>
+      <LastGenOutput>TaskManagerModel.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\TaskManager\TaskManagerModel.edmx.diagram">
+      <DependentUpon>TaskManagerModel.edmx</DependentUpon>
+    </Content>
+    <Content Include="Models\TaskManager\TaskManagerModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>TaskManagerModel.edmx</DependentUpon>
+      <LastGenOutput>TaskManagerModel.cs</LastGenOutput>
+    </Content>
     <None Include="Scripts\jquery-1.9.0.intellisense.js" />
     <Content Include="Scripts\datajs-1.0.3.js" />
     <Content Include="Scripts\datajs-1.0.3.min.js" />
@@ -714,6 +767,9 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -732,7 +788,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>62308</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:54514/</IISUrl>
+          <IISUrl>http://localhost:64176/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

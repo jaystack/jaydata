@@ -13,7 +13,7 @@ $data.Class.define('$data.StorageModel', null, null, {
     TableOptions: { value: undefined },
     ComplexTypes: {},
     Associations: {},
-    EntitySetReference: {}
+    ContextType: {}
 }, null);
 $data.Class.define('$data.Association', null, null, {
     constructor: function (initParam) {
@@ -104,6 +104,10 @@ $data.Class.define('$data.EntityContext', null, null,
         var i = 0, providerType;
         var providerList = [].concat(storageProviderCfg.name);
         var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider, error: this._successInitProvider });
+
+        this._initStorageModelSync();
+        ctx._initializeEntitySets(ctx.getType());
+
         $data.StorageProviderLoader.load(providerList, {
             success: function (providerType) {
                 ctx.storageProvider = new providerType(storageProviderCfg, ctx);
@@ -118,7 +122,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     contextType._storageModelCache[providerType.name] = ctx._storageModel;
                 }
 
-                ctx._initializeEntitySets(contextType);
+                //ctx._initializeEntitySets(contextType);
                 if (storageProviderCfg && storageProviderCfg.user) Object.defineProperty(ctx, 'user', { value: storageProviderCfg.user, enumerable: true });
                 if (storageProviderCfg && storageProviderCfg.checkPermission) Object.defineProperty(ctx, 'checkPermission', { value: storageProviderCfg.checkPermission, enumerable: true });
 
@@ -158,31 +162,6 @@ $data.Class.define('$data.EntityContext', null, null,
             this[delegateName].fire(data);
         };
 
-        /*
-        while (!(providerType = $data.StorageProviderBase.getProvider(storageProviderCfg.name[i])) && i < storageProviderCfg.name.length) i++;
-        if (providerType){
-            this.storageProvider = new providerType(storageProviderCfg, this);
-            this.storageProvider.setContext(this);
-            this.stateManager = new $data.EntityStateManager(this);
-
-            if (storageProviderCfg.name in this.getType()._storageModelCache){
-                this._storageModel = this.getType()._storageModelCache[storageProviderCfg.name];
-            }else{
-                this._initializeStorageModel();
-                this.getType()._storageModelCache[storageProviderCfg.name] = this._storageModel;
-            }
-        }else{
-            Guard.raise(new Exception("Provider fallback failed!", "Not Found"));
-        }
-        this._initializeEntitySets(this.constructor);
-        this._user = (storageProviderCfg && storageProviderCfg.user) || user;
-
-        this._isOK = false;
-        var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider });
-        if (this.storageProvider){
-            this.storageProvider.initializeStore(callBack);
-        }
-        */
 
         this.ready = this.onReady();
     },
@@ -196,10 +175,7 @@ $data.Class.define('$data.EntityContext', null, null,
         return dataType;
     },
     _initializeEntitySets: function (ctor) {
-        /*if (ctor.inheritsFrom !== null && ctor.inheritsFrom !== undefined) {
-            this._initializeEntitySets(ctor.inheritsFrom);
-        }*/
-        //this._storageModel.forEach(function (storageModel) {
+
         for (var i = 0, l = this._storageModel.length; i < l; i++){
             var storageModel = this._storageModel[i];
             this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers);
@@ -212,14 +188,13 @@ $data.Class.define('$data.EntityContext', null, null,
 
             this._initializeActions(sm, ctor, ctor.getMemberDefinition(storageModel.ItemName));
 
-            storageModel.EntitySetReference = sm;
         }
-        //}, this);
-    },
-    _initializeStorageModel: function () {
 
-        //this.getType().memberDefinitions.asArray().forEach(function (item) {
+    },
+
+    _initStorageModelSync: function() {
         var _memDefArray = this.getType().memberDefinitions.asArray();
+
         for (var i = 0; i < _memDefArray.length; i++) {
             var item = _memDefArray[i];
 
@@ -235,6 +210,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     storageModel.LogicalType = Container.resolveType(item.elementType);
                     storageModel.LogicalTypeName = storageModel.LogicalType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                    storageModel.ContextType = this.getType();
                     if (item.beforeCreate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeCreate = item.beforeCreate;
@@ -271,6 +247,12 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
             }
         }
+
+    },
+    _initializeStorageModel: function () {
+
+        //this.getType().memberDefinitions.asArray().forEach(function (item) {
+        var _memDefArray = this.getType().memberDefinitions.asArray();
         //}, this);
 
         if (typeof intellisense !== 'undefined')
@@ -544,7 +526,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
 
-        association = this._addAssociationElement(storageModel.LogicalType,
+        var association = this._addAssociationElement(storageModel.LogicalType,
                                                  memDef.required ? "0..1" : "1",
                                                  memDef.name,
                                                  refereedStorageModel.LogicalType,
@@ -1441,7 +1423,8 @@ $data.Class.define('$data.EntityContext', null, null,
             //});
             filterFunc += "; }"
 
-            return storageModel.EntitySetReference
+            var entitySet = this.getEntitySetFromElementType(entity.getType());
+            return entitySet
                 .map('function (e) { return e.' + memberDefinition.name + ' }')
                 .single(filterFunc, filterParams, callback);
         } else {

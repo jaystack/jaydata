@@ -8,12 +8,12 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
     },
     open: function (callBack) {
 		if (this.database){
-			this.database.transaction(function (tran) { callBack.success(tran); });
+		    this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error);
         } else {
             var p = this.connectionParams;
             var con = this;
 			this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
-			this.database.transaction(function (tran) { callBack.success(tran); });
+			this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error);
         }
     },
     close: function () {

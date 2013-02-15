@@ -2,23 +2,39 @@
 <html>
 <head>
     <title>JayData unit tests</title>
+    <meta charset=utf-8 />
 
-    <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
-    
-    <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
-    <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
-    <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
-    <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
+    <link href="http://cdn.kendostatic.com/2012.3.1315/styles/kendo.common.min.css" rel="stylesheet" type="text/css" />
+<!--    <link href="http://cdn.kendostatic.com/2012.3.1315/styles/kendo.rtl.min.css" rel="stylesheet" type="text/css" />-->
+    <link href="http://cdn.kendostatic.com/2012.3.1315/styles/kendo.default.min.css" rel="stylesheet" type="text/css" />
+    <link href="http://cdn.kendostatic.com/2012.3.1315/styles/kendo.dataviz.min.css" rel="stylesheet" type="text/css" />
+    <link href="http://cdn.kendostatic.com/2012.3.1315/styles/kendo.dataviz.default.min.css" rel="stylesheet" type="text/css" />
+<!--    <link href="http://cdn.kendostatic.com/2012.3.1315/styles/kendo.mobile.all.min.css" rel="stylesheet" type="text/css" />-->
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="Scripts/modernizr-2.5.3.js"></script>
+    <!--<link href="Content/Site.css" rel="stylesheet" />-->
+    <script src="http://cdn.kendostatic.com/2012.3.1315/js/kendo.all.min.js"></script>
+<!--    <script type="text/javascript" src="Scripts/jquery.validate.js"></script>-->
 <!--    <script src="3rdparty/kendo/src/js/kendo.core.js"></script>
-    <script src="3rdparty/kendo/src/js/kendo.data.js"></script>-->
-    <script type="text/javascript" src="Scripts/kendo.all.min.js"></script>
-    
+    <script src="3rdparty/kendo/src/js/kendo.data.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.binder.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.grid.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.editable.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.sortable.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.validator.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.calendar.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.timepicker.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.datetimepicker.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.datepicker.js"></script>
+    <script src="3rdparty/kendo/src/js/kendo.popup.js"></script>-->
+    <!--<script src="3rdparty/kendo/js/kendo.web.min.js"></script>-->
+    <script src="Scripts/datajs-1.1.0.js"></script>
+
     <!--************************************************************************************-->
     <script type="text/javascript" src="TypeSystem/initializeJayDataClient.js"></script>
     <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
     <script type="text/javascript" src="TypeSystem/utils.js"></script>
     <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
-    <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
     <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
     <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
     <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
@@ -199,69 +215,135 @@
     <script type="text/javascript" src="JayDataModules/knockout.js"></script>
     <script type="text/javascript" src="JayDataModules/kendo.js"></script>
     <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
-
     <!--************************************************************************************-->
     
 
     <!--**********************************UNIT TESTS****************************************-->
-    <script src="NewsReaderContext.js" type="text/javascript"></script>
-    
+    <script>
+        /*
+        Task.setStore('xxxx', { provider: 'oData', oDataServiceHost: 'x', tableName: 'xxx' });
+        Task.setStore('xxx3', { provider: 'webApi', dataSource: 'api/todos' });
+        Task.setStore('xxx2', { provider: 'webApi', apiUrl: 'api', tableName: 'todos' });
+        */
+        //var T = $data.define("Task", {
+        //    Todo: String,
+        //    Completed: Boolean
+        //});
 
-    <script src="UnitTests/inMemoryProviderTests.js" type="text/javascript"></script>
-    <script src="UnitTests/storageModelTests.js" type="text/javascript"></script>
-    <script src="UnitTests/typeSystemTests.js" type="text/javascript"></script>
-    <script src="UnitTests/EntityContextTests.js" type="text/javascript"></script>
-    <script src="UnitTests/dataDistributeTest.js" type="text/javascript"></script>
-    <script src="UnitTests/ValidationTests.js" type="text/javascript"></script>
-    <script src="UnitTests/indexedDbProviderTest.js" type="text/javascript"></script>
+        //var contextT = $data.EntityContext.extend("CX", {
+        //    Tasks: { type: $data.EntitySet, elementType: T }
+        //});
 
-    <script src="UnitTests/knockoutTests.js" type="text/javascript"></script>
-    <script src="UnitTests/kendoTests.js" type="text/javascript"></script>
-    <script src="UnitTests/setOperationTests.js" type="text/javascript"></script>
+        //var ctx = new contextT({ name: 'local', databaseName: 'xxxx' });
 
-    <script src="UnitTests/sqLiteProviderTests.js" type="text/javascript"></script>
-    <script src="UnitTests/sqLiteCompilerTests.js" type="text/javascript"></script>
-    <script src="UnitTests/sqLiteCRUDTests.js" type="text/javascript"></script>
-    <script src="UnitTests/LocalItemStoreTests.js" type="text/javascript"></script>
-
-    <script src="UnitTests/oDataProviderTests.js" type="text/javascript"></script>
-    
-    <!--Commented out because of popups-->
-    <!--<script src="UnitTests/oDataProviderTests_auth.js" type="text/javascript"></script>-->
-
-    <script src="UnitTests/T1.js" type="text/javascript"></script>
-    <script src="UnitTests/T3.js" type="text/javascript"></script>
-    <script src="UnitTests/webApiTests.js" type="text/javascript"></script>
-    <script src="UnitTests/dataServiceVersionTests.js" type="text/javascript"></script>
-    <script src="UnitTests/T2.js" type="text/javascript"></script>
-    <script src="UnitTests/loadPropertyTests.js" type="text/javascript"></script>
-    <script src="UnitTests/ValidatonPluginTest.js" type="text/javascript"></script>
-    <script src="UnitTests/promiseTests.js" type="text/javascript"></script>
-    <script src="UnitTests/JaySvcUtilTests.js" type="text/javascript"></script>
-
-    <script src="UnitTests/FaceBookProviderTests.js" type="text/javascript"></script>
-    <script src="UnitTests/YQLProviderTests.js" type="text/javascript"></script>
-
-    <script type="text/javascript" src="oDataParser/currentTests.js"></script>
-    <script type="text/javascript" src="oDataParser/lexerTests.js"></script>
-    <script type="text/javascript" src="oDataParser/parserTests.js"></script>
-    <script type="text/javascript" src="oDataParser/expressionParserTests.js"></script>
-
-    <!--<script src="UnitTests/AuthEntityContextTests.js" type="text/javascript"></script>--> <!--//TODO: fixed authentication context bugs-->
-    
+        //$data.define('XXX', {
+        //    Id: {
+        //        key: true,
+        //        type: 'string',
+        //        get: function () { return this.F1 + this.F2 },
+        //        set: function (value) { }
+        //    },
+        //    F1: String,
+        //    F2: String
+        //})
+    </script>    
 </head>
 <body>
-    <h1 id="qunit-header">
-        JayData unit tests</h1>
-    <h2 id="qunit-banner">
-    </h2>
-    <div id="qunit-testrunner-toolbar">
+
+    <script type="text/x-kendo-tmpl" id="editTemplate">
+        <div class="product-view">
+            <dl>
+                <dt>Todo</dt>
+                <dd>
+                    <input type="text" data-bind="value:Todo" name="Todo" required="required" validationMessage="required" />
+                    <span data-for="ProductName" class="k-invalid-msg"></span>
+                </dd>
+                <dt>Completed</dt>
+                <dd>
+                    <input type="checkbox" data-bind="checked:Done" name="Done" />
+                </dd>
+                <dt>Id</dt>
+                <dd>
+                    <input type="text" data-bind="value:Id" name="Id" />
+                    <span data-for="ProductName" class="k-invalid-msg"></span>
+                </dd>
+            </dl>
+            <div class="edit-buttons">
+                <a class="k-button k-button-icontext k-update-button" href="\\#"><span class="k-icon k-update"></span>Save</a>
+                <a class="k-button k-button-icontext k-cancel-button" href="\\#"><span class="k-icon k-cancel"></span>Cancel</a>
+            </div>
+        </div>
+    </script>
+    <div id="grid">
+
     </div>
-    <h2 id="qunit-userAgent">
-    </h2>
-    <ol id="qunit-tests">
-    </ol>
-    <div id="qunit-fixture">
-        test markup, will be hidden</div>
+    <script>
+        var apiKey = {
+            ownerId: 'a0f577b9-8b98-4685-af6d-98943da6448f',
+            appId: '9fe72773-3e38-4c4d-af21-6716ec70876c',
+            serviceName: 'mydatabase'
+        };
+        
+        // the credentials used when connecting to the service
+        // set <username> and <password> correctly
+        // uncomment this section to enable
+        /*var credentials = {
+            user: '<username>',
+            password: '<password>'
+        };*/
+        
+        // initialize the connection to the mydatabase service in the  application
+        // credentials are optional, anonymous access used if omitted
+        //$data.initService(apiKey).then(function (mydatabase, factory, type) {
+        //    $('#grid').kendoGrid({
+        //        dataSource: mydatabase.TodoItems.asKendoDataSource({ batch: true }),
+        //        editable: 'inline',
+        //        pageable: true,
+        //        columns: [{ command: ['edit', 'delete'] }].concat(mydatabase.TodoItems.asKendoColumns()),
+        //        toolbar: ['create','save']
+        //    })
+        //});
+
+        $data.define("Todo", {
+            Task: String,
+            DueDate: Date,
+            Completed: Boolean
+        })
+        //$data.service("/Services/TaskManagerService.svc", function (f, t) {
+        //    var db = f();
+
+        //    db.onReady(function() {
+        $('#grid').kendoGrid({
+            dataSource: Todo.asKendoDataSource(),
+            editable: 'inline',
+            toolbar: ['create', 'save'],
+            sortable: true
+        })
+        //});
+
+        //$data.service("/Services/emptyNewsReader.svc", function (f, t) {
+        //    var db = f();
+        //    var listView = $("#listView").kendoListView({
+        //        dataSource: db.Articles.asKendoDataSource(),
+        //        template: kendo.template('<div>${Title}</div>')
+        //    }).data("kendoListView");
+        //});
+
+
+        ////var listView = $("#listView").kendoListView({
+        ////    dataSource: ds,
+        ////    template: kendo.template('<div>${Id}, ${Todo}</div>'),
+        ////    editTemplate: kendo.template($('#editTemplate').html())
+        ////}).data("kendoListView");
+
+        ////$(".k-add-button").click(function () {
+        ////    alert("!");
+        ////    listView.add();
+        ////});
+        ////$("#pager").kendoPager({
+        ////    dataSource: ds
+        ////});
+    </script>
+
 </body>
 </html>

@@ -11,6 +11,16 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             return self.addItemStoreAlias.apply(self, arguments);
         };
         $data.implementation = self.implementation;
+
+        $data.Entity.addMember('storeToken', {
+            get: function () {
+                if (this.storeConfigs && this.storeConfigs['default'])
+                    return this.storeConfigs.stores[this.storeConfigs['default']];
+            },
+            set: function (value) {
+                self._setTypeStoreConfig(this, 'default', value);
+            } 
+        }, true);
     },
     itemStoreConfig: {},
 
@@ -87,23 +97,19 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         return entity;
     },
     _getStoreAlias: function (entity, storeAlias) {
-        var validStoreAlias = undefined;
-        if (typeof storeAlias === 'string') {
-            validStoreAlias = storeAlias;
+        var type;
+        if (entity instanceof $data.Entity) {
+            var alias = storeAlias || entity.storeToken;
+            if (alias) {
+                return alias;
+            } else {
+                type = entity.getType();
+            }
+        } else {
+            type = entity;
         }
 
-        if (entity instanceof $data.Entity) {
-            var type = entity.getType();
-            return validStoreAlias ||
-                //entity
-                entity.storeToken ||
-                //type
-                type.storeToken;
-        } else {
-            return validStoreAlias ||
-                //type
-                entity.storeToken;
-        }
+        return storeAlias || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
     },
     _getStoreContext: function (aliasOrToken, type, nullIfInvalid) {
         var contextPromise = this._getContextPromise(aliasOrToken, type);
@@ -136,19 +142,23 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             var type = Container.resolveType(aliasOrToken.typeName);
             return new type(JSON.parse(JSON.stringify(aliasOrToken.args)));
         }
-        /*resolve alias from type (constructor options)*/
+            /*resolve alias from type (Token)*/
+        else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken] && typeof type.storeConfigs.stores[aliasOrToken].factory === 'function') {
+            return type.storeConfigs.stores[aliasOrToken].factory();
+        }
+            /*resolve alias from type (constructor options)*/
         else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken]) {
             return this._getDefaultItemStoreFactory(type, type.storeConfigs.stores[aliasOrToken]);
         }
-        /*resolve alias from ItemStore (factories)*/
+            /*resolve alias from ItemStore (factories)*/
         else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
             return this.itemStoreConfig.aliases[aliasOrToken](type);
         }
-        /*token is factory*/
+            /*token is factory*/
         else if (aliasOrToken && 'function' === typeof aliasOrToken) {
             return aliasOrToken();
         }
-        /*default no hint*/
+            /*default no hint*/
         else {
             return this.itemStoreConfig.aliases[this.itemStoreConfig['default']](type);
         }
@@ -185,7 +195,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             if (storeConfig.tableName && !storeConfig.collectionName)
                 storeConfig.collectionName = storeConfig.tableName;
 
-            var contextDef = {}
+            var contextDef = {};
             contextDef[storeConfig.collectionName] = { type: $data.EntitySet, elementType: type }
             if (storeConfig.tableName)
                 contextDef[storeConfig.collectionName]['tableName'] = storeConfig.tableName;
@@ -427,6 +437,11 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
     EntityTypeSetStore: function (type) {
         return function (name, config) {
+            if (typeof name === 'object' && typeof config === 'undefined') {
+                config = name;
+                name = 'default';
+            }
+
             var self = $data.ItemStore;
 
             var defStoreConfig = {};
@@ -468,15 +483,21 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 config = { name: 'local' };
             }
 
-            if (!type.storeConfigs) {
-                type.storeConfigs = {
-                    stores: {}
-                };
-            }
-            type.storeConfigs.stores[name] = defStoreConfig;
-            type.storeConfigs.stores[name].initParam = config;
+            defStoreConfig.initParam = config;
+            self._setTypeStoreConfig(type, name, defStoreConfig);
 
             return type;
+        }
+    },
+    _setTypeStoreConfig: function(type, name, config){
+        if (!type.storeConfigs) {
+            type.storeConfigs = {
+                stores: {}
+            };
+        }
+        type.storeConfigs.stores[name] = config;
+        if (name === 'default') {
+            type.storeConfigs['default'] = name;
         }
     },
 
@@ -569,8 +590,9 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 var itemResolvedDataType = Container.resolveType(item.type);
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
                     var elementType = Container.resolveType(item.elementType);
-                    elementType.storeToken = elementType.storeToken || this.storeToken;
-                    elementType.assignedToContext = true;
+                    if (!elementType.storeToken) {
+                        elementType.storeToken = elementType.storeToken || this.storeToken;
+                    }
                 }
             }
         }
@@ -597,12 +619,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 });
 $data.ItemStore = new $data.ItemStoreClass();
 
-
-
 $data.Entity.addMember('field', function (propName) {
-    if (this.assignedToContext)
-        Guard.raise(new Exception("Type '" + this.fullName + "' already used in context!", 'Invalid Operation'));
-
     var def = this.memberDefinitions.getMember(propName);
     if (def) {
         if (def.definedBy === this) {
