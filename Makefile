@@ -196,6 +196,9 @@ WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 
+modules: 
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp -fp ./JayDataModules/* $(MODULE_DIR)
+
 all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
 	@@rm -r $(TEMP_DIR)

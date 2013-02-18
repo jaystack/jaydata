@@ -554,10 +554,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             }
 
         }, this);
-        if (fieldParam.length < 1) { Guard.raise(new Exception('None of the fields contain values in the entity to be saved.')); }
-        if (fieldList[fieldList.length - 1] == ",") { fieldList = fieldList.slice(0, fieldList.length - 1); }
-        if (fieldValue[fieldValue.length - 1] == ",") { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
-        insertSqlString += fieldList + ") VALUES(" + fieldValue + ");";
+        if (fieldParam.length < 1) {
+            insertSqlString =  "INSERT INTO [" + item.entitySet.tableName + "] Default values";
+        } else {
+            if (fieldList[fieldList.length - 1] == ",") { fieldList = fieldList.slice(0, fieldList.length - 1); }
+            if (fieldValue[fieldValue.length - 1] == ",") { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
+            insertSqlString += fieldList + ") VALUES(" + fieldValue + ");";
+        }
         return { query: insertSqlString, param: fieldParam };
     },
     save_reloadSavedEntity: function (rowid, tableName) {
