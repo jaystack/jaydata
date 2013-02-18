@@ -223,7 +223,19 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         enumerable: true,
         writable: true
     },
-
+    _beginTran: function (tableList, isWrite, callBack) {
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        this._createSqlConnection();
+        this.connection.open({
+            error: function () {
+                console.log("Transaction create error");
+            },
+            success: function (tran) {
+                callBack.success(tran);
+            }
+        });
+        //callBack.success(this.connection);
+    },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         this.context._storageModel.forEach(function (item, index) {
@@ -555,7 +567,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         }, this);
         if (fieldParam.length < 1) {
-            insertSqlString =  "INSERT INTO [" + item.entitySet.tableName + "] Default values";
+            insertSqlString = "INSERT INTO [" + item.entitySet.tableName + "] Default values";
         } else {
             if (fieldList[fieldList.length - 1] == ",") { fieldList = fieldList.slice(0, fieldList.length - 1); }
             if (fieldValue[fieldValue.length - 1] == ",") { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
