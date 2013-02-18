@@ -1,6 +1,8 @@
 *~
 .idea
 *.pwd.js
+*.sou
+*.*.sou
 CommandLine.dll
 JayData_readme.txt
 JaySvcUtil.exe
