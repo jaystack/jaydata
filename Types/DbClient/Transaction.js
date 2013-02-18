@@ -12,7 +12,7 @@ $data.Class.define('$data.dbClient.Transaction', null, null, {
         Guard.raise(new Exception('User Abort', 'Exception'));
     },
 
-    _objectId: { type: $data.Date },
+    _objectId: { type: $data.Integer },
     transaction: { type: $data.Object },
 
     oncomplete: { type: $data.Event },
