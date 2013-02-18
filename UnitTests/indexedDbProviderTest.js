@@ -579,60 +579,47 @@
             });
         });
     });
-    /*
-    test('sqliteProvider_openDbInsertSingleKeyCRUD_external_tran', function () {
-        expect(4);
+
+    /*test('indexedDbProvider_schemaChange', function () {
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },
             Name: { dataType: 'string' },
             Desc: { dataType: 'string' }
         }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        $data.Class.define('indexedDbProviderTest_Person2', $data.Entity, null, {
+            Id: { dataType: 'int', key: true },
+            Name: { dataType: 'string' },
+            Desc: { dataType: 'string' }
         }, null);
-        var context = new indexedDbProviderTest_Context({
-            name: 'sqLite',
-            databaseName: 'indexedDbProvider_openDbInsertSingleKeyCRUD',
-            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person },
+            Persons2: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        }, null);
+        var contextDebug = new indexedDbProviderTest_Context({
+            name: 'indexedDb',
+            databaseName: 'indexedDbProvider_schemaChnage',
+            dbCreation: $data.storageProviders.DbCreationType.ErrorIfChange
         });
+        
         stop(1);
-        context.onReady(function () {
-            context.beginTransaction(function (tran) {
-                context.tran = tran
-                context.Persons.toArray({
-                    error: function () {
-                        ok(false, 'empty db');
-                        close(context);
-                    },
-                    success: function (result, tranBack) {
-                        deepEqual(tranBack, tran, "In/Out transactions are not same after query!");
-                        equal(result.length, 0, 'empty db');
-                        var p = new indexedDbProviderTest_Person({ Id: 1, Name: 'user', Desc: 'some text' });
-                        context.Persons.add(p);
 
-                        context.beginTransaction(true, function (tran2) {
-                            console.log("tran2 OK");
-                            context.saveChanges({
-                                success: function (result, tranBack2) {
-                                    deepEqual(tranBack2, tran2, "In/Out transactions are not same after save!");
-                                    ok(true, 'save');
-                                    console.log(arguments);
-                                    close(context);
-                                },
-                                error: function () {
-                                    //start();
-                                    ok(false, 'entity insert without id fail');
-                                    close(context);
-                                }
-                            }, tran2);
-                        });
+        contextDebug.onReady(function () {
+            close(contextDebug);
+            try{
+                var contextErrorIfChange = new indexedDbProviderTest_Context({
+                    name: 'indexedDb',
+                    databaseName: 'indexedDbProvider_schemaChnage',
+                    dbCreation: $data.storageProviders.DbCreationType.ErrorIfChange
+                });
+                contextErrorIfChange.onReady(function () {
 
-                    }
-                }, tran);
-            });
+                });
+            } catch (ex) {
+                ok(false, "db create error");
+            }
         });
-    });
-*/
+    });*/
+
     test('indexedDbProvider_write_table_row_count', function () {
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },

@@ -2,7 +2,10 @@ $data.storageProviders = {
     DbCreationType: {
         Merge: 10,
         DropTableIfChanged: 20,
-        DropAllExistingTables: 30
+        DropTableIfChange: 20,
+        DropAllExistingTables: 30,
+        ErrorIfChange: 40,
+        DropDbIfChange: 50
     }
 }
 
@@ -302,8 +305,8 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         if (frameType && result.allowedIn) {
             if ((result.allowedIn instanceof Array && !result.allowedIn.some(function (type) { return frameType === Container.resolveType(type); })) ||
                         (!(result.allowedIn instanceof Array) && frameType !== Container.resolveType(result.allowedIn))) {
-                            Guard.raise(new Exception(operationName + " not supported in: " + frameType.name));
-                        }
+                Guard.raise(new Exception(operationName + " not supported in: " + frameType.name));
+            }
         }
         result.name = operationName;
         return result;
@@ -325,8 +328,8 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         if (frameType && result.allowedIn) {
             if ((result.allowedIn instanceof Array && !result.allowedIn.some(function (type) { return frameType === Container.resolveType(type); })) ||
                         (!(result.allowedIn instanceof Array) && frameType !== Container.resolveType(result.allowedIn))) {
-                            Guard.raise(new Exception(operator + " not supported in: " + frameType.name));
-                        }
+                Guard.raise(new Exception(operator + " not supported in: " + frameType.name));
+            }
         }
         result.name = operator;
         return result;
@@ -347,8 +350,8 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         if (frameType && result.allowedIn) {
             if ((result.allowedIn instanceof Array && !result.allowedIn.some(function (type) { return frameType === Container.resolveType(type); })) ||
                         (!(result.allowedIn instanceof Array) && frameType !== Container.resolveType(result.allowedIn))) {
-                            Guard.raise(new Exception(operator + " not supported in: " + frameType.name));
-                        }
+                Guard.raise(new Exception(operator + " not supported in: " + frameType.name));
+            }
         }
         result.name = operator;
         return result;
@@ -387,7 +390,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     makePhysicalTypeDefinition: function (entityDefinition, association) {
     },
 
-    _beginTran: function () { throw new Exception("Transaction is not supported!");}
+    _beginTran: function () { throw new Exception("Transaction is not supported!"); }
 },
 {
     onRegisterProvider: { value: new $data.Event() },
@@ -397,10 +400,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         $data.RegisteredStorageProviders[name] = provider;
     },
     getProvider: function (name) {
-		var provider = $data.RegisteredStorageProviders[name];
-		if (!provider)
+        var provider = $data.RegisteredStorageProviders[name];
+        if (!provider)
             console.warn("Provider not found: '" + name + "'");
-		return provider;
+        return provider;
         /*var provider = $data.RegisteredStorageProviders[name];
         if (!provider)
             Guard.raise(new Exception("Provider not found: '" + name + "'", "Not Found"));
