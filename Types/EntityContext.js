@@ -193,41 +193,41 @@ $data.Class.define('$data.EntityContext', null, null,
         this.storageProvider._beginTran(tables, isWrite, function (tran) {
             var tranWrapper = new (function () {
                 var self = this;
-                this.create = (new Date()).getTime();
+                this._objectId = (new Date()).getTime();
                 this.transaction = tran;
                 this.oncomplete = new $data.Event("oncomplete", this);
                 this.onerror = new $data.Event("onerror", this);
                 this.onabort = new $data.Event("onabort", this);
                 this.abort = function () {
-                    console.log("tranWrapper onabort: ", self.create);
+                    console.log("tranWrapper onabort: ", self._objectId);
                     tran.abort();
                 };
 
                 tran.oncomplete = function () {
-                    console.log("oncomplete: ", self.create);
+                    console.log("oncomplete: ", self._objectId);
                     if (self.oncomplete) {
                         self.oncomplete.fire(arguments, self);
                     }
                 };
                 tran.onerror = function () {
-                    console.log("onerror: ", self.create);
+                    console.log("onerror: ", self._objectId);
                     if (self.onerror) {
                         self.onerror.fire(arguments, self);
                     }
                 };
                 tran.onabort = function () {
-                    console.log("onabort: ", self.create);
+                    console.log("onabort: ", self._objectId);
                     if (self.onabort) {
                         self.onabort.fire(arguments, self);
                     }
                 };
                 tran.onblocked = function () {
-                    console.log("onblocked: ", self.create);
+                    console.log("onblocked: ", self._objectId);
                     if (self.onabort) {
                         self.onabort.fire(arguments, self);
                     }
                 };
-                console.log("create: ", this.create);
+                console.log("create: ", this._objectId);
             })();
             callBack.success(tranWrapper);
         });
