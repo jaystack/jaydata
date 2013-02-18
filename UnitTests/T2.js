@@ -1,4 +1,5 @@
 ﻿$(document).ready(function () {
+    TransactionTests({ name: "indexedDb", databaseName: 'transactionTests', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_indexedDb');
     ModelBinderTests({ name: "sqLite", databaseName: 'ModelBinderTest', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');
     ModelBinderTests({ name: "oData", databaseName: 'T1', oDataServiceHost: "emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
 

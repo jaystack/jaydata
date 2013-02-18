@@ -364,6 +364,7 @@
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
+    <Content Include="UnitTests\transactionTests.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
     <Content Include="README.md" />
@@ -781,7 +782,6 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>57784</DevelopmentServerPort>
           <DevelopmentServerPort>63560</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:64176/</IISUrl>
