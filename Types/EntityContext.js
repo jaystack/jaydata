@@ -191,45 +191,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         this.storageProvider._beginTran(tables, isWrite, function (tran) {
-            var tranWrapper = new (function () {
-                var self = this;
-                this.create = (new Date()).getTime();
-                this.transaction = tran;
-                this.oncomplete = new $data.Event("oncomplete", this);
-                this.onerror = new $data.Event("onerror", this);
-                this.onabort = new $data.Event("onabort", this);
-                this.abort = function () {
-                    console.log("tranWrapper onabort: ", self.create);
-                    tran.abort();
-                };
-
-                tran.oncomplete = function () {
-                    console.log("oncomplete: ", self.create);
-                    if (self.oncomplete) {
-                        self.oncomplete.fire(arguments, self);
-                    }
-                };
-                tran.onerror = function () {
-                    console.log("onerror: ", self.create);
-                    if (self.onerror) {
-                        self.onerror.fire(arguments, self);
-                    }
-                };
-                tran.onabort = function () {
-                    console.log("onabort: ", self.create);
-                    if (self.onabort) {
-                        self.onabort.fire(arguments, self);
-                    }
-                };
-                tran.onblocked = function () {
-                    console.log("onblocked: ", self.create);
-                    if (self.onabort) {
-                        self.onabort.fire(arguments, self);
-                    }
-                };
-                console.log("create: ", this.create);
-            })();
-            callBack.success(tranWrapper);
+            callBack.success(tran);
         });
 
     },

@@ -224,16 +224,31 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         writable: true
     },
     _beginTran: function (tableList, isWrite, callBack) {
+        var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        this._createSqlConnection();
-        this.connection.open({
-            error: function () {
-                console.log("Transaction create error");
-            },
-            success: function (tran) {
-                callBack.success(tran);
+        self._createSqlConnection();
+
+        var transaction = new $data.dbClient.Transaction();
+        function onComplete() {
+            if (transaction.oncomplete) {
+                transaction.oncomplete.fire(arguments, transaction);
             }
-        });
+        }
+        setTimeout(function () {
+            self.connection.open({
+                error: function () {
+                    console.log("onerror: ", transaction.create);
+                    if (transaction.onerror) {
+                        transaction.onerror.fire(arguments, transaction);
+                    }
+                },
+                success: function (tran) {
+                    transaction.transaction = tran;
+                    callBack.success(transaction);
+                },
+                oncomplete: onComplete
+            }, undefined, isWrite);
+        }, 0);
         //callBack.success(this.connection);
     },
     initializeStore: function (callBack) {
@@ -250,55 +265,58 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var cmd = sqlConnection.createCommand("SELECT * FROM sqlite_master WHERE type = 'table'", null);
         var that = this;
 
-        cmd.executeQuery({
-            success: function (result) {
-                var existObjectInDB = {};
-                for (var i = 0; i < result.rows.length; i++) {
-                    var item = result.rows[i];
-                    existObjectInDB[item.tbl_name] = item;
-                }
-                switch (that.providerConfiguration.dbCreation) {
-                    case $data.storageProviders.DbCreationType.Merge:
-                        Guard.raise(new Exception('Not supported db creation type'));
-                        break;
-                    case $data.storageProviders.DbCreationType.DropTableIfChanged:
-                        var deleteCmd = [];
-                        for (var i = 0; i < that.SqlCommands.length; i++) {
-                            if (that.SqlCommands[i] == "") { continue; }
-                            var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
-                            var data = regEx.exec(that.SqlCommands[i]);
-                            if (data) {
-                                var tableName = data[1];
-                                var tableDef = data[2];
-                                if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
-                                    var regex = new RegExp('\\(.*\\)', 'g');
-                                    var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
+        this.context.beginTransaction(true, function (tran) {
+            cmd.executeQuery({
+                success: function (result, tran) {
+                    var existObjectInDB = {};
+                    for (var i = 0; i < result.rows.length; i++) {
+                        var item = result.rows[i];
+                        existObjectInDB[item.tbl_name] = item;
+                    }
+                    switch (that.providerConfiguration.dbCreation) {
+                        case $data.storageProviders.DbCreationType.Merge:
+                            Guard.raise(new Exception('Not supported db creation type'));
+                            break;
+                        case $data.storageProviders.DbCreationType.DropTableIfChanged:
+                            var deleteCmd = [];
+                            for (var i = 0; i < that.SqlCommands.length; i++) {
+                                if (that.SqlCommands[i] == "") { continue; }
+                                var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
+                                var data = regEx.exec(that.SqlCommands[i]);
+                                if (data) {
+                                    var tableName = data[1];
+                                    var tableDef = data[2];
+                                    if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
+                                        var regex = new RegExp('\\(.*\\)', 'g');
+                                        var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
 
-                                    if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
-                                        deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
+                                        if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
+                                            deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
+                                        }
                                     }
                                 }
+                                else {
+                                    //console.dir(regEx);
+                                    //console.dir(that.SqlCommands[i]);
+                                }
                             }
-                            else {
-                                //console.dir(regEx);
-                                //console.dir(that.SqlCommands[i]);
+                            that.SqlCommands = that.SqlCommands.concat(deleteCmd);
+                            //console.log(deleteCmd);
+                            break;
+                        case $data.storageProviders.DbCreationType.DropAllExistingTables:
+                            for (var objName in existObjectInDB) {
+                                if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
+                                    that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
+                                }
                             }
-                        }
-                        that.SqlCommands = that.SqlCommands.concat(deleteCmd);
-                        //console.log(deleteCmd);
-                        break;
-                    case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                        for (var objName in existObjectInDB) {
-                            if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
-                                that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
-                            }
-                        }
-                        break;
-                }
-                that._runSqlCommands(sqlConnection, { success: callBack.success, error: callBack.error });
-            },
-            error: callBack.error
+                            break;
+                    }
+                    that._runSqlCommands(sqlConnection, { success: callBack.success, error: callBack.error }, tran, true);
+                },
+                error: callBack.error
+            }, tran, true);
         });
+
     },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -309,7 +327,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         query.modelBinderConfig = sql.modelBinderConfig;
         var sqlCommand = sqlConnection.createCommand(sql.sqlText, sql.params);
         var that = this;
-        sqlCommand.executeQuery({
+
+
+        var innerCallback = {
             success: function (sqlResult) {
                 if (callBack.success) {
                     query.rawDataList = sqlResult.rows;
@@ -317,7 +337,15 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
             },
             error: callBack.error
-        });
+        }
+
+        if (query.transaction) {
+            sqlCommand.executeQuery(innerCallback, query.transaction, false);
+        } else {
+            this.context.beginTransaction(false, function (tran) {
+                sqlCommand.executeQuery(innerCallback, tran, false);
+            });
+        }
     },
     _compile: function (query, params) {
         var compiler = new $data.storageProviders.sqLite.SQLiteCompiler();
@@ -330,13 +358,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var sqlText = this._compile(query);
         return sqlText;
     },
-    _runSqlCommands: function (sqlConnection, callBack) {
+    _runSqlCommands: function (sqlConnection, callBack, tran, isWrite) {
         if (this.SqlCommands && this.SqlCommands.length > 0) {
             var cmdStr = this.SqlCommands.pop();
             var command = sqlConnection.createCommand(cmdStr, null);
             var that = this;
-            var okFn = function (result) { that._runSqlCommands.apply(that, [sqlConnection, callBack]); };
-            command.executeQuery({ success: okFn, error: callBack.error });
+            var okFn = function (result) { that._runSqlCommands.apply(that, [sqlConnection, callBack, tran, isWrite]); };
+            command.executeQuery({ success: okFn, error: callBack.error }, tran, isWrite);
         } else {
             callBack.success(this.context);
         }
@@ -344,13 +372,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     setContext: function (ctx) {
         this.context = ctx;
     },
-    saveChanges: function (callback, changedItems) {
+    saveChanges: function (callback, changedItems, tran) {
         var sqlConnection = this._createSqlConnection();
         var provider = this;
         var independentBlocks = this.buildIndependentBlocks(changedItems);
-        this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback);
+
+        if (tran) {
+            this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
+        } else {
+            this.context.beginTransaction(true, function (tran) {
+                provider.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
+            });
+        }
     },
-    saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback) {
+    saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback, tran) {
         /// <summary>
         /// Saves the sequentially independent items to the database.
         /// </summary>
@@ -359,9 +394,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         /// <param name="callback">Callback on finish</param>
         var provider = this;
         var t = [].concat(independentBlocks);
-        function saveNextIndependentBlock() {
+        function saveNextIndependentBlock(tran) {
             if (t.length === 0) {
-                callback.success();
+                callback.success(tran);
                 return;
             }
             var currentBlock = t.shift();
@@ -372,24 +407,24 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 return item;
             }, this);
             provider.saveIndependentItems(convertedItems, sqlConnection, {
-                success: function () {
+                success: function (items, tran) { //TODO items???
                     provider.postProcessItems(convertedItems);
-                    saveNextIndependentBlock();
+                    saveNextIndependentBlock(tran);
                 },
                 error: callback.error
-            });
+            }, tran);
         }
-        saveNextIndependentBlock();
+        saveNextIndependentBlock(tran);
     },
 
-    saveIndependentItems: function (items, sqlConnection, callback) {
+    saveIndependentItems: function (items, sqlConnection, callback, tran) {
         var provider = this;
         var queries = items.map(function (item) {
             return provider.saveEntitySet(item);
         });
         queries = queries.filter(function (item) { return item; });
         if (queries.length === 0) {
-            callback.success(items);
+            callback.success(items, tran);
             return;
         }
         function toCmd(sqlConnection, queries) {
@@ -406,7 +441,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         }
         var cmd = toCmd(sqlConnection, queries);
         cmd.executeQuery({
-            success: function (results) {
+            success: function (results, tran) {
                 var reloadQueries = results.map(function (result, i) {
                     if (result && result.insertId) {
                         return provider.save_reloadSavedEntity(result.insertId, items[i].entitySet.tableName, sqlConnection);
@@ -416,20 +451,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 })
                 var cmd = toCmd(sqlConnection, reloadQueries);
                 if (cmd.query.length > 0) {
-                    cmd.executeQuery(function (results) {
+                    cmd.executeQuery(function (results, tran) {
                         results.forEach(function (item, i) {
                             if (item && item.rows) {
                                 items[i].physicalData.initData = item.rows[0];
                             }
                         });
-                        callback.success(items);
-                    });
+                        callback.success(items, tran);
+                    }, tran, true);
                 } else {
-                    callback.success(0);//TODO Zenima: fixed this!
+                    callback.success(0, tran);//TODO Zenima: fixed this!
                 }
             },
             error: callback.error
-        });
+        }, tran, true);
     },
     postProcessItems: function (changedItems) {
         var pmpCache = {};

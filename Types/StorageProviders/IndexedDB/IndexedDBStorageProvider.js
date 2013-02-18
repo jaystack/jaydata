@@ -449,8 +449,37 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         var self = this;
         setTimeout(function () {
             callBack = $data.typeSystem.createCallbackSetting(callBack);
-            try{
-                var transaction = self.db.transaction(tableList ? tableList : self.db.objectStoreNames, isWrite ? self.IDBTransactionType.READ_WRITE : self.IDBTransactionType.READ_ONLY);
+            try {
+                var transaction = new $data.dbClient.Transaction();
+                var tran = self.db.transaction(tableList ? tableList : self.db.objectStoreNames, isWrite ? self.IDBTransactionType.READ_WRITE : self.IDBTransactionType.READ_ONLY);
+
+                tran.oncomplete = function () {
+                    console.log("oncomplete: ", transaction.create);
+                    if (transaction.oncomplete) {
+                        transaction.oncomplete.fire(arguments, transaction);
+                    }
+                };
+                tran.onerror = function () {
+                    console.log("onerror: ", transaction.create);
+                    if (transaction.onerror) {
+                        transaction.onerror.fire(arguments, transaction);
+                    }
+                };
+                tran.onabort = function () {
+                    console.log("onabort: ", transaction.create);
+                    if (transaction.onabort) {
+                        transaction.onabort.fire(arguments, transaction);
+                    }
+                };
+                tran.onblocked = function () {
+                    console.log("onblocked: ", transaction.create);
+                    if (transaction.onabort) {
+                        transaction.onabort.fire(arguments, transaction);
+                    }
+                };
+
+                transaction.transaction = tran;
+
                 callBack.success(transaction);
             } catch (e) {
                 callBack.error(e);
