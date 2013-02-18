@@ -403,7 +403,7 @@
                         close(context);
                     },
                     success: function (result, tranBack) {
-                        deepEqual(tranBack, tran, "In/Out transactions are not same after query!");
+                        deepEqual(tranBack._objectId, tran._objectId, "In/Out transactions are not same after query!");
                         equal(result.length, 0, 'empty db');
                         var p = new indexedDbProviderTest_Person({ Id: 1, Name: 'user', Desc: 'some text' });
                         context.Persons.add(p);
@@ -412,7 +412,7 @@
                             console.log("tran2 OK");
                             context.saveChanges({
                                 success: function (result, tranBack2) {
-                                    deepEqual(tranBack2, tran2, "In/Out transactions are not same after save!");
+                                    deepEqual(tranBack2._objectId, tran2._objectId, "In/Out transactions are not same after save!");
                                     ok(true, 'save');
                                     console.log(arguments);
                                     close(context);
@@ -455,38 +455,38 @@
                         close(context);
                     },
                     success: function (result, tran2) {
-                        deepEqual(tran2, tran, 'transactions equality error');
+                        deepEqual(tran2._objectId, tran._objectId, 'transactions equality error');
                         equal(result.length, 0, 'empty db');
                         var p = new indexedDbProviderTest_Person({ Name: 'user', Desc: 'some text' });
                         equal(p.Id, undefined, 'id undefined');
                         context.Persons.add(p);
                         context.saveChanges({
                             success: function (count, tran3) {
-                                deepEqual(tran3, tran, 'transactions equality error');
+                                deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                 ok(false, 'entity insert without id fail');
                                 close(context);
                             },
                             error: function (tran3) {
-                                deepEqual(tran3, tran, 'transactions equality error');
+                                deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                 ok(true, 'entity insert without id fail');
                                 p.Id = 1;
                                 context.saveChanges({
                                     error: function (tran4) {
-                                        deepEqual(tran3, tran, 'transactions equality error');
+                                        deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                         ok(false, 'entity insert with id success');
                                         close(context);
                                     },
-                                    success: function (changedItems,tran4) {
-                                        notDeepEqual(tran4, tran, 'transactions equality error');
+                                    success: function (changedItems, tran4) {
+                                        notDeepEqual(tran4._objectId, tran._objectId, 'transactions equality error');
                                         equal(changedItems, 1, 'entity insert with id success');
                                         context.Persons.toArray({
                                             error: function (tran5) {
-                                                deepEqual(tran5, tran4, 'transactions equality error');
+                                                deepEqual(tran5._objectId, tran4._objectId, 'transactions equality error');
                                                 ok(false, 'entity query');
                                                 close(context);
                                             },
-                                            success: function (result,tran5) {
-                                                deepEqual(tran5, tran4, 'transactions equality error');
+                                            success: function (result, tran5) {
+                                                deepEqual(tran5._objectId, tran4._objectId, 'transactions equality error');
                                                 equal(result.length, 1, 'entity query');
                                                 p = result[0];
                                                 equal(p.Id, 1, 'entity query');
@@ -495,21 +495,21 @@
                                                 p.Name = 'modifiedUser';
                                                 context.saveChanges({
                                                     error: function (tran6) {
-                                                        deepEqual(tran6, tran4, 'transactions equality error');
+                                                        deepEqual(tran6._objectId, tran4._objectId, 'transactions equality error');
                                                         ok(false, 'entity update');
                                                         close(context);
                                                     },
                                                     success: function (changedItems, tran6) {
-                                                        deepEqual(tran6, tran4, 'transactions equality error');
+                                                        deepEqual(tran6._objectId, tran4._objectId, 'transactions equality error');
                                                         equal(changedItems, 1, 'entity update');
                                                         context.Persons.toArray({
                                                             error: function (tran7) {
-                                                                deepEqual(tran7, tran4, 'transactions equality error');
+                                                                deepEqual(tran7._objectId, tran4._objectId, 'transactions equality error');
                                                                 ok(false, 'entity update');
                                                                 close(context);
                                                             },
                                                             success: function (result, tran7) {
-                                                                deepEqual(tran7, tran4, 'transactions equality error');
+                                                                deepEqual(tran7._objectId, tran4._objectId, 'transactions equality error');
                                                                 equal(result.length, 1, 'entity update');
                                                                 p = result[0];
                                                                 equal(p.Id, 1, 'entity update');
@@ -519,41 +519,41 @@
                                                                 p.Id = 2;
                                                                 context.saveChanges({
                                                                     success: function (tran8) {
-                                                                        notDeepEqual(tran8, tran4, 'transactions equality error');
+                                                                        notDeepEqual(tran8._objectId, tran4._objectId, 'transactions equality error');
                                                                         ok(false, 'invalid entity update fail');
                                                                         close(context);
                                                                     },
                                                                     error: function (tran8) {
-                                                                        notDeepEqual(tran8, tran4, 'transactions equality error');
+                                                                        notDeepEqual(tran8._objectId, tran4._objectId, 'transactions equality error');
                                                                         ok(true, 'invalid entity update fail');
                                                                         context.Persons.remove(p);
                                                                         context.saveChanges({
                                                                             success: function (tran9) {
-                                                                                notDeepEqual(tran9, tran8, 'transactions equality error');
+                                                                                notDeepEqual(tran9._objectId, tran8._objectId, 'transactions equality error');
                                                                                 ok(false, 'invalid entity delete fail');
                                                                                 close(context);
                                                                             },
                                                                             error: function (tran9) {
-                                                                                notDeepEqual(tran9, tran8, 'transactions equality error');
+                                                                                notDeepEqual(tran9._objectId, tran8._objectId, 'transactions equality error');
                                                                                 ok(true, 'invalid entity delete fail');
                                                                                 p.Id = 1;
                                                                                 context.saveChanges({
                                                                                     error: function (tran10) {
-                                                                                        notDeepEqual(tran10, tran9, 'transactions equality error');
+                                                                                        notDeepEqual(tran10._objectId, tran9._objectId, 'transactions equality error');
                                                                                         ok(false, 'entity delete');
                                                                                         //close(context);
                                                                                     },
                                                                                     success: function (changedItems, tran10) {
-                                                                                        notDeepEqual(tran10, tran9, 'transactions equality error');
+                                                                                        notDeepEqual(tran10._objectId, tran9._objectId, 'transactions equality error');
                                                                                         equal(changedItems, 1, 'entity delete');
                                                                                         context.Persons.toArray({
                                                                                             error: function (tran11) {
-                                                                                                deepEqual(tran11, tran10, 'transactions equality error');
+                                                                                                deepEqual(tran11._objectId, tran10._objectId, 'transactions equality error');
                                                                                                 ok(false, 'entity delete');
                                                                                                 close(context);
                                                                                             },
                                                                                             success: function (result, tran11) {
-                                                                                                deepEqual(tran11, tran10, 'transactions equality error');
+                                                                                                deepEqual(tran11._objectId, tran10._objectId, 'transactions equality error');
                                                                                                 equal(result.length, 0, 'entity delete');
                                                                                                 close(context);
                                                                                             }
@@ -569,7 +569,7 @@
                                                     }
                                                 }, tran5);
                                             }
-                                        },tran4);
+                                        }, tran4);
                                     }
                                 });
                             }
@@ -580,8 +580,47 @@
         });
     });
 
-    test('sqliteProvider_openDbInsertSingleKeyCRUD_external_tran', function () {
-        expect(4);
+    /*test('indexedDbProvider_schemaChange', function () {
+        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+            Id: { dataType: 'int', key: true },
+            Name: { dataType: 'string' },
+            Desc: { dataType: 'string' }
+        }, null);
+        $data.Class.define('indexedDbProviderTest_Person2', $data.Entity, null, {
+            Id: { dataType: 'int', key: true },
+            Name: { dataType: 'string' },
+            Desc: { dataType: 'string' }
+        }, null);
+        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person },
+            Persons2: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        }, null);
+        var contextDebug = new indexedDbProviderTest_Context({
+            name: 'indexedDb',
+            databaseName: 'indexedDbProvider_schemaChnage',
+            dbCreation: $data.storageProviders.DbCreationType.ErrorIfChange
+        });
+        
+        stop(1);
+
+        contextDebug.onReady(function () {
+            close(contextDebug);
+            try{
+                var contextErrorIfChange = new indexedDbProviderTest_Context({
+                    name: 'indexedDb',
+                    databaseName: 'indexedDbProvider_schemaChnage',
+                    dbCreation: $data.storageProviders.DbCreationType.ErrorIfChange
+                });
+                contextErrorIfChange.onReady(function () {
+
+                });
+            } catch (ex) {
+                ok(false, "db create error");
+            }
+        });
+    });*/
+
+    test('indexedDbProvider_write_table_row_count', function () {
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },
             Name: { dataType: 'string' },
@@ -591,45 +630,115 @@
             Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
         }, null);
         var context = new indexedDbProviderTest_Context({
-            name: 'sqLite',
-            databaseName: 'indexedDbProvider_openDbInsertSingleKeyCRUD',
+            name: 'indexedDb',
+            databaseName: 'indexedDbProvider_openDbTransactionMultipleIndex',
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         });
         stop(1);
         context.onReady(function () {
-            context.beginTransaction(function (tran) {
-                context.tran = tran
-                context.Persons.toArray({
-                    error: function () {
-                        ok(false, 'empty db');
-                        close(context);
-                    },
-                    success: function (result, tranBack) {
-                        deepEqual(tranBack, tran, "In/Out transactions are not same after query!");
-                        equal(result.length, 0, 'empty db');
-                        var p = new indexedDbProviderTest_Person({ Id: 1, Name: 'user', Desc: 'some text' });
-                        context.Persons.add(p);
+            for (var i = 0; i < 10; i++) {
 
-                        context.beginTransaction(true, function (tran2) {
-                            console.log("tran2 OK");
+                var fn = function () {
+                    var idx = i;
+                    context.beginTransaction(true, function (tran) {
+                        console.log("GetLength: " + idx);
+                        context.Persons.length(function (result, tran2) {
+                            deepEqual(tran2._objectId, tran._objectId, "Transaction error");
+                            equal(result, idx, "Row count error");
+                            context.Persons.add(new indexedDbProviderTest_Person({ Id: idx, Name: idx.toString() }));
+                            console.log("Save: " + idx);
                             context.saveChanges({
-                                success: function (result, tranBack2) {
-                                    deepEqual(tranBack2, tran2, "In/Out transactions are not same after save!");
-                                    ok(true, 'save');
-                                    console.log(arguments);
-                                    close(context);
+                                success: function (count, tran3) {
+                                    console.log("Saved: " + idx);
+                                    deepEqual(tran3._objectId, tran._objectId, "Transaction3 error");
+                                    deepEqual(tran3._objectId, tran2._objectId, "Tran3 - tran2 error");
+                                    if (idx == 9) {
+                                        context.beginTransaction(function (tran4) {
+                                            context.Persons.toArray(function (result) {
+                                                notDeepEqual(tran4._objectId, tran._objectId, "tran4 error");
+                                                notDeepEqual(tran4._objectId, tran3._objectId, "tran4-tran3 error");
+                                                notDeepEqual(tran4._objectId, tran2._objectId, "tran4-tran2 error");
+                                                equal(result.length, 10, "Row count error");
+                                                for (var j = 0; j < result.length; j++) {
+                                                    equal(result[j].Name, j.toString(), "Name error");
+                                                    equal(result[j].Id, j, "Id error");
+                                                }
+                                                close(context);
+                                            }, tran4);
+                                        });
+                                    }
                                 },
                                 error: function () {
-                                    //start();
-                                    ok(false, 'entity insert without id fail');
+                                    ok(false, "dbwrite error");
                                     close(context);
                                 }
                             }, tran2);
-                        });
-
-                    }
-                }, tran);
-            });
+                        }, tran);
+                    });
+                };
+                //setTimeout(fn, 0);
+                fn();
+            }
+        });
+    });
+    test('indexedDbProvider_write_table_row_count_async', function () {
+        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+            Id: { dataType: 'int', key: true },
+            Name: { dataType: 'string' },
+            Desc: { dataType: 'string' }
+        }, null);
+        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        }, null);
+        var context = new indexedDbProviderTest_Context({
+            name: 'indexedDb',
+            databaseName: 'indexedDbProvider_openDbTransactionMultipleIndex',
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        });
+        stop(1);
+        context.onReady(function () {
+            var fn = function (idx) {
+                setTimeout(function () {
+                    context.beginTransaction(true, function (tran) {
+                        console.log("GetLength: " + idx);
+                        context.Persons.length(function (result, tran2) {
+                            equal(tran2._objectId, tran._objectId, "Transaction error");
+                            equal(result, idx, "Row count error");
+                            context.Persons.add(new indexedDbProviderTest_Person({ Id: idx, Name: idx.toString() }));
+                            console.log("Save: " + idx);
+                            context.saveChanges({
+                                success: function (count, tran3) {
+                                    console.log("Saved: " + idx);
+                                    deepEqual(tran3._objectId, tran._objectId, "Transaction3 error");
+                                    deepEqual(tran3._objectId, tran2._objectId, "Tran3 - tran2 error");
+                                    if (idx == 9) {
+                                        context.beginTransaction(function (tran4) {
+                                            context.Persons.toArray(function (result) {
+                                                notDeepEqual(tran4._objectId, tran._objectId, "tran4 error");
+                                                notDeepEqual(tran4._objectId, tran3._objectId, "tran4-tran3 error");
+                                                notDeepEqual(tran4._objectId, tran2._objectId, "tran4-tran2 error");
+                                                equal(result.length, 10, "Row count error");
+                                                for (var j = 0; j < result.length; j++) {
+                                                    equal(result[j].Name, j.toString(), "Name error");
+                                                    equal(result[j].Id, j, "Id error");
+                                                }
+                                                close(context);
+                                            }, tran4);
+                                        });
+                                    }
+                                },
+                                error: function () {
+                                    ok(false, "dbwrite error");
+                                    close(context);
+                                }
+                            }, tran2);
+                        }, tran);
+                    });
+                }, 0);
+            };
+            for (var i = 0; i < 10; i++) {
+                fn(i);
+            }
         });
     });
 

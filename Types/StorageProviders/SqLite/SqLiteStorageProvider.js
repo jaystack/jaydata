@@ -237,7 +237,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         setTimeout(function () {
             self.connection.open({
                 error: function () {
-                    console.log("onerror: ", transaction.create);
+                    console.log("onerror: ", transaction._objectId);
                     if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }

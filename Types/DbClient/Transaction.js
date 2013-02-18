@@ -1,13 +1,18 @@
 $data.Class.define('$data.dbClient.Transaction', null, null, {
     constructor: function () {
-        this.create = (new Date()).getTime();
-        console.log("create: ", this.create);
+        this._objectId = (new Date()).getTime();
+        console.log("create: ", this._objectId);
 
         this.oncomplete = new $data.Event("oncomplete", this);
         this.onerror = new $data.Event("onerror", this);
         this.onabort = new $data.Event("onabort", this);
     },
-    create: { type: $data.Date },
+    abort: function () {
+        console.log("tranWrapper onabort: ", self._objectId);
+        Guard.raise(new Exception('User Abort', 'Exception'));
+    },
+
+    _objectId: { type: $data.Date },
     transaction: { type: $data.Object },
 
     oncomplete: { type: $data.Event },

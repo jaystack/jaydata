@@ -197,12 +197,6 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             error.name = "KeyNotFoundError";
             throw error;
         }
-        /*if (1 != keyFields.length) {
-            var error = new Error("Entity must have only one key field: " + contextStore.storeName);
-            error.name = "MultipleKeysNotSupportedError";
-            throw error;
-        }*/
-        //var keyField = keyFields[0];
         for (var i = 0; i < keyFields.length; i++) {
 
             if (keyFields[i].computed === true &&
@@ -221,7 +215,6 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         contextStore.keyFields = keyFields;
         return contextStore;
     },
-
     _getObjectStoreDefinitions: function () {
         var objectStoreDefinitions = [];
         var self = this;
@@ -273,10 +266,35 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             }
         }
     },
-    _hasDbChanges: function (db, definitions) {
+    _hasDbChanges: function (db, transaction, definitions) {
         var isOriginal = true;
+        var tran = transaction;
+        if (!tran) {
+            tran = db.transaction(db.objectStoreNames, "readonly");
+        }
         for (var i = 0; i < definitions.length && isOriginal; i++) {
-            isOriginal = isOriginal && db.objectStoreNames.contains(definitions[i].storeName);
+            if (db.objectStoreNames.contains(definitions[i].storeName)) {
+                //check pk change
+                
+                var os = tran.objectStore(definitions[i].storeName);
+                var keyPath = [].concat(os.keyPath).sort(function (a, b) { return a == b ? 0 : a > b ? 1 : -1; });
+                var defKeyPath = definitions[i].keyFields.map(function (memDef) { return memDef.name; }).sort(function (a, b) { return a == b ? 0 : a > b ? 1 : -1; });
+                if (keyPath.length === defKeyPath.length) {
+                    for (var j = 0; j < keyPath.length; j++) {
+                        isOriginal = isOriginal && (keyPath[j] === defKeyPath[j]);
+                    }
+                    definitions[i].changed = !isOriginal;
+                } else {
+                    isOriginal = false;
+                    definitions[i].changed = true;
+                }
+
+                isOriginal = isOriginal && true;
+            }
+            else {
+                isOriginal = false;
+                definitions[i].changed = true;
+            }
         }
 
         return !isOriginal;
@@ -288,7 +306,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             db.onversionchange = function (event) {
                 return event.target.close();
             };
-            var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+            var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions);
             if (hasTableChanges)
                 self._createDB(db, objectStoreDefinitions);
         }
@@ -313,7 +331,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     return event.target.close();
                 };
 
-                var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+                var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions);
                 //oldAPI
                 if (db.setVersion) {
                     if (db.version === "" || hasTableChanges) {
@@ -450,29 +468,29 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         setTimeout(function () {
             callBack = $data.typeSystem.createCallbackSetting(callBack);
             try {
-                var transaction = new $data.dbClient.Transaction();
+                var transaction = new $data.storageProviders.IndexedDB.IndexedDBTransaction();
                 var tran = self.db.transaction(tableList ? tableList : self.db.objectStoreNames, isWrite ? self.IDBTransactionType.READ_WRITE : self.IDBTransactionType.READ_ONLY);
 
                 tran.oncomplete = function () {
-                    console.log("oncomplete: ", transaction.create);
+                    console.log("oncomplete: ", transaction._objectId);
                     if (transaction.oncomplete) {
                         transaction.oncomplete.fire(arguments, transaction);
                     }
                 };
                 tran.onerror = function () {
-                    console.log("onerror: ", transaction.create);
+                    console.log("onerror: ", transaction._objectId);
                     if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }
                 };
                 tran.onabort = function () {
-                    console.log("onabort: ", transaction.create);
+                    console.log("onabort: ", transaction._objectId);
                     if (transaction.onabort) {
                         transaction.onabort.fire(arguments, transaction);
                     }
                 };
                 tran.onblocked = function () {
-                    console.log("onblocked: ", transaction.create);
+                    console.log("onblocked: ", transaction._objectId);
                     if (transaction.onabort) {
                         transaction.onabort.fire(arguments, transaction);
                     }
