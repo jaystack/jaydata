@@ -54,7 +54,7 @@ $data.Class.define("$news.Types.Location", $data.Entity, null, {
     Country: { type: "string" }
 }, null);
 $data.Class.define("$news.Types.TestItem", $data.Entity, null, {
-    Id: { type: "int", key: true },
+    Id: { type: "int", key: true, computed: true },
     i0: { type: "int" },
     b0: { type: "boolean" },
     s0: { type: "string" },

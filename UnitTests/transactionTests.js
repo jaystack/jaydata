@@ -164,6 +164,8 @@
     });
 
     test('singleKeyCRUD_same_tran', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+
         expect(26);
         var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);

@@ -240,9 +240,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             self.connection.open({
                 error: function () {
                     console.log("onerror: ", transaction._objectId, arguments);
-                    if (transaction.onabort && transaction.aborted === true) {
-                        transaction.onabort.fire(arguments, transaction);
-                    } else if (transaction.onerror) {
+                    if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }
                 },
