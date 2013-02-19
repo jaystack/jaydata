@@ -236,6 +236,11 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     _createDB: function (db, definitions) {
         for (var i = 0; i < definitions.length; i++) {
+            if (definitions[i].dropIfExists && db.objectStoreNames.contains(definitions[i].storeName)) {
+                db.deleteObjectStore(definitions[i].storeName);
+            }
+        }
+        for (var i = 0; i < definitions.length; i++) {
             var storeDef = definitions[i];
 
             if (!db.objectStoreNames.contains(storeDef.storeName)) {
@@ -266,14 +271,14 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             }
         }
     },
-    _hasDbChanges: function (db, transaction, definitions) {
+    _hasDbChanges: function (db, transaction, definitions, dropTabes) {
         var isOriginal = true;
         var tran = transaction;
         if (!tran) {
             tran = db.transaction(db.objectStoreNames, "readonly");
         }
-        for (var i = 0; i < definitions.length && isOriginal; i++) {
-            if (db.objectStoreNames.contains(definitions[i].storeName)) {
+        for (var i = 0; i < definitions.length; i++) {
+            if (!dropTabes && db.objectStoreNames.contains(definitions[i].storeName)) {
                 //check pk change
                 
                 var os = tran.objectStore(definitions[i].storeName);
@@ -292,8 +297,10 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 isOriginal = isOriginal && true;
             }
             else {
+
                 isOriginal = false;
                 definitions[i].changed = true;
+                definitions[i].dropIfExists = dropTabes;
             }
         }
 
@@ -306,7 +313,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             db.onversionchange = function (event) {
                 return event.target.close();
             };
-            var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions);
+            var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions, self.providerConfiguration.dbCreation == $data.storageProviders.DbCreationType.DropAllExistingTables);
             if (hasTableChanges)
                 self._createDB(db, objectStoreDefinitions);
         }
@@ -331,7 +338,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     return event.target.close();
                 };
 
-                var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions);
+                var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions, self.providerConfiguration.dbCreation == $data.storageProviders.DbCreationType.DropAllExistingTables);
                 //oldAPI
                 if (db.setVersion) {
                     if (db.version === "" || hasTableChanges) {

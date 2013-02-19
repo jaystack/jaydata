@@ -228,7 +228,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         self._createSqlConnection();
 
-        var transaction = new $data.dbClient.Transaction();
+        var transaction = new $data.sqLite.SqlTransaction();
         function onComplete() {
             console.log("oncomplete: ", transaction._objectId);
             if (transaction.oncomplete) {
@@ -411,13 +411,18 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 item.physicalData = dbType.convertTo(item.data);
                 return item;
             }, this);
-            provider.saveIndependentItems(convertedItems, sqlConnection, {
-                success: function (items, tran) { //TODO items???
-                    provider.postProcessItems(convertedItems);
-                    saveNextIndependentBlock(tran);
-                },
-                error: callback.error
-            }, tran);
+            //try {
+                provider.saveIndependentItems(convertedItems, sqlConnection, {
+                    success: function (items, tran) { //TODO items???
+                        provider.postProcessItems(convertedItems);
+                        saveNextIndependentBlock(tran);
+                    },
+                    error: callback.error
+                }, tran);
+            //} catch (e) {
+            //    callback.error(tran);
+            //}
+            
         }
         saveNextIndependentBlock(tran);
     },
@@ -590,6 +595,11 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var fieldValue = "";
         var fieldParam = [];
         item.physicalData.constructor.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
+            //if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(item[fieldDef.name])) {
+            //    Guard.raise('Key is not set', 'Value exception', item);
+            //    return;
+            //}
+
             if (fieldList.length > 0 && fieldList[fieldList.length - 1] != ",") { fieldList += ","; fieldValue += ","; }
             var fieldName = fieldDef.name;
             if (/*item.physicalData[fieldName] !== null && */item.physicalData[fieldName] !== undefined) {
