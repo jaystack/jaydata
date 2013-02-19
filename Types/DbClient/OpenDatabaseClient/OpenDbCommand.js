@@ -64,6 +64,8 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
 
                                 if (errorhandler)
                                     errorhandler(err);
+
+                                return true;
                             }
                         );
                     } else {

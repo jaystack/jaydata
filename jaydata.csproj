@@ -358,12 +358,14 @@
     <Content Include="test_JayData_nuget_prov.html" />
     <Content Include="test_Node.js" />
     <Content Include="test_odata.html" />
+    <Content Include="Types\DbClient\Transaction.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalInFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
+    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
     <Content Include="README.md" />
@@ -781,7 +783,6 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>57784</DevelopmentServerPort>
           <DevelopmentServerPort>63560</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:64176/</IISUrl>

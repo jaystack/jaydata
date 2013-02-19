@@ -190,10 +190,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        this.storageProvider._beginTran(tables, isWrite, function (tran) {
-            callBack.success(tran);
-        });
-
+        this.storageProvider._beginTran(tables, isWrite, callBack);
     },
     getDataType: function (dataType) {
         // Obsolate

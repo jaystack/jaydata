@@ -230,15 +230,19 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         var transaction = new $data.dbClient.Transaction();
         function onComplete() {
+            console.log("oncomplete: ", transaction._objectId);
             if (transaction.oncomplete) {
                 transaction.oncomplete.fire(arguments, transaction);
             }
         }
+
         setTimeout(function () {
             self.connection.open({
                 error: function () {
-                    console.log("onerror: ", transaction._objectId);
-                    if (transaction.onerror) {
+                    console.log("onerror: ", transaction._objectId, arguments);
+                    if (transaction.onabort && transaction.aborted === true) {
+                        transaction.onabort.fire(arguments, transaction);
+                    } else if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }
                 },
@@ -343,6 +347,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             sqlCommand.executeQuery(innerCallback, query.transaction, false);
         } else {
             this.context.beginTransaction(false, function (tran) {
+                query.transaction = tran;
                 sqlCommand.executeQuery(innerCallback, tran, false);
             });
         }

@@ -8,8 +8,9 @@ $data.Class.define('$data.dbClient.Transaction', null, null, {
         this.onabort = new $data.Event("onabort", this);
     },
     abort: function () {
-        console.log("tranWrapper onabort: ", self._objectId);
-        Guard.raise(new Exception('User Abort', 'Exception'));
+        console.log("onabort: ", this._objectId);
+        this.aborted = true;
+        Guard.raise(new Exception('User Abort', 'Exception', arguments));
     },
 
     _objectId: { type: $data.Integer },
