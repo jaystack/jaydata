@@ -342,7 +342,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 //oldAPI
                 if (db.setVersion) {
                     if (db.version === "" || hasTableChanges) {
-                        db.setVersion(parseInt(db.version) || 1).setCallbacks({
+                        db.setVersion((parseInt(db.version) || 0)+1).setCallbacks({
                             onsuccess: function (e) {
                                 var db = e.target.result
                                 self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
@@ -485,15 +485,20 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     }
                 };
                 tran.onerror = function () {
+                    console.log(new Date().getTime());
                     console.log("onerror: ", transaction._objectId);
+                    transaction.aborted = true;
                     if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }
                 };
                 tran.onabort = function () {
+                    console.log(new Date().getTime());
                     console.log("onabort: ", transaction._objectId);
-                    if (transaction.onabort) {
-                        transaction.onabort.fire(arguments, transaction);
+                    if (!transaction.aborted) {
+                        if (transaction.onerror) {
+                            transaction.onerror.fire(arguments, transaction);
+                        }
                     }
                 };
                 tran.onblocked = function () {
@@ -542,7 +547,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         var doSave = function () {
             if (independentBlocks.length == 0) {
                 transaction.onerror.detach(t1);
-                transaction.onabort.detach(t2);
+                //transaction.onabort.detach(t2);
                 callBack.success(transaction);
             }
             else {
@@ -565,19 +570,19 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             }
         }
         var t1 = null;
-        var t2 = null;
+        //var t2 = null;
         var tranError = function (sender, event) {
             this.onerror.detach(t1);
             callBack.error(transaction);
         };
-        var tranAbort = function (sender, event) {
-            this.onabort.detach(t2);
-            callBack.error(transaction);
-        };
+        //var tranAbort = function (sender, event) {
+        //    this.onabort.detach(t2);
+        //    callBack.error(transaction);
+        //};
         t1 = tranError;
-        t2 = tranAbort;
+        //t2 = tranAbort;
         transaction.onerror.attach(tranError);
-        transaction.onabort.attach(tranAbort);
+        //transaction.onabort.attach(tranAbort);
         doSave();
     },
     _saveIndependentBlock: function (items, tran, callBack) {
@@ -615,6 +620,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         } else {
                             request = store.add(item.physicalData.initData);
                         }
+                        request.onerror = function () { console.log("error");};
                         request.onsuccess = function (event) {
                             var newKey = event.target.result;
                             if (newKey instanceof $data.Array) {
@@ -659,6 +665,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         Guard.raise(new Exception('Not supported entity state', null, item));
                 }
             } catch (ex) {
+                console.log("try error");
                 callBack.error(ex);
             }
         }

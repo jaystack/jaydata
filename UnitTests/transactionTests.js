@@ -1,6 +1,14 @@
 ﻿function TransactionTests(providerConfig, msg) {
     msg = msg || '';
     module("Transactions_" + msg);
+    function getProviderConfig() {
+        return JSON.parse(JSON.stringify(providerConfig));
+    }
+    function closeDbIfNeeded(context) {
+        if (context.storageProvider.db) {
+            context.storageProvider.db.close();
+        }
+    }
     $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
         Id: { dataType: 'int', key: true },
         Name: { dataType: 'string' },
@@ -11,7 +19,7 @@
     }, null);
 
     test('write_table_count_without_setTimeout', function () {
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             for (var i = 0; i < 10; i++) {
@@ -41,6 +49,7 @@
                                                     equal(result[j].Name, j.toString(), "Name error");
                                                     equal(result[j].Id, j, "Id error");
                                                 }
+                                                closeDbIfNeeded(context);
                                                 start();
                                             }, tran4);
                                         });
@@ -48,6 +57,7 @@
                                 },
                                 error: function () {
                                     ok(false, "dbwrite error");
+                                    closeDbIfNeeded(context);
                                     start();
                                 }
                             }, tran2);
@@ -60,15 +70,7 @@
     });
 
     test('write_table_count_with_setTimeout', function () {
-        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-        //    Id: { dataType: 'int', key: true },
-        //    Name: { dataType: 'string' },
-        //    Desc: { dataType: 'string' }
-        //}, null);
-        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        //}, null);
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             var fn = function (idx) {
@@ -96,6 +98,7 @@
                                                     equal(result[j].Name, j.toString(), "Name error");
                                                     equal(result[j].Id, j, "Id error");
                                                 }
+                                                closeDbIfNeeded(context);
                                                 start();
                                             }, tran4);
                                         });
@@ -103,6 +106,7 @@
                                 },
                                 error: function () {
                                     ok(false, "dbwrite error");
+                                    closeDbIfNeeded(context);
                                     start();
                                 }
                             }, tran2);
@@ -118,16 +122,7 @@
 
     test('singleKeyCRUD_external_tran', function () {
         expect(4);
-        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-        //    Id: { dataType: 'int', key: true },
-        //    Name: { dataType: 'string' },
-        //    Desc: { dataType: 'string' }
-        //}, null);
-        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        //}, null);
-
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             context.beginTransaction(function (tran) {
@@ -135,6 +130,7 @@
                 context.Persons.toArray({
                     error: function () {
                         ok(false, 'empty db');
+                        closeDbIfNeeded(context);
                         start();
                     },
                     success: function (result, tranBack) {
@@ -150,11 +146,12 @@
                                     deepEqual(tranBack2._objectId, tran2._objectId, "In/Out transactions are not same after save!");
                                     ok(true, 'save');
                                     console.log(arguments);
+                                    closeDbIfNeeded(context);
                                     start();
                                 },
                                 error: function () {
-                                    //start();
                                     ok(false, 'entity insert without id fail');
+                                    closeDbIfNeeded(context);
                                     start();
                                 }
                             }, tran2);
@@ -168,22 +165,14 @@
 
     test('singleKeyCRUD_same_tran', function () {
         expect(26);
-        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-        //    Id: { dataType: 'int', key: true },
-        //    Name: { dataType: 'string' },
-        //    Desc: { dataType: 'string' }
-        //}, null);
-        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        //}, null);
-
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             context.beginTransaction(true, function (tran) {
                 context.Persons.toArray({
                     error: function (tran) {
                         ok(false, 'empty db');
+                        closeDbIfNeeded(context);
                         start();
                     },
                     success: function (result, tran2) {
@@ -196,6 +185,7 @@
                             success: function (count, tran3) {
                                 deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                 ok(false, 'entity insert without id fail');
+                                closeDbIfNeeded(context);
                                 start();
                             },
                             error: function (tran3) {
@@ -206,6 +196,7 @@
                                     error: function (tran4) {
                                         deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                         ok(false, 'entity insert with id success');
+                                        closeDbIfNeeded(context);
                                         start();
                                     },
                                     success: function (changedItems, tran4) {
@@ -215,6 +206,7 @@
                                             error: function (tran5) {
                                                 deepEqual(tran5._objectId, tran4._objectId, 'transactions equality error');
                                                 ok(false, 'entity query');
+                                                closeDbIfNeeded(context);
                                                 start();
                                             },
                                             success: function (result, tran5) {
@@ -229,6 +221,7 @@
                                                     error: function (tran6) {
                                                         deepEqual(tran6._objectId, tran4._objectId, 'transactions equality error');
                                                         ok(false, 'entity update');
+                                                        closeDbIfNeeded(context);
                                                         start();
                                                     },
                                                     success: function (changedItems, tran6) {
@@ -238,6 +231,7 @@
                                                             error: function (tran7) {
                                                                 deepEqual(tran7._objectId, tran4._objectId, 'transactions equality error');
                                                                 ok(false, 'entity update');
+                                                                closeDbIfNeeded(context);
                                                                 start();
                                                             },
                                                             success: function (result, tran7) {
@@ -253,6 +247,7 @@
                                                                     success: function (tran8) {
                                                                         notDeepEqual(tran8._objectId, tran4._objectId, 'transactions equality error');
                                                                         ok(false, 'invalid entity update fail');
+                                                                        closeDbIfNeeded(context);
                                                                         start();
                                                                     },
                                                                     error: function (tran8) {
@@ -263,6 +258,7 @@
                                                                             success: function (tran9) {
                                                                                 notDeepEqual(tran9._objectId, tran8._objectId, 'transactions equality error');
                                                                                 ok(false, 'invalid entity delete fail');
+                                                                                closeDbIfNeeded(context);
                                                                                 start();
                                                                             },
                                                                             error: function (tran9) {
@@ -273,7 +269,7 @@
                                                                                     error: function (tran10) {
                                                                                         notDeepEqual(tran10._objectId, tran9._objectId, 'transactions equality error');
                                                                                         ok(false, 'entity delete');
-                                                                                        //start();
+                                                                                       
                                                                                     },
                                                                                     success: function (changedItems, tran10) {
                                                                                         notDeepEqual(tran10._objectId, tran9._objectId, 'transactions equality error');
@@ -282,11 +278,13 @@
                                                                                             error: function (tran11) {
                                                                                                 deepEqual(tran11._objectId, tran10._objectId, 'transactions equality error');
                                                                                                 ok(false, 'entity delete');
+                                                                                                closeDbIfNeeded(context);
                                                                                                 start();
                                                                                             },
                                                                                             success: function (result, tran11) {
                                                                                                 deepEqual(tran11._objectId, tran10._objectId, 'transactions equality error');
                                                                                                 equal(result.length, 0, 'entity delete');
+                                                                                                closeDbIfNeeded(context);
                                                                                                 start();
                                                                                             }
                                                                                         }, tran10);
@@ -313,16 +311,7 @@
     });
 
     test('abort_test', function () {
-        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-        //    Id: { dataType: 'int', key: true },
-        //    Name: { dataType: 'string' },
-        //    Desc: { dataType: 'string' }
-        //}, null);
-        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        //}, null);
-
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             context.beginTransaction(true, function (tran) {
@@ -330,6 +319,7 @@
                 context.Persons.toArray({
                     error: function (tran) {
                         ok(false, 'empty db');
+                        closeDbIfNeeded(context);
                         start();
                     },
                     success: function (result, tran2) {
@@ -342,6 +332,27 @@
                             success: function (count, tran3) {
                                 deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                 context.beginTransaction(true, function (tran4) {
+
+                                    tran4.onerror.attach(function () {
+                                        context.beginTransaction(function (tran7) {
+                                            context.Persons.toArray({
+                                                error: function (tran8) {
+                                                    ok(false, "get data after abort error");
+                                                    equal(tran8._objectId, tran7._objectId, "Tran error");
+                                                    closeDbIfNeeded(context);
+                                                    start();
+                                                },
+                                                success: function (result, tran8) {
+                                                    equal(tran8._objectId, tran7._objectId, "Tran error");
+                                                    equal(result.length, 1, "Data integrity error");
+                                                    equal(result[0].Name, "user", "Date integrity 2 error");
+                                                    closeDbIfNeeded(context);
+                                                    start();
+                                                }
+                                            }, tran7);
+                                        });
+                                    });
+
                                     var p = new indexedDbProviderTest_Person({ Id: 2, Name: 'user2', Desc: 'some text' });
                                     context.Persons.add(p);
                                     context.saveChanges({
@@ -351,29 +362,16 @@
                                                 error: function (tran6) {
                                                     ok(false, "get data error");
                                                     equal(tran6._objectId, tran5._objectId, "Tran error");
+                                                    closeDbIfNeeded(context);
                                                     start();
                                                 },
                                                 success: function (result, tran6) {
                                                     equal(result.length, 2, "Data integrity error");
                                                     equal(result[0].Name, "user", "Date integrity 2 error");
                                                     equal(result[1].Name, "user2", "Date integrity 2 error");
-
+                                                    ok(true, 'Uncaught Exception can be okay in WebSql');
                                                     tran6.abort();
-                                                    context.beginTransaction(function (tran7) {
-                                                        context.Persons.toArray({
-                                                            error: function (tran8) {
-                                                                ok(false, "get data after abort error");
-                                                                equal(tran8._objectId, tran7._objectId, "Tran error");
-                                                                start();
-                                                            },
-                                                            success: function (result, tran8) {
-                                                                equal(tran8._objectId, tran7._objectId, "Tran error");
-                                                                equal(result.length, 1, "Data integrity error");
-                                                                equal(result[0].Name, "user", "Date integrity 2 error");
-                                                                start();
-                                                            }
-                                                        }, tran7);
-                                                    });
+                                                   
 
                                                 }
                                             }, tran5);
@@ -381,6 +379,7 @@
                                         error: function (tran5) {
                                             ok(false, "2nd change error");
                                             equal(tran5._objectId, tran4._objectId, "Tran error");
+                                            closeDbIfNeeded(context);
                                             start();
                                         }
                                     }, tran4);
@@ -389,6 +388,7 @@
                             error: function (tran3) {
                                 deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                 ok(false, 'empty db');
+                                closeDbIfNeeded(context);
                                 start();
                             }
                         }, tran2);
@@ -396,5 +396,173 @@
                 }, tran);
             });
         });
+    });
+
+    test('simple Abort test', function () {
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'error onSave' });
+            db.Categories.add(cat);
+            //db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+               
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onerror.attach(function () {
+                    console.log('-onabort', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        closeDbIfNeeded(db);
+                        start();
+                    });
+                });
+
+
+                db.saveChanges({
+                    success: function (res, tran1) {
+
+                        db.Categories.toArray({
+                            success: function (res, tran2) {
+                                ok(true, 'Uncaught Exception can be okay in WebSql');
+                                tran2.abort();
+                            },
+                            error: function () {
+                                ok(false, 'error handler called');
+                            }
+                        }, tran1);
+
+                    },
+                    error: function () {
+                        ok(false, 'error handler called');
+                    }
+                }, tran);
+            });
+        });
+
+    });
+
+    test('simple Abort test promise', function () {
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'error onSave' });
+            db.Categories.add(cat);
+            //db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onerror.attach(function () {
+                    console.log('-onabort', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        closeDbIfNeeded(db);
+                        start();
+                    });
+                });
+
+
+                db.saveChanges({
+                    success: function (res, tran1) {
+
+                        db.Categories.toArray(undefined, tran1).then(function (res, tran2) {
+                            ok(true, 'Uncaught Exception can be okay in WebSql');
+                            tran2.abort();
+                        }).fail(function () {
+                            ok(false, 'error handler called');
+                        });
+
+                    },
+                    error: function () {
+                        ok(false, 'error handler called');
+                    }
+                }, tran);
+            });
+        });
+
+    });
+
+    test('insert_failed_test', 1, function () {
+        expect(2);
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item1' });
+            db.Categories.add(cat);
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item2' });
+            db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                tran.onerror.attach(function () {
+                    console.log('-onabort', arguments);
+                })
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onerror.attach(function () {
+                    console.log('-onerror', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        closeDbIfNeeded(db);
+                        start();
+                    });
+                });
+
+
+                db.saveChanges({
+                    success: function (res, tran1) {
+                        ok(false, 'error handler not called');
+                    },
+                    error: function (ex, promise) {
+                        ok(true, 'error handler called');
+                    }
+                }, tran);
+            });
+        });
+
+    });
+
+    test('insert failed test promise', 1, function () {
+        expect(2);
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item1' });
+            db.Categories.add(cat);
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item2' });
+            db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onerror.attach(function () {
+                    console.log("test", new Date().getTime());
+                    console.log('-onerror', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        closeDbIfNeeded(db);
+                        start();
+                    });
+                });
+
+
+                db.saveChanges(undefined, tran).then(function (res, tran1) {
+                    ok(false, 'error handler not called');
+                }).fail(function () {
+                    ok(true, 'promise error handler called');
+                });
+            });
+        });
+
     });
 };

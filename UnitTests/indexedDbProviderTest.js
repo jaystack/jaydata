@@ -39,7 +39,7 @@
     });
 
     test('disallow_types_with_incorrect_keys', function () {
-        expect(3);
+        expect(2);
         $data.Class.define('indexedDbProviderTest_PersonWithoutKey', $data.Entity, null, {
             Id: { dataType: 'int', computed: true },
             Name: { dataType: 'string' }
@@ -444,103 +444,103 @@
             });
         });
     });
+    if (typeof ActiveXObject === 'undefined') {
+        test('indexedDbProvider_openDb_multiple_key', function () {
+            expect(12);
+            stop();
 
-    test('indexedDbProvider_openDb_multiple_key', function () {
-        expect(12);
-        stop();
+            $data.Class.define('indexedDbProviderTest_Person2Key', $data.Entity, null, {
+                Id: { dataType: 'int', key: true, required: true },
+                IdGuid: { dataType: 'guid', key: true, required: true },
+                Name: { dataType: 'string' }
+            }, null);
 
-        $data.Class.define('indexedDbProviderTest_Person2Key', $data.Entity, null, {
-            Id: { dataType: 'int', key: true, required: true },
-            IdGuid: { dataType: 'guid', key: true, required: true },
-            Name: { dataType: 'string' }
-        }, null);
+            $data.Class.define('indexedDbProviderTest_Context2Key', $data.EntityContext, null, {
+                Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person2Key }
+            }, null);
 
-        $data.Class.define('indexedDbProviderTest_Context2Key', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person2Key }
-        }, null);
-
-        try {
-            var context = new indexedDbProviderTest_Context2Key({
-                name: 'indexedDb',
-                databaseName: 'indexedDbProvider_openDb_multiple_key'
-            });
-        } catch (exception) {
-            console.log("!!!");
-            console.dir(exception);
-        }
-
-        context.onReady({
-            error: function (e) {
-                console.dir(e);
-            },
-            success: function () {
-                //start();
-                ok(true, 'simple context opened');
-                context.Persons.toArray({
-                    error: function () {
-                        ok(false, 'empty db');
-                        //start();
-                        close(context);
-                    },
-                    success: function (result) {
-                        var item = new indexedDbProviderTest_Person2Key({ Name: 'test' });
-                        context.Persons.add(item);
-                        equal(item.Id, undefined, 'Id is not set');
-                        equal(item.IdGuid, undefined, 'IdGuid is not set');
-                        context.saveChanges({
-                            error: function (e) {
-
-                                item.Id = 1;
-                                item.IdGuid = $data.parseGuid('83a2532a-bc7c-4554-b0fd-c63642a95d04');
-
-                                context.saveChanges({
-                                    error: function (e) {
-
-                                        ok(false, '(in IE10, multiple key not supported on this implementation) save error ' + e);
-
-                                        close(context);
-                                    },
-                                    success: function (result) {
-                                        equal(typeof item.Id, 'number', 'Id has valid type');
-                                        equal(item.Id, 1, 'is has valid value');
-
-                                        equal(item.IdGuid instanceof $data.Guid, true, 'IdGuid is guid');
-                                        equal(item.IdGuid.valueOf(), '83a2532a-bc7c-4554-b0fd-c63642a95d04', 'IdGuid valid has value');
-
-                                        context.Persons.toArray({
-                                            success: function (res) {
-                                                equal(res.length, 1, 'result lenght failed');
-
-                                                equal(typeof res[0].Id, 'number', 'Id has valid type');
-                                                equal(res[0].Id, 1, 'is has valid value');
-
-                                                equal(res[0].IdGuid instanceof $data.Guid, true, 'IdGuid is guid');
-                                                equal(res[0].IdGuid.valueOf(), '83a2532a-bc7c-4554-b0fd-c63642a95d04', 'IdGuid valid has value');
-
-                                                close(context);
-                                            },
-                                            error: function (res) {
-                                                ok(false, 'save error ' + res);
-                                                close(context);
-                                            }
-                                        });
-                                    }
-                                });
-
-                            },
-                            success: function (result) {
-                                ok(false, 'save error ' + result);
-                                close(context);
-                            }
-                        });
-
-                    }
+            try {
+                var context = new indexedDbProviderTest_Context2Key({
+                    name: 'indexedDb',
+                    databaseName: 'indexedDbProvider_openDb_multiple_key'
                 });
+            } catch (exception) {
+                console.log("!!!");
+                console.dir(exception);
             }
-        }
-        );
-    });
 
+            context.onReady({
+                error: function (e) {
+                    console.dir(e);
+                },
+                success: function () {
+                    //start();
+                    ok(true, 'simple context opened');
+                    context.Persons.toArray({
+                        error: function () {
+                            ok(false, 'empty db');
+                            //start();
+                            close(context);
+                        },
+                        success: function (result) {
+                            var item = new indexedDbProviderTest_Person2Key({ Name: 'test' });
+                            context.Persons.add(item);
+                            equal(item.Id, undefined, 'Id is not set');
+                            equal(item.IdGuid, undefined, 'IdGuid is not set');
+                            context.saveChanges({
+                                error: function (e) {
+
+                                    item.Id = 1;
+                                    item.IdGuid = $data.parseGuid('83a2532a-bc7c-4554-b0fd-c63642a95d04');
+
+                                    context.saveChanges({
+                                        error: function (e) {
+
+                                            ok(false, '(in IE10, multiple key not supported on this implementation) save error ' + e);
+
+                                            close(context);
+                                        },
+                                        success: function (result) {
+                                            equal(typeof item.Id, 'number', 'Id has valid type');
+                                            equal(item.Id, 1, 'is has valid value');
+
+                                            equal(item.IdGuid instanceof $data.Guid, true, 'IdGuid is guid');
+                                            equal(item.IdGuid.valueOf(), '83a2532a-bc7c-4554-b0fd-c63642a95d04', 'IdGuid valid has value');
+
+                                            context.Persons.toArray({
+                                                success: function (res) {
+                                                    equal(res.length, 1, 'result lenght failed');
+
+                                                    equal(typeof res[0].Id, 'number', 'Id has valid type');
+                                                    equal(res[0].Id, 1, 'is has valid value');
+
+                                                    equal(res[0].IdGuid instanceof $data.Guid, true, 'IdGuid is guid');
+                                                    equal(res[0].IdGuid.valueOf(), '83a2532a-bc7c-4554-b0fd-c63642a95d04', 'IdGuid valid has value');
+
+                                                    close(context);
+                                                },
+                                                error: function (res) {
+                                                    ok(false, 'save error ' + res);
+                                                    close(context);
+                                                }
+                                            });
+                                        }
+                                    });
+
+                                },
+                                success: function (result) {
+                                    ok(false, 'save error ' + result);
+                                    close(context);
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }
+            );
+        });
+    }
     $data.Class.define("idbexample.idbTestItem1", $data.Entity, null, {
         Id: { type: "int", key: true, computed: true },
         i0: { type: "int" },
