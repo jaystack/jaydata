@@ -411,7 +411,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 item.physicalData = dbType.convertTo(item.data);
                 return item;
             }, this);
-            //try {
+            try {
                 provider.saveIndependentItems(convertedItems, sqlConnection, {
                     success: function (items, tran) { //TODO items???
                         provider.postProcessItems(convertedItems);
@@ -419,9 +419,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     },
                     error: callback.error
                 }, tran);
-            //} catch (e) {
-            //    callback.error(tran);
-            //}
+            } catch (e) {
+                callback.error(e, tran);
+            }
             
         }
         saveNextIndependentBlock(tran);
@@ -595,10 +595,10 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var fieldValue = "";
         var fieldParam = [];
         item.physicalData.constructor.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
-            //if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(item[fieldDef.name])) {
-            //    Guard.raise('Key is not set', 'Value exception', item);
-            //    return;
-            //}
+            if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+                Guard.raise(new Exception('Key is not set', 'Value exception', item));
+                return;
+            }
 
             if (fieldList.length > 0 && fieldList[fieldList.length - 1] != ",") { fieldList += ","; fieldValue += ","; }
             var fieldName = fieldDef.name;

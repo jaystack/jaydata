@@ -2,6 +2,10 @@
     msg = msg || '';
     module("Transactions_" + msg);
 
+    function getProviderConfig() {
+        return JSON.parse(JSON.stringify(providerConfig));
+    }
+
     test('write_table_count_without_setTimeout', function () {
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },
@@ -12,7 +16,7 @@
             Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
         }, null);
 
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             for (var i = 0; i < 10; i++) {
@@ -69,7 +73,7 @@
         $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
             Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
         }, null);
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             var fn = function (idx) {
@@ -128,7 +132,7 @@
             Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
         }, null);
 
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             context.beginTransaction(function (tran) {
@@ -168,6 +172,9 @@
     });
 
     test('singleKeyCRUD_same_tran', function () {
+        if (providerConfig.name === "sqLite") { ok(true, "Not supported"); return; }
+
+
         expect(26);
         $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
             Id: { dataType: 'int', key: true },
@@ -323,10 +330,11 @@
             Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
         }, null);
 
-        var context = new indexedDbProviderTest_Context(providerConfig);
+        var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
             context.beginTransaction(true, function (tran) {
+
                 context.Persons.toArray({
                     error: function (tran) {
                         ok(false, 'empty db');
@@ -342,6 +350,25 @@
                             success: function (count, tran3) {
                                 deepEqual(tran3._objectId, tran._objectId, 'transactions equality error');
                                 context.beginTransaction(true, function (tran4) {
+
+                                    tran4.onabort.attach(function () {
+                                        context.beginTransaction(function (tran7) {
+                                            context.Persons.toArray({
+                                                error: function (tran8) {
+                                                    ok(false, "get data after abort error");
+                                                    equal(tran8._objectId, tran7._objectId, "Tran error");
+                                                    start();
+                                                },
+                                                success: function (result, tran8) {
+                                                    equal(tran8._objectId, tran7._objectId, "Tran error");
+                                                    equal(result.length, 1, "Data integrity error");
+                                                    equal(result[0].Name, "user", "Date integrity 2 error");
+                                                    start();
+                                                }
+                                            }, tran7);
+                                        });
+                                    });
+
                                     var p = new indexedDbProviderTest_Person({ Id: 2, Name: 'user2', Desc: 'some text' });
                                     context.Persons.add(p);
                                     context.saveChanges({
@@ -358,22 +385,8 @@
                                                     equal(result[0].Name, "user", "Date integrity 2 error");
                                                     equal(result[1].Name, "user2", "Date integrity 2 error");
 
+                                                    ok(true, 'Uncaught Exception can be okay in WebSql');
                                                     tran6.abort();
-                                                    context.beginTransaction(function (tran7) {
-                                                        context.Persons.toArray({
-                                                            error: function (tran8) {
-                                                                ok(false, "get data after abort error");
-                                                                equal(tran8._objectId, tran7._objectId, "Tran error");
-                                                                start();
-                                                            },
-                                                            success: function (result, tran8) {
-                                                                equal(tran8._objectId, tran7._objectId, "Tran error");
-                                                                equal(result.length, 1, "Data integrity error");
-                                                                equal(result[0].Name, "user", "Date integrity 2 error");
-                                                                start();
-                                                            }
-                                                        }, tran7);
-                                                    });
 
                                                 }
                                             }, tran5);
@@ -396,5 +409,175 @@
                 }, tran);
             });
         });
+    });
+
+    test('simple Abort test', function () {
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'error onSave' });
+            db.Categories.add(cat);
+            //db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                tran.onerror.attach(function () {
+                    console.log('-onerror', arguments);
+                })
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onabort.attach(function () {
+                    console.log('-onabort', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        start();
+                    });
+                });
+
+
+                db.saveChanges({
+                    success: function (res, tran1) {
+
+                        db.Categories.toArray({
+                            success: function (res, tran2) {
+                                ok(true, 'Uncaught Exception can be okay in WebSql');
+                                tran2.abort();
+                            },
+                            error: function () {
+                                ok(false, 'error handler called');
+                            }
+                        }, tran1);
+
+                    },
+                    error: function () {
+                        ok(false, 'error handler called');
+                    }
+                }, tran);
+            });
+        });
+
+    });
+
+    test('simple Abort test promise', function () {
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'error onSave' });
+            db.Categories.add(cat);
+            //db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                tran.onerror.attach(function () {
+                    console.log('-onerror', arguments);
+                })
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onabort.attach(function () {
+                    console.log('-onabort', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        start();
+                    });
+                });
+
+
+                db.saveChanges({
+                    success: function (res, tran1) {
+
+                        db.Categories.toArray(undefined, tran1).then(function (res, tran2) {
+                            ok(true, 'Uncaught Exception can be okay in WebSql');
+                            tran2.abort();
+                        }).fail(function () {
+                            ok(false, 'error handler called');
+                        });
+
+                    },
+                    error: function () {
+                        ok(false, 'error handler called');
+                    }
+                }, tran);
+            });
+        });
+
+    });
+
+    test('insert failed test', 1, function () {
+        expect(2);
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item1' });
+            db.Categories.add(cat);
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item2' });
+            db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                tran.onabort.attach(function () {
+                    console.log('-onabort', arguments);
+                })
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onerror.attach(function () {
+                    console.log('-onerror', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        start();
+                    });
+                });
+
+
+                db.saveChanges({
+                    success: function (res, tran1) {
+                        ok(false, 'error handler not called');
+                    },
+                    error: function (ex, promise) {
+                        ok(true, 'error handler called');
+                    }
+                }, tran);
+            });
+        });
+
+    });
+
+    test('insert failed test promise', 1, function () {
+        expect(2);
+        stop(1);
+        (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
+
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item1' });
+            db.Categories.add(cat);
+            var cat = new $news.Types.Category({ Id: 1, Title: 'Item2' });
+            db.Categories.add(cat);
+
+            db.beginTransaction(true, function (tran) {
+
+                tran.onabort.attach(function () {
+                    console.log('-onabort', arguments);
+                })
+                tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
+                tran.onerror.attach(function () {
+                    console.log('-onerror', arguments);
+
+                    db.Categories.toArray(function (res, tran3) {
+
+                        equal(res.length, 0, 'rollback applied');
+                        start();
+                    });
+                });
+
+
+                db.saveChanges(undefined, tran).then(function (res, tran1) {
+                    ok(false, 'error handler not called');
+                }).fail(function () {
+                    ok(true, 'promise error handler called');
+                });
+            });
+        });
+
     });
 };
