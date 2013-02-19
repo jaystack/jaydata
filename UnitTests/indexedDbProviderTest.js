@@ -378,46 +378,6 @@
         });
     });
 
-    /*test('indexedDbProvider_schemaChange', function () {
-        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Person2', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person },
-            Persons2: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        }, null);
-        var contextDebug = new indexedDbProviderTest_Context({
-            name: 'indexedDb',
-            databaseName: 'indexedDbProvider_schemaChnage',
-            dbCreation: $data.storageProviders.DbCreationType.ErrorIfChange
-        });
-        
-        stop(1);
-
-        contextDebug.onReady(function () {
-            close(contextDebug);
-            try{
-                var contextErrorIfChange = new indexedDbProviderTest_Context({
-                    name: 'indexedDb',
-                    databaseName: 'indexedDbProvider_schemaChnage',
-                    dbCreation: $data.storageProviders.DbCreationType.ErrorIfChange
-                });
-                contextErrorIfChange.onReady(function () {
-
-                });
-            } catch (ex) {
-                ok(false, "db create error");
-            }
-        });
-    });*/
-
     test('indexedDbProvider_count', function () {
         expect(2);
         var context = new $news.Types.NewsContext({
@@ -451,7 +411,7 @@
         });
     });
 
-    test('indexedDbProvider auto increment', function () {
+    test('indexedDbProvider_auto_increment', function () {
         expect(3);
         var context = new $news.Types.NewsContext({
             name: 'indexedDb',
@@ -485,7 +445,7 @@
         });
     });
 
-    test('indexedDbProvider_openDb multiple key', function () {
+    test('indexedDbProvider_openDb_multiple_key', function () {
         expect(12);
         stop();
 
@@ -606,7 +566,7 @@
         Items2: { dataType: $data.EntitySet, elementType: idbexample.idbTestItem2 }
     }, null);
 
-    test('many data test', function () {
+    test('many_data_test', function () {
         var dataNumber = 1000;
         expect((6 + 6) * dataNumber + 6);
 
@@ -695,7 +655,59 @@
         });
     });
 
-    test('indexed db simple tests', function () {
+    test('next_prev_result', function () {
+        var context = new idbexample.idbContext({
+            name: 'indexedDb',
+            databaseName: 'idbexample_idbContext2',
+            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
+        });
+        stop(1);
+        context.onReady(function () {
+            var maxItemNum = 1000;
+            for (var i = 0; i < maxItemNum; i++) {
+                var item1 = new idbexample.idbTestItem1({
+                    i0: i,
+                    b0: i % 2 ? true : false,
+                    s0: 's0' + (maxItemNum - i),
+                    n0: parseFloat('2.2' + i),
+                    d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
+                });
+                var item2 = new idbexample.idbTestItem2({
+                    Id: $data.Guid.NewGuid(),
+                    i0: i,
+                    b0: i % 2 ? true : false,
+                    s0: 's0' + (maxItemNum - i),
+                    n0: parseFloat('2.2' + i),
+                    d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
+                });
+                if (i == 500) {
+                    item2_500_guid = item2.Id.value;
+                }
+                context.Items1.add(item1);
+                context.Items2.add(item2);
+            }
+            context.saveChanges({
+                success: function () {
+                    context.Items1.take(5).toArray(function (result) {
+                        equal(result.length, 5, "endsWith(), result length");
+                        for (var i = 0; i < result.length; i++) {
+                            equal(result[i].i0, i, "Id error");
+                        }
+                        result.next(function (result2) {
+                            equal(result2.length, 5, "endsWith(), result length");
+                            for (var i = 0; i < result.length; i++) {
+                                equal(result2[i].i0, (i + 5), "Id error");
+                            }
+                            close(context);
+                        });
+                    });
+                }
+            });
+        });
+        context.onReady(function () { console.log("KHKJHKJH");});
+    });
+
+    test('indexed_db_simple_tests', function () {
         //$data.Trace = new $data.Logger();
         var context = new idbexample.idbContext({
             name: 'indexedDb',
@@ -730,9 +742,12 @@
             }
             context.saveChanges({
                 success: function () {
-                    //context.Items2.toArray(function (result) {
-                    //    equal(result.length, 1, "endsWith(), result length");
-                    //    close(context);
+                    //context.Items2.take(5).toArray(function (result) {
+                    //    equal(result.length, 5, "endsWith(), result length");
+                    //    result.next(function (result2) {
+                    //        equal(result2.length, 5, "endsWith(), result length");
+                    //        close(context);
+                    //    });
                     //}); return;
                     subQuery = context.Items2.filter("it.i0<10").select(function (item) { return item.i0; });
                     $.when(
@@ -823,6 +838,12 @@
                                 equal(result[0].i0, 7, "skip - take filter, id error");
                                 equal(result[1].i0, 8, "skip - take filter, id error");
                             }),
+                            context.Items1.filter("it.i0<10 && it.i0>=5").take(2).skip(2).toArray(function (result) {
+                                equal(result.length, 2, "skip - take filter, result count error");
+                                equal(result[0].i0, 7, "skip - take filter, id error");
+                                equal(result[1].i0, 8, "skip - take filter, id error");
+                            }),
+                            
                             context.Items1.filter("it.i0<10 && it.i0>=5").orderBy("it.s0").toArray(function (result) {
                                 equal(result.length, 5, "orderBy filter, result count error");
                                 equal(result[0].i0, 9, "orderBy filter, id error");
@@ -883,40 +904,5 @@
             });
         });
     });
-
-    /*test('indexed db navigation tests', function () {
-        var context = new $news.Types.NewsContext({
-            name: 'indexedDb',
-            databaseName: 'idbtest_navigation',
-            dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
-        });
-        stop(1);
-        context.onReady(function () {
-            $news.Types.NewsContext.generateTestData(context, function () {
-                //context.Articles.filter(function (item) { return item in (item.Category.Title>'kjhkjh'); }, { a: 'sport' }).toArray(function (result) {
-                //    equal(result.length, 1, "param query result legth");
-                //    close(context);
-                //}); return;
-                //context.Articles.filter(function (item) { return item.Author.Profile.FullName == this.a; }, { a: 'Full Name2' }).toArray(function (result) {
-                //    equal(result.length, 1, "param query result legth");
-                //    close(context);
-                //}); return;
-                context.Articles.toArray(function (result) {
-                    equal(result.length, 1, "param query result legth");
-                    close(context);
-                }); return;
-                $.when(
-                        
-
-                ).then(function () {
-                    close(context);
-                }).fail(function () {
-                    ok(false, JSON.stringify(arguments));
-                    close(context);
-                });
-            });
-        });
-    });*/
-
 
 });

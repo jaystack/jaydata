@@ -370,8 +370,8 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         },
                         onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
                         onerror: callBack.error,
-                        onabort: callBack.error,
-                        onblocked: callBack.error
+                        onabort: callBack.error
+                        //onblocked: callBack.error
                     });
                     return;
                 }
@@ -383,7 +383,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             onupgradeneeded: this.onupgradeneeded(objectStoreDefinitions),
             onerror: callBack.error,
             onabort: callBack.error,
-            onblocked: callBack.error
+            //onblocked: callBack.error
         });
     },
     _compile: function (query, callback) {

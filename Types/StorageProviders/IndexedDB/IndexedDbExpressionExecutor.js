@@ -15,6 +15,12 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
             callback: {}
         };
         ctx.callback.success = function (result) {
+            if (result.skip && result.objects) {
+                result.objects = result.objects.slice(result.skip);
+            }
+            if (result.take && result.objects) {
+                result.objects = result.objects.slice(0, result.take);
+            }
             ctx.result = result.objects || result;
             $data.Trace.log("Executor in milliseconds : ", new Date().getTime() - start);
             callback.success(ctx.result);
@@ -87,10 +93,10 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                 self.Visit(expression.amount, v);
                 var resultSet = { ids: [], objects: [] };
                 switch (expression.nodeType) {
-                    case "Skip": resultSet.ids = result.ids.slice(v.value); resultSet.objects = result.objects.slice(v.value); break;
-                    case "Take": resultSet.ids = result.ids.slice(0, v.value); resultSet.objects = result.objects.slice(0, v.value); break;
+                    case "Skip": result.skip = v.value; break;//resultSet.ids = result.ids.slice(v.value); resultSet.objects = result.objects.slice(v.value); break;
+                    case "Take": result.take = v.value; break;//resultSet.ids = result.ids.slice(0, v.value); resultSet.objects = result.objects.slice(0, v.value); break;
                 }
-                tmp.success(resultSet);
+                tmp.success(result);
             }
         };
         this.Visit(expression.source, context);

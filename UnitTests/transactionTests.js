@@ -1,17 +1,16 @@
 ﻿function TransactionTests(providerConfig, msg) {
     msg = msg || '';
     module("Transactions_" + msg);
+    $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+        Id: { dataType: 'int', key: true },
+        Name: { dataType: 'string' },
+        Desc: { dataType: 'string' }
+    }, null);
+    $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+        Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+    }, null);
 
     test('write_table_count_without_setTimeout', function () {
-        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        }, null);
-
         var context = new indexedDbProviderTest_Context(providerConfig);
         stop(1);
         context.onReady(function () {
@@ -61,14 +60,14 @@
     });
 
     test('write_table_count_with_setTimeout', function () {
-        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        }, null);
+        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+        //    Id: { dataType: 'int', key: true },
+        //    Name: { dataType: 'string' },
+        //    Desc: { dataType: 'string' }
+        //}, null);
+        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        //}, null);
         var context = new indexedDbProviderTest_Context(providerConfig);
         stop(1);
         context.onReady(function () {
@@ -119,14 +118,14 @@
 
     test('singleKeyCRUD_external_tran', function () {
         expect(4);
-        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        }, null);
+        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+        //    Id: { dataType: 'int', key: true },
+        //    Name: { dataType: 'string' },
+        //    Desc: { dataType: 'string' }
+        //}, null);
+        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        //}, null);
 
         var context = new indexedDbProviderTest_Context(providerConfig);
         stop(1);
@@ -169,14 +168,14 @@
 
     test('singleKeyCRUD_same_tran', function () {
         expect(26);
-        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        }, null);
+        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+        //    Id: { dataType: 'int', key: true },
+        //    Name: { dataType: 'string' },
+        //    Desc: { dataType: 'string' }
+        //}, null);
+        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        //}, null);
 
         var context = new indexedDbProviderTest_Context(providerConfig);
         stop(1);
@@ -314,14 +313,14 @@
     });
 
     test('abort_test', function () {
-        $data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
-            Id: { dataType: 'int', key: true },
-            Name: { dataType: 'string' },
-            Desc: { dataType: 'string' }
-        }, null);
-        $data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
-            Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
-        }, null);
+        //$data.Class.define('indexedDbProviderTest_Person', $data.Entity, null, {
+        //    Id: { dataType: 'int', key: true },
+        //    Name: { dataType: 'string' },
+        //    Desc: { dataType: 'string' }
+        //}, null);
+        //$data.Class.define('indexedDbProviderTest_Context', $data.EntityContext, null, {
+        //    Persons: { dataType: $data.EntitySet, elementType: indexedDbProviderTest_Person }
+        //}, null);
 
         var context = new indexedDbProviderTest_Context(providerConfig);
         stop(1);
