@@ -326,6 +326,7 @@
         stop(1);
         context.onReady(function () {
             context.beginTransaction(true, function (tran) {
+
                 context.Persons.toArray({
                     error: function (tran) {
                         ok(false, 'empty db');
