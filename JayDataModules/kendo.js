@@ -458,7 +458,7 @@
                     promises.push(q.toArray());
                     //var ta = q.toArray();
                     if (withLength) {
-                        promises.push(q.length());
+                        promises.push(allItemsQ.length());
                     } else if (!withInlineCount) {
                         promises.push(allItemsQ.toArray());
                     }
