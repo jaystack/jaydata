@@ -108,7 +108,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
             if (cursor) {
                 resultSet.objects.push(cursor.value);
                 resultSet.ids.push(JSON.stringify(cursor.primaryKey));
-                cursor.continue();
+                cursor['continue']();
             }
             else {
                 context.callback.success(resultSet);
@@ -261,7 +261,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Express
                     resultSet.objects.push(c.value);
                     resultSet.ids.push(JSON.stringify(c.primaryKey));
                 }
-                c.continue();
+                c['continue']();
             }
             else {
                 context.callback.success(resultSet);

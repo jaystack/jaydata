@@ -382,7 +382,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             //newVersionAPI
             onupgradeneeded: this.onupgradeneeded(objectStoreDefinitions),
             onerror: callBack.error,
-            onabort: callBack.error,
+            onabort: callBack.error
             //onblocked: callBack.error
         });
     },
@@ -639,7 +639,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                             onsuccess: function (event) {
                                 var cursor = event.target.result;
                                 if (cursor) {
-                                    cursor.delete();
+                                    cursor['delete']();
                                     callBack.success();
                                 }
                                 else {
