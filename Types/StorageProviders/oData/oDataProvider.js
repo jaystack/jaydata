@@ -108,6 +108,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             return dbInstance;
         };
     },
+    buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
