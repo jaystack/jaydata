@@ -18,7 +18,9 @@
         var startClb = function (event) { start(1); running = false; }
         start();
         context.storageProvider.db.close();
-        var request = context.storageProvider.indexedDB.deleteDatabase(context.storageProvider.db.name);
+        if (context.storageProvider.indexedDB.deleteDatabase) {
+            var request = context.storageProvider.indexedDB.deleteDatabase(context.storageProvider.db.name);
+        }
         //request.onsuccess = startClb;
         //request.onerror = startClb;
     }
