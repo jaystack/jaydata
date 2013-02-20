@@ -54,7 +54,7 @@ $data.Class.define("$news.Types.Location", $data.Entity, null, {
     Country: { type: "string" }
 }, null);
 $data.Class.define("$news.Types.TestItem", $data.Entity, null, {
-    Id: { type: "int", key: true },
+    Id: { type: "int", key: true, computed: true },
     i0: { type: "int" },
     b0: { type: "boolean" },
     s0: { type: "string" },
@@ -81,12 +81,12 @@ $data.Class.define("$news.Types.TestItemGroup", $data.Entity, null, {
 
 
 $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
-    Categories: { type: $data.EntitySet, elementType: $news.Types.Category },
+    Categories: { type: $data.EntitySet, elementType: $news.Types.Category, indices: [{ name: 'i1', keys: ['Title'], unique: false }] },
     Articles: { type: $data.EntitySet, elementType: $news.Types.Article },
     TagConnections: { type: $data.EntitySet, elementType: $news.Types.TagConnection },
     Tags: { type: $data.EntitySet, elementType: $news.Types.Tag },
-    Users: { type: $data.EntitySet, elementType: $news.Types.User },
-    UserProfiles: { type: $data.EntitySet, elementType: $news.Types.UserProfile },
+    Users: { type: $data.EntitySet, elementType: $news.Types.User, indices: [{ name: 'i1', keys: ['LoginName'], unique: true }] },
+    UserProfiles: { type: $data.EntitySet, elementType: $news.Types.UserProfile, indices: [{ name: 'i1', keys: [{ fieldName: 'FullName', order: 'DESC' }, { fieldName: 'Birthday', order: 'ASC' }], unique: false }, { name: 'i2', keys: [{ fieldName: 'Birthday', order: 'DESC' }], unique: false }] },
     TestTable: { type: $data.EntitySet, elementType: $news.Types.TestItem },
 
     TestTable2: { type: $data.EntitySet, elementType: $news.Types.TestItemGuid },
@@ -138,37 +138,37 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
     context.Tags.add(tag4);
     context.Tags.add(tag5);
 
-    context.Articles.add(new $news.Types.Article({Title: "Article1", Lead: "Lead1", Body: "Body1", CreateDate: new Date(), Category: cat1, Author: usr1, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article2", Lead: "Lead2", Body: "Body2", CreateDate: new Date(), Category: cat1, Author: usr2, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article3", Lead: "Lead3", Body: "Body3", CreateDate: new Date(), Category: cat1, Author: usr3, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article4", Lead: "Lead4", Body: "Body4", CreateDate: new Date(), Category: cat1, Author: usr4, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article5", Lead: "Lead5", Body: "Body5", CreateDate: new Date(), Category: cat1, Author: usr5, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article1", Lead: "Lead1", Body: "Body1", CreateDate: new Date(), Category: cat1, Author: usr1, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article2", Lead: "Lead2", Body: "Body2", CreateDate: new Date(), Category: cat1, Author: usr2, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article3", Lead: "Lead3", Body: "Body3", CreateDate: new Date(), Category: cat1, Author: usr3, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article4", Lead: "Lead4", Body: "Body4", CreateDate: new Date(), Category: cat1, Author: usr4, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article5", Lead: "Lead5", Body: "Body5", CreateDate: new Date(), Category: cat1, Author: usr5, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
 
-    context.Articles.add(new $news.Types.Article({Title: "Article21", Lead: "Lead21", Body: "Body21", CreateDate: new Date(), Category: cat2, Author: usr1, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article22", Lead: "Lead22", Body: "Body22", CreateDate: new Date(), Category: cat2, Author: usr2, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article23", Lead: "Lead23", Body: "Body23", CreateDate: new Date(), Category: cat2, Author: usr3, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article24", Lead: "Lead24", Body: "Body24", CreateDate: new Date(), Category: cat2, Author: usr4, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article25", Lead: "Lead25", Body: "Body25", CreateDate: new Date(), Category: cat2, Author: usr5, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article21", Lead: "Lead21", Body: "Body21", CreateDate: new Date(), Category: cat2, Author: usr1, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article22", Lead: "Lead22", Body: "Body22", CreateDate: new Date(), Category: cat2, Author: usr2, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article23", Lead: "Lead23", Body: "Body23", CreateDate: new Date(), Category: cat2, Author: usr3, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article24", Lead: "Lead24", Body: "Body24", CreateDate: new Date(), Category: cat2, Author: usr4, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article25", Lead: "Lead25", Body: "Body25", CreateDate: new Date(), Category: cat2, Author: usr5, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
 
-    context.Articles.add(new $news.Types.Article({Title: "Article31", Lead: "Lead31", Body: "Body31", CreateDate: new Date(), Category: cat3, Author: usr1, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article32", Lead: "Lead32", Body: "Body32", CreateDate: new Date(), Category: cat3, Author: usr2, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article33", Lead: "Lead33", Body: "Body33", CreateDate: new Date(), Category: cat3, Author: usr3, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article34", Lead: "Lead34", Body: "Body34", CreateDate: new Date(), Category: cat3, Author: usr4, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article35", Lead: "Lead35", Body: "Body35", CreateDate: new Date(), Category: cat3, Author: usr5, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article31", Lead: "Lead31", Body: "Body31", CreateDate: new Date(), Category: cat3, Author: usr1, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article32", Lead: "Lead32", Body: "Body32", CreateDate: new Date(), Category: cat3, Author: usr2, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article33", Lead: "Lead33", Body: "Body33", CreateDate: new Date(), Category: cat3, Author: usr3, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article34", Lead: "Lead34", Body: "Body34", CreateDate: new Date(), Category: cat3, Author: usr4, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article35", Lead: "Lead35", Body: "Body35", CreateDate: new Date(), Category: cat3, Author: usr5, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
 
-    context.Articles.add(new $news.Types.Article({Title: "Article41", Lead: "Lead41", Body: "Body41", CreateDate: new Date(), Category: cat4, Author: usr1, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article42", Lead: "Lead42", Body: "Body42", CreateDate: new Date(), Category: cat4, Author: usr2, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article43", Lead: "Lead43", Body: "Body43", CreateDate: new Date(), Category: cat4, Author: usr3, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article44", Lead: "Lead44", Body: "Body44", CreateDate: new Date(), Category: cat4, Author: usr4, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article45", Lead: "Lead45", Body: "Body45", CreateDate: new Date(), Category: cat4, Author: usr5, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article41", Lead: "Lead41", Body: "Body41", CreateDate: new Date(), Category: cat4, Author: usr1, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article42", Lead: "Lead42", Body: "Body42", CreateDate: new Date(), Category: cat4, Author: usr2, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article43", Lead: "Lead43", Body: "Body43", CreateDate: new Date(), Category: cat4, Author: usr3, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article44", Lead: "Lead44", Body: "Body44", CreateDate: new Date(), Category: cat4, Author: usr4, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article45", Lead: "Lead45", Body: "Body45", CreateDate: new Date(), Category: cat4, Author: usr5, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
 
-    context.Articles.add(new $news.Types.Article({Title: "Article51", Lead: "Lead51", Body: "Body51", CreateDate: new Date(), Category: cat5, Author: usr1, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article52", Lead: "Lead52", Body: "Body52", CreateDate: new Date(), Category: cat5, Author: usr2, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article53", Lead: "Lead53", Body: "Body53", CreateDate: new Date(), Category: cat5, Author: usr3, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article54", Lead: "Lead54", Body: "Body54", CreateDate: new Date(), Category: cat5, Author: usr4, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
-    context.Articles.add(new $news.Types.Article({Title: "Article55", Lead: "Lead55", Body: "Body55", CreateDate: new Date(), Category: cat5, Author: usr5, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article51", Lead: "Lead51", Body: "Body51", CreateDate: new Date(), Category: cat5, Author: usr1, Reviewer: usr4, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article52", Lead: "Lead52", Body: "Body52", CreateDate: new Date(), Category: cat5, Author: usr2, Reviewer: usr3, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article53", Lead: "Lead53", Body: "Body53", CreateDate: new Date(), Category: cat5, Author: usr3, Reviewer: usr2, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag3 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article54", Lead: "Lead54", Body: "Body54", CreateDate: new Date(), Category: cat5, Author: usr4, Reviewer: usr1, Tags: [new $news.Types.TagConnection({ Tag: tag3 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article55", Lead: "Lead55", Body: "Body55", CreateDate: new Date(), Category: cat5, Author: usr5, Reviewer: usr6, Tags: [new $news.Types.TagConnection({ Tag: tag1 }), new $news.Types.TagConnection({ Tag: tag2 })] }));
 
-    context.Articles.add(new $news.Types.Article({Title: "Article65", Lead: "Lead65", Body: "Body65", CreateDate: new Date(), Category: cat3, Author: usr6, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
+    context.Articles.add(new $news.Types.Article({ Title: "Article65", Lead: "Lead65", Body: "Body65", CreateDate: new Date(), Category: cat3, Author: usr6, Reviewer: usr5, Tags: [new $news.Types.TagConnection({ Tag: tag2 }), new $news.Types.TagConnection({ Tag: tag1 })] }));
 
     //var categoryName = ["Top news", "Sport", "World", "Politics", "Tech", "Health"];
     //for (var i = 0; i < 6; i++) {
@@ -181,19 +181,24 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
     //}
     //console.log("Original");
     //console.log(Date());
-    context.saveChanges(function (count) {
-        console.log("Success upload testdb for: " + count + " items");
-        if (callBack) {
-            callBack(count);
+    context.saveChanges({
+        success: function (count) {
+            console.log("Success upload testdb for: " + count + " items");
+            if (callBack) {
+                callBack(count);
+            }
+            //    console.log(Date());
+            //    for (var t = 0; t < 50000; t++) {
+            //        $news.context.Users.add(new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com", Profile: null }));
+            //    }
+            //    console.log(t + " users");
+            //    console.log("START: " + Date());
+            //    $news.context.saveChanges(function () {
+            //        console.log("END: " + Date());
+            //    });
+        },
+        error: function () {
+            console.log("Generate test data ERROR: ", arguments);
         }
-        //    console.log(Date());
-        //    for (var t = 0; t < 50000; t++) {
-        //        $news.context.Users.add(new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com", Profile: null }));
-        //    }
-        //    console.log(t + " users");
-        //    console.log("START: " + Date());
-        //    $news.context.saveChanges(function () {
-        //        console.log("END: " + Date());
-        //    });
     });
 }

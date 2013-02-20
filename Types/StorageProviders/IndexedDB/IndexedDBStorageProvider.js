@@ -17,7 +17,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         this.newVersionAPI = !!(window.IDBFactory && IDBFactory.prototype.deleteDatabase);
         this.sequenceStore = '__jayData_sequence';
         this.SqlCommands = [];
-        this.context = {};
+        this.context = ctxInstance;
         this.providerConfiguration = $data.typeSystem.extend({
             databaseName: 'JayDataDemo',
             version: 1,
@@ -28,34 +28,61 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
 
         if (ctxInstance)
             this.originalContext = ctxInstance.getType();
+
+        if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
+            this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
+        }
+        if (this.context && this.context._buildDbType_modifyInstanceDefinition && this.buildDbType_modifyInstanceDefinition) {
+            this.context._buildDbType_modifyInstanceDefinition = this.buildDbType_modifyInstanceDefinition;
+        }
     },
     supportedBinaryOperators: {
         value: {
             equal: { mapTo: ' == ', dataType: $data.Boolean },
             notEqual: { mapTo: ' != ', dataType: $data.Boolean },
-            equalTyped: { mapTo: ' == ', dataType: $data.Boolean },
-            notEqualTyped: { mapTo: ' != ', dataType: $data.Boolean },
+            equalTyped: { mapTo: ' === ', dataType: $data.Boolean },
+            notEqualTyped: { mapTo: ' !== ', dataType: $data.Boolean },
             greaterThan: { mapTo: ' > ', dataType: $data.Boolean },
             greaterThanOrEqual: { mapTo: ' >= ', dataType: $data.Boolean },
-
             lessThan: { mapTo: ' < ', dataType: $data.Boolean },
             lessThenOrEqual: { mapTo: ' <= ', dataType: $data.Boolean },
+
             or: { mapTo: ' || ', dataType: $data.Boolean },
-            and: { mapTo: ' && ', dataType: $data.Boolean }
-            //'in': { mapTo: ' in ', dataType: $data.Boolean, resolvableType: [$data.Array, $data.Queryable] }
+            and: { mapTo: ' && ', dataType: $data.Boolean },
+            'in': { mapTo: ' in ', dataType: $data.Boolean, resolvableType: [$data.Array] }
         }
     },
     supportedSetOperations: {
         value: {
+            filter: {},
+            map: {},
             length: {},
+            forEach: {},
             toArray: {},
-            forEach: {}
+            single: {},
+            some: {},
+            every: {},
+            take: {},
+            skip: {},
+            orderBy: {},
+            orderByDescending: {},
+            first: {}
         },
         enumerable: true,
         writable: true
     },
     supportedFieldOperations: {
         value: {
+            length: { mapTo: "length", dataType: 'number' },
+            startsWith: { mapTo: "$data.StringFunctions.startsWith", dataType: $data.Boolean, parameters: [{ name: "p1", dataType: "string" }] },
+            endsWith: { mapTo: "$data.StringFunctions.endsWith", dataType: $data.Boolean, parameters: [{ name: "p1", dataType: "string" }] },
+            contains: { mapTo: "$data.StringFunctions.contains", dataType: $data.Boolean, parameters: [{ name: "p1", dataType: "string" }] },
+            substr: { mapTo: "substr", dataType: $data.String, parameters: [{ name: "startFrom", dataType: "number" }, { name: "length", dataType: "number" }] },
+            toLowerCase: { mapTo: "toLowerCase", dataType: $data.String },
+            toUpperCase: { mapTo: "toUpperCase", dataType: $data.String },
+            trim: { mapTo: 'trim', dataType: $data.String },
+            ltrim: { mapTo: 'trimLeft', dataType: $data.String },
+            rtrim: { mapTo: 'trimRight', dataType: $data.String }
         },
         enumerable: true,
         writable: true
@@ -170,12 +197,6 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             error.name = "KeyNotFoundError";
             throw error;
         }
-        /*if (1 != keyFields.length) {
-            var error = new Error("Entity must have only one key field: " + contextStore.storeName);
-            error.name = "MultipleKeysNotSupportedError";
-            throw error;
-        }*/
-        //var keyField = keyFields[0];
         for (var i = 0; i < keyFields.length; i++) {
 
             if (keyFields[i].computed === true &&
@@ -190,11 +211,10 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 throw error;
             }
         }
-
+        contextStore.indices = setDefinition.indices;
         contextStore.keyFields = keyFields;
         return contextStore;
     },
-
     _getObjectStoreDefinitions: function () {
         var objectStoreDefinitions = [];
         var self = this;
@@ -216,6 +236,11 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     _createDB: function (db, definitions) {
         for (var i = 0; i < definitions.length; i++) {
+            if (definitions[i].dropIfExists && db.objectStoreNames.contains(definitions[i].storeName)) {
+                db.deleteObjectStore(definitions[i].storeName);
+            }
+        }
+        for (var i = 0; i < definitions.length; i++) {
             var storeDef = definitions[i];
 
             if (!db.objectStoreNames.contains(storeDef.storeName)) {
@@ -231,14 +256,52 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         settings.key.push(storeDef.keyFields[i].name);
                     }
                 }
-                db.createObjectStore(storeDef.storeName, settings);
+                var objStore = db.createObjectStore(storeDef.storeName, settings);
+                if (storeDef.indices && storeDef.indices.length > 0) {
+                    for (var idx = 0; idx < storeDef.indices.length; idx++) {
+                        var idx_name = storeDef.indices[idx].name;
+                        var idx_keys = storeDef.indices[idx].keys;
+                        var idx_unique = storeDef.indices[idx].unique;
+                        if (!idx_keys || (idx_keys && idx_keys.length < 1)) { throw new Exception("Index create error: Keys field is required!"); }
+                        if (typeof idx_keys[0] !== "string") { idx_keys = idx_keys.map(function (k) { return k.fieldName; }); }
+                        if (typeof idx_keys[0] !== "string") { throw new Exception("Index create error: type of fieldName property must be string!"); }
+                        objStore.createIndex(idx_name, idx_keys, { unique: idx_unique });
+                    }
+                }
             }
         }
     },
-    _hasDbChanges: function (db, definitions) {
+    _hasDbChanges: function (db, transaction, definitions, dropTabes) {
         var isOriginal = true;
-        for (var i = 0; i < definitions.length && isOriginal; i++) {
-            isOriginal = isOriginal && db.objectStoreNames.contains(definitions[i].storeName);
+        var tran = transaction;
+        if (!tran) {
+            tran = db.transaction(db.objectStoreNames, "readonly");
+        }
+        for (var i = 0; i < definitions.length; i++) {
+            if (!dropTabes && db.objectStoreNames.contains(definitions[i].storeName)) {
+                //check pk change
+
+                var os = tran.objectStore(definitions[i].storeName);
+                var keyPath = [].concat(os.keyPath).sort(function (a, b) { return a == b ? 0 : a > b ? 1 : -1; });
+                var defKeyPath = definitions[i].keyFields.map(function (memDef) { return memDef.name; }).sort(function (a, b) { return a == b ? 0 : a > b ? 1 : -1; });
+                if (keyPath.length === defKeyPath.length) {
+                    for (var j = 0; j < keyPath.length; j++) {
+                        isOriginal = isOriginal && (keyPath[j] === defKeyPath[j]);
+                    }
+                    definitions[i].changed = !isOriginal;
+                } else {
+                    isOriginal = false;
+                    definitions[i].changed = true;
+                }
+
+                isOriginal = isOriginal && true;
+            }
+            else {
+
+                isOriginal = false;
+                definitions[i].changed = true;
+                definitions[i].dropIfExists = dropTabes;
+            }
         }
 
         return !isOriginal;
@@ -250,7 +313,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             db.onversionchange = function (event) {
                 return event.target.close();
             };
-            var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+            var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions, self.providerConfiguration.dbCreation == $data.storageProviders.DbCreationType.DropAllExistingTables);
             if (hasTableChanges)
                 self._createDB(db, objectStoreDefinitions);
         }
@@ -260,263 +323,116 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var self = this;
 
-        this.initializeMemoryStore({
-            success: function () {
-                var objectStoreDefinitions;
-                try {
-                    objectStoreDefinitions = self._getObjectStoreDefinitions();
-                } catch (e) {
-                    console.log(objectStoreDefinitions);
-                    callBack.error(e);
+        var objectStoreDefinitions;
+        try {
+            objectStoreDefinitions = this._getObjectStoreDefinitions();
+        } catch (e) {
+            $data.Trace.log(objectStoreDefinitions);
+            callBack.error(e);
+            return;
+        }
+        this.indexedDB.open(this.providerConfiguration.databaseName).setCallbacks({
+            onsuccess: function (e) {
+                var db = e.target.result;
+                db.onversionchange = function (event) {
+                    return event.target.close();
+                };
+
+                var hasTableChanges = self._hasDbChanges(db, e.target.transaction, objectStoreDefinitions, self.providerConfiguration.dbCreation == $data.storageProviders.DbCreationType.DropAllExistingTables);
+                //oldAPI
+                if (db.setVersion) {
+                    if (db.version === "" || hasTableChanges) {
+                        db.setVersion((parseInt(db.version) || 0) + 1).setCallbacks({
+                            onsuccess: function (e) {
+                                var db = e.target.result
+                                self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
+                                    self.db = e.target.db;
+                                    callBack.success(self.context);
+                                });
+                            },
+                            onerror: function () {
+                                var v = arguments;
+                            },
+                            onblocked: function () {
+                                var v = arguments;
+                            }
+                        });
+                        return;
+                    };
+                } else if (hasTableChanges) {
+                    //newVersionAPI
+                    db.close();
+                    var version = parseInt(db.version) + 1;
+                    self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
+                        onsuccess: function (e) {
+                            self.db = e.target.result;
+                            callBack.success(self.context);
+                        },
+                        onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
+                        onerror: callBack.error,
+                        onabort: callBack.error
+                        //onblocked: callBack.error
+                    });
                     return;
                 }
-                self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks({
-                    onsuccess: function (e) {
-                        var db = e.target.result;
-                        db.onversionchange = function (event) {
-                            return event.target.close();
-                        };
 
-                        var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
-                        //oldAPI
-                        if (db.setVersion) {
-                            if (db.version === "" || hasTableChanges) {
-                                db.setVersion(parseInt(db.version) || 1).setCallbacks({
-                                    onsuccess: function (e) {
-                                        var db = e.target.result
-                                        self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
-                                            self.db = e.target.db;
-                                            callBack.success(self.context);
-                                        });
-                                    },
-                                    onerror: function () {
-                                        var v = arguments;
-                                    },
-                                    onblocked: function () {
-                                        var v = arguments;
-                                    }
-                                });
-                                return;
-                            };
-                        } else if (hasTableChanges) {
-                            //newVersionAPI
-                            db.close();
-                            var version = parseInt(db.version) + 1;
-                            self.indexedDB.open(self.providerConfiguration.databaseName, version).setCallbacks({
-                                onsuccess: function (e) {
-                                    self.db = e.target.result;
-                                    callBack.success(self.context);
-                                },
-                                onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
-                                onerror: callBack.error,
-                                onabort: callBack.error,
-                                onblocked: callBack.error
-                            });
-                            return;
-                        }
-
-                        self.db = db;
-                        callBack.success(self.context);
-                    },
-                    //newVersionAPI
-                    onupgradeneeded: self.onupgradeneeded(objectStoreDefinitions),
-                    onerror: callBack.error,
-                    onabort: callBack.error,
-                    onblocked: callBack.error
-                });
+                self.db = db;
+                callBack.success(self.context);
             },
-            error: callBack.error
-        });
-    },
-    initializeMemoryStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var self = this;
-
-        if (self.originalContext && self.providerConfiguration.memoryOperations) {
-            self.operationProvider = new self.originalContext({ name: 'InMemory' });
-            self.operationProvider.onReady({
-                success: function () {
-                    self.supportedBinaryOperators = self.operationProvider.storageProvider.supportedBinaryOperators;
-                    self.supportedSetOperations = self.operationProvider.storageProvider.supportedSetOperations;
-                    self.supportedFieldOperations = self.operationProvider.storageProvider.supportedFieldOperations;
-                    self.supportedUnaryOperators = self.operationProvider.storageProvider.supportedUnaryOperators;
-                    callBack.success();
-                },
-                error: callBack.error
-            });
-        } else {
-            callBack.success();
-        }
-    },
-
-    _initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var self = this;
-
-
-        var initDb = function (db) {
-            db.onversionchange = function (event) {
-                var ret = event.target.close();
-                return ret;
-            };
-            var newSequences = [];
-            self.context._storageModel.forEach(function (memDef) {
-                function createStore() {
-                    /// <summary>
-                    /// Creates a store for 'memDef'
-                    /// </summary>
-                    var osParam = {};
-                    var keySettings = self._getKeySettings(memDef);
-                    if (self.newVersionAPI) {
-                        if (keySettings.autoIncrement)
-                            newSequences.push(memDef.TableName);
-                    } else {
-                        osParam.autoIncrement = keySettings.autoIncrement;
-                    }
-                    if (keySettings.keyPath !== undefined)
-                        osParam.keyPath = keySettings.keyPath;
-                    db.createObjectStore(memDef.TableName, osParam);
-                }
-                if (db.objectStoreNames.contains(memDef.TableName)) {
-                    // ObjectStore already present.
-                    if (self.providerConfiguration.dbCreation === $data.storageProviders.DbCreationType.DropAllExistingTables) {
-                        // Force drop and recreate object store
-                        db.deleteObjectStore(memDef.TableName);
-                        createStore();
-                    }
-                } else {
-                    // Store does not exists yet, we need to create it
-                    createStore();
-                }
-            });
-            if (newSequences.length > 0 && !db.objectStoreNames.contains(self.sequenceStore)) {
-                // Sequence store does not exists yet, we create it
-                db.createObjectStore(self.sequenceStore, { keyPath: 'store' });
-                newSequences = [];
-            }
-            return newSequences;
-        }
-        var newSequences = null;
-        // Creating openCallbacks settings for both type of db.open() method
-        var openCallbacks = {
-            onupgradeneeded: function (event) {
-                newSequences = initDb(event.target.result);
-            },
-            onerror: callBack.error,
-            onblocked: callBack.error,
-            onsuccess: function (event) {
-                self.db = event.target.result;
-                self.db.onversionchange = function (event) {
-                    event.target.close();
-                }
-                if (self.newVersionAPI) {
-                    if (newSequences && newSequences.length > 0) {
-                        var store = self.db.transaction([self.sequenceStore], self.IDBTransactionType.READ_WRITE).setCallbacks({
-                            onerror: callBack.error,
-                            oncomplete: function () {
-                                callBack.success(self.context);
-                            }
-                        }).objectStore(self.sequenceStore);
-                        switch (self.providerConfiguration.dbCreation) {
-                            case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                            case $data.storageProviders.DbCreationType.DropTableIfChanged:
-                                // Clearing all data
-                                store.clear();
-                                break;
-                            default:
-                                // Removing data for newly created stores, if they previously existed
-                                newSequences.forEach(function (item) {
-                                    store['delete'](item);
-                                });
-                                break;
-                        }
-                    }
-                    callBack.success(self.context);
-                }
-                else {
-                    // Calling setVersion on webkit
-                    var versionRequest = self.db.setVersion(self.providerConfiguration.version.toString()).setCallbacks({
-                        onerror: callBack.error,
-                        onblocked: callBack.error,
-                        onsuccess: function (event) {
-                            initDb(self.db);
-                            versionRequest.result.oncomplete = function (evt) {
-                                callBack.success(self.context);
-                            }
-                        }
-                    });
-                }
-            }
-        };
-        // For Firefox we need to pass the version here
-        if (self.newVersionAPI)
-            self.indexedDB.open(self.providerConfiguration.databaseName, parseInt(self.providerConfiguration.version, 10)).setCallbacks(openCallbacks);
-        else
-            self.indexedDB.open(self.providerConfiguration.databaseName).setCallbacks(openCallbacks);
-    },
-
-    executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
-        var self = this;
-
-        //var compiledQuery = self._compile(query);
-
-        // Creating read only transaction for query. Results are passed in transaction's oncomplete event
-        var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
-        var store = self.db.transaction([entitySet.tableName], self.IDBTransactionType.READ_ONLY).setCallbacks({
+            //newVersionAPI
+            onupgradeneeded: this.onupgradeneeded(objectStoreDefinitions),
             onerror: callBack.error,
             onabort: callBack.error,
-            oncomplete: function (event) {
-                if (self.operationProvider) {
-                    self.operationProvider.storageProvider.providerConfiguration.source[entitySet.tableName] = query.rawDataList;
-                    self.operationProvider.storageProvider.executeQuery(query, {
-                        success: function (query) {
-                            if (query.expression.nodeType === $data.Expressions.ExpressionType.Count) {
-                                query.rawDataList[0] = { cnt: query.rawDataList[0] };
-                            }
-                            callBack.success(query);
-                        },
-                        error: callBack.error
-                    });
-                } else {
-                    callBack.success(query);
-                }
+            //onblocked: callBack.error
+        });
+    },
+    _compile: function (query, callback) {
+        var compiler = Container.createIndexedDBCompiler(this);
+        var compiledQuery = compiler.compile(query, {
+            success: function (compiledQuery) {
+                callback.success(compiledQuery);
             }
-        }).objectStore(entitySet.tableName);
-        var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
-        modelBinderCompiler.Visit(query.expression);
+        });
 
-        if (self.operationProvider) {
-            store.openCursor().onsuccess = function (event) {
-                // We currently support only toArray() so let's just dump all data
-                var cursor = event.target.result;
-                if (cursor) {
-                    var value = cursor.value;
-                    query.rawDataList.push(cursor.value);
-                    cursor['continue']();
-                }
-            };
-        } else {
-            switch (query.expression.nodeType) {
-                case $data.Expressions.ExpressionType.Count:
-                    store.count().onsuccess = function (event) {
-                        var count = event.target.result;
-                        query.rawDataList.push({ cnt: count });
-                    }
-                    break;
-                default:
-                    store.openCursor().onsuccess = function (event) {
-                        // We currently support only toArray() so let's just dump all data
-                        var cursor = event.target.result;
-                        if (cursor) {
-                            var value = cursor.value;
-                            query.rawDataList.push(cursor.value);
-                            cursor['continue']();
+        return compiledQuery;
+    },
+    getTraceString: function (query) {
+        var compiledExpression = this._compile(query);
+        var executor = Container.createIndexedDBExpressionExecutor(this);
+        executor.runQuery(compiledExpression);
+        return compiledExpression;
+    },
+    executeQuery: function (query, callBack) {
+        var self = this;
+        var start = new Date().getTime();
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+
+        var doQuery = function () {
+            self._compile(query, {
+                success: function (expression) {
+                    var executor = Container.createIndexedDBExpressionExecutor(self, query.transaction);
+                    executor.runQuery(expression, {
+                        success: function (result) {
+                            var modelBinderCompiler = Container.createModelBinderConfigCompiler(query, []);
+                            modelBinderCompiler.Visit(query.expression);
+                            query.rawDataList = result;
+                            $data.Trace.log("execute Query in milliseconds:", new Date().getTime() - start);
+                            callBack.success(query);
                         }
-                    };
-                    break;
-            }
+                    });
+                }
+            });
         };
+
+        if (!query.transaction) {
+            this.context.beginTransaction(function (tran) {
+                query.transaction = tran;
+                doQuery();
+            });
+        }
+        else {
+            doQuery();
+        }
     },
     _getKeySettings: function (memDef) {
         /// <summary>
@@ -546,154 +462,223 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             // Setting key fields (composite key)
             settings.keys = keys;
         } else if (keys.length == 1) {
-                // Simple key
+            // Simple key
             settings.keyPath = keys[0];
         } else {
             Guard.raise(new Exception('No valid key found!'));
         }
         return settings;
     },
-    saveChanges: function (callBack, changedItems) {
+
+    _beginTran: function (tableList, isWrite, callBack) {
+        var self = this;
+        setTimeout(function () {
+            callBack = $data.typeSystem.createCallbackSetting(callBack);
+            try {
+                var transaction = new $data.storageProviders.IndexedDB.IndexedDBTransaction();
+                var tran = self.db.transaction(tableList ? tableList : self.db.objectStoreNames, isWrite ? self.IDBTransactionType.READ_WRITE : self.IDBTransactionType.READ_ONLY);
+
+                tran.oncomplete = function () {
+                    $data.Trace.log("oncomplete: ", transaction._objectId);
+                    if (transaction.oncomplete) {
+                        transaction.oncomplete.fire(arguments, transaction);
+                    }
+                };
+                tran.onerror = function () {
+                    $data.Trace.log("onerror: ", transaction._objectId);
+                    transaction.aborted = true;
+                    if (transaction.onerror) {
+                        transaction.onerror.fire(arguments, transaction);
+                    }
+                };
+                tran.onabort = function () {
+                    $data.Trace.log("onabort: ", transaction._objectId);
+                    if (!transaction.aborted) {
+                        if (transaction.onerror) {
+                            transaction.onerror.fire(arguments, transaction);
+                        }
+                    }
+                };
+                tran.onblocked = function () {
+                    $data.Trace.log("onblocked: ", transaction._objectId);
+                    if (transaction.onabort) {
+                        transaction.onabort.fire(arguments, transaction);
+                    }
+                };
+
+                transaction.transaction = tran;
+
+                callBack.success(transaction);
+            } catch (e) {
+                callBack.error(e);
+            }
+        }, 0);
+    },
+
+    saveChanges: function (callBack, changedItems, tran) {
         var self = this;
         // Building independent blocks and processing them sequentially
-        var independentBlocks = self.buildIndependentBlocks(changedItems);
-        function saveNextIndependentBlock() {
-            /// <summary>
-            /// Saves the next independent block
-            /// </summary>
-            if (independentBlocks.length === 0) {
-                // No more blocks left, calling success callback
-                callBack.success();
-            } else {
-                // 'Popping' next block
+        var independentBlocks = this.buildIndependentBlocks(changedItems);
+        var objectStoreNames = [];
+        for (var i = 0; i < independentBlocks.length; i++) {
+            for (var j = 0; j < independentBlocks[i].length; j++) {
+                if (objectStoreNames.indexOf(independentBlocks[i][j].entitySet.tableName) < 0) {
+                    objectStoreNames.push(independentBlocks[i][j].entitySet.tableName);
+                }
+            }
+        }
+        if (objectStoreNames.length < 1) { callBack.success(tran); return; }
+
+        if (tran) {
+            this._saveChangesWithTran(callBack, independentBlocks, tran);
+        } else {
+
+
+            this.context.beginTransaction(objectStoreNames, true, function (transaction) {
+                self._saveChangesWithTran(callBack, independentBlocks, transaction);
+            });
+        };
+    },
+    _saveChangesWithTran: function (callBack, independentBlocks, transaction) {
+        var self = this;
+
+        var doSave = function () {
+            if (independentBlocks.length == 0) {
+                transaction.onerror.detach(t1);
+                //transaction.onabort.detach(t2);
+                callBack.success(transaction);
+            }
+            else {
                 var currentBlock = independentBlocks.shift();
-                // Collecting stores of items for transaction initialize
-                var storesObj = {};
-                // Generating physicalData
-                var convertedItems = currentBlock.map(function (item) {
-                    storesObj[item.entitySet.tableName] = true;
-                    item.physicalData = {};
-                    self.context._storageModel.getStorageModel(item.data.getType())
-                        .PhysicalType.memberDefinitions
-                        .getPublicMappedProperties().forEach(function (memDef) {
-                            if (memDef.key && memDef.computed && item.data[memDef.name] == undefined) {
-                                // Autogenerated fields for new items should not be present in the physicalData
-                                return;
-                            }
-                            if (typeof memDef.concurrencyMode === 'undefined' && (memDef.key === true || item.data.entityState === $data.EntityState.Added || (item.data.changedProperties && item.data.changedProperties.some(function (def) { return def.name === memDef.name; })))) {
-                                var typeName = Container.resolveName(memDef.type);
-                                if (self.fieldConverter.toDb[typeName]) {
-                                    item.physicalData[memDef.name] = self.fieldConverter.toDb[typeName](item.data[memDef.name]);
-                                } else {
-                                    console.log('WARN!!!');
-                                    item.physicalData[memDef.name] = item.data[memDef.name];
-                                }
-                            }
-                        });
-                    return item;
-                });
-                var stores = [];
-                for (var i in storesObj) {
-                    stores.push(i);
-                }
-                var tran = self.db.transaction(stores, self.IDBTransactionType.READ_WRITE).setCallbacks({
-                    onerror: function (event) {
-                        // Only call the error callback when it's not because of an abort
-                        // aborted cases should call the error callback there
-                        if (event.target.errorCode !== self.IDBDatabaseException.ABORT_ERR)
-                            callBack.error(event);
+                var itemCount = currentBlock.length;
+                var hasError = false;
+                self._saveIndependentBlock(currentBlock, transaction, {
+                    success: function () {
+                        if (--itemCount < 1 && !hasError) {
+                            doSave();
+                        }
                     },
-                    oncomplete: function (event) {
-                        // Moving to next block
-                        saveNextIndependentBlock();
-                    }
-                });
-                function KeySettingsCache() {
-                    /// <summary>
-                    /// Simple cache for key settings of types
-                    /// </summary>
-                    var cache = {};
-                    this.getSettingsForItem = function (item) {
-                        var typeName = item.data.getType().fullName;
-                        if (!cache.hasOwnProperty(typeName)) {
-                            cache[typeName] = self._getKeySettings(self.context._storageModel.getStorageModel(item.data.getType()));
-                        }
-                        return cache[typeName]
-                    }
-                }
-                var ksCache = new KeySettingsCache();
-                convertedItems.forEach(function (item) {
-                    // Getting store and keysettings for the current item
-                    var store = tran.objectStore(item.entitySet.tableName);
-                    var keySettings = ksCache.getSettingsForItem(item);
-                    // Contains the keys that should be passed for create, update and delete (composite keys)
-                    var itemKeys = keySettings.keys && keySettings.keys.map(function (key) { return item.physicalData[key]; }) || null;
-                    try {
-                        var cursorAction = function (action) {
-                            /// <summary>
-                            /// Find the current item in the store, and calls the action on it. Error raised when item was not found
-                            /// </summary>
-                            /// <param name="action">Action to call on the item</param>
-                            var key = keySettings.keyPath ? item.physicalData[keySettings.keyPath] : itemKeys;
-                            var data = item.physicalData;
-                            store.openCursor(self.IDBKeyRange.only(key))
-                                .onsuccess = function (event) {
-                                    try {
-                                        var cursor = event.target.result;
-                                        if (cursor)
-                                            action(cursor, key, data);
-                                        else
-                                            Guard.raise(new Exception('Object not found', null, item));
-                                    } catch (ex) {
-                                        tran.abort();
-                                        callBack.error(ex);
-                                    }
-                                }
-                        };
-                        switch (item.data.entityState) {
-                            case $data.EntityState.Added:
-                                if (!keySettings.keyPath) {
-                                    // Item needs explicit keys
-                                    store.add(item.physicalData, itemKeys);
-                                }
-                                else {
-                                    store.add(item.physicalData)
-                                        .onsuccess = function (event) {
-                                            // Saves the generated key back to the entity
-                                            item.data[keySettings.keyPath] = event.target.result;
-                                        };
-                                }
-                                break;
-                            case $data.EntityState.Deleted:
-                                // Deletes the item
-                                cursorAction(function (cursor) {
-                                    cursor['delete']();
-                                });
-                                break;
-                            case $data.EntityState.Modified:
-                                // Updates the item
-                                cursorAction(function (cursor, key, data) {
-                                    cursor.update($data.typeSystem.extend(cursor.value, data));
-                                });
-                                break;
-                            case $data.EntityState.Unchanged:
-                                break;
-                            default:
-                                Guard.raise(new Exception('Not supported entity state', null, item));
-                        }
-                    } catch (ex) {
-                        // Abort on exceptions
-                        tran.abort();
-                        callBack.error(ex);
+                    error: function (error) {
+                        hasError = false;
+                        itemCount = 0;
+                        transaction.hasError = true;
+                        transaction.abort();
                     }
                 });
             }
         }
-        saveNextIndependentBlock();
+        var t1 = null;
+        var tranError = function (sender, event) {
+            this.onerror.detach(t1);
+            callBack.error(transaction);
+        };
+        t1 = tranError;
+        transaction.onerror.attach(tranError);
+        doSave();
     },
-    _compile: function (query) {
-        var sqlText = Container.createIndexedDBCompiler().compile(query);
-        return sqlText;
+    _saveIndependentBlock: function (items, tran, callBack) {
+        var self = this;
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        var saveItem = function (item) {
+            //var item = items[i];
+            var physicalType = self.context._storageModel.getStorageModel(item.data.getType()).PhysicalType;
+            item.physicalData = physicalType.convertTo(item.data);
+            var keyValues = physicalType.memberDefinitions.getKeyProperties().map(function (memDef) {
+                var typeName = Container.resolveName(memDef.type);
+                if (self.fieldConverter.toDb[typeName]) {
+                    var convertedValue = self.fieldConverter.toDb[typeName](item.physicalData[memDef.name]);
+                    if (convertedValue !== undefined) {
+                        item.physicalData.initData[memDef.name] = convertedValue;
+                    }
+                    return item.physicalData.initData[memDef.name];
+                } else {
+                    console.log('WARN!!!');
+                    return item.physicalData[memDef.name];
+                }
+            });
+            if (keyValues.length == 1) { keyValues = keyValues[0]; }
+            if (tran.hasError) {
+                callBack.success();
+                return;
+            }
+            try {
+                var store = tran.transaction.objectStore(item.entitySet.tableName);
+                switch (item.data.entityState) {
+                    case $data.EntityState.Added:
+                        var request = null;
+                        if (keyValues instanceof $data.Array) {
+                            request = store.add(item.physicalData.initData, keyValues);
+                        } else {
+                            request = store.add(item.physicalData.initData);
+                        }
+                        request.setCallbacks({
+                            onerror: function (ex) {
+                                callBack.error(ex);
+                                return true;
+                            },
+                            onsuccess: function (event) {
+                                var newKey = event.target.result;
+                                if (newKey instanceof $data.Array) {
+                                    physicalType.memberDefinitions.getKeyProperties().forEach(function (k, idx) {
+                                        item.data[k.name] = newKey[idx];
+                                    });
+                                } else {
+                                    item.data[physicalType.memberDefinitions.getKeyProperties()[0].name] = newKey;
+                                }
+
+                                callBack.success();
+                            }
+                        });
+                        break;
+                    case $data.EntityState.Deleted:
+                        store.openCursor(self.IDBKeyRange.only(keyValues)).setCallbacks({
+                            onerror: function (ex) {
+                                callBack.error(ex);
+                                return true;
+                            },
+                            onsuccess: function (event) {
+                                var cursor = event.target.result;
+                                if (cursor) {
+                                    cursor.delete();
+                                    callBack.success();
+                                }
+                                else {
+                                    callBack.error(new Exception('Object not found'));
+                                }
+                            }
+                        });
+                        break;
+                    case $data.EntityState.Modified:
+                        store.openCursor(self.IDBKeyRange.only(keyValues)).setCallbacks({
+                            onsuccess: function (ex) {
+                                callBack.error(ex);
+                                return true;
+                            },
+                            onsuccess: function (event) {
+                                var cursor = event.target.result;
+                                if (cursor) {
+                                    cursor.update($data.typeSystem.extend(cursor.value, item.physicalData.initData));
+                                    callBack.success();
+                                }
+                                else {
+                                    callBack.error(new Exception('Object not found'));
+                                }
+                            }
+                        });
+                        break;
+                    case $data.EntityState.Unchanged:
+                        callBack.success();
+                        break;
+                    default:
+                        Guard.raise(new Exception('Not supported entity state', null, item));
+                }
+            } catch (ex) {
+                callBack.error(ex);
+            }
+        }
+        for (var i = 0; i < items.length; i++) {
+            saveItem(items[i]);
+        }
     }
 }, {
     isSupported: {

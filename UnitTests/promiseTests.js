@@ -302,8 +302,8 @@ function promiseTests(providerConfig) {
 
                 $.when(loadUserPromise, loadArticlePromise).then(function(users, articles){
                     start();
-                    equal(users[0] instanceof $news.Types.User, true, 'users result item type failed');
-                    equal(articles[0] instanceof $news.Types.Article, true, 'articles result item type failed');
+                    equal(users[0][0] instanceof $news.Types.User, true, 'users result item type failed');
+                    equal(articles[0][0] instanceof $news.Types.Article, true, 'articles result item type failed');
                 });
             });
         });

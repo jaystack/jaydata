@@ -263,7 +263,7 @@
         }
 
         $.when(promises).then(function () {
-            $data("Cart13").query(function (item) { return item.Product.contains(this.val) }, { val: 'tem5' }).then(function (items) {
+            $data("Cart13").query(function (item) { return item.Product.contains(this.val) == true; }, { val: 'tem5' }).then(function (items) {
                 equal(items.length, 1, 'query length correct');
 
                 $data("Cart13").removeAll().then(function () {
@@ -902,7 +902,7 @@
 
         equal(typeof myArticle.storeToken, 'undefined', 'storeToken not set');
 
-        var context = new myContext({ name: 'local' });
+        var context = new myContext({ name: 'local', databaseName:"typeDefaultFactoryValue" });
         deepEqual(myArticle.storeToken, context.storeToken, 'storeToken has value before onready');
 
         context.onReady(function () {
