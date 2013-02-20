@@ -146,7 +146,7 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBExpressionExecutor.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDbExpressionExecutor.js\
 	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBCompiler.js\
 	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBPhysicalAndFilterExpression.js\
 	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalAndFilterExpression.js\
