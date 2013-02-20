@@ -873,6 +873,9 @@
                             context.Items1.filter("it.s0.contains('111') == true").toArray(function (result) {
                                 equal(result.length, 1, "contains(), result length");
                             }),
+                            context.Items1.filter(function (item) { return item.s0.contains(this.val) == true;}, {val:"111"}).toArray(function (result) {
+                                equal(result.length, 1, "contains(), result length");
+                            }),
                             context.Items1.filter("it.s0.startsWith('s01') == true").toArray(function (result) {
                                 equal(result.length, 112, "startsWith(), result length");
                             }),

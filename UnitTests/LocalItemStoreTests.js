@@ -263,7 +263,7 @@
         }
 
         $.when(promises).then(function () {
-            $data("Cart13").query(function (item) { return item.Product.contains(this.val) }, { val: 'tem5' }).then(function (items) {
+            $data("Cart13").query(function (item) { return item.Product.contains(this.val) == true; }, { val: 'tem5' }).then(function (items) {
                 equal(items.length, 1, 'query length correct');
 
                 $data("Cart13").removeAll().then(function () {
