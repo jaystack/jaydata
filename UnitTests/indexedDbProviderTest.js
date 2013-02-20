@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-
+    //$data.Trace = new $data.Logger();
     if (!$data.StorageProviderLoader.isSupported('indexedDb'))
         return;
 
@@ -13,7 +13,7 @@
     });
 
     function close(context) {
-        console.log("!!close context!!");
+        $data.Trace.log("!!close context!!");
         context.storageProvider.db.close();
         var startClb = function (event) { start(1); running = false; }
         start();
@@ -704,11 +704,10 @@
                 }
             });
         });
-        context.onReady(function () { console.log("KHKJHKJH");});
     });
 
     test('indexed_db_simple_tests', function () {
-        //$data.Trace = new $data.Logger();
+        
         var context = new idbexample.idbContext({
             name: 'indexedDb',
             databaseName: 'idbexample_idbContext1',

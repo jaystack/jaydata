@@ -327,7 +327,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         try {
             objectStoreDefinitions = this._getObjectStoreDefinitions();
         } catch (e) {
-            console.log(objectStoreDefinitions);
+            $data.Trace.log(objectStoreDefinitions);
             callBack.error(e);
             return;
         }
@@ -479,22 +479,20 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 var tran = self.db.transaction(tableList ? tableList : self.db.objectStoreNames, isWrite ? self.IDBTransactionType.READ_WRITE : self.IDBTransactionType.READ_ONLY);
 
                 tran.oncomplete = function () {
-                    console.log("oncomplete: ", transaction._objectId);
+                    $data.Trace.log("oncomplete: ", transaction._objectId);
                     if (transaction.oncomplete) {
                         transaction.oncomplete.fire(arguments, transaction);
                     }
                 };
                 tran.onerror = function () {
-                    console.log(new Date().getTime());
-                    console.log("onerror: ", transaction._objectId);
+                    $data.Trace.log("onerror: ", transaction._objectId);
                     transaction.aborted = true;
                     if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }
                 };
                 tran.onabort = function () {
-                    console.log(new Date().getTime());
-                    console.log("onabort: ", transaction._objectId);
+                    $data.Trace.log("onabort: ", transaction._objectId);
                     if (!transaction.aborted) {
                         if (transaction.onerror) {
                             transaction.onerror.fire(arguments, transaction);
@@ -502,7 +500,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     }
                 };
                 tran.onblocked = function () {
-                    console.log("onblocked: ", transaction._objectId);
+                    $data.Trace.log("onblocked: ", transaction._objectId);
                     if (transaction.onabort) {
                         transaction.onabort.fire(arguments, transaction);
                     }
@@ -675,7 +673,6 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                         Guard.raise(new Exception('Not supported entity state', null, item));
                 }
             } catch (ex) {
-                console.log("try error");
                 callBack.error(ex);
             }
         }

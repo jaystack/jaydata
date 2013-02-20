@@ -230,7 +230,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         var transaction = new $data.sqLite.SqlTransaction();
         function onComplete() {
-            console.log("oncomplete: ", transaction._objectId);
+            $data.Trace.log("oncomplete: ", transaction._objectId);
             if (transaction.oncomplete) {
                 transaction.oncomplete.fire(arguments, transaction);
             }
@@ -239,7 +239,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         setTimeout(function () {
             self.connection.open({
                 error: function () {
-                    console.log("onerror: ", transaction._objectId, arguments);
+                    $data.Trace.log("onerror: ", transaction._objectId, arguments);
                     if (transaction.onerror) {
                         transaction.onerror.fire(arguments, transaction);
                     }
