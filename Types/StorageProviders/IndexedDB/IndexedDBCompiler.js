@@ -259,6 +259,6 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         this.Visit(expression.right, context);
     }
 });
-$C("$data.storageProviders.IndexedDB.NavPropMonitor", $data.sqLite.ExpressionMonitor, null, {
+/*$C("$data.storageProviders.IndexedDB.NavPropMonitor", $data.sqLite.ExpressionMonitor, null, {
 
-});
+});*/
