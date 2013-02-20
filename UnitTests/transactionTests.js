@@ -312,7 +312,7 @@
         });
     });
 
-    test('abort_test', function () {
+    test('Abort_test', function () {
         var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
