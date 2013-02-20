@@ -902,7 +902,7 @@
 
         equal(typeof myArticle.storeToken, 'undefined', 'storeToken not set');
 
-        var context = new myContext({ name: 'local' });
+        var context = new myContext({ name: 'local', databaseName:"typeDefaultFactoryValue" });
         deepEqual(myArticle.storeToken, context.storeToken, 'storeToken has value before onready');
 
         context.onReady(function () {

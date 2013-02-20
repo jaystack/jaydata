@@ -37,7 +37,7 @@
             ok(provider.IDBKeyRange, "IDBKeyRange");
         });
     });
-
+    /*
     test('disallow_types_with_incorrect_keys', function () {
         expect(2);
         $data.Class.define('indexedDbProviderTest_PersonWithoutKey', $data.Entity, null, {
@@ -102,7 +102,7 @@
         }
 
     });
-
+    */
     var indexedDbProvider_openDbSimpleContext_dbname = 'indexedDbProvider_openDbSimpleContext' + Math.random();
     test('indexedDbProvider_openDbSimpleContext', function () {
         expect(4);

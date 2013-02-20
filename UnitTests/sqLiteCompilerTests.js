@@ -502,17 +502,6 @@
     "SELECT * FROM TestTable T0 WHERE (((T0.i0 = T0.Id) OR (T0.i0 = ?)) AND (T0.i0 > (T0.Id + ?))) | [16,12]");
         });
 
-        test("alma", 1, function () {
-            equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.i0 < 1 && m.i0 == 0 || m.i0 > 4 && m.i0 == 5; }, {}).toTraceString()),
-    "SELECT * FROM TestTable T0 WHERE (((T0.i0 = T0.Id) OR (T0.i0 = ?)) AND (T0.i0 > (T0.Id + ?))) | [16,12]");
-        });
-
-        test("alma2", 1, function () {
-            equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.i0 < 1 || m.i0 == 0 && m.i0 > 4 || m.i0 == 5; }, {}).toTraceString()),
-    "SELECT * FROM TestTable T0 WHERE (((T0.i0 = T0.Id) OR (T0.i0 = ?)) AND (T0.i0 > (T0.Id + ?))) | [16,12]");
-        });
-
-
         //==================================================================================================== Take
 
         test("Take: literal", 2, function () {
