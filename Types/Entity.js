@@ -126,8 +126,8 @@ var PropertyValidationEventData = $data.Class.define("PropertyValidationEventDat
     cancel: {}
 });
 
-//$data.EntityCreationOptions = $data.Class.define("$data.EntityCreationOptions", {
-//}
+
+
 $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     constructor: function (initData, newInstanceOptions) {
         /// <description>
@@ -162,14 +162,18 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
         var ctx = null;
         this.context = ctx;
+        if ("setDefaultValues" in thisType) {
+            if (!newInstanceOptions || newInstanceOptions.setDefaultValues !== false) {
+                if (!initData || Object.keys(initData).length < 1) {
+                    initData = thisType.setDefaultValues(initData);
+                }
+            }
+        }
 
         if (typeof initData === "object") {
             var typeMemDefs = thisType.memberDefinitions;
-            var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
-            //            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
-            //                this.initData = initData;
-            //            }
-            this.initData = {};
+            var memDefNames = typeMemDefs.getPublicMappedPropertyNames();
+
             for (var i in initData) {
                 if (memDefNames.indexOf(i) > -1) {
                     var type = Container.resolveType(typeMemDefs.getMember(i).type);
@@ -257,9 +261,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
         return false;
     },
-    //propertyChanging: { dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false },
 
-    //propertyChanged: { dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false },
     propertyChanging: {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
@@ -270,6 +272,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         },
         set: function (value) { this._propertyChanging = value; }
     },
+
     propertyChanged: {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
@@ -280,6 +283,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         },
         set: function (value) { this._propertyChanged = value; }
     },
+
     propertyValidationError: {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
@@ -296,7 +300,6 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="memberDefinition" type="MemberDefinition" />
         /// <param name="value" />
 
-        //if (origValue == value) return;
         value = this.typeConversion(memberDefinition, value);
         var eventData = null;
         if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
@@ -539,7 +542,8 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     },
     storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true }
  
-}, {
+},
+{
     //create get_[property] and set_[property] functions for properties
     __setPropertyfunctions: { value: true, notMapped: true, enumerable: false, storeOnObject: true },
     //copy public properties to current instance
@@ -548,6 +552,34 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     inheritedTypeProcessor: function (type) {
         if ($data.ItemStore && 'EntityInheritedTypeProcessor' in $data.ItemStore)
             $data.ItemStore.EntityInheritedTypeProcessor.apply(this, arguments);
+
+        //default value setter method factory
+        type.defaultValues = {};
+
+        type.memberDefinitions.asArray().forEach(function (pd) {
+            if (pd.hasOwnProperty("defaultValue")) {
+                type.defaultValues[pd.name] = pd.defaultValue;
+            }
+        });
+
+        if (Object.keys(type.defaultValues).length > 0) {
+            type.setDefaultValues = function (initData, instance) {
+                initData = initData || {};
+                var dv = type.defaultValues;
+                for (var n in dv) {
+                    if (!(n in initData)) {
+                        var value = dv[n];
+                        if ("function" === typeof value) {
+                            initData[n] = dv[n](n, instance);
+                        } else {
+                            initData[n] = dv[n];
+                        }
+                    }
+                }
+                console.log("ret init:", initData);
+                return initData;
+            }
+        }
     },
 
 

@@ -232,12 +232,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 this._buildSelector(meta, context);
                 context.src += '}';
             }
-            var type = Container.resolveName(Container.resolveType(meta.$type));
+            var resolvedType = Container.resolveType(meta.$type);
+            var type = Container.resolveName(resolvedType);
+            var isEntityType = resolvedType.isAssignableTo && resolvedType.isAssignableTo($data.Entity);
             var item = '_' + type.replace(/\./gi, '_') + '_';
             if (context.item == item) item += 'new_';
             context.item = item;
             
-            var resolvedType = Container.resolveType(meta.$type);
+            
             var isPrimitive = false;
             if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo)
                 isPrimitive = true;
@@ -261,13 +263,21 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += 'if (itemKey && cache[itemKey]){';
                     context.src += item + ' = cache[itemKey];';
                     context.src += '}else{';
-                    context.src += item + ' = new ' + type + '();';
+                    if (isEntityType) {
+                        context.src += item + ' = new ' + type + '(undefined, { setDefaultValues: false });';
+                    } else {
+                        context.src += item + ' = new ' + type + '();';
+                    }
                     context.src += 'if (itemKey){';
                     context.src += 'cache[itemKey] = ' + item + ';';
                     context.src += '}';
                     context.src += '}';
-                }else{
-                    context.src += 'var ' + item + ' = new ' + type + '();';
+                } else {
+                    if (isEntityType) {
+                        context.src += 'var ' + item + ' = new ' + type + '(undefined, { setDefaultValues: false });';
+                    } else {
+                        context.src += 'var ' + item + ' = new ' + type + '();';
+                    }
                 }
             }
             for (var i in meta){
