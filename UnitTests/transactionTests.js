@@ -503,9 +503,6 @@
 
             db.beginTransaction(true, function (tran) {
 
-                tran.onerror.attach(function () {
-                    console.log('-onabort', arguments);
-                })
                 tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
                 tran.onerror.attach(function () {
                     console.log('-onerror', arguments);

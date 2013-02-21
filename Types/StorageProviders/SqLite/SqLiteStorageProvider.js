@@ -238,10 +238,10 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         setTimeout(function () {
             self.connection.open({
-                error: function () {
+                error: function (err) {
                     $data.Trace.log("onerror: ", transaction._objectId, arguments);
                     if (transaction.onerror) {
-                        transaction.onerror.fire(arguments, transaction);
+                        transaction.onerror.fire(err, transaction);
                     }
                 },
                 success: function (tran) {
@@ -376,17 +376,37 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.context = ctx;
     },
     saveChanges: function (callback, changedItems, tran) {
-        var sqlConnection = this._createSqlConnection();
         var provider = this;
-        var independentBlocks = this.buildIndependentBlocks(changedItems);
-
         if (tran) {
-            this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
+            this._saveChangesWithTran(callback, changedItems, tran);
         } else {
             this.context.beginTransaction(true, function (tran) {
-                provider.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
+                provider._saveChangesWithTran(callback, changedItems, tran);
             });
         }
+    },
+    _saveChangesWithTran: function (callback, changedItems, tran) {
+        var sqlConnection = this._createSqlConnection();
+        var independentBlocks = this.buildIndependentBlocks(changedItems);
+
+        var tranError;
+        tranError = function (sender, event) {
+            tran.onerror.detach(tranError);
+            callback.error.call(this, event);
+        };
+
+        tran.onerror.attach(tranError);
+        this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, {
+            success: function () {
+                tran.onerror.detach(tranError);
+                callback.success.apply(this, arguments);
+            },
+            error: function () {
+                tran.onerror.detach(tranError);
+                callback.error.apply(this, arguments);
+            }
+        }, tran);
+
     },
     saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback, tran) {
         /// <summary>
