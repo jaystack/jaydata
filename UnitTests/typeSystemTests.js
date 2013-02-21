@@ -782,4 +782,37 @@
         equal(art.Title, 'title', 'art.Title');
 
     });
+
+    test('type with default values', 9, function () {
+        var sharedArray = [];
+
+        var mt = $data.define("MyType", {
+            Field: { type: String, defaultValue: "alma" },
+            Field2: { type: String, defaultValue: function () { return "korte" } },
+            Field3: { type: "Array", defaultValue: function () { return [] } },
+            Field4: { type: Array, defaultValue: sharedArray }
+        });
+
+        var i = new mt();
+        equal(i.Field, "alma", "primitive default value set");
+        equal(i.Field2, "korte", "function based default value set");
+
+        var i2 = new mt({ Field: "huhu" });
+        equal(i2.Field, "huhu", "init data overrides default values");
+        equal(i2.Field2, undefined, "upon init data default values are not set");
+
+        var i3 = new mt({});
+        equal(i3.Field, "alma", "empty init data is no init data");
+
+        var i4 = new mt({}, { setDefaultValues: false });
+        equal(i4.Field, undefined, "opt out init data");
+        equal(i4.Field2, undefined, "opt out init data");
+
+        var i0 = new mt();
+        var i1 = new mt();
+        ok(i0.Field3 !== i1.Field3, "pointer values differ");
+        ok(i0.Field4 === i1.Field4, "pointer values equal");
+
+
+    });
 });
