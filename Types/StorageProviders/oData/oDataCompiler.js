@@ -24,7 +24,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var queryText = queryFragments.urlText;
         var addAmp = false;
         for (var name in queryFragments) {
-            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && queryFragments[name] != "") {
+            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && name != "postData" && queryFragments[name] != "") {
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
                 if(name != "$urlParams"){
@@ -40,6 +40,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             queryText: queryText,
             withInlineCount: '$inlinecount' in queryFragments,
             method: queryFragments.method || 'GET',
+            postData: queryFragments.postData,
             params: []
         };
     },
@@ -112,7 +113,15 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
     },
     VisitServiceOperationExpression: function (expression, context) {
+        if (expression.bindedEntity) {
+            context.urlText += "/" + expression.bindedEntity.entitySet.tableName;
+            if (expression.bindedEntity.data instanceof $data.Entity) {
+                context.urlText += '(' + this.provider.getEntityKeysValue(expression.bindedEntity) + ')';
+            }
+        }
         context.urlText += "/" + expression.cfg.serviceName;
+        context.method = context.method || expression.cfg.method;
+
         //this.logicalType = expression.returnType;
         if (expression.params) {
             for (var i = 0; i < expression.params.length; i++) {
@@ -127,16 +136,23 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
 
     VisitConstantExpression: function (expression, context) {
-        if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
+        if (context.method === 'GET' || !context.method) {
+            var value;
+            if (expression.value instanceof $data.Entity) {
+                value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
+            } else if (expression.value !== undefined) {
+                var valueType = Container.getTypeName(expression.value);
+                value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+            }
 
-        var value;
-        if (expression.value instanceof $data.Entity) {
-            value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
+            if (value !== undefined) {
+                if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
+                context['$urlParams'] += expression.name + '=' + value;
+            }
         } else {
-            var valueType = Container.getTypeName(expression.value);
-            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+            context.postData = context.postData || {};
+            context.postData[expression.name] = expression.value;
         }
-        context['$urlParams'] += expression.name + '=' + value;
     },
 //    VisitConstantExpression: function (expression, context) {
 //        if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }

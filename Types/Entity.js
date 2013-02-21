@@ -126,8 +126,10 @@ var PropertyValidationEventData = $data.Class.define("PropertyValidationEventDat
     cancel: {}
 });
 
+//$data.EntityCreationOptions = $data.Class.define("$data.EntityCreationOptions", {
+//}
 $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
-    constructor: function (initData) {
+    constructor: function (initData, newInstanceOptions) {
         /// <description>
         ///     This class provide a light weight, object-relational interface between 
         ///     your javascript code and database.
@@ -153,15 +155,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <field name="changedProperties" type="Array">array of MemberDefinition</field>
 
         this.initData = {};
-        if (this.getType().__copyPropertiesToInstance) {
+        var thisType = this.getType();
+        if (thisType.__copyPropertiesToInstance) {
             $data.typeSystem.writePropertyValues(this);
         }
 
         var ctx = null;
         this.context = ctx;
 
-        if (arguments.length == 1 && typeof initData === "object") {
-            var typeMemDefs = this.getType().memberDefinitions;
+        if (typeof initData === "object") {
+            var typeMemDefs = thisType.memberDefinitions;
             var memDefNames = typeMemDefs.getPublicMappedPropertyNames();//.map(function (memDef) { return memDef.name; });
             //            if (Object.keys(initData).every(function (key) { return memDefNames.indexOf(key) != -1; })) {
             //                this.initData = initData;
@@ -173,8 +176,34 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                     if (!Object.isNullOrUndefined(initData[i])) {
                         if (type === $data.Date && typeof initData[i] === 'string')
                             this.initData[i] = new Date(initData[i]);
-                        else if (type === $data.Geography && typeof initData[i] === 'object' && !(initData[i] instanceof $data.Geography))
-                            this.initData[i] = new $data.Geography(initData[i]);
+                        else if (type === $data.GeographyPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeographyPoint))
+                            this.initData[i] = new $data.GeographyPoint(initData[i]);
+                        else if(type === $data.GeographyLineString && !(initData[i] instanceof $data.GeographyLineString))
+                            this.initData[i] = new $data.GeographyLineString(initData[i]);
+                        else if (type === $data.GeographyPolygon && !(initData[i] instanceof $data.GeographyPolygon))
+                            this.initData[i] = new $data.GeographyPolygon(initData[i]);
+                        else if (type === $data.GeographyMultiPoint && !(initData[i] instanceof $data.GeographyMultiPoint))
+                            this.initData[i] = new $data.GeographyMultiPoint(initData[i]);
+                        else if (type === $data.GeographyMultiLineString && !(initData[i] instanceof $data.GeographyMultiLineString))
+                            this.initData[i] = new $data.GeographyMultiLineString(initData[i]);
+                        else if (type === $data.GeographyMultiPolygon && !(initData[i] instanceof $data.GeographyMultiPolygon))
+                            this.initData[i] = new $data.GeographyMultiPolygon(initData[i]);
+                        else if (type === $data.GeographyCollection && !(initData[i] instanceof $data.GeographyCollection))
+                            this.initData[i] = new $data.GeographyCollection(initData[i]);
+                        else if (type === $data.GeometryPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeometryPoint))
+                            this.initData[i] = new $data.GeometryPoint(initData[i]);
+                        else if (type === $data.GeometryLineString && !(initData[i] instanceof $data.GeometryLineString))
+                            this.initData[i] = new $data.GeometryLineString(initData[i]);
+                        else if (type === $data.GeometryPolygon && !(initData[i] instanceof $data.GeometryPolygon))
+                            this.initData[i] = new $data.GeometryPolygon(initData[i]);
+                        else if (type === $data.GeometryMultiPoint && !(initData[i] instanceof $data.GeometryMultiPoint))
+                            this.initData[i] = new $data.GeometryMultiPoint(initData[i]);
+                        else if (type === $data.GeometryMultiLineString && !(initData[i] instanceof $data.GeometryMultiLineString))
+                            this.initData[i] = new $data.GeometryMultiLineString(initData[i]);
+                        else if (type === $data.GeometryMultiPolygon && !(initData[i] instanceof $data.GeometryMultiPolygon))
+                            this.initData[i] = new $data.GeometryMultiPolygon(initData[i]);
+                        else if (type === $data.GeometryCollection && !(initData[i] instanceof $data.GeometryCollection))
+                            this.initData[i] = new $data.GeometryCollection(initData[i]);
                         else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
                             this.initData[i] = initData[i] ? $data.parseGuid(initData[i]) : undefined;
                         else {
@@ -186,9 +215,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                 }
             }
 
-            this.changedProperties = undefined;
-            this.entityState = undefined;
         }
+
+        if (newInstanceOptions && newInstanceOptions.entityBuilder) {
+            newInstanceOptions.entityBuilder(this, thisType.memberDefinitions.asArray(), thisType);
+        }
+
+        this.changedProperties = undefined;
+        this.entityState = undefined;
+
     },
     toString: function () {
         /// <summary>Returns a string that represents the current $data.Entity</summary>

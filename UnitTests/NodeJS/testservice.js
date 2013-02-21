@@ -36,7 +36,7 @@ $data.Class.define('$exampleSrv.OrderSrv', $data.Entity, null, {
 $data.Class.define('$exampleSrv.PlaceSrv', $data.Entity, null, {
     Id: { type: 'id', key: true, computed: true },
     Name: { type: 'string' },
-    Location: { type: 'geo' }
+    Location: { type: 'GeographyPoint' }
 });
 
 $data.Class.define('$exampleSrv.TestItem', $data.Entity, null, {
@@ -120,8 +120,13 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
         ///<returns type="date"/>
         return a; }),
     FuncGeographyParam: (function (a) {
-        ///<param name="a" type="geo"/>
-        ///<returns type="geo"/>
+        ///<param name="a" type="GeographyPoint"/>
+        ///<returns type="GeographyPoint"/>
+        return a;
+    }),
+    FuncGeometryParam: (function (a) {
+        ///<param name="a" type="GeometryPoint"/>
+        ///<returns type="GeometryPoint"/>
         return a;
     }),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),

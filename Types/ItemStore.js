@@ -11,12 +11,23 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             return self.addItemStoreAlias.apply(self, arguments);
         };
         $data.implementation = self.implementation;
+
+        $data.Entity.addMember('storeToken', {
+            get: function () {
+                if (this.storeConfigs && this.storeConfigs['default'])
+                    return this.storeConfigs.stores[this.storeConfigs['default']];
+            },
+            set: function (value) {
+                self._setTypeStoreConfig(this, 'default', value);
+            } 
+        }, true);
     },
     itemStoreConfig: {},
 
     addItemStoreAlias: function (name, contextFactoryOrToken, isDefault) {
         var self = this;
         var promise = new $data.PromiseHandler();
+        var callback = promise.createCallback();
 
         if ('string' === typeof name) {
             //storeToken
@@ -29,7 +40,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                     self.itemStoreConfig['default'] = name;
                 }
 
-                promise.deferred.resolve();
+                callback.success();
                 return promise.getPromise();
             }
                 //contextFactory
@@ -37,7 +48,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 var preContext = contextFactoryOrToken();
                 var contextPromise;
                 if (preContext && preContext instanceof $data.EntityContext) {
-                    promise.deferred.resolve(preContext);
+                    callback.success(preContext);
                     contextPromise = promise.getPromise();
                 } else {
                     contextPromise = preContext;
@@ -62,14 +73,15 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                             });
                     } else {
                         promise = new $data.PromiseHandler();
-                        promise.deferred.reject(new Exception('factory dont have context instance', 'Invalid arguments'));
+                        callback = promise.createCallback();
+                        callback.error(new Exception('factory dont have context instance', 'Invalid arguments'));
                         return promise.getPromise();
                     }
                 });
             }
         }
 
-        promise.deferred.reject(new Exception('Name or factory missing', 'Invalid arguments'));
+        callback.error(new Exception('Name or factory missing', 'Invalid arguments'));
         return promise.getPromise();
     },
     resetStoreToDefault: function (name, isDefault) {
@@ -85,24 +97,27 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         return entity;
     },
     _getStoreAlias: function (entity, storeAlias) {
-        var validStoreAlias = undefined;
-        if (typeof storeAlias === 'string') {
-            validStoreAlias = storeAlias;
+        var type;
+        if (entity instanceof $data.Entity) {
+            var alias = storeAlias || entity.storeToken;
+            if (alias) {
+                return alias;
+            } else {
+                type = entity.getType();
+            }
+        } else {
+            type = entity;
         }
 
-        if (entity instanceof $data.Entity) {
-            var type = entity.getType();
-            return validStoreAlias || entity.storeToken || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
-        } else {
-            return validStoreAlias || (entity.storeConfigs ? entity.storeConfigs['default'] : undefined) || entity.storeToken;
-        }
+        return storeAlias || (type.storeConfigs ? type.storeConfigs['default'] : undefined) || type.storeToken;
     },
     _getStoreContext: function (aliasOrToken, type, nullIfInvalid) {
         var contextPromise = this._getContextPromise(aliasOrToken, type);
 
         if (!contextPromise || contextPromise instanceof $data.EntityContext) {
             var promise = new $data.PromiseHandler();
-            promise.deferred.resolve(contextPromise);
+            var callback = promise.createCallback();
+            callback.success(contextPromise);
             contextPromise = promise.getPromise();
         }
 
@@ -113,24 +128,38 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 return null;
             } else {
                 var promise = new $data.PromiseHandler();
-                promise.deferred.reject(new Exception('factory return type error', 'Error'));
+                var callback = promise.createCallback();
+                callback.error(new Exception('factory return type error', 'Error'));
                 return promise.getPromise();
             }
         });
     },
     _getContextPromise: function (aliasOrToken, type) {
+        /*Token*/
         if (aliasOrToken && 'object' === typeof aliasOrToken && 'function' === typeof aliasOrToken.factory) {
             return aliasOrToken.factory(type);
         } else if (aliasOrToken && 'object' === typeof aliasOrToken && 'object' === typeof aliasOrToken.args && 'string' === typeof aliasOrToken.typeName) {
             var type = Container.resolveType(aliasOrToken.typeName);
             return new type(JSON.parse(JSON.stringify(aliasOrToken.args)));
-        } else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken]) {
+        }
+            /*resolve alias from type (Token)*/
+        else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken] && typeof type.storeConfigs.stores[aliasOrToken].factory === 'function') {
+            return type.storeConfigs.stores[aliasOrToken].factory();
+        }
+            /*resolve alias from type (constructor options)*/
+        else if (aliasOrToken && 'string' === typeof aliasOrToken && type.storeConfigs && type.storeConfigs.stores[aliasOrToken]) {
             return this._getDefaultItemStoreFactory(type, type.storeConfigs.stores[aliasOrToken]);
-        } else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
+        }
+            /*resolve alias from ItemStore (factories)*/
+        else if (aliasOrToken && 'string' === typeof aliasOrToken && this.itemStoreConfig.aliases[aliasOrToken]) {
             return this.itemStoreConfig.aliases[aliasOrToken](type);
-        } else if (aliasOrToken && 'function' === typeof aliasOrToken) {
+        }
+            /*token is factory*/
+        else if (aliasOrToken && 'function' === typeof aliasOrToken) {
             return aliasOrToken();
-        } else {
+        }
+            /*default no hint*/
+        else {
             return this.itemStoreConfig.aliases[this.itemStoreConfig['default']](type);
         }
 
@@ -144,7 +173,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 var entitySet = ctx.getEntitySetFromElementType(type);
                 if (!entitySet) {
                     var d = new $data.PromiseHandler();
-                    d.deferred.reject("EntitySet not exist for " + type.fullName);
+                    var callback = d.createCallback();
+                    callback.error("EntitySet not exist for " + type.fullName);
                     return d.getPromise();
                 }
                 return entitySet;
@@ -165,7 +195,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             if (storeConfig.tableName && !storeConfig.collectionName)
                 storeConfig.collectionName = storeConfig.tableName;
 
-            var contextDef = {}
+            var contextDef = {};
             contextDef[storeConfig.collectionName] = { type: $data.EntitySet, elementType: type }
             if (storeConfig.tableName)
                 contextDef[storeConfig.collectionName]['tableName'] = storeConfig.tableName;
@@ -232,7 +262,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                                 break;
                             default:
                                 var d = new $data.PromiseHandler();
-                                d.deferred.reject('save mode not supported: ' + mode);
+                                var callback = d.createCallback();
+                                callback.error('save mode not supported: ' + mode);
                                 return d.getPromise();
                         }
 
@@ -322,7 +353,8 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                             .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                     } catch (e) {
                         var d = new $data.PromiseHandler();
-                        d.deferred.reject(e);
+                        var callback = d.createCallback();
+                        callback.error(e);
                         return d.getPromise();
                     }
                 });
@@ -403,6 +435,11 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
     EntityTypeSetStore: function (type) {
         return function (name, config) {
+            if (typeof name === 'object' && typeof config === 'undefined') {
+                config = name;
+                name = 'default';
+            }
+
             var self = $data.ItemStore;
 
             var defStoreConfig = {};
@@ -444,16 +481,21 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 config = { name: 'local' };
             }
 
-            if (!type.storeConfigs) {
-                type.storeConfigs = {
-                    stores: {},
-                    'default': name
-                };
-            }
-            type.storeConfigs.stores[name] = defStoreConfig;
-            type.storeConfigs.stores[name].initParam = config;
+            defStoreConfig.initParam = config;
+            self._setTypeStoreConfig(type, name, defStoreConfig);
 
             return type;
+        }
+    },
+    _setTypeStoreConfig: function(type, name, config){
+        if (!type.storeConfigs) {
+            type.storeConfigs = {
+                stores: {}
+            };
+        }
+        type.storeConfigs.stores[name] = config;
+        if (name === 'default') {
+            type.storeConfigs['default'] = name;
         }
     },
 
@@ -500,22 +542,25 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     _getSaveMode: function (entity, entitySet, hint, storeAlias) {
         var self = this;
         var promise = new $data.PromiseHandler();
-        var deferred = promise.deferred;
+        var callback = promise.createCallback();
         var entityType = entity.getType();
 
         switch (true) {
             case hint === 'update':
-                deferred.resolve('attach'); break;
+                callback.success('attach'); break;
             case hint === 'new':
-                deferred.resolve('add'); break;
+                callback.success('add'); break;
             case false === entityType.memberDefinitions.getKeyProperties().every(function (keyDef) { return entity[keyDef.name]; }):
-                deferred.resolve('add'); break;
+                callback.success('add'); break;
+            case !!entity.storeToken:
+                callback.success('attach'); break;
+                break;
             default:
                 //use the current entity store informations
                 storeAlias = this._getStoreAlias(entity, storeAlias);
                 entityType.read(self._getKeyObjectFromEntity(entity, entityType), storeAlias)
-                    .then(function () { deferred.resolve('attach'); })
-                    .fail(function () { deferred.resolve('add'); });
+                    .then(function () { callback.success('attach'); })
+                    .fail(function () { callback.success('add'); });
                 break;
         }
 
@@ -543,8 +588,9 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 var itemResolvedDataType = Container.resolveType(item.type);
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
                     var elementType = Container.resolveType(item.elementType);
-                    elementType.storeToken = elementType.storeToken || this.storeToken;
-                    elementType.assignedToContext = true;
+                    if (!elementType.storeToken) {
+                        elementType.storeToken = elementType.storeToken || this.storeToken;
+                    }
                 }
             }
         }
@@ -571,12 +617,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 });
 $data.ItemStore = new $data.ItemStoreClass();
 
-
-
 $data.Entity.addMember('field', function (propName) {
-    if (this.assignedToContext)
-        Guard.raise(new Exception("Type '" + this.fullName + "' already used in context!", 'Invalid Operation'));
-
     var def = this.memberDefinitions.getMember(propName);
     if (def) {
         if (def.definedBy === this) {

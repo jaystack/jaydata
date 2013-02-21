@@ -65,7 +65,7 @@
         stop(1);
 
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
 
                 db.Articles.add({ Title: 'TitleData', Lead: 'LeadData' });
                 db.saveChanges(function () {
@@ -83,7 +83,7 @@
 
                     });
                 });
-            });
+            //});
         });
     });
 
@@ -92,7 +92,7 @@
         stop(1);
 
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
 
                 db.Articles.add({ Title: 'TitleData', Lead: 'LeadData' });
                 db.saveChanges(function () {
@@ -107,7 +107,7 @@
                         start();
                     });
                 });
-            });
+            //});
         });
     });
 
@@ -1100,17 +1100,17 @@
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             try {
                 start(1);
-                $news.Types.NewsContext.generateTestData(db, function () {
+                //$news.Types.NewsContext.generateTestData(db, function () {
                     start(1);
                     var a = new $news.Types.Article({ Title: "asdads", Category: new $news.Types.Category({ Title: "CatX" }) });
                     db.Articles.add(a);
                     db.saveChanges(function (count) {
                         start(1);
                         equal(count, 2, "Saved entity count faild");
-                        equal(a.Id, 27, 'Article Id faild');
-                        equal(a.Category.Id, 6, "category Id faild");
+                        equal(a.Id, 1, 'Article Id faild');
+                        equal(a.Category.Id, 1, "category Id faild");
                     });
-                });
+                //});
             } catch (ex) {
                 start(1);
                 ok(false, "Unhandled exception occured");
@@ -1239,7 +1239,7 @@
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             start(1);
             ok(db, 'Databse generation faild');
-            $news.Types.NewsContext.generateTestData(db, function () {
+            //$news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
                 var item = new $news.Types.TestItem();
                 item.b0 = true;
@@ -1252,7 +1252,7 @@
                         ok(result[0].b0, 'boolean result error');
                     });
                 });
-            });
+            //});
         });
     });
     //test("XXX_Projection_scalar_with_function_call", 3, function () {

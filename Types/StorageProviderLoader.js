@@ -1,22 +1,32 @@
 $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
     isSupported: function (providerName) {
+        $data.Trace.log('Detecting ' + providerName + ' provider support');
+        var supported = true;
         switch (providerName) {
             case 'indexedDb':
-                return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || (window.msIndexedDB && !(/^file:/.test(window.location.href)));
+                supported = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || (window.msIndexedDB && !(/^file:/.test(window.location.href)));
+                break;
             case 'storm':
-                return 'XMLHttpRequest' in window;
+                supported = 'XMLHttpRequest' in window;
+                break;
             case 'webSql':
             case 'sqLite':
-                return 'openDatabase' in window;
+                supported = 'openDatabase' in window;
+                break;
             case 'LocalStore':
-                return 'localStorage' in window && window.localStorage ? true : false;
+                supported = 'localStorage' in window && window.localStorage ? true : false;
+                break;
             case 'sqLite':
-                return 'openDatabase' in window;
+                supported = 'openDatabase' in window;
+                break;
             case 'mongoDB':
-                return $data.mongoDBDriver;
+                supported = $data.mongoDBDriver;
+                break;
             default:
-                return true;
+                break;
         }
+        $data.Trace.log(providerName + ' provider is ' + (supported ? '' : 'not') + ' supported');
+        return supported;
     },
     scriptLoadTimeout: { type: 'int', value: 1000 },
     scriptLoadInterval: { type: 'int', value: 50 },
@@ -46,49 +56,66 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         }
     },
     load: function (providerList, callback) {
+        $data.Trace.log('Loading provider(s): ' + providerList);
         callback = $data.typeSystem.createCallbackSetting(callback);
         var currentProvider = providerList.shift();
 
         while (currentProvider && !this.isSupported(currentProvider)) {
             currentProvider = providerList.shift();
         }
+        
+        $data.Trace.log('First supported provider is ' + currentProvider);
 
-        if (!currentProvider)
+        if (!currentProvider){
+            $data.Trace.log('Provider fallback failed');
             callback.error();
+        }
 
         if ($data.RegisteredStorageProviders) {
+            $data.Trace.log('Is the ' + currentProvider + ' provider already registered?');
             var provider = $data.RegisteredStorageProviders[currentProvider];
             if (provider) {
+                $data.Trace.log(currentProvider + ' provider registered');
                 callback.success(provider)
                 return;
+            }else{
+                $data.Trace.log(currentProvider + ' provider not registered');
             }
         }
 
         if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
             // NodeJS
+            $data.Trace.log('node.js detected trying to load NPM module');
             this.loadNpmModule(currentProvider, providerList, callback);
         } else {
+            $data.Trace.log('Browser detected trying to load provider');
             this.loadProvider(currentProvider, providerList, callback);
         }
     },
     loadProvider: function (currentProvider, providerList, callback) {
         var self = this;
         var mappedName = $data.StorageProviderLoader.ProviderNames[currentProvider] || currentProvider;
+        $data.Trace.log(currentProvider + ' provider is mapped to name ' + mappedName + 'Provider');
         if (mappedName) {
             var url = this.getUrl(mappedName);
+            $data.Trace.log(currentProvider + ' provider from URL: ' + url);
 
             var loader = this.loadScript;
             if (document && document.createElement) {
+                $data.Trace.log('document and document.createElement detected, using script element loader method');
                 loader = this.loadScriptElement;
             }
 
             loader.call(this, url, currentProvider, function (successful) {
                 var provider = $data.RegisteredStorageProviders[currentProvider];
                 if (successful && provider) {
+                    $data.Trace.log(currentProvider + ' provider successfully registered');
                     callback.success(provider);
                 } else if (providerList.length > 0) {
+                    $data.Trace.log(currentProvider + ' provider failed to load, trying to fallback to ' + providerList + ' provider(s)');
                     self.load(providerList, callback);
                 } else {
+                    $data.Trace.log(currentProvider + ' provider failed to load');
                     callback.error();
                 }
             });
@@ -102,30 +129,42 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         else return 'jaydataproviders/' + providerName + 'Provider.js';
     },
     loadScript: function (url, currentProvider, callback) {
-        if (!url)
+        if (!url){
             callback(false);
+            return;
+        }
 
         function getHttpRequest() {
             if (window.XMLHttpRequest)
                 return new XMLHttpRequest();
             else if (window.ActiveXObject)
                 return new ActiveXObject("MsXml2.XmlHttp");
+            else{
+                $data.Trace.log('XMLHttpRequest or MsXml2.XmlHttp ActiveXObject not found');
+                callback(false);
+                return;
+            }
         }
 
         var oXmlHttp = getHttpRequest();
         oXmlHttp.onreadystatechange = function () {
+            $data.Trace.log('HTTP request is in state: ' + oXmlHttp.readyState);
             if (oXmlHttp.readyState == 4) {
                 if (oXmlHttp.status == 200 || oXmlHttp.status == 304) {
+                    $data.Trace.log('HTTP request succeeded');
+                    $data.Trace.log('HTTP request response text: ' + oXmlHttp.responseText);
                     eval.call(window, oXmlHttp.responseText);
                     if (typeof callback === 'function')
                         callback(true);
+                    else $data.Trace.log('Callback function is undefined');
                 } else {
-                    if (typeof callback === 'function') {
+                    $data.Trace.log('HTTP request status: ', oXmlHttp.status);
+                    if (typeof callback === 'function')
                         callback(false);
-                    }
+                    else $data.Trace.log('Callback function is undefined');
                 }
             }
-        }
+        };
         oXmlHttp.open('GET', url, true);
         oXmlHttp.send(null);
     },
@@ -135,19 +174,25 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         var script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = url;
+        $data.Trace.log('Appending child ' + script + ' to ' + head);
         head.appendChild(script);
 
         var loadInterval = this.scriptLoadInterval || 50;
-        var iteration = this.scriptLoadTimeout / loadInterval;
+        var iteration = Math.ceil(this.scriptLoadTimeout / loadInterval);
+        $data.Trace.log('Script element watcher iterating ' + iteration + ' times');
         function watcher() {
+            $data.Trace.log('Script element watcher iteration ' + iteration);
             var provider = $data.RegisteredStorageProviders[currentProvider];
             if (provider) {
+                $data.Trace.log(currentProvider + ' provider registered');
                 callback(true);
             } else {
                 iteration--;
                 if (iteration > 0) {
+                    $data.Trace.log('Script element watcher next iteration');
                     setTimeout(watcher, loadInterval);
                 } else {
+                    $data.Trace.log('Script element loader failed');
                     callback(false);
                 }
             }
@@ -160,7 +205,10 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         try {
             require(this.npmModules[currentProvider]);
             provider = $data.RegisteredStorageProviders[currentProvider];
-        } catch (e) { }
+            $data.Trace.log('NPM module loader successfully registered ' + currentProvider + ' provider');
+        } catch (e) {
+            $data.Trace.log('NPM module loader failed for ' + currentProvider + ' provider');
+        }
 
         if (provider) {
             callback.success(provider);

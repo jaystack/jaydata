@@ -10,14 +10,14 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             maxSize: 1024 * 1024,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
-        
+
         this.providerName = '';
-        for (var i in $data.RegisteredStorageProviders){
-            if ($data.RegisteredStorageProviders[i] === this.getType()){
+        for (var i in $data.RegisteredStorageProviders) {
+            if ($data.RegisteredStorageProviders[i] === this.getType()) {
                 this.providerName = i;
             }
         }
-        
+
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -50,7 +50,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         return connection;
     },
     //$data.Array, 
-    supportedDataTypes: { value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid], writable: false },
+    supportedDataTypes: {
+        value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid, $data.GeographyPoint,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
     fieldConverter: {
         value: {
             fromDb: {
@@ -64,7 +69,21 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     if (arguments.length == 0) return [];
                     return arguments[0] ? JSON.parse(arguments[0]) : undefined;
                 },
-                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(JSON.parse(g)); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(JSON.parse(g)); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(JSON.parse(g)); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(JSON.parse(g)); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(JSON.parse(g)); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(JSON.parse(g)); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(JSON.parse(g)); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(JSON.parse(g)); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(JSON.parse(g)); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(JSON.parse(g)); } return g; }
             },
             toDb: {
                 "$data.Integer": function (number) { return number; },
@@ -75,7 +94,21 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 "$data.Blob": function (blob) { return blob; },
                 "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
                 "$data.Guid": function (g) { return g ? g.value : g; },
-                "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; }
+                "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; },
+                '$data.GeographyPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return JSON.stringify(g); } return g; }
             }
         }
     },
@@ -190,118 +223,42 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         enumerable: true,
         writable: true
     },
+    _beginTran: function (tableList, isWrite, callBack) {
+        var self = this;
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        self._createSqlConnection();
 
-    buildDbType_modifyInstanceDefinition: function (instanceDefinition, storageModel) {
-        var buildDbType_copyPropertyDefinition = function (propertyDefinition, refProp) {
-            var cPropertyDef;
-            if (refProp) {
-                cPropertyDef = JSON.parse(JSON.stringify(instanceDefinition[refProp]));
-                cPropertyDef.kind = propertyDefinition.kind;
-                cPropertyDef.name = propertyDefinition.name;
-                cPropertyDef.notMapped = false;
-            } else {
-                cPropertyDef = JSON.parse(JSON.stringify(propertyDefinition));
+        var transaction = new $data.sqLite.SqlTransaction();
+        function onComplete() {
+            $data.Trace.log("oncomplete: ", transaction._objectId);
+            if (transaction.oncomplete) {
+                transaction.oncomplete.fire(arguments, transaction);
             }
-
-            cPropertyDef.dataType = Container.resolveType(propertyDefinition.dataType);
-            cPropertyDef.type = cPropertyDef.dataType;
-            cPropertyDef.key = false;
-            cPropertyDef.computed = false;
-            return cPropertyDef;
-        };
-        var buildDbType_createConstrain = function (foreignType, dataType, propertyName, prefix) {
-            var constrain = new Object();
-            constrain[foreignType.name] = propertyName;
-            constrain[dataType.name] = prefix + '__' + propertyName;
-            return constrain;
-        };
-
-        if (storageModel.Associations) {
-            storageModel.Associations.forEach(function (association) {
-                var addToEntityDef = false;
-                var foreignType = association.FromType;
-                var dataType = association.ToType;
-                var foreignPropName = association.ToPropertyName;
-
-                association.ReferentialConstraint = association.ReferentialConstraint || [];
-
-                if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
-                    foreignType = association.ToType;
-                    dataType = association.FromType;
-                    foreignPropName = association.FromPropertyName;
-                    addToEntityDef = true;
-                }
-
-                foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d) {
-                    if (addToEntityDef) {
-                        instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
-                    }
-                    association.ReferentialConstraint.push(buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName));
-                }, this);
-            }, this);
         }
-        //Copy complex type properties
-        if (storageModel.ComplexTypes) {
-            storageModel.ComplexTypes.forEach(function (complexType) {
-                complexType.ReferentialConstraint = complexType.ReferentialConstraint || [];
 
-                complexType.ToType.memberDefinitions.getPublicMappedProperties().forEach(function (d) {
-                    instanceDefinition[complexType.FromPropertyName + '__' + d.name] = buildDbType_copyPropertyDefinition(d);
-                    complexType.ReferentialConstraint.push(buildDbType_createConstrain(complexType.ToType, complexType.FromType, d.name, complexType.FromPropertyName));
-                }, this);
-            }, this);
-        }
-    },
-    buildDbType_generateConvertToFunction: function (storageModel) {
-        return function (logicalEntity) {
-            var dbInstance = new storageModel.PhysicalType();
-            dbInstance.entityState = logicalEntity.entityState;
-
-            //logicalEntity.changedProperties.forEach(function(memberDef){
-            //}, this);
-            storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (property) {
-                dbInstance[property.name] = logicalEntity[property.name];
-            }, this);
-
-            if (storageModel.Associations) {
-                storageModel.Associations.forEach(function (association) {
-                    if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
-                        var complexInstance = logicalEntity[association.FromPropertyName];
-                        if (complexInstance !== undefined) {
-                            association.ReferentialConstraint.forEach(function (constrain) {
-                                if (complexInstance !== null) {
-                                    dbInstance[constrain[association.From]] = complexInstance[constrain[association.To]];
-                                } else {
-                                    dbInstance[constrain[association.From]] = null;
-                                }
-                            }, this);
-                        }
+        setTimeout(function () {
+            self.connection.open({
+                error: function () {
+                    $data.Trace.log("onerror: ", transaction._objectId, arguments);
+                    if (transaction.onerror) {
+                        transaction.onerror.fire(arguments, transaction);
                     }
-                }, this);
-            }
-            if (storageModel.ComplexTypes) {
-                storageModel.ComplexTypes.forEach(function (cmpType) {
-                    var complexInstance = logicalEntity[cmpType.FromPropertyName];
-                    if (complexInstance !== undefined) {
-                        cmpType.ReferentialConstraint.forEach(function (constrain) {
-                            if (complexInstance !== null) {
-                                dbInstance[constrain[cmpType.From]] = complexInstance[constrain[cmpType.To]];
-                            } else {
-                                dbInstance[constrain[cmpType.From]] = null;
-                            }
-                        }, this);
-                    }
-                }, this);
-            }
-            return dbInstance;
-        };
+                },
+                success: function (tran) {
+                    transaction.transaction = tran;
+                    callBack.success(transaction);
+                },
+                oncomplete: onComplete
+            }, undefined, isWrite);
+        }, 0);
+        //callBack.success(this.connection);
     },
     initializeStore: function (callBack) {
-        // callBack.success(this.context); return;
-
-
-
         callBack = $data.typeSystem.createCallbackSetting(callBack);
+        this.context._storageModel.forEach(function (item, index) {
+            var indices = this.createSqlIndexFromStorageModel(item);
+            this.SqlCommands = this.SqlCommands.concat(indices);
+        }, this);
         this.context._storageModel.forEach(function (item, index) {
             this.SqlCommands.push(this.createSqlFromStorageModel(item) + " ");
         }, this);
@@ -310,55 +267,58 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var cmd = sqlConnection.createCommand("SELECT * FROM sqlite_master WHERE type = 'table'", null);
         var that = this;
 
-        cmd.executeQuery({
-            success: function (result) {
-                var existObjectInDB = {};
-                for (var i = 0; i < result.rows.length; i++) {
-                    var item = result.rows[i];
-                    existObjectInDB[item.tbl_name] = item;
-                }
-                switch (that.providerConfiguration.dbCreation) {
-                    case $data.storageProviders.DbCreationType.Merge:
-                        Guard.raise(new Exception('Not supported db creation type'));
-                        break;
-                    case $data.storageProviders.DbCreationType.DropTableIfChanged:
-                        var deleteCmd = [];
-                        for (var i = 0; i < that.SqlCommands.length; i++) {
-                            if (that.SqlCommands[i] == "") { continue; }
-                            var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
-                            var data = regEx.exec(that.SqlCommands[i]);
-                            if (data) {
-                                var tableName = data[1];
-                                var tableDef = data[2];
-                                if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
-                                    var regex = new RegExp('\\(.*\\)', 'g');
-                                    var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
+        this.context.beginTransaction(true, function (tran) {
+            cmd.executeQuery({
+                success: function (result, tran) {
+                    var existObjectInDB = {};
+                    for (var i = 0; i < result.rows.length; i++) {
+                        var item = result.rows[i];
+                        existObjectInDB[item.tbl_name] = item;
+                    }
+                    switch (that.providerConfiguration.dbCreation) {
+                        case $data.storageProviders.DbCreationType.Merge:
+                            Guard.raise(new Exception('Not supported db creation type'));
+                            break;
+                        case $data.storageProviders.DbCreationType.DropTableIfChanged:
+                            var deleteCmd = [];
+                            for (var i = 0; i < that.SqlCommands.length; i++) {
+                                if (that.SqlCommands[i] == "") { continue; }
+                                var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
+                                var data = regEx.exec(that.SqlCommands[i]);
+                                if (data) {
+                                    var tableName = data[1];
+                                    var tableDef = data[2];
+                                    if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
+                                        var regex = new RegExp('\\(.*\\)', 'g');
+                                        var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
 
-                                    if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
-                                        deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
+                                        if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
+                                            deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
+                                        }
                                     }
                                 }
+                                else {
+                                    //console.dir(regEx);
+                                    //console.dir(that.SqlCommands[i]);
+                                }
                             }
-                            else {
-                                //console.dir(regEx);
-                                //console.dir(that.SqlCommands[i]);
+                            that.SqlCommands = that.SqlCommands.concat(deleteCmd);
+                            //console.log(deleteCmd);
+                            break;
+                        case $data.storageProviders.DbCreationType.DropAllExistingTables:
+                            for (var objName in existObjectInDB) {
+                                if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
+                                    that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
+                                }
                             }
-                        }
-                        that.SqlCommands = that.SqlCommands.concat(deleteCmd);
-                        //console.log(deleteCmd);
-                        break;
-                    case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                        for (var objName in existObjectInDB) {
-                            if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
-                                that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
-                            }
-                        }
-                        break;
-                }
-                that._runSqlCommands(sqlConnection, { success: callBack.success, error: callBack.error });
-            },
-            error: callBack.error
+                            break;
+                    }
+                    that._runSqlCommands(sqlConnection, { success: callBack.success, error: callBack.error }, tran, true);
+                },
+                error: callBack.error
+            }, tran, true);
         });
+
     },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -369,7 +329,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         query.modelBinderConfig = sql.modelBinderConfig;
         var sqlCommand = sqlConnection.createCommand(sql.sqlText, sql.params);
         var that = this;
-        sqlCommand.executeQuery({
+
+
+        var innerCallback = {
             success: function (sqlResult) {
                 if (callBack.success) {
                     query.rawDataList = sqlResult.rows;
@@ -377,7 +339,16 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
             },
             error: callBack.error
-        });
+        }
+
+        if (query.transaction) {
+            sqlCommand.executeQuery(innerCallback, query.transaction, false);
+        } else {
+            this.context.beginTransaction(false, function (tran) {
+                query.transaction = tran;
+                sqlCommand.executeQuery(innerCallback, tran, false);
+            });
+        }
     },
     _compile: function (query, params) {
         var compiler = new $data.storageProviders.sqLite.SQLiteCompiler();
@@ -390,13 +361,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var sqlText = this._compile(query);
         return sqlText;
     },
-    _runSqlCommands: function (sqlConnection, callBack) {
+    _runSqlCommands: function (sqlConnection, callBack, tran, isWrite) {
         if (this.SqlCommands && this.SqlCommands.length > 0) {
             var cmdStr = this.SqlCommands.pop();
             var command = sqlConnection.createCommand(cmdStr, null);
             var that = this;
-            var okFn = function (result) { that._runSqlCommands.apply(that, [sqlConnection, callBack]); };
-            command.executeQuery({ success: okFn, error: callBack.error });
+            var okFn = function (result) { that._runSqlCommands.apply(that, [sqlConnection, callBack, tran, isWrite]); };
+            command.executeQuery({ success: okFn, error: callBack.error }, tran, isWrite);
         } else {
             callBack.success(this.context);
         }
@@ -404,13 +375,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     setContext: function (ctx) {
         this.context = ctx;
     },
-    saveChanges: function (callback, changedItems) {
+    saveChanges: function (callback, changedItems, tran) {
         var sqlConnection = this._createSqlConnection();
         var provider = this;
         var independentBlocks = this.buildIndependentBlocks(changedItems);
-        this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback);
+
+        if (tran) {
+            this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
+        } else {
+            this.context.beginTransaction(true, function (tran) {
+                provider.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
+            });
+        }
     },
-    saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback) {
+    saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback, tran) {
         /// <summary>
         /// Saves the sequentially independent items to the database.
         /// </summary>
@@ -419,9 +397,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         /// <param name="callback">Callback on finish</param>
         var provider = this;
         var t = [].concat(independentBlocks);
-        function saveNextIndependentBlock() {
+        function saveNextIndependentBlock(tran) {
             if (t.length === 0) {
-                callback.success();
+                callback.success(tran);
                 return;
             }
             var currentBlock = t.shift();
@@ -431,25 +409,30 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 item.physicalData = dbType.convertTo(item.data);
                 return item;
             }, this);
-            provider.saveIndependentItems(convertedItems, sqlConnection, {
-                success: function () {
-                    provider.postProcessItems(convertedItems);
-                    saveNextIndependentBlock();
-                },
-                error: callback.error
-            });
+            try {
+                provider.saveIndependentItems(convertedItems, sqlConnection, {
+                    success: function (items, tran) { //TODO items???
+                        provider.postProcessItems(convertedItems);
+                        saveNextIndependentBlock(tran);
+                    },
+                    error: callback.error
+                }, tran);
+            } catch (e) {
+                callback.error(e, tran);
+            }
+            
         }
-        saveNextIndependentBlock();
+        saveNextIndependentBlock(tran);
     },
 
-    saveIndependentItems: function (items, sqlConnection, callback) {
+    saveIndependentItems: function (items, sqlConnection, callback, tran) {
         var provider = this;
         var queries = items.map(function (item) {
             return provider.saveEntitySet(item);
         });
         queries = queries.filter(function (item) { return item; });
         if (queries.length === 0) {
-            callback.success(items);
+            callback.success(items, tran);
             return;
         }
         function toCmd(sqlConnection, queries) {
@@ -466,7 +449,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         }
         var cmd = toCmd(sqlConnection, queries);
         cmd.executeQuery({
-            success: function (results) {
+            success: function (results, tran) {
                 var reloadQueries = results.map(function (result, i) {
                     if (result && result.insertId) {
                         return provider.save_reloadSavedEntity(result.insertId, items[i].entitySet.tableName, sqlConnection);
@@ -476,20 +459,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 })
                 var cmd = toCmd(sqlConnection, reloadQueries);
                 if (cmd.query.length > 0) {
-                    cmd.executeQuery(function (results) {
+                    cmd.executeQuery(function (results, tran) {
                         results.forEach(function (item, i) {
                             if (item && item.rows) {
                                 items[i].physicalData.initData = item.rows[0];
                             }
                         });
-                        callback.success(items);
-                    });
+                        callback.success(items, tran);
+                    }, tran, true);
                 } else {
-                    callback.success(0);//TODO Zenima: fixed this!
+                    callback.success(0, tran);//TODO Zenima: fixed this!
                 }
             },
             error: callback.error
-        });
+        }, tran, true);
     },
     postProcessItems: function (changedItems) {
         var pmpCache = {};
@@ -538,9 +521,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 if (fieldDef.key || addAllField) {
                     deleteSqlString += "([" + fieldDef.name + "] == ?)";
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
                         deleteParam.push(logicalFieldDef.converter[this.providerName].toDb(item.data[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    }else{
+                    } else {
                         deleteParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.data[fieldDef.name]));
                     }
                     hasCondition = true;
@@ -577,9 +560,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 if (fieldDef.key) {
                     whereSection += '([' + fieldDef.name + '] == ?)';
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
                         whereParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], fieldDef, this.context, logicalFieldDef.dataType));
-                    }else{
+                    } else {
                         whereParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
                     }
                     hasCondition = true;
@@ -587,9 +570,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 else {
                     setSection += "[" + fieldDef.name + "] = ?";
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
                         setParam.push(fieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    }else{
+                    } else {
                         setParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
                     }
                 }
@@ -610,6 +593,11 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var fieldValue = "";
         var fieldParam = [];
         item.physicalData.constructor.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
+            if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+                Guard.raise(new Exception('Key is not set', 'Value exception', item));
+                return;
+            }
+
             if (fieldList.length > 0 && fieldList[fieldList.length - 1] != ",") { fieldList += ","; fieldValue += ","; }
             var fieldName = fieldDef.name;
             if (/*item.physicalData[fieldName] !== null && */item.physicalData[fieldName] !== undefined) {
@@ -617,19 +605,22 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     fieldValue += '?';
                     fieldList += "[" + fieldName + "]";
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
                         fieldParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[fieldName], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    }else{
+                    } else {
                         fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
                     }
                 }
             }
 
         }, this);
-        if (fieldParam.length < 1) { Guard.raise(new Exception('None of the fields contain values in the entity to be saved.')); }
-        if (fieldList[fieldList.length - 1] == ",") { fieldList = fieldList.slice(0, fieldList.length - 1); }
-        if (fieldValue[fieldValue.length - 1] == ",") { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
-        insertSqlString += fieldList + ") VALUES(" + fieldValue + ");";
+        if (fieldParam.length < 1) {
+            insertSqlString = "INSERT INTO [" + item.entitySet.tableName + "] Default values";
+        } else {
+            if (fieldList[fieldList.length - 1] == ",") { fieldList = fieldList.slice(0, fieldList.length - 1); }
+            if (fieldValue[fieldValue.length - 1] == ",") { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
+            insertSqlString += fieldList + ") VALUES(" + fieldValue + ");";
+        }
         return { query: insertSqlString, param: fieldParam };
     },
     save_reloadSavedEntity: function (rowid, tableName) {
@@ -684,7 +675,34 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             sql += pkFragment + ')';
         }
         sql += ');';
+
         return sql;
+    },
+    createSqlIndexFromStorageModel: function (memberDef) {
+        //Create indices
+        var sql = "";
+        var indices = [];
+        if (memberDef.indices && memberDef.indices.length > 0) {
+            for (var i = 0; i < memberDef.indices.length; i++) {
+                sql = "";
+                sql += "CREATE " + (memberDef.indices[i].unique ? "UNIQUE " : "") + "INDEX IF NOT EXISTS ";
+                sql += memberDef.indices[i].name + " ON " + memberDef.TableName + " (";
+                if (!memberDef.indices[i].keys || (memberDef.indices[i].keys && memberDef.indices[i].keys.length < 1)) { throw new Exception("Index create error: Keys field is required!"); }
+                for (var k = 0; k < memberDef.indices[i].keys.length; k++) {
+                    if (k !== 0) { sql += ", "; }
+                    var key = memberDef.indices[i].keys[k];
+                    if (typeof key === "string") {
+                        sql += key;
+                    } else {
+                        sql += key.fieldName;
+                        if (key.order) { sql += " " + key.order; }
+                    }
+                }
+                sql += ");";
+                indices.push(sql);
+            }
+        }
+        return indices;
     },
     createSqlFragmentFromField: function (field, parsePk, storageModelObject) {
         if (('schemaCreate' in field) && (field['schemaCreate']))
@@ -707,6 +725,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 case $data.Guid:
                 case "text":
                 case "string":
+                case $data.GeographyPoint:
+                case $data.GeographyLineString:
+                case $data.GeographyPolygon:
+                case $data.GeographyMultiPoint:
+                case $data.GeographyMultiLineString:
+                case $data.GeographyMultiPolygon:
+                case $data.GeographyCollection:
+                case $data.GeometryPoint:
+                case $data.GeometryLineString:
+                case $data.GeometryPolygon:
+                case $data.GeometryMultiPoint:
+                case $data.GeometryMultiLineString:
+                case $data.GeometryMultiPolygon:
+                case $data.GeometryCollection:
                     this.buildFieldNameAndType("TEXT");
                     break;
                 case $data.Boolean:

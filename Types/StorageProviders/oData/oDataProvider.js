@@ -88,13 +88,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                 if (convertedItems.indexOf(refValue) < 0) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
-                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: sMod.EntitySetReference }) + ')';
-                                    /*var pk = '(';
-                                    refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
-                                        if (index > 0) { pk += ','; }
-                                        pk += refValue[k.name];
-                                    }, this);
-                                    pk += ')';*/
+                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
                                     dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
@@ -114,6 +108,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             return dbInstance;
         };
     },
+    buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
@@ -130,13 +125,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
+                data: sql.postData,
                 enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 }
             },
             function (data, textStatus, jqXHR) {
-                if (!data) data = JSON.parse(textStatus.body);
+                if (!data && textStatus.body) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'string' ? [{ cnt: data }] : data;
                     if (sql.withInlineCount && typeof data === 'object' && (data.__count || ('d' in data && data.d.__count))) {
@@ -191,7 +187,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 convertedItem.push(independentBlocks[index][i].data);
                 request = {
                     requestUri: this.providerConfiguration.oDataServiceHost + '/',
-                    headers: {}
+                    headers: {
+                        MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
+                    }
                 };
                 //request.headers = { "Content-Id": convertedItem.length };
                 switch (independentBlocks[index][i].data.entityState) {
@@ -305,6 +303,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             method: "POST",
             data: {
                 __batchRequests: [{ __changeRequests: batchRequests }]
+            },
+            headers: {
+                MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
             }
         }, function (data, response) {
             if (response.statusCode == 202) {
@@ -385,7 +386,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var sqlText = this._compile(queryable);
         return queryable;
     },
-    supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.Geography, $data.Guid], writable: false },
+    supportedDataTypes: {
+        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
+            $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
+            $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection],
+        writable: false
+    },
 
     supportedBinaryOperators: {
         value: {
@@ -439,10 +445,26 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
             },
 
-            length: {
+            length: [{
+                allowedType: 'string',
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
+            {
+                allowedType: 'GeographyLineString',
+                mapTo: "geo.length",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: ['GeographyLineString'] }],
+                fixedDataType: 'decimal'
+            },
+            {
+                allowedType: 'GeometryLineString',
+                mapTo: "geo.length",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeometryLineString' }],
+                fixedDataType: 'decimal'
+            }],
+
             strLength: {
                 mapTo: "length",
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
@@ -531,7 +553,37 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             ceiling: {
                 allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
-            }
+            },
+
+
+            /* geo functions */
+            distance: [{
+                allowedType: 'GeographyPoint',
+                mapTo: "geo.distance",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "to", dataType: 'GeographyPoint' }],
+                fixedDataType: 'decimal'
+            }, {
+                allowedType: 'GeometryPoint',
+                mapTo: "geo.distance",
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "to", dataType: 'GeometryPoint' }],
+                fixedDataType: 'decimal'
+            }],
+
+            intersects: [{
+                allowedType: 'GeographyPoint',
+                mapTo: "geo.intersects",
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "in", dataType: 'GeographyPolygon' }]
+
+            }, {
+                allowedType: 'GeometryPoint',
+                mapTo: "geo.intersects",
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "in", dataType: 'GeometryPolygon' }]
+
+            }]
         },
         enumerable: true,
         writable: true
@@ -575,18 +627,39 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             fromDb: {
                 '$data.Integer': function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : dbData; },
+                '$data.Date': function (dbData) {
+                    if (dbData) {
+                        if (dbData.substring(0, 6) === '/Date(') {
+                            return new Date(parseInt(dbData.substr(6)));
+                        } else {
+                            //ISODate without Z? Safari compatible with Z
+                            if (dbData.indexOf('Z') === -1 && !dbData.match('T.*[+-]'))
+                                dbData += 'Z';
+                            return new Date(dbData);
+                        }
+                    } else {
+                        return dbData;
+                    }
+                },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
                 '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
-                '$data.Geography': function (geo) {
-                    if (geo && typeof geo === 'object' && Array.isArray(geo.coordinates)) {
-                        return new $data.Geography(geo.coordinates[0], geo.coordinates[1]);
-                    }
-                    return geo;
-                },
+                '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return new $data.GeographyPolygon(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return new $data.GeographyMultiPoint(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return new $data.GeographyMultiLineString(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return new $data.GeographyMultiPolygon(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return new $data.GeographyCollection(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return new $data.GeometryPoint(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return new $data.GeometryLineString(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return new $data.GeometryPolygon(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return new $data.GeometryMultiPoint(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; },
                 '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
             },
             toDb: {
@@ -599,20 +672,73 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },
-                '$data.Geography': function (geo) {
-                    /*POINT(-127.89734578345 45.234534534)*/
-                    if (geo instanceof $data.Geography)
-                        return 'POINT(' + geo.longitude + ' ' + geo.latitude + ')';
-                    return geo;
-                },
+                '$data.GeographyPoint': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyLineString': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyPolygon': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyMultiPoint': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyMultiLineString': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyMultiPolygon': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeographyCollection': function (g) { if (g) { return $data.Geography.stringifyToUrl(g); } return g; },
+                '$data.GeometryPoint': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryLineString': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryPolygon': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryMultiPoint': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryMultiLineString': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryMultiPolygon': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
+                '$data.GeometryCollection': function (g) { if (g) { return $data.Geometry.stringifyToUrl(g); } return g; },
                 '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
 }
         }
     },
+    resolveTypeOperations: function (operation, expression, frameType) {
+        var memDef = expression.entityType.getMemberDefinition(operation);
+        if (!memDef ||
+            !memDef.method ||
+            memDef.method.IsSideEffecting !== false ||
+            !memDef.method.returnType ||
+            !(frameType === $data.Expressions.FilterExpression || frameType === $data.Expressions.OrderExpression))
+        {
+            Guard.raise(new Exception("Entity '" + expression.entityType.name + "' Operation '" + operation + "' is not supported by the provider"));
+        }
+
+        return memDef;
+    },
+    resolveSetOperations: function (operation, expression, frameType) {
+        if (expression) {
+            var esDef = expression.storageModel.ContextType.getMemberDefinition(expression.storageModel.ItemName);
+            if (esDef && esDef.actions && esDef.actions[operation]) {
+                var memDef = $data.MemberDefinition.translateDefinition(esDef.actions[operation], operation, this.getType());
+                if (!memDef ||
+                    !memDef.method ||
+                    memDef.method.IsSideEffecting !== false ||
+                    !memDef.method.returnType ||
+                    !(frameType === $data.Expressions.FilterExpression || frameType === $data.Expressions.OrderExpression)) {
+
+                    Guard.raise(new Exception("Collection '" + expression.storageModel.ItemName + "' Operation '" + operation + "' is not supported by the provider"));
+                }
+
+                return memDef;
+            }
+        }
+        return $data.StorageProviderBase.prototype.resolveSetOperations.apply(this, arguments);
+
+    },
+    resolveContextOperations: function (operation, expression, frameType) {
+        var memDef = this.context.getType().getMemberDefinition(operation);
+        if (!memDef ||
+            !memDef.method ||
+            memDef.method.IsSideEffecting !== false ||
+            !memDef.method.returnType ||
+            !(frameType === $data.Expressions.FilterExpression || frameType === $data.Expressions.OrderExpression)) {
+            Guard.raise(new Exception("Context '" + expression.instance.getType().name + "' Operation '" + operation + "' is not supported by the provider"));
+        }
+        return memDef;
+    },
+
     getEntityKeysValue: function (entity) {
         var result = [];
         var keyValue = undefined;
-        var memDefs = entity.entitySet.createNew.memberDefinitions.asArray();
+        var memDefs = entity.data.getType().memberDefinitions.getKeyProperties();
         for (var i = 0, l = memDefs.length; i < l; i++) {
             var field = memDefs[i];
             if (field.key) {

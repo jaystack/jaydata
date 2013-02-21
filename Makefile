@@ -28,7 +28,10 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
 	$(TYPESYSTEM_DIR)/Trace/Trace.js\
 	$(TYPESYSTEM_DIR)/Trace/Logger.js\
+	$(TYPESYSTEM_DIR)/Types/SimpleBase.js\
+	$(TYPESYSTEM_DIR)/Types/GeoSpatial.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
+	$(TYPESYSTEM_DIR)/Types/Geometry.js\
 	$(TYPESYSTEM_DIR)/Types/Guid.js\
 	$(TYPESYSTEM_DIR)/Types/EdmTypes.js\
 	$(TYPESYSTEM_DIR)/Extensions.js\
@@ -88,6 +91,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Notifications/ChangeCollectorBase.js\
 	$(TYPES_DIR)/Notifications/ChangeDistributor.js\
 	$(TYPES_DIR)/Notifications/ChangeCollector.js\
+	$(TYPES_DIR)/DbClient/Transaction.js\
 	$(TYPES_DIR)/Access.js\
 	$(TYPES_DIR)/Promise.js\
 	$(TYPES_DIR)/Entity.js\
@@ -104,6 +108,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Exception.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
+	$(TYPES_DIR)/ServiceOperation.js\
 	$(TYPES_DIR)/EntityWrapper.js\
 	$(TYPES_DIR)/Ajax/jQueryAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/WinJSAjaxWrapper.js\
@@ -142,6 +147,13 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDbExpressionExecutor.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBCompiler.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBPhysicalAndFilterExpression.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalAndFilterExpression.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalOrFilterExpression.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalInFilterExpression.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBTransaction.js\
 
 SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/DbClient/DbConnection.js\
@@ -158,6 +170,7 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlProjectionCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ExpressionMonitor.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlTransaction.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
 oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
@@ -192,6 +205,9 @@ WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
 
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
+
+modules: 
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp -fp ./JayDataModules/* $(MODULE_DIR)
 
 all: jaydatavsdoc jaydatamin jaydata providers npms
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)

@@ -1,60 +1,137 @@
 (function ($data) {
 
     var oldProcessor = $data.Entity.inheritedTypeProcessor;
+
+    $data.kendo = {};
+    $data.kendo.BaseModelType = kendo.data.Model.define({
+        init: function (data) {
+            kendo.data.Model.fn.init.call(this, data);
+        }
+    });
+
+
+    var kendoTypeMap = {
+        "$data.Blob": "string",
+        "$data.String": "string",
+        "$data.Boolean": "boolean",
+        "$data.Integer": "number",
+        "$data.Number": "number",
+        "$data.Date": "date"
+    }
+
     $data.Entity.inheritedTypeProcessor = function (type) {
 
         var memberDefinitions = type.memberDefinitions;
 
-        function getKendoTypeName(jayDataTypeName) {
-            jayDataTypeName = $data.Container.resolveName(jayDataTypeName);
-            switch (jayDataTypeName) {
-                case "$data.Blob":
-                case "$data.String":
-                    return "string";
-                case "$data.Boolean":
-                    return "boolean";
-                case "$data.Integer":
-                case "$data.Number":
-                    return "number";
-                case "$data.Date":
-                    return "date";
-                default:
-                    return 'object'; // TODO ???
-                    throw new Error("unimplemented: " + jayDataTypeName);
-            }
+        function getKendoTypeName(canonicType, pd) {
+            return kendoTypeMap[canonicType] || 'object';
         };
 
 
-        function createKendoModel(newInstanceDelegate) {
-            console.log("creating type");
+
+        function createKendoModel(options) {
+            ///<param name="options">Contains options.owningContextType if initialized in a scope of a context</param>
             var memberDefinitions = type.memberDefinitions,
                 fields = {};
+            //debugger;
+            function getNullable(canonicType, pd) {
+                if (canonicType === "$data.Boolean") {
+                    //grid validation errs on requied/nonnull bools
+                    return true;
+                }
+                return pd.required !== true;
+            };
+
+            function getRequired(canonicType, pd) {
+                if ("$data.Boolean" === canonicType) {
+                    return false;
+                }
+                return pd.required || "nullable" in pd ? !(pd.nullable) : false;
+            }
 
             memberDefinitions
                 .getPublicMappedProperties()
                 .forEach(function (pd) {
+                    var canonicType = $data.Container.resolveName(pd.type);
                     //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
                     fields[pd.name] = {
-                        type: getKendoTypeName(pd.type),
-                        nullable: false,
+                        //TODO
+                        type: getKendoTypeName(canonicType, pd),
+                        nullable: getNullable(canonicType, pd),
+                        defaultValue: pd.defaultValue,
+                        //nullable: false,
+                        //nullable:  "nullable" in pd ? pd.nullable : true,
                         editable: !pd.computed,
-                        //defaultValue: pd.type === "Edm.Boolean" ? true : undefined,
+                        //defaultValue: true,
+                        //defaultValue: 'abc',
+                        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
                         validation: {
-                            required: pd.required
+                            required: getRequired(canonicType, pd)
                         }
                     }
+
                     //};
                 });
 
+            function setInitialValue(obj, memDef) {
+                return;
+                //if (!obj[memDef.name]) {
+                //    function getDefault() {
+                //        switch ($data.Container.resolveType(memDef.type)) {
+                //            case $data.Number: return 0.0;
+                //            case $data.Integer: return 0;
+                //            case $data.Date: return new Date();
+                //            case $data.Boolean: return false;
+                //        }
+                //    }
 
-            console.dir(memberDefinitions.getPublicMappedMethods());
+                //    obj[memDef.name] = getDefault();
+
+                //}
+            }
+
+            //console.dir(memberDefinitions.getPublicMappedMethods());
             var modelDefinition = {
                 fields: fields,
                 init: function (data) {
                     //console.dir(arguments);
-                    var jayInstance = data instanceof type ? data : new type(data);
+
+                    var ctxType = options && options.owningContextType || undefined;
+
+                    var contextSetTypes = [];
+                    if (options && options.owningContextType) {
+                        contextSetTypes = options.owningContextType
+                                                     .memberDefinitions
+                                                     .getPublicMappedProperties()
+                                                     .filter(function (pd) { return $data.Container.resolveType(pd.type) === $data.EntitySet })
+                                                     .map(function (pd) { return $data.Container.resolveType(pd.elementType) });
+
+                    }
+
+                    var newInstanceOptions = {
+                        entityBuilder: function (instance, members) {
+                            members.forEach(function (memberInfo) {
+                                if (!(memberInfo.key === true) && (memberInfo.required === true || memberInfo.nullable === false)) {
+                                    var memberType = $data.Container.resolveType(memberInfo.type);
+                                    if (memberType.isAssignableTo && memberType.isAssignableTo($data.Entity) && contextSetTypes.indexOf(memberType) === -1) {
+                                        //it's a complex property
+                                        var _data;
+                                        if (data) {
+                                            _data = data[memberInfo.name];
+                                        };
+                                        instance[memberInfo.name] = new memberType(_data, newInstanceOptions);
+                                    } else {
+                                        setInitialValue(instance, memberInfo);
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    var jayInstance = data instanceof type ? data : new type(data, newInstanceOptions);
 
                     var seed = jayInstance.initData;
+
                     var feed = {};
                     //TODO create precompiled strategy
                     for (var j in seed) {
@@ -78,22 +155,52 @@
 
 
 
-                    kendo.data.Model.fn.init.call(this, feed);
+                    //kendo.data.Model.fn.init.call(this, feed);
+                    $data.kendo.BaseModelType.fn.init.call(this, feed);
+
                     jayInstance.propertyChanged.attach(function (obj, propinfo) {
-                        self.set(propinfo.propertyName, propinfo.newValue)
-                    });
-                    this.bind("set", function (e) {
-                        var v = jayInstance[e.field];
-                        if (v !== e.value) {
-                            jayInstance[e.field] = e.value;
+                        var jay = this;
+                        var newValue = propinfo.newValue;
+                        if (!jay.changeFromKendo) {
+                            newValue = newValue ? (newValue.asKendoObservable ? newValue.asKendoObservable() : newValue) : newValue;
+                            jayInstance.changeFromJay = true;
+                            self.set(propinfo.propertyName, propinfo.newValue);
+                            delete jayInstance.changeFromJay;
                         }
                     });
-                    if (newInstanceDelegate) {
-                        newInstanceDelegate(jayInstance);
+
+                    this.bind("set", function (e) {
+                        var propName = e.field;
+                        var propNameParts = propName.split(".");
+                        jayInstance.changeFromKendo = true;
+                        if (propNameParts.length == 1) {
+                            var propValue = e.value;
+                            if (!jayInstance.changeFromJay) {
+                                propValue = propValue.innerInstance ? propValue.innerInstance() : propValue;
+                                jayInstance[propName] = propValue;
+                                if (options && options.autoSave) {
+                                    jayInstance.save();
+                                }
+                            }
+                        } else {
+                            var rootProp = jayInstance[propNameParts[0]];
+                            if (rootProp instanceof $data.Entity) {
+                                jayInstance[propNameParts[0]] = rootProp;
+                            }
+                        }
+                        delete jayInstance.changeFromKendo;
+                    });
+                    if (options && options.newInstanceCallback) {
+                        options.newInstanceCallback(jayInstance);
                     }
+
                 },
                 save: function () {
-                    this.innerInstance().save();
+                    //console.log("item.save", this, arguments);
+                    return this.innerInstance().save();
+                },
+                remove: function () {
+                    return this.innerInstance().remove();
                 }
 
             };
@@ -109,36 +216,74 @@
                     console.warn("entity with multiple keys not supported");
                     break;
             }
+            console.log("md", modelDefinition);
 
-            var returnValue = kendo.data.Model.define(modelDefinition);
+            var returnValue = kendo.data.Model.define($data.kendo.BaseModelType, modelDefinition);
+
+
+            //returnValue.readAll
+
             //TODO align with kendoui concept
-            for (var j in returnValue.prototype.defaults) {
-                returnValue.prototype.defaults[j] = undefined;
-            }
+            //for (var j in returnValue.prototype.defaults) {
+            //    returnValue.prototype.defaults[j] = undefined;
+            //}
             //console.log("default", returnValue.prototype.defaults)
             return returnValue;
         }
 
-        function asKendoModel(newInstanceDelegate) {
-            var cacheObject = newInstanceDelegate || type;
-            return cacheObject.kendoModelType || (cacheObject.kendoModelType = createKendoModel(newInstanceDelegate));
+        function asKendoModel(options) {
+            var cacheObject = options || type;
+            return cacheObject.kendoModelType || (cacheObject.kendoModelType = createKendoModel(options));
         }
 
-        function asKendoObservable(instance) {
+        function asKendoObservable(instance, options) {
 
-            var kendoModel = type.asKendoModel();
+            var kendoModel = type.asKendoModel(options);
             return new kendoModel(instance);
         }
 
         type.asKendoModel = asKendoModel;
+        //type.asKendoModelType = asKendoModel;
 
-        type.prototype.asKendoObservable = function () {
+        type.prototype.asKendoObservable = function (options) {
             var self = this;
 
-            var kendoObservable = asKendoObservable(this);
+            var kendoObservable = asKendoObservable(this, options);
 
             return kendoObservable;
         }
+
+        function r(value){
+            return value || '';
+        }
+        function registerStoreAlias(type, options) {
+            if (!options.provider) return;
+            var key = r(options.databaseName) + r(options.tableName) + r(options.url) + r(options.apiUrl) + r(options.oDataServiceHost);
+            var storeDef = {
+                provider: options.provider,
+                databaseName: options.databaseName,
+                tableName: options.tableName,
+                dataSource: options.url,
+                apiUrl: options.apiUrl,
+                oDataServiceHost: options.oDataServiceHost
+            };
+            Object.keys(storeDef).forEach(function (k) {
+                delete options[k];
+            });
+
+            type.setStore(key, storeDef);
+            return key;
+        }
+
+        type.asKendoDataSource = function (options, modelOptions, storeAlias) {
+            options = options || {};
+            var mOptions = modelOptions || {};
+            var salias = registerStoreAlias(type, options) || storeAlias;
+            var token = $data.ItemStore._getStoreAlias(type, salias);
+            var ctx = $data.ItemStore._getContextPromise(token, type);
+            var set = ctx.getEntitySetFromElementType(type);
+            return set.asKendoDataSource(options, mOptions);
+        };
 
         if (oldProcessor) {
             oldProcessor(type);
@@ -148,15 +293,20 @@
         //console.log('col', this, arguments);
         var result = [];
         columns = columns || {};
+        var showComplex = columns['$showComplexFields'] === true;
+        delete columns['$showComplexFields'];
+
         this.defaultType
             .memberDefinitions
             .getPublicMappedProperties()
             .forEach(function (pd) {
                 //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
-                var col = (columns[pd.name] ? columns[pd.name] : {});
-                var colD = { field: pd.name };
-                $.extend(colD, col)
-                result.push(colD);
+                if (showComplex || kendoTypeMap[$data.Container.resolveName(pd.type)]) {
+                    var col = columns[pd.name] || {};
+                    var colD = { field: pd.name };
+                    $.extend(colD, col)
+                    result.push(colD);
+                }
                 //}
             });
 
@@ -200,9 +350,9 @@
     });
 
 
-    $data.Queryable.addMember("asKendoModel", function (newInstanceDelegate) {
-        return this.defaultType.asKendoModel(newInstanceDelegate);
-
+    $data.Queryable.addMember("asKendoModel", function (options) {
+        options.owningContextType = options.owningContextType || this.entityContext.getType();
+        return this.defaultType.asKendoModel(options);
     });
 
     $data.Queryable.addMember("asKendoRemoteTransportClass", function (modelItemClass) {
@@ -212,169 +362,204 @@
             ctx.stateManager.reset();
         };
         var TransportClass = kendo.data.RemoteTransport.extend({
-            init: function (dynamicEntries) {
-                this.de = dynamicEntries;
+            init: function () {
                 this.items = [];
             },
             read: function (options) {
                 var query = self;
-                var _this = this;
-                if (options.data.filter) {
 
-                    //console.log(options.data.filter);
+                query.entityContext.onReady().then(function () {
+                    var _this = this;
+                    var q = query;
+                    var sp = query.entityContext.storageProvider;
+                    var withInlineCount = query.entityContext.storageProvider.supportedSetOperations.withInlineCount;
+                    var withLength = (!withInlineCount) && query.entityContext.storageProvider.supportedSetOperations.length;
 
-                    var filter = "";
-                    var thisArg = {};
-                    options.data.filter.filters.forEach(function (f, index) {
-                        if (index > 0) { filter += options.data.filter.logic == "or" ? " || " : " && "; }
+                    if (withInlineCount) {
+                        q = q.withInlineCount();
+                    }
 
-                        //console.log(filter, f);
+                    if (options.data.filter) {
+                        var filter = "";
+                        var thisArg = {};
+                        options.data.filter.filters.forEach(function (f, index) {
+                            if (index > 0) { filter += options.data.filter.logic == "or" ? " || " : " && "; }
 
-                        switch (f.operator) {
-                            case 'eq':
-                                filter += "it." + f.field;
-                                filter += " == this." + f.field;
-                                break;
-                            case 'neq':
-                                filter += "it." + f.field;
-                                filter += " != this." + f.field;
-                                break;
-                            case 'startswith':
-                                filter += "it." + f.field;
-                                filter += ".startsWith(this." + f.field + ")";
-                                break;
-                            case 'contains':
-                                filter += "it." + f.field;
-                                filter += ".contains(this." + f.field + ")";
-                                break;
-                            case 'doesnotcontain':
-                                filter += "!";
-                                filter += "it." + f.field;
-                                filter += ".contains(this." + f.field + ")";
-                                break;
-                            case 'endswith':
-                                filter += "it." + f.field;
-                                filter += ".endsWith(this." + f.field + ")";
-                                break;
-                            case 'gte':
-                                filter += "it." + f.field;
-                                filter += " >= this." + f.field;
-                                break;
-                            case 'gt':
-                                filter += "it." + f.field;
-                                filter += " > this." + f.field;
-                                break;
-                            case 'lte':
-                                filter += "it." + f.field;
-                                filter += " <= this." + f.field;
-                                break;
-                            case 'lt':
-                                filter += "it." + f.field;
-                                filter += " < this." + f.field;
-                                break;
-                            default:
-                                console.log('unknown operator', f.operator);
-                                break;
+                            //console.log(filter, f);
+
+                            switch (f.operator) {
+                                case 'eq':
+                                    filter += "it." + f.field;
+                                    filter += " == this." + f.field;
+                                    break;
+                                case 'neq':
+                                    filter += "it." + f.field;
+                                    filter += " != this." + f.field;
+                                    break;
+                                case 'startswith':
+                                    filter += "it." + f.field;
+                                    filter += ".startsWith(this." + f.field + ")";
+                                    break;
+                                case 'contains':
+                                    filter += "it." + f.field;
+                                    filter += ".contains(this." + f.field + ")";
+                                    break;
+                                case 'doesnotcontain':
+                                    filter += "!";
+                                    filter += "it." + f.field;
+                                    filter += ".contains(this." + f.field + ")";
+                                    break;
+                                case 'endswith':
+                                    filter += "it." + f.field;
+                                    filter += ".endsWith(this." + f.field + ")";
+                                    break;
+                                case 'gte':
+                                    filter += "it." + f.field;
+                                    filter += " >= this." + f.field;
+                                    break;
+                                case 'gt':
+                                    filter += "it." + f.field;
+                                    filter += " > this." + f.field;
+                                    break;
+                                case 'lte':
+                                    filter += "it." + f.field;
+                                    filter += " <= this." + f.field;
+                                    break;
+                                case 'lt':
+                                    filter += "it." + f.field;
+                                    filter += " < this." + f.field;
+                                    break;
+                                default:
+                                    console.log('unknown operator', f.operator);
+                                    break;
+                            }
+                            thisArg[f.field] = f.value;
+                        })
+                        q = q.filter(filter, thisArg);
+                    }
+                    var allItemsQ = q;
+
+                    if (options.data.sort) {
+                        options.data.sort.forEach(function (s) {
+                            q = q.order((s.dir == 'desc' ? "-" : "") + s.field);
+                        })
+                    }
+
+                    if (options.data.skip) {
+                        q = q.skip(options.data.skip);
+                    }
+                    if (options.data.take) {
+                        q = q.take(options.data.take);
+                    }
+
+                    //Data.defaultHttpClient.enableJsonpCallback = true;
+                    var promises = [];
+
+                    promises.push(q.toArray());
+                    //var ta = q.toArray();
+                    if (withLength) {
+                        promises.push(allItemsQ.length());
+                    } else if (!withInlineCount) {
+                        promises.push(allItemsQ.toArray());
+                    }
+
+                    console.log(promises);
+                    jQuery.when.apply(this, promises).then(function (items, total) {
+                        console.dir(arguments);
+                        //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
+                        var result = items.map(function (item) {
+                            var d = (item instanceof $data.Entity) ? item.initData : item;
+                            var kendoItem = item.asKendoObservable();
+                            return kendoItem;
+                        });
+                        var r = {
+                            data: result,
+                            total: withInlineCount ? items.totalCount : (withLength ? total : total.length)
                         }
-                        thisArg[f.field] = f.value;
-                    })
-                    query = query.filter(filter, thisArg);
-                }
-                if (options.data.sort) {
-                    options.data.sort.forEach(function (s) {
-                        query = query.order((s.dir == 'desc' ? "-" : "") + s.field);
-                    })
-                }
-                var qcount = query;
-                var q = query.skip(options.data.skip).take(options.data.take);
-                //Data.defaultHttpClient.enableJsonpCallback = true;
-                var ta = q.toArray();
-                var l = qcount.length();
-                jQuery.when(ta, l).then(function (items, total) {
-                    //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
-                    var result = items.map(function (item) {
-                        var d = (item instanceof $data.Entity) ? item.initData : item;
-                        var kendoItem = item.asKendoObservable();
-                        return kendoItem;
-                    });
-
-                    options.success({
-                        data: result,
-                        total: total
+                        console.log(r);
+                        options.success(r);
                     });
                 });
             },
             create: function (options, model) {
-
-                if (model.length > 1) {
-                    var modelItems = [];
-                    model.forEach(function (modelItem) {
-                        modelItems.push(modelItem.innerInstance());
-                    });
-                    ctx.addMany(modelItems);
-                    ctx.saveChanges().then(function () {
-                        var data = [];
-                        modelItems.forEach(function (modelItem) {
-                            data.push(modelItem.initData);
+                var query = self;
+                query.entityContext.onReady().then(function () {
+                    if (model.length > 1) {
+                        var modelItems = [];
+                        model.forEach(function (modelItem) {
+                            modelItems.push(modelItem.innerInstance());
                         });
-                        options.success({ data: data });
-                    }).fail(function () {
-                        console.log("error in create");
-                        options.error({}, arguments);
-                        ctx.stateManager.reset();
-                    });
-                } else {
-                    //console.log("save single");
-                    model[0]
-                        .innerInstance()
-                        .save()
-                        .then(function () {
-                            options.success({ data: model[0].innerInstance().initData });
+                        ctx.addMany(modelItems);
+                        ctx.saveChanges().then(function () {
+                            var data = [];
+                            modelItems.forEach(function (modelItem) {
+                                data.push(modelItem.initData);
+                            });
+                            options.success({ data: data });
+                        }).fail(function () {
+                            console.log("error in create");
+                            options.error({}, arguments);
+                            ctx.stateManager.reset();
                         });
-                }
+                    } else {
+                        //console.log("save single");
+                        console.dir(ctx.storeToken);
+                        model[0]
+                            .innerInstance()
+                            .save(ctx.storeToken)
+                            .then(function () {
+                                options.success({ data: model[0].innerInstance().initData });
+                            });
+                    }
+                });
             },
             update: function (options, model) {
                 //console.log("update");
                 //console.dir(arguments);
-
-                if (model.length > 1) {
-                    var items = model.map(function (item) { return item.innerInstance() });
-                    items.forEach(function (item) {
-                        ctx.attach(item, true);
-                    });
-                    ctx.saveChanges().then(function () {
-                        options.success();
-                    }).fail(function () {
-                        ctx.stateManager.reset();
-                        alert("error in batch update");
-                        options.error({}, "error");
-                    });
-                } else {
-                    model[0].innerInstance().save().then(function (item) {
-                        options.success();
-                    }).fail(function () { alert("error in update") });
-                }
+                var query = self;
+                query.entityContext.onReady().then(function () {
+                    if (model.length > 1) {
+                        var items = model.map(function (item) { return item.innerInstance() });
+                        items.forEach(function (item) {
+                            ctx.attach(item, true);
+                        });
+                        ctx.saveChanges().then(function () {
+                            options.success();
+                        }).fail(function () {
+                            ctx.stateManager.reset();
+                            alert("error in batch update");
+                            options.error({}, "error");
+                        });
+                    } else {
+                        model[0].innerInstance().save().then(function (item) {
+                            options.success();
+                        }).fail(function () { alert("error in update") });
+                    }
+                });
             },
 
             destroy: function (options, model) {
-                if (model.length > 1) {
-                    model.forEach(function (item) {
-                        ctx.remove(item.innerInstance());
-                    });
-                    ctx.saveChanges().then(function () {
-                        options.success({ data: options.data });
-                    }).fail(function () {
-                        ctx.stateManager.reset();
-                        alert("error in save:" + arguments[0]);
-                        options.error({}, "error", options.data);
-                    });
-                } else {
-                    model[0].innerInstance().remove().then(function () {
-                        options.success({ data: options.data });
-                    }).fail(function () {
+                var query = self;
+                query.entityContext.onReady().then(function () {
+                    if (model.length > 1) {
+                        model.forEach(function (item) {
+                            ctx.remove(item.innerInstance());
+                        });
+                        ctx.saveChanges().then(function () {
+                            options.success({ data: options.data });
+                        }).fail(function () {
+                            ctx.stateManager.reset();
+                            alert("error in save:" + arguments[0]);
+                            options.error({}, "error", options.data);
+                        });
+                    } else {
+                        model[0].innerInstance().remove().then(function () {
+                            options.success({ data: options.data });
+                        }).fail(function () {
 
-                    });
-                }
+                        });
+                    }
+                });
             },
             setup: function () {
                 console.log("setup");
@@ -387,6 +572,10 @@
     var jayDataSource = kendo.data.DataSource.extend({
         init: function () {
             kendo.data.DataSource.fn.init.apply(this, arguments);
+        },
+        createItem: function (initData) {
+            var type = this.options.schema.model;
+            return new type(initData);
         },
         _promise: function (data, models, type) {
             var that = this,
@@ -412,12 +601,15 @@
         },
     });
 
-    $data.Queryable.addMember("asKendoDataSource", function (ds) {
+    $data.kendo = $data.kendo || {};
+
+    $data.kendo.defaultPageSize = 25;
+
+    $data.Queryable.addMember("asKendoDataSource", function (ds, modelOptions) {
         var self = this;
 
-        var newEntries = [];
-
-        var model = self.asKendoModel(function (item) { newEntries.push(item); });
+        modelOptions = modelOptions || {};
+        var model = self.asKendoModel(modelOptions);
 
         ds = ds || {};
         //unless user explicitly opts out server side logic
@@ -425,10 +617,10 @@
         ds.serverPaging = ds.serverPaging || true;
         ds.serverFiltering = ds.serverFiltering || true;
         ds.serverSorting = ds.serverSorting || true;
-        ds.pageSize = ds.pageSize || 25;
+        ds.pageSize = ds.pageSize === undefined ? $data.kendo.defaultPageSize : ds.pageSize;
 
         var TransportClass = self.asKendoRemoteTransportClass(model);
-        ds.transport = new TransportClass(newEntries);
+        ds.transport = new TransportClass();
 
         ds.schema = {
             model: model,
@@ -437,4 +629,22 @@
         };
         return new jayDataSource(ds);
     });
+
+    kendo.data.binders.submit = kendo.data.Binder.extend({
+        init: function (element, bindings, options) {
+            kendo.data.Binder.fn.init.call(this, element, bindings, options);
+            $(element).bind("submit", function () {
+                var obj = bindings.submit.source;
+                var fn = obj[bindings.submit.path];
+                if (typeof fn === 'function') {
+                    fn.apply(obj, arguments);
+                    return false;
+                }
+
+            });
+        },
+        refresh: function () {
+        }
+    });
+
 })($data);

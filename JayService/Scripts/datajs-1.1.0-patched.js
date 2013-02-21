@@ -2373,7 +2373,7 @@
 
         var responseHeaders = xhr.getAllResponseHeaders().split(/\r?\n/);
         //FF CORS fix
-        if (responseHeaders.length === 1 && responseHeaders[0] === '') {
+        if (responseHeaders.length === 1 && responseHeaders[0] === '' && xhr.status > 0) {
             for (var i = 0; i < headerKeysForRead.length; i++) {
                 var headerKey = headerKeysForRead[i];
                 var headerValue = xhr.getResponseHeader(headerKey);

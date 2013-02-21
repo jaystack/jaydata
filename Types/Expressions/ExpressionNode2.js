@@ -69,6 +69,8 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     EntityMember: "EntityMember",
     EntityFieldOperation: "EntityFieldOperation",
     FrameOperation: "FrameOperation",
+    EntityFunctionOperation: "EntityFunctionOperation",
+    ContextFunctionOperation: "ContextFunctionOperation",
     EntityBinary: "EntityBinary",
     Code: "Code",
     ParametricQuery: "ParametricQuery",
@@ -80,7 +82,12 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Skip: "Skip",
     OrderBy: "OrderBy",
     OrderByDescending: "OrderByDescending",
-    Include: "Include"
+    Include: "Include",
+
+    IndexedPhysicalAnd:"IndexedDBPhysicalAndFilterExpression",
+    IndexedLogicalAnd:"IndexedDBLogicalAndFilterExpression",
+    IndexedLogicalOr: "IndexedDBLogicalOrFilterExpression",
+    IndexedLogicalIn: "IndexedDBLogicalInFilterExpression"
 });
 
 $data.BinaryOperator = function () {

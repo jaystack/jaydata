@@ -30,20 +30,22 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         this._defaultModelBinder(expression);
     },
     VisitServiceOperationExpression: function (expression) {
-        var returnType = Container.resolveType(expression.cfg.returnType);
-        if ((typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Queryable)) || returnType === $data.Array) {
-            this._defaultModelBinder(expression);
-        } else {
-            var builder = Container.createqueryBuilder();
-            builder.modelBinderConfig['$type'] = returnType;
-            if (typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Entity)) {
-                builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
+        if (expression.cfg.returnType) {
+            var returnType = Container.resolveType(expression.cfg.returnType);
+            if ((typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Queryable)) || returnType === $data.Array) {
+                this._defaultModelBinder(expression);
             } else {
-                builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
+                var builder = Container.createqueryBuilder();
+                builder.modelBinderConfig['$type'] = returnType;
+                if (typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Entity)) {
+                    builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
+                } else {
+                    builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
+                }
+                this.VisitExpression(expression, builder);
+                builder.resetModelBinderProperty();
+                this._query.modelBinderConfig = builder.modelBinderConfig;
             }
-            this.VisitExpression(expression, builder);
-            builder.resetModelBinderProperty();
-            this._query.modelBinderConfig = builder.modelBinderConfig;
         }
     },
     VisitCountExpression: function (expression) {

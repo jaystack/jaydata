@@ -52,6 +52,9 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
                     case $data.Expressions.UnaryExpression:
                         result = this.VisitUnary(eNode, context);
                         break;
+                    case $data.Expressions.EntityContextExpression:
+                        result = this.VisitEntityContext(eNode, context);
+                        break;
                     default:
                         debugger;
                         break;
@@ -179,6 +182,13 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
             if (operand === eNode.operand) 
                 return eNode;
             return new $data.Expressions.UnaryExpression(operand, eNode.operator, eNode.nodeType);
+        },
+
+        VisitEntityContext: function (eNode, context) {
+            ///<param name="eNode" type="$data.Expressions.ParameterExpression" />
+            ///<returns type="$data.Expressions.EntityContextExpression" />
+            //var result  = new $data.Expressions.ParameterExpression(eNode.name, eNode.type, eNode.nodeType);
+            return eNode;
         },
 
         VisitDecision: function (eNode, context) {
