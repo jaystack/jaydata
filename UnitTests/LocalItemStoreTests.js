@@ -263,7 +263,7 @@
         }
 
         $.when(promises).then(function () {
-            $data("Cart13").query(function (item) { return item.Product.contains(this.val) }, { val: 'tem5' }).then(function (items) {
+            $data("Cart13").query(function (item) { return item.Product.contains(this.val) == true; }, { val: 'tem5' }).then(function (items) {
                 equal(items.length, 1, 'query length correct');
 
                 $data("Cart13").removeAll().then(function () {
@@ -398,24 +398,24 @@
 
                 item.Title = 'asdasd';
                 equal(item.Title, 'asdasd', 'item Title after refresh');
-                item.refresh().then(function (rItem) {
+                return item.refresh().then(function (rItem) {
                     equal(item.Title, 'first', 'item Title after refresh');
                     equal(rItem.Title, 'first', 'item Title after refresh');
 
-                    $data('ItemStore.Example.Article').read(item.Id).then(function (item) {
+                    return $data('ItemStore.Example.Article').read(item.Id).then(function (item) {
                         equal(typeof item.storeToken, 'object', 'store token set on loaded item');
 
-                        $data('ItemStore.Example.Article').readAll().then(function (items) {
+                        return $data('ItemStore.Example.Article').readAll().then(function (items) {
                             equal(typeof items[0].storeToken, 'object', 'store token set on loaded item');
 
 
                             var context = factory();
-                            context.onReady(function () {
-                                context.Articles.first()
+                            return context.onReady().then(function () {
+                                return context.Articles.first()
                                     .then(function (item) {
                                         equal(typeof item.storeToken, 'object', 'store token set on loaded item');
 
-                                        $data('ItemStore.Example.Article').removeAll()
+                                        return $data('ItemStore.Example.Article').removeAll()
                                             .then(function () {
                                                 return $data('ItemStore.Example.Article').itemCount()
                                                     .then(function (count) {
@@ -429,6 +429,9 @@
                         });
                     });
                 });
+            }).fail(function (e) {
+                ok(false, 'Error: ' + e);
+                start();
             });
         });
     });
@@ -635,7 +638,7 @@
     });
 
     test('return $data.service in factory', 5, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined' ) { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -766,7 +769,7 @@
     });
 
     test('return $data.initService business in factory', 1, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -795,7 +798,7 @@
     });
 
     test('return $data.initService open in factory', 1, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -899,7 +902,7 @@
 
         equal(typeof myArticle.storeToken, 'undefined', 'storeToken not set');
 
-        var context = new myContext({ name: 'local' });
+        var context = new myContext({ name: 'local', databaseName:"typeDefaultFactoryValue" });
         deepEqual(myArticle.storeToken, context.storeToken, 'storeToken has value before onready');
 
         context.onReady(function () {
@@ -1003,6 +1006,46 @@
 
                 newsArticle.field('Id').setKey().setNullable().setComputed();
 
+                newsArticle.readAll("remote").then(function (items) {
+
+                    equal(items.length, 26, 'items length');
+                    equal(items[0] instanceof newsArticle, true, 'result type');
+
+                    return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' }, "remote");
+                }).then(function (item) {
+
+                    return newsArticle.takeFirst('it.Title == "newsArticle_Title"', null, "remote");
+
+                }).then(function (it) {
+
+                    equal(it.Title, 'newsArticle_Title', "Title");
+                    equal(it.Lead, 'Lead', "Lead");
+                    equal(typeof it.Id, 'number', 'Id');
+
+                    start();
+                }).fail(function (e) {
+                    ok(false, 'Error: ' + e);
+                    start();
+                });
+
+            });
+        });
+    });
+
+    test('$data.define with setStore oData - default', 5, function () {
+        stop();
+
+        (new $news.Types.NewsContext({ name: "oData", oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                $data.define('newsArticle', {
+                    Id: "int",
+                    Lead: String,
+                    Title: String,
+                }).setStore("default", { name: 'oData', dataSource: "Services/emptyNewsReader.svc/Articles" })
+
+                newsArticle.field('Id').setKey().setNullable().setComputed();
+
                 newsArticle.readAll().then(function (items) {
 
                     equal(items.length, 26, 'items length');
@@ -1043,14 +1086,14 @@
 
             newsArticle.field('Id').setKey().setNullable().setComputed();
 
-            newsArticle.readAll().then(function (items) {
+            newsArticle.readAll("local").then(function (items) {
 
                 equal(items.length, 0, 'items length');
 
-                return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' });
+                return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' }, "local");
             }).then(function (item) {
 
-                return newsArticle.takeFirst('it.Title == "newsArticle_Title"');
+                return newsArticle.takeFirst('it.Title == "newsArticle_Title"', null, "local");
 
             }).then(function (it) {
 
@@ -1059,7 +1102,7 @@
                 equal(it.Lead, 'Lead', "Lead");
                 equal(typeof it.Id, 'number', 'Id');
 
-                return newsArticle.removeAll().then(function () { return newsArticle.itemCount(); });
+                return newsArticle.removeAll("local").then(function () { return newsArticle.itemCount("local"); });
             }).then(function (items) {
                 equal(items, 0, 'items count');
 
@@ -1076,25 +1119,175 @@
         }
     });
 
-    test('$data.define with setStore default', 6, function () {
-        stop();
+    test('$data.define with setStore sqLite - default', 1, function () {
+
+        if ($data.StorageProviderLoader.isSupported('sqLite')) {
+            stop();
+            expect(6);
+
+            $data.define('newsArticle', {
+                Id: "int",
+                Lead: String,
+                Title: String,
+            }).setStore("default", { name: 'sqLite', tableName: 'Articles' })
+
+            newsArticle.field('Id').setKey().setNullable().setComputed();
+
+            newsArticle.readAll().then(function (items) {
+
+                equal(items.length, 0, 'items length');
+
+                return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' });
+            }).then(function (item) {
+
+                return newsArticle.takeFirst('it.Title == "newsArticle_Title"');
+
+            }).then(function (it) {
+
+                equal(it instanceof newsArticle, true, 'result type');
+                equal(it.Title, 'newsArticle_Title', "Title");
+                equal(it.Lead, 'Lead', "Lead");
+                equal(typeof it.Id, 'number', 'Id');
+
+                return newsArticle.removeAll().then(function () { return newsArticle.itemCount("default"); });
+            }).then(function (items) {
+                equal(items, 0, 'items count');
+
+                start();
+            }).fail(function (e) {
+                ok(false, 'Error: ' + e);
+                start();
+            });
+
+
+        } else {
+            expect(1);
+            ok('not supported');
+        }
+    });
+
+    test('$data.define with setStore indexedDb', 1, function () {
+
+        if ($data.StorageProviderLoader.isSupported('indexedDb')) {
+            stop();
+            expect(6);
+
+            $data.define('newsArticle', {
+                Id: "int",
+                Lead: String,
+                Title: String,
+            }).setStore("local", { name: 'indexedDb', tableName: 'Articles' })
+
+            newsArticle.field('Id').setKey().setNullable().setComputed();
+
+            newsArticle.readAll("local").then(function (items) {
+
+                equal(items.length, 0, 'items length');
+
+                return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' }, "local");
+            }).then(function (item) {
+
+                return newsArticle.takeFirst('it.Title == "newsArticle_Title"', null, "local");
+
+            }).then(function (it) {
+
+                equal(it instanceof newsArticle, true, 'result type');
+                equal(it.Title, 'newsArticle_Title', "Title");
+                equal(it.Lead, 'Lead', "Lead");
+                equal(typeof it.Id, 'number', 'Id');
+
+                return newsArticle.removeAll("local").then(function () { return newsArticle.itemCount("local"); });
+            }).then(function (items) {
+                equal(items, 0, 'items count');
+
+                start();
+            }).fail(function (e) {
+                ok(false, 'Error: ' + e);
+                start();
+            });
+
+
+        } else {
+            expect(1);
+            ok('not supported');
+        }
+    });
+
+    test('$data.define with setStore indexedDb - default', 1, function () {
+
+        if ($data.StorageProviderLoader.isSupported('indexedDb')) {
+            stop();
+            expect(6);
+
+            $data.define('newsArticle', {
+                Id: "int",
+                Lead: String,
+                Title: String,
+            }).setStore("default", { name: 'indexedDb', tableName: 'Articles' })
+
+            newsArticle.field('Id').setKey().setNullable().setComputed();
+
+            newsArticle.readAll().then(function (items) {
+
+                equal(items.length, 0, 'items length');
+
+                return newsArticle.save({ Lead: 'Lead', Title: 'newsArticle_Title' });
+            }).then(function (item) {
+
+                return newsArticle.takeFirst('it.Title == "newsArticle_Title"');
+
+            }).then(function (it) {
+
+                equal(it instanceof newsArticle, true, 'result type');
+                equal(it.Title, 'newsArticle_Title', "Title");
+                equal(it.Lead, 'Lead', "Lead");
+                equal(typeof it.Id, 'number', 'Id');
+
+                return newsArticle.removeAll().then(function () { return newsArticle.itemCount("default"); });
+            }).then(function (items) {
+                equal(items, 0, 'items count');
+
+                start();
+            }).fail(function (e) {
+                ok(false, 'Error: ' + e);
+                start();
+            });
+
+
+        } else {
+            expect(1);
+            ok('not supported');
+        }
+    });
+
+    test('$data.define with setStore default', 7, function () {
+        stop(1);
 
         $data.define('newsArticle2', {
             Id: "int",
             Lead: String,
             Title: String,
-        }).setStore("local")
+        }).setStore("local", { provider: 'local', databaseName: 'anotherLocalDb' });
 
         newsArticle2.field('Id').setKey().setNullable().setComputed();
 
-        newsArticle2.readAll().then(function (items) {
+        /*implicit init for default store*/
+        newsArticle2.readAll().then(function () {
+            return newsArticle2.readAll("local");
+        })
+        .then(function (items) {
 
             equal(items.length, 0, 'items length');
 
-            return newsArticle2.save({ Lead: 'Lead', Title: 'newsArticle2_Title' });
+            return newsArticle2.save({ Lead: 'Lead', Title: 'newsArticle2_Title' }, "local");
         }).then(function (item) {
 
-            return newsArticle2.takeFirst('it.Title == "newsArticle2_Title"');
+            return newsArticle2.itemCount()
+                .then(function (num) {
+                    equal(num, 0, 'default store must be empty');
+
+                    return newsArticle2.takeFirst('it.Title == "newsArticle2_Title"', null, "local");
+                });
 
         }).then(function (it) {
 
@@ -1103,7 +1296,48 @@
             equal(it.Lead, 'Lead', "Lead");
             equal(typeof it.Id, 'number', 'Id');
 
-            return newsArticle2.removeAll().then(function () { return newsArticle2.itemCount(); });
+            return newsArticle2.removeAll("local").then(function () { return newsArticle2.itemCount("local"); });
+        }).then(function (items) {
+            equal(items, 0, 'items count');
+
+            start();
+        }).fail(function (e) {
+            ok(false, 'Error: ' + e);
+            start();
+        });
+
+    });
+
+    test('$data.define with setStore object param (default)', 6, function () {
+        stop(1);
+
+        $data.define('newsArticle3', {
+            Id: "int",
+            Lead: String,
+            Title: String,
+        }).setStore({ provider: 'local', databaseName: 'anotherLocalDb_1' });
+
+        newsArticle3.field('Id').setKey().setNullable().setComputed();
+
+        /*implicit init for default store*/
+        newsArticle3.readAll()
+        .then(function (items) {
+
+            equal(items.length, 0, 'items length');
+
+            return newsArticle3.save({ Lead: 'Lead', Title: 'newsArticle3_Title' });
+        }).then(function (item) {
+
+            return newsArticle3.takeFirst('it.Title == "newsArticle3_Title"');
+
+        }).then(function (it) {
+
+            equal(it instanceof newsArticle3, true, 'result type');
+            equal(it.Title, 'newsArticle3_Title', "Title");
+            equal(it.Lead, 'Lead', "Lead");
+            equal(typeof it.Id, 'number', 'Id');
+
+            return newsArticle3.removeAll("default").then(function () { return newsArticle3.itemCount(); });
         }).then(function (items) {
             equal(items, 0, 'items count');
 

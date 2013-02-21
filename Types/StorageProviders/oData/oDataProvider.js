@@ -88,13 +88,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                 if (convertedItems.indexOf(refValue) < 0) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
-                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: sMod.EntitySetReference }) + ')';
-                                    /*var pk = '(';
-                                    refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
-                                        if (index > 0) { pk += ','; }
-                                        pk += refValue[k.name];
-                                    }, this);
-                                    pk += ')';*/
+                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
                                     dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
@@ -114,6 +108,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             return dbInstance;
         };
     },
+    buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
@@ -632,7 +627,20 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             fromDb: {
                 '$data.Integer': function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
                 '$data.Number': function (number) { return number; },
-                '$data.Date': function (dbData) { return dbData ? new Date(parseInt(dbData.substr(6))) : dbData; },
+                '$data.Date': function (dbData) {
+                    if (dbData) {
+                        if (dbData.substring(0, 6) === '/Date(') {
+                            return new Date(parseInt(dbData.substr(6)));
+                        } else {
+                            //ISODate without Z? Safari compatible with Z
+                            if (dbData.indexOf('Z') === -1 && !dbData.match('T.*[+-]'))
+                                dbData += 'Z';
+                            return new Date(dbData);
+                        }
+                    } else {
+                        return dbData;
+                    }
+                },
                 '$data.String': function (text) { return text; },
                 '$data.Boolean': function (bool) { return bool; },
                 '$data.Blob': function (blob) { return blob; },
@@ -697,7 +705,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
     resolveSetOperations: function (operation, expression, frameType) {
         if (expression) {
-            var esDef = expression.storageModel.EntitySetReference.entityContext.getType().getMemberDefinition(expression.storageModel.ItemName);
+            var esDef = expression.storageModel.ContextType.getMemberDefinition(expression.storageModel.ItemName);
             if (esDef && esDef.actions && esDef.actions[operation]) {
                 var memDef = $data.MemberDefinition.translateDefinition(esDef.actions[operation], operation, this.getType());
                 if (!memDef ||

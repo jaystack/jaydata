@@ -122,13 +122,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                                 if (refValue.entityState === $data.EntityState.Modified) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
-                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: sMod.EntitySetReference }) + ')';
-                                    /*var pk = '(';
-                                    refValue.getType().memberDefinitions.getKeyProperties().forEach(function (k, index) {
-                                        if (index > 0) { pk += ','; }
-                                        pk += refValue[k.name];
-                                    }, this);
-                                    pk += ')';*/
+                                    var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
                                     dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
@@ -148,6 +142,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             return dbInstance;
         };
     },
+    buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 

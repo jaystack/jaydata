@@ -238,13 +238,13 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
                 if (info.length > 0) {
                     return context.sets[info[0].AliasNumber];
                 }
-                var memberDefinitions = this.backupContextExpression.instance.getType().memberDefinitions.getMember(expression.storageModel.EntitySetReference.name);
+                var memberDefinitions = this.backupContextExpression.instance.getType().memberDefinitions.getMember(expression.storageModel.ItemName);
                 if (!memberDefinitions) {
                     Guard.raise("Context schema error");
                 }
                 var mi = Container.createMemberInfoExpression(memberDefinitions);
                 var result = Container.createEntitySetExpression(this.backupContextExpression, mi);
-                result.instance = this.backupContextExpression.instance[expression.storageModel.EntitySetReference.name];
+                result.instance = this.backupContextExpression.instance[expression.storageModel.ItemName];
                 var aliasNum = context.sets.push(result);
                 context.infos.push({
                     AliasNumber: aliasNum - 1,

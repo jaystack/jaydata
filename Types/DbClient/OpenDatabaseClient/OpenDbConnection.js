@@ -6,14 +6,28 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
     isOpen: function () {
         return this.database !== null && this.database !== undefined && this.transaction !== null && this.transaction !== undefined;
     },
-    open: function (callBack) {
-		if (this.database){
-		    this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error);
+    open: function (callBack, tran, isWrite) {
+        if (isWrite === undefined)
+            isWrite = true;
+
+        if (tran) {
+            callBack.success(tran.transaction);
+        } else if (this.database) {
+            if (isWrite) {
+                this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
+            } else {
+                this.database.readTransaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
+            }
         } else {
             var p = this.connectionParams;
             var con = this;
-			this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
-			this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error);
+            this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
+
+			if (isWrite) {
+			    this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
+			} else {
+			    this.database.readTransaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
+			}
         }
     },
     close: function () {
