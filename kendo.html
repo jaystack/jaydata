@@ -49,7 +49,8 @@
     <!--*******************************Expressions****************************************-->
     <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
     <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
-    
+    <script src="Types/DbClient/Transaction.js"></script>
+    <script src="Types/StorageProviders/SqLite/SqlTransaction.js"></script>
     <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js" ></script>
     <script type="text/javascript" src="Types/Expressions/CallExpression.js" ></script>
     <script type="text/javascript" src="Types/Expressions/CodeParser.js"></script>
@@ -309,6 +310,8 @@
             DueDate: Date,
             Completed: Boolean
         })
+
+
         //$data.service("/Services/TaskManagerService.svc", function (f, t) {
         //    var db = f();
 
