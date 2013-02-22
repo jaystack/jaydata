@@ -339,16 +339,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
             },
             error: callBack.error
-        }
+        };
 
-        if (query.transaction) {
-            sqlCommand.executeQuery(innerCallback, query.transaction, false);
-        } else {
-            this.context.beginTransaction(false, function (tran) {
-                query.transaction = tran;
-                sqlCommand.executeQuery(innerCallback, tran, false);
-            });
-        }
+        sqlCommand.executeQuery(innerCallback, query.transaction, false);
     },
     _compile: function (query, params) {
         var compiler = new $data.storageProviders.sqLite.SQLiteCompiler();
@@ -377,13 +370,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     },
     saveChanges: function (callback, changedItems, tran) {
         var provider = this;
-        if (tran) {
-            this._saveChangesWithTran(callback, changedItems, tran);
-        } else {
-            this.context.beginTransaction(true, function (tran) {
-                provider._saveChangesWithTran(callback, changedItems, tran);
-            });
-        }
+        this._saveChangesWithTran(callback, changedItems, tran);
     },
     _saveChangesWithTran: function (callback, changedItems, tran) {
         var sqlConnection = this._createSqlConnection();
