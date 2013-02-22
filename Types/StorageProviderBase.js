@@ -390,7 +390,9 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     makePhysicalTypeDefinition: function (entityDefinition, association) {
     },
 
-    _beginTran: function () { throw new Exception("Transaction is not supported!"); }
+    _beginTran: function (tables, isWrite, callBack) {
+        callBack.success(new $data.Transaction());
+    }
 },
 {
     onRegisterProvider: { value: new $data.Event() },

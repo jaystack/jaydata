@@ -238,10 +238,10 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         setTimeout(function () {
             self.connection.open({
-                error: function () {
+                error: function (err) {
                     $data.Trace.log("onerror: ", transaction._objectId, arguments);
                     if (transaction.onerror) {
-                        transaction.onerror.fire(arguments, transaction);
+                        transaction.onerror.fire(err, transaction);
                     }
                 },
                 success: function (tran) {
@@ -339,16 +339,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
             },
             error: callBack.error
-        }
+        };
 
-        if (query.transaction) {
-            sqlCommand.executeQuery(innerCallback, query.transaction, false);
-        } else {
-            this.context.beginTransaction(false, function (tran) {
-                query.transaction = tran;
-                sqlCommand.executeQuery(innerCallback, tran, false);
-            });
-        }
+        sqlCommand.executeQuery(innerCallback, query.transaction, false);
     },
     _compile: function (query, params) {
         var compiler = new $data.storageProviders.sqLite.SQLiteCompiler();
@@ -376,17 +369,31 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.context = ctx;
     },
     saveChanges: function (callback, changedItems, tran) {
-        var sqlConnection = this._createSqlConnection();
         var provider = this;
+        this._saveChangesWithTran(callback, changedItems, tran);
+    },
+    _saveChangesWithTran: function (callback, changedItems, tran) {
+        var sqlConnection = this._createSqlConnection();
         var independentBlocks = this.buildIndependentBlocks(changedItems);
 
-        if (tran) {
-            this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
-        } else {
-            this.context.beginTransaction(true, function (tran) {
-                provider.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback, tran);
-            });
-        }
+        var tranError;
+        tranError = function (sender, event) {
+            tran.onerror.detach(tranError);
+            callback.error.call(this, event);
+        };
+
+        tran.onerror.attach(tranError);
+        this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, {
+            success: function () {
+                tran.onerror.detach(tranError);
+                callback.success.apply(this, arguments);
+            },
+            error: function () {
+                tran.onerror.detach(tranError);
+                callback.error.apply(this, arguments);
+            }
+        }, tran);
+
     },
     saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback, tran) {
         /// <summary>

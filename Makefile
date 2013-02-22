@@ -91,7 +91,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Notifications/ChangeCollectorBase.js\
 	$(TYPES_DIR)/Notifications/ChangeDistributor.js\
 	$(TYPES_DIR)/Notifications/ChangeCollector.js\
-	$(TYPES_DIR)/DbClient/Transaction.js\
+	$(TYPES_DIR)/Transaction.js\
 	$(TYPES_DIR)/Access.js\
 	$(TYPES_DIR)/Promise.js\
 	$(TYPES_DIR)/Entity.js\

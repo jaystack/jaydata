@@ -186,12 +186,39 @@ $data.Class.define('$data.EntityContext', null, null,
             case 1:
                 callBack = arguments[0];
                 break;
+            case 0:
+                break;
             default: throw new Exception("Begin tran is async function!"); break;
         }
 
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        var pHandler = new $data.PromiseHandler();
+        callBack = pHandler.createCallback(callBack);
+
+        //callBack = $data.typeSystem.createCallbackSetting(callBack);
         this.storageProvider._beginTran(tables, isWrite, callBack);
+
+        return pHandler.getPromise();
     },
+    _isReturnTransaction: function (transaction) {
+        return transaction instanceof $data.Base || transaction === 'returnTransaction';
+    },
+    _applyTransaction: function (scope, cb, args, transaction, isReturnTransaction) {
+        if (isReturnTransaction === true) {
+            if (transaction instanceof $data.Transaction) {
+                Array.prototype.push.call(args, transaction);
+                cb.apply(scope, args);
+            } else {
+                this.beginTransaction(function (tran) {
+                    Array.prototype.push.call(args, tran);
+                    cb.apply(scope, args);
+                });
+            }
+        }
+        else {
+            cb.apply(scope, args);
+        }
+    },
+
     getDataType: function (dataType) {
         // Obsolate
         if (typeof dataType == "string") {
@@ -654,7 +681,8 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     executeQuery: function (queryable, callBack, transaction) {
         var query = new $data.Query(queryable.expression, queryable.defaultType, this);
-        query.transaction = transaction;
+        query.transaction = transaction instanceof $data.Transaction ? transaction : undefined;
+        var returnTransaction = this._isReturnTransaction(transaction);
 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var that = this;
@@ -695,7 +723,19 @@ $data.Class.define('$data.EntityContext', null, null,
             }
 
             var readyFn = function () {
-                callBack.success(successResult, query.transaction);
+                that._applyTransaction(callBack, callBack.success, [successResult], query.transaction, returnTransaction);
+
+                /*if (returnTransaction === true) {
+                    if (query.transaction)
+                        callBack.success(successResult, query.transaction);
+                    else {
+                        that.beginTransaction(function (tran) {
+                            callBack.success(successResult, tran);
+                        });
+                    }
+                }
+                else
+                    callBack.success(successResult);*/
             };
 
             var i = 0;
@@ -720,7 +760,12 @@ $data.Class.define('$data.EntityContext', null, null,
             else readyFn();
         };
 
-        clbWrapper.error = callBack.error;
+        clbWrapper.error = function () {
+            if(returnTransaction)
+                callBack.error.apply(this, arguments);
+            else
+                callBack.error.apply(this, Array.prototype.filter.call(arguments, function (p) { return !(p instanceof $data.Transaction); }));
+        };
         var sets = query.getEntitySets();
 
         var authorizedFn = function () {
@@ -731,8 +776,16 @@ $data.Class.define('$data.EntityContext', null, null,
             var readyFn = function (cancel) {
                 if (cancel === false) ex = false;
 
-                if (ex) ctx.storageProvider.executeQuery(query, clbWrapper);
-                else {
+                if (ex) {
+                    if (query.transaction) {
+                        ctx.storageProvider.executeQuery(query, clbWrapper);
+                    } else {
+                        ctx.beginTransaction(function (tran) {
+                            query.transaction = tran;
+                            ctx.storageProvider.executeQuery(query, clbWrapper);
+                        });
+                    }
+                } else {
                     query.rawDataList = [];
                     query.result = [];
                     clbWrapper.success(query);
@@ -796,6 +849,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var pHandler = new $data.PromiseHandler();
         var clbWrapper = pHandler.createCallback(callback);
         var pHandlerResult = pHandler.getPromise();
+        var returnTransaction = this._isReturnTransaction(transaction);
 
         var skipItems = [];
         while (trackedEntities.length > 0) {
@@ -969,7 +1023,13 @@ $data.Class.define('$data.EntityContext', null, null,
         var ctx = this;
         if (changedEntities.length == 0) {
             this.stateManager.trackedEntities.length = 0;
-            clbWrapper.success(0, transaction);
+            ctx._applyTransaction(clbWrapper, clbWrapper.success, [0], transaction, returnTransaction);
+
+            /*if (returnTransaction) {
+                clbWrapper.success(0, transaction);
+            } else {
+                clbWrapper.success(0);
+            }*/
             return pHandlerResult;
         }
 
@@ -1058,15 +1118,37 @@ $data.Class.define('$data.EntityContext', null, null,
 
             if (changedEntities.length) {
                 //console.log('changedEntities: ', changedEntities.map(function(it){ return it.data.initData; }));
-                ctx.storageProvider.saveChanges({
+
+                var innerCallback = {
                     success: function (tran) {
-                        ctx._postProcessSavedItems(clbWrapper, changedEntities, tran);
+                        ctx._postProcessSavedItems(clbWrapper, changedEntities, tran, returnTransaction);
                     },
-                    error: clbWrapper.error
-                }, changedEntities, transaction);
+                    error: function () {
+                        //TODO remove trans from args;
+                        if (returnTransaction)
+                            clbWrapper.error.apply(this, arguments);
+                        else
+                            clbWrapper.error.apply(this, Array.prototype.filter.call(arguments, function (p) { return !(p instanceof $data.Transaction); }));
+                    }
+                };
+
+                if (transaction instanceof $data.Transaction){
+                    ctx.storageProvider.saveChanges(innerCallback, changedEntities, transaction);
+                } else {
+                    ctx.beginTransaction(true, function (tran) {
+                        ctx.storageProvider.saveChanges(innerCallback, changedEntities, tran);
+                    });
+                }
             } else if (cancelEvent) {
                 clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
-            } else clbWrapper.success(0, transaction);
+            } else {
+                ctx._applyTransaction(clbWrapper, clbWrapper.success, [0], transaction, returnTransaction);
+
+                /*if(returnTransaction)
+                    clbWrapper.success(0, transaction);
+                else
+                    clbWrapper.success(0);*/
+            };
 
             /*else if (cancelEvent) clbWrapper.error(new $data.Exception('saveChanges cancelled from event [' + cancelEvent + ']'));
             else Guard.raise('No changed entities');*/
@@ -1205,7 +1287,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
 
     prepareRequest: function () { },
-    _postProcessSavedItems: function (callBack, changedEntities, transaction) {
+    _postProcessSavedItems: function (callBack, changedEntities, transaction, returnTransaction) {
         if (this.ChangeCollector && this.ChangeCollector instanceof $data.Notifications.ChangeCollectorBase)
             this.ChangeCollector.processChangedData(changedEntities);
 
@@ -1286,7 +1368,12 @@ $data.Class.define('$data.EntityContext', null, null,
                 ctx.stateManager.reset();
             }
 
-            callBack.success(changedEntities.length, transaction);
+            ctx._applyTransaction(callBack, callBack.success, [changedEntities.length], transaction, returnTransaction);
+
+            /*if (returnTransaction)
+                callBack.success(changedEntities.length, transaction);
+            else
+                callBack.success(changedEntities.length);*/
         };
 
         var callbackFn = function () {
@@ -1340,7 +1427,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
     },
 
-    loadItemProperty: function (entity, property, callback) {
+    loadItemProperty: function (entity, property, callback, transaction) {
         /// <signature>
         ///     <summary>Loads a property of the entity through the storage provider.</summary>
         ///     <param name="entity" type="$data.Entity">Entity object</param>
@@ -1384,11 +1471,18 @@ $data.Class.define('$data.EntityContext', null, null,
         Guard.requireType('entity', entity, $data.Entity);
 
         var memberDefinition = typeof property === 'string' ? entity.getType().memberDefinitions.getMember(property) : property;
+        var returnTransaction = this._isReturnTransaction(transaction);
 
         if (entity[memberDefinition.name] != undefined) {
+
             var pHandler = new $data.PromiseHandler();
             callBack = pHandler.createCallback(callback);
-            callback.success(entity[memberDefinition.name]);
+            this._applyTransaction(callback, callback.success, [entity[memberDefinition.name]], transaction, returnTransaction);
+            /*if (returnTransaction)
+                callback.success(entity[memberDefinition.name], transaction);
+            else
+                callback.success(entity[memberDefinition.name]);*/
+                
             return pHandler.getPromise();
         }
 
@@ -1435,7 +1529,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var entitySet = this.getEntitySetFromElementType(entity.getType());
             return entitySet
                 .map('function (e) { return e.' + memberDefinition.name + ' }')
-                .single(filterFunc, filterParams, callback);
+                .single(filterFunc, filterParams, callback, transaction);
         } else {
             //multipleSide
 
@@ -1456,7 +1550,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var entitySet = this.getEntitySetFromElementType(elementType);
             return entitySet
                 .filter(filterFunc, filterParams)
-                .toArray(callback);
+                .toArray(callback, transaction);
         }
 
     },

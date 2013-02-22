@@ -424,15 +424,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             });
         };
 
-        if (!query.transaction) {
-            this.context.beginTransaction(function (tran) {
-                query.transaction = tran;
-                doQuery();
-            });
-        }
-        else {
-            doQuery();
-        }
+        doQuery();
     },
     _getKeySettings: function (memDef) {
         /// <summary>
@@ -529,15 +521,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         }
         if (objectStoreNames.length < 1) { callBack.success(tran); return; }
 
-        if (tran) {
-            this._saveChangesWithTran(callBack, independentBlocks, tran);
-        } else {
-
-
-            this.context.beginTransaction(objectStoreNames, true, function (transaction) {
-                self._saveChangesWithTran(callBack, independentBlocks, transaction);
-            });
-        };
+        this._saveChangesWithTran(callBack, independentBlocks, tran);
     },
     _saveChangesWithTran: function (callBack, independentBlocks, transaction) {
         var self = this;

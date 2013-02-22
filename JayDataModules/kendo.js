@@ -478,7 +478,10 @@
                         }
                         console.log(r);
                         options.success(r);
-                    });
+                    }).fail(function() {
+                        console.log("error in create");
+			options.error({}, arguments);
+		    });
                 });
             },
             create: function (options, model) {
@@ -509,7 +512,11 @@
                             .save(ctx.storeToken)
                             .then(function () {
                                 options.success({ data: model[0].innerInstance().initData });
-                            });
+                            })
+			    .fail(function() {
+                                console.log("error in create");
+				options.error({}, arguments);
+			    });
                     }
                 });
             },
@@ -527,13 +534,16 @@
                             options.success();
                         }).fail(function () {
                             ctx.stateManager.reset();
-                            alert("error in batch update");
-                            options.error({}, "error");
+                            //alert("error in batch update");
+                            options.error({}, arguments);
                         });
                     } else {
                         model[0].innerInstance().save().then(function (item) {
                             options.success();
-                        }).fail(function () { alert("error in update") });
+                        }).fail(function () { 
+			     //alert("error in update")
+                            options.error({}, arguments);
+			});
                     }
                 });
             },
@@ -549,14 +559,16 @@
                             options.success({ data: options.data });
                         }).fail(function () {
                             ctx.stateManager.reset();
-                            alert("error in save:" + arguments[0]);
+                            //alert("error in save:" + arguments[0]);
                             options.error({}, "error", options.data);
                         });
                     } else {
                         model[0].innerInstance().remove().then(function () {
                             options.success({ data: options.data });
                         }).fail(function () {
-
+                            ctx.stateManager.reset();
+                            //alert("error in save:" + arguments[0]);
+                            options.error({}, "error", options.data);
                         });
                     }
                 });

@@ -1,4 +1,4 @@
-$data.Class.define('$data.dbClient.Transaction', null, null, {
+$data.Class.define('$data.Transaction', null, null, {
     constructor: function () {
         this._objectId = (new Date()).getTime();
         $data.Trace.log("create: ", this._objectId);

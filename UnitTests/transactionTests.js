@@ -19,6 +19,7 @@
     }, null);
 
     test('write_table_count_without_setTimeout', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
@@ -70,6 +71,7 @@
     });
 
     test('write_table_count_with_setTimeout', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
@@ -121,6 +123,7 @@
     });
 
     test('singleKeyCRUD_external_tran', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(4);
         var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
@@ -164,6 +167,7 @@
     });
 
     test('singleKeyCRUD_same_tran', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
 
         expect(26);
@@ -291,9 +295,9 @@
                                                                                             }
                                                                                         }, tran10);
                                                                                     }
-                                                                                });
+                                                                                }, 'returnTransaction');
                                                                             }
-                                                                        });
+                                                                        }, 'returnTransaction');
                                                                     }
                                                                 });
                                                             }
@@ -303,7 +307,7 @@
                                             }
                                         }, tran4);
                                     }
-                                });
+                                }, 'returnTransaction');
                             }
                         }, tran2);
                     }
@@ -313,6 +317,8 @@
     });
 
     test('Abort_test', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+
         var context = new indexedDbProviderTest_Context(getProviderConfig());
         stop(1);
         context.onReady(function () {
@@ -401,6 +407,7 @@
     });
 
     test('simple Abort test', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         stop(1);
         (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
 
@@ -448,6 +455,7 @@
     });
 
     test('simple Abort test promise', function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         stop(1);
         (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
 
@@ -492,6 +500,7 @@
     });
 
     test('insert_failed_test', 1, function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(2);
         stop(1);
         (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
@@ -503,9 +512,6 @@
 
             db.beginTransaction(true, function (tran) {
 
-                tran.onerror.attach(function () {
-                    console.log('-onabort', arguments);
-                })
                 tran.oncomplete.attach(function () { console.log('-oncomplete', arguments); })
                 tran.onerror.attach(function () {
                     console.log('-onerror', arguments);
@@ -533,6 +539,7 @@
     });
 
     test('insert failed test promise', 1, function () {
+        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(2);
         stop(1);
         (new $news.Types.NewsContext(getProviderConfig())).onReady(function (db) {
@@ -567,4 +574,165 @@
         });
 
     });
+
+    test('loadProperty with trans', 5, function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Users.toArray(function (users, tran) {
+
+                    db.Users.attach(users[0]);
+                    var loadPropPromise = users[0].get_Articles(function (articles, tran1) {
+                        equal(tran._objectId, tran1._objectId, 'transaction0-1 are equals');
+                        ok(articles.length > 0, 'callback called');
+
+                        db.loadItemProperty(users[0], 'Articles', function (articles1, tran2) {
+                            equal(tran._objectId, tran2._objectId, 'transaction0-2 are equals');
+                            equal(tran1._objectId, tran2._objectId, 'transaction1-2 are equals');
+                            start(1);
+                            ok(articles1.length > 0, 'callback called');
+                            closeDbIfNeeded(db);
+                        }, tran1);
+                    }, tran);
+
+                }, 'returnTransaction');
+
+            });
+        });
+
+    });
+
+    test('transaction command', function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+
+                db.Users.toArray(function (users, tran) {
+                    equal(tran instanceof $data.Transaction, true, 'transaction is avaliable');
+
+                    ok(true, 'transaction is not returned is okay x1');
+                    db.Users.toArray(function (users, tran) {
+                        equal(typeof tran, 'undefined', 'transaction is not avaliable');
+                        start();
+                        closeDbIfNeeded(db);
+                    }, 'other_value');
+
+                }, 'returnTransaction');
+
+                
+
+            });
+        });
+
+    });
+
+    test('begin transaction promise test', 3, function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+
+                var tranPromise = db.beginTransaction(function () {
+                    ok(true, 'beginTransaction callback called');
+                });
+
+                tranPromise.then(function (tran) {
+                    ok(true, 'promise then called');
+                    equal(tran instanceof $data.Transaction, true, 'promise has transaction value');
+                    closeDbIfNeeded(db);
+                    start();
+                });
+
+        });
+
+    });
+
+    test('begin transaction promise test just then', 2, function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+
+            var tranPromise = db.beginTransaction();
+
+            tranPromise.then(function (tran) {
+                ok(true, 'promise then called');
+                equal(tran instanceof $data.Transaction, true, 'promise has transaction value');
+                closeDbIfNeeded(db);
+                start();
+            });
+
+        });
+
+    });
+};
+
+function SimpleTransactionTests(providerConfig, msg) {
+    msg = msg || '';
+    module("Simple_Transactions_" + msg);
+    function getProviderConfig() {
+        return JSON.parse(JSON.stringify(providerConfig));
+    }
+    function closeDbIfNeeded(context) {
+        if (context.storageProvider.db) {
+            context.storageProvider.db.close();
+        }
+    }
+
+
+    test('get transaction', 2, function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+
+            var tranPromise = db.beginTransaction();
+
+            tranPromise.then(function (tran) {
+                ok(true, 'promise then called');
+                equal(tran instanceof $data.Transaction, true, 'promise has transaction value');
+                closeDbIfNeeded(db);
+                start();
+            });
+
+        });
+
+    });
+
+    test('returnTransaction toArray', 2, function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+
+            var promise = db.Categories.toArray(undefined, 'returnTransaction');
+
+            promise.then(function (items, tran) {
+                ok(true, 'promise then called');
+                equal(tran instanceof $data.Transaction, true, 'promise has transaction value');
+                closeDbIfNeeded(db);
+                start();
+            });
+
+        });
+
+    });
+
+    test('returnTransaction empty saveChanges', 2, function () {
+        stop(1);
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+
+            var promise = db.saveChanges(undefined, 'returnTransaction');
+
+            promise.then(function (items, tran) {
+                ok(true, 'promise then called');
+                equal(tran instanceof $data.Transaction, true, 'promise has transaction value');
+                closeDbIfNeeded(db);
+                start();
+            });
+
+        });
+
+    });
+
 };
