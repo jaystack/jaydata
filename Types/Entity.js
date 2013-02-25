@@ -424,7 +424,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     },
 
     // protected
-    getProperty: function (memberDefinition, callback) {
+    getProperty: function (memberDefinition, callback, tran) {
         /// <summary>Retrieve value of member</summary>
         /// <param name="memberDefinition" type="MemberDefinition" />
         /// <param name="callback" type="Function">
@@ -436,25 +436,28 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
         callback = $data.typeSystem.createCallbackSetting(callback);
         if (this[memberDefinition.name] != undefined) {
-            callback.success(this[memberDefinition.name]);
+            if (tran instanceof $data.Transaction)
+                callback.success(this[memberDefinition.name], tran);
+            else
+                callback.success(this[memberDefinition.name]);
             return;
         }
 
         if (!this.context)
             Guard.raise(new Exception('Entity not in context', 'Invalid operation'));
 
-        return this.context.loadItemProperty(this, memberDefinition, callback);
+        return this.context.loadItemProperty(this, memberDefinition, callback, tran);
     },
     // protected
-    setProperty: function (memberDefinition, value, callback) {
+    setProperty: function (memberDefinition, value, callback, tran) {
         /// <param name="memberDefinition" type="MemberDefinition" />
         /// <param name="value" />
         /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
         
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        //callback = $data.typeSystem.createCallbackSetting(callback);
         var pHandler = new $data.PromiseHandler();
-        callBack = pHandler.createCallback(callback);
+        callback = pHandler.createCallback(callback);
         callback.success(this[memberDefinition.name]);
         return pHandler.getPromise();
     },

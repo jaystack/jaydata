@@ -115,6 +115,7 @@
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
     <script type="text/javascript" src="Types/ServiceOperation.js"></script>
 
+    <script type="text/javascript" src="Types/Transaction.js"></script>
     <script type="text/javascript" src="Types/EntityWrapper.js"></script>
     <script type="text/javascript" src="JaySvcUtil/JaySvcUtil.js"></script>
     <script type="text/javascript" src="Types/JayStorm.js"></script>
@@ -126,7 +127,6 @@
     <script type="text/javascript" src="Types/Ajax/AjaxStub.js"></script>
 
     <!--******************************* DbClient ****************************************-->
-    <script type="text/javascript" src="Types/DbClient/Transaction.js"></script>
     <script type="text/javascript" src="Types/DbClient/DbCommand.js"></script>
     <script type="text/javascript" src="Types/DbClient/DbConnection.js"></script>
     <script type="text/javascript" src="Types/DbClient/OpenDatabaseClient/OpenDbCommand.js"></script>
@@ -201,6 +201,52 @@
 
 
     <!--******************************* jsExtensions ****************************************-->
+    
+        <script type="text/javascript">
+
+            function checkArgs(cb, t, tranIsOptional) {
+                var funcWrapper = function () {
+                    var hasTran = Array.prototype.some.call(arguments, function (p) { return p instanceof $data.Transaction; });
+                    if (t === undefined && hasTran) {
+                        ok(false, 'transaction in result');
+                    } else if (!tranIsOptional && t !== undefined && !hasTran) {
+                        ok(false, 'transaction not in result');
+                    }
+                    cb.apply(this, arguments);
+                };
+                return funcWrapper;
+            }
+
+
+            var operators = [
+                { name: 'toArray', cbArg: 0, tArg: 1, base: $data.Queryable },
+                { name: 'length', cbArg: 0, tArg: 1, base: $data.Queryable },
+                { name: 'count', cbArg: 0, tArg: 1, base: $data.Queryable },
+                { name: 'first', cbArg: 2, tArg: 3, base: $data.Queryable },
+                { name: 'single', cbArg: 2, tArg: 3, base: $data.Queryable },
+                { name: 'saveChanges', cbArg: 0, tArg: 1, base: $data.EntityContext }
+            ];
+            operators.orig = {};
+
+            operators.forEach(function (operator) {
+                var op = operator.name;
+                var base = operator.base;
+
+                operators.orig[op] = base.prototype[op];
+                base.prototype[op] = function () {
+                    var cb = $data.typeSystem.createCallbackSetting(arguments[operator.cbArg]);
+                    arguments[operator.cbArg] = {};
+                    arguments[operator.cbArg].success = checkArgs(cb.success, arguments[operator.tArg]);
+                    arguments[operator.cbArg].error = checkArgs(cb.error, arguments[operator.tArg], true);
+
+                    return operators.orig[op].apply(this, arguments);
+                }
+
+            });
+
+    </script>
+    
+    
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>
     <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
     <script type="text/javascript" src="JayDataModules/template.js"></script>
@@ -210,6 +256,7 @@
     <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
 
     <!--************************************************************************************-->
+
 
 
     <!--**********************************UNIT TESTS****************************************-->

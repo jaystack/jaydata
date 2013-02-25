@@ -90,14 +90,14 @@
         var pd = this;
         return {
             enumerable: false, writable: false, configurable: false,
-            value: function (callback) { return this.getProperty(pd, callback); }
+            value: function (callback, tran) { return this.getProperty(pd, callback, tran); }
         };
     };
     MemberDefinition.prototype.createSetMethod = function () {
         var pd = this;
         return {
             enumerable: false, writable: false, configurable: false,
-            value: function (value, callback) { return this.setProperty(pd, value, callback); }
+            value: function (value, callback, tran) { return this.setProperty(pd, value, callback, tran); }
         };
     };
     MemberDefinition.translateDefinition = function (memDef, name, holder) {
