@@ -342,6 +342,7 @@
     <Content Include="oDataParser\RequestParser.js" />
     <Content Include="oDataParser\test.html" />
     <Content Include="oDataParser\testConsole.html" />
+    <Content Include="Pro\localMigrations.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
     <Content Include="Services\emptyNewsReader.svc" />
