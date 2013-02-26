@@ -836,7 +836,7 @@
 
     });
 
-    test('Containers', 9, function () {
+    test('Containers', 5, function () {
         var container = $data.createContainer();
         var dynaType = $data.Entity.extend("FoobarTypeName", container, {
             F1: { type: 'String' }
@@ -878,25 +878,25 @@
 
     })
 
-    test('Class framework', 5, function () {
-    var MyBaseClass = $data.Base.extend("MyBaseClass", {
-        constructor: function() {
-            console.log("MyBaseClass ctor");
-        },
-        _field: "MyValue",
-        prop: {
-            get: function () { return this._field; },
-            set: function (value) { this._field = value; }
-        },
-        readMethod: function () { return this.prop; },
-        writeMethod: function (p) { this.prop = p; },
-        fn: {
-            kind: 'method',
-            method: function() { }
-        }
-    });
+    //test('Class framework', 5, function () {
+    //    var MyBaseClass = $data.Base.extend("MyBaseClass", {
+    //        constructor: function() {
+    //            console.log("MyBaseClass ctor");
+    //        },
+    //        _field: "MyValue",
+    //        prop: {
+    //            get: function () { return this._field; },
+    //            set: function (value) { this._field = value; }
+    //        },
+    //        readMethod: function () { return this.prop; },
+    //        writeMethod: function (p) { this.prop = p; },
+    //        fn: {
+    //            kind: 'method',
+    //            method: function() { }
+    //        }
+    //    });
 
-    var instance = new MyBaseClass();
-    console.log("Output:" , instance, instance.readMethod());
-    });
+    //    var instance = new MyBaseClass();
+    //    console.log("Output:" , instance, instance.readMethod());
+    //});
 });
