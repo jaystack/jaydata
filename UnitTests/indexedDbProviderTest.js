@@ -32,7 +32,25 @@
         stop(1);
         $data.StorageProviderLoader.load(['indexedDb'], function () {
             start(1);
-            var provider = new $data.storageProviders.indexedDb.IndexedDBStorageProvider();
+            var provider = $data.storageProviders.indexedDb ? 
+                new $data.storageProviders.indexedDb.IndexedDBStorageProvider() : 
+                new $data.storageProviders.indexedDbPro.IndexedDBStorageProvider();
+
+            ok(provider.indexedDB, "IndexedDB interface found");
+            ok(provider.IDBRequest, "IDBRequest");
+            ok(provider.IDBTransaction, "IDBTransaction");
+            ok(provider.IDBKeyRange, "IDBKeyRange");
+        });
+    });
+    test('storageProvider_finds_interfaces', function () {
+        expect(4);
+        stop(1);
+        $data.StorageProviderLoader.load(['indexedDb'], function () {
+            start(1);
+            var provider = $data.storageProviders.indexedDbPro ?
+                new $data.storageProviders.indexedDbPro.IndexedDBStorageProvider() :
+                new $data.storageProviders.indexedDb.IndexedDBStorageProvider();
+
             ok(provider.indexedDB, "IndexedDB interface found");
             ok(provider.IDBRequest, "IDBRequest");
             ok(provider.IDBTransaction, "IDBTransaction");

@@ -55,7 +55,7 @@
         }, null);
 
         var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
-        var provType = $data.storageProviders.sqLite.SqLiteStorageProvider;
+        var provType = $data.storageProviders.sqLite ? $data.storageProviders.sqLite.SqLiteStorageProvider : $data.storageProviders.sqLitePro.SqLiteStorageProvider;
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
         var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
 
@@ -99,7 +99,83 @@
             }
         }, null);
         var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
-        var provType = $data.storageProviders.sqLite.SqLiteStorageProvider;
+        var provType = $data.storageProviders.sqLite ? $data.storageProviders.sqLite.SqLiteStorageProvider : $data.storageProviders.sqLitePro.SqLiteStorageProvider;
+        var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
+
+        var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [SimpleDataTypes] ([i0] INTEGER NOT NULL, [i1] INTEGER, [b0] INTEGER NOT NULL, [b1] INTEGER, [t0] TEXT NOT NULL, [t1] TEXT, [bl0] BLOB NOT NULL, [bl1] BLOB, [n0] REAL NOT NULL, [n1] REAL, [d1] REAL NOT NULL, [d2] REAL);', 'create table function faild');
+        var sql = prov.createSqlFromStorageModel(c._storageModel[1]);
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [RequireWithKeys] ([i0] INTEGER NOT NULL, [i1] INTEGER NOT NULL,PRIMARY KEY ([i0]));', 'required with key');
+        var sql = prov.createSqlFromStorageModel(c._storageModel[2]);
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [RequireWithMultipleKeys] ([i0] INTEGER NOT NULL, [i1] INTEGER NOT NULL,PRIMARY KEY ([i0], [i1]));', 'required with multiple key');
+        var sql = prov.createSqlFromStorageModel(c._storageModel[3]);
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [RequireWithComputeds] ([i0] INTEGER PRIMARY KEY AUTOINCREMENT, [i1] INTEGER NOT NULL);', 'required with computed field');
+    });
+
+    test("simpleFieldDataTypeTest", function () {
+        var context = $data.Class.define("ProviderTestContext", $data.EntityContext, null, {
+            SimpleDataTypes: {
+                dataType: $data.EntitySet, elementType: $data.Class.define("SimpleDataType", $data.Entity, null, {
+                    i0: { dataType: 'integer' },
+                    i1: { dataType: 'int' },
+                    b0: { dataType: 'bool' },
+                    b1: { dataType: 'boolean' },
+                    t0: { dataType: 'text' },
+                    t1: { dataType: 'string' },
+                    bl: { dataType: 'blob' },
+                    n0: { dataType: 'number' },
+                    d1: { dataType: 'datetime' },
+                    d2: { dataType: 'date' }
+                }, null)
+            }
+        }, null);
+
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
+        var provType = $data.storageProviders.sqLitePro ? $data.storageProviders.sqLitePro.SqLiteStorageProvider : $data.storageProviders.sqLite.SqLiteStorageProvider;
+        var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
+        var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
+
+        equal(sql, 'CREATE TABLE IF NOT EXISTS [SimpleDataTypes] ([i0] INTEGER, [i1] INTEGER, [b0] INTEGER, [b1] INTEGER, [t0] TEXT, [t1] TEXT, [bl] BLOB, [n0] REAL, [d1] REAL, [d2] REAL);', 'create table function faild');
+    });
+    test("requiredFieldTest", function () {
+        var context = $data.Class.define("ProviderTestContext", $data.EntityContext, null, {
+            SimpleDataTypes: {
+                dataType: $data.EntitySet, elementType: $data.Class.define("SimpleDataType", $data.Entity, null, {
+                    i0: { dataType: 'integer', required: true },
+                    i1: { dataType: 'int', required: false },
+                    b0: { dataType: 'bool', required: true },
+                    b1: { dataType: 'boolean', required: false },
+                    t0: { dataType: 'text', required: true },
+                    t1: { dataType: 'string', required: false },
+                    bl0: { dataType: 'blob', required: true },
+                    bl1: { dataType: 'blob', required: false },
+                    n0: { dataType: 'number', required: true },
+                    n1: { dataType: 'number', required: false },
+                    d1: { dataType: 'datetime', required: true },
+                    d2: { dataType: 'date', required: false }
+                }, null)
+            },
+            RequireWithKeys: {
+                dataType: $data.EntitySet, elementType: $data.Class.define("RequireWithKey", $data.Entity, null, {
+                    i0: { dataType: 'integer', required: true, key: true },
+                    i1: { dataType: 'int', required: true }
+                }, null)
+            },
+            RequireWithMultipleKeys: {
+                dataType: $data.EntitySet, elementType: $data.Class.define("RequireWithMultipleKey", $data.Entity, null, {
+                    i0: { dataType: 'integer', required: true, key: true },
+                    i1: { dataType: 'int', required: true, key: true }
+                }, null)
+            },
+            RequireWithComputeds: {
+                dataType: $data.EntitySet, elementType: $data.Class.define("RequireWithComputed", $data.Entity, null, {
+                    i0: { dataType: 'integer', required: true, key: true, computed: true },
+                    i1: { dataType: 'int', required: true }
+                }, null)
+            }
+        }, null);
+        var c = new context({ databaseName: "sqLiteProviderTest_createDb", name: "sqLite", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })
+        var provType = $data.storageProviders.sqLitePro ? $data.storageProviders.sqLitePro.SqLiteStorageProvider : $data.storageProviders.sqLite.SqLiteStorageProvider;
         var prov = new provType({ databaseName: "ProviderTestDb", name: "sqLite" });
 
         var sql = prov.createSqlFromStorageModel(c._storageModel[0]);
