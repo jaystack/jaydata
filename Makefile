@@ -85,6 +85,14 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/RepresentationExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/ServiceOperationExpression.js\
 	$(TYPES_DIR)/Expressions/ContinuationExpressionBuilder.js\
+	$(TYPES_DIR)/DbClient/DbCommand.js\
+	$(TYPES_DIR)/DbClient/DbConnection.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
 	$(TYPES_DIR)/Validation/EntityValidationBase.js\
 	$(TYPES_DIR)/Validation/EntityValidation.js\
 	$(TYPES_DIR)/Notifications/ChangeDistributorBase.js\
@@ -148,15 +156,7 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
-SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
-	$(TYPES_DIR)/DbClient/DbConnection.js\
-	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
-	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
-	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
-	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
-	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
-	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
-	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
+SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
