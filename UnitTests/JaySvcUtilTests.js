@@ -5,7 +5,7 @@
             ok(false, 'JaySvcUtil.js is not supported!!');
         });
     } else {
-        metadataTests({ name: "sqLite", databaseName: 'kendoTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
+        metadataTests({ name: "sqLite", databaseName: 'kendoTests', oDataServiceHost: "/Services/newsReader.svc", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
     }
 });
 
@@ -19,7 +19,7 @@ function metadataTests(providerConfig, msg) {
         $data.MetadataLoader.debugMode = true;
         $data.MetadataLoader.factoryCache = {};
 
-        $data.MetadataLoader.load('Services/emptyNewsreader.svc', {
+        $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
             success: function (f, type, code) {
 
                 equal(typeof f, 'function', 'factory is function');
@@ -32,7 +32,7 @@ function metadataTests(providerConfig, msg) {
                 ok(ctx instanceof type, 'context instance of type ');
                 ok(Object.keys($data.MetadataLoader.factoryCache).length > 0, 'factory cache has record')
 
-                $data.MetadataLoader.load('Services/emptyNewsreader.svc', {
+                $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
                     success: function (f2, type2, code2) {
 
                         ok(f2 === f, 'factory is same if load again');
@@ -68,7 +68,7 @@ function metadataTests(providerConfig, msg) {
         $data.MetadataLoader.debugMode = true;
         $data.MetadataLoader.factoryCache = {};
 
-        $data.MetadataLoader.load('Services/emptyNewsreader.svc', {
+        $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
             success: function (f, type, code) {
 
                 var ctx = f();
@@ -112,7 +112,7 @@ function metadataTests(providerConfig, msg) {
         $data.MetadataLoader.debugMode = true;
         $data.MetadataLoader.factoryCache = {};
 
-        $data.MetadataLoader.load('Services/emptyNewsreader.svc', {
+        $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
             success: function (f, type, code) {
 
                 var ctx = f();
@@ -142,7 +142,7 @@ function metadataTests(providerConfig, msg) {
 
     test('factory test', 12, function () {
         stop();
-        $data.service('UnitTests/JaySvcUtil/$metadata.action.xml', function (f, type) {
+        $data.service('/UnitTests/JaySvcUtil/$metadata.action.xml', function (f, type) {
 
             var context = f();
             context.onReady(function () {

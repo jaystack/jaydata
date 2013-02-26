@@ -359,7 +359,6 @@
     <Content Include="test_Node.js" />
     <Content Include="test_odata.html" />
     <Content Include="Types\Transaction.js" />
-    <Content Include="UnitTests\transactionTests.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
     <Content Include="README.md" />
