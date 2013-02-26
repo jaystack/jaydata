@@ -358,6 +358,7 @@
     <Content Include="test_JayData_nuget_prov.html" />
     <Content Include="test_Node.js" />
     <Content Include="test_odata.html" />
+    <Content Include="Types\Expressions\EntityExpressions\ExpressionMonitor.js" />
     <Content Include="Types\Transaction.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
@@ -607,7 +608,7 @@
     <Content Include="Types\StorageProviders\oData\oDataProjectionCompiler.js" />
     <Content Include="Types\StorageProviders\oData\oDataProvider.js" />
     <Content Include="Types\StorageProviders\oData\oDataWhereCompiler.js" />
-    <Content Include="Types\StorageProviders\SqLite\ExpressionMonitor.js" />
+    <Content Include="Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
     <Content Include="Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
     <Content Include="Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
     <Content Include="Types\StorageProviders\SqLite\SqLiteCompiler.js" />

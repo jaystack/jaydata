@@ -72,7 +72,7 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
         sqlBuilder.addText(opName);
         sqlBuilder.addText(SqlStatementBlocks.beginGroup);
         if (opName === "like") {
-            var builder = Container.createSqlBuilder();
+            var builder = $data.sqLite.SqlBuilder.create();
             this.Visit(expression.parameters[0], builder);
             builder.params.forEach(function (p) {
                 var v = p;
