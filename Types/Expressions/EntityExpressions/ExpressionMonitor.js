@@ -1,4 +1,4 @@
-﻿$C('$data.Expressions.ExpressionMonitor', $data.Expressions.EntityExpressionVisitor, null, {
+$C('$data.Expressions.ExpressionMonitor', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (monitorDefinition) {
         this.Visit = function (expression, context) {
 
