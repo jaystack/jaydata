@@ -5,15 +5,15 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
         this.connection = con;
         this.parameters = params;
     },
-    executeNonQuery: function (callback, tran, isWrite) {
+    executeNonQuery: function (callback) {
         callback = $data.typeSystem.createCallbackSetting(callback);
-        this.exec(this.query, this.parameters, callback.success, callback.error, tran, isWrite);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
     },
-    executeQuery: function (callback, tran, isWrite) {
+    executeQuery: function (callback) {
         callback = $data.typeSystem.createCallbackSetting(callback);
-        this.exec(this.query, this.parameters, callback.success, callback.error, tran, isWrite);
+        this.exec(this.query, this.parameters, callback.success, callback.error);
     },
-    exec: function (query, parameters, callback, errorhandler, transaction, isWrite) {
+    exec: function (query, parameters, callback, errorhandler) {
 		// suspicious code
         /*if (console) {
             //console.log(query);
@@ -33,7 +33,7 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
 
                 function decClb() {
                     if (--remainingCommands == 0) {
-                        callback(single ? results[0] : results, transaction);
+                        callback(single ? results[0] : results);
                     }
                 }
 
@@ -56,16 +56,11 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
                                     }
                                 }
                                 results[i] = r;
-                                decClb(trx);
+                                decClb();
                             },
                             function (trx, err) {
-                                var _q = q;
-                                var _i = i;
-
                                 if (errorhandler)
                                     errorhandler(err);
-
-                                return true;
                             }
                         );
                     } else {
@@ -74,6 +69,6 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
                     }
                 });
             }
-        }, transaction, isWrite);
+        });
     }
 }, null);

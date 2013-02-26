@@ -21,7 +21,6 @@ TYPE_SYSTEM_CLIENT = $(TYPESYSTEM_DIR)/initializeJayDataClient.js
 TYPE_SYSTEM_NPM = TypeSystem/initializeJayData.js
 
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
-	$(TYPESYSTEM_DIR)/initializeJayDataPro.js\
 	$(TYPESYSTEM_DIR)/utils.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
 	$(TYPESYSTEM_DIR)/JayLint.js\
@@ -147,13 +146,6 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDbExpressionExecutor.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBCompiler.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBPhysicalAndFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalAndFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalOrFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalInFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBTransaction.js\
 
 SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/DbClient/DbConnection.js\
@@ -170,7 +162,6 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlProjectionCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ExpressionMonitor.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
-	$(TYPES_DIR)/StorageProviders/SqLite/SqlTransaction.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
 oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
