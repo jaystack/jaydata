@@ -1,6 +1,7 @@
 *~
 .idea
 *.pwd.js
+*.suo
 *.*.suo
 CommandLine.dll
 JayData_readme.txt
