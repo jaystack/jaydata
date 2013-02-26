@@ -34,14 +34,14 @@
     test("Type definition - type alias", 17, function () {
 
         var typeAlias = $data.Class.define('typeAlias', null, null, {
-            prop1: { dataType: "integer", key: true },
-            prop2: { type: "string" },
-            prop3: { type: "$data.String" },
+            prop1: { dataType: "@integer", key: true },
+            prop2: { type: "@string" },
+            prop3: { type: "@$data.String" },
             prop4: {},
             prop5: { type: $data.String },
-            prop6: { type: "date" }
+            prop6: { type: "@date" }
         }, null);
-
+        console.dir(typeAlias.memberDefinitions);
         var memDef = typeAlias.getMemberDefinition('prop1');
         ok(memDef.dataType === "integer", 'type equal failed');
         ok(memDef.type === "integer", 'type equal failed');
@@ -488,6 +488,7 @@
 
         try {
             $data.Container.resolveType('$some.int');
+            ok(false, "exception were expected");
         } catch (e) {
             equal(e.message, 'Unable to resolve type:$some.int', 'type override throw error failed');
         }
@@ -814,5 +815,88 @@
         ok(i0.Field4 === i1.Field4, "pointer values equal");
 
 
+    });
+
+    test('forward declaration', 5, function () {
+        
+
+        var Apple  = $data.define("Apple", { Basket: "Basket" });
+        equal(Apple.getMemberDefinition("Basket").type, "Basket", "forward declared type is not resolved yet");
+        var Basket = $data.define("Basket", {});
+        equal(Apple.getMemberDefinition("Basket").type, Basket, "forward declared type is resolved");
+
+        var BeeHive = $data.define("BeeHive", {
+            Bees: { type: "Array", elementType: "Bee" }
+        });
+        equal(BeeHive.getMemberDefinition("Bees").type, $data.Array, "declared type is resolved");
+        equal(BeeHive.getMemberDefinition("Bees").elementType, "Bee", "forward declared type is not resolved yet");
+
+        var Bee = $data.define("Bee", { });
+        equal(BeeHive.getMemberDefinition("Bees").elementType, Bee, "forward declared type is resolved");
+
+    });
+
+    test('Containers', 9, function () {
+        var container = $data.createContainer();
+        var dynaType = $data.Entity.extend("FoobarTypeName", container, {
+            F1: { type: 'String' }
+        }, {
+
+        });
+        equal(typeof FoobarTypeName, "undefined", "type is not globally visible");
+        equal(typeof container.FoobarTypeName, "function", "type is visible on container");
+        ok($data.Container.resolveType(container.FoobarTypeName), "main container can resolve type");
+        ok(container.resolveType(container.FoobarTypeName), "sub container can resolve type");
+        equal($data.Container.resolveName(container.FoobarTypeName), "FoobarTypeName", "main container can resolve type");
+
+
+    });
+
+    test('IoC', 4, function () {
+        
+        var pt = $data.Entity.extend("PureType", { });
+
+        var ip = $data.Entity.extend("ImplementationType", { F1: { type: 'string' } });
+
+        var i = pt.create();
+        ok(i instanceof pt, "type initially is type");
+        $data.Container.mapType(pt, ip);
+        var i2 = pt.create();
+        ok(i2 instanceof ip, "type is mapped");
+
+        var container = $data.createContainer();
+
+        var ptc = $data.Entity.extend("PureType", container, {});
+
+        var ipc = $data.Entity.extend("ImplementationType", container, { F1: { type: 'string' } });
+
+        var i3 = ptc.create();
+        ok(i3 instanceof ptc, "contained type initially is type");
+        $data.Container.mapType(ptc, ipc);
+        var i4 = ptc.create();
+        ok(i4 instanceof ipc, "contained type is mapped");
+
+    })
+
+    test('Class framework', 5, function () {
+    var MyBaseClass = $data.Base.extend("MyBaseClass", {
+        constructor: function() {
+            console.log("MyBaseClass ctor");
+        },
+        _field: "MyValue",
+        prop: {
+            get: function () { return this._field; },
+            set: function (value) { this._field = value; }
+        },
+        readMethod: function () { return this.prop; },
+        writeMethod: function (p) { this.prop = p; },
+        fn: {
+            kind: 'method',
+            method: function() { }
+        }
+    });
+
+    var instance = new MyBaseClass();
+    console.log("Output:" , instance, instance.readMethod());
     });
 });
