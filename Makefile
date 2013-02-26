@@ -69,6 +69,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityContextExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityExpressionVisitor.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/ExpressionMonitor.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityFieldExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntitySetExpression.js\
@@ -160,7 +161,7 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlProjectionCompiler.js\
-	$(TYPES_DIR)/StorageProviders/SqLite/ExpressionMonitor.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlExpressionMonitor.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
