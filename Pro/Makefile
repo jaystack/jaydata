@@ -13,6 +13,11 @@ CREDITS_BASE_TRIAL = ./Pro/CREDITS_TRIAL.txt
 CREDITS_TRIAL = $(TEMP_DIR)/CREDITS_TRIAL.txt
 CREDITS_BASE_PRO = ./Pro/CREDITS_PRO.txt
 CREDITS_PRO = $(TEMP_DIR)/CREDITS_PRO.txt
+CREDITS_PRO_WEBSQL = $(TEMP_DIR)/CREDITS_PRO_WEBSQL.txt
+CREDITS_TRIAL_WEBSQL = $(TEMP_DIR)/CREDITS_TRIAL_WEBSQL.txt
+CREDITS_PRO_INDEXEDDB = $(TEMP_DIR)/CREDITS_PRO_INDEXEDDB.txt
+CREDITS_TRIAL_INDEXEDDB = $(TEMP_DIR)/CREDITS_TRIAL_INDEXEDDB.txt
+
 
 TYPE_SYSTEM_PRO = $(TYPESYSTEM_DIR_PRO)/initializeJayDataPro.js\
 
@@ -50,23 +55,23 @@ makeprodirs:
 
 proproviders: indexeddbproprovider sqliteproprovider
 
-indexeddbproprovider: $(IndexedDbProProvider) $(CREDITS_PRO) $(CREDITS_TRIAL)
+indexeddbproprovider: $(IndexedDbProProvider) $(CREDITS_PRO_INDEXEDDB) $(CREDITS_TRIAL_INDEXEDDB)
 	@@echo "Building IndexedDbProvider - Pro provider..."
 	@@test -d $(PROPROVIDERS_DIR_COM) || mkdir -p $(PROPROVIDERS_DIR_COM)
 	@@test -d $(PROPROVIDERS_DIR_TRIAL) || mkdir -p $(PROPROVIDERS_DIR_TRIAL)
-	@@cat $(CREDITS_PRO) $(IndexedDbProProvider) > $(PROPROVIDERS_DIR_COM)/IndexedDbProProvider.js
+	@@cat $(CREDITS_PRO_INDEXEDDB) $(IndexedDbProProvider) > $(PROPROVIDERS_DIR_COM)/IndexedDbProProvider.js
 	@@java -jar $(COMPILER) --js $(PROPROVIDERS_DIR_COM)/IndexedDbProProvider.js --js_output_file $(TEMP_DIR)/IndexedDbProProvider.min.js
-	@@cat $(CREDITS_PRO) $(TEMP_DIR)/IndexedDbProProvider.min.js > $(PROPROVIDERS_DIR_COM)/IndexedDbProProvider.min.js
-	@@cat $(CREDITS_TRIAL) $(TEMP_DIR)/IndexedDbProProvider.min.js > $(PROPROVIDERS_DIR_TRIAL)/IndexedDbProProvider.min.js
+	@@cat $(CREDITS_PRO_INDEXEDDB) $(TEMP_DIR)/IndexedDbProProvider.min.js > $(PROPROVIDERS_DIR_COM)/IndexedDbProProvider.min.js
+	@@cat $(CREDITS_TRIAL_INDEXEDDB) $(TEMP_DIR)/IndexedDbProProvider.min.js > $(PROPROVIDERS_DIR_TRIAL)/IndexedDbProProvider.min.js
 
-sqliteproprovider: $(SqLiteProProvider) $(CREDITS_PRO) $(CREDITS_TRIAL)
+sqliteproprovider: $(SqLiteProProvider) $(CREDITS_PRO_WEBSQL) $(CREDITS_TRIAL_WEBSQL)
 	@@echo "Building SqLiteProvider - Pro provider..."
 	@@test -d $(PROPROVIDERS_DIR_COM) || mkdir -p $(PROPROVIDERS_DIR_COM)
 	@@test -d $(PROPROVIDERS_DIR_TRIAL) || mkdir -p $(PROPROVIDERS_DIR_TRIAL)
-	@@cat $(CREDITS_PRO) $(SqLiteProProvider) > $(PROPROVIDERS_DIR_COM)/SqLiteProProvider.js
+	@@cat $(CREDITS_PRO_WEBSQL) $(SqLiteProProvider) > $(PROPROVIDERS_DIR_COM)/SqLiteProProvider.js
 	@@java -jar $(COMPILER) --js $(PROPROVIDERS_DIR_COM)/SqLiteProProvider.js --js_output_file $(TEMP_DIR)/SqLiteProProvider.min.js
-	@@cat $(CREDITS_PRO) $(TEMP_DIR)/SqLiteProProvider.min.js > $(PROPROVIDERS_DIR_COM)/SqLiteProProvider.min.js
-	@@cat $(CREDITS_TRIAL) $(TEMP_DIR)/SqLiteProProvider.min.js > $(PROPROVIDERS_DIR_TRIAL)/SqLiteProProvider.min.js
+	@@cat $(CREDITS_PRO_WEBSQL) $(TEMP_DIR)/SqLiteProProvider.min.js > $(PROPROVIDERS_DIR_COM)/SqLiteProProvider.min.js
+	@@cat $(CREDITS_TRIAL_WEBSQL) $(TEMP_DIR)/SqLiteProProvider.min.js > $(PROPROVIDERS_DIR_TRIAL)/SqLiteProProvider.min.js
 
 providers_cls: indexeddbprovider_cls sqliteprovider_cls odataprovider_cls facebookprovider_cls yqlprovider_cls inmemoryprovider_cls mongodbprovider_cls stormprovider_cls webapiprovider_cls
 
@@ -250,8 +255,28 @@ $(CREDITS_PRO): $(CREDITS_BASE_PRO)
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
 	@@sed -e 's/JayData [0-9].[0-9].[0-9]/JayData $(VERSION)/' $(CREDITS_BASE_PRO) > $(CREDITS_PRO)
 
+$(CREDITS_PRO_WEBSQL): $(CREDITS_PRO)
+	@@echo "Create CREDITS_PRO_WEBSQL.txt file"
+	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
+	@@sed -e 's/{{module_name}}/WebSQL Provider/' $(CREDITS_PRO) > $(CREDITS_PRO_WEBSQL)
+
+$(CREDITS_PRO_INDEXEDDB): $(CREDITS_PRO)
+	@@echo "Create CREDITS_PRO_INDEXEDDB.txt file"
+	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
+	@@sed -e 's/{{module_name}}/IndexedDB Provider/' $(CREDITS_PRO) > $(CREDITS_PRO_INDEXEDDB)
+
+
 $(CREDITS_TRIAL): $(CREDITS_BASE_TRIAL)
 	@@echo "Create CREDITS_TRIAL.txt file"
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
 	@@sed -e 's/JayData [0-9].[0-9].[0-9]/JayData $(VERSION)/' $(CREDITS_BASE_TRIAL) > $(CREDITS_TRIAL)
 
+$(CREDITS_TRIAL_WEBSQL): $(CREDITS_TRIAL)
+	@@echo "Create CREDITS_TRIAL_WEBSQL.txt file"
+	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
+	@@sed -e 's/{{module_name}}/WebSQL Provider/' $(CREDITS_TRIAL) > $(CREDITS_TRIAL_WEBSQL)
+
+$(CREDITS_TRIAL_INDEXEDDB): $(CREDITS_TRIAL)
+	@@echo "Create CREDITS_TRIAL_INDEXEDDB.txt file"
+	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
+	@@sed -e 's/{{module_name}}/IndexedDB Provider/' $(CREDITS_TRIAL) > $(CREDITS_TRIAL_INDEXEDDB)
