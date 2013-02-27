@@ -1,4 +1,4 @@
-﻿(function ($data) {
+(function ($data) {
     var q;
     if (typeof Q === 'undefined') {
         if (typeof module !== 'undefined' && module.exports) {

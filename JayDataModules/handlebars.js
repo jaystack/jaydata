@@ -1,4 +1,4 @@
-﻿(function ($data, Handlebars) {
+(function ($data, Handlebars) {
     var oldProcessor = $data.Entity.inheritedTypeProcessor;
     var templateCache = {};
 
