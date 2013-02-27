@@ -1,0 +1,4 @@
+// JayData 1.0.4 COMMERCIAL
+// Copyright JayStack Technologies (http://jaydata.org/licensing)
+// Do not redistribute
+// Support: http://jaystack.com
