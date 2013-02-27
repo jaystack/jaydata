@@ -1,4 +1,4 @@
-﻿(function ($data, Handlebars) {
+(function ($data, Handlebars) {
     var oldProcessor = $data.Entity.inheritedTypeProcessor;
     var templateCache = {};
 
@@ -254,7 +254,7 @@
                     var field = {
                         name: md.name,
                         metadata: md,
-                        get value() { return self[name]; },
+                        get value() { return self[name]; }
                     }
                     results.push(field);
                 }

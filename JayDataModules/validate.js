@@ -1,4 +1,4 @@
-﻿
+
 (function ($data, $) {
 
     var entityValidator = $data.Validation.Entity;

@@ -1,4 +1,4 @@
-﻿/* Base: http://bitovi.com/blog/2010/06/convert-form-elements-to-javascript-object-literals-with-jquery-formBinder-plugin.html */
+/* Base: http://bitovi.com/blog/2010/06/convert-form-elements-to-javascript-object-literals-with-jquery-formBinder-plugin.html */
 (function ($) {
     var radioCheck = /radio|checkbox/i,
 		keyBreaker = /[^\[\]]+/g,
