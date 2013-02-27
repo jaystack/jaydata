@@ -822,7 +822,7 @@
                 $type: $data.Array,
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
-                    $type: 'int',
+                    $type: $data.Integer,
                     $source: 'Id'
                 }
             };
@@ -841,7 +841,7 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $selector: ['json:Author.Profile.results', 'json:Author.Profile'],
-                    $type: 'string',
+                    $type: $data.String,
                     $source: 'Bio'
                 }
             };
@@ -877,8 +877,8 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $source: 'Title' },
-                    l: { $type: 'string', $source: 'Lead' }
+                    t: { $type: $data.String, $source: 'Title' },
+                    l: { $type: $data.String, $source: 'Lead' }
                 }
             };
             deepEqual(q.modelBinderConfig, expectedObject, "Model binder error");
@@ -896,8 +896,8 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
-                    l: { $type: 'string', $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
+                    t: { $type: $data.String, $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
+                    l: { $type: $data.String, $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
                 }
             };
             deepEqual(q.modelBinderConfig, expectedObject, "Model binder error");
@@ -915,14 +915,14 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
+                    t: { $type:  $data.String, $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
                     a: {
                         $type: $data.Object,
                         b: {
                             $type: $data.Object,
                             c: {
                                 $type: $data.Object,
-                                d: { $type: 'string', $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
+                                d: { $type: $data.String, $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
                             }
                         }
                     }
@@ -943,7 +943,7 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
+                    t: { $type: $data.String, $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
                     a: {
                         $type: $data.Object,
                         b: {
@@ -952,10 +952,10 @@
                                 $type: $data.Object,
                                 d: {
                                     $type: $data.Object,
-                                    f: { $type: 'string', $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
+                                    f: { $type: $data.String, $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
                                 }
                             },
-                            c2: { $type: 'int', $source: 'Id' }
+                            c2: { $type: $data.Integer, $source: 'Id' }
                         }
                     }
                 }
@@ -975,7 +975,7 @@
                 $selector: ['json:d.results', 'json:d', 'json:results'],
                 $item: {
                     $type: $data.Object,
-                    t: { $type: 'string', $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
+                    t: { $type: $data.String, $selector: ['json:Author.Profile.results', 'json:Author.Profile'], $source: 'FullName' },
                     a: {
                         $type: $data.Object,
                         b: {
@@ -984,13 +984,13 @@
                                 $type: $data.Object,
                                 d: {
                                     $type: $data.Object,
-                                    f: { $type: 'string', $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
+                                    f: { $type: $data.String, $selector: ['json:Author.results', 'json:Author'], $source: 'LoginName' }
                                 }
                             },
                             c2: {
                                 $type: $data.Object,
-                                c2d1: { $type: 'int', $source: 'Id' },
-                                c2d2: { $type: 'string', $source: 'Title' }
+                                c2d1: { $type: $data.Integer, $source: 'Id' },
+                                c2d2: { $type: $data.String, $source: 'Title' }
                             }
                         }
                     }
@@ -1083,7 +1083,7 @@
                                     $type: $data.Object,
                                     d: {
                                         $selector: ['json:Author.Profile.Location.results', 'json:Author.Profile.Location'],
-                                        $type: '$news.Types.Location',
+                                        $type: $news.Types.Location,
                                         Address: 'Address',
                                         City: 'City',
                                         Zip: 'Zip',

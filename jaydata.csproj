@@ -372,6 +372,7 @@
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlTransaction.js" />
     <Content Include="Pro\UnitTests\T2.js" />
     <Content Include="Pro\UnitTests\transactionTests.js" />
+    <Content Include="Pro\localMigrations.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
     <Content Include="Services\emptyNewsReader.svc" />

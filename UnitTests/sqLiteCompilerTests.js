@@ -969,7 +969,7 @@
                     $keys: ['rowid$$'],
                     $type: $data.Object,
                     title: {
-                        $type: "string",
+                        $type: $data.String,
                         $source: "title"
                     },
                     articles: {
@@ -1228,7 +1228,7 @@
                     $keys: ['rowid$$'],
                     $type: $data.Object,
                     name: {
-                        $type: "string",
+                        $type: $data.String,
                         $source: "name"
                     },
                     People: {
@@ -1236,22 +1236,22 @@
                         p1: {
                             $type: $data.Object,
                             name: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p1__name"
                             },
                             bio: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p1__bio"
                             }
                         },
                         p2: {
                             $type: $data.Object,
                             name: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p2__name"
                             },
                             bio: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p2__bio"
                             },
                             tags: {
@@ -1263,13 +1263,13 @@
                                 }
                             },
                             adr: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p2__adr"
                             }
                         }
                     },
                     Cat: {
-                        $type: "string",
+                        $type: $data.String,
                         $source: "Cat"
                     },
                     Articles: {
@@ -1332,7 +1332,7 @@
                     $keys: ['rowid$$'],
                     $type: $data.Object,
                     name: {
-                        $type: "string",
+                        $type: $data.String,
                         $source: "name"
                     },
                     People: {
@@ -1340,22 +1340,22 @@
                         p1: {
                             $type: $data.Object,
                             name: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p1__name"
                             },
                             bio: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p1__bio"
                             }
                         },
                         p2: {
                             $type: $data.Object,
                             name: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p2__name"
                             },
                             bio: {
-                                $type: "string",
+                                $type: $data.String,
                                 $source: "People__p2__bio"
                             },
                             tags: {
@@ -1376,7 +1376,7 @@
                         }
                     },
                     Cat: {
-                        $type: "string",
+                        $type: $data.String,
                         $source: "Cat"
                     },
                     Articles: {
@@ -1427,7 +1427,7 @@
                 $type: $data.Array,
                 $item: {
                     $keys: ['rowid$$'],
-                    $type: 'int',
+                    $type: $data.Integer,
                     $source: 'd'
                 }
             };
@@ -1445,7 +1445,7 @@
                 $type: $data.Array,
                 $item: {
                     $keys: ['rowid$$'],
-                    $type: 'string',
+                    $type: $data.String,
                     $source: 'd'
                 }
             };
@@ -1462,8 +1462,8 @@
                 $item: {
                     $keys: ['rowid$$'],
                     $type: $data.Object,
-                    t: { $type: 'string', $source: 't' },
-                    l: { $type: 'string', $source: 'l' },
+                    t: { $type: $data.String, $source: 't' },
+                    l: { $type: $data.String, $source: 'l' },
                 }
             };
             deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
@@ -1481,8 +1481,8 @@
                 $item: {
                     $keys: ['rowid$$'],
                     $type: $data.Object,
-                    t: { $type: 'string', $source: 't' },
-                    l: { $type: 'string', $source: 'l' },
+                    t: { $type: $data.String, $source: 't' },
+                    l: { $type: $data.String, $source: 'l' },
                 }
             };
             deepEqual(_modelBinderToString(r.modelBinderConfig), _modelBinderToString(expectedObject), "expected model binder obejct faild!");
@@ -1500,14 +1500,14 @@
                 $item: {
                     $keys: ['rowid$$'],
                     $type: $data.Object,
-                    t: { $type: 'string', $source: 't' },
+                    t: { $type: $data.String, $source: 't' },
                     a: {
                         $type: $data.Object,
                         b: {
                             $type: $data.Object,
                             c: {
                                 $type: $data.Object,
-                                d: { $type: 'string', $source: 'a__b__c__d' },
+                                d: { $type: $data.String, $source: 'a__b__c__d' },
                             }
                         }
                     }
@@ -1530,7 +1530,7 @@
                 $item: {
                     $keys: ['rowid$$'],
                     $type: $data.Object,
-                    t: { $type: 'string', $source: 't' },
+                    t: { $type: $data.String, $source: 't' },
                     a: {
                         $type: $data.Object,
                         b: {
@@ -1586,7 +1586,7 @@
                 $type: $data.Array,
                 $item: {
                     $keys: ['rowid$$'],
-                    $type: 'string',
+                    $type: $data.String,
                     $source: "d"
                 }
             };
@@ -1604,7 +1604,7 @@
                 $type: $data.Array,
                 $item: {
                     $keys: ['rowid$$'],
-                    Title: { $type: 'string', $source: 'Title' },
+                    Title: { $type: $data.String, $source: 'Title' },
                     Auth: {
                         $type: $news.Types.User,
                         Id: 'Auth__Id',
