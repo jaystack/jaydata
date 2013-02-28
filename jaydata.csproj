@@ -257,6 +257,7 @@
     <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
+    <Content Include="localMigrations.html" />
     <Content Include="CREDITS.txt" />
     <Content Include="datajs-1.0.3.min.js" />
     <Content Include="favicon.ico" />
@@ -342,7 +343,7 @@
     <Content Include="oDataParser\RequestParser.js" />
     <Content Include="oDataParser\test.html" />
     <Content Include="oDataParser\testConsole.html" />
-    <Content Include="Pro\localMigrations.js" />
+    <Content Include="Pro\JayDataModules\localMigrations.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
     <Content Include="Services\emptyNewsReader.svc" />
