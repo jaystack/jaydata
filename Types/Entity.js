@@ -579,7 +579,6 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                         }
                     }
                 }
-                console.log("ret init:", initData);
                 return initData;
             }
         }
@@ -611,7 +610,11 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 });
 
 
-$data.define = function (name, definition) {
+$data.define = function (name, container, definition) {
+    if (container && !(container instanceof $data.ContainerClass)) {
+        definition = container;
+        container = undefined;
+    }
     if (!definition) {
         throw new Error("json object type is not supported yet");
     }
@@ -667,7 +670,7 @@ $data.define = function (name, definition) {
     }
 
 
-    var entityType = $data.Entity.extend(name, _def);
+    var entityType = $data.Entity.extend(name, container, _def);
     return entityType;
 }
 $data.implementation = function (name) {
