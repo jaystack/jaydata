@@ -1,4 +1,4 @@
-$C('$data.storageProviders.IndexedDB.IndexedDBPhysicalAndFilterExpression', $data.Expressions.ExpressionNode, null, {
+$C('$data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (f) {
         this.filters = f;
     },

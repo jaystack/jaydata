@@ -1,4 +1,4 @@
-$C('$data.storageProviders.IndexedDB.IndexedDBExpressionExecutor', $data.Expressions.EntityExpressionVisitor, null, {
+$C('$data.storageProviders.IndexedDBPro.IndexedDBExpressionExecutor', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, tran) {
         this.provider = provider;
         this.tran = tran.transaction;

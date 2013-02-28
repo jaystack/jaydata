@@ -1,4 +1,4 @@
-VERSION = '1.2.6'
+VERSION = '1.2.7'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules
@@ -21,7 +21,6 @@ TYPE_SYSTEM_CLIENT = $(TYPESYSTEM_DIR)/initializeJayDataClient.js
 TYPE_SYSTEM_NPM = TypeSystem/initializeJayData.js
 
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
-	$(TYPESYSTEM_DIR)/initializeJayDataPro.js\
 	$(TYPESYSTEM_DIR)/utils.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
 	$(TYPESYSTEM_DIR)/JayLint.js\
@@ -70,6 +69,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityContextExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityExpressionVisitor.js\
+	$(TYPES_DIR)/Expressions/EntityExpressions/ExpressionMonitor.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityFieldExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntityFieldOperationExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/EntitySetExpression.js\
@@ -85,6 +85,14 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ASTParser.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/RepresentationExpression.js\
 	$(TYPES_DIR)/Expressions/EntityExpressions/ServiceOperationExpression.js\
 	$(TYPES_DIR)/Expressions/ContinuationExpressionBuilder.js\
+	$(TYPES_DIR)/DbClient/DbCommand.js\
+	$(TYPES_DIR)/DbClient/DbConnection.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
+	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
+	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
+	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
 	$(TYPES_DIR)/Validation/EntityValidationBase.js\
 	$(TYPES_DIR)/Validation/EntityValidation.js\
 	$(TYPES_DIR)/Notifications/ChangeDistributorBase.js\
@@ -147,30 +155,14 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDbExpressionExecutor.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBCompiler.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBPhysicalAndFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalAndFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalOrFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBLogicalInFilterExpression.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBTransaction.js\
 
-SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
-	$(TYPES_DIR)/DbClient/DbConnection.js\
-	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
-	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
-	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageCommand.js\
-	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
-	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
-	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
-	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
+SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlProjectionCompiler.js\
-	$(TYPES_DIR)/StorageProviders/SqLite/ExpressionMonitor.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqlExpressionMonitor.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
-	$(TYPES_DIR)/StorageProviders/SqLite/SqlTransaction.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
 oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
@@ -203,14 +195,35 @@ StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 
 WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
 
+DeferredModule = $(BASEMODULE_DIR)/deferred.js\
+
+ErrorHandlerModule = $(BASEMODULE_DIR)/errorhandler.js\
+
+FormBinderModule = $(BASEMODULE_DIR)/formBinder.js\
+
+HandlebarsModule = $(BASEMODULE_DIR)/handlebars.js\
+
+InMemoryModule = $(BASEMODULE_DIR)/inMemory.js\
+
+KendoModule = $(BASEMODULE_DIR)/kendo.js\
+
+KnockoutModule = $(BASEMODULE_DIR)/knockout.js\
+
+QDeferredModule = $(BASEMODULE_DIR)/qDeferred.js\
+
+SenchaModule = $(BASEMODULE_DIR)/sencha.js\
+
+TemplateModule = $(BASEMODULE_DIR)/template.js\
+
+ValidateModule = $(BASEMODULE_DIR)/Validate.js\
+
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 
-modules: 
-	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp -fp ./JayDataModules/* $(MODULE_DIR)
+modules: jaydatamodules
+	@@rm -r $(TEMP_DIR)
 
-all: jaydatavsdoc jaydatamin jaydata providers npms
-	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR) && cp ./JayDataModules/* $(MODULE_DIR)
+all: jaydatavsdoc jaydatamin jaydata providers jaydatamodules npms
 	@@rm -r $(TEMP_DIR)
 
 npms: npmjaydata npmjaydata-core npmindexeddb npmsqlite npmodata npminmemory npmmongodb npmstorm npmwebapi
@@ -428,6 +441,85 @@ stormprovider: $(StormProvider) $(CREDITS)
 	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/StormProvider.js --js_output_file $(TEMP_DIR)/StormProvider.min.js
 	@@cat $(CREDITS) $(TEMP_DIR)/StormProvider.min.js > $(PROVIDERS_DIR)/StormProvider.min.js
 
+jaydatamodules: deferredmodule errorhandlermodule formbindermodule handlebarsmodule inmemorymodule kendomodule knockoutmodule qdeferredmodule senchamodule templatemodule validatemodule
+
+deferredmodule: $(DeferredModule) $(CREDITS)
+	@@echo "Building Deferred module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(DeferredModule) > $(MODULE_DIR)/deferred.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/deferred.js --js_output_file $(TEMP_DIR)/deferred.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/deferred.min.js > $(MODULE_DIR)/deferred.min.js
+
+errorhandlermodule: $(ErrorHandlerModule) $(CREDITS)
+	@@echo "Building ErrorHandler module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(ErrorHandlerModule) > $(MODULE_DIR)/errorhandler.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/errorhandler.js --js_output_file $(TEMP_DIR)/errorhandler.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/errorhandler.min.js > $(MODULE_DIR)/errorhandler.min.js
+
+formbindermodule: $(FormBinderModule) $(CREDITS)
+	@@echo "Building FormBinder module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(FormBinderModule) > $(MODULE_DIR)/formBinder.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/formBinder.js --js_output_file $(TEMP_DIR)/formBinder.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/formBinder.min.js > $(MODULE_DIR)/formBinder.min.js
+
+handlebarsmodule: $(HandlebarsModule) $(CREDITS)
+	@@echo "Building Handlebars module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(HandlebarsModule) > $(MODULE_DIR)/handlebars.js
+	#@@java -jar $(COMPILER) --js $(MODULE_DIR)/handlebars.js --js_output_file $(TEMP_DIR)/handlebars.min.js
+	#@@cat $(CREDITS) $(TEMP_DIR)/handlebars.min.js > $(MODULE_DIR)/handlebars.min.js
+
+inmemorymodule: $(InMemoryModule) $(CREDITS)
+	@@echo "Building InMemory module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(InMemoryModule) > $(MODULE_DIR)/inMemory.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/inMemory.js --js_output_file $(TEMP_DIR)/inMemory.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/inMemory.min.js > $(MODULE_DIR)/inMemory.min.js
+
+kendomodule: $(KendoModule) $(CREDITS)
+	@@echo "Building Kendo module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(KendoModule) > $(MODULE_DIR)/kendo.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/kendo.js --js_output_file $(TEMP_DIR)/kendo.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/kendo.min.js > $(MODULE_DIR)/kendo.min.js
+
+knockoutmodule: $(KnockoutModule) $(CREDITS)
+	@@echo "Building Knockout module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(KnockoutModule) > $(MODULE_DIR)/knockout.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/knockout.js --js_output_file $(TEMP_DIR)/knockout.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/knockout.min.js > $(MODULE_DIR)/knockout.min.js
+
+qdeferredmodule: $(QDeferredModule) $(CREDITS)
+	@@echo "Building QDeferred module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(QDeferredModule) > $(MODULE_DIR)/qDeferred.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/qDeferred.js --js_output_file $(TEMP_DIR)/qDeferred.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/qDeferred.min.js > $(MODULE_DIR)/qDeferred.min.js
+
+senchamodule: $(SenchaModule) $(CREDITS)
+	@@echo "Building Sencha module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(SenchaModule) > $(MODULE_DIR)/sencha.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/sencha.js --js_output_file $(TEMP_DIR)/sencha.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/sencha.min.js > $(MODULE_DIR)/sencha.min.js
+
+templatemodule: $(TemplateModule) $(CREDITS)
+	@@echo "Building Template module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(TemplateModule) > $(MODULE_DIR)/template.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/template.js --js_output_file $(TEMP_DIR)/template.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/template.min.js > $(MODULE_DIR)/template.min.js
+
+validatemodule: $(ValidateModule) $(CREDITS)
+	@@echo "Building Validate module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(ValidateModule) > $(MODULE_DIR)/Validate.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/Validate.js --js_output_file $(TEMP_DIR)/Validate.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/Validate.min.js > $(MODULE_DIR)/Validate.min.js
+
 jaydatavsdoc: jaydata $(CREDITS)
 	@@echo "Building JayData vsdoc version..."
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
@@ -456,6 +548,8 @@ $(CREDITS): $(CREDITS_BASE)
 	@@echo "Create CREDITS.txt file"
 	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
 	@@sed -e 's/JayData [0-9].[0-9].[0-9]/JayData $(VERSION)/' $(CREDITS_BASE) > $(CREDITS)
+
+-include ./Pro/Makefile
 
 .PHONY: JayDataMin JayData JayDataStandaloneMin JayDataStandalone All
 

@@ -1,4 +1,4 @@
-$C('$data.storageProviders.IndexedDB.IndexedDBLogicalAndFilterExpression', $data.Expressions.ExpressionNode, null, {
+$C('$data.storageProviders.IndexedDBPro.IndexedDBLogicalAndFilterExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (l, r) {
         this.left = l;
         this.right = r;

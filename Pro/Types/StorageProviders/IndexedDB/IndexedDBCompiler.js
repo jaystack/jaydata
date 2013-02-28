@@ -1,4 +1,4 @@
-$C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.EntityExpressionVisitor, null, {
+$C('$data.storageProviders.IndexedDBPro.IndexedDBCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider) {
         this.db = provider.db;
         this.provider = provider;
@@ -12,9 +12,9 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
 
         //search new indexes
         var newIndexContext = { db: this.db };
-        var objectStoreMonitor = Container.createFindAllObjectStores();
+        var objectStoreMonitor = $data.storageProviders.IndexedDBPro.FindAllObjectStores.create();
         objectStoreMonitor.Visit(newExpression, newIndexContext);
-        var indexMonitor = Container.createPhysicalIndexSearch();
+        var indexMonitor = $data.storageProviders.IndexedDBPro.PhysicalIndexSearch.create();
         newExpression = indexMonitor.Visit(newExpression, newIndexContext);
 
         //createIndexes
@@ -102,7 +102,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
             context.navProp = undefined;
             return newExp;
         } else if (nLeft instanceof $data.Expressions.EntityExpression || nRight instanceof $data.Expressions.EntityExpression) {
-            return Container.createIndexedDBLogicalInFilterExpression(nLeft, nRight);
+            return $data.storageProviders.IndexedDBPro.IndexedDBLogicalInFilterExpression.create(nLeft, nRight);
         } else {*/
             switch (expression.nodeType) {
                 case "and":
@@ -111,39 +111,39 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
                         if (context.parentNodeType == "and") {
                             return filters;
                         }
-                        return Container.createIndexedDBPhysicalAndFilterExpression(filters);
+                        return $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create(filters);
                     } else {
                         if (nLeft instanceof Array) {
-                            nLeft = Container.createIndexedDBPhysicalAndFilterExpression(nLeft);
+                            nLeft = $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create(nLeft);
                         }
                         if (nRight instanceof Array) {
-                            nRight = Container.createIndexedDBPhysicalAndFilterExpression(nRight);
+                            nRight = $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create(nRight);
                         }
-                        return Container.createIndexedDBLogicalAndFilterExpression(nLeft, nRight);
+                        return $data.storageProviders.IndexedDBPro.IndexedDBLogicalAndFilterExpression.create(nLeft, nRight);
                     }
                     break;
                 case "or":
                     if (nLeft instanceof Array) {
-                        nLeft = Container.createIndexedDBPhysicalAndFilterExpression(nLeft);
+                        nLeft = $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create(nLeft);
                     }
                     if (nRight instanceof Array) {
-                        nRight = Container.createIndexedDBPhysicalAndFilterExpression(nRight);
+                        nRight = $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create(nRight);
                     }
 
-                    return Container.createIndexedDBLogicalOrFilterExpression(nLeft, nRight);
+                    return $data.storageProviders.IndexedDBPro.IndexedDBLogicalOrFilterExpression.create(nLeft, nRight);
                     break;
                 case "in":
-                    if (nLeft instanceof $data.storageProviders.IndexedDB.IndexedDBPhysicalAndFilterExpression || nRight instanceof $data.storageProviders.IndexedDB.IndexedDBPhysicalAndFilterExpression) {
-                        return Container.createIndexedDBLogicalInFilterExpression(nLeft, nRight);
+                    if (nLeft instanceof $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression || nRight instanceof $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression) {
+                        return $data.storageProviders.IndexedDBPro.IndexedDBLogicalInFilterExpression.create(nLeft, nRight);
                     }
                     if (context.parentNodeType !== 'and') {
-                        return Container.createIndexedDBPhysicalAndFilterExpression([expression]);
+                        return $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create([expression]);
                     }
                     return [expression];
                     break;
                 default:
                     if (context.parentNodeType !== 'and') {
-                        return Container.createIndexedDBPhysicalAndFilterExpression([expression]);
+                        return $data.storageProviders.IndexedDBPro.IndexedDBPhysicalAndFilterExpression.create([expression]);
                     }
                     return [expression];
                     break;
@@ -157,7 +157,7 @@ $C('$data.storageProviders.IndexedDB.IndexedDBCompiler', $data.Expressions.Entit
         return expression;
     }
 }, {});
-$C('$data.storageProviders.IndexedDB.FindAllObjectStores', $data.Expressions.EntityExpressionVisitor, null, {
+$C('$data.storageProviders.IndexedDBPro.FindAllObjectStores', $data.Expressions.EntityExpressionVisitor, null, {
     VisitEntitySetExpression: function (expression, context) {
         var tName = expression.storageModel.TableName;
         context.objectStoresName = context.objectStoresName || [];
@@ -187,7 +187,7 @@ $C('$data.storageProviders.IndexedDB.FindAllObjectStores', $data.Expressions.Ent
         this.Visit(expression.right, context);
     }
 });
-$C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.EntityExpressionVisitor, null, {
+$C('$data.storageProviders.IndexedDBPro.PhysicalIndexSearch', $data.Expressions.EntityExpressionVisitor, null, {
     //VisitEntitySetExpression: function (expression, context) {
     //    var tName = expression.storageModel.TableName;
     //    context.objectStoresName = context.objectStoresName || [];
@@ -259,6 +259,3 @@ $C('$data.storageProviders.IndexedDB.PhysicalIndexSearch', $data.Expressions.Ent
         this.Visit(expression.right, context);
     }
 });
-/*$C("$data.storageProviders.IndexedDB.NavPropMonitor", $data.sqLite.ExpressionMonitor, null, {
-
-});*/

@@ -60,7 +60,7 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            T3_Storm({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
+            T3_Storm({ name: "oData", databaseName: 'T1', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
         });
     </script>
     <script src="UnitTests/T3_jayStorm.js" type="text/javascript"></script>

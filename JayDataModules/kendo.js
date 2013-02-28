@@ -610,7 +610,7 @@
                 }, data), models
                 );
             }).promise();
-        },
+        }
     });
 
     $data.kendo = $data.kendo || {};

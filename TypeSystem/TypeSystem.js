@@ -1336,7 +1336,12 @@ $data.typeSystem = {
         if (typeof callBack == 'function') {
             return this.extend(setting, { success: callBack });
         }
-        return this.extend(setting, callBack);
+
+        var clb = this.extend(setting, callBack);
+        function wrapCode(fn) { var t = this; function r() { fn.apply(t, arguments); fn = function () { } } return r; }
+        clb.error = wrapCode(clb.error);
+
+        return clb;
     },
     createCtorParams: function (source, indexes, thisObj) {
         ///<param name="source" type="Array" />Paramerter array

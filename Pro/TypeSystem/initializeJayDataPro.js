@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     var head = document.getElementsByTagName('head')[0] || document.documentElement;
     var script = document.createElement('script');
     script.type = 'text/javascript';

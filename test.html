@@ -68,6 +68,7 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityContextExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpressionVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntitySetExpression.js"></script>
@@ -143,9 +144,8 @@
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlOrderCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlProjectionCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/SqLite/ExpressionMonitor.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlTransaction.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProvider.js"></script>
@@ -156,13 +156,6 @@
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
     <!--******************************* StorageProvider - IndexDb ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBExpressionExecutor.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBPhysicalAndFilterExpression.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBLogicalAndFilterExpression.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBLogicalOrFilterExpression.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBLogicalInFilterExpression.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBTransaction.js"></script>
 
     <!--******************************* Authentication???? ****************************************-->
     <script type="text/javascript" src="Types/Authentication/AuthenticationBase.js"></script>
@@ -286,8 +279,7 @@
     <!--<script src="UnitTests/oDataProviderTests_auth.js" type="text/javascript"></script>-->
 
     <script src="UnitTests/T2.js" type="text/javascript"></script>
-    <script src="UnitTests/transactionTests.js"></script>
-     <script src="UnitTests/T1.js" type="text/javascript"></script>
+    <script src="UnitTests/T1.js" type="text/javascript"></script>
     <script src="UnitTests/T3.js" type="text/javascript"></script>
     <script src="UnitTests/loadPropertyTests.js" type="text/javascript"></script>
     <script src="UnitTests/ValidatonPluginTest.js" type="text/javascript"></script>
