@@ -1,21 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>JayData unit tests</title>
+    <meta charset=utf-8 />
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="Scripts/modernizr-2.5.3.js"></script>
+    <script src="Scripts/datajs-1.1.0.js"></script>
 
-    <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
-    
-    <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
-    <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
-    <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
-    <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
-    
     <!--************************************************************************************-->
     <script type="text/javascript" src="TypeSystem/initializeJayDataClient.js"></script>
     <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
     <script type="text/javascript" src="TypeSystem/utils.js"></script>
     <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
-    <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
     <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
     <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
     <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
@@ -57,7 +53,10 @@
     <script type="text/javascript" src="Types/Expressions/Visitors/ExecutorVisitor.js"></script>
     
     <script type="text/javascript" src="Types/Expressions/ExpressionBuilder.js"></script>
-    
+    <script src="Types/Transaction.js"></script>
+    <script src="Types/StorageProviders/SqLite/SqlTransaction.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBTransaction.js"></script>
+
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/AssociationInfoExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeToEntityConverter.js"></script>
@@ -65,7 +64,6 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityContextExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpressionVisitor.js"></script>
-    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntitySetExpression.js"></script>
@@ -80,6 +78,8 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/QueryExpressionCreator.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/QueryParameterExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/RepresentationExpression.js"></script>
+
+    <script type="text/javascript" src="Types/Expressions/ContinuationExpressionBuilder.js"></script>
     
     <!--******************************* Validation ****************************************-->  
     <script type="text/javascript" src="Types/Validation/EntityValidationBase.js"></script>
@@ -111,7 +111,6 @@
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
     <script type="text/javascript" src="Types/ServiceOperation.js"></script>
 
-    <script type="text/javascript" src="Types/Transaction.js"></script>
     <script type="text/javascript" src="Types/EntityWrapper.js"></script>
     <script type="text/javascript" src="JaySvcUtil/JaySvcUtil.js"></script>
     <script type="text/javascript" src="Types/JayStorm.js"></script>
@@ -139,7 +138,7 @@
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlOrderCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlProjectionCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlExpressionMonitor.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/ExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
@@ -150,7 +149,14 @@
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
     <!--******************************* StorageProvider - IndexDb ****************************************-->
-    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBCompiler.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDbExpressionExecutor.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBLogicalAndFilterExpression.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBLogicalInFilterExpression.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBLogicalOrFilterExpression.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBPhysicalAndFilterExpression.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
+    <script src="Types/StorageProviders/IndexedDB/IndexedDBTransaction.js"></script>
     
     <!--******************************* Authentication???? ****************************************-->
     <script type="text/javascript" src="Types/Authentication/AuthenticationBase.js"></script>
@@ -176,6 +182,18 @@
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
 
+    <!--******************************* StorageProvider - webApi ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/WebApi/WebApiProvider.js"></script>
+
+    <!--******************************* OData Parser ****************************************-->
+    <script type="text/javascript" src="oDataParser/RequestExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/RequestLexer.js"></script>
+    <script type="text/javascript" src="oDataParser/RequestParser.js"></script>
+
+    <script type="text/javascript" src="oDataParser/EntityExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/ODataEntityExpressionBuilder.js"></script>
+
+
     <!--******************************* jsExtensions ****************************************-->
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>
     <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
@@ -183,73 +201,87 @@
     <script type="text/javascript" src="JayDataModules/validate.js"></script>
     <script type="text/javascript" src="JayDataModules/knockout.js"></script>
     <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
-
     <!--************************************************************************************-->
-    <script type="text/javascript" src="JayService/EntityTransform.js"></script>
+    <script id="xxx" src="Pro/JayDataModules/localMigrations.js"></script>
 
-    <script type="text/javascript">
-        var exports = {};
-        function require() {
-
-        }
-        require.reporters = {
-            default: {
-                run: function () { }
-            }
-        }
-
-        var QUnitWrapper = {
-            expect: function () { expect.apply(this, arguments); },
-            equal: function () { equal.apply(this, arguments); },
-            notEqual: function () { notEqual.apply(this, arguments); },
-            deepEqual: function () { deepEqual.apply(this, arguments); },
-            notDeepEqual: function () { notDeepEqual.apply(this, arguments); },
-            ok: function () { ok.apply(this, arguments); },
-            done: function () { start(1); }
-        }
-    </script>
     <!--**********************************UNIT TESTS****************************************-->
-    <script src="NewsReaderContext.js" type="text/javascript"></script>
-    <script type="text/javascript" src="UnitTests/NodeJS/EntityTransformTests.js"></script>
-    <script type="text/javascript" src="UnitTests/NodeJS/oDataRestTests.js"></script>
-    <script type="text/javascript" src="UnitTests/NodeJS/typeTests.js"></script>
-    
-    <script>
-        var tests = [];
-        function discover(obj, name) {
-            if (typeof obj === 'function')
-                tests.push({ test: obj, name: name});
-            else {
-                for (var t in obj) {
-                    discover(obj[t], name ? (name + ' - ' + t) : t);
-                }
-            }
-                
-        }
-        discover(exports);
+    <script id="abc_definition">
+        $data.defineSchema("abcDatabase", function (container) {
+            c = container;
+            $data.Entity.extend("Product", container, {
+                Id: { type: 'int', key: true, computed: true },
+                Name: { type: String },
+                Category: { type: "Category", inverseProperty: "Products" }
+            });
 
-        tests.forEach(function (cfg) {
-            test(cfg.name, function () {
-                stop(1);
-                cfg.test.call(null, QUnitWrapper);
+            $data.Entity.extend("Category", container, {
+                Id: { type: 'int', key: true, computed: true },
+                Name: { type: String },
+                Name2: { type: String },
+                Name3: { type: String },
+                Products: { type: Array, elementType: container.Product, inverseProperty: "Category" }
+            });
+
+
+            return $data.EntityContext.extend("EC", container, {
+                Products: { type: $data.EntitySet, elementType: container.Product },
+                Categories: { type: $data.EntitySet, elementType: container.Category, indices: [{ name: 'xxxx', keys: ['Name', 'Name2'] }] }
             });
         });
+        //v6 some txt
+    </script>    
 
+
+    <script>
+        //var container = $data.createContainer();
+        //$data.defineSchema("abcDatabase", function (container) {
+        //    c = container;
+        //    $data.Entity.extend("Product", container, {
+        //        Id: { type: 'int', key: true, computed: true },
+        //        Name: { type: String },
+        //        Category: { type: "Category", inverseProperty: "Products" }
+        //    });
+
+        //    $data.Entity.extend("Category", container, {
+        //        Id: { type: 'int', key: true, computed: true },
+        //        Name: { type: String },
+        //        Name2: { type: String },
+        //        Name3: { type: String },
+        //        Products: { type: Array, elementType: container.Product, inverseProperty: "Category" }
+        //    });
+
+
+        //    return $data.EntityContext.extend("EC", container, {
+        //        Products: { type: $data.EntitySet, elementType: container.Product },
+        //        Categories: { type: $data.EntitySet, elementType: container.Category, indices: [{ name: 'xxxx', keys: ['Name', 'Name2'] }] }
+        //    });
+        //});
+
+        //var c = new c.EC({ provider: 'local', databaseName: 'abc' });
+        //c = $data.createContainer();
+        //$data.Entity.extend("XXX", c, {});
+        //c.XXX.extend("YYYY", c)
+
+        $data.registerSchema("abcDatabase", document.getElementById("abc_definition"));
+
+        var x = $data.EntityContext.createFromSchema("abcDatabase", {
+            onSchemaChange: function (defer, ctxNew, ctxOld) {
+                defer.resolve(true)
+            }
+        });
+
+        //        ctxOld.Products.toArray()
+        //                       .then(function (items) {
+        //                            //ctxNew.Products.addMany(items);
+        //                            //ctxNew.saveChanges().done(defer.resolve).fail(defer.reject);
+        //                       })
+        //                       .fail(function () { console.log("err old toarray"); });
+
+        //    }
+        //});
     </script>
-    
 </head>
 <body>
-    <h1 id="qunit-header">
-        JayData unit tests</h1>
-    <h2 id="qunit-banner">
-    </h2>
-    <div id="qunit-testrunner-toolbar">
-    </div>
-    <h2 id="qunit-userAgent">
-    </h2>
-    <ol id="qunit-tests">
-    </ol>
-    <div id="qunit-fixture">
-        test markup, will be hidden</div>
+
 </body>
 </html>

@@ -249,17 +249,19 @@ $data.Class.define('$data.EntityContext', null, null,
     _initStorageModelSync: function() {
         var _memDefArray = this.getType().memberDefinitions.asArray();
 
+
         for (var i = 0; i < _memDefArray.length; i++) {
             var item = _memDefArray[i];
             if ('dataType' in item) {
                 var itemResolvedDataType = Container.resolveType(item.dataType);
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
+                    var elementType = Container.resolveType(item.elementType);
                     var storageModel = new $data.StorageModel();
                     storageModel.TableName = item.tableName || item.name;
                     storageModel.TableOptions = item.tableOptions;
                     storageModel.ItemName = item.name;
-                    storageModel.LogicalType = Container.resolveType(item.elementType);
-                    storageModel.LogicalTypeName = storageModel.LogicalType.name;
+                    storageModel.LogicalType = elementType;
+                    storageModel.LogicalTypeName = elementType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
                     storageModel.ContextType = this.getType();
 		    if (item.indices) {
@@ -305,13 +307,14 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _initializeStorageModel: function () {
 
-        //this.getType().memberDefinitions.asArray().forEach(function (item) {
+        
         var _memDefArray = this.getType().memberDefinitions.asArray();
-        //}, this);
+        
 
         if (typeof intellisense !== 'undefined')
             return;
 
+        
         for (var i = 0; i < this._storageModel.length; i++) {
             var storageModel = this._storageModel[i];
 
@@ -386,7 +389,8 @@ $data.Class.define('$data.EntityContext', null, null,
             this._buildDbType_modifyClassDefinition(dbEntityClassDefinition, storageModel, this);
 
             //create physical type
-            storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, null, dbEntityInstanceDefinition, dbEntityClassDefinition);
+            //TODO
+            storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, storageModel.LogicalType.container, dbEntityInstanceDefinition, dbEntityClassDefinition);
         }
     },
     _initializeActions: function (es, ctor, esDef) {
@@ -1669,6 +1673,11 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     storeToken: { type: Object }
 }, {
+    inheritedTypeProcessor: function(type) {
+        if (type.resolveForwardDeclarations) {
+            type.resolveForwardDeclarations();
+        }
+    },
     generateServiceOperation: function (cfg) {
 
         var fn;

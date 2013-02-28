@@ -257,6 +257,7 @@
     <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
+    <Content Include="localMigrations.html" />
     <Content Include="CREDITS.txt" />
     <Content Include="datajs-1.0.3.min.js" />
     <Content Include="favicon.ico" />
@@ -358,16 +359,8 @@
     <Content Include="test_JayData_nuget_prov.html" />
     <Content Include="test_Node.js" />
     <Content Include="test_odata.html" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalInFilterExpression.js" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
-    <Content Include="Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
-    <Content Include="Types\StorageProviders\SqLite\SqlTransaction.js" />
+    <Content Include="Types\Expressions\EntityExpressions\ExpressionMonitor.js" />
     <Content Include="Types\Transaction.js" />
-    <Content Include="UnitTests\transactionTests.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
     <Content Include="README.md" />
@@ -616,7 +609,7 @@
     <Content Include="Types\StorageProviders\oData\oDataProjectionCompiler.js" />
     <Content Include="Types\StorageProviders\oData\oDataProvider.js" />
     <Content Include="Types\StorageProviders\oData\oDataWhereCompiler.js" />
-    <Content Include="Types\StorageProviders\SqLite\ExpressionMonitor.js" />
+    <Content Include="Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
     <Content Include="Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
     <Content Include="Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
     <Content Include="Types\StorageProviders\SqLite\SqLiteCompiler.js" />

@@ -81,7 +81,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
         sqlBuilder.addText(opName);
         sqlBuilder.addText(SqlStatementBlocks.beginGroup);
         if (opName === "like") {
-            var builder = Container.createSqlBuilder([], sqlBuilder.entityContext);
+            var builder = $data.sqLite.SqlBuilder.create([], sqlBuilder.entityContext);
             builder.selectTextPart("fragment");
             this.Visit(expression.parameters[0], builder);
             var fragment = builder.getTextPart("fragment");

@@ -592,6 +592,7 @@
             $data.Trace.log('hello', 'console', 42, { prop: 24 }, [1, 2, 3]);
             $data.Trace = new $data.Logger();
             $data.Trace.log('hello', 'console', 42, { prop: 24 }, [1, 2, 3]);
+            $data.Trace = new $data.TraceBase();
             ok(true, '$data.Trace not throw exception');
         } catch (e) {
             ok(false, '$data.Trace failed: ' + e);
@@ -786,7 +787,6 @@
 
     test('type with default values', 9, function () {
         var sharedArray = [];
-
         var mt = $data.define("MyType", {
             Field: { type: String, defaultValue: "alma" },
             Field2: { type: String, defaultValue: function () { return "korte" } },
@@ -817,26 +817,82 @@
 
     });
 
-    test('forward declaration', 5, function () {
+    test('forward declaration', 16, function () {
         
 
         var Apple  = $data.define("Apple", { Basket: "Basket" });
         equal(Apple.getMemberDefinition("Basket").type, "Basket", "forward declared type is not resolved yet");
         var Basket = $data.define("Basket", {});
+        equal(Apple.getMemberDefinition("Basket").type, "Basket", "forward declared type is not resolved yet");
+        Apple.resolveForwardDeclarations();
         equal(Apple.getMemberDefinition("Basket").type, Basket, "forward declared type is resolved");
 
         var BeeHive = $data.define("BeeHive", {
-            Bees: { type: "Array", elementType: "Bee" }
+            Bees: { type: "Array", elementType: "Bee" },
+            Wasps: { type: "Array", elementType: "Wasp" }
         });
-        equal(BeeHive.getMemberDefinition("Bees").type, $data.Array, "declared type is resolved");
+        equal(BeeHive.getMemberDefinition("Bees").type, "Array", "declared type is not resolved");
         equal(BeeHive.getMemberDefinition("Bees").elementType, "Bee", "forward declared type is not resolved yet");
 
-        var Bee = $data.define("Bee", { });
-        equal(BeeHive.getMemberDefinition("Bees").elementType, Bee, "forward declared type is resolved");
+        var Bee = $data.define("Bee", {});
+        var Wasp = $data.define("Wasp", {});
+        equal(BeeHive.getMemberDefinition("Bees").elementType, "Bee", "forward declared type is not resolved yet");
+        equal(BeeHive.getMemberDefinition("Bees").type, "Array", "declared type is not yet resolved");
+        BeeHive.resolveForwardDeclarations();
+        equal(BeeHive.getMemberDefinition("Bees").elementType, Bee, "forward declared type is resolved ");
+        equal(BeeHive.getMemberDefinition("Bees").type, $data.Array, "declared type is resolved");
+        equal(BeeHive.getMemberDefinition("Wasps").elementType, Wasp, "forward declared type is resolved ");
+        equal(BeeHive.getMemberDefinition("Wasps").type, $data.Array, "declared type is resolved");
 
+        var c1 = $data.createContainer();
+        var T1 = $data.define("T1", c1, { F1: { type: "T2" } });
+        try {
+            T1.resolveForwardDeclarations();
+            ok(false, "T2 type should not be found");
+        } catch (exception) {
+            ok(true, "T2 not found exception");
+        };
+
+        var T11 = $data.define("T11", c1, { F1: { type: "T2" } });
+        var T2 = $data.define("T2", {});
+        try {
+            T11.resolveForwardDeclarations();
+            ok(true, "T2 type should be found in global container");
+        } catch (exception) {
+            ok(false, "T2 not found exception");
+        };
+
+
+        var T12 = $data.define("T12", c1, { F1: { type: "T2" } });
+        var T2_ = $data.define("T2", c1, {});
+        try {
+            T12.resolveForwardDeclarations();
+            ok(true, "T2 type should be found in global container");
+        } catch (exception) {
+            ok(false, "T2 not found exception");
+        };
+        equal(T12.getMemberDefinition("F1").type, T2_, "local type found");
+
+        var TParent = $data.define("TParent", {
+            F1: { type: "TSub" }
+        });
+
+        var TSub = $data.define("TSub", {
+            F1: { type: "TSubSub" }
+        });
+
+        var TSubSub = $data.define("TSubSub", {
+        });
+
+        TParent.resolveForwardDeclarations();
+        equal(TSub.getMemberDefinition("F1").type, TSubSub, "second level is resolved");
+
+        //var T3 = $data.define("T2", c)
+        
+        //var c2 = $data.createContainer();
     });
 
-    test('Containers', 5, function () {
+    test('Containers', 10, function () {
         var container = $data.createContainer();
         var dynaType = $data.Entity.extend("FoobarTypeName", container, {
             F1: { type: 'String' }
@@ -848,6 +904,16 @@
         ok($data.Container.resolveType(container.FoobarTypeName), "main container can resolve type");
         ok(container.resolveType(container.FoobarTypeName), "sub container can resolve type");
         equal($data.Container.resolveName(container.FoobarTypeName), "FoobarTypeName", "main container can resolve type");
+
+        $data.define("RuntimeType1", {});
+        equal(typeof RuntimeType1, "function", "type is globally visible");
+
+        $data.define("RuntimeType2", container, { F1: { type: String, defaultValue: 'foobar' }});
+        equal(typeof RuntimeType2, "undefined", "type is globally not visible");
+        equal(typeof container.RuntimeType2, "function", "type is container visible");
+        ok($data.Container.getIndex(container.RuntimeType2) > 0, "local type has global index");
+        var instance = new container.RuntimeType2();
+        equal(instance.F1, 'foobar', 'contained type supports defaultValue');
 
 
     });

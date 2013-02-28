@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 IMPORTANT:
 !!!  Do not reference this file to html!  !!!

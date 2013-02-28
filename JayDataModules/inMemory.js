@@ -1,4 +1,4 @@
-﻿(function ($data) {
+(function ($data) {
 
     $data.Array.prototype.toQueryable = function () {
         if (this.length > 0) {

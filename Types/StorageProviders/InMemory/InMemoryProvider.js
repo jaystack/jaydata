@@ -94,7 +94,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         if (sql.$filter && !sql.$every)
             result = result.filter(sql.$filter);
 
-        if (sql.$map)
+        if (sql.$map && Object.keys(query.modelBinderConfig).length === 0)
             result = result.map(sql.$map);
         
         if (sql.$order && sql.$order.length > 0) {

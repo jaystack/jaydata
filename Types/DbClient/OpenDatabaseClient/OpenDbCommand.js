@@ -14,7 +14,7 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
         this.exec(this.query, this.parameters, callback.success, callback.error, tran, isWrite);
     },
     exec: function (query, parameters, callback, errorhandler, transaction, isWrite) {
-		// suspicious code
+        // suspicious code
         /*if (console) {
             //console.log(query);
         }*/
@@ -27,7 +27,7 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
                     query = [query];
                     parameters = [parameters];
                 }
-                
+
                 var results = [];
                 var remainingCommands = 0;
 

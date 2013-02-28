@@ -23,11 +23,11 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
             var con = this;
             this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
 
-			if (isWrite) {
-			    this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
-			} else {
-			    this.database.readTransaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
-			}
+            if (isWrite) {
+                this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
+            } else {
+                this.database.readTransaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
+            }
         }
     },
     close: function () {

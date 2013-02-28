@@ -10,14 +10,14 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             maxSize: 1024 * 1024,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
-
+        
         this.providerName = '';
         for (var i in $data.RegisteredStorageProviders) {
             if ($data.RegisteredStorageProviders[i] === this.getType()) {
                 this.providerName = i;
             }
         }
-
+        
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -223,42 +223,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         enumerable: true,
         writable: true
     },
-    _beginTran: function (tableList, isWrite, callBack) {
-        var self = this;
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
-        self._createSqlConnection();
 
-        var transaction = new $data.sqLite.SqlTransaction();
-        function onComplete() {
-            $data.Trace.log("oncomplete: ", transaction._objectId);
-            if (transaction.oncomplete) {
-                transaction.oncomplete.fire(arguments, transaction);
-            }
-        }
-
-        setTimeout(function () {
-            self.connection.open({
-                error: function (err) {
-                    $data.Trace.log("onerror: ", transaction._objectId, arguments);
-                    if (transaction.onerror) {
-                        transaction.onerror.fire(err, transaction);
-                    }
-                },
-                success: function (tran) {
-                    transaction.transaction = tran;
-                    callBack.success(transaction);
-                },
-                oncomplete: onComplete
-            }, undefined, isWrite);
-        }, 0);
-        //callBack.success(this.connection);
-    },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        this.context._storageModel.forEach(function (item, index) {
-            var indices = this.createSqlIndexFromStorageModel(item);
-            this.SqlCommands = this.SqlCommands.concat(indices);
-        }, this);
         this.context._storageModel.forEach(function (item, index) {
             this.SqlCommands.push(this.createSqlFromStorageModel(item) + " ");
         }, this);
@@ -267,58 +234,55 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var cmd = sqlConnection.createCommand("SELECT * FROM sqlite_master WHERE type = 'table'", null);
         var that = this;
 
-        this.context.beginTransaction(true, function (tran) {
-            cmd.executeQuery({
-                success: function (result, tran) {
-                    var existObjectInDB = {};
-                    for (var i = 0; i < result.rows.length; i++) {
-                        var item = result.rows[i];
-                        existObjectInDB[item.tbl_name] = item;
-                    }
-                    switch (that.providerConfiguration.dbCreation) {
-                        case $data.storageProviders.DbCreationType.Merge:
-                            Guard.raise(new Exception('Not supported db creation type'));
-                            break;
-                        case $data.storageProviders.DbCreationType.DropTableIfChanged:
-                            var deleteCmd = [];
-                            for (var i = 0; i < that.SqlCommands.length; i++) {
-                                if (that.SqlCommands[i] == "") { continue; }
-                                var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
-                                var data = regEx.exec(that.SqlCommands[i]);
-                                if (data) {
-                                    var tableName = data[1];
-                                    var tableDef = data[2];
-                                    if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
-                                        var regex = new RegExp('\\(.*\\)', 'g');
-                                        var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
+        cmd.executeQuery({
+            success: function (result) {
+                var existObjectInDB = {};
+                for (var i = 0; i < result.rows.length; i++) {
+                    var item = result.rows[i];
+                    existObjectInDB[item.tbl_name] = item;
+                }
+                switch (that.providerConfiguration.dbCreation) {
+                    case $data.storageProviders.DbCreationType.Merge:
+                        Guard.raise(new Exception('Not supported db creation type'));
+                        break;
+                    case $data.storageProviders.DbCreationType.DropTableIfChanged:
+                        var deleteCmd = [];
+                        for (var i = 0; i < that.SqlCommands.length; i++) {
+                            if (that.SqlCommands[i] == "") { continue; }
+                            var regEx = new RegExp('^CREATE TABLE IF NOT EXISTS ([^ ]*) (\\(.*\\))', 'g');
+                            var data = regEx.exec(that.SqlCommands[i]);
+                            if (data) {
+                                var tableName = data[1];
+                                var tableDef = data[2];
+                                if (existObjectInDB[tableName.slice(1, tableName.length - 1)]) {
+                                    var regex = new RegExp('\\(.*\\)', 'g');
+                                    var existsRegExMatches = existObjectInDB[tableName.slice(1, tableName.length - 1)].sql.match(regex);
 
-                                        if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
-                                            deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
-                                        }
+                                    if (!existsRegExMatches || tableDef.toLowerCase() != existsRegExMatches[0].toLowerCase()) {
+                                        deleteCmd.push("DROP TABLE IF EXISTS [" + existObjectInDB[tableName.slice(1, tableName.length - 1)].tbl_name + "];");
                                     }
                                 }
-                                else {
-                                    //console.dir(regEx);
-                                    //console.dir(that.SqlCommands[i]);
-                                }
                             }
-                            that.SqlCommands = that.SqlCommands.concat(deleteCmd);
-                            //console.log(deleteCmd);
-                            break;
-                        case $data.storageProviders.DbCreationType.DropAllExistingTables:
-                            for (var objName in existObjectInDB) {
-                                if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
-                                    that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
-                                }
+                            else {
+                                //console.dir(regEx);
+                                //console.dir(that.SqlCommands[i]);
                             }
-                            break;
-                    }
-                    that._runSqlCommands(sqlConnection, { success: callBack.success, error: callBack.error }, tran, true);
-                },
-                error: callBack.error
-            }, tran, true);
+                        }
+                        that.SqlCommands = that.SqlCommands.concat(deleteCmd);
+                        //console.log(deleteCmd);
+                        break;
+                    case $data.storageProviders.DbCreationType.DropAllExistingTables:
+                        for (var objName in existObjectInDB) {
+                            if (objName && !objName.match('^__') && !objName.match('^sqlite_')) {
+                                that.SqlCommands.push("DROP TABLE IF EXISTS [" + existObjectInDB[objName].tbl_name + "];");
+                            }
+                        }
+                        break;
+                }
+                that._runSqlCommands(sqlConnection, { success: callBack.success, error: callBack.error });
+            },
+            error: callBack.error
         });
-
     },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -329,9 +293,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         query.modelBinderConfig = sql.modelBinderConfig;
         var sqlCommand = sqlConnection.createCommand(sql.sqlText, sql.params);
         var that = this;
-
-
-        var innerCallback = {
+        sqlCommand.executeQuery({
             success: function (sqlResult) {
                 if (callBack.success) {
                     query.rawDataList = sqlResult.rows;
@@ -339,9 +301,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 }
             },
             error: callBack.error
-        };
-
-        sqlCommand.executeQuery(innerCallback, query.transaction, false);
+        });
     },
     _compile: function (query, params) {
         var compiler = new $data.storageProviders.sqLite.SQLiteCompiler();
@@ -354,13 +314,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var sqlText = this._compile(query);
         return sqlText;
     },
-    _runSqlCommands: function (sqlConnection, callBack, tran, isWrite) {
+    _runSqlCommands: function (sqlConnection, callBack) {
         if (this.SqlCommands && this.SqlCommands.length > 0) {
             var cmdStr = this.SqlCommands.pop();
             var command = sqlConnection.createCommand(cmdStr, null);
             var that = this;
-            var okFn = function (result) { that._runSqlCommands.apply(that, [sqlConnection, callBack, tran, isWrite]); };
-            command.executeQuery({ success: okFn, error: callBack.error }, tran, isWrite);
+            var okFn = function (result) { that._runSqlCommands.apply(that, [sqlConnection, callBack]); };
+            command.executeQuery({ success: okFn, error: callBack.error });
         } else {
             callBack.success(this.context);
         }
@@ -368,34 +328,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     setContext: function (ctx) {
         this.context = ctx;
     },
-    saveChanges: function (callback, changedItems, tran) {
-        var provider = this;
-        this._saveChangesWithTran(callback, changedItems, tran);
-    },
-    _saveChangesWithTran: function (callback, changedItems, tran) {
+    saveChanges: function (callback, changedItems) {
         var sqlConnection = this._createSqlConnection();
+        var provider = this;
         var independentBlocks = this.buildIndependentBlocks(changedItems);
-
-        var tranError;
-        tranError = function (sender, event) {
-            tran.onerror.detach(tranError);
-            callback.error.call(this, event);
-        };
-
-        tran.onerror.attach(tranError);
-        this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, {
-            success: function () {
-                tran.onerror.detach(tranError);
-                callback.success.apply(this, arguments);
-            },
-            error: function () {
-                tran.onerror.detach(tranError);
-                callback.error.apply(this, arguments);
-            }
-        }, tran);
-
+        this.saveIndependentBlocks(changedItems, independentBlocks, sqlConnection, callback);
     },
-    saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback, tran) {
+    saveIndependentBlocks: function (changedItems, independentBlocks, sqlConnection, callback) {
         /// <summary>
         /// Saves the sequentially independent items to the database.
         /// </summary>
@@ -404,9 +343,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         /// <param name="callback">Callback on finish</param>
         var provider = this;
         var t = [].concat(independentBlocks);
-        function saveNextIndependentBlock(tran) {
+        function saveNextIndependentBlock() {
             if (t.length === 0) {
-                callback.success(tran);
+                callback.success();
                 return;
             }
             var currentBlock = t.shift();
@@ -418,28 +357,28 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             }, this);
             try {
                 provider.saveIndependentItems(convertedItems, sqlConnection, {
-                    success: function (items, tran) { //TODO items???
+                    success: function () {
                         provider.postProcessItems(convertedItems);
-                        saveNextIndependentBlock(tran);
+                        saveNextIndependentBlock();
                     },
                     error: callback.error
-                }, tran);
+                });
             } catch (e) {
-                callback.error(e, tran);
+                callback.error(e);
             }
             
         }
-        saveNextIndependentBlock(tran);
+        saveNextIndependentBlock();
     },
 
-    saveIndependentItems: function (items, sqlConnection, callback, tran) {
+    saveIndependentItems: function (items, sqlConnection, callback) {
         var provider = this;
         var queries = items.map(function (item) {
             return provider.saveEntitySet(item);
         });
         queries = queries.filter(function (item) { return item; });
         if (queries.length === 0) {
-            callback.success(items, tran);
+            callback.success(items);
             return;
         }
         function toCmd(sqlConnection, queries) {
@@ -456,7 +395,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         }
         var cmd = toCmd(sqlConnection, queries);
         cmd.executeQuery({
-            success: function (results, tran) {
+            success: function (results) {
                 var reloadQueries = results.map(function (result, i) {
                     if (result && result.insertId) {
                         return provider.save_reloadSavedEntity(result.insertId, items[i].entitySet.tableName, sqlConnection);
@@ -466,20 +405,20 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 })
                 var cmd = toCmd(sqlConnection, reloadQueries);
                 if (cmd.query.length > 0) {
-                    cmd.executeQuery(function (results, tran) {
+                    cmd.executeQuery(function (results) {
                         results.forEach(function (item, i) {
                             if (item && item.rows) {
                                 items[i].physicalData.initData = item.rows[0];
                             }
                         });
-                        callback.success(items, tran);
-                    }, tran, true);
+                        callback.success(items);
+                    });
                 } else {
-                    callback.success(0, tran);//TODO Zenima: fixed this!
+                    callback.success(0);//TODO Zenima: fixed this!
                 }
             },
             error: callback.error
-        }, tran, true);
+        });
     },
     postProcessItems: function (changedItems) {
         var pmpCache = {};
@@ -528,9 +467,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 if (fieldDef.key || addAllField) {
                     deleteSqlString += "([" + fieldDef.name + "] == ?)";
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
                         deleteParam.push(logicalFieldDef.converter[this.providerName].toDb(item.data[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    } else {
+                    }else{
                         deleteParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.data[fieldDef.name]));
                     }
                     hasCondition = true;
@@ -567,9 +506,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 if (fieldDef.key) {
                     whereSection += '([' + fieldDef.name + '] == ?)';
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
                         whereParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], fieldDef, this.context, logicalFieldDef.dataType));
-                    } else {
+                    }else{
                         whereParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
                     }
                     hasCondition = true;
@@ -577,9 +516,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 else {
                     setSection += "[" + fieldDef.name + "] = ?";
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
                         setParam.push(fieldDef.converter[this.providerName].toDb(item.physicalData[logicalFieldDef.name], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    } else {
+                    }else{
                         setParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldDef.name]));
                     }
                 }
@@ -612,9 +551,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                     fieldValue += '?';
                     fieldList += "[" + fieldName + "]";
                     var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
                         fieldParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[fieldName], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    } else {
+                    }else{
                         fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
                     }
                 }
@@ -682,34 +621,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             sql += pkFragment + ')';
         }
         sql += ');';
-
         return sql;
-    },
-    createSqlIndexFromStorageModel: function (memberDef) {
-        //Create indices
-        var sql = "";
-        var indices = [];
-        if (memberDef.indices && memberDef.indices.length > 0) {
-            for (var i = 0; i < memberDef.indices.length; i++) {
-                sql = "";
-                sql += "CREATE " + (memberDef.indices[i].unique ? "UNIQUE " : "") + "INDEX IF NOT EXISTS ";
-                sql += memberDef.indices[i].name + " ON " + memberDef.TableName + " (";
-                if (!memberDef.indices[i].keys || (memberDef.indices[i].keys && memberDef.indices[i].keys.length < 1)) { throw new Exception("Index create error: Keys field is required!"); }
-                for (var k = 0; k < memberDef.indices[i].keys.length; k++) {
-                    if (k !== 0) { sql += ", "; }
-                    var key = memberDef.indices[i].keys[k];
-                    if (typeof key === "string") {
-                        sql += key;
-                    } else {
-                        sql += key.fieldName;
-                        if (key.order) { sql += " " + key.order; }
-                    }
-                }
-                sql += ");";
-                indices.push(sql);
-            }
-        }
-        return indices;
     },
     createSqlFragmentFromField: function (field, parsePk, storageModelObject) {
         if (('schemaCreate' in field) && (field['schemaCreate']))

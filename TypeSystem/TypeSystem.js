@@ -41,10 +41,12 @@
                 this.configurable = true;
                 if (typeof memberDefinitionData === "number") {
                     this.value = memberDefinitionData;
-                    this.dataType = "integer";
+                    this.type = $data.Integer;
+                    this.dataType = $data.Integer;
                 } else if (typeof memberDefinitionData === "string") {
                     this.value = memberDefinitionData;
-                    this.dataType = typeof memberDefinitionData;
+                    this.dataType = $data.String;
+                    this.type = $data.String;
                 } else {
                     for (var item in memberDefinitionData) {
                         if (memberDefinitionData.hasOwnProperty(item)) {
@@ -103,11 +105,9 @@
     MemberDefinition.translateDefinition = function (memDef, name, classFunction) {
         var holder = classFunction;
         var memberDefinition;
-
-
+        
         if (memDef.type && Container.isTypeRegistered(memDef.type)) {
             holder = Container.resolveType(memDef.type);
-
             if (typeof holder.translateDefinition === 'function') {
                 memberDefinition = holder.translateDefinition.apply(holder, arguments);
                 memberDefinition.name = memberDefinition.name || name;
@@ -121,33 +121,74 @@
             memberDefinition = new MemberDefinition(memberDefinition || memDef, holder);
             memberDefinition.name = name;
         }
+        classFunction.resolverThunks = classFunction.resolverThunks || [];
+        classFunction.childResolverThunks = classFunction.childResolverThunks || [];
+
+
         var t = memberDefinition.type;
+        var et = memberDefinition.elementType;
+
+        function addChildThunk(referencedType) {
+            if (referencedType && referencedType.isAssignableTo && $data.Entity && referencedType.isAssignableTo($data.Entity)) {
+                console.log("!!!");
+                classFunction.childResolverThunks.push(function () {
+                    if (referencedType.resolveForwardDeclarations) {
+                        referencedType.resolveForwardDeclarations();
+                    }
+                });
+            }
+        }
+
+        addChildThunk(t);
+        addChildThunk(et);
+
         if ("string" === typeof t) {
             if ("@" === t[0]) {
                 memberDefinition.type = t.substr(1);
                 memberDefinition.dataType = t.substr(1);
             } else {
                 //forward declared types get this callback when type is registered
-                classFunction.container.resolveType(t, function (type) {
-                    memberDefinition.type = type;
-                    memberDefinition.dataType = type;
+                classFunction.resolverThunks.push(function () {
+                    var rt = classFunction.container.resolveType(t);
+                    addChildThunk(rt);
+                    memberDefinition.type = rt;
+                    memberDefinition.dataType = rt;
                 });
             }
         }
 
-        if (memberDefinition.elementType) {
-            t = memberDefinition.elementType;
-            if ("string" === typeof t) {
-                if ("@" === t[0]) {
-                    memberDefinition.elementType = t.substr(1);
+        if (et) {
+            if ("string" === typeof et) {
+                if ("@" === et[0]) {
+                    memberDefinition.elementType = et.substr(1);
                 } else {
                     //forward declared types get this callback when type is registered
-                    classFunction.container.resolveType(t, function (type) {
-                        memberDefinition.elementType = type;
+                    classFunction.resolverThunks.push(function () {
+                        var rt = classFunction.container.resolveType(et);
+                        addChildThunk(rt);
+                        memberDefinition.elementType = rt;
                     });
+
                 }
             }
         }
+
+
+        //if (!classFunction)
+
+        classFunction.resolveForwardDeclarations = function () {
+            classFunction.resolveForwardDeclarations = function () { };
+            console.log("resolving: " + classFunction.fullName);
+            this.resolverThunks.forEach(function (thunk) {
+                thunk();
+            });
+            //this.resolverThunks = [];
+            this.childResolverThunks.forEach(function (thunk) {
+                thunk();
+            });
+            //this.childResolverThunks = [];
+        }
+
         return memberDefinition;
     };
 
@@ -823,6 +864,9 @@
         };
 
         this.resolveType = function (typeOrName, onResolved) {
+            //if ("string" === typeof typeOrName) {
+            //    console.log("@@@@String type!!!", typeOrName)
+            //}
             var t = typeOrName;
             t = this.getType(t, onResolved ? true : false, onResolved);
             var posT = classTypes.indexOf(t);
@@ -940,6 +984,15 @@
         };
 
         //name array ['', '', '']
+        this.getIndex = function (typeOrName) {
+            var t = this.resolveType(typeOrName);
+            return classTypes.indexOf(t);
+        }
+
+        this.resolveByIndex = function (index) {
+            return classTypes[index];
+        }
+
         this.registerType = function (nameOrNamesArray, type, factoryFunc) {
             ///<signature>
             ///<summary>Registers a type and optionally a lifetimeManager with a name
@@ -1033,6 +1086,7 @@
             }
         };
     }
+    $data.ContainerClass = ContainerCtor;
 
     $data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
     $data.Integer = typeof Integer !== 'undefined' ? Integer : function JayInteger() { };
@@ -1099,7 +1153,7 @@
     }, {
         create: function () { return Container.createInstance(this, arguments); },
         extend: function (name, container, instanceDefinition, classDefinition) {
-            if (!(container instanceof ContainerCtor)) {
+            if (container && !(container instanceof ContainerCtor)) {
                 classDefinition = instanceDefinition;
                 instanceDefinition = container;
                 container = undefined;
@@ -1282,7 +1336,12 @@ $data.typeSystem = {
         if (typeof callBack == 'function') {
             return this.extend(setting, { success: callBack });
         }
-        return this.extend(setting, callBack);
+
+        var clb = this.extend(setting, callBack);
+        function wrapCode(fn) { var t = this; function r() { fn.apply(t, arguments); fn = function () { } } return r; }
+        clb.error = wrapCode(clb.error);
+
+        return clb;
     },
     createCtorParams: function (source, indexes, thisObj) {
         ///<param name="source" type="Array" />Paramerter array

@@ -2,7 +2,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     constructor: function (query, context) {
         this._query = query;
         this.sqlContext = context;
-        this._sqlBuilder = Container.createSqlBuilder(context.sets, context.entityContext);
+        this._sqlBuilder = $data.sqLite.SqlBuilder.create(context.sets, context.entityContext);
     },
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
