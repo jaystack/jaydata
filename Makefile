@@ -215,7 +215,7 @@ SenchaModule = $(BASEMODULE_DIR)/sencha.js\
 
 TemplateModule = $(BASEMODULE_DIR)/template.js\
 
-ValidateModule = $(BASEMODULE_DIR)/Validate.js\
+ValidateModule = $(BASEMODULE_DIR)/validate.js\
 
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
@@ -516,9 +516,9 @@ templatemodule: $(TemplateModule) $(CREDITS)
 validatemodule: $(ValidateModule) $(CREDITS)
 	@@echo "Building Validate module..."
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
-	@@cat $(CREDITS) $(ValidateModule) > $(MODULE_DIR)/Validate.js
-	@@java -jar $(COMPILER) --js $(MODULE_DIR)/Validate.js --js_output_file $(TEMP_DIR)/Validate.min.js
-	@@cat $(CREDITS) $(TEMP_DIR)/Validate.min.js > $(MODULE_DIR)/Validate.min.js
+	@@cat $(CREDITS) $(ValidateModule) > $(MODULE_DIR)/validate.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/validate.js --js_output_file $(TEMP_DIR)/validate.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/validate.min.js > $(MODULE_DIR)/validate.min.js
 
 jaydatavsdoc: jaydata $(CREDITS)
 	@@echo "Building JayData vsdoc version..."
