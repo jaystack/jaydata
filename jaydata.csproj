@@ -343,6 +343,7 @@
     <Content Include="oDataParser\RequestParser.js" />
     <Content Include="oDataParser\test.html" />
     <Content Include="oDataParser\testConsole.html" />
+    <Content Include="pro\localMigrations.html" />
     <Content Include="pro\CREDITS.txt" />
     <Content Include="pro\CREDITS_PRO.txt" />
     <Content Include="pro\CREDITS_TRIAL.txt" />
