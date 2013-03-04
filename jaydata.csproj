@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -207,6 +207,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include=".gitmodules" />
     <Content Include="App_Data\TaskManagerDatabase.mdf" />
     <Content Include="App_Data\TaskManagerDatabase_log.ldf">
       <DependentUpon>TaskManagerDatabase.mdf</DependentUpon>
@@ -272,7 +273,6 @@
     <Content Include="Global.asax" />
     <Content Include="GPL-LICENSE.txt" />
     <Content Include="handlebars_examples.html" />
-    <Content Include="idbtest.html" />
     <Content Include="index.html" />
     <Content Include="jaydata.d.ts" />
     <Content Include="JayDataModules\deferred.js" />
@@ -351,38 +351,37 @@
     <Content Include="oDataParser\RequestParser.js" />
     <Content Include="oDataParser\test.html" />
     <Content Include="oDataParser\testConsole.html" />
-    <Content Include="pro\localMigrations.html" />
-    <Content Include="pro\CREDITS.txt" />
-    <Content Include="pro\CREDITS_PRO.txt" />
-    <Content Include="pro\CREDITS_TRIAL.txt" />
-    <Content Include="pro\JayDataModules\localMigrations.js" />
+    <Content Include="Pro\CREDITS.txt" />
+    <Content Include="Pro\CREDITS_PRO.txt" />
+    <Content Include="Pro\CREDITS_TRIAL.txt" />
+    <Content Include="Pro\JayDataModules\localMigrations.js" />
     <Content Include="Pro\localMigrations.html" />
-    <Content Include="pro\test.html" />
-    <Content Include="pro\test_JayData.html" />
-    <Content Include="pro\test_JayData_Complex.html" />
-    <Content Include="pro\test_JayData_min.html" />
-    <Content Include="pro\TypeSystem\initializeJayDataPro.js" />
-    <Content Include="pro\Types\DbClient\OpenDatabaseClient\OpenDbCommand.js" />
-    <Content Include="pro\Types\DbClient\OpenDatabaseClient\OpenDbConnection.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalInFilterExpression.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBStorageProvider.js" />
-    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqLiteCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqLiteStorageProvider.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqlOrderCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqlPagingCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqlProjectionCompiler.js" />
-    <Content Include="pro\Types\StorageProviders\SqLite\SqlTransaction.js" />
-    <Content Include="pro\UnitTests\T2.js" />
-    <Content Include="pro\UnitTests\transactionTests.js" />
+    <Content Include="Pro\test.html" />
+    <Content Include="Pro\test_JayData.html" />
+    <Content Include="Pro\test_JayData_Complex.html" />
+    <Content Include="Pro\test_JayData_min.html" />
+    <Content Include="Pro\TypeSystem\initializeJayDataPro.js" />
+    <Content Include="Pro\Types\DbClient\OpenDatabaseClient\OpenDbCommand.js" />
+    <Content Include="Pro\Types\DbClient\OpenDatabaseClient\OpenDbConnection.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalInFilterExpression.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBStorageProvider.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqLiteCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqLiteStorageProvider.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqlOrderCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqlPagingCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqlProjectionCompiler.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\SqlTransaction.js" />
+    <Content Include="Pro\UnitTests\T2.js" />
+    <Content Include="Pro\UnitTests\transactionTests.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
     <Content Include="Services\emptyNewsReader.svc" />
@@ -435,8 +434,9 @@
       <DependentUpon>TaskManagerModel.edmx</DependentUpon>
       <LastGenOutput>TaskManagerModel.cs</LastGenOutput>
     </Content>
-    <Content Include="pro\.git" />
-    <Content Include="pro\Makefile" />
+    <Content Include="Pro\.git" />
+    <Content Include="Pro\Makefile" />
+    <Content Include="Pro\README.md" />
     <None Include="Scripts\jquery-1.9.0.intellisense.js" />
     <Content Include="Scripts\datajs-1.0.3.js" />
     <Content Include="Scripts\datajs-1.0.3.min.js" />
