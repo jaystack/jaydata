@@ -41,10 +41,12 @@
                 this.configurable = true;
                 if (typeof memberDefinitionData === "number") {
                     this.value = memberDefinitionData;
-                    this.dataType = "integer";
+                    this.type = $data.Integer;
+                    this.dataType = $data.Integer;
                 } else if (typeof memberDefinitionData === "string") {
                     this.value = memberDefinitionData;
-                    this.dataType = typeof memberDefinitionData;
+                    this.dataType = $data.String;
+                    this.type = $data.String;
                 } else {
                     for (var item in memberDefinitionData) {
                         if (memberDefinitionData.hasOwnProperty(item)) {
@@ -90,19 +92,103 @@
         var pd = this;
         return {
             enumerable: false, writable: false, configurable: false,
-            value: function (callback) { return this.getProperty(pd, callback); }
+            value: function (callback, tran) { return this.getProperty(pd, callback, tran); }
         };
     };
     MemberDefinition.prototype.createSetMethod = function () {
         var pd = this;
         return {
             enumerable: false, writable: false, configurable: false,
-            value: function (value, callback) { return this.setProperty(pd, value, callback); }
+            value: function (value, callback, tran) { return this.setProperty(pd, value, callback, tran); }
         };
     };
-    MemberDefinition.translateDefinition = function (memDef, name, holder) {
-        var memberDefinition = new MemberDefinition(memDef, holder);
-        memberDefinition.name = name;
+    MemberDefinition.translateDefinition = function (memDef, name, classFunction) {
+        var holder = classFunction;
+        var memberDefinition;
+        
+        if (memDef.type && Container.isTypeRegistered(memDef.type)) {
+            holder = Container.resolveType(memDef.type);
+            if (typeof holder.translateDefinition === 'function') {
+                memberDefinition = holder.translateDefinition.apply(holder, arguments);
+                memberDefinition.name = memberDefinition.name || name;
+            } else {
+                holder = classFunction;
+            }
+        }
+
+
+        if (!(memberDefinition instanceof MemberDefinition)) {
+            memberDefinition = new MemberDefinition(memberDefinition || memDef, holder);
+            memberDefinition.name = name;
+        }
+        classFunction.resolverThunks = classFunction.resolverThunks || [];
+        classFunction.childResolverThunks = classFunction.childResolverThunks || [];
+
+
+        var t = memberDefinition.type;
+        var et = memberDefinition.elementType;
+
+        function addChildThunk(referencedType) {
+            if (referencedType && referencedType.isAssignableTo && $data.Entity && referencedType.isAssignableTo($data.Entity)) {
+                console.log("!!!");
+                classFunction.childResolverThunks.push(function () {
+                    if (referencedType.resolveForwardDeclarations) {
+                        referencedType.resolveForwardDeclarations();
+                    }
+                });
+            }
+        }
+
+        addChildThunk(t);
+        addChildThunk(et);
+
+        if ("string" === typeof t) {
+            if ("@" === t[0]) {
+                memberDefinition.type = t.substr(1);
+                memberDefinition.dataType = t.substr(1);
+            } else {
+                //forward declared types get this callback when type is registered
+                classFunction.resolverThunks.push(function () {
+                    var rt = classFunction.container.resolveType(t);
+                    addChildThunk(rt);
+                    memberDefinition.type = rt;
+                    memberDefinition.dataType = rt;
+                });
+            }
+        }
+
+        if (et) {
+            if ("string" === typeof et) {
+                if ("@" === et[0]) {
+                    memberDefinition.elementType = et.substr(1);
+                } else {
+                    //forward declared types get this callback when type is registered
+                    classFunction.resolverThunks.push(function () {
+                        var rt = classFunction.container.resolveType(et);
+                        addChildThunk(rt);
+                        memberDefinition.elementType = rt;
+                    });
+
+                }
+            }
+        }
+
+
+        //if (!classFunction)
+
+        classFunction.resolveForwardDeclarations = function () {
+            classFunction.resolveForwardDeclarations = function () { };
+            console.log("resolving: " + classFunction.fullName);
+            this.resolverThunks.forEach(function (thunk) {
+                thunk();
+            });
+            //this.resolverThunks = [];
+            this.childResolverThunks.forEach(function (thunk) {
+                thunk();
+            });
+            //this.childResolverThunks = [];
+        }
+
         return memberDefinition;
     };
 
@@ -238,7 +324,7 @@
         //    return classFunction.propertyDefinitions;
         //},
 
-        define: function (className, baseClass, interfaces, instanceDefinition, classDefinition) {
+        define: function (className, baseClass, container, instanceDefinition, classDefinition) {
             /// <signature>
             ///     <summary>Creates a Jaydata type</summary>
             ///     <param name="className" type="String">Name of the class</param>
@@ -259,9 +345,9 @@
             ///     </example>
             /// </signature>
 
-            return this.defineEx(className, [{ type: baseClass }], interfaces, instanceDefinition, classDefinition);
+            return this.defineEx(className, [{ type: baseClass }], container, instanceDefinition, classDefinition);
         },
-        defineEx: function (className, baseClasses, interfaces, instanceDefinition, classDefinition) {
+        defineEx: function (className, baseClasses, container, instanceDefinition, classDefinition) {
             /// <signature>
             ///     <summary>Creates a Jaydata type</summary>
             ///     <param name="className" type="String">Name of the class</param>
@@ -307,7 +393,7 @@
             ///     </example>
             /// </signature>
 
-            //il("!defineClass was invoked:" + className);
+            container = container || $data.Container;
 
             if (baseClasses.length == 0) {
                 baseClasses.push({ type: $data.Base });
@@ -324,11 +410,10 @@
             var classNameParts = className.split('.');
             var shortClassName = classNameParts.splice(classNameParts.length - 1, 1)[0];
 
-            var root = window;
+            var root = container === $data.Container ? window : container;
             for (var i = 0; i < classNameParts.length; i++) {
                 var part = classNameParts[i];
                 if (!root[part]) {
-                    //console.log("namespace missing:" + part + ", creating");
                     var ns = {};
                     ns.__namespace = true;
                     root[part] = ns;
@@ -336,25 +421,18 @@
                 root = root[part];
             }
 
-            /*classNameParts.forEach(function (part) {
-                if (!root[part]) {
-                    //console.log("namespace missing:" + part + ", creating");
-                    var ns = {};
-                    ns.__namespace = true;
-                    root[part] = ns;
-                }
-                root = root[part];
-            });*/
 
             var classFunction = null;
             classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
             classFunction.fullName = className;
             classFunction.namespace = classNameParts.join('.'); //classname splitted
+            classFunction.name = shortClassName;
+            classFunction.container = container;
+            classFunction.container.registerType(className, classFunction);
 
             this.buildType(classFunction, baseClasses, instanceDefinition, classDefinition);
 
-            classFunction.name = shortClassName;
-            Container.registerType(className, classFunction);
+
 
             if (typeof intellisense !== 'undefined') {
                 if (instanceDefinition && instanceDefinition.constructor) {
@@ -585,7 +663,7 @@
             for (var item in memberListDefinition) {
                 if (memberListDefinition.hasOwnProperty(item)) {
                     var memberDefinition = MemberDefinition.translateDefinition(memberListDefinition[item], item, classFunction);
-                    t.buildMember(classFunction, memberDefinition);
+                    t.buildMember(classFunction, memberDefinition, undefined, 'memberDefinitions');
                 }
             }
         },
@@ -668,317 +746,381 @@
 
     $data.Class = Class = new ClassEngineBase();
 
-    (function (global) {
-
-        function ContainerCtor() {
-
-            var classNames = {};
-            var consolidatedClassNames = [];
-            var classTypes = [];
-
-            this.classNames = classNames;
-            this.consolidatedClassNames = consolidatedClassNames;
-            this.classTypes = classTypes;
-
-            var mappedTo = [];
-            this.mappedTo = mappedTo;
-
-            var self = this;
-
-            this["holder"] = null;
-
-            var IoC = function (type, parameters) {
-                var t = self.resolveType(type);
-                var inst = Object.create(t.prototype);
-                t.apply(inst, parameters);
-                return inst;
-            };
-            this.createInstance = function (type, parameters) { return IoC(type, parameters); };
-
-            this.mapType = function (aliasTypeOrName, realTypeOrName) {
-                Guard.requireValue("aliasType", aliasTypeOrName);
-                Guard.requireValue("realType", realTypeOrName);
-                var aliasT = this.getType(aliasTypeOrName);
-                var realT = this.getType(realTypeOrName);
-                var aliasPos = classTypes.indexOf(aliasT);
-                var realPos = classTypes.indexOf(realT);
-                mappedTo[aliasPos] = realPos;
-            },
-
-            this.resolve = function (type, parameters) {
-                var classFunction = this.resolveType(type, parameters);
-                return new classFunction(parameters);
-            };
-
-            this.resolveName = function (type) {
-                var t = this.resolveType(type);
-                var tPos = classTypes.indexOf(t);
-                return consolidatedClassNames[tPos];
-            };
-
-            this.isPrimitiveType = function (type) {
-                var t = this.resolveType(type);
-
-                switch (true) {
-                    case t === Number:
-                    case t === String:
-                    case t === Date:
-                    case t === Boolean:
-                    case t === Array:
-                    case t === Object:
-
-                    case t === $data.Number:
-                    case t === $data.Integer:
-                    case t === $data.Date:
-                    case t === $data.String:
-                    case t === $data.Boolean:
-                    case t === $data.Array:
-                    case t === $data.Object:
-                    case t === $data.Guid:
-
-                    case t === $data.SimpleBase:
-                    case t === $data.Geospatial:
-                    case t === $data.Geography:
-                    case t === $data.GeographyPoint:
-                    case t === $data.GeographyLineString:
-                    case t === $data.GeographyPolygon:
-                    case t === $data.GeographyMultiPoint:
-                    case t === $data.GeographyMultiLineString:
-                    case t === $data.GeographyMultiPolygon:
-                    case t === $data.GeographyCollection:
-                    case t === $data.Geometry:
-                    case t === $data.GeometryPoint:
-                    case t === $data.GeometryLineString:
-                    case t === $data.GeometryPolygon:
-                    case t === $data.GeometryMultiPoint:
-                    case t === $data.GeometryMultiLineString:
-                    case t === $data.GeometryMultiPolygon:
-                    case t === $data.GeometryCollection:
-
-                        return true;
-                    default:
-                        return false;
-                }
-
-                //return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
-                //    t === $data.Number || t === $data.Integer || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
-                //    t === $data.GeographyPoint || t === $data.Guid;
-            };
-
-            this.resolveType = function (typeOrName) {
-                var t = typeOrName;
-                t = this.getType(t);
-                var posT = classTypes.indexOf(t);
-                return typeof mappedTo[posT] === 'undefined' ? t : classTypes[mappedTo[posT]];
-            };
-
-            this.getTypes = function () {
-                var keys = Object.keys(classNames);
-                var ret = [];
-                for (var i = 0; i < keys.length; i++) {
-                    var className = keys[i];
-                    ret.push({ name: className, type: classTypes[classNames[className]], toString: function () { return this.name; } });
-                }
-                return ret;
-
-                /*return Object.keys(classNames).map(function (className, index) {
-                    return { name: className, type: classTypes[classNames[className]], toString: function () { return this.name; } };
-                });*/
-            };
-
-            //this.getTypeName( in type);
-            //this.resolveType()
-            //this.inferTypeFromValue = function (value) {
-
-            this.getTypeName = function (value) {
-                switch (typeof value) {
-                    case 'object':
-                        if (value == null) return '$data.Object';
-                        if (value instanceof Array) return '$data.Array';
-                        if (value.getType) return value.getType().fullName;
-                        if (value instanceof Date) return '$data.Date';
-                        if (value instanceof $data.GeographyPoint) return '$data.GeographyPoint';
-                        if (value instanceof $data.GeographyLineString) return '$data.GeographyLineString';
-                        if (value instanceof $data.GeographyPolygon) return '$data.GeographyPolygon';
-                        if (value instanceof $data.GeographyMultiPoint) return '$data.GeographyMultiPoint';
-                        if (value instanceof $data.GeographyMultiLineString) return '$data.GeographyMultiLineString';
-                        if (value instanceof $data.GeographyMultiPolygon) return '$data.GeographyMultiPolygon';
-                        if (value instanceof $data.GeographyCollection) return '$data.GeographyCollection';
-                        if (value instanceof $data.Geography) return '$data.Geography';
-                        if (value instanceof $data.GeometryPoint) return '$data.GeometryPoint';
-                        if (value instanceof $data.GeometryLineString) return '$data.GeometryLineString';
-                        if (value instanceof $data.GeometryPolygon) return '$data.GeometryPolygon';
-                        if (value instanceof $data.GeometryMultiPoint) return '$data.GeometryMultiPoint';
-                        if (value instanceof $data.GeometryMultiLineString) return '$data.GeometryMultiLineString';
-                        if (value instanceof $data.GeometryMultiPolygon) return '$data.GeometryMultiPolygon';
-                        if (value instanceof $data.GeometryCollection) return '$data.GeometryCollection';
-                        if (value instanceof $data.Geometry) return '$data.Geometry';
-                        if (value instanceof $data.Geospatial) return '$data.Geospatial';
-                        if (value instanceof $data.SimpleBase) return '$data.SimpleBase';
-                        if (value instanceof $data.Guid) return '$data.Guid';
-                        //if(value instanceof "number") return
-                    default:
-                        return typeof value;
-                }
-            };
-
-            this.isTypeRegistered = function (typeOrName) {
-                if (typeof typeOrName === 'function') {
-                    return classTypes.indexOf(typeOrName) > -1;
-                } else {
-                    return typeOrName in classNames;
-                }
-            };
-
-            this.unregisterType = function (type) {
-                Guard.raise("Unimplemented");
-            };
-
-            this.getType = function (typeOrName) {
-                Guard.requireValue("typeOrName", typeOrName);
-                if (typeof typeOrName === 'function') {
-                    return typeOrName;
-                };
-
-                if (!(typeOrName in classNames)) {
-                    Guard.raise(new Exception("Unable to resolve type:" + typeOrName));
-                };
-                return classTypes[classNames[typeOrName]];
-            };
-
-            this.getName = function (typeOrName) {
-                var t = this.getType(typeOrName);
-                var tPos = classTypes.indexOf(t);
-                if (tPos == -1)
-                    Guard.raise("unknown type to request name for: " + typeOrName);
-                return consolidatedClassNames[tPos];
-            };
-
-            this.getDefault = function (typeOrName) {
-                var t = this.resolveType(typeOrName);
-                switch (t) {
-                    case $data.Number: return 0.0;
-                    case $data.Integer: return 0;
-                    case $data.String: return null;
-                    case $data.Boolean: return false;
-                    default: return null;
-                }
-            };
-
-            //name array ['', '', '']
-            this.registerType = function (nameOrNamesArray, type, factoryFunc) {
-                ///<signature>
-                ///<summary>Registers a type and optionally a lifetimeManager with a name
-                ///that can be used to later resolve the type or create new instances</summary>
-                ///<param name="nameOrNamesArray" type="Array">The names of the type</param>
-                ///<param name="type" type="Function">The type to register</param>
-                ///<param name="instanceManager" type="Function"></param>
-                ///</signature>
-                ///<signature>
-                ///<summary>Registers a new type that </summary>
-                ///<param name="aliasType" type="Function">The name of the type</param>
-                ///<param name="actualType" type="Function">The type to register</param>
-                ///</signature>
-
-
-                ///TODO remove
-                /*if (typeof typeNameOrAlias === 'string') {
-                    if (classNames.indexOf(typeNameOrAlias) > -1) {
-                        Guard.raise("Type already registered. Remove first");
-                    }
-                }*/
-
-                if (!nameOrNamesArray) {
-                    return;
-                }
-
-                //todo add ('number', 'number')
-                if (typeof type === "string") {
-                    type = self.resolveType(type);
-                }
-
-                if (typeof nameOrNamesArray === 'string') {
-                    var tmp = [];
-                    tmp.push(nameOrNamesArray);
-                    nameOrNamesArray = tmp;
-                }
-
-                for (var i = 0; i < nameOrNamesArray.length; i++) {
-                    var parts = nameOrNamesArray[i].split('.');
-                    var item = {};
-                    item.shortName = parts[parts.length - 1];
-                    item.fullName = nameOrNamesArray[i];
-                    nameOrNamesArray[i] = item;
-                }
-
-                //if (type.
-
-
-                var creatorFnc = function () { return IoC(type, arguments); };
-
-                if (typeof intellisense !== 'undefined') {
-                    intellisense.annotate(creatorFnc, type);
-                }
-
-                for (var i = 0, l = nameOrNamesArray.length; i < l; i++) {
-                    var item = nameOrNamesArray[i];
-                    if (!(("create" + item.shortName) in self)) {
-                        if (typeof factoryFunc === 'function') {
-                            self["create" + item.shortName] = factoryFunc;
-                        } else {
-                            self["create" + item.shortName] = creatorFnc;
-                        }
-                    }/* else {
-                    //if (console) { console.warn("warning: short names overlap:" + item.shortName + ", Container.create" + item.shortName + " has not been updated"); }
-                };*/
-
-                    var typePos = classTypes.indexOf(type);
-                    if (typePos == -1) {
-                        //new type
-                        typePos = classTypes.push(type) - 1;
-                        var fn = item.fullName;
-                        consolidatedClassNames[typePos] = item.fullName;
-                    };
-
-                    /*if (item.fullName in classNames) {
-                        //console.warn("warning:!!! This typename has already been registered:" + item.fullName);
-                    };*/
-                    classNames[item.fullName] = typePos;
-                }
-
-                if (!type.name) {
-                    type.name = nameOrNamesArray[0].shortName;
-                }
-            };
+    //(function (global) {
+    global = window;
+    function ContainerCtor(parentContainer) {
+        var parent = parentContainer;
+        if (parent) {
+            parent.addChildContainer(this);
         }
 
-        $data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
-        $data.Integer = typeof Integer !== 'undefined' ? Integer : function JayInteger() { };
-        $data.Date = typeof Date !== 'undefined' ? Date : function JayDate() { };
-        $data.String = typeof String !== 'undefined' ? String : function JayString() { };
-        $data.Boolean = typeof Boolean !== 'undefined' ? Boolean : function JayBoolean() { };
-        $data.Blob = /*typeof Blob !== 'undefined' ? Blob :*/ function JayBlob() { };
-        $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
-        $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
-        $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID() { };
-        $data.Function = Function;
+        var classNames = {};
+        var consolidatedClassNames = [];
+        var classTypes = [];
 
-        var c;
-        global["Container"] = $data.Container = c = global["C$"] = new ContainerCtor();
-        c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
-        c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64", "JayInteger"], $data.Integer);
-        c.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
-        c.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
-            return $data.Array.apply(undefined, arguments);
-        });
-        c.registerType(["$data.Date", "datetime", "date", "JayDate"], $data.Date);
-        c.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"], $data.Boolean);
-        c.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
-        c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
-        c.registerType(["$data.Function", "Function", "function"], $data.Function);
-        c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
+        this.classNames = classNames;
+        this.consolidatedClassNames = consolidatedClassNames;
+        this.classTypes = classTypes;
 
-    })(window);
+        var mappedTo = [];
+        this.mappedTo = mappedTo;
+
+        var self = this;
+
+        this["holder"] = null;
+
+        var IoC = function (type, parameters) {
+            var t = self.resolveType(type);
+            var inst = Object.create(t.prototype);
+            t.apply(inst, parameters);
+            return inst;
+        };
+
+        var pendingResolutions = {};
+        this.pendingResolutions = pendingResolutions;
+
+        function addPendingResolution(name, onResolved) {
+            pendingResolutions[name] = pendingResolutions[name] || [];
+            pendingResolutions[name].push(onResolved);
+        }
+
+        this.addChildContainer = function (container) {
+            //children.push(container);
+        }
+
+        this.createInstance = function (type, parameters) { return IoC(type, parameters); };
+
+        this.mapType = function (aliasTypeOrName, realTypeOrName) {
+            Guard.requireValue("aliasType", aliasTypeOrName);
+            Guard.requireValue("realType", realTypeOrName);
+            var aliasT = this.getType(aliasTypeOrName);
+            var realT = this.getType(realTypeOrName);
+            var aliasPos = classTypes.indexOf(aliasT);
+            var realPos = classTypes.indexOf(realT);
+            mappedTo[aliasPos] = realPos;
+        },
+
+        //this.resolve = function (type, parameters) {
+        //    var classFunction = this.resolveType(type, parameters);
+        //    return new classFunction(parameters);
+        //};
+
+
+
+        this.isPrimitiveType = function (type) {
+            var t = this.resolveType(type);
+
+            switch (true) {
+                case t === Number:
+                case t === String:
+                case t === Date:
+                case t === Boolean:
+                case t === Array:
+                case t === Object:
+
+                case t === $data.Number:
+                case t === $data.Integer:
+                case t === $data.Date:
+                case t === $data.String:
+                case t === $data.Boolean:
+                case t === $data.Array:
+                case t === $data.Object:
+                case t === $data.Guid:
+
+                case t === $data.SimpleBase:
+                case t === $data.Geospatial:
+                case t === $data.Geography:
+                case t === $data.GeographyPoint:
+                case t === $data.GeographyLineString:
+                case t === $data.GeographyPolygon:
+                case t === $data.GeographyMultiPoint:
+                case t === $data.GeographyMultiLineString:
+                case t === $data.GeographyMultiPolygon:
+                case t === $data.GeographyCollection:
+                case t === $data.Geometry:
+                case t === $data.GeometryPoint:
+                case t === $data.GeometryLineString:
+                case t === $data.GeometryPolygon:
+                case t === $data.GeometryMultiPoint:
+                case t === $data.GeometryMultiLineString:
+                case t === $data.GeometryMultiPolygon:
+                case t === $data.GeometryCollection:
+
+                    return true;
+                default:
+                    return false;
+            }
+
+            //return t === Number || t === String || t === Date || t === String || t === Boolean || t === Array || t === Object ||
+            //    t === $data.Number || t === $data.Integer || t === $data.Date || t === $data.String || t === $data.Boolean || t === $data.Array || t === $data.Object ||
+            //    t === $data.GeographyPoint || t === $data.Guid;
+        };
+
+
+        this.resolveName = function (type) {
+            var t = this.resolveType(type);
+            var tPos = classTypes.indexOf(t);
+            return consolidatedClassNames[tPos];
+        };
+
+        this.resolveType = function (typeOrName, onResolved) {
+            //if ("string" === typeof typeOrName) {
+            //    console.log("@@@@String type!!!", typeOrName)
+            //}
+            var t = typeOrName;
+            t = this.getType(t, onResolved ? true : false, onResolved);
+            var posT = classTypes.indexOf(t);
+            return typeof mappedTo[posT] === 'undefined' ? t : classTypes[mappedTo[posT]];
+        };
+
+
+
+        this.getType = function (typeOrName, doNotThrow, onResolved) {
+            Guard.requireValue("typeOrName", typeOrName);
+            if (typeof typeOrName === 'function') {
+                return typeOrName;
+            };
+
+            if (!(typeOrName in classNames)) {
+                if (parent) {
+                    var tp = parent.getType(typeOrName, true);
+                    if (tp) return tp;
+                }
+                if (onResolved) {
+                    addPendingResolution(typeOrName, onResolved);
+                    return;
+                }
+                else if (doNotThrow) {
+                    return undefined;
+                } else {
+                    Guard.raise(new Exception("Unable to resolve type:" + typeOrName));
+                }
+            };
+            var result = classTypes[classNames[typeOrName]];
+            if (onResolved) {
+                onResolved(result);
+            }
+            return result;
+        };
+
+        this.getName = function (typeOrName) {
+            var t = this.getType(typeOrName);
+            var tPos = classTypes.indexOf(t);
+            if (tPos == -1)
+                Guard.raise("unknown type to request name for: " + typeOrName);
+            return consolidatedClassNames[tPos];
+        };
+
+        this.getTypes = function () {
+            var keys = Object.keys(classNames);
+            var ret = [];
+            for (var i = 0; i < keys.length; i++) {
+                var className = keys[i];
+                ret.push({ name: className, type: classTypes[classNames[className]], toString: function () { return this.name; } });
+            }
+            return ret;
+        };
+
+        //this.getTypeName( in type);
+        //this.resolveType()
+        //this.inferTypeFromValue = function (value) {
+
+        this.getTypeName = function (value) {
+            //TODO refactor
+            switch (typeof value) {
+                case 'object':
+                    if (value == null) return '$data.Object';
+                    if (value instanceof Array) return '$data.Array';
+                    if (value.getType) return value.getType().fullName;
+                    if (value instanceof Date) return '$data.Date';
+                    if (value instanceof $data.GeographyPoint) return '$data.GeographyPoint';
+                    if (value instanceof $data.GeographyLineString) return '$data.GeographyLineString';
+                    if (value instanceof $data.GeographyPolygon) return '$data.GeographyPolygon';
+                    if (value instanceof $data.GeographyMultiPoint) return '$data.GeographyMultiPoint';
+                    if (value instanceof $data.GeographyMultiLineString) return '$data.GeographyMultiLineString';
+                    if (value instanceof $data.GeographyMultiPolygon) return '$data.GeographyMultiPolygon';
+                    if (value instanceof $data.GeographyCollection) return '$data.GeographyCollection';
+                    if (value instanceof $data.Geography) return '$data.Geography';
+                    if (value instanceof $data.GeometryPoint) return '$data.GeometryPoint';
+                    if (value instanceof $data.GeometryLineString) return '$data.GeometryLineString';
+                    if (value instanceof $data.GeometryPolygon) return '$data.GeometryPolygon';
+                    if (value instanceof $data.GeometryMultiPoint) return '$data.GeometryMultiPoint';
+                    if (value instanceof $data.GeometryMultiLineString) return '$data.GeometryMultiLineString';
+                    if (value instanceof $data.GeometryMultiPolygon) return '$data.GeometryMultiPolygon';
+                    if (value instanceof $data.GeometryCollection) return '$data.GeometryCollection';
+                    if (value instanceof $data.Geometry) return '$data.Geometry';
+                    if (value instanceof $data.Geospatial) return '$data.Geospatial';
+                    if (value instanceof $data.SimpleBase) return '$data.SimpleBase';
+                    if (value instanceof $data.Guid) return '$data.Guid';
+                    //if(value instanceof "number") return
+                default:
+                    return typeof value;
+            }
+        };
+
+        this.isTypeRegistered = function (typeOrName) {
+            if (typeof typeOrName === 'function') {
+                return classTypes.indexOf(typeOrName) > -1;
+            } else {
+                return typeOrName in classNames;
+            }
+        };
+
+        this.unregisterType = function (type) {
+            Guard.raise("Unimplemented");
+        };
+
+
+
+        this.getDefault = function (typeOrName) {
+            var t = this.resolveType(typeOrName);
+            switch (t) {
+                case $data.Number: return 0.0;
+                case $data.Integer: return 0;
+                case $data.String: return null;
+                case $data.Boolean: return false;
+                default: return null;
+            }
+        };
+
+        //name array ['', '', '']
+        this.getIndex = function (typeOrName) {
+            var t = this.resolveType(typeOrName);
+            return classTypes.indexOf(t);
+        }
+
+        this.resolveByIndex = function (index) {
+            return classTypes[index];
+        }
+
+        this.registerType = function (nameOrNamesArray, type, factoryFunc) {
+            ///<signature>
+            ///<summary>Registers a type and optionally a lifetimeManager with a name
+            ///that can be used to later resolve the type or create new instances</summary>
+            ///<param name="nameOrNamesArray" type="Array">The names of the type</param>
+            ///<param name="type" type="Function">The type to register</param>
+            ///<param name="instanceManager" type="Function"></param>
+            ///</signature>
+            ///<signature>
+            ///<summary>Registers a new type that </summary>
+            ///<param name="aliasType" type="Function">The name of the type</param>
+            ///<param name="actualType" type="Function">The type to register</param>
+            ///</signature>
+
+
+            ///TODO remove
+            /*if (typeof typeNameOrAlias === 'string') {
+                if (classNames.indexOf(typeNameOrAlias) > -1) {
+                    Guard.raise("Type already registered. Remove first");
+                }
+            }*/
+
+            if (!nameOrNamesArray) {
+                return;
+            }
+
+            //todo add ('number', 'number')
+            if (typeof type === "string") {
+                type = self.resolveType(type);
+            }
+
+            var namesArray = [];
+            if (typeof nameOrNamesArray === 'string') {
+                var tmp = [];
+                tmp.push(nameOrNamesArray);
+                namesArray = tmp;
+            } else {
+                namesArray = nameOrNamesArray;
+            }
+
+            for (var i = 0; i < namesArray.length; i++) {
+                var parts = namesArray[i].split('.');
+                var item = {};
+                item.shortName = parts[parts.length - 1];
+                item.fullName = namesArray[i];
+                namesArray[i] = item;
+            }
+
+            //if (type.
+
+
+            var creatorFnc = function () { return IoC(type, arguments); };
+
+            if (typeof intellisense !== 'undefined') {
+                intellisense.annotate(creatorFnc, type);
+            }
+
+            for (var i = 0, l = namesArray.length; i < l; i++) {
+                var item = namesArray[i];
+                if (!(("create" + item.shortName) in self)) {
+                    if (typeof factoryFunc === 'function') {
+                        self["create" + item.shortName] = factoryFunc;
+                    } else {
+                        self["create" + item.shortName] = creatorFnc;
+                    }
+                }
+
+                var typePos = classTypes.indexOf(type);
+                if (typePos == -1) {
+                    //new type
+                    typePos = classTypes.push(type) - 1;
+                    var fn = item.fullName;
+                    consolidatedClassNames[typePos] = item.fullName;
+                };
+
+                classNames[item.fullName] = typePos;
+
+                var pending = pendingResolutions[item.fullName] || [];
+                if (pending.length > 0) {
+                    pending.forEach(function (t) {
+                        t(type);
+                    });
+                    pendingResolutions[item.fullName] = [];
+                }
+            }
+            if (parent) {
+                parent.registerType.apply(parent, arguments);
+            }
+            if (!type.name) {
+                type.name = namesArray[0].shortName;
+            }
+        };
+    }
+    $data.ContainerClass = ContainerCtor;
+
+    $data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
+    $data.Integer = typeof Integer !== 'undefined' ? Integer : function JayInteger() { };
+    $data.Date = typeof Date !== 'undefined' ? Date : function JayDate() { };
+    $data.String = typeof String !== 'undefined' ? String : function JayString() { };
+    $data.Boolean = typeof Boolean !== 'undefined' ? Boolean : function JayBoolean() { };
+    $data.Blob = /*typeof Blob !== 'undefined' ? Blob :*/ function JayBlob() { };
+    $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
+    $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
+    $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID() { };
+    $data.Function = Function;
+
+    var c;
+        
+    global["Container"] = $data.Container = c = global["C$"] = new ContainerCtor();
+
+    $data.createContainer = function () {
+        return new ContainerCtor($data.Container);
+    }
+
+    c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
+    c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64", "JayInteger"], $data.Integer);
+    c.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
+    c.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
+        return $data.Array.apply(undefined, arguments);
+    });
+    c.registerType(["$data.Date", "datetime", "date", "JayDate"], $data.Date);
+    c.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"], $data.Boolean);
+    c.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
+    c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
+    c.registerType(["$data.Function", "Function", "function"], $data.Function);
+    c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
+
+    //})(window);
 
     global["$C"] = function () { Class.define.apply(Class, arguments); };
 
@@ -997,6 +1139,7 @@
         return this[backingFieldName];
     };
 
+
     $data.Class.define('$data.Base', function Base() { }, null, {
         storeProperty: storeProperty,
         retrieveProperty: retrieveProperty,
@@ -1009,8 +1152,13 @@
         }
     }, {
         create: function () { return Container.createInstance(this, arguments); },
-        extend: function (name, instanceDefinition, classDefinition) {
-            return $data.Class.define(name, this, null, instanceDefinition, classDefinition);
+        extend: function (name, container, instanceDefinition, classDefinition) {
+            if (container && !(container instanceof ContainerCtor)) {
+                classDefinition = instanceDefinition;
+                instanceDefinition = container;
+                container = undefined;
+            }
+            return $data.Class.define(name, this, container, instanceDefinition, classDefinition);
         },
         getMemberDefinition: function (name) {
             return this.memberDefinitions.getMember(name);
@@ -1068,27 +1216,6 @@
 
 
     //override after typeSystem initialized
-    MemberDefinition.translateDefinition = function (memDef, name, classFunction) {
-        var holder = classFunction;
-        var memberDefinition;
-        if (memDef.type && Container.isTypeRegistered(memDef.type)) {
-            holder = Container.resolveType(memDef.type);
-
-            if (typeof holder.translateDefinition === 'function') {
-                memberDefinition = holder.translateDefinition.apply(holder, arguments);
-                memberDefinition.name = memberDefinition.name || name;
-            } else {
-                holder = classFunction;
-            }
-        }
-
-        if (!(memberDefinition instanceof MemberDefinition)) {
-            memberDefinition = new MemberDefinition(memberDefinition || memDef, holder);
-            memberDefinition.name = name;
-        }
-
-        return memberDefinition;
-    };
 
 
     $data.Class.ConstructorParameter = ConstructorParameter = $data.Class.define('ConstructorParameter', null, null, {
@@ -1209,7 +1336,12 @@ $data.typeSystem = {
         if (typeof callBack == 'function') {
             return this.extend(setting, { success: callBack });
         }
-        return this.extend(setting, callBack);
+
+        var clb = this.extend(setting, callBack);
+        function wrapCode(fn) { var t = this; function r() { fn.apply(t, arguments); fn = function () { } } return r; }
+        clb.error = wrapCode(clb.error);
+
+        return clb;
     },
     createCtorParams: function (source, indexes, thisObj) {
         ///<param name="source" type="Array" />Paramerter array

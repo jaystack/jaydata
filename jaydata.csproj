@@ -265,6 +265,7 @@
     <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
+    <Content Include="localMigrations.html" />
     <Content Include="CREDITS.txt" />
     <Content Include="datajs-1.0.3.min.js" />
     <Content Include="favicon.ico" />
@@ -350,6 +351,37 @@
     <Content Include="oDataParser\RequestParser.js" />
     <Content Include="oDataParser\test.html" />
     <Content Include="oDataParser\testConsole.html" />
+    <Content Include="pro\localMigrations.html" />
+    <Content Include="pro\CREDITS.txt" />
+    <Content Include="pro\CREDITS_PRO.txt" />
+    <Content Include="pro\CREDITS_TRIAL.txt" />
+    <Content Include="pro\JayDataModules\localMigrations.js" />
+    <Content Include="pro\test.html" />
+    <Content Include="pro\test_JayData.html" />
+    <Content Include="pro\test_JayData_Complex.html" />
+    <Content Include="pro\test_JayData_min.html" />
+    <Content Include="pro\TypeSystem\initializeJayDataPro.js" />
+    <Content Include="pro\Types\DbClient\OpenDatabaseClient\OpenDbCommand.js" />
+    <Content Include="pro\Types\DbClient\OpenDatabaseClient\OpenDbConnection.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalInFilterExpression.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBStorageProvider.js" />
+    <Content Include="pro\Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqLiteCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqLiteStorageProvider.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqlOrderCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqlPagingCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqlProjectionCompiler.js" />
+    <Content Include="pro\Types\StorageProviders\SqLite\SqlTransaction.js" />
+    <Content Include="pro\UnitTests\T2.js" />
+    <Content Include="pro\UnitTests\transactionTests.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
     <Content Include="Services\emptyNewsReader.svc" />
@@ -366,6 +398,8 @@
     <Content Include="test_JayData_nuget_prov.html" />
     <Content Include="test_Node.js" />
     <Content Include="test_odata.html" />
+    <Content Include="Types\Expressions\EntityExpressions\ExpressionMonitor.js" />
+    <Content Include="Types\Transaction.js" />
     <Content Include="UnitTests\dataServiceVersionTests.js" />
     <Content Include="UnitTests\webApiTests.js" />
     <Content Include="webserver\localserver.js" />
@@ -400,6 +434,8 @@
       <DependentUpon>TaskManagerModel.edmx</DependentUpon>
       <LastGenOutput>TaskManagerModel.cs</LastGenOutput>
     </Content>
+    <Content Include="pro\.git" />
+    <Content Include="pro\Makefile" />
     <None Include="Scripts\jquery-1.9.0.intellisense.js" />
     <Content Include="Scripts\datajs-1.0.3.js" />
     <Content Include="Scripts\datajs-1.0.3.min.js" />
@@ -616,7 +652,7 @@
     <Content Include="Types\StorageProviders\oData\oDataProjectionCompiler.js" />
     <Content Include="Types\StorageProviders\oData\oDataProvider.js" />
     <Content Include="Types\StorageProviders\oData\oDataWhereCompiler.js" />
-    <Content Include="Types\StorageProviders\SqLite\ExpressionMonitor.js" />
+    <Content Include="Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
     <Content Include="Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
     <Content Include="Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
     <Content Include="Types\StorageProviders\SqLite\SqLiteCompiler.js" />
@@ -759,7 +795,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Code\" />
-    <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -786,7 +821,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>62308</DevelopmentServerPort>
+          <DevelopmentServerPort>63560</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:64176/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>

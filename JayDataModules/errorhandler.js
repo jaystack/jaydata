@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
 	window.onerror = function(msg, url, line){
 		alert('Error' + (line ? ' in line ' + line : '') + '\n' + (url || '') + '\n' + msg);
 	};

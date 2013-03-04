@@ -68,11 +68,18 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                         callBack.error(response);
                         return;
                     }
-                    var parser = new DOMParser();
                     var text = response.responseText;
                     text = text.replace('xmlns:edm="@@VERSIONNS@@"', 'xmlns:edm="' + versionInfo.ns + '"');
                     text = text.replace('@@VERSION@@', versionInfo.version);
-                    xsl = parser.parseFromString(text, "text/xml");
+
+                    if (typeof ActiveXObject === 'undefined') {
+                        var parser = new DOMParser();
+                        xsl = parser.parseFromString(text, "text/xml");
+                    } else {
+                        xsl = new ActiveXObject("Microsoft.XMLDOM");
+                        xsl.async = false;
+                        xsl.loadXML(text);
+                    }
 
                     self._transform(callBack, versionInfo, xml, xsl, cnf);
                 });

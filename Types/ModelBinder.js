@@ -1,34 +1,34 @@
 $data.Class.define('$data.ModelBinder', null, null, {
 
-    constructor: function(context){
+    constructor: function (context) {
         this.context = context;
         this.providerName = null;
-        if (this.context.storageProvider && typeof this.context.storageProvider.getType === 'function'){
+        if (this.context.storageProvider && typeof this.context.storageProvider.getType === 'function') {
             this.references = !(this.context.storageProvider.providerConfiguration.modelBinderOptimization || false);
-            for (var i in $data.RegisteredStorageProviders){
-                if ($data.RegisteredStorageProviders[i] === this.context.storageProvider.getType()){
+            for (var i in $data.RegisteredStorageProviders) {
+                if ($data.RegisteredStorageProviders[i] === this.context.storageProvider.getType()) {
                     this.providerName = i;
                 }
             }
         }
     },
-    
-    _deepExtend: function(o, r){
-        if (o === null || o === undefined){
+
+    _deepExtend: function (o, r) {
+        if (o === null || o === undefined) {
             return r;
         }
-        for (var i in r){
-            if (o.hasOwnProperty(i)){
-                if (typeof r[i] === 'object'){
-                    if (Array.isArray(r[i])){
-                        for (var j = 0; j < r[i].length; j++){
-                            if (o[i].indexOf(r[i][j]) < 0){
+        for (var i in r) {
+            if (o.hasOwnProperty(i)) {
+                if (typeof r[i] === 'object') {
+                    if (Array.isArray(r[i])) {
+                        for (var j = 0; j < r[i].length; j++) {
+                            if (o[i].indexOf(r[i][j]) < 0) {
                                 o[i].push(r[i][j]);
                             }
                         }
-                    }else this._deepExtend(o[i], r[i]);
+                    } else this._deepExtend(o[i], r[i]);
                 }
-            }else{
+            } else {
                 o[i] = r[i];
             }
         }
@@ -36,95 +36,98 @@ $data.Class.define('$data.ModelBinder', null, null, {
             o.changedProperties = undefined;
         return o;
     },
-    
-    _buildSelector: function(meta, context){
-        if (meta.$selector){
-            if (!(Array.isArray(meta.$selector))){
+
+    _buildSelector: function (meta, context) {
+        if (meta.$selector) {
+            if (!(Array.isArray(meta.$selector))) {
                 meta.$selector = [meta.$selector];
             }
-            
-            for (var i = 0; i < meta.$selector.length; i++){
+
+            for (var i = 0; i < meta.$selector.length; i++) {
                 var selector = meta.$selector[i].replace('json:', '');
                 context.src += 'if(';
                 var path = selector.split('.');
-                for (var j = 0; j < path.length; j++){
+                for (var j = 0; j < path.length; j++) {
                     context.src += 'di.' + path.slice(0, j + 1).join('.') + (j < path.length - 1 ? ' && ' : ' !== undefined && typeof di.' + selector + ' === "object"');
                 }
                 context.src += '){di = di.' + selector + ';}' + (i < meta.$selector.length - 1 ? 'else ' : '');
             }
-            
+
             context.src += 'if (di === null){';
             if (context.iter) context.src += context.iter + ' = null;';
             context.src += 'return null;';
             context.src += '}';
         }
     },
-    
-    _buildKey: function(name, type, keys, context, data){
-        if (keys){
+
+    _buildKey: function (name, type, keys, context, data) {
+        if (keys) {
             var type = Container.resolveType(type);
+            var typeIndex = Container.getIndex(type);
             type = type.fullName || type.name;
             context.src += 'var ' + name + 'Fn = function(di){';
-            if (!(Array.isArray(keys)) || keys.length == 1){
+            if (!(Array.isArray(keys)) || keys.length == 1) {
                 if (typeof keys !== 'string') keys = keys[0];
                 context.src += 'if (typeof di.' + keys + ' === "undefined") return undefined;';
                 context.src += 'if (di.' + keys + ' === null) return null;';
-                context.src += 'var key = ("' + type + '_' + keys + '#" + di.' + keys + ');';
-            }else{
+                context.src += 'var key = ("' + type + '_' + typeIndex + '_' + keys + '#" + di.' + keys + ');';
+            } else {
                 context.src += 'var key = "";';
-                for (var i = 0; i < keys.length; i++){
+                for (var i = 0; i < keys.length; i++) {
                     var id = typeof keys[i] !== 'object' ? keys[i] : keys[i].$source;
                     context.src += 'if (typeof di.' + id + ' === "undefined") return undefined;';
                     context.src += 'if (di.' + id + ' === null) return null;';
-                    context.src += 'key += ("' + type + '_' + id + '#" + di.' + id + ');';
+                    context.src += 'key += ("' + type + '_' + typeIndex + '_' + id + '#" + di.' + id + ');';
                 }
             }
-            
+
             context.src += 'return key;};';
         }
-        
+
         context.src += 'var ' + name + ' = ' + (keys ? name + 'Fn(' + (data || 'di') + ')' : 'undefined') + ';';
     },
 
-    build: function(meta, context){
-        if (meta.$selector){
+    build: function (meta, context) {
+        if (meta.$selector) {
             if (!(Array.isArray(meta.$selector))) meta.$selector = [meta.$selector];
-            for (var i = 0; i < meta.$selector.length; i++){
+            for (var i = 0; i < meta.$selector.length; i++) {
                 meta.$selector[i] = meta.$selector[i].replace('json:', '');
             }
         }
-        
-        if (meta.$value){
-            if (typeof meta.$value === 'function'){
+
+        if (meta.$value) {
+            if (typeof meta.$value === 'function') {
                 context.src += 'var fn = function(){ return meta' + (context.meta.length ? '.' + context.meta.join('.') : '') + '.$value.call(self, meta' + (context.meta.length ? '.' + context.meta.join('.') : '') + ', di); };';
                 context.item = 'fn()';
-            }else if (meta.$type){
+            } else if (meta.$type) {
                 var type = Container.resolveName(Container.resolveType(meta.$type));
+                var typeIndex = Container.getIndex(Container.resolveType(meta.$type));
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                if (converter){
+                if (converter) {
                     context.item = 'self.context.storageProvider.fieldConverter.fromDb["' + type + '"](' + meta.$value + ')';
-                }else{
-                    context.item = 'new ' + type + '(' + meta.$value + ')';
+                } else {
+                    context.item = 'new (Container.resolveByIndex(' + typeIndex + '))(' + meta.$value + ')';
                 }
-            }else context.item = meta.$value;
-        }else if (meta.$source){
+            } else context.item = meta.$value;
+        } else if (meta.$source) {
             var type = Container.resolveName(Container.resolveType(meta.$type));
+            var typeIndex = Container.getIndex(Container.resolveType(meta.$type));
             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
             var item = '_' + type.replace(/\./gi, '_') + '_';
             if (!context.forEach) context.src += 'var di = data;';
             context.item = item;
             this._buildSelector(meta, context);
-            if (converter){
+            if (converter) {
                 context.src += 'var ' + item + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta.$source + ');';
-            }else{
-                context.src += 'var ' + item + ' = new ' + type + '(di.' + meta.$source + ');';
+            } else {
+                context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta.$source + ');';
             }
-        }else if (meta.$item){
+        } else if (meta.$item) {
             context.meta.push('$item');
             var iter = (context.item && context.current ? context.item + '.' + context.current : (context.item ? context.item : 'result'));
             if (iter.indexOf('.') < 0) context.src += 'var ' + iter + ';';
             context.src += 'var fn = function(di){';
-            if (meta.$selector){
+            if (meta.$selector) {
                 context.src += 'if (typeof di !== "undefined" && !(Array.isArray(di))){';
                 this._buildSelector(meta, context);
                 context.src += '}';
@@ -145,7 +148,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.src += iter + ' = typeof ' + iter + ' == "undefined" ? [] : ' + iter + ';';
             //context.src += iter + ' = [];';
             context.iter = iter;
-            if (this.references && meta.$item.$keys){
+            if (this.references && meta.$item.$keys) {
                 var keycacheName = 'keycache_' + iter.replace(/\./gi, '_');
                 context.src += 'var ' + keycacheName + ';';
                 context.src += 'var kci = keycacheIter.indexOf(' + iter + ');';
@@ -166,11 +169,11 @@ $data.Class.define('$data.ModelBinder', null, null, {
             if (this.providerName == "sqLite" && this.references && meta.$item.$keys) this._buildKey(itemForKey, meta.$type, meta.$item.$keys, context);
             var item = context.item || 'iter';
             context.item = item;
-            if (!meta.$item.$source){
+            if (!meta.$item.$source) {
                 this._buildSelector(meta.$item, context);
             }
             this.build(meta.$item, context);
-            if (this.references && meta.$keys){
+            if (this.references && meta.$keys) {
                 context.src += 'if (forKey){';
                 context.src += 'if (cache[forKey]){';
                 context.src += iter + ' = cache[forKey];';
@@ -192,8 +195,8 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += '}';
                 context.src += '}';
                 context.src += '}';
-            }else{
-                if (this.references && meta.$item.$keys){
+            } else {
+                if (this.references && meta.$item.$keys) {
                     context.src += 'if (typeof ' + itemForKey + ' !== "undefined" && ' + itemForKey + ' !== null){';
                     context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && ' + itemForKey + '){';
                     context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(' + itemForKey + ') < 0){';
@@ -214,7 +217,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += '}}else{';
                     context.src += iter + '.push(' + (context.item || item) + ');';
                     context.src += '}';*/
-                }else{
+                } else {
                     context.src += iter + '.push(' + (context.item || item) + ');';
                 }
             }
@@ -225,80 +228,92 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.item = null;
             context.src += '};fn(typeof di === "undefined" ? data : di);'
             context.meta.pop();
-        }else if (meta.$type){
-            if (!context.forEach){
+        } else if (meta.$type) {
+            if (!context.forEach) {
                 context.src += 'if (typeof di === "undefined"){';
                 context.src += 'var di = data;';
                 this._buildSelector(meta, context);
                 context.src += '}';
             }
-            var type = Container.resolveName(Container.resolveType(meta.$type));
+            var resolvedType = Container.resolveType(meta.$type);
+            var type = Container.resolveName(resolvedType);
+            var typeIndex = Container.getIndex(resolvedType);
+            var isEntityType = resolvedType.isAssignableTo && resolvedType.isAssignableTo($data.Entity);
             var item = '_' + type.replace(/\./gi, '_') + '_';
             if (context.item == item) item += 'new_';
             context.item = item;
-            
-            var resolvedType = Container.resolveType(meta.$type);
+
+
             var isPrimitive = false;
             if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo)
                 isPrimitive = true;
-            if (resolvedType === $data.Object || resolvedType === $data.Array){
+            if (resolvedType === $data.Object || resolvedType === $data.Array) {
                 var keys = Object.keys(meta);
                 if (keys.length == 1 || (keys.length == 2 && meta.$selector)) isPrimitive = true;
             }
 
             if (isPrimitive) {
                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                if (converter){
+                if (converter) {
                     context.src += 'var ' + item + ' = di != undefined ? self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di) : di;';
-                }else{
+                } else {
                     context.src += 'var ' + item + ' = di;';
                 }
             } else {
-                if (this.references && meta.$keys){
+                if (this.references && meta.$keys) {
                     this._buildKey('itemKey', meta.$type, meta.$keys, context);
                     context.src += 'if (itemKey === null) return null;';
                     context.src += 'var ' + item + ';';
                     context.src += 'if (itemKey && cache[itemKey]){';
                     context.src += item + ' = cache[itemKey];';
                     context.src += '}else{';
-                    context.src += item + ' = new ' + type + '();';
+                    if (isEntityType) {
+                        context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
+                    } else {
+                        context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
+                    }
                     context.src += 'if (itemKey){';
                     context.src += 'cache[itemKey] = ' + item + ';';
                     context.src += '}';
                     context.src += '}';
-                }else{
-                    context.src += 'var ' + item + ' = new ' + type + '();';
+                } else {
+                    if (isEntityType) {
+                        context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
+                    } else {
+                        context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
+                    }
                 }
             }
-            for (var i in meta){
-                if (i.indexOf('$') < 0){
+            for (var i in meta) {
+                if (i.indexOf('$') < 0) {
                     context.current = i;
-                    if (!meta[i].$item){
-                        if (meta[i].$value){
+                    if (!meta[i].$item) {
+                        if (meta[i].$value) {
                             context.meta.push(i);
                             var item = context.item;
                             this.build(meta[i], context);
                             context.src += item + '.' + i + ' = ' + context.item + ';';
                             context.item = item;
                             context.meta.pop();
-                        }else if (meta[i].$source){
+                        } else if (meta[i].$source) {
                             context.src += 'var fn = function(di){';
                             this._buildSelector(meta[i], context);
-                            if (meta[i].$type){
+                            if (meta[i].$type) {
                                 var type = Container.resolveName(Container.resolveType(meta[i].$type));
+                                var typeIndex = Container.getIndex(Container.resolveType(meta[i].$type));
                                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                                if (converter){
+                                if (converter) {
                                     context.src += 'return self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta[i].$source + ');';
-                                }else{
-                                    context.src += 'return new ' + type + '(di.' + meta[i].$source + ');';
+                                } else {
+                                    context.src += 'return new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta[i].$source + ');';
                                 }
-                            }else{
+                            } else {
                                 context.src += item + '.' + i + ' = di.' + meta[i].$source + ';';
                             }
                             context.src += '};';
                             if (meta[i].$type) context.src += item + '.' + i + ' = fn(di);';
                             else context.src += 'fn(di);';
-                        }else if (meta[i].$type){
+                        } else if (meta[i].$type) {
                             context.meta.push(i);
                             context.src += 'var fn = function(di){';
                             this._buildSelector(meta[i], context);
@@ -308,21 +323,23 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             else context.src += item + '.' + i + ' = fn(di);';
                             context.item = item;
                             context.meta.pop();
-                        }else if (meta.$type){
+                        } else if (meta.$type) {
                             var memDef = Container.resolveType(meta.$type).memberDefinitions.getMember(i);
                             var type = Container.resolveName(memDef.type);
-                            var entityType = Container.resolveName(Container.resolveType(meta.$type));
+                            var entityType = Container.resolveType(meta.$type);
+                            var entityTypeIndex = Container.getIndex(meta.$type);
                             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                            if (this.providerName && memDef && memDef.converter && memDef.converter[this.providerName] && typeof memDef.converter[this.providerName].fromDb == 'function'){
-                                context.src += item + '.' + i + ' = Container.resolveType("' + entityType + '").memberDefinitions.getMember("' + i + '").converter.' + this.providerName + '.fromDb(di.' + meta[i] + ', Container.resolveType("' + entityType + '").memberDefinitions.getMember("' + i + '"), self.context, Container.resolveType("' + entityType + '"));';
-                            }else if (converter){
+                            if (this.providerName && memDef && memDef.converter && memDef.converter[this.providerName] && typeof memDef.converter[this.providerName].fromDb == 'function') {
+                                context.src += item + '.' + i + ' = Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '").converter.' + this.providerName + '.fromDb(di.' + meta[i] + ', Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '"), self.context, Container.resolveByIndex("' + entityTypeIndex + '"));';
+                            } else if (converter) {
                                 context.src += item + '.' + i + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta[i] + ');';
-                            }else{
-                                var type = Container.resolveName(Container.resolveType(type.memberDefinitions.getMember(i).type));
-                                context.src += item + '.' + i + ' = new ' + type + '(di.' + meta[i] + ');';
+                            } else {
+                                //var type = Container.resolveName(Container.resolveType(type.memberDefinitions.getMember(i).type));
+                                var typeIndex = Container.getIndex(Container.resolveType(type.memberDefinitions.getMember(i).type));
+                                context.src += item + '.' + i + ' = new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta[i] + ');';
                             }
                         }
-                    }else{
+                    } else {
                         context.meta.push(i);
                         this.build(meta[i], context);
                         context.item = item;
@@ -330,17 +347,17 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }
             }
-            if (this.references && meta.$keys){
+            if (this.references && meta.$keys) {
                 context.src += 'if (' + item + ' instanceof $data.Entity){' + item + '.changedProperties = undefined;}';
                 //context.src += '}';
-            }else{
+            } else {
                 context.src += 'if (' + item + ' instanceof $data.Entity){' + item + '.changedProperties = undefined;}';
             }
         }
     },
 
     call: function (data, meta) {
-        if (!Object.getOwnPropertyNames(meta).length){
+        if (!Object.getOwnPropertyNames(meta).length) {
             return data;
         }
         var context = {

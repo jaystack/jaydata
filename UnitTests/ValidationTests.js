@@ -424,7 +424,7 @@
         }
 
         try {
-            efc.prop6 = '4-3-2-42';
+            efc.prop6 = '4-3*2-42';
             ok(false, 'invalid run');
         } catch (e) {
             equal(e.name, 'value not convertable to $data.Date', 'Falseb is not valid date');

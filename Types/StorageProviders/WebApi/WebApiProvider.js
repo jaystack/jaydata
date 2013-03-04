@@ -142,6 +142,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             return dbInstance;
         };
     },
+    buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 

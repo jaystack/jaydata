@@ -825,34 +825,37 @@ function T3(providerConfig, msg) {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(48);
         stop(1);
-        $data.Class.define("$navProp.Category", $data.Entity, null, {
+        var c = $data.createContainer();
+        $data.Class.define("$navProp.Category", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
             Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Category" }
         }, null);
-        $data.Class.define("$navProp.Article", $data.Entity, null, {
+        $data.Class.define("$navProp.Article", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
             Category: { dataType: "$navProp.Category", inverseProperty: "Articles" },
             Author: { dataType: "$navProp.User", inverseProperty: "Articles" },
         }, null);
-        $data.Class.define("$navProp.User", $data.Entity, null, {
+        $data.Class.define("$navProp.User", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             LoginName: { dataType: "string" },
             Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Author" },
             Profile: { dataType: "$navProp.UserProfile", inverseProperty: "User" },
         }, null);
-        $data.Class.define("$navProp.UserProfile", $data.Entity, null, {
+        $data.Class.define("$navProp.UserProfile", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             FullName: { dataType: "string" },
             User: { dataType: "$navProp.User", inverseProperty: "Profile", required: true }
         }, null);
-        $data.Class.define("$navProp.NewsContext", $data.EntityContext, null, {
-            Categories: { dataType: $data.EntitySet, elementType: $navProp.Category },
-            Articles: { dataType: $data.EntitySet, elementType: $navProp.Article },
-            Users: { dataType: $data.EntitySet, elementType: $navProp.User },
-            UserProfiles: { dataType: $data.EntitySet, elementType: $navProp.UserProfile },
+        $data.Class.define("$navProp.NewsContext", $data.EntityContext, c, {
+            Categories: { dataType: $data.EntitySet, elementType: c.$navProp.Category },
+            Articles: { dataType: $data.EntitySet, elementType: c.$navProp.Article },
+            Users: { dataType: $data.EntitySet, elementType: c.$navProp.User },
+            UserProfiles: { dataType: $data.EntitySet, elementType: c.$navProp.UserProfile },
         }, null);
+        var $navProp = c.$navProp;
+
         (new $navProp.NewsContext(providerConfig)).onReady(function (db) {
 
             var storageModel = db._storageModel.getStorageModel($navProp.Category);
@@ -929,34 +932,36 @@ function T3(providerConfig, msg) {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(48);
         stop(1);
-        $data.Class.define("$navProp.Category", $data.Entity, null, {
+        var c = $data.createContainer();
+        $data.Class.define("$navProp.Category", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
             Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Category" }
         }, null);
-        $data.Class.define("$navProp.Article", $data.Entity, null, {
+        $data.Class.define("$navProp.Article", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
             Category: { dataType: "$navProp.Category" },
             Author: { dataType: "$navProp.User" },
         }, null);
-        $data.Class.define("$navProp.User", $data.Entity, null, {
+        $data.Class.define("$navProp.User", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             LoginName: { dataType: "string" },
             Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Author" },
             Profile: { dataType: "$navProp.UserProfile", inverseProperty: "User" },
         }, null);
-        $data.Class.define("$navProp.UserProfile", $data.Entity, null, {
+        $data.Class.define("$navProp.UserProfile", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             FullName: { dataType: "string" },
             User: { dataType: "$navProp.User", required: true }
         }, null);
-        $data.Class.define("$navProp.NewsContext", $data.EntityContext, null, {
-            Categories: { dataType: $data.EntitySet, elementType: $navProp.Category },
-            Articles: { dataType: $data.EntitySet, elementType: $navProp.Article },
-            Users: { dataType: $data.EntitySet, elementType: $navProp.User },
-            UserProfiles: { dataType: $data.EntitySet, elementType: $navProp.UserProfile },
+        $data.Class.define("$navProp.NewsContext", $data.EntityContext, c, {
+            Categories: { dataType: $data.EntitySet, elementType: c.$navProp.Category },
+            Articles: { dataType: $data.EntitySet, elementType: c.$navProp.Article },
+            Users: { dataType: $data.EntitySet, elementType: c.$navProp.User },
+            UserProfiles: { dataType: $data.EntitySet, elementType: c.$navProp.UserProfile },
         }, null);
+        var $navProp = c.$navProp;
         (new $navProp.NewsContext(providerConfig)).onReady(function (db) {
 
             var storageModel = db._storageModel.getStorageModel($navProp.Category);
@@ -1033,34 +1038,38 @@ function T3(providerConfig, msg) {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(48);
         stop(1);
-        $data.Class.define("$navProp.Category", $data.Entity, null, {
+        var c = $data.createContainer();
+
+        $data.Class.define("$navProp.Category", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
             Articles: { dataType: "Array", elementType: "$navProp.Article", inverseProperty: "Category" }
         }, null);
-        $data.Class.define("$navProp.Article", $data.Entity, null, {
+        $data.Class.define("$navProp.Article", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             Title: { dataType: "string" },
             Category: { dataType: "$navProp.Category", inverseProperty: "Articles" },
             Author: { dataType: "$navProp.User", inverseProperty: "Articles" },
         }, null);
-        $data.Class.define("$navProp.User", $data.Entity, null, {
+        $data.Class.define("$navProp.User", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             LoginName: { dataType: "string" },
-            Articles: { dataType: "Array", elementType: $navProp.Article },
+            Articles: { dataType: "Array", elementType: c.$navProp.Article },
             Profile: { dataType: "$navProp.UserProfile" },
         }, null);
-        $data.Class.define("$navProp.UserProfile", $data.Entity, null, {
+        $data.Class.define("$navProp.UserProfile", $data.Entity, c, {
             Id: { dataType: "int", key: true, computed: true },
             FullName: { dataType: "string" },
             User: { dataType: "$navProp.User", inverseProperty: "Profile", required: true }
         }, null);
-        $data.Class.define("$navProp.NewsContext", $data.EntityContext, null, {
+        var $navProp = c.$navProp;
+        $data.Class.define("$navProp.NewsContext", $data.EntityContext, c, {
             Categories: { dataType: $data.EntitySet, elementType: $navProp.Category },
             Articles: { dataType: $data.EntitySet, elementType: $navProp.Article },
             Users: { dataType: $data.EntitySet, elementType: $navProp.User },
             UserProfiles: { dataType: $data.EntitySet, elementType: $navProp.UserProfile },
         }, null);
+
         (new $navProp.NewsContext(providerConfig)).onReady(function (db) {
 
             var storageModel = db._storageModel.getStorageModel($navProp.Category);

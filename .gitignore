@@ -1,12 +1,15 @@
 *~
 .idea
 *.pwd.js
+*.suo
+*.*.suo
 CommandLine.dll
 JayData_readme.txt
 JaySvcUtil.exe
 Scripts/jaydata*
 build
 /obj/*
+/3rdparty/*
 /bin/*
 !bin/Antlr3.Runtime.dll
 !bin/EntityFramework.dll
@@ -15,3 +18,4 @@ build
 !bin/System.Web.Optimization.dll
 !bin/System.Web.Providers.dll
 !bin/WebGrease.dll
+

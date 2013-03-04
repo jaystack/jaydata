@@ -216,6 +216,12 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     _createDB: function (db, definitions) {
         for (var i = 0; i < definitions.length; i++) {
+            if (definitions[i].dropIfExists && db.objectStoreNames.contains(definitions[i].storeName)) {
+                db.deleteObjectStore(definitions[i].storeName);
+            }
+        }
+
+        for (var i = 0; i < definitions.length; i++) {
             var storeDef = definitions[i];
 
             if (!db.objectStoreNames.contains(storeDef.storeName)) {
@@ -235,10 +241,15 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             }
         }
     },
-    _hasDbChanges: function (db, definitions) {
+    _hasDbChanges: function (db, definitions, dropTabes) {
         var isOriginal = true;
-        for (var i = 0; i < definitions.length && isOriginal; i++) {
+        for (var i = 0; i < definitions.length; i++) {
             isOriginal = isOriginal && db.objectStoreNames.contains(definitions[i].storeName);
+
+            if (dropTabes) {
+                definitions[i].dropIfExists = true;
+                isOriginal = false;
+            }
         }
 
         return !isOriginal;
@@ -250,7 +261,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             db.onversionchange = function (event) {
                 return event.target.close();
             };
-            var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+            var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions, self.providerConfiguration.dbCreation == $data.storageProviders.DbCreationType.DropAllExistingTables);
             if (hasTableChanges)
                 self._createDB(db, objectStoreDefinitions);
         }
@@ -277,11 +288,11 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                             return event.target.close();
                         };
 
-                        var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions);
+                        var hasTableChanges = self._hasDbChanges(db, objectStoreDefinitions, self.providerConfiguration.dbCreation == $data.storageProviders.DbCreationType.DropAllExistingTables);
                         //oldAPI
                         if (db.setVersion) {
                             if (db.version === "" || hasTableChanges) {
-                                db.setVersion(parseInt(db.version) || 1).setCallbacks({
+                                db.setVersion((parseInt(db.version) || 0) + 1).setCallbacks({
                                     onsuccess: function (e) {
                                         var db = e.target.result
                                         self._oldCreateDB(db /*setVerTran*/, objectStoreDefinitions, function (e) {
@@ -546,7 +557,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             // Setting key fields (composite key)
             settings.keys = keys;
         } else if (keys.length == 1) {
-                // Simple key
+            // Simple key
             settings.keyPath = keys[0];
         } else {
             Guard.raise(new Exception('No valid key found!'));

@@ -42,7 +42,7 @@ $data.Class.define('$data.ComplexType', $data.Association, null, {}, null);
 
 $data.Class.define('$data.EntityContext', null, null,
 {
-    constructor: function (storageProviderCfg){
+    constructor: function (storageProviderCfg) {
         /// <description>Provides facilities for querying and working with entity data as objects.</description>
         ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
 
@@ -138,7 +138,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
 
 
-        this.addEventListener = function(eventName, fn) {
+        this.addEventListener = function (eventName, fn) {
             var delegateName = "on" + eventName;
             if (!(delegateName in this)) {
                 this[delegateName] = new $data.Event(eventName, this);
@@ -146,7 +146,7 @@ $data.Class.define('$data.EntityContext', null, null,
             this[delegateName].attach(fn);
         };
 
-        this.removeEventListener = function(eventName, fn) {
+        this.removeEventListener = function (eventName, fn) {
             var delegateName = "on" + eventName;
             if (!(delegateName in this)) {
                 return;
@@ -154,7 +154,7 @@ $data.Class.define('$data.EntityContext', null, null,
             this[delegateName].detach(fn);
         };
 
-        this.raiseEvent = function(eventName, data) {
+        this.raiseEvent = function (eventName, data) {
             var delegateName = "on" + eventName;
             if (!(delegateName in this)) {
                 return;
@@ -165,6 +165,61 @@ $data.Class.define('$data.EntityContext', null, null,
 
         this.ready = this.onReady();
     },
+    beginTransaction: function () {
+        var tables = null;
+        var callBack = null;
+        var isWrite = false;
+
+        switch (arguments.length) {
+            case 3:
+                tables = arguments[0];
+                isWrite = arguments[1];
+                callBack = arguments[2];
+                break;
+            case 2:
+                if (arguments[0] instanceof $data.Array) {
+                    tables = arguments[0];
+                } else {
+                    isWrite = arguments[0];
+                }
+                callBack = arguments[1];
+                break;
+            case 1:
+                callBack = arguments[0];
+                break;
+            case 0:
+                break;
+            default: throw new Exception("Begin tran is async function!"); break;
+        }
+
+        var pHandler = new $data.PromiseHandler();
+        callBack = pHandler.createCallback(callBack);
+
+        //callBack = $data.typeSystem.createCallbackSetting(callBack);
+        this.storageProvider._beginTran(tables, isWrite, callBack);
+
+        return pHandler.getPromise();
+    },
+    _isReturnTransaction: function (transaction) {
+        return transaction instanceof $data.Base || transaction === 'returnTransaction';
+    },
+    _applyTransaction: function (scope, cb, args, transaction, isReturnTransaction) {
+        if (isReturnTransaction === true) {
+            if (transaction instanceof $data.Transaction) {
+                Array.prototype.push.call(args, transaction);
+                cb.apply(scope, args);
+            } else {
+                this.beginTransaction(function (tran) {
+                    Array.prototype.push.call(args, tran);
+                    cb.apply(scope, args);
+                });
+            }
+        }
+        else {
+            cb.apply(scope, args);
+        }
+    },
+
     getDataType: function (dataType) {
         // Obsolate
         if (typeof dataType == "string") {
@@ -195,22 +250,24 @@ $data.Class.define('$data.EntityContext', null, null,
     _initStorageModelSync: function() {
         var _memDefArray = this.getType().memberDefinitions.asArray();
 
+
         for (var i = 0; i < _memDefArray.length; i++) {
             var item = _memDefArray[i];
-
-
-
             if ('dataType' in item) {
                 var itemResolvedDataType = Container.resolveType(item.dataType);
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
+                    var elementType = Container.resolveType(item.elementType);
                     var storageModel = new $data.StorageModel();
                     storageModel.TableName = item.tableName || item.name;
                     storageModel.TableOptions = item.tableOptions;
                     storageModel.ItemName = item.name;
-                    storageModel.LogicalType = Container.resolveType(item.elementType);
-                    storageModel.LogicalTypeName = storageModel.LogicalType.name;
+                    storageModel.LogicalType = elementType;
+                    storageModel.LogicalTypeName = elementType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
                     storageModel.ContextType = this.getType();
+		    if (item.indices) {
+                        storageModel.indices = item.indices;
+                    }
                     if (item.beforeCreate) {
                         if (!storageModel.EventHandlers) storageModel.EventHandlers = {};
                         storageModel.EventHandlers.beforeCreate = item.beforeCreate;
@@ -251,14 +308,14 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _initializeStorageModel: function () {
 
-        //this.getType().memberDefinitions.asArray().forEach(function (item) {
+        
         var _memDefArray = this.getType().memberDefinitions.asArray();
-        //}, this);
+        
 
         if (typeof intellisense !== 'undefined')
             return;
 
-        //this._storageModel.forEach(function (storageModel) {
+        
         for (var i = 0; i < this._storageModel.length; i++) {
             var storageModel = this._storageModel[i];
 
@@ -267,7 +324,6 @@ $data.Class.define('$data.EntityContext', null, null,
 
             storageModel.Associations = storageModel.Associations || [];
             storageModel.ComplexTypes = storageModel.ComplexTypes || [];
-            //storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
             for (var j = 0; j < storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().length; j++) {
                 var memDef = storageModel.LogicalType.memberDefinitions.getPublicMappedProperties()[j];
                 ///<param name="memDef" type="MemberDefinition">Member definition instance</param>
@@ -285,10 +341,9 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 this._buildDbType_navigationPropertyComplite(memDef, memDefResolvedDataType, storageModel);
 
-
-
                 //var memDef_dataType = this.getDataType(memDef.dataType);
-                if ((memDefResolvedDataType === $data.Array || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet))) && (memDef.inverseProperty && memDef.inverseProperty !== '$$unbound')) {
+                if ((memDefResolvedDataType === $data.Array || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet))) &&
+                    (memDef.inverseProperty && memDef.inverseProperty !== '$$unbound')) {
                     this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
                 } else {
                     if (memDef.inverseProperty) {
@@ -329,16 +384,15 @@ $data.Class.define('$data.EntityContext', null, null,
                     }
                 }
             }
-            //}, this);
             this._buildDbType_modifyInstanceDefinition(dbEntityInstanceDefinition, storageModel, this);
             var dbEntityClassDefinition = {};
             dbEntityClassDefinition.convertTo = this._buildDbType_generateConvertToFunction(storageModel, this);
             this._buildDbType_modifyClassDefinition(dbEntityClassDefinition, storageModel, this);
 
             //create physical type
-            storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, null, dbEntityInstanceDefinition, dbEntityClassDefinition);
+            //TODO
+            storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, storageModel.LogicalType.container, dbEntityInstanceDefinition, dbEntityClassDefinition);
         }
-        //}, this);
     },
     _initializeActions: function (es, ctor, esDef) {
         if (esDef && esDef.actions) {
@@ -370,10 +424,6 @@ $data.Class.define('$data.EntityContext', null, null,
                         if ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === Container.resolveType(storageModel.LogicalType)))
                             refMemDefs.push(m);
                     }
-
-                    //refMemDefs = refStorageModel.LogicalType.memberDefinitions.getPublicMappedProperties().filter(function (m) {
-                    //    return ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === Container.resolveType(storageModel.LogicalType)))
-                    //});
                 }
             } else {
                 var refStorageModel = this._storageModel.getStorageModel(memDefResolvedDataType);
@@ -382,21 +432,11 @@ $data.Class.define('$data.EntityContext', null, null,
                     var pubDefs = refStorageModel.LogicalType.memberDefinitions.getPublicMappedProperties();
                     for (var i = 0; i < pubDefs.length; i++) {
                         var m = pubDefs[i];
-                        if(m.elementType && ((m.inverseProperty == memDef.name) && (Container.resolveType(m.elementType) === storageModel.LogicalType)))
+                        if (m.elementType && ((m.inverseProperty == memDef.name) && (Container.resolveType(m.elementType) === storageModel.LogicalType)))
                             refMemDefs.push(m);
                         else if ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === storageModel.LogicalType))
                             refMemDefs.push(m);
                     }
-
-
-                    //refMemDefs = refStorageModel.LogicalType.memberDefinitions.getPublicMappedProperties().filter(function (m) {
-                    //    if (m.elementType) {
-                    //        return ((m.inverseProperty == memDef.name) && (Container.resolveType(m.elementType) === storageModel.LogicalType))
-                    //    } else {
-                    //        return ((m.inverseProperty == memDef.name) && (Container.resolveType(m.dataType) === storageModel.LogicalType))
-                    //    }
-
-                    //});
                 }
             }
             if (refMemDefs) {
@@ -622,7 +662,7 @@ $data.Class.define('$data.EntityContext', null, null,
             this.onReadyFunction = this.onReadyFunction || [];
             this.onReadyFunction.push(callBack);
         }
-        
+
         return pHandler.getPromise();
     },
     ready: { type: $data.Promise },
@@ -645,8 +685,11 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         return result;
     },
-    executeQuery: function (queryable, callBack) {
+    executeQuery: function (queryable, callBack, transaction) {
         var query = new $data.Query(queryable.expression, queryable.defaultType, this);
+        query.transaction = transaction instanceof $data.Transaction ? transaction : undefined;
+        var returnTransaction = this._isReturnTransaction(transaction);
+
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var that = this;
         var clbWrapper = {};
@@ -657,7 +700,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 $data.ItemStore.QueryResultModifier.call(that, query);
 
             var successResult;
-            
+
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Count ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ||
@@ -684,84 +727,109 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 successResult = query.result;
             }
-            
+
             var readyFn = function () {
-                callBack.success(successResult);
+                that._applyTransaction(callBack, callBack.success, [successResult], query.transaction, returnTransaction);
+
+                /*if (returnTransaction === true) {
+                    if (query.transaction)
+                        callBack.success(successResult, query.transaction);
+                    else {
+                        that.beginTransaction(function (tran) {
+                            callBack.success(successResult, tran);
+                        });
+                    }
+                }
+                else
+                    callBack.success(successResult);*/
             };
-            
+
             var i = 0;
             var sets = query.getEntitySets();
-            
-            var callbackFn = function(){
+
+            var callbackFn = function () {
                 var es = sets[i];
-                if (es.afterRead){
+                if (es.afterRead) {
                     i++;
                     var r = es.afterRead.call(this, successResult, sets, query);
-                    if (typeof r === 'function'){
+                    if (typeof r === 'function') {
                         r.call(this, i < sets.length ? callbackFn : readyFn, successResult, sets, query);
-                    }else{
-                        if (i < sets.length){
+                    } else {
+                        if (i < sets.length) {
                             callbackFn();
-                        }else readyFn();
+                        } else readyFn();
                     }
-                }else readyFn();
+                } else readyFn();
             }
-            
+
             if (sets.length) callbackFn();
             else readyFn();
         };
-        
-        clbWrapper.error = callBack.error;
+
+        clbWrapper.error = function () {
+            if(returnTransaction)
+                callBack.error.apply(this, arguments);
+            else
+                callBack.error.apply(this, Array.prototype.filter.call(arguments, function (p) { return !(p instanceof $data.Transaction); }));
+        };
         var sets = query.getEntitySets();
-        
-        var authorizedFn = function(){
+
+        var authorizedFn = function () {
             var ex = true;
             var wait = false;
             var ctx = that;
-            
-            var readyFn = function(cancel){
+
+            var readyFn = function (cancel) {
                 if (cancel === false) ex = false;
-                
-                if (ex) ctx.storageProvider.executeQuery(query, clbWrapper);
-                else{
+
+                if (ex) {
+                    if (query.transaction) {
+                        ctx.storageProvider.executeQuery(query, clbWrapper);
+                    } else {
+                        ctx.beginTransaction(function (tran) {
+                            query.transaction = tran;
+                            ctx.storageProvider.executeQuery(query, clbWrapper);
+                        });
+                    }
+                } else {
                     query.rawDataList = [];
                     query.result = [];
                     clbWrapper.success(query);
                 }
             };
-            
+
             var i = 0;
-            var callbackFn = function(cancel){
+            var callbackFn = function (cancel) {
                 if (cancel === false) ex = false;
-                
+
                 var es = sets[i];
-                if (es.beforeRead){
+                if (es.beforeRead) {
                     i++;
                     var r = es.beforeRead.call(this, sets, query);
-                    if (typeof r === 'function'){
+                    if (typeof r === 'function') {
                         r.call(this, (i < sets.length && ex) ? callbackFn : readyFn, sets, query);
-                    }else{
+                    } else {
                         if (r === false) ex = false;
-                        
-                        if (i < sets.length && ex){
+
+                        if (i < sets.length && ex) {
                             callbackFn();
-                        }else readyFn();
+                        } else readyFn();
                     }
-                }else readyFn();
+                } else readyFn();
             };
-            
+
             if (sets.length) callbackFn();
             else readyFn();
         };
-        
-        if (this.user && this.checkPermission){
+
+        if (this.user && this.checkPermission) {
             this.checkPermission(query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ? $data.Access.DeleteBatch : $data.Access.Read, this.user, sets, {
                 success: authorizedFn,
                 error: clbWrapper.error
             });
-        }else authorizedFn();
+        } else authorizedFn();
     },
-    saveChanges: function (callback) {
+    saveChanges: function (callback, transaction) {
         /// <signature>
         ///     <summary>
         ///         Saves the changes made to the context.
@@ -787,6 +855,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var pHandler = new $data.PromiseHandler();
         var clbWrapper = pHandler.createCallback(callback);
         var pHandlerResult = pHandler.getPromise();
+        var returnTransaction = this._isReturnTransaction(transaction);
 
         var skipItems = [];
         while (trackedEntities.length > 0) {
@@ -960,7 +1029,13 @@ $data.Class.define('$data.EntityContext', null, null,
         var ctx = this;
         if (changedEntities.length == 0) {
             this.stateManager.trackedEntities.length = 0;
-            clbWrapper.success(0);
+            ctx._applyTransaction(clbWrapper, clbWrapper.success, [0], transaction, returnTransaction);
+
+            /*if (returnTransaction) {
+                clbWrapper.success(0, transaction);
+            } else {
+                clbWrapper.success(0);
+            }*/
             return pHandlerResult;
         }
 
@@ -1002,37 +1077,37 @@ $data.Class.define('$data.EntityContext', null, null,
             clbWrapper.error(errors);
             return pHandlerResult;
         }
-        
+
         var access = $data.Access.None;
-        
+
         var eventData = {};
         var sets = [];
-        for (var i = 0; i < changedEntities.length; i++){
+        for (var i = 0; i < changedEntities.length; i++) {
             var it = changedEntities[i];
             var n = it.entitySet.elementType.name;
             sets.push(it.entitySet.name);
             var es = this._entitySetReferences[n];
-            if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || (this.user && this.checkPermission)){
+            if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || (this.user && this.checkPermission)) {
                 if (!eventData[n]) eventData[n] = {};
-                
-                switch (it.data.entityState){
+
+                switch (it.data.entityState) {
                     case $data.EntityState.Added:
                         access |= $data.Access.Create;
-                        if (es.beforeCreate){
+                        if (es.beforeCreate) {
                             if (!eventData[n].createAll) eventData[n].createAll = [];
                             eventData[n].createAll.push(it);
                         }
                         break;
                     case $data.EntityState.Modified:
                         access |= $data.Access.Update;
-                        if (es.beforeUpdate){
+                        if (es.beforeUpdate) {
                             if (!eventData[n].modifyAll) eventData[n].modifyAll = [];
                             eventData[n].modifyAll.push(it);
                         }
                         break;
                     case $data.EntityState.Deleted:
                         access |= $data.Access.Delete;
-                        if (es.beforeDelete){
+                        if (es.beforeDelete) {
                             if (!eventData[n].deleteAll) eventData[n].deleteAll = [];
                             eventData[n].deleteAll.push(it);
                         }
@@ -1040,29 +1115,51 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
             }
         }
-        
-        var readyFn = function(cancel){
-            if (cancel === false){
+
+        var readyFn = function (cancel) {
+            if (cancel === false) {
                 cancelEvent = 'async';
                 changedEntities.length = 0;
             }
-            
-            if (changedEntities.length){
+
+            if (changedEntities.length) {
                 //console.log('changedEntities: ', changedEntities.map(function(it){ return it.data.initData; }));
-                ctx.storageProvider.saveChanges({
-                    success: function () {
-                        ctx._postProcessSavedItems(clbWrapper, changedEntities);
+
+                var innerCallback = {
+                    success: function (tran) {
+                        ctx._postProcessSavedItems(clbWrapper, changedEntities, tran, returnTransaction);
                     },
-                    error: clbWrapper.error
-                }, changedEntities);
-            }else if (cancelEvent){
+                    error: function () {
+                        //TODO remove trans from args;
+                        if (returnTransaction)
+                            clbWrapper.error.apply(this, arguments);
+                        else
+                            clbWrapper.error.apply(this, Array.prototype.filter.call(arguments, function (p) { return !(p instanceof $data.Transaction); }));
+                    }
+                };
+
+                if (transaction instanceof $data.Transaction){
+                    ctx.storageProvider.saveChanges(innerCallback, changedEntities, transaction);
+                } else {
+                    ctx.beginTransaction(true, function (tran) {
+                        ctx.storageProvider.saveChanges(innerCallback, changedEntities, tran);
+                    });
+                }
+            } else if (cancelEvent) {
                 clbWrapper.error(new Exception('Cancelled event in ' + cancelEvent, 'CancelEvent'));
-            }else clbWrapper.success(0);
-            
+            } else {
+                ctx._applyTransaction(clbWrapper, clbWrapper.success, [0], transaction, returnTransaction);
+
+                /*if(returnTransaction)
+                    clbWrapper.success(0, transaction);
+                else
+                    clbWrapper.success(0);*/
+            };
+
             /*else if (cancelEvent) clbWrapper.error(new $data.Exception('saveChanges cancelled from event [' + cancelEvent + ']'));
             else Guard.raise('No changed entities');*/
         };
-        
+
         var cancelEvent;
         var ies = Object.getOwnPropertyNames(eventData);
         var i = 0;
@@ -1072,36 +1169,36 @@ $data.Class.define('$data.EntityContext', null, null,
             beforeDelete: 'deleteAll',
             beforeUpdate: 'modifyAll'
         };
-        
-        var callbackFn = function(cancel){
-            if (cancel === false){
+
+        var callbackFn = function (cancel) {
+            if (cancel === false) {
                 cancelEvent = 'async';
                 changedEntities.length = 0;
-                
+
                 readyFn(cancel);
                 return;
             }
-        
+
             var es = ctx._entitySetReferences[ies[i]];
             var c = cmd.pop();
             var ed = eventData[ies[i]];
             var all = ed[cmdAll[c]];
-            
+
             if (all) {
                 var m = [];
                 for (var im = 0; im < all.length; im++) {
                     m.push(all[im].data);
                 }
                 //var m = all.map(function(it){ return it.data; });
-                if (!cmd.length){
+                if (!cmd.length) {
                     cmd = ['beforeUpdate', 'beforeDelete', 'beforeCreate'];
                     i++;
                 }
-                
+
                 var r = es[c].call(ctx, m);
-                if (typeof r === 'function'){
+                if (typeof r === 'function') {
                     r.call(ctx, (i < ies.length && !cancelEvent) ? callbackFn : readyFn, m);
-                }else if (r === false){
+                } else if (r === false) {
                     cancelEvent = (es.name + '.' + c);
                     //all.forEach(function (it) {
                     for (var index = 0; index < all.length; index++) {
@@ -1111,36 +1208,36 @@ $data.Class.define('$data.EntityContext', null, null,
                         changedEntities.splice(ix, 1);
                     }
                     //});
-                    
+
                     readyFn();
-                }else{
+                } else {
                     if (i < ies.length && !cancelEvent) callbackFn();
                     else readyFn();
                 }
-            }else{
-                if (!cmd.length){
+            } else {
+                if (!cmd.length) {
                     cmd = ['beforeUpdate', 'beforeDelete', 'beforeCreate'];
                     i++;
                 }
-                
+
                 if (i < ies.length && !cancelEvent) callbackFn();
                 else readyFn();
             }
         };
-        
-        if (this.user && this.checkPermission){
+
+        if (this.user && this.checkPermission) {
             this.checkPermission(access, this.user, sets, {
-                success: function(){
+                success: function () {
                     if (i < ies.length) callbackFn();
                     else readyFn();
                 },
                 error: clbWrapper.error
             });
-        }else{
+        } else {
             if (i < ies.length) callbackFn();
             else readyFn();
         }
-        
+
         return pHandlerResult;
     },
 
@@ -1196,7 +1293,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
 
     prepareRequest: function () { },
-    _postProcessSavedItems: function (callBack, changedEntities) {
+    _postProcessSavedItems: function (callBack, changedEntities, transaction, returnTransaction) {
         if (this.ChangeCollector && this.ChangeCollector instanceof $data.Notifications.ChangeCollectorBase)
             this.ChangeCollector.processChangedData(changedEntities);
 
@@ -1210,11 +1307,11 @@ $data.Class.define('$data.EntityContext', null, null,
             this.processEntityTypeAfterEventHandler(entity);
 
             var oes = entity.data.entityState;
-            
+
             entity.data.entityState = $data.EntityState.Unchanged;
             entity.data.changedProperties = [];
             entity.physicalData = undefined;
-            
+
             var n = entity.entitySet.elementType.name;
             var es = ctx._entitySetReferences[n];
 
@@ -1222,37 +1319,37 @@ $data.Class.define('$data.EntityContext', null, null,
             var eventName = undefined;
             switch (oes) {
                 case $data.EntityState.Added:
-                    eventName  = 'added';
+                    eventName = 'added';
                     break;
                 case $data.EntityState.Deleted:
-                    eventName  = 'deleted';
+                    eventName = 'deleted';
                     break;
                 case $data.EntityState.Modified:
-                    eventName  = 'updated';
+                    eventName = 'updated';
                     break;
             }
             if (eventName) {
                 this.raiseEvent(eventName, entity);
             }
 
-            if (es.afterCreate || es.afterUpdate || es.afterDelete){
+            if (es.afterCreate || es.afterUpdate || es.afterDelete) {
                 if (!eventData[n]) eventData[n] = {};
-                    
-                switch (oes){
+
+                switch (oes) {
                     case $data.EntityState.Added:
-                        if (es.afterCreate){
+                        if (es.afterCreate) {
                             if (!eventData[n].createAll) eventData[n].createAll = [];
                             eventData[n].createAll.push(entity);
                         }
                         break;
                     case $data.EntityState.Modified:
-                        if (es.afterUpdate){
+                        if (es.afterUpdate) {
                             if (!eventData[n].modifyAll) eventData[n].modifyAll = [];
                             eventData[n].modifyAll.push(entity);
                         }
                         break;
                     case $data.EntityState.Deleted:
-                        if (es.afterDelete){
+                        if (es.afterDelete) {
                             if (!eventData[n].deleteAll) eventData[n].deleteAll = [];
                             eventData[n].deleteAll.push(entity);
                         }
@@ -1261,7 +1358,7 @@ $data.Class.define('$data.EntityContext', null, null,
             }
         }
         //});
-        
+
         var ies = Object.getOwnPropertyNames(eventData);
         var i = 0;
         var ctx = this;
@@ -1271,16 +1368,21 @@ $data.Class.define('$data.EntityContext', null, null,
             afterDelete: 'deleteAll',
             afterUpdate: 'modifyAll'
         };
-        
-        var readyFn = function(){
+
+        var readyFn = function () {
             if (!ctx.trackChanges) {
                 ctx.stateManager.reset();
             }
-            
-            callBack.success(changedEntities.length);
+
+            ctx._applyTransaction(callBack, callBack.success, [changedEntities.length], transaction, returnTransaction);
+
+            /*if (returnTransaction)
+                callBack.success(changedEntities.length, transaction);
+            else
+                callBack.success(changedEntities.length);*/
         };
-        
-        var callbackFn = function(){
+
+        var callbackFn = function () {
             var es = ctx._entitySetReferences[ies[i]];
             var c = cmd.pop();
             var ed = eventData[ies[i]];
@@ -1291,29 +1393,29 @@ $data.Class.define('$data.EntityContext', null, null,
                     m.push(all[im].data);
                 }
                 //var m = all.map(function(it){ return it.data; });
-                if (!cmd.length){
+                if (!cmd.length) {
                     cmd = ['afterUpdate', 'afterDelete', 'afterCreate'];
                     i++;
                 }
-                
+
                 var r = es[c].call(ctx, m);
-                if (typeof r === 'function'){
+                if (typeof r === 'function') {
                     r.call(ctx, i < ies.length ? callbackFn : readyFn, m);
-                }else{
+                } else {
                     if (i < ies.length) callbackFn();
                     else readyFn();
                 }
-            }else{
-                if (!cmd.length){
+            } else {
+                if (!cmd.length) {
                     cmd = ['afterUpdate', 'afterDelete', 'afterCreate'];
                     i++;
                 }
-                
+
                 if (i < ies.length) callbackFn();
                 else readyFn();
             }
         };
-        
+
         if (i < ies.length) callbackFn();
         else readyFn();
     },
@@ -1331,7 +1433,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
     },
 
-    loadItemProperty: function (entity, property, callback) {
+    loadItemProperty: function (entity, property, callback, transaction) {
         /// <signature>
         ///     <summary>Loads a property of the entity through the storage provider.</summary>
         ///     <param name="entity" type="$data.Entity">Entity object</param>
@@ -1375,11 +1477,18 @@ $data.Class.define('$data.EntityContext', null, null,
         Guard.requireType('entity', entity, $data.Entity);
 
         var memberDefinition = typeof property === 'string' ? entity.getType().memberDefinitions.getMember(property) : property;
+        var returnTransaction = this._isReturnTransaction(transaction);
 
         if (entity[memberDefinition.name] != undefined) {
+
             var pHandler = new $data.PromiseHandler();
             callBack = pHandler.createCallback(callback);
-            callback.success(entity[memberDefinition.name]);
+            this._applyTransaction(callback, callback.success, [entity[memberDefinition.name]], transaction, returnTransaction);
+            /*if (returnTransaction)
+                callback.success(entity[memberDefinition.name], transaction);
+            else
+                callback.success(entity[memberDefinition.name]);*/
+                
             return pHandler.getPromise();
         }
 
@@ -1426,7 +1535,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var entitySet = this.getEntitySetFromElementType(entity.getType());
             return entitySet
                 .map('function (e) { return e.' + memberDefinition.name + ' }')
-                .single(filterFunc, filterParams, callback);
+                .single(filterFunc, filterParams, callback, transaction);
         } else {
             //multipleSide
 
@@ -1447,7 +1556,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var entitySet = this.getEntitySetFromElementType(elementType);
             return entitySet
                 .filter(filterFunc, filterParams)
-                .toArray(callback);
+                .toArray(callback, transaction);
         }
 
     },
@@ -1485,7 +1594,7 @@ $data.Class.define('$data.EntityContext', null, null,
     },
 
     _generateServiceOperationQueryable: function (functionName, returnEntitySet, arg, parameters) {
-        if(typeof console !== 'undefined' && console.log)
+        if (typeof console !== 'undefined' && console.log)
             console.log('Obsolate: _generateServiceOperationQueryable, $data.EntityContext');
 
         var params = [];
@@ -1525,7 +1634,7 @@ $data.Class.define('$data.EntityContext', null, null,
         return entitySet.attachOrGet(entity);
     },
 
-    addMany: function(entities) {
+    addMany: function (entities) {
         /// <summary>
         ///     Adds several entities to their matching entity set.
         /// </summary>
@@ -1566,6 +1675,11 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     storeToken: { type: Object }
 }, {
+    inheritedTypeProcessor: function(type) {
+        if (type.resolveForwardDeclarations) {
+            type.resolveForwardDeclarations();
+        }
+    },
     generateServiceOperation: function (cfg) {
 
         var fn;
@@ -1683,8 +1797,7 @@ $data.Class.define('$data.EntityContext', null, null,
         if (cfg.params) {
             for (var i = 0; i < cfg.params.length; i++) {
                 var param = cfg.params[i];
-                for (var name in param)
-                {
+                for (var name in param) {
                     params.push({
                         name: name,
                         type: param[name]

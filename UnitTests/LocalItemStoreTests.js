@@ -28,7 +28,7 @@
                 if ($data.StorageProviderLoader.isSupported('sqLite')) {
                     db = new mine({ provider: 'sqLite', databaseName: "FooBarDb" });
                     db.onReady(function () {
-                        ok(db.storageProvider instanceof $data.storageProviders.sqLite.SqLiteStorageProvider, "provider type guessed correctly from init data");
+                        equal(db.storageProvider.getType().name, "SqLiteStorageProvider", "provider type guessed correctly from init data");
                         start();
                     });
                 } else {
@@ -263,7 +263,7 @@
         }
 
         $.when(promises).then(function () {
-            $data("Cart13").query(function (item) { return item.Product.contains(this.val) }, { val: 'tem5' }).then(function (items) {
+            $data("Cart13").query(function (item) { return item.Product.contains(this.val) == true; }, { val: 'tem5' }).then(function (items) {
                 equal(items.length, 1, 'query length correct');
 
                 $data("Cart13").removeAll().then(function () {
@@ -638,11 +638,11 @@
     });
 
     test('return $data.service in factory', 5, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined' ) { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
-            return $data.service({ url: 'Services/emptyNewsReader.svc' });
+            return $data.service({ url: '/Services/emptyNewsReader.svc' });
         }, true).then(function (ctx) {
 
             return $data('Article', 'remote')
@@ -670,7 +670,7 @@
         $news.Types.Article.storeToken = undefined;
         $data.addStore('remote', function () {
             var p = new $data.PromiseHandler();
-            p.deferred.resolve(new $news.Types.NewsContext({ name: "oData", databaseName: 'T1', oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }));
+            p.deferred.resolve(new $news.Types.NewsContext({ name: "oData", databaseName: 'T1', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }));
             return p.getPromise();
         }, true).then(function (ctx) {
 
@@ -769,7 +769,7 @@
     });
 
     test('return $data.initService business in factory', 1, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -798,7 +798,7 @@
     });
 
     test('return $data.initService open in factory', 1, function () {
-        if (typeof XSLTProcessor == "undefined") { expect(1); ok(false, "XSLTProcessor not exists"); return; }
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(1);
 
         $data.addStore('remote', function () {
@@ -902,7 +902,7 @@
 
         equal(typeof myArticle.storeToken, 'undefined', 'storeToken not set');
 
-        var context = new myContext({ name: 'local' });
+        var context = new myContext({ name: 'local', databaseName:"typeDefaultFactoryValue" });
         deepEqual(myArticle.storeToken, context.storeToken, 'storeToken has value before onready');
 
         context.onReady(function () {
@@ -995,14 +995,14 @@
     test('$data.define with setStore oData', 5, function () {
         stop();
 
-        (new $news.Types.NewsContext({ name: "oData", oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+        (new $news.Types.NewsContext({ name: "oData", oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
                 $data.define('newsArticle', {
                     Id: "int",
                     Lead: String,
                     Title: String,
-                }).setStore("remote", { name: 'oData', dataSource: "Services/emptyNewsReader.svc/Articles" })
+                }).setStore("remote", { name: 'oData', dataSource: "/Services/emptyNewsReader.svc/Articles" })
 
                 newsArticle.field('Id').setKey().setNullable().setComputed();
 
@@ -1035,14 +1035,14 @@
     test('$data.define with setStore oData - default', 5, function () {
         stop();
 
-        (new $news.Types.NewsContext({ name: "oData", oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
+        (new $news.Types.NewsContext({ name: "oData", oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
 
                 $data.define('newsArticle', {
                     Id: "int",
                     Lead: String,
                     Title: String,
-                }).setStore("default", { name: 'oData', dataSource: "Services/emptyNewsReader.svc/Articles" })
+                }).setStore("default", { name: 'oData', dataSource: "/Services/emptyNewsReader.svc/Articles" })
 
                 newsArticle.field('Id').setKey().setNullable().setComputed();
 

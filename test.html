@@ -4,18 +4,18 @@
     <title>JayData unit tests</title>
 
     <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
-    
+
     <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
     <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
     <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
-<!--    <script src="3rdparty/kendo/src/js/kendo.core.js"></script>
+    <!--    <script src="3rdparty/kendo/src/js/kendo.core.js"></script>
     <script src="3rdparty/kendo/src/js/kendo.data.js"></script>-->
     <script type="text/javascript" src="Scripts/kendo.all.min.js"></script>
-    
+
     <!--************************************************************************************-->
     <script type="text/javascript" src="TypeSystem/initializeJayDataClient.js"></script>
-    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
+    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>
     <script type="text/javascript" src="TypeSystem/utils.js"></script>
     <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
     <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
@@ -33,20 +33,20 @@
     <!--*******************************Expressions****************************************-->
     <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
     <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
-    
-    <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/CallExpression.js" ></script>
+
+    <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/CallExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/CodeParser.js"></script>
-    <script type="text/javascript" src="Types/Expressions/ConstantExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/FunctionExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/ObjectFieldExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/ObjectLiteralExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/PagingExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/ConstantExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/FunctionExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ObjectFieldExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ObjectLiteralExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/PagingExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/ParameterExpression.js"> </script>
-    <script type="text/javascript" src="Types/Expressions/PropertyExpression.js" ></script>   
-    <script type="text/javascript" src="Types/Expressions/SimpleBinaryExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/ThisExpression.js" ></script>    
-    
+    <script type="text/javascript" src="Types/Expressions/PropertyExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/SimpleBinaryExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ThisExpression.js"></script>
+
     <script type="text/javascript" src="Types/Expressions/Visitors/ExpressionVisitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/ParameterProcessor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/GlobalContextProcessor.js"></script>
@@ -58,9 +58,9 @@
     <script type="text/javascript" src="Types/Expressions/Visitors/ExpTreeVisitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/SetExecutableVisitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/ExecutorVisitor.js"></script>
-    
+
     <script type="text/javascript" src="Types/Expressions/ExpressionBuilder.js"></script>
-    
+
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/AssociationInfoExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeToEntityConverter.js"></script>
@@ -68,6 +68,7 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityContextExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpressionVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntitySetExpression.js"></script>
@@ -84,17 +85,17 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/RepresentationExpression.js"></script>
 
     <script type="text/javascript" src="Types/Expressions/ContinuationExpressionBuilder.js"></script>
-    
-    <!--******************************* Validation ****************************************-->  
+
+    <!--******************************* Validation ****************************************-->
     <script type="text/javascript" src="Types/Validation/EntityValidationBase.js"></script>
     <script type="text/javascript" src="Types/Validation/EntityValidation.js"></script>
-    <!--******************************* Notification ****************************************-->  
+    <!--******************************* Notification ****************************************-->
     <script type="text/javascript" src="Types/Notifications/ChangeDistributorBase.js"></script>
     <script type="text/javascript" src="Types/Notifications/ChangeCollectorBase.js"></script>
     <script type="text/javascript" src="Types/Notifications/ChangeDistributor.js"></script>
     <script type="text/javascript" src="Types/Notifications/ChangeCollector.js"></script>
-    
-    <!--******************************* Types ****************************************--> 
+
+    <!--******************************* Types ****************************************-->
     <script type="text/javascript" src="Types/Access.js"></script>
     <script type="text/javascript" src="Types/Promise.js"></script>
     <script type="text/javascript" src="Types/Entity.js"></script>
@@ -115,14 +116,15 @@
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
     <script type="text/javascript" src="Types/ServiceOperation.js"></script>
 
+    <script type="text/javascript" src="Types/Transaction.js"></script>
     <script type="text/javascript" src="Types/EntityWrapper.js"></script>
     <script type="text/javascript" src="JaySvcUtil/JaySvcUtil.js"></script>
     <script type="text/javascript" src="Types/JayStorm.js"></script>
 
-    <!--******************************* Ajax*********************************************-->    
+    <!--******************************* Ajax*********************************************-->
     <script type="text/javascript" src="Types/Ajax/jQueryAjaxWrapper.js"></script>
     <script type="text/javascript" src="Types/Ajax/WinJSAjaxWrapper.js"></script>
-    <script type="text/javascript" src="Types/Ajax/ExtJSAjaxWrapper.js"></script>        
+    <script type="text/javascript" src="Types/Ajax/ExtJSAjaxWrapper.js"></script>
     <script type="text/javascript" src="Types/Ajax/AjaxStub.js"></script>
 
     <!--******************************* DbClient ****************************************-->
@@ -142,7 +144,7 @@
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlOrderCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlProjectionCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/SqLite/ExpressionMonitor.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
@@ -154,7 +156,7 @@
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
     <!--******************************* StorageProvider - IndexDb ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
-    
+
     <!--******************************* Authentication???? ****************************************-->
     <script type="text/javascript" src="Types/Authentication/AuthenticationBase.js"></script>
     <script type="text/javascript" src="Types/Authentication/Anonymous.js"></script>
@@ -167,13 +169,13 @@
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/friend.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/page.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQLContext.js"></script>
-    
+
     <!--******************************* StorageProvider - YQL ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/YQL/YQLProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/YQLCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/geo.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/YQLContext.js"></script>
-        
+
     <!--******************************* StorageProvider - inMemory ****************************************-->
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
@@ -192,6 +194,52 @@
 
 
     <!--******************************* jsExtensions ****************************************-->
+    
+        <script type="text/javascript">
+
+            function checkArgs(cb, t, tranIsOptional) {
+                var funcWrapper = function () {
+                    var hasTran = Array.prototype.some.call(arguments, function (p) { return p instanceof $data.Transaction; });
+                    if (t === undefined && hasTran) {
+                        ok(false, 'transaction in result');
+                    } else if (!tranIsOptional && t !== undefined && !hasTran) {
+                        ok(false, 'transaction not in result');
+                    }
+                    cb.apply(this, arguments);
+                };
+                return funcWrapper;
+            }
+
+
+            var operators = [
+                { name: 'toArray', cbArg: 0, tArg: 1, base: $data.Queryable },
+                { name: 'length', cbArg: 0, tArg: 1, base: $data.Queryable },
+                { name: 'count', cbArg: 0, tArg: 1, base: $data.Queryable },
+                { name: 'first', cbArg: 2, tArg: 3, base: $data.Queryable },
+                { name: 'single', cbArg: 2, tArg: 3, base: $data.Queryable },
+                { name: 'saveChanges', cbArg: 0, tArg: 1, base: $data.EntityContext }
+            ];
+            operators.orig = {};
+
+            operators.forEach(function (operator) {
+                var op = operator.name;
+                var base = operator.base;
+
+                operators.orig[op] = base.prototype[op];
+                base.prototype[op] = function () {
+                    var cb = $data.typeSystem.createCallbackSetting(arguments[operator.cbArg]);
+                    arguments[operator.cbArg] = {};
+                    arguments[operator.cbArg].success = checkArgs(cb.success, arguments[operator.tArg]);
+                    arguments[operator.cbArg].error = checkArgs(cb.error, arguments[operator.tArg], true);
+
+                    return operators.orig[op].apply(this, arguments);
+                }
+
+            });
+
+    </script>
+    
+    
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>
     <script type="text/javascript" src="JayDataModules/formBinder.js"></script>
     <script type="text/javascript" src="JayDataModules/template.js"></script>
@@ -201,11 +249,12 @@
     <script type="text/javascript" src="JayDataModules/inMemory.js"></script>
 
     <!--************************************************************************************-->
-    
+
+
 
     <!--**********************************UNIT TESTS****************************************-->
     <script src="NewsReaderContext.js" type="text/javascript"></script>
-    
+
 
     <script src="UnitTests/inMemoryProviderTests.js" type="text/javascript"></script>
     <script src="UnitTests/storageModelTests.js" type="text/javascript"></script>
@@ -225,7 +274,7 @@
     <script src="UnitTests/LocalItemStoreTests.js" type="text/javascript"></script>
 
     <script src="UnitTests/oDataProviderTests.js" type="text/javascript"></script>
-    
+
     <!--Commented out because of popups-->
     <!--<script src="UnitTests/oDataProviderTests_auth.js" type="text/javascript"></script>-->
 
@@ -247,21 +296,20 @@
     <script type="text/javascript" src="oDataParser/parserTests.js"></script>
     <script type="text/javascript" src="oDataParser/expressionParserTests.js"></script>
 
-    <!--<script src="UnitTests/AuthEntityContextTests.js" type="text/javascript"></script>--> <!--//TODO: fixed authentication context bugs-->
-    
+    <!--<script src="UnitTests/AuthEntityContextTests.js" type="text/javascript"></script>-->
+    <!--//TODO: fixed authentication context bugs-->
+
 </head>
 <body>
-    <h1 id="qunit-header">
-        JayData unit tests</h1>
-    <h2 id="qunit-banner">
-    </h2>
+    <h1 id="qunit-header">JayData unit tests</h1>
+    <h2 id="qunit-banner"></h2>
     <div id="qunit-testrunner-toolbar">
     </div>
-    <h2 id="qunit-userAgent">
-    </h2>
+    <h2 id="qunit-userAgent"></h2>
     <ol id="qunit-tests">
     </ol>
     <div id="qunit-fixture">
-        test markup, will be hidden</div>
+        test markup, will be hidden
+    </div>
 </body>
 </html>
