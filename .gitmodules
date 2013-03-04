@@ -1,3 +1,3 @@
-[submodule "pro"]
-	path = pro
-	url = http://github.com/jaydata/jaydatapro
+[submodule "Pro"]
+	path = Pro
+	url = https://github.com/jaydata/pro

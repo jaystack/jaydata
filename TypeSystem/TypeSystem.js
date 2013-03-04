@@ -130,7 +130,6 @@
 
         function addChildThunk(referencedType) {
             if (referencedType && referencedType.isAssignableTo && $data.Entity && referencedType.isAssignableTo($data.Entity)) {
-                console.log("!!!");
                 classFunction.childResolverThunks.push(function () {
                     if (referencedType.resolveForwardDeclarations) {
                         referencedType.resolveForwardDeclarations();
@@ -178,7 +177,7 @@
 
         classFunction.resolveForwardDeclarations = function () {
             classFunction.resolveForwardDeclarations = function () { };
-            console.log("resolving: " + classFunction.fullName);
+            $data.Trace.log("resolving: " + classFunction.fullName);
             this.resolverThunks.forEach(function (thunk) {
                 thunk();
             });
