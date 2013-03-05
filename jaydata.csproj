@@ -257,7 +257,6 @@
     <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
-    <Content Include="localMigrations.html" />
     <Content Include="CREDITS.txt" />
     <Content Include="datajs-1.0.3.min.js" />
     <Content Include="favicon.ico" />
