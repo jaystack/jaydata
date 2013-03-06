@@ -551,8 +551,8 @@
     test("Extends noparam", 2, function () {
         var target = { a: 1 };
         $data.typeSystem.extend(target);
-        equals(Object.keys(target).length, 1, "Key count");
-        equals(target.a, 1, "Param value");
+        equal(Object.keys(target).length, 1, "Key count");
+        equal(target.a, 1, "Param value");
     });
 
     test("Extends multiple param", 4, function () {
@@ -560,16 +560,16 @@
         var obj1 = { b: 2 };
         var obj2 = { c: 3 };
         $data.typeSystem.extend(target, obj1, obj2);
-        equals(Object.keys(target).length, 3, "Key count");
-        equals(target.a, 1, "Param 'a'");
-        equals(target.b, 2, "Param 'b'");
-        equals(target.c, 3, "Param 'c'");
+        equal(Object.keys(target).length, 3, "Key count");
+        equal(target.a, 1, "Param 'a'");
+        equal(target.b, 2, "Param 'b'");
+        equal(target.c, 3, "Param 'c'");
     });
     test("Extends overwrite", 2, function () {
         var target = { a: 1 };
         var obj = { a: 2 };
         $data.typeSystem.extend(target, obj);
-        equals(Object.keys(target).length, 1, "Key count");
+        equal(Object.keys(target).length, 1, "Key count");
         equal(target.a, 2, "Param 'a'");
     });
     test("Extends multiple param overwrite", 2, function () {
@@ -577,7 +577,7 @@
         var obj1 = { a: 2 };
         var obj2 = { a: 3 };
         $data.typeSystem.extend(target, obj1, obj2);
-        equals(Object.keys(target).length, 1, "Key count");
+        equal(Object.keys(target).length, 1, "Key count");
         equal(target.a, 3, "Param 'a'");
     });
 

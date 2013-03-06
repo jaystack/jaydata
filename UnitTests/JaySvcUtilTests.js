@@ -179,13 +179,13 @@ function metadataTests(providerConfig, msg) {
             var context = f();
             context.onReady(function () {
 
-                equals(context.Vehicle instanceof $data.EntitySet, false, 'Vehicle entitySet');
+                equal(context.Vehicle instanceof $data.EntitySet, false, 'Vehicle entitySet');
 
-                equals(context.Cars instanceof $data.EntitySet, true, 'Car entitySet');
+                equal(context.Cars instanceof $data.EntitySet, true, 'Car entitySet');
                 equal(context.Cars.elementType.isAssignableTo($data.Entity), true, 'Car is $data.Entity');
                 equal(context.Cars.elementType.isAssignableTo(JayData.Models.ODataInheritance.Vehicle), true, 'Car is Vehicle');
 
-                equals(context.Ships instanceof $data.EntitySet, true, 'Ship entitySet');
+                equal(context.Ships instanceof $data.EntitySet, true, 'Ship entitySet');
                 equal(context.Ships.elementType.isAssignableTo($data.Entity), true, 'Ship is $data.Entity');
                 equal(context.Ships.elementType.isAssignableTo(JayData.Models.ODataInheritance.Ship), true, 'Ship is Vehicle');
 
