@@ -198,8 +198,6 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     xslproc.addParameter('CollectionBaseClass', cnf.CollectionBaseClass);
                     xslproc.addParameter('DefaultNamespace', cnf.DefaultNamespace);
                     xslproc.addParameter('MaxDataserviceVersion', versionInfo.maxVersion || '3.0');
-                    xslproc.addParameter();
-
 
                     xslproc.transform();
                     return xslproc.output;
@@ -260,7 +258,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             if (item)
                 version = item.value;
 
-            var maxDSVersion = metadata.getElementsByTagName('DataServices')[0];
+            var maxDSVersion = metadata.getElementsByTagName('edmx:DataServices')[0] || metadata.getElementsByTagName('DataServices')[0];
             if (maxDSVersion)
                 maxDSVersion = maxDSVersion.attributes.getNamedItem('m:MaxDataServiceVersion');
             if (maxDSVersion && version)
@@ -713,7 +711,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "  <!--<xsl:template match=\"*\">\r\n" +
             "    !<xsl:value-of select=\"name()\"/>!\r\n" +
             "  </xsl:template>-->\r\n" +
-            "</xsl:stylesheet><end>"
+            "</xsl:stylesheet>"
     }
 
 });
