@@ -45,6 +45,19 @@
                         config.context = self.context.getType();
                         config.singleResult = true;
 
+                        for (var i in bodyData){
+                            if (bodyData.hasOwnProperty(i)){
+                                var o = bodyData[i];
+                                if (typeof o === 'object' && o && o.__metadata && o.__metadata.uri){
+                                    var uri = o.__metadata.uri;
+                                    var parsed = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
+                                    var entity = new parsed.set.createNew(parsed.idObj);
+                                    bodyData[i] = entity;
+                                    parsed.set.attach(entity);
+                                }
+                            }
+                        }
+                        
                         var entity = new this.entitySet.createNew(bodyData);
                         this.entitySet.add(entity);
                         this.context.saveChanges({
@@ -74,9 +87,27 @@
                         if (bodyContentType.indexOf($data.JayService.OData.Defaults.jsonContentType) === -1) {
                             bodyData = this._readXmlBody(bodyData, req.headers);
                         }
+                        
+                        for (var i in bodyData){
+                            if (bodyData.hasOwnProperty(i)){
+                                var o = bodyData[i];
+                                if (typeof o === 'object' && o && o.__metadata && o.__metadata.uri){
+                                    var uri = o.__metadata.uri;
+                                    var parsed = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
+                                    var entity = new parsed.set.createNew(parsed.idObj);
+                                    bodyData[i] = entity;
+                                    parsed.set.attach(entity);
+                                }
+                            }
+                        }
 
                         var entity = new this.entitySet.createNew(bodyData);
                         this.entitySet.attach(entity);
+                        entity.changedProperties = entity.getType().memberDefinitions.getPublicMappedProperties().filter(function(p){
+                            if (entity[p.name] === undefined) return false;
+                            if (p.computed) return false;
+                            return p;
+                        });
                         entity.entityState = $data.EntityState.Modified;
                         this.context.saveChanges({
                             success: function () {
@@ -142,7 +173,7 @@
             select: this.member.selectedField || req.query.$select || '',
             skip: req.query.$skip || '',
             top: req.query.$top || '',
-            expand: this.member.selectedField || req.query.$expand || ''
+            expand: /*this.member.selectedField ||*/ req.query.$expand || ''
         }));
 
         config.collectionName = this.entitySet.name;

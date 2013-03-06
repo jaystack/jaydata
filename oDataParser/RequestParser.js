@@ -270,10 +270,10 @@
             //bnf: PrimaryExpr        : ParenExpr | LiteralExpr | FunctionCall | MemberPath
             var expr;
             if (expr = this.parseNULLLiteral()) return expr;
-            if (expr = this.parseParenExpr()) return expr;
             if (expr = this.parseLiteralExpr()) return expr;
             if (expr = this.parseFunctionCall()) return expr;
             if (expr = this.parseMemberPath()) return expr;
+            if (expr = this.parseParenExpr()) return expr;
             return null;
         },
         parseNULLLiteral: function () {
@@ -588,9 +588,12 @@
                 token = this.lexer.token;
                 if (!name)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: name.", "parseMemberPath");
-                member += name;
-                steps.push(name);
+                if (name != '*'){
+                    member += name;
+                    steps.push(name);
+                }
             }
+
             if (hasDot && !hasSlash)
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: / after namespace.", "parseMemberPath");
             if (this.lexer.token.value != ASCII.LPAREN)
@@ -606,7 +609,7 @@
             //bnf: Name               : (WORD | UNDERSCORE) *(WORD | UNDERSCORE | DIGIT)
             //HACK: this and getNextNamePart are not a clean parser function
             var token = this.lexer.token;
-            if (token.tokenType != TokenType.WORD && token.value != ASCII.UNDERSCORE)
+            if (token.tokenType != TokenType.WORD && token.value != ASCII.UNDERSCORE && token.value != ASCII.ASTERISK)
                 return null;
             var name = token.toString() + this.getNextNamePart();
             this.lexer.nextToken();

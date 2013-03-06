@@ -109,6 +109,29 @@
             });
         }
     },
+    
+    _discoverNavigations: function(changeRequest, referenceData, itemType){
+        for (var ni in changeRequest.data){
+            var d = changeRequest.data;
+            if (d.hasOwnProperty(ni)){
+                var o = d[ni];
+                if (typeof o === 'object' && o && o.__metadata && o.__metadata.uri){
+                    var uri = o.__metadata.uri;
+                    var ref;
+                    if (uri.indexOf('$') >= 0){
+                        referenceData[uri.slice(1)].requestObject;
+                    }else{
+                        console.log('URLPART', $data.JayService.OData.Utils.parseUrlPart(uri, this.context));
+                    }
+                    d[ni] = new (Container.resolveType(itemType.memberDefinitions.getMember(ni).type))(ref.data);
+                    switch (ref.method){
+                        case 'MERGE': d[ni].entityState = $data.EntityState.Modified; break;
+                        case 'POST': d[ni].entityState = $data.EntityState.Added; break;
+                    }
+                }
+            }
+        }
+    },
 
     _processBatch: function (changeRequests, request, callback) {
         var referenceData = {};
@@ -125,17 +148,25 @@
 
             switch (changeRequest.method) {
                 case 'POST':
+                    //discover navigations (__metadata.uri: "$n")
+                    this._discoverNavigations(changeRequest, referenceData, itemType);
                     var entity = new itemType(changeRequest.data);
                     referenceData[refId].resultObject = entity;
-                    //discover navigations (__metadata.uri: "$n")
                     setInfo.set.add(entity);
                     break;
                 case 'MERGE':
+                    //discover navigations (__metadata.uri: "$n")
+                    this._discoverNavigations(changeRequest, referenceData, itemType);
                     var entity = new itemType(changeRequest.data);
                     referenceData[refId].resultObject = entity;
 
                     //discover navigations (__metadata.uri: "$n")
                     setInfo.set.attach(entity);
+                    entity.changedProperties = entity.getType().memberDefinitions.getPublicMappedProperties().filter(function(p){
+                            if (entity[p.name] === undefined) return false;
+                            if (p.computed) return false;
+                            return p;
+                        });
                     entity.entityState = $data.EntityState.Modified;
                     break;
                 case 'DELETE':

@@ -289,7 +289,14 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         if (Array.isArray(result)) {
             var i = 0;
             for (; i < result.length; i++) {
-                if (result[i].allowedType === 'default' || Container.resolveType(result[i].allowedType) === Container.resolveType(expression.selector.memberDefinition.type)) {
+                if (result[i].allowedType === 'default' || Container.resolveType(result[i].allowedType) === Container.resolveType(expression.selector.memberDefinition.type) &&
+                    (frameType && result[i].allowedIn &&
+                        (
+                            (Array.isArray(result[i].allowedIn) && result[i].allowedIn.some(function(type){ return frameType === Container.resolveType(type); })) ||
+                            (!Array.isArray(result[i].allowedIn) && (frameType === Container.resolveType(result[i].allowedIn)))
+                        )
+                    )
+                    ) {
                     result = result[i];
                     break;
                 }

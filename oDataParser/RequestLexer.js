@@ -12,6 +12,7 @@
         APOS: { value: 39 }, // '
         LPAREN: { value: 40 }, // (
         RPAREN: { value: 41 }, // )
+        ASTERISK: { value: 42 }, // *
         PLUS: { value: 43 }, // +
         COMMA: { value: 44 }, // },
         MINUS: { value: 45 }, // -
@@ -117,12 +118,12 @@
             token.line = this.line;
             token.column = this.column;
             switch (this.currentCharType) {
-                case CharType.EOF: token.tokenType = TokenType.EOF; token.value = this.currentChar; return;
-                case CharType.WSP: token.tokenType = TokenType.WSP; token.value = this.currentChar; this.nextChar(); return;
-                case CharType.CTRLCHAR: token.tokenType = TokenType.CTRLCHAR; token.value = this.currentChar; this.nextChar(); return;
-                case CharType.CHAR: this.scanChar(token); return;
-                case CharType.DIGIT: this.scanDigits(token); return;
-                case CharType.ALPHA: this.scanWord(token); return;
+                case CharType.EOF: token.tokenType = TokenType.EOF; token.value = this.currentChar; break;
+                case CharType.WSP: token.tokenType = TokenType.WSP; token.value = this.currentChar; this.nextChar(); break;
+                case CharType.CTRLCHAR: token.tokenType = TokenType.CTRLCHAR; token.value = this.currentChar; this.nextChar(); break;
+                case CharType.CHAR: this.scanChar(token); break;
+                case CharType.DIGIT: this.scanDigits(token); break;
+                case CharType.ALPHA: this.scanWord(token); break;
                 default:
                     throw "Unknown CharType: " + this.currentCharType;
             }
