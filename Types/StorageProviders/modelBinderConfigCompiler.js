@@ -40,7 +40,10 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 if (typeof returnType.isAssignableTo === 'function' && returnType.isAssignableTo($data.Entity)) {
                     builder.modelBinderConfig['$selector'] = ['json:' + expression.cfg.serviceName];
                 } else {
-                    builder.modelBinderConfig['$source'] = expression.cfg.serviceName;
+                    builder.modelBinderConfig['$type'] = returnType;
+                    builder.modelBinderConfig['$value'] = function (a, v) {
+                        return (expression.cfg.serviceName in v) ? v[expression.cfg.serviceName] : v.value;
+                    }
                 }
                 this.VisitExpression(expression, builder);
                 builder.resetModelBinderProperty();

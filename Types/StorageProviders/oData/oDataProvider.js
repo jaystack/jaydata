@@ -1,10 +1,33 @@
 
+var datajsPatch;
+datajsPatch = function () {
+    if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler) {
+        console.log('!!!!!!! - patch datajs 1.1.0');
+        var oldread = OData.defaultHandler.read;
+        OData.defaultHandler.read = function (p, context) {
+            delete context.contentType;
+            delete context.dataServiceVersion;
+
+            oldread.apply(this, arguments);
+        };
+        var oldwrite = OData.defaultHandler.write;
+        OData.defaultHandler.write = function (p, context) {
+            delete context.contentType;
+            delete context.dataServiceVersion;
+
+            oldwrite.apply(this, arguments);
+        };
+    }
+    datajsPatch = function () { };
+}
+
 $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctx) {
         if (typeof OData === 'undefined') {
             Guard.raise(new Exception('datajs is required', 'Not Found!'));
         }
+        datajsPatch();
 
         this.SqlCommands = [];
         this.context = ctx;
@@ -19,7 +42,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             password: null,
             withCredentials: false,
             enableJSONP: false,
-            UpdateMethod: 'PATCH'
+            UpdateMethod: 'PATCH',
+            useJsonLight: true
         }, cfg);
 
         this.fixkDataServiceVersions(cfg);
@@ -43,6 +67,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         if ((cfg && !cfg.UpdateMethod && this.providerConfiguration.dataServiceVersion < '3.0') || !this.providerConfiguration.dataServiceVersion) {
             this.providerConfiguration.UpdateMethod = 'MERGE';
         }
+
+        if (this.providerConfiguration.maxDataServiceVersion < '3.0')
+            this.providerConfiguration.useJsonLight = false;
 
     },
     initializeStore: function (callBack) {
@@ -149,7 +176,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
-                }
+                },
+                useJsonLight: this.providerConfiguration.useJsonLight
             },
             function (data, textStatus, jqXHR) {
                 if (!data && textStatus.body) data = JSON.parse(textStatus.body);
@@ -213,7 +241,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     requestUri: this.providerConfiguration.oDataServiceHost + '/',
                     headers: {
                         MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
-                    }
+                    },
+                    useJsonLight: this.providerConfiguration.useJsonLight
                 };
                 if (this.providerConfiguration.dataServiceVersion) {
                     request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
@@ -341,7 +370,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             },
             headers: {
                 MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
-            }
+            },
+            useJsonLight: this.providerConfiguration.useJsonLight
         }, function (data, response) {
             if (response.statusCode == 202) {
                 var result = data.__batchResponses[0].__changeResponses;
@@ -408,8 +438,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function(def){ return def.name === memdef.name; })))
-                    serializableObject[memdef.name] = item.physicalData[memdef.name];
+                if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function (def) { return def.name === memdef.name; }))) {
+                    if (item.physicalData[memdef.name] instanceof $data.Date || !item.physicalData[memdef.name])
+                        serializableObject[memdef.name] = item.physicalData[memdef.name];
+                    else
+                        serializableObject[memdef.name] = JSON.parse(JSON.stringify(item.physicalData[memdef.name]));
+                }
             }
         }, this);
         return serializableObject;
@@ -668,7 +702,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Number': function (number) { return number; },
                 '$data.Date': function (dbData) {
                     if (dbData) {
-                        if (dbData.substring(0, 6) === '/Date(') {
+                        if (dbData instanceof Date) {
+                            return dbData;
+                        } else if (dbData.substring(0, 6) === '/Date(') {
                             return new Date(parseInt(dbData.substr(6)));
                         } else {
                             //ISODate without Z? Safari compatible with Z

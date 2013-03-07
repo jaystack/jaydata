@@ -7,9 +7,10 @@
     T3_oDataV3({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
 
     //T3 tests in V3 service
+    EntityContextTests({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
     T3({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
-    T3_oDataV3({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
-    T3WebapiBugfix({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/odata", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
+    T3_oDataV3({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
+    T3WebapiBugfix({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/odata", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
 
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
 		EntityContextTests({ name: "sqLite", databaseName: 'T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');

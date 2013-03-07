@@ -72,7 +72,7 @@ $(function () {
         });
     });
 
-    test('webApi OData Entity action GeographyPoint', 8, function () {
+    test('webApi OData Entity action GeographyPoint', function () {
         stop(2);
 
         (new $news.Types.NewsContext({
@@ -90,22 +90,45 @@ $(function () {
                         context.Categories.first("it.Title == 'Sport'", null, function (cat) {
 
                             var geoPoint = new $data.GeographyPoint(-1.35, 44.35);
-                            cat.LocationSwipe(geoPoint, function (newLocation) {
-                                equal(newLocation.longitude, 44.35, 'Entity Action result longitude');
-                                equal(newLocation.latitude, -1.35, 'Entity Action result latitude');
-                                deepEqual(newLocation.coordinates, [44.35, -1.35], 'Entity Action result coordinates')
-                                deepEqual(geoPoint.coordinates, [-1.35, 44.35], 'geoPoint coordinates')
 
-                                start();
+                            context.prepareRequest = function (req) {
+                                ok(true, '!!!!! Override Accept format to odata=verbose');
+                                console.log(req[0]);
+                                req[0].headers.Accept = 'application/atomsvc+xml;q=0.8, application/json;odata=verbose;q=0.7, application/json;q=0.5, */*;q=0.1';
+                                context.prepareRequest = function () { };
+                            };
+
+                            context.attach(cat);
+
+                            cat.LocationSwipe(geoPoint, {
+                                success: function (newLocation) {
+                                    equal(newLocation.longitude, 44.35, 'Entity Action result longitude');
+                                    equal(newLocation.latitude, -1.35, 'Entity Action result latitude');
+                                    deepEqual(newLocation.coordinates, [44.35, -1.35], 'Entity Action result coordinates')
+                                    deepEqual(geoPoint.coordinates, [-1.35, 44.35], 'geoPoint coordinates')
+
+                                    start();
+                                },
+                                error: function (e) {
+                                    ok(e.data[0].request.headers.Accept.indexOf('fullmetadata') > -1, 'WebApi geo not supported with fullmetadata');
+                                    ok(false, 'Error: ' + e);
+                                    start();
+                                }
                             });
 
-                            cat.LocationSwipe({ Loc: geoPoint }, function (newLocation) {
-                                equal(newLocation.longitude, 44.35, 'Entity Action result longitude');
-                                equal(newLocation.latitude, -1.35, 'Entity Action result latitude');
-                                deepEqual(newLocation.coordinates, [44.35, -1.35], 'Entity Action result coordinates')
-                                deepEqual(geoPoint.coordinates, [-1.35, 44.35], 'geoPoint coordinates')
+                            cat.LocationSwipe({ Loc: geoPoint }, {
+                                success: function (newLocation) {
+                                    equal(newLocation.longitude, 44.35, 'Entity Action result longitude');
+                                    equal(newLocation.latitude, -1.35, 'Entity Action result latitude');
+                                    deepEqual(newLocation.coordinates, [44.35, -1.35], 'Entity Action result coordinates')
+                                    deepEqual(geoPoint.coordinates, [-1.35, 44.35], 'geoPoint coordinates')
 
-                                start();
+                                    start();
+                                },
+                                error: function (e) {
+                                    ok(e.data[0].request.headers.Accept.indexOf('fullmetadata') > -1, 'WebApi geo not supported with fullmetadata'); ok(false, 'Error: ' + e);
+                                    start();
+                                }
                             });
 
                         });
@@ -118,7 +141,8 @@ $(function () {
 
 });
 
-function T3WebapiBugfix(providerConfiguration) {
+function T3WebapiBugfix(providerConfiguration, msg) {
+    module("webapi fix test" + msg);
 
     test('oData V3 date result', 1, function () {
         stop();

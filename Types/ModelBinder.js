@@ -97,8 +97,18 @@ $data.Class.define('$data.ModelBinder', null, null, {
 
         if (meta.$value) {
             if (typeof meta.$value === 'function') {
+                if (!context.forEach) context.src += 'var di = data;';
                 context.src += 'var fn = function(){ return meta' + (context.meta.length ? '.' + context.meta.join('.') : '') + '.$value.call(self, meta' + (context.meta.length ? '.' + context.meta.join('.') : '') + ', di); };';
-                context.item = 'fn()';
+                if (meta.$type) {
+                    var type = Container.resolveName(Container.resolveType(meta.$type));
+                    var typeIndex = Container.getIndex(Container.resolveType(meta.$type));
+                    var converter = this.context.storageProvider.fieldConverter.fromDb[type];
+                    if (converter) {
+                        context.item = 'self.context.storageProvider.fieldConverter.fromDb["' + type + '"](fn())';
+                    } else {
+                        context.item = 'new (Container.resolveByIndex(' + typeIndex + '))(fn())';
+                    }
+                } else context.item = 'fn()';
             } else if (meta.$type) {
                 var type = Container.resolveName(Container.resolveType(meta.$type));
                 var typeIndex = Container.getIndex(Container.resolveType(meta.$type));
@@ -370,7 +380,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
         context.src += 'var keycache = [];';
         context.src += 'var keycacheIter = [];';
         this.build(meta, context);
-        if (context.item) context.src += 'if (!result) result = ' + context.item + ';';
+        if (context.item) context.src += 'if (typeof result === "undefined") result = ' + context.item + ';';
         context.src += 'return result;';
         var fn = new Function('meta', 'data', context.src).bind(this);
         var ret = fn(meta, data);
