@@ -1230,4 +1230,22 @@
             equal(q.queryText, "/Users?$filter=((Id gt 0) and substringof('Joe',LoginName))", "Invalid query string");
         });
     });
+    test('deep_include_fix', 6, function(){
+        stop(3);
+        (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var trace = db.Articles.include('Tags.Article').include('Tags.Tag').include('Category').toTraceString();
+                var config = trace.modelBinderConfig;
+                ok(config.$item, 'no $item');
+                ok(config.$item.Tags, 'no Tags');
+                ok(config.$item.Tags.$item, 'no Tags.$item');
+                ok(config.$item.Tags.$item.Article, 'no Tags.Article');
+                ok(config.$item.Tags.$item.Tag, 'no Tags.Tag');
+                ok(config.$item.Category, 'no Category');
+                start(1);
+            });
+        });
+    });
 });
