@@ -45,7 +45,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                 var context = this;
                 var memberdef;
 
-                var bindedEntity;
+                var boundItem;
                 if (this instanceof $data.Entity || this instanceof $data.EntitySet) {
                     var entitySet;
                     if (this instanceof $data.Entity) {
@@ -68,7 +68,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                     }
 
 
-                    bindedEntity = {
+                    boundItem = {
                         data: this,
                         entitySet: entitySet
                     };
@@ -105,8 +105,8 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
 
                 var ec = Container.createEntityContextExpression(context);
                 if (!memberdef) {
-                    if (bindedEntity && bindedEntity.data) {
-                        memberdef = bindedEntity.data.getType().getMemberDefinition(cfg.serviceName);
+                    if (boundItem && boundItem.data) {
+                        memberdef = boundItem.data.getType().getMemberDefinition(cfg.serviceName);
                     } else {
                         memberdef = context.getType().getMemberDefinition(cfg.serviceName);
                     }
@@ -115,7 +115,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                         Container.createMemberInfoExpression(memberdef),
                         paramConstExpression,
                         cfg,
-                        bindedEntity);
+                        boundItem);
 
                 //Get callback function
                 var clb = arguments[arguments.length - 1];

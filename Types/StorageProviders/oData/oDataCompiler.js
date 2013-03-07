@@ -114,10 +114,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
     },
     VisitServiceOperationExpression: function (expression, context) {
-        if (expression.bindedEntity) {
-            context.urlText += "/" + expression.bindedEntity.entitySet.tableName;
-            if (expression.bindedEntity.data instanceof $data.Entity) {
-                context.urlText += '(' + this.provider.getEntityKeysValue(expression.bindedEntity) + ')';
+        if (expression.boundItem) {
+            context.urlText += "/" + expression.boundItem.entitySet.tableName;
+            if (expression.boundItem.data instanceof $data.Entity) {
+                context.urlText += '(' + this.provider.getEntityKeysValue(expression.boundItem) + ')';
             }
         }
         context.urlText += "/" + expression.cfg.serviceName;

@@ -1719,7 +1719,7 @@ $data.Class.define('$data.EntityContext', null, null,
             fn = function () {
                 var context = this;
 
-                var bindedEntity;
+                var boundItem;
                 if (this instanceof $data.Entity) {
                     if (!cfg.method) {
                         cfg.method = 'POST';
@@ -1732,7 +1732,7 @@ $data.Class.define('$data.EntityContext', null, null,
                         return;
                     }
 
-                    bindedEntity = {
+                    boundItem = {
                         data: this,
                         entitySet: context.getEntitySetFromElementType(this.getType())
                     };
@@ -1752,12 +1752,12 @@ $data.Class.define('$data.EntityContext', null, null,
                 }
 
                 var ec = Container.createEntityContextExpression(context);
-                var memberdef = (bindedEntity ? bindedEntity.data : context).getType().getMemberDefinition(cfg.serviceName);
+                var memberdef = (boundItem ? boundItem.data : context).getType().getMemberDefinition(cfg.serviceName);
                 var es = Container.createServiceOperationExpression(ec,
                         Container.createMemberInfoExpression(memberdef),
                         paramConstExpression,
                         cfg,
-                        bindedEntity);
+                        boundItem);
 
                 //Get callback function
                 var clb = arguments[arguments.length - 1];
