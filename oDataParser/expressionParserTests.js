@@ -58,9 +58,10 @@ $(document).ready(function () {
     builderTest('take', c.Articles.take(6), c);
     builderTest('field compare, order by, skip, take', c.Articles.filter(function (it) { return it.Author.LoginName.contains('almafa') && it.CreateDate > '2001/05/05' && it.Id <= 500; }).orderBy('it.Title').skip(10).take(5), c);
     builderTest('map', c.Articles.map(function (it) { return { Title: it.Title, Body: it.Body }; }), c);
-    builderTest('map navProp simple', c.Articles.map(function (it) { return { Author: it.Author.LoginName }; }), c);
+    builderTest('map navProp simple', c.Articles.map(function (it) { return { Author: { LoginName: it.Author.LoginName } }; }), c);
+    builderTest('map navProp simple more field', c.Articles.map(function (it) { return { Author: { LoginName: it.Author.LoginName, Email: it.Author.Email } }; }), c);
     builderTest('map navProp complex', c.Articles.map(function (it) { return { Title: it.Title, Author: it.Author }; }), c);
-    builderTest('map navProp complex deep prop', c.Articles.map(function (it) { return { Title: it.Title, Author: it.Author.LoginName }; }), c);
+    builderTest('map navProp complex deep prop', c.Articles.map(function (it) { return { Title: it.Title, Author: { LoginName: it.Author.LoginName } }; }), c);
     builderTest('include singleProp', c.Articles.include('Category'), c, false, true);
     builderTest('include deep 1', c.Articles.include('Author.Articles'), c, false, true);
     builderTest('include deep 2', c.Articles.include('Author.Profile'), c, false, true);

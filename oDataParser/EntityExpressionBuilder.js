@@ -35,7 +35,7 @@
             var paramName = this.supportedParameters[i].name;
             var funcName = paramName + 'Converter';
             if (typeof this[funcName] === 'function' && req[paramName]) {
-                expression = this[funcName].call(this, req[paramName], expression);
+                expression = this[funcName].call(this, req[paramName], expression, req);
             }
         }
 
@@ -72,14 +72,21 @@
         return rootExpr;
     },
     selectConverter: function (exprObjArray, rootExpr) {
-        var objectFields = [];
+        //var objectFields = [];
+        //for (var i = 0; i < exprObjArray.length; i++) {
+        //    var expr = exprObjArray[i];
+        //    var ofExpr = new $data.Expressions.ObjectFieldExpression(this.findMemberPathBaseName(expr), expr);
+        //    objectFields.push(ofExpr);
+        //}
+
+        //var objectLiteralExpr = new $data.Expressions.ObjectLiteralExpression(objectFields);
+
+        var objectLiteralExpr = new $data.Expressions.ObjectLiteralExpression([]);
+        var objectLiteralBuilder = new $data.oDataParser.ObjectLiteralBuilderVisitor();
         for (var i = 0; i < exprObjArray.length; i++) {
             var expr = exprObjArray[i];
-            var ofExpr = new $data.Expressions.ObjectFieldExpression(this.findMemberPathBaseName(expr), expr);
-            objectFields.push(ofExpr);
+            objectLiteralBuilder.Visit(expr, objectLiteralExpr);
         }
-
-        var objectLiteralExpr = new $data.Expressions.ObjectLiteralExpression(objectFields);
 
         var pqExp = this._buildParametricQueryExpression(objectLiteralExpr, $data.Expressions.ProjectionExpression);
         var expression = new $data.Expressions.ProjectionExpression(rootExpr, pqExp);
@@ -108,10 +115,21 @@
         return rootExpr;
     },
     _getMemberPath: function (expr) {
-        if (expr.expression instanceof $data.Expressions.PropertyExpression)
-            return this._getMemberPath(expr.expression) + '.' + expr.member.value;
-        else
+        var ret;
+        if (expr.expression && expr.expression instanceof $data.Expressions.PropertyExpression){
+            ret = this._getMemberPath(expr.expression) + '.' + expr.member.value;
+        }else if (expr.member){
+            ret = expr.member.value;
+        }else if (expr.value){
+            ret = expr.value;
+        }
+        return ret;
+        /*if (expr.expression instanceof $data.Expressions.PropertyExpression){
+            var ret = this._getMemberPath(expr.expression) + '.' + expr.member.value;
+            return ret;
+        }else{
             return expr.member.value;
+        }*/
     },
     _buildParametricQueryExpression: function (expression, frameType) {
 

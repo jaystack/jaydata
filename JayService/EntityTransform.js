@@ -48,7 +48,7 @@
         var memDefs = defaultType.memberDefinitions.getPublicMappedProperties();
         if (selectedFields && selectedFields.length > 0) {
             memDefs = memDefs.filter(function (memDef) {
-                return selectedFields.indexOf(memDef.name) >= 0
+                return selectedFields.indexOf(memDef.name) >= 0 || selectedFields.filter(function(it){ return it.split('.')[0] === memDef.name }).length;
             });
         }
 
@@ -76,14 +76,13 @@
                 }
             }
         };
-        this.addMemberConfigs(memDefs, binderConfig.$item, includes, undefined);
-
+        this.addMemberConfigs(memDefs, binderConfig.$item, selectedFields, includes, undefined, '');
         var converter = new $data.ModelBinder({ storageProvider: { fieldConverter: this.converter } });
 
         var result = converter.call(results, binderConfig);
         return result;
     },
-    addMemberConfigs: function (memberDefinitions, config, includes, includeStep) {
+    addMemberConfigs: function (memberDefinitions, config, selectedFields, includes, includeStep, path) {
         var self = this;
         memberDefinitions.forEach(function (memDef) {
             var step = includeStep ? (includeStep + '.' + memDef.name) : memDef.name;
@@ -123,7 +122,7 @@
                                 }
                             }
                         }
-                        this.addMemberConfigs(elementType.memberDefinitions.getPublicMappedProperties(), config[memDef.name].$item, includes, step);
+                        this.addMemberConfigs(elementType.memberDefinitions.getPublicMappedProperties(), config[memDef.name].$item, selectedFields, includes, step, path);
                     }else{
                         config[memDef.name] = {
                             $type: $data.Array,
@@ -151,14 +150,14 @@
                         $selector: ['json:' + memDef.name],
                         __metadata: {
                             $type: $data.Object,
-                            $value: function (meta, data) {
+                            $value: (function (meta, data) {
                                 return {
-                                    type: data.getType().fullName
+                                    type: this.fullName
                                 };
-                            }
+                            }).bind(type)
                         }
                     }
-                    this.addMemberConfigs(type.memberDefinitions.getPublicMappedProperties(), config[memDef.name], includes, step);
+                    this.addMemberConfigs(type.memberDefinitions.getPublicMappedProperties(), config[memDef.name], selectedFields, includes, step, path);
                 } else {
                     //single side
                     if (includes.indexOf(step) >= 0) {
@@ -167,8 +166,9 @@
                             $selector: ['json:' + memDef.name],
                             __metadata: {
                                 $type: $data.Object,
-                                $value: function (meta, data) {
-                                    var setDef = self._getEntitySetDefByType(data.getType());
+                                $value: (function (meta, data) {
+                                    //console.log(data);
+                                    /*var setDef = self._getEntitySetDefByType(data.getType());
                                     if (setDef) {
                                         var uri = self.generateUri(data, setDef);
                                         var result = {
@@ -178,11 +178,28 @@
                                         };
                                         data.uri = result.uri;
                                         return result;
+                                    }*/
+                                    var setDef = self._getEntitySetDefByType(this);
+                                    if (setDef) {
+                                        var uri = self.generateUri(data, setDef);
+                                        var result = {
+                                            id: uri,
+                                            uri: uri,
+                                            type: this.fullName
+                                        };
+                                        data.uri = result.uri;
+                                        return result;
                                     }
-                                }
+                                }).bind(type)
                             }
+                        };
+                        var map = type.memberDefinitions.getPublicMappedProperties();
+                        if (selectedFields && selectedFields.length > 0){
+                            map = map.filter(function(it){
+                                return selectedFields.indexOf(memDef.name + '.' + (path ? path + '.' : '') + it.name) >= 0;
+                            });
                         }
-                        this.addMemberConfigs(type.memberDefinitions.getPublicMappedProperties(), config[memDef.name], includes, step);
+                        this.addMemberConfigs(map, config[memDef.name], selectedFields, includes, step, memDef.name);
                     } else {
                         config[memDef.name] = {
                             $type: $data.Object,
@@ -193,7 +210,7 @@
                                     }
                                 };
                             }
-                        }
+                        };
                     }
                 }
             } else {
@@ -205,7 +222,7 @@
         var defs = this.context.memberDefinitions.asArray();
         for (var i = 0, l = defs.length; i < l; i++) {
             var def = defs[i];
-            if (def.elementType === type)
+            if (def.elementType && type && def.elementType.fullName === type.fullName)
                 return def;
         }
         return null;

@@ -266,7 +266,6 @@
     <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
-    <Content Include="localMigrations.html" />
     <Content Include="CREDITS.txt" />
     <Content Include="datajs-1.0.3.min.js" />
     <Content Include="favicon.ico" />
@@ -351,7 +350,7 @@
     <Content Include="oDataParser\RequestParser.js" />
     <Content Include="oDataParser\test.html" />
     <Content Include="oDataParser\testConsole.html" />
-    <Content Include="Pro\CREDITS.txt" />
+    <Content Include="oDataParser\Visitors\ObjectLiteralBuilderVisitor.js" />
     <Content Include="Pro\CREDITS_PRO.txt" />
     <Content Include="Pro\CREDITS_TRIAL.txt" />
     <Content Include="Pro\JayDataModules\localMigrations.js" />

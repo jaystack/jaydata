@@ -2,6 +2,42 @@
     msg = msg || '';
     module("BugFix" + msg);
 
+    test('deep_include_fix', function () {
+        if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+        expect(18);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+                var trace = db.Users.include('Articles.Category').include('Profile').toTraceString();
+                var config = trace.modelBinderConfig;
+                ok(config.$item, 'no $item');
+                ok(config.$item.Articles, 'no Articles');
+                ok(config.$item.Articles.$item, 'no Articles.$item');
+                ok(config.$item.Articles.$item.Category, 'no Articles.Category');
+                ok(config.$item.Profile, 'no Profile');
+
+                db.Users.include('Articles.Category').include('Profile').filter(function (it) { return it.LoginName == this.name; }, { name: 'Usr1' }).toArray(function (users) {
+                    ok(users, 'no users');
+                    ok(Array.isArray(users), 'not an Array');
+                    ok(users[0], 'empty');
+                    ok(users[0] instanceof $news.Types.User, 'not a User');
+                    equal(users[0].Email, 'usr1@company.com', 'bad Email');
+                    ok(Array.isArray(users[0].Articles), 'not an Array');
+                    ok(users[0].Articles[0], 'empty');
+                    ok(users[0].Articles[0] instanceof $news.Types.Article, 'not an Article');
+                    ok(users[0].Articles[0].Category, 'bad Category');
+                    ok(users[0].Articles[0].Category instanceof $news.Types.Category, 'not a Category');
+                    ok(users[0].Profile, 'bad Profile');
+                    ok(users[0].Profile instanceof $news.Types.UserProfile, 'not a UserProfile');
+                    equal(users[0].Profile.Bio, 'Bio1', 'bad Profile.Bio');
+                    start(1);
+                });
+            });
+        });
+    });
+
     test('remove navgation property value', function () {
         expect(4);
         stop(1);

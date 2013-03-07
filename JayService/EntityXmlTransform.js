@@ -62,7 +62,7 @@
         var memDefs = defaultType.memberDefinitions.getPublicMappedProperties();
         if (selectedFields && selectedFields.length > 0) {
             memDefs = memDefs.filter(function (memDef) {
-                return selectedFields.indexOf(memDef.name) >= 0
+                return selectedFields.indexOf(memDef.name) >= 0 || selectedFields.filter(function(it){ return it.split('.')[0] === memDef.name }).length;
             });
         }
 
@@ -71,20 +71,22 @@
 
         this.xml.startDocument();
         if ($data.Array.isArray(results)) {
-            this._buildFeed(results, entitySetDef, defaultType, memDefs);
+            this._buildFeed(results, entitySetDef, defaultType, memDefs, selectedFields, includes, '');
         } else {
-            this._buildEntry(results, entitySetDef, defaultType, memDefs, includes, true);
+            this._buildEntry(results, entitySetDef, defaultType, memDefs, selectedFields, includes, true, '');
         }
         this.xml.endDocument();
         xmlResult += this.xml.getXmlString();
         return xmlResult.replace('xml__base', 'xml:base');
     },
 
-    _buildFeed: function (data, esDef, elementType, selectedFields, includes) {
+    _buildFeed: function (data, esDef, elementType, memDefs, selectedFields, includes, path, rootHref) {
         var feed = this.xml.declareElement('feed');
         this.xml.startElement(feed);
 
-        this._addMainNamespaces(esDef);
+        if (!path){
+            this._addMainNamespaces(esDef);
+        }
 
         //id
         var id = this.xml.declareElement('id');
@@ -111,11 +113,11 @@
         this.xml.startElement(link)
             .addAttribute(rel, 'self')
             .addAttribute(title, esDef.name)
-            .addAttribute(href, esDef.name)
+            .addAttribute(href, rootHref || esDef.name)
             .endElement();
 
         for (var i = 0; i < data.length; i++) {
-            this._buildEntry(data[i], esDef, elementType, selectedFields, includes);
+            this._buildEntry(data[i], esDef, elementType, memDefs, selectedFields, includes, false, path);
         }
 
         if (data.length === 0) {
@@ -128,7 +130,7 @@
 
         this.xml.endElement();
     },
-    _buildEntry: function (data, esDef, elementType, selectedFields, includes, isRoot) {
+    _buildEntry: function (data, esDef, elementType, memDefs, selectedFields, includes, isRoot, path) {
         var entry = this.xml.declareElement('entry');
         this.xml.startElement(entry);
 
@@ -162,7 +164,7 @@
             .endElement();
 
         //navProperties
-        this._buildNavProperties(data, esDef, elementType, itemUrl, selectedFields, includes);
+        this._buildNavProperties(data, esDef, elementType, itemUrl, memDefs, selectedFields, includes, path);
 
         //title
         var title = this.xml.declareElement('title');
@@ -188,7 +190,7 @@
         this.xml.startElement(content)
             .addAttribute(contentType, 'application/xml')
             .startElement(properties);
-        this._buildProperties(data, esDef, elementType, selectedFields, includes);
+        this._buildProperties(data, esDef, elementType, memDefs, selectedFields, includes, path);
         this.xml.endElement()
            .endElement()
            .endElement();
@@ -210,10 +212,10 @@
         this.xml.addAttribute(base, this.requesUrl + '/' + esDef.name);
     },
 
-    _buildNavProperties: function (data, esDef, elementType, itemUrl, selectedFields, includes) {
+    _buildNavProperties: function (data, esDef, elementType, itemUrl, memDefs, selectedFields, includes, path) {
         var memDefs = elementType.memberDefinitions.getPublicMappedProperties();
-        if (selectedFields && selectedFields.length > 0)
-            memDefs = selectedFields;
+        if (path && selectedFields && selectedFields.length > 0)
+            memDefs = memDefs.filter(function(it){ return selectedFields.indexOf(path + '.' + it.name) >= 0; });
 
         for (var i = 0; i < memDefs.length; i++) {
             var memDef = memDefs[i];
@@ -236,23 +238,46 @@
                 var link = this.xml.declareElement('link');
                 var typeName = elementType.name;
                 this.xml.startElement(link)
-                    .addAttribute(rel, this.cfg.related + '/' + linkEsDef.name)
+                    .addAttribute(rel, this.cfg.related + '/' + (type === $data.Array ? linkEsDef.name : memDef.name))
                     .addAttribute(atype, 'application/atom+xml;type=' + linkType)
                     .addAttribute(href, itemUrl.slice(this.requesUrl.length + 1) + '/' + memDef.name);
 
                 //includes
+                if (data[memDef.name] !== undefined){
+                    var m = this.xml.declareNamespace(this.cfg.m, 'm');
+                    var inline = this.xml.declareElement(m, 'inline');
+                    this.xml.startElement(inline);
+                    
+                    var defaultType = Container.resolveType(memDef.elementType || memDef.type);
+                    var esType = this._getEntitySetDefByType(defaultType);
+                    var path = path ? path + '.' + memDef.name : memDef.name;
+                    if (memDef.elementType){
+                        this._buildFeed(data[memDef.name], esType, defaultType, defaultType.memberDefinitions.getPublicMappedProperties(), selectedFields, includes, path, itemUrl.slice(this.requesUrl.length + 1) + '/' + memDef.name);
+                    }else{
+                        this._buildEntry(data[memDef.name], esType, defaultType, memDefs, selectedFields, includes, false, path);
+                    }
+                    
+                    this.xml.endElement();
+                }
 
                 this.xml.endElement();
             }
         }
     },
-    _buildProperties: function (data, esDef, elementType, selectedFields, includes) {
+    _buildProperties: function (data, esDef, elementType, memDefs, selectedFields, includes, path) {
         var m = this.xml.declareNamespace(this.cfg.m, 'm');
         var d = this.xml.declareNamespace(this.cfg.d, 'd');
 
         var memDefs = elementType.memberDefinitions.getPublicMappedProperties();
-        if (selectedFields && selectedFields.length > 0)
-            memDefs = selectedFields;
+        if (path){
+            if (selectedFields && selectedFields.length > 0)
+                memDefs = memDefs.filter(function(it){
+                    return (selectedFields.indexOf(path) >= 0 && selectedFields.indexOf(path + '.' + it.name) < 0) ||
+                        selectedFields.indexOf(path + '.' + it.name) >= 0; });
+        }else{
+            if (selectedFields && selectedFields.length > 0)
+                memDefs = memDefs.filter(function(it){ return selectedFields.indexOf(it.name) >= 0; });
+        }
 
         for (var i = 0; i < memDefs.length; i++) {
             var memDef = memDefs[i];
