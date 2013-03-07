@@ -192,19 +192,23 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
             }
         }, this);
     },
-    DefaultSelection: function (builder, type, includes) {
+    DefaultSelection: function (builder, type, allIncludes) {
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = type;
 
         var storageModel = this._query.context._storageModel.getStorageModel(type);
         this._addPropertyToModelBinderConfig(type, builder);
-        if (includes) {
-            includes.forEach(function (include) {
+        if (allIncludes) {
+            allIncludes.forEach(function (include) {
                 var includes = include.name.split('.');
                 var association = null;
                 var tmpStorageModel = storageModel;
+                var itemCount = 0;
                 for (var i = 0; i < includes.length; i++) {
-                    if (builder.modelBinderConfig.$item) builder.selectModelBinderProperty('$item');
+                    if (builder.modelBinderConfig.$item){
+                        builder.selectModelBinderProperty('$item');
+                        itemCount++;
+                    }
                     builder.selectModelBinderProperty(includes[i]);
                     association = tmpStorageModel.Associations[includes[i]];
                     tmpStorageModel = this._query.context._storageModel.getStorageModel(association.ToType);
@@ -225,7 +229,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     this._addPropertyToModelBinderConfig(include.type, builder);
                 }
 
-                for (var i = 0; i < includes.length; i++) {
+                for (var i = 0; i < includes.length + itemCount; i++) {
                     builder.popModelBinderProperty();
                 }
             }, this);
