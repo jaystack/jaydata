@@ -9,7 +9,7 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
     open: function (callBack, tran, isWrite) {
         if (isWrite === undefined)
             isWrite = true;
-
+	callBack.oncomplete = callBack.oncomplete || function(){};
         if (tran) {
             callBack.success(tran.transaction);
         } else if (this.database) {
