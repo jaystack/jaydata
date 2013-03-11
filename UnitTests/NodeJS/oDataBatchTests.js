@@ -91,6 +91,7 @@ $example.Context.generateTestData = function (ctx, callback) {
         for (var i = 0; i < $example.Context.generateTestData.itemsInTables; i++) {
             ctx.People.add({ Name: 'Person' + i, Description: 'desc' + i, Age: 10 + i });
             ctx.Orders.add({ Value: i * 1000, Date: new Date((2000 + i) + '/01/01'), Completed: i % 2 });
+            if ($data.storageProviders.mongoDBPro) ctx.Places.add({ Name: 'Place' + i, Location: new $data.GeographyPoint([i / 100, i / 100]) });
         }
 
         ctx.saveChanges(callback);
@@ -776,3 +777,50 @@ exports.Tests = {
     }
 
 };
+
+if ($data.storageProviders.mongoDBPro){
+    exports.Tests.getGeoDataFromDb = function (test) {
+        test.expect(1);
+
+        var context = $example.Context.getContext();
+        $example.Context.generateTestData(context, function () {
+
+            context.Places.toArray(function (p) {
+                test.equal(p.length, $example.Context.generateTestData.itemsInTables, 'Places count failed');
+                test.done();
+            }).fail(function(err){
+                test.ok(false, 'Query failed');
+                test.done();
+            });
+
+        });
+    };
+    exports.Tests.filterGeoDataFromDb = function (test) {
+        test.expect(2);
+
+        var context = $example.Context.getContext();
+        $example.Context.generateTestData(context, function () {
+
+            context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toArray(function (p) {
+                test.equal(p.length, 3, 'Places count failed');
+                //console.log(p.map(function(it){ return it.initData.Location; }));
+                test.deepEqual(p.map(function(it){ return it.initData.Location; }), [
+                    {
+                        type: 'Point',
+                        coordinates: [0.01, 0.01]
+                    }, {
+                        type: 'Point',
+                        coordinates: [0.02, 0.02]
+                    }, {
+                        type: 'Point',
+                        coordinates: [0, 0]
+                    }
+                ], 'Bad places filtered');
+                test.done();
+            }).fail(function(err){
+                console.log(JSON.parse(err.data[0].response.body).error);
+            });
+
+        });
+    };
+}

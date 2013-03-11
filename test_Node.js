@@ -1,4 +1,5 @@
 ﻿require('jaydata');
+try{ require('jaydata-mongodb-pro'); }catch(err){}
 window.DOMParser = require('xmldom').DOMParser;
 
 var nodeunit = require('nodeunit');
@@ -13,7 +14,8 @@ exports['oDataBatchTest'] = require('./UnitTests/NodeJS/oDataBatchTests.js');
 exports['argumentBinderTests'] = require('./UnitTests/NodeJS/argumentBinderTests.js');
 exports['oDataXmlResultTests'] = require('./UnitTests/NodeJS/oDataXmlResultTests.js');
 
-exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js');
+try{ exports['mongoProviderTests'] = require('./Pro/UnitTests/mongoProviderTests.js'); }
+catch(err){ exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js'); }
 
 var connect = require('connect');
 var app = connect();
@@ -100,7 +102,7 @@ $exampleSrv.TestItemComputed.addEventListener('beforeCreate', function (sender, 
 $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceBase], null, {
     People: { type: $data.EntitySet, elementType: $exampleSrv.PersonSrv },
     Orders: { type: $data.EntitySet, elementType: $exampleSrv.OrderSrv },
-    Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv },
+    Places: { type: $data.EntitySet, elementType: $exampleSrv.PlaceSrv, indices: $data.storageProviders.mongoDBPro ? [{ keys: [{ field: 'Location', spatial: true }] }] : undefined },
     TestItems: { type: $data.EntitySet, elementType: $exampleSrv.TestItem },
     TestItemGuids: { type: $data.EntitySet, elementType: $exampleSrv.TestItemGuid },
     TestItemComputeds: { type: $data.EntitySet, elementType: $exampleSrv.TestItemComputed },
