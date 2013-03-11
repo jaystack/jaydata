@@ -153,6 +153,7 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/RequestParser.js\
 	$(ODATAPARSER_DIR)/EntityExpressionBuilder.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
+	$(ODATAPARSER_DIR)/Visitors/ObjectLiteralBuilderVisitor.js\
 
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
