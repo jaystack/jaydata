@@ -19,7 +19,10 @@
             xmlHead: '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
 
             headers: [],
-            excelUserAgent: 'PowerPivot'
+            excelUserAgent: 'PowerPivot',
+
+            gml: 'http://www.opengis.net/gml',
+            georss: 'http://www.georss.org/georss'
 
         }, config);
 
@@ -333,7 +336,7 @@
                 } else {
                     //primitive types
                     var typeName = Container.resolveName(type);
-                    this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName](value) : value.toString());
+                    this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName].call(this, value) : value.toString());
                 }
             } else {
                 var nullValue = this.xml.declareAttribute(m, 'null');
@@ -362,7 +365,7 @@
                 this.xml.startElement(item);
                 if (edmTypeName !== 'Edm.String')
                     this.xml.addAttribute(itemType, edmTypeName);
-                this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName](data[i]) : data[i].toString());
+                this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName].call(this, data[i]) : data[i].toString());
                 this.xml.endElement();
             }
         }
@@ -378,6 +381,49 @@
         }
         return this._edmTypeMapping[typeName] ? this._edmTypeMapping[typeName] : typeName;
     },
+
+    _buildSpatialPoint: function (value, srsName) {
+        var gml = this.xml.declareNamespace(this.cfg.gml, 'gml');
+        var point = this.xml.declareElement(gml, value.type);
+        var srsNameAttr = this.xml.declareAttribute(gml, 'srsName');
+
+        this.xml.startElement(point)
+            .addAttribute(srsNameAttr, srsName);
+
+        var pos = this.xml.declareElement(gml, 'pos');
+        this.xml.startElement(pos);
+        this.xml.addText(value.coordinates.join(' '));
+        this.xml.endElement();
+
+        this.xml.endElement();
+    },
+
+    _buildSpatialLineString: function (value, srsName) {
+        var gml = this.xml.declareNamespace(this.cfg.gml, 'gml');
+        var point = this.xml.declareElement(gml, value.type);
+        var srsNameAttr = this.xml.declareAttribute(gml, 'srsName');
+
+        this.xml.startElement(point)
+            .addAttribute(srsNameAttr, srsName);
+
+        var pos = this.xml.declareElement(gml, 'posList');
+        this.xml.startElement(pos);
+
+        var valueText = '';
+        if (value.coordinates) {
+            for (var i = 0; i < value.coordinates.length; i++) {
+                if (Array.isArray(value.coordinates[i])) {
+                    if (i !== 0) valueText += ' ';
+                    valueText += value.coordinates[i].join(' ');
+                }
+            }
+        }
+        this.xml.addText(valueText);
+        this.xml.endElement();
+
+        this.xml.endElement();
+    },
+
     _edmTypeMapping: {
         value: {
             '$data.Boolean': 'Edm.Boolean',
@@ -387,7 +433,21 @@
             '$data.Integer': 'Edm.Int32',
             '$data.String': 'Edm.String',
             '$data.ObjectID': 'Edm.String',
-            '$data.Guid': 'Edm.Guid'
+            '$data.Guid': 'Edm.Guid',
+            '$data.GeographyPoint': 'Edm.GeographyPoint',
+            '$data.GeographyLineString': 'Edm.GeographyLineString',
+            '$data.GeographyPolygon': 'Edm.GeographyPolygon',
+            '$data.GeographyMultiPoint': 'Edm.GeographyMultiPoint',
+            '$data.GeographyMultiLineString': 'Edm.GeographyMultiLineString',
+            '$data.GeographyMultiPolygon': 'Edm.GeographyMultiPolygon',
+            '$data.GeographyCollection': 'Edm.GeographyCollection',
+            '$data.GeometryPoint': 'Edm.GeometryPoint',
+            '$data.GeometryLineString': 'Edm.GeometryLineString',
+            '$data.GeometryPolygon': 'Edm.GeometryPolygon',
+            '$data.GeometryMultiPoint': 'Edm.GeometryMultiPoint',
+            '$data.GeometryMultiLineString': 'Edm.GeometryMultiLineString',
+            '$data.GeometryMultiPolygon': 'Edm.GeometryMultiPolygon',
+            '$data.GeometryCollection': 'Edm.GeometryCollection'
         }
     },
     _valueConverters: {
@@ -400,7 +460,11 @@
             '$data.String': function (v) { return v; },
             '$data.ObjectID': function (v) { return v.toString(); },
             '$data.Object': function (v) { return JSON.stringify(v); },
-            '$data.Guid': function (v) { return v.toString(); },
+            '$data.Guid': function (v) { return v.toString(); }/*,
+            '$data.GeographyPoint': function (v) { return this._buildSpatialPoint(v, 'http://www.opengis.net/def/crs/EPSG/0/4326'); },
+            '$data.GeometryPoint': function (v) { return this._buildSpatialPoint(v, 'http://www.opengis.net/def/crs/EPSG/0/0'); },
+            '$data.GeographyLineString': function (v) { return this._buildSpatialLineString(v, 'http://www.opengis.net/def/crs/EPSG/0/4326'); },
+            '$data.GeometryLineString': function (v) { return this._buildSpatialLineString(v, 'http://www.opengis.net/def/crs/EPSG/0/0'); }*/
         }
     },
     supports: {
