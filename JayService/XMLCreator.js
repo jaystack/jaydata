@@ -57,8 +57,9 @@ $data.Class.define('$data.Xml.XmlCreator', null, null, {
 
     addAttribute: function (attr, value) {
         attr.Value = value;
-        this.currentElement.Attributes.push(attr.Name);
-        this.currentElement.Attributes[attr.Name] = attr;
+        var key = attr.Namespace ? (attr.Name + '_' + attr.Namespace.Name) : attr.Name;
+        this.currentElement.Attributes.push(key);
+        this.currentElement.Attributes[key] = attr;
 
         if (attr.Namespace && this.currentElement.InheritedNamespaces.indexOf(attr.Namespace.Name) === -1 && this.currentElement.Namespaces.indexOf(attr.Namespace.Name) === -1) {
             this.currentElement.Namespaces.push(attr.Namespace.Name);
