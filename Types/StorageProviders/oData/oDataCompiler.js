@@ -152,7 +152,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             }
         } else {
             context.postData = context.postData || {};
-            context.postData[expression.name] = expression.value;
+            if(expression.value instanceof $data.Date)
+                context.postData[expression.name] = expression.value;
+            else
+                context.postData[expression.name] = JSON.parse(JSON.stringify(expression.value));
         }
     },
 //    VisitConstantExpression: function (expression, context) {
