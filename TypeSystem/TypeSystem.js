@@ -828,7 +828,7 @@
 
                 case t === $data.SimpleBase:
                 case t === $data.Geospatial:
-                case t === $data.Geography:
+                case t === $data.GeographyBase:
                 case t === $data.GeographyPoint:
                 case t === $data.GeographyLineString:
                 case t === $data.GeographyPolygon:
@@ -836,7 +836,7 @@
                 case t === $data.GeographyMultiLineString:
                 case t === $data.GeographyMultiPolygon:
                 case t === $data.GeographyCollection:
-                case t === $data.Geometry:
+                case t === $data.GeometryBase:
                 case t === $data.GeometryPoint:
                 case t === $data.GeometryLineString:
                 case t === $data.GeometryPolygon:
@@ -939,7 +939,7 @@
                     if (value instanceof $data.GeographyMultiLineString) return '$data.GeographyMultiLineString';
                     if (value instanceof $data.GeographyMultiPolygon) return '$data.GeographyMultiPolygon';
                     if (value instanceof $data.GeographyCollection) return '$data.GeographyCollection';
-                    if (value instanceof $data.Geography) return '$data.Geography';
+                    if (value instanceof $data.GeographyBase) return '$data.GeographyBase';
                     if (value instanceof $data.GeometryPoint) return '$data.GeometryPoint';
                     if (value instanceof $data.GeometryLineString) return '$data.GeometryLineString';
                     if (value instanceof $data.GeometryPolygon) return '$data.GeometryPolygon';
@@ -947,7 +947,7 @@
                     if (value instanceof $data.GeometryMultiLineString) return '$data.GeometryMultiLineString';
                     if (value instanceof $data.GeometryMultiPolygon) return '$data.GeometryMultiPolygon';
                     if (value instanceof $data.GeometryCollection) return '$data.GeometryCollection';
-                    if (value instanceof $data.Geometry) return '$data.Geometry';
+                    if (value instanceof $data.GeometryBase) return '$data.GeometryBase';
                     if (value instanceof $data.Geospatial) return '$data.Geospatial';
                     if (value instanceof $data.SimpleBase) return '$data.SimpleBase';
                     if (value instanceof $data.Guid) return '$data.Guid';

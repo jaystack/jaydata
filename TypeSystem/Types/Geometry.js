@@ -1,25 +1,25 @@
 /* $data.Geometry */
-$data.Geometry = function Geometry() {
+$data.GeometryBase = function GeometryBase() {
     $data.Geospatial.apply(this, arguments);
 };
 
-$data.Geometry.parseFromString = function (strData) {
+$data.GeometryBase.parseFromString = function (strData) {
     var lparenIdx = strData.indexOf('(');
     if (lparenIdx >= 0) {
         var name = strData.substring(0, lparenIdx).toLowerCase();
-        var type = $data.Geometry.registered[name];
+        var type = $data.GeometryBase.registered[name];
 
-        if (type && type.parseFromString && type != $data.Geometry) {
+        if (type && type.parseFromString && type != $data.GeometryBase) {
             return type.parseFromString(strData);
         } else {
             Guard.raise(new Exception('parseFromString', 'Not Implemented', strData));
         }
     }
 };
-$data.Geometry.stringifyToUrl = function (geoData) {
-    if (geoData instanceof $data.Geometry && geoData.constructor && geoData.constructor.stringifyToUrl) {
+$data.GeometryBase.stringifyToUrl = function (geoData) {
+    if (geoData instanceof $data.GeometryBase && geoData.constructor && geoData.constructor.stringifyToUrl) {
         return geoData.constructor.stringifyToUrl(geoData);
-    } else if (geoData instanceof $data.Geometry && geoData.constructor && Array.isArray(geoData.constructor.validMembers) && geoData.constructor.validMembers.length === 1 && geoData.constructor.validMembers[0] === 'coordinates') {
+    } else if (geoData instanceof $data.GeometryBase && geoData.constructor && Array.isArray(geoData.constructor.validMembers) && geoData.constructor.validMembers.length === 1 && geoData.constructor.validMembers[0] === 'coordinates') {
         var data = "geometry'" + geoData.type.toUpperCase() + '(';
         function buildArray(d, context) {
             if (Array.isArray(d[0])) {
@@ -47,23 +47,23 @@ $data.Geometry.stringifyToUrl = function (geoData) {
         Guard.raise(new Exception('stringifyToUrl on instance type', 'Not Implemented', geoData));
     }
 };
-$data.Geometry.registerType = function (name, type, base) {
-    $data.SimpleBase.registerType(name, type, base || $data.Geometry);
+$data.GeometryBase.registerType = function (name, type, base) {
+    $data.SimpleBase.registerType(name, type, base || $data.GeometryBase);
 
-    $data.Geometry.registered = $data.Geometry.registered || {};
-    $data.Geometry.registered[name.toLowerCase()] = type;
+    $data.GeometryBase.registered = $data.GeometryBase.registered || {};
+    $data.GeometryBase.registered[name.toLowerCase()] = type;
 };
-$data.SimpleBase.registerType('Geometry', $data.Geometry, $data.Geospatial);
-$data.Container.registerType(['$data.Geometry'], $data.Geometry);
+$data.SimpleBase.registerType('GeometryBase', $data.GeometryBase, $data.Geospatial);
+$data.Container.registerType(['$data.GeometryBase'], $data.GeometryBase);
 
 /* $data.GeometryPoint */
 $data.GeometryPoint = function GeometryPoint(lon, lat) {
     if (lon && typeof lon === 'object' && Array.isArray(lon)) {
-        $data.Geometry.call(this, { coordinates: lon });
+        $data.GeometryBase.call(this, { coordinates: lon });
     } else if (lon && typeof lon === 'object') {
-        $data.Geometry.call(this, lon);
+        $data.GeometryBase.call(this, lon);
     } else {
-        $data.Geometry.call(this, { coordinates: [lon || 0, lat || 0] });
+        $data.GeometryBase.call(this, { coordinates: [lon || 0, lat || 0] });
     }
 };
 $data.GeometryPoint.parseFromString = function (strData) {
@@ -73,7 +73,7 @@ $data.GeometryPoint.parseFromString = function (strData) {
     return new $data.GeometryPoint(parseFloat(values[0]), parseFloat(values[1]));
 };
 $data.GeometryPoint.validMembers = ['coordinates'];
-$data.Geometry.registerType('Point', $data.GeometryPoint);
+$data.GeometryBase.registerType('Point', $data.GeometryPoint);
 Object.defineProperty($data.GeometryPoint.prototype, 'x', { get: function () { return this.coordinates[0]; }, set: function (v) { this.coordinates[0] = v; } });
 Object.defineProperty($data.GeometryPoint.prototype, 'y', { get: function () { return this.coordinates[1]; }, set: function (v) { this.coordinates[1] = v; } });
 $data.Container.registerType(['$data.GeometryPoint', 'GeometryPoint'], $data.GeometryPoint);
@@ -81,67 +81,67 @@ $data.Container.registerType(['$data.GeometryPoint', 'GeometryPoint'], $data.Geo
 /* $data.GeometryLineString */
 $data.GeometryLineString = function GeometryLineString(data) {
     if (Array.isArray(data)) {
-        $data.Geometry.call(this, { coordinates: data });
+        $data.GeometryBase.call(this, { coordinates: data });
     } else {
-        $data.Geometry.call(this, data);
+        $data.GeometryBase.call(this, data);
     }
 };
 $data.GeometryLineString.validMembers = ['coordinates'];
-$data.Geometry.registerType('LineString', $data.GeometryLineString);
+$data.GeometryBase.registerType('LineString', $data.GeometryLineString);
 $data.Container.registerType(['$data.GeometryLineString', 'GeometryLineString'], $data.GeometryLineString);
 
 /* $data.GeometryPolygon */
 $data.GeometryPolygon = function GeometryPolygon(data) {
     if (Array.isArray(data)) {
-        $data.Geometry.call(this, { coordinates: data });
+        $data.GeometryBase.call(this, { coordinates: data });
     } else {
-        $data.Geometry.call(this, data);
+        $data.GeometryBase.call(this, data);
     }
 };
 $data.GeometryPolygon.validMembers = ['coordinates'];
-$data.Geometry.registerType('Polygon', $data.GeometryPolygon);
+$data.GeometryBase.registerType('Polygon', $data.GeometryPolygon);
 $data.Container.registerType(['$data.GeometryPolygon', 'GeometryPolygon'], $data.GeometryPolygon);
 
 /* $data.GeometryMultiPoint */
 $data.GeometryMultiPoint = function GeometryMultiPoint(data) {
     if (Array.isArray(data)) {
-        $data.Geometry.call(this, { coordinates: data });
+        $data.GeometryBase.call(this, { coordinates: data });
     } else {
-        $data.Geometry.call(this, data);
+        $data.GeometryBase.call(this, data);
     }
 };
 $data.GeometryMultiPoint.validMembers = ['coordinates'];
-$data.Geometry.registerType('MultiPoint', $data.GeometryMultiPoint);
+$data.GeometryBase.registerType('MultiPoint', $data.GeometryMultiPoint);
 $data.Container.registerType(['$data.GeometryMultiPoint', 'GeometryMultiPoint'], $data.GeometryMultiPoint);
 
 /* $data.GeometryMultiLineString */
 $data.GeometryMultiLineString = function GeometryMultiLineString(data) {
     if (Array.isArray(data)) {
-        $data.Geometry.call(this, { coordinates: data });
+        $data.GeometryBase.call(this, { coordinates: data });
     } else {
-        $data.Geometry.call(this, data);
+        $data.GeometryBase.call(this, data);
     }
 };
 $data.GeometryMultiLineString.validMembers = ['coordinates'];
-$data.Geometry.registerType('MultiLineString', $data.GeometryMultiLineString);
+$data.GeometryBase.registerType('MultiLineString', $data.GeometryMultiLineString);
 $data.Container.registerType(['$data.GeometryMultiLineString', 'GeometryMultiLineString'], $data.GeometryMultiLineString);
 
 /* $data.GeometryMultiPolygon */
 $data.GeometryMultiPolygon = function GeometryMultiPolygon(data) {
     if (Array.isArray(data)) {
-        $data.Geometry.call(this, { coordinates: data });
+        $data.GeometryBase.call(this, { coordinates: data });
     } else {
-        $data.Geometry.call(this, data);
+        $data.GeometryBase.call(this, data);
     }
 };
 $data.GeometryMultiPolygon.validMembers = ['coordinates'];
-$data.Geometry.registerType('MultiPolygon', $data.GeometryMultiPolygon);
+$data.GeometryBase.registerType('MultiPolygon', $data.GeometryMultiPolygon);
 $data.Container.registerType(['$data.GeometryMultiPolygon', 'GeometryMultiPolygon'], $data.GeometryMultiPolygon);
 
 /* $data.GeometryCollection */
 $data.GeometryCollection = function GeometryCollection(data) {
-    $data.Geometry.call(this, data);
+    $data.GeometryBase.call(this, data);
 };
-$data.Geometry.registerType('Collection', $data.GeometryCollection);
+$data.GeometryBase.registerType('Collection', $data.GeometryCollection);
 $data.Container.registerType(['$data.GeometryCollection', 'GeometryCollection'], $data.GeometryCollection);
 

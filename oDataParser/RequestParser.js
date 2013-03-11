@@ -427,7 +427,7 @@
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geography format.", "parseGeographyLiteral");
             var g;
             try {
-                g = $data.Geography.parseFromString(token.value);
+                g = $data.GeographyBase.parseFromString(token.value);
             } catch (e) {
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geography format.", "parseGeographyLiteral");
             }
@@ -445,7 +445,7 @@
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geometry format.", "parseGeometryLiteral");
             var g;
             try {
-                g = $data.Geometry.parseFromString(token.value);
+                g = $data.GeometryBase.parseFromString(token.value);
             } catch (e) {
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid geometry format.", "parseGeometryLiteral");
             }
