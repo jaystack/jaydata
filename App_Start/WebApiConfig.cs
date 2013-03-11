@@ -1,4 +1,5 @@
-﻿using JayData.Models.ODataInheritance;
+﻿using JayData.Models.GeoData;
+using JayData.Models.ODataInheritance;
 using JayData.NewsReader;
 using Microsoft.Data.Edm;
 using System;
@@ -78,6 +79,14 @@ namespace jaydata
 
             IEdmModel modelInheritance = modelBuilderInheriance.GetEdmModel();
             config.Routes.MapODataRoute(routeName: "ODataInheritance", routePrefix: "odatainheritance", model: modelInheritance);
+
+
+
+            ODataConventionModelBuilder modelBuilderGeoData = new ODataConventionModelBuilder();
+            var place = modelBuilderGeoData.EntitySet<Place>("Places");
+
+            IEdmModel modelGeoData = modelBuilderGeoData.GetEdmModel();
+            config.Routes.MapODataRoute(routeName: "ODataGeoData", routePrefix: "odatageo", model: modelGeoData);
 
         }
     }
