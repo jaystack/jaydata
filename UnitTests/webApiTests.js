@@ -226,7 +226,7 @@ $(function () {
 
                 context.saveChanges({
                     success: function (res) {
-
+                        ok(false, 'check result');
                         equal(res, 1, 'item saved');
                         notEqual(typeof place.Id, 'undefined', 'Id has value');
 
@@ -234,6 +234,7 @@ $(function () {
                         start();
                     },
                     error: function (e) {
+                        OData.defaultHandler.accept = origAccept;
                         ok(false, '.NET Convertable error');
                         start();
                     }
