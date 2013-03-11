@@ -801,6 +801,7 @@ if ($data.storageProviders.mongoDBPro){
         var context = $example.Context.getContext();
         $example.Context.generateTestData(context, function () {
 
+            console.log(context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toTraceString());
             context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toArray(function (p) {
                 test.equal(p.length, 3, 'Places count failed');
                 //console.log(p.map(function(it){ return it.initData.Location; }));
