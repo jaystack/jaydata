@@ -86,7 +86,7 @@
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Http.OData">
-      <HintPath>packages\Microsoft.AspNet.WebApi.OData.4.0.0-rtm-130205\lib\net40\System.Web.Http.OData.dll</HintPath>
+      <HintPath>packages\Microsoft.AspNet.WebApi.OData.4.0.0\lib\net40\System.Web.Http.OData.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Web.Services" />
@@ -157,6 +157,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\GeoData\PlacesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ODataInheritance\CarsController.cs" />
     <Compile Include="Controllers\WebApiOData\ArticlesController.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\GeoData\Place.cs" />
     <Compile Include="Models\ODataInheritance\ODataInheritanceModels.cs" />
     <Compile Include="Models\TaskManager\Category.cs">
       <DependentUpon>TaskManagerModel.tt</DependentUpon>
