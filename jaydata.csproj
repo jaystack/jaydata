@@ -362,8 +362,6 @@
     <Content Include="Pro\test_JayData_Complex.html" />
     <Content Include="Pro\test_JayData_min.html" />
     <Content Include="Pro\TypeSystem\initializeJayDataPro.js" />
-    <Content Include="Pro\Types\DbClient\OpenDatabaseClient\OpenDbCommand.js" />
-    <Content Include="Pro\Types\DbClient\OpenDatabaseClient\OpenDbConnection.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
@@ -372,6 +370,8 @@
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBStorageProvider.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
+    <Content Include="Pro\Types\StorageProviders\mongoDB\ClientObjectID.js" />
+    <Content Include="Pro\Types\StorageProviders\mongoDB\mongoDBStorageProvider.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlFilterCompiler.js" />

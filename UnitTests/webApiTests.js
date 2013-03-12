@@ -9,11 +9,11 @@ $(function () {
         (new $news.Types.NewsContext({ 
             name: "oData", 
             databaseName: 'T1', 
-            oDataServiceHost: "Services/emptyNewsReader.svc", 
-            serviceUrl: 'Services/oDataDbDelete.asmx', 
+            oDataServiceHost: "/Services/emptyNewsReader.svc", 
+            serviceUrl: '/Services/oDataDbDelete.asmx', 
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables })).onReady(function (db) {
                 $news.Types.NewsContext.generateTestData(db, function () {
-                    $data.service('odata', function (f, t) {
+                    $data.service('/odata', function (f, t) {
 
                         var context = f();
                         context.onReady(function () {
@@ -44,12 +44,12 @@ $(function () {
         (new $news.Types.NewsContext({
             name: "oData",
             databaseName: 'T1',
-            oDataServiceHost: "Services/emptyNewsReader.svc",
-            serviceUrl: 'Services/oDataDbDelete.asmx',
+            oDataServiceHost: "/Services/emptyNewsReader.svc",
+            serviceUrl: '/Services/oDataDbDelete.asmx',
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         })).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
-                $data.service('odata', function (f, t) {
+                $data.service('/odata', function (f, t) {
 
                     var context = f();
                     context.onReady(function () {
@@ -78,12 +78,12 @@ $(function () {
         (new $news.Types.NewsContext({
             name: "oData",
             databaseName: 'T1',
-            oDataServiceHost: "Services/emptyNewsReader.svc",
-            serviceUrl: 'Services/oDataDbDelete.asmx',
+            oDataServiceHost: "/Services/emptyNewsReader.svc",
+            serviceUrl: '/Services/oDataDbDelete.asmx',
             dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables
         })).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
-                $data.service('odata', function (f, t) {
+                $data.service('/odata', function (f, t) {
 
                     var context = f({ maxDataServiceVersion: '3.0' });
                     context.onReady(function () {
