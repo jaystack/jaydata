@@ -8,7 +8,7 @@ $data.Geospatial = function Geospatial() {
     }
 
     $data.SimpleBase.apply(this, arguments);
-    this.type = this.constructor.type || 'InvalidType';
+    this.type = this.constructor.type || 'Unknown';
 };
 $data.SimpleBase.registerType('Geospatial', $data.Geospatial);
 $data.Container.registerType(['$data.Geospatial', 'Geospatial'], $data.Geospatial);

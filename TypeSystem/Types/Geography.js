@@ -1,6 +1,15 @@
 /* $data.GeographyBase */
 $data.GeographyBase = function GeographyBase() {
     $data.Geospatial.apply(this, arguments);
+
+    this.crs = $data.GeographyBase.defaultCrs;
+};
+
+$data.GeographyBase.defaultCrs = {
+    properties: {
+        name: 'EPSG:4326'
+    },
+    type: 'name'
 };
 
 $data.GeographyBase.parseFromString = function (strData) {
@@ -19,7 +28,7 @@ $data.GeographyBase.parseFromString = function (strData) {
 $data.GeographyBase.stringifyToUrl = function (geoData) {
     if (geoData instanceof $data.GeographyBase && geoData.constructor && geoData.constructor.stringifyToUrl) {
         return geoData.constructor.stringifyToUrl(geoData);
-    } else if (geoData instanceof $data.GeographyBase && geoData.constructor && Array.isArray(geoData.constructor.validMembers) && geoData.constructor.validMembers.length === 1 && geoData.constructor.validMembers[0] === 'coordinates') {
+    } else if (geoData instanceof $data.GeographyBase && geoData.constructor && Array.isArray(geoData.constructor.validMembers) && geoData.constructor.validMembers[0] === 'coordinates') {
         var data = "geography'" + geoData.type.toUpperCase() + '(';
         function buildArray(d, context) {
             if (Array.isArray(d[0])) {
@@ -143,6 +152,6 @@ $data.Container.registerType(['$data.GeographyMultiPolygon', 'GeographyMultiPoly
 $data.GeographyCollection = function GeographyCollection(data) {
     $data.GeographyBase.call(this, data);
 };
-$data.GeographyBase.registerType('Collection', $data.GeographyCollection);
+$data.GeographyBase.registerType('GeometryCollection', $data.GeographyCollection);
 $data.Container.registerType(['$data.GeographyCollection', 'GeographyCollection'], $data.GeographyCollection);
 
