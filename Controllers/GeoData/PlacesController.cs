@@ -161,6 +161,29 @@ namespace JayData.Controllers.GeoData
                 geographyPipeline5.EndGeography();
                 data[i].Coll = (GeographyCollection)spatialBuilder5.ConstructedGeography;
 
+                SpatialBuilder spatialBuilder6 = SpatialBuilder.Create();
+                GeometryPipeline geographyPipeline6 = spatialBuilder6.GeometryPipeline;
+                geographyPipeline6.SetCoordinateSystem(CoordinateSystem.DefaultGeometry);
+                geographyPipeline6.BeginGeometry(SpatialType.Collection);
+                geographyPipeline6.BeginGeometry(SpatialType.LineString);
+                geographyPipeline6.BeginFigure(new GeometryPosition(-1.56, 29.76));
+                geographyPipeline6.LineTo(new GeometryPosition(-1.58, 29.78));
+                geographyPipeline6.LineTo(new GeometryPosition(5, 50));
+                geographyPipeline6.EndFigure();
+                geographyPipeline6.EndGeometry();
+                geographyPipeline6.BeginGeometry(SpatialType.Point);
+                geographyPipeline6.BeginFigure(new GeometryPosition(-1.56, 29.76));
+                geographyPipeline6.EndFigure();
+                geographyPipeline6.EndGeometry();
+                geographyPipeline6.BeginGeometry(SpatialType.LineString);
+                geographyPipeline6.BeginFigure(new GeometryPosition(-1.56, 29.76));
+                geographyPipeline6.LineTo(new GeometryPosition(-1.58, 29.78));
+                geographyPipeline6.LineTo(new GeometryPosition(5, 50));
+                geographyPipeline6.EndFigure();
+                geographyPipeline6.EndGeometry();
+                geographyPipeline6.EndGeometry();
+                data[i].gColl = (GeometryCollection)spatialBuilder6.ConstructedGeometry;
+
             }
             
         }

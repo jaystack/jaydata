@@ -19,5 +19,6 @@ namespace JayData.Models.GeoData
         public GeographyMultiPolygon MPol { get; set; }
         public GeographyMultiLineString MLs { get; set; }
         public GeographyCollection Coll { get; set; }
+        public GeometryCollection gColl { get; set; }
     }
 }

@@ -184,20 +184,23 @@ $(function () {
             if (origAccept.indexOf('fullmetadata') >= 0)
                 OData.defaultHandler.accept = "application/atomsvc+xml;q=0.8, application/json;odata=verbose;q=0.7, application/json;q=0.5, */*;q=0.1";
 
-            context.Places.toArray(function (res) {
+            context.onReady(function () {
+                context.Places.toArray(function (res) {
 
-                for (var i = 0; i < res.length; i++) {
-                    var item = res[i];
-                    ok(item.Entrance instanceof $data.GeographyPoint, '$data.GeographyPoint');
-                    ok(item.Ls instanceof $data.GeographyLineString, '$data.GeographyLineString');
-                    ok(item.Mp instanceof $data.GeographyMultiPoint, '$data.GeographyMultiPoint');
-                    ok(item.Pol instanceof $data.GeographyPolygon, '$data.GeographyPolygon');
-                    ok(item.MPol instanceof $data.GeographyMultiPolygon, '$data.GeographyMultiPolygon');
-                    ok(item.MLs instanceof $data.GeographyMultiLineString, '$data.GeographyMultiLineString');
-                    ok(item.Coll instanceof $data.GeographyCollection, '$data.GeographyCollection');
-                }
-                OData.defaultHandler.accept = origAccept;
-                start();
+                    for (var i = 0; i < res.length; i++) {
+                        var item = res[i];
+                        ok(item.Entrance instanceof $data.GeographyPoint, '$data.GeographyPoint');
+                        ok(item.Ls instanceof $data.GeographyLineString, '$data.GeographyLineString');
+                        ok(item.Mp instanceof $data.GeographyMultiPoint, '$data.GeographyMultiPoint');
+                        ok(item.Pol instanceof $data.GeographyPolygon, '$data.GeographyPolygon');
+                        ok(item.MPol instanceof $data.GeographyMultiPolygon, '$data.GeographyMultiPolygon');
+                        ok(item.MLs instanceof $data.GeographyMultiLineString, '$data.GeographyMultiLineString');
+                        ok(item.Coll instanceof $data.GeographyCollection, '$data.GeographyCollection');
+                        ok(item.gColl instanceof $data.GeometryCollection, '$data.GeometryCollection');
+                    }
+                    OData.defaultHandler.accept = origAccept;
+                    start();
+                });
             });
 
         });
@@ -214,33 +217,34 @@ $(function () {
             if (origAccept.indexOf('fullmetadata') >= 0)
                 OData.defaultHandler.accept = "application/atomsvc+xml;q=0.8, application/json;odata=verbose;q=0.7, application/json;q=0.5, */*;q=0.1";
 
-            context.Places.toArray(function (res) {
-                var item = res[0];
+            context.onReady(function () {
+                context.Places.toArray(function (res) {
+                    var item = res[0];
 
-                var place = new context.Places.elementType();
-                place.Name = 'item new';
-                place.Description = 'Desc new';
-                place.Entrance = new $data.GeographyPoint(1, 1);
+                    var place = new context.Places.elementType();
+                    place.Name = 'item new';
+                    place.Description = 'Desc new';
+                    place.Entrance = new $data.GeographyPoint(1, 1);
 
-                context.Places.add(place);
+                    context.Places.add(place);
 
-                context.saveChanges({
-                    success: function (res) {
-                        ok(false, 'check result');
-                        equal(res, 1, 'item saved');
-                        notEqual(typeof place.Id, 'undefined', 'Id has value');
+                    context.saveChanges({
+                        success: function (res) {
+                            ok(false, 'check result');
+                            equal(res, 1, 'item saved');
+                            notEqual(typeof place.Id, 'undefined', 'Id has value');
 
-                        OData.defaultHandler.accept = origAccept;
-                        start();
-                    },
-                    error: function (e) {
-                        OData.defaultHandler.accept = origAccept;
-                        ok(false, '.NET Convertable error');
-                        start();
-                    }
+                            OData.defaultHandler.accept = origAccept;
+                            start();
+                        },
+                        error: function (e) {
+                            OData.defaultHandler.accept = origAccept;
+                            ok(false, '.NET Convertable error');
+                            start();
+                        }
+                    });
                 });
             });
-
         });
 
     });
