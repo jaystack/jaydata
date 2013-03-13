@@ -208,7 +208,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 var tmpStorageModel = storageModel;
                 var itemCount = 0;
                 for (var i = 0; i < includes.length; i++) {
-                    if (builder.modelBinderConfig.$item){
+                    if (builder.modelBinderConfig.$item) {
                         builder.selectModelBinderProperty('$item');
                         itemCount++;
                     }

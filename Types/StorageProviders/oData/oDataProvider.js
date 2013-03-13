@@ -41,9 +41,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             user: null,
             password: null,
             withCredentials: false,
-            enableJSONP: false,
-            UpdateMethod: 'PATCH',
-            useJsonLight: true
+            //enableJSONP: undefined,
+            //useJsonLight: undefined
+            UpdateMethod: 'PATCH'
         }, cfg);
 
         this.fixkDataServiceVersions(cfg);
@@ -67,10 +67,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         if ((cfg && !cfg.UpdateMethod && this.providerConfiguration.dataServiceVersion < '3.0') || !this.providerConfiguration.dataServiceVersion) {
             this.providerConfiguration.UpdateMethod = 'MERGE';
         }
-
-        if (this.providerConfiguration.maxDataServiceVersion < '3.0')
-            this.providerConfiguration.useJsonLight = false;
-
     },
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
@@ -173,11 +169,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
                 data: sql.postData,
-                enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
-                },
-                useJsonLight: this.providerConfiguration.useJsonLight
+                }
             },
             function (data, textStatus, jqXHR) {
                 if (!data && textStatus.body) data = JSON.parse(textStatus.body);
@@ -197,6 +191,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         if (this.providerConfiguration.dataServiceVersion) {
             requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+        }
+       
+        if (typeof this.providerConfiguration.enableJSONP !== 'undefined') {
+            requestData[0].enableJsonpCallback = this.providerConfiguration.enableJSONP;
+        }
+        if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
+            requestData[0].useJsonLight = this.providerConfiguration.useJsonLight;
         }
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
@@ -241,11 +242,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     requestUri: this.providerConfiguration.oDataServiceHost + '/',
                     headers: {
                         MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
-                    },
-                    useJsonLight: this.providerConfiguration.useJsonLight
+                    }
                 };
                 if (this.providerConfiguration.dataServiceVersion) {
                     request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+                }
+                if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
+                    request.useJsonLight = this.providerConfiguration.useJsonLight;
                 }
 
                 //request.headers = { "Content-Id": convertedItem.length };
@@ -370,8 +373,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             },
             headers: {
                 MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
-            },
-            useJsonLight: this.providerConfiguration.useJsonLight
+            }
         }, function (data, response) {
             if (response.statusCode == 202) {
                 var result = data.__batchResponses[0].__changeResponses;
@@ -422,6 +424,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         if (this.providerConfiguration.dataServiceVersion) {
             requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+        }
+        if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
+            requestData[0].useJsonLight = this.providerConfiguration.useJsonLight;
         }
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
