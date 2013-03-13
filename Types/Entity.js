@@ -543,8 +543,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         else
             throw 'not implemented'; //todo
     },
-    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true }
- 
+    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true } 
 },
 {
     //create get_[property] and set_[property] functions for properties
@@ -607,7 +606,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             return;
         }
         this[delegateName].fire(data);
+    },
+
+    getFieldNames: function () {
+        return this.memberDefinitions.getPublicMappedPropertyNames();
     }
+
 });
 
 

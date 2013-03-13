@@ -15,8 +15,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             maxDataServiceVersion: '2.0',
             user: null,
             password: null,
-            withCredentials: false,
-            enableJSONP: false
+            withCredentials: false
+            //enableJSONP: undefined
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -126,7 +126,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
                 data: sql.postData,
-                enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 }
@@ -146,6 +145,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 callBack.error(errorThrow || new Exception('Request failed', 'RequestError', arguments));
             }
         ];
+
+        if (typeof this.providerConfiguration.enableJSONP !== 'undefined') {
+            requestData[0].enableJsonpCallback = this.providerConfiguration.enableJSONP;
+        }
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
         //if (this.providerConfiguration.user) {
