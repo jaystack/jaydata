@@ -370,8 +370,10 @@
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBStorageProvider.js" />
     <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
+    <Content Include="Pro\Types\StorageProviders\IndexedDB\initializeIndexedDBPro.js" />
     <Content Include="Pro\Types\StorageProviders\mongoDB\ClientObjectID.js" />
     <Content Include="Pro\Types\StorageProviders\mongoDB\mongoDBStorageProvider.js" />
+    <Content Include="Pro\Types\StorageProviders\SqLite\initializeSqLitePro.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
