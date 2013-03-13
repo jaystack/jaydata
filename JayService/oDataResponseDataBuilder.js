@@ -123,15 +123,21 @@
             result = result[0];
 
         if (versionSelector || versionSelector === undefined) {
-            return this._buildVersionPath(result);
+            return this._buildVersionPath(result, data);
         } else {
             return result;
         }
     },
-    _buildVersionPath: function (result) {
-        if (this.config.version === 'V1')
+    _buildVersionPath: function (result, data) {
+        if (this.config.version === 'V1'){
             return { d: result };
-        else
-            return { d: { results: result, __count: result.length } };
+        }else{
+            var ret = { d: { results: result } };
+            if (data && typeof data.totalCount == 'number'){
+                ret.d.__count = data.totalCount;
+            }
+            return ret;
+            //return { d: { results: result, __count: result.totalCount || result.length } };
+        }
     }
 });

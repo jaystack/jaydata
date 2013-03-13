@@ -182,6 +182,19 @@ $example.Context.getContext = function (cfg) {
     return ctx;
 };
 
+test("REST - GET inlineCount", function () {
+    stop();
+    expect(2);
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Orders.withInlineCount().take(2).toArray(function (orders) {
+            equal(orders.length, 2, 'length invalid');
+            equal(orders.totalCount, 10, 'totalCount invalid');
+            start();
+        });
+    });
+});
 test("REST - GET types", 9, function () {
     stop();
 

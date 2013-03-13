@@ -174,7 +174,8 @@
             select: this.member.selectedField || req.query.$select || '',
             skip: req.query.$skip || '',
             top: req.query.$top || '',
-            expand: /*this.member.selectedField ||*/ req.query.$expand || ''
+            expand: /*this.member.selectedField ||*/ req.query.$expand || '',
+            inlinecount: req.query.$inlinecount || ''
         }));
 
         config.collectionName = this.entitySet.name;

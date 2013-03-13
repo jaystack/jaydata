@@ -12,9 +12,9 @@
             this.top = "";
             this.select = "";
             this.expand = "";
-            //this.format =      "";
-            //this.inlinecount = "";
-        },
+            this.format = "";
+            this.inlinecount = "";
+        }/*,
         filter: { type: 'string' },
         orderby: { type: 'string' },
         skip: { type: 'string' },
@@ -22,7 +22,7 @@
         select: { type: 'string' },
         expand: { type: 'string' },
         format: { type: 'string' },
-        inlinecount: { type: 'string' }
+        inlinecount: { type: 'string' }*/
     });
 
     // ODataRequestParser

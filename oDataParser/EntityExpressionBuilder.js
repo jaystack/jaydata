@@ -10,6 +10,7 @@
         value: [
             { name: 'expand', expType: $data.Expressions.IncludeExpression },
             { name: 'filter', expType: $data.Expressions.FilterExpression },
+            { name: 'inlinecount', expType: $data.Expressions.InlineCountExpression },
             { name: 'orderby', expType: $data.Expressions.OrderExpression },
             { name: 'select', expType: $data.Expressions.ProjectionExpression },
             { name: 'skip', expType: $data.Expressions.PagingExpression },
@@ -105,6 +106,9 @@
     topConverter: function (expr, rootExpr) {
         var expression = new $data.Expressions.PagingExpression(rootExpr, expr, $data.Expressions.ExpressionType.Take);
         return expression;
+    },
+    inlinecountConverter: function(expr, rootExpr){
+        return new $data.Expressions.InlineCountExpression(rootExpr, expr);
     },
     expandConverter: function (exprObjArray, rootExpr) {
         if (exprObjArray.length > 0) {
