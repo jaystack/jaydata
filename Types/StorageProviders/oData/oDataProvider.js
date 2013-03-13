@@ -41,7 +41,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             user: null,
             password: null,
             withCredentials: false,
-            enableJSONP: false,
+            //enableJSONP: undefined,
             UpdateMethod: 'PATCH',
             useJsonLight: true
         }, cfg);
@@ -173,7 +173,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
                 data: sql.postData,
-                enableJsonpCallback: this.providerConfiguration.enableJSONP,
                 headers: {
                     MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 },
@@ -197,6 +196,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         if (this.providerConfiguration.dataServiceVersion) {
             requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
+        }
+       
+        if (typeof this.providerConfiguration.enableJSONP !== 'undefined') {
+            requestData[0].enableJsonpCallback = this.providerConfiguration.enableJSONP;
         }
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
