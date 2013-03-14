@@ -808,13 +808,16 @@ if ($data.storageProviders.mongoDBPro){
                 test.deepEqual(p.map(function(it){ return it.initData.Location; }), [
                     {
                         type: 'Point',
-                        coordinates: [0.01, 0.01]
+                        coordinates: [0.01, 0.01],
+                        crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }, {
                         type: 'Point',
-                        coordinates: [0.02, 0.02]
+                        coordinates: [0.02, 0.02],
+                        crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }, {
                         type: 'Point',
-                        coordinates: [0, 0]
+                        coordinates: [0, 0],
+                        crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }
                 ], 'Bad places filtered');
                 test.done();
