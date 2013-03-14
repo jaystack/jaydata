@@ -374,7 +374,7 @@ exports['functionContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(['Hello', 'World!']);
-                test.deepEqual(response, { d: { results: ['Hello', 'World!'], __count: 2 } }, 'V2: string convert failed');
+                test.deepEqual(response, { d: { results: ['Hello', 'World!']/*, __count: 2*/ } }, 'V2: string convert failed');
 
                 test.done();
             },
@@ -389,7 +389,7 @@ exports['functionContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(['Hello', 'World!']);
-                test.deepEqual(response, { d: { results: ['Hello', 'World!'], __count: 2 } }, 'V3: string convert failed');
+                test.deepEqual(response, { d: { results: ['Hello', 'World!']/*, __count: 2*/ } }, 'V3: string convert failed');
 
                 test.done();
             }
@@ -421,7 +421,7 @@ exports['functionContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse([42, 24]);
-                test.deepEqual(response, { d: { results: [42, 24], __count: 2 } }, 'int convert failed');
+                test.deepEqual(response, { d: { results: [42, 24]/*, __count: 2*/ } }, 'int convert failed');
 
                 test.done();
             },
@@ -436,7 +436,7 @@ exports['functionContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse([42, 24]);
-                test.deepEqual(response, { d: { results: [42, 24], __count: 2 } }, 'int convert failed');
+                test.deepEqual(response, { d: { results: [42, 24]/*, __count: 2*/ } }, 'int convert failed');
 
                 test.done();
             }
@@ -469,7 +469,7 @@ exports['functionContext'] = {
                 var dates = [new Date('2000/05/05'), new Date('2000/05/10')];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(dates);
-                test.deepEqual(response, { d: { results: dates, __count: 2 } }, 'datetime convert failed');
+                test.deepEqual(response, { d: { results: dates/*, __count: 2*/ } }, 'datetime convert failed');
 
                 test.done();
             },
@@ -518,7 +518,7 @@ exports['functionContext'] = {
                 var objects = [{ a: 'test', b: 42 }, { a: 'test2', b: 421 }, { a: 'test3', b: 423 }];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(objects);
-                test.deepEqual(response, { d: { results: objects, __count: 3 } }, 'object convert failed');
+                test.deepEqual(response, { d: { results: objects/*, __count: 3*/ } }, 'object convert failed');
 
                 test.done();
             },
@@ -534,7 +534,7 @@ exports['functionContext'] = {
                 var objects = [{ a: 'test', b: 42 }, { a: 'test2', b: 421 }, { a: 'test3', b: 423 }];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(objects);
-                test.deepEqual(response, { d: { results: objects, __count: 3 } }, 'object convert failed');
+                test.deepEqual(response, { d: { results: objects/*, __count: 3*/ } }, 'object convert failed');
 
                 test.done();
             }
@@ -575,7 +575,7 @@ exports['functionContext'] = {
                 ];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(entities);
-                test.deepEqual(response, { d: { results: entities, __count: 4 } }, 'object convert failed');
+                test.deepEqual(response, { d: { results: entities/*, __count: 4*/ } }, 'object convert failed');
 
                 test.done();
             },
@@ -595,7 +595,7 @@ exports['functionContext'] = {
                 ];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(entities);
-                test.deepEqual(response, { d: { results: entities, __count: 4 } }, 'object convert failed');
+                test.deepEqual(response, { d: { results: entities/*, __count: 4*/ } }, 'object convert failed');
 
                 test.done();
             }
@@ -975,7 +975,7 @@ exports['entityContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(['Hello', 'World!']);
-                test.deepEqual(response, { d: { results: ['Hello', 'World!'], __count: 2 } }, 'V2: string convert failed');
+                test.deepEqual(response, { d: { results: ['Hello', 'World!']/*, __count: 2*/ } }, 'V2: string convert failed');
 
                 test.done();
             },
@@ -990,7 +990,7 @@ exports['entityContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(['Hello', 'World!']);
-                test.deepEqual(response, { d: { results: ['Hello', 'World!'], __count: 2 } }, 'V3: string convert failed');
+                test.deepEqual(response, { d: { results: ['Hello', 'World!']/*, __count: 2*/ } }, 'V3: string convert failed');
 
                 test.done();
             }
@@ -1022,7 +1022,7 @@ exports['entityContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse([42, 24]);
-                test.deepEqual(response, { d: { results: [42, 24], __count: 2 } }, 'int convert failed');
+                test.deepEqual(response, { d: { results: [42, 24]/*, __count: 2*/ } }, 'int convert failed');
 
                 test.done();
             },
@@ -1037,7 +1037,7 @@ exports['entityContext'] = {
 
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse([42, 24]);
-                test.deepEqual(response, { d: { results: [42, 24], __count: 2 } }, 'int convert failed');
+                test.deepEqual(response, { d: { results: [42, 24]/*, __count: 2*/ } }, 'int convert failed');
 
                 test.done();
             }
@@ -1070,7 +1070,7 @@ exports['entityContext'] = {
                 var dates = [new Date('2000/05/05'), new Date('2000/05/10')];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(dates);
-                test.deepEqual(response, { d: { results: dates, __count: 2 } }, 'datetime convert failed');
+                test.deepEqual(response, { d: { results: dates/*, __count: 2*/ } }, 'datetime convert failed');
 
                 test.done();
             },
@@ -1119,7 +1119,7 @@ exports['entityContext'] = {
                 var objects = [{ a: 'test', b: 42 }, { a: 'test2', b: 421 }, { a: 'test3', b: 423 }];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(objects);
-                test.deepEqual(response, { d: { results: objects, __count: 3 } }, 'object convert failed');
+                test.deepEqual(response, { d: { results: objects/*, __count: 3*/ } }, 'object convert failed');
 
                 test.done();
             },
@@ -1135,7 +1135,7 @@ exports['entityContext'] = {
                 var objects = [{ a: 'test', b: 42 }, { a: 'test2', b: 421 }, { a: 'test3', b: 423 }];
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(objects);
-                test.deepEqual(response, { d: { results: objects, __count: 3 } }, 'object convert failed');
+                test.deepEqual(response, { d: { results: objects/*, __count: 3*/ } }, 'object convert failed');
 
                 test.done();
             }
@@ -1161,7 +1161,7 @@ exports['entityContext'] = {
                 test.done();
             },
             V2: function (test) {
-                test.expect(2);
+                test.expect(1);
 
                 var builderConfig = getBuilderConfig($news.Types.NewsContext, {
                     version: 'V2',
@@ -1177,12 +1177,12 @@ exports['entityContext'] = {
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(entities);
                 test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-                test.equal(response.d.__count, 4, 'object count failed');
+                //test.equal(response.d.__count, 4, 'object count failed');
 
                 test.done();
             },
             V3: function (test) {
-                test.expect(2);
+                test.expect(1);
 
                 var builderConfig = getBuilderConfig($news.Types.NewsContext, {
                     version: 'V3',
@@ -1198,7 +1198,7 @@ exports['entityContext'] = {
                 var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
                 var response = builder.convertToResponse(entities);
                 test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-                test.equal(response.d.__count, 4, 'object count failed');
+                //test.equal(response.d.__count, 4, 'object count failed');
 
                 test.done();
             }
@@ -1227,7 +1227,7 @@ exports['entityContext'] = {
             test.done();
         },
         V2: function (test) {
-            test.expect(2);
+            test.expect(1);
 
             var builderConfig = getBuilderConfig($news.Types.NewsContext, {
                 version: 'V2',
@@ -1244,12 +1244,12 @@ exports['entityContext'] = {
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(entities);
             test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-            test.equal(response.d.__count, 5, 'object count failed');
+            //test.equal(response.d.__count, 5, 'object count failed');
 
             test.done();
         },
         V3: function (test) {
-            test.expect(2);
+            test.expect(1);
 
             var builderConfig = getBuilderConfig($news.Types.NewsContext, {
                 version: 'V3',
@@ -1266,7 +1266,7 @@ exports['entityContext'] = {
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(entities);
             test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-            test.equal(response.d.__count, 5, 'object count failed');
+            //test.equal(response.d.__count, 5, 'object count failed');
 
             test.done();
         }
@@ -1304,7 +1304,7 @@ exports['entityContext'] = {
             test.done();
         },
         V2: function (test) {
-            test.expect(22);
+            test.expect(21);
 
             var builderConfig = getBuilderConfig($news.Types.NewsContext, {
                 version: 'V2',
@@ -1322,9 +1322,9 @@ exports['entityContext'] = {
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(entities);
             test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-            test.equal(response.d.__count, 5, 'object count failed');
+            //test.equal(response.d.__count, 5, 'object count failed');
 
-            for (var i = 0; i < response.d.__count; i++) {
+            for (var i = 0; i < /*response.d.__count*/ response.d.results.length; i++) {
                 var item = response.d.results[i];
 
                 test.equal(item.hasOwnProperty('__metadata'), true, '__metadata property failed');
@@ -1336,7 +1336,7 @@ exports['entityContext'] = {
             test.done();
         },
         V3: function (test) {
-            test.expect(22);
+            test.expect(21);
 
             var builderConfig = getBuilderConfig($news.Types.NewsContext, {
                 version: 'V3',
@@ -1354,9 +1354,9 @@ exports['entityContext'] = {
             var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
             var response = builder.convertToResponse(entities);
             test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-            test.equal(response.d.__count, 5, 'object count failed');
+            //test.equal(response.d.__count, 5, 'object count failed');
 
-            for (var i = 0; i < response.d.__count; i++) {
+            for (var i = 0; i < /*response.d.__count*/ response.d.results.length; i++) {
                 var item = response.d.results[i];
 
                 test.equal(item.hasOwnProperty('__metadata'), true, '__metadata property failed');
@@ -1369,7 +1369,7 @@ exports['entityContext'] = {
         }
     },
     'entitySet - map no key selected': function (test) {
-        test.expect(22 + 5 * 5);
+        test.expect(21 + 5 * 5);
 
         var builderConfig = getBuilderConfig($news.Types.NewsContext, {
             version: 'V2',
@@ -1387,9 +1387,9 @@ exports['entityContext'] = {
         var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
         var response = builder.convertToResponse(entities);
         test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-        test.equal(response.d.__count, 5, 'object count failed');
+        //test.equal(response.d.__count, 5, 'object count failed');
 
-        for (var i = 0; i < response.d.__count; i++) {
+        for (var i = 0; i < /*response.d.__count*/ response.d.results.length; i++) {
             var item = response.d.results[i];
 
             test.equal(item.hasOwnProperty('__metadata'), true, '__metadata property failed');
@@ -1412,7 +1412,7 @@ exports['entityContext'] = {
         test.done();
     },
     'entitySet - map key selected': function (test) {
-        test.expect(22 + 5 * 5);
+        test.expect(21 + 5 * 5);
 
         var builderConfig = getBuilderConfig($news.Types.NewsContext, {
             version: 'V2',
@@ -1430,9 +1430,9 @@ exports['entityContext'] = {
         var builder = new $data.oDataServer.oDataResponseDataBuilder(builderConfig);
         var response = builder.convertToResponse(entities);
         test.equal(response.d.results instanceof $data.Array, true, 'object convert failed');
-        test.equal(response.d.__count, 5, 'object count failed');
+        //test.equal(response.d.__count, 5, 'object count failed');
 
-        for (var i = 0; i < response.d.__count; i++) {
+        for (var i = 0; i < /*response.d.__count*/ response.d.results.length; i++) {
             var item = response.d.results[i];
 
             test.equal(item.hasOwnProperty('__metadata'), true, '__metadata property failed');
