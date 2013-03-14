@@ -80,11 +80,12 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                         $item: {
                             $type: $data.ObjectID,
                             $value: function(meta, data){
-                                var type = Container.resolveName(meta.$type);
+                                return data;
+                                /*var type = Container.resolveName(meta.$type);
                                 var converter = this.context.storageProvider.fieldConverter.fromDb;
                                 var converterFn = converter ? converter[type] : undefined;
                                 
-                                return converter && converter[type] ? converter[type](data) : new (Container.resolveType(type))(data);
+                                return converter && converter[type] ? converter[type](data) : new (Container.resolveType(type))(data);*/
                             }
                         }
                     });
