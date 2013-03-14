@@ -1,4 +1,4 @@
-VERSION = '1.2.7.1'
+VERSION = '1.2.7'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules

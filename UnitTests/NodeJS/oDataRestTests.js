@@ -1148,6 +1148,9 @@ test("Filter Geography equal", 3, function () {
         });
     });
 });
+/*
+
+MongoDB doesn't support not equals when spatial index exists on field!
 
 test("Filter Geography not equal", 19, function () {
     stop();
@@ -1166,7 +1169,7 @@ test("Filter Geography not equal", 19, function () {
         });
     });
 });
-
+*/
 test("Save GeographyObjects", 19, function () {
     stop();
 
