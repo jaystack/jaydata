@@ -12,3 +12,21 @@ $data.Geospatial = function Geospatial() {
 };
 $data.SimpleBase.registerType('Geospatial', $data.Geospatial);
 $data.Container.registerType(['$data.Geospatial', 'Geospatial'], $data.Geospatial);
+
+$data.point = function (arg) {
+    if (arg && arg.crs) {
+        if (arg.crs.properties && arg.crs.properties.name === $data.GeometryBase.defaultCrs.properties.name) {
+            return new $data.GeometryPoint(arg);
+        } else {
+            return new $data.GeographyPoint(arg);
+        }
+    } else if(arg) {
+        if ('x' in arg && 'y' in arg) {
+            return new $data.GeometryPoint(arg.x, arg.y);
+        } else if ('longitude' in arg && 'latitude' in arg) {
+            return new $data.GeographyPoint(arg.longitude, arg.latitude);
+        } else if ('lng' in arg && 'lat' in arg) {
+            return new $data.GeographyPoint(arg.lng, arg.lat);
+        }
+    }
+};
