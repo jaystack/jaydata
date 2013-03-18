@@ -203,7 +203,8 @@
             request: subReq,
             response: res,
             context: this.context.getType(),
-            simpleResult: batchUrl.toLowerCase().indexOf('/$count') > 0
+            simpleResult: batchUrl.toLowerCase().indexOf('/$count') > 0,
+            isCountResult: batchUrl.toLowerCase().indexOf('/$count') > 0
         };
 
         if (getProcessor.isSupported(subReq)) {

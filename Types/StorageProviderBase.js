@@ -399,6 +399,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
 
     _beginTran: function (tables, isWrite, callBack) {
         callBack.success(new $data.Transaction());
+    },
+
+    getFieldUrl: function () {
+        return '#';
     }
 },
 {

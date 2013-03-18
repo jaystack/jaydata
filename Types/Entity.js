@@ -543,7 +543,18 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         else
             throw 'not implemented'; //todo
     },
-    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true } 
+    storeToken: { type: Object, monitorChanges: false, notMapped: true, storeOnObject: true },
+
+    getFieldUrl: function (field) {
+        if (this.context) {
+            return this.context.getFieldUrl(this, field);
+        } else if (this.getType().storeToken && typeof this.getType().storeToken.factory === 'function') {
+            var context = this.getType().storeToken.factory();
+            return context.getFieldUrl(this, field);
+        } else {
+            return '#';
+        }
+    }
 },
 {
     //create get_[property] and set_[property] functions for properties

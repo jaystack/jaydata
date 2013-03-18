@@ -391,5 +391,8 @@ $data.Class.defineEx('$data.EntitySet',
         set: function (value) {
             this._expression = value;
         }
+    },
+    getFieldUrl: function (keys, field) {
+        return this.entityContext.getFieldUrl(keys, field, this);
     }
 }, null);

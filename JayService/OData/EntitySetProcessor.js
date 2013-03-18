@@ -78,6 +78,7 @@
                 case 'GET': //R
                     config.context = self.context.getType();
                     config.simpleResult = baseurl.toLowerCase().indexOf('/$count') > 0;
+                    config.isCountResult = config.simpleResult;
                     self.ReadFromEntitySet(req, config, cbWrapper);
                     break;
                 case 'MERGE': //U
@@ -151,6 +152,7 @@
     },
 
     ReadFromEntitySet: function (req, config, callback) {
+        var self = this;
         var builder = new $data.oDataParser.ODataEntityExpressionBuilder(this.context, this.entitySet.name);
         var frameType = $data.Expressions.ExpressionType.ToArray;
 
@@ -164,8 +166,10 @@
             config.singleResult = true;
         }
 
-        if (config.simpleResult === true)
+        if (config.isCountResult === true)
             frameType = $data.Expressions.ExpressionType.Count;
+
+        config.simpleResult = config.simpleResult || this.member.valueRequeset;
 
         var result = builder.parse(this._applyRestrictions({
             frame: frameType,
@@ -178,12 +182,16 @@
             inlinecount: req.query.$inlinecount || ''
         }));
 
+
         config.collectionName = this.entitySet.name;
         config.selectedFields = result.selectedFields;
         config.includes = result.includes;
         this.context.executeQuery(new $data.Queryable(this.entitySet, result.expression), {
             success: function (contextResult) {
-                if (config.simpleResult) {
+                if (self.member.valueRequeset) {
+                    // request pattern: /EntitySet(key)/Field/$value
+                    self.prepareSimpleResponse(contextResult, self.member.selectedField, self.entitySet, callback);
+                } else if (config.simpleResult) {
                     callback.success(new $data.ServiceResult(contextResult));
                 } else {
                     callback.success(contextResult, config);
@@ -193,6 +201,16 @@
                 callback.error(err);
             }
         });
+    },
+    prepareSimpleResponse: function (contextResult, fieldName, entitySet, callback) {
+        var respValue = contextResult[this.member.selectedField];
+        if (Object.isNullOrUndefined(respValue)){
+            callback.success(new $data.EmptyServiceResult(404));
+        } else {
+            var propertyType = entitySet.elementType.getMemberDefinition(fieldName);
+            callback.success(new $data.oDataSimpleResult(respValue, propertyType));
+        }
+
     },
     _applyRestrictions: function (data) {
         if (this.restrictions) {
@@ -240,6 +258,12 @@
             if (urlParts[i] !== '')
                 parts.push(urlParts[i]);
         }
+
+        if (parts[parts.length - 1] === '$value' && parts.length === 3) {
+            this.member.valueRequeset = true;
+            parts.length = parts.length - 1;
+        }
+
         var resolvedMethod = this._supportedMethods[req.method];
         if (resolvedMethod) {
             var requestInfo = $data.JayService.OData.Utils.parseUrlPart(parts[0], this.context, req.method === 'GET');
@@ -279,7 +303,7 @@
         value: {
             'POST': true,
             'GET': {
-                _isAllowed: true, $count: true,
+                _isAllowed: true, $count: true, $value: true,
                 _onNotSupported: function (parts) {
                     var entityType = this.entitySet.elementType;
                     if (parts.length === 1) {

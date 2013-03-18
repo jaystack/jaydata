@@ -1673,7 +1673,30 @@ $data.Class.define('$data.EntityContext', null, null,
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.remove(entity);
     },
-    storeToken: { type: Object }
+    storeToken: { type: Object },
+
+    getFieldUrl: function (entity, member, collection) {
+        try {
+            var entitySet = typeof collection === 'string' ? this[collection] : collection;
+            var fieldName = typeof member === 'string' ? member : member.name;
+            if (entity instanceof $data.Entity) {
+                entitySet = this.getEntitySetFromElementType(entity.getType());
+            } else if (!Object.isNullOrUndefined(entity) && entity.constructor !== $data.Object) { //just a single key
+                var keyDef = entitySet.elementType.memberDefinitions.getKeyProperties()[0];
+                var key = {};
+                key[keyDef.name] = entity;
+                entity = key;
+            }
+
+            //key object
+            if (!(entity instanceof $data.Entity)) {
+                entity = new entitySet.elementType(entity);
+            }
+
+            return this.storageProvider.getFieldUrl(entity, fieldName, entitySet);
+        } catch (e) {}
+        return '#';
+    }
 }, {
     inheritedTypeProcessor: function(type) {
         if (type.resolveForwardDeclarations) {

@@ -861,6 +861,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             return result.join(",");
         }
         return keyValue;
+    },
+    getFieldUrl: function (entity, fieldName, entitySet) {
+        var keyPart = this.getEntityKeysValue({ data: entity });
+        var servicehost = this.providerConfiguration.oDataServiceHost
+        if (servicehost.lastIndexOf('/') === servicehost.length)
+            servicehost = servicehost.substring(0, servicehost.length - 1);
+
+        return servicehost + '/' + entitySet.tableName + '(' + keyPart + ')/' + fieldName + '/$value';
     },/*
     getServiceMetadata: function () {
         $data.ajax(this._setAjaxAuthHeader({

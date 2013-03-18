@@ -89,6 +89,53 @@ $data.ServiceResult.extend('$data.oDataResult', {
     }
 });
 
+$data.ServiceResult.extend('$data.oDataSimpleResult', {
+    constructor: function (data, memDef) {
+        this.fieldDefinition = memDef;
+    },
+    toString: function () {
+        var typeName = Container.resolveName(this.fieldDefinition.type);
+        //read contentType from definition and set it into this.contentType
+
+        if (this.converter.fromDb[typeName]) {
+            return this.converter.fromDb[typeName](this.data).toString();
+        }
+        console.log('')
+        throw "The segment before '$value' must be a primitive property.";
+    },
+    converter: {
+        value: {
+            fromDb: {
+                '$data.ObjectID': function (o) { return o; },
+                '$data.Integer': function (o) { return o; },
+                '$data.Number': function (o) { return o; },
+                '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o },
+                '$data.String': function (o) { return o; },
+                '$data.Boolean': function (o) { return o; },
+                '$data.Blob': function (o) { return o; },
+                '$data.Object': function (o) { return JSON.stringify(o); },
+                '$data.Array': function (o) { return JSON.stringify(o); },
+                '$data.Guid': function (o) { return o; },
+                '$data.GeographyPoint': function (o) { return JSON.stringify(o); },
+                '$data.GeometryPoint': function (o) { return JSON.stringify(o); },
+                '$data.GeographyLineString': function (o) { return JSON.stringify(o); },
+                '$data.GeographyPolygon': function (o) { return JSON.stringify(o); },
+                '$data.GeographyMultiPoint': function (o) { return JSON.stringify(o); },
+                '$data.GeographyMultiLineString': function (o) { return JSON.stringify(o); },
+                '$data.GeographyMultiPolygon': function (o) { return JSON.stringify(o); },
+                '$data.GeographyCollection': function (o) { return JSON.stringify(o); },
+                '$data.GeometryLineString': function (o) { return JSON.stringify(o); },
+                '$data.GeometryPolygon': function (o) { return JSON.stringify(o); },
+                '$data.GeometryMultiPoint': function (o) { return JSON.stringify(o); },
+                '$data.GeometryMultiLineString': function (o) { return JSON.stringify(o); },
+                '$data.GeometryMultiPolygon': function (o) { return JSON.stringify(o); },
+                '$data.GeometryCollection': function (o) { return JSON.stringify(o); }
+
+            }
+        }
+    }
+});
+
 $data.ServiceResult.extend('$data.EmptyServiceResult', {
     constructor: function (statusCode) {
         this.statusCode = statusCode;
