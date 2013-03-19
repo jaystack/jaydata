@@ -22,7 +22,7 @@
         var value = request.query[name];
         if (options.type) {
             var type = Container.resolveType(options.type);
-            var converter = Container.getName(type);
+            var converter = Container.resolveName(type);
             if (type && type.isAssignableTo && type.isAssignableTo($data.Entity)) {
                 converter = $data.Entity.fullName;
             }
@@ -52,7 +52,7 @@
     '$data.Array': function (config, value) {
         if (config.elementType) {
             var type = Container.resolveType(config.elementType);
-            var converter = Container.getName(type);
+            var converter = Container.resolveName(type);
             if (type && type.isAssignableTo && type.isAssignableTo($data.Entity)) {
                 converter = $data.Entity.fullName;
             }

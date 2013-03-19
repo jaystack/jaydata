@@ -823,7 +823,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
-                switch (Container.getName(field.dataType)) {
+                switch (Container.getName(field.originalType)) {
                     case "$data.Guid":
                     case "Edm.Guid":
                         keyValue = ("guid'" + (keyValue ? keyValue.value : keyValue)  + "'");

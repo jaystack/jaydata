@@ -103,51 +103,53 @@
                 var elementType = Container.resolveType(memDef.elementType);
                 var isEntity = elementType.isAssignableTo && elementType.isAssignableTo($data.Entity);
                 var hasEntitySet = isEntity ? self._getEntitySetDefByType(elementType) : false;
-                if (includes.indexOf(step) >= 0 || !hasEntitySet) {
-                    if (isEntity){
-                        config[memDef.name] = {
-                            $type: $data.Array,
-                            $selector: ['json:' + memDef.name],
-                            $item: {
-                                $type: $data.Object,
-                                __metadata: {
+                if (hasEntitySet || (memDef.lazyLoad !== true || selectedFields.indexOf(step) >= 0)) {
+                    if (includes.indexOf(step) >= 0 || !hasEntitySet) {
+                        if (isEntity) {
+                            config[memDef.name] = {
+                                $type: $data.Array,
+                                $selector: ['json:' + memDef.name],
+                                $item: {
                                     $type: $data.Object,
-                                    $value: function (meta, data) {
-                                        var setDef = self._getEntitySetDefByType(data.getType());
-                                        if (setDef) {
-                                            var uri = self.generateUri(data, setDef);
-                                            var result = {
-                                                id: uri,
-                                                uri: uri,
-                                                type: data.getType().fullName
-                                            };
-                                            data.uri = result.uri;
-                                            return result;
-                                        }else{
-                                            return {
-                                                type: data.getType().fullName
-                                            };
+                                    __metadata: {
+                                        $type: $data.Object,
+                                        $value: function (meta, data) {
+                                            var setDef = self._getEntitySetDefByType(data.getType());
+                                            if (setDef) {
+                                                var uri = self.generateUri(data, setDef);
+                                                var result = {
+                                                    id: uri,
+                                                    uri: uri,
+                                                    type: data.getType().fullName
+                                                };
+                                                data.uri = result.uri;
+                                                return result;
+                                            } else {
+                                                return {
+                                                    type: data.getType().fullName
+                                                };
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        this.addMemberConfigs(elementType.memberDefinitions.getPublicMappedProperties(), config[memDef.name].$item, selectedFields, includes, step, path);
-                    }else{
-                        config[memDef.name] = {
-                            $type: $data.Array,
-                            $source: memDef.name
-                        };
-                    }
-                } else {
-                    config[memDef.name] = {
-                        $type: $data.Object,
-                        $value: function (meta, data) {
-                            return {
-                                __deferred: {
-                                    uri: data.uri + '/' + memDef.name
-                                }
+                            this.addMemberConfigs(elementType.memberDefinitions.getPublicMappedProperties(), config[memDef.name].$item, selectedFields, includes, step, path);
+                        } else {
+                            config[memDef.name] = {
+                                $type: $data.Array,
+                                $source: memDef.name
                             };
+                        }
+                    } else {
+                        config[memDef.name] = {
+                            $type: $data.Object,
+                            $value: function (meta, data) {
+                                return {
+                                    __deferred: {
+                                        uri: data.uri + '/' + memDef.name
+                                    }
+                                };
+                            }
                         }
                     }
                 }
@@ -155,19 +157,21 @@
                 var setDef = this._getEntitySetDefByType(type);
                 if (!setDef) {
                     //ComplexType
-                    config[memDef.name] = {
-                        $type: $data.Object,
-                        $selector: ['json:' + memDef.name],
-                        __metadata: {
+                    if (memDef.lazyLoad !== true || selectedFields.indexOf(step) >= 0) {
+                        config[memDef.name] = {
                             $type: $data.Object,
-                            $value: (function (meta, data) {
-                                return {
-                                    type: this.fullName
-                                };
-                            }).bind(type)
+                            $selector: ['json:' + memDef.name],
+                            __metadata: {
+                                $type: $data.Object,
+                                $value: (function (meta, data) {
+                                    return {
+                                        type: this.fullName
+                                    };
+                                }).bind(type)
+                            }
                         }
+                        this.addMemberConfigs(type.memberDefinitions.getPublicMappedProperties(), config[memDef.name], selectedFields, includes, step, path);
                     }
-                    this.addMemberConfigs(type.memberDefinitions.getPublicMappedProperties(), config[memDef.name], selectedFields, includes, step, path);
                 } else {
                     //single side
                     if (includes.indexOf(step) >= 0) {
@@ -223,7 +227,7 @@
                         };
                     }
                 }
-            } else {
+            } else if (memDef.lazyLoad !== true || selectedFields.indexOf(step) >= 0) {
                 config[memDef.name] = { $source: memDef.name, $type: memDef.type };
             }
         }, this)

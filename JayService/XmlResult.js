@@ -92,11 +92,15 @@ $data.ServiceResult.extend('$data.oDataResult', {
 $data.ServiceResult.extend('$data.oDataSimpleResult', {
     constructor: function (data, memDef) {
         this.fieldDefinition = memDef;
+
+        if (Container.resolveType(this.fieldDefinition.type) === $data.Blob) {
+            this.contentType = 'application/octet-stream';
+        }
+
+        //TODO: read contentType hint from definition and set it into this.contentType
     },
     toString: function () {
         var typeName = Container.resolveName(this.fieldDefinition.type);
-        //read contentType from definition and set it into this.contentType
-
         if (this.converter.fromDb[typeName]) {
             return this.converter.fromDb[typeName](this.data).toString();
         }
@@ -130,7 +134,6 @@ $data.ServiceResult.extend('$data.oDataSimpleResult', {
                 '$data.GeometryMultiLineString': function (o) { return JSON.stringify(o); },
                 '$data.GeometryMultiPolygon': function (o) { return JSON.stringify(o); },
                 '$data.GeometryCollection': function (o) { return JSON.stringify(o); }
-
             }
         }
     }

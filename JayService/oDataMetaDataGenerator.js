@@ -560,7 +560,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         if (typeof resolvedType.isAssignableTo === 'function' && resolvedType.isAssignableTo($data.Entity)) {
             return this.cfg.contextNamespace + '.' + resolvedType.name;
         } else {
-            var resolvedName = Container.getName(resolvedType);
+            var resolvedName = Container.resolveName(resolvedType);
             if (this.cfg.edmTypeMapping) {
                 return this._edmTypeMapping[resolvedName] || resolvedName;
             } else {

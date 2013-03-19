@@ -67,7 +67,7 @@
         if (Container.resolveType(methodCfg.returnType) === $data.Array && methodCfg.elementType) {
             return this._buildVersionPath(data);
         } else {
-            var converter = this.transform.converter.fromDb[Container.getName(methodCfg.returnType)];
+            var converter = this.transform.converter.fromDb[Container.resolveName(methodCfg.returnType)];
             var result = { d: {} };
             result.d[methodCfg.serviceOpName || this.config.methodName] = converter ? converter(data) : data;
             return result;
@@ -102,7 +102,7 @@
             if (typeof rType.isAssignableTo === 'function' && rType.isAssignableTo($data.Entity))
                 data = this._convertData(data, rType, false, true);
 
-            var converter = this.transform.converter.fromDb[Container.getName(rType)];
+            var converter = this.transform.converter.fromDb[Container.resolveName(rType)];
             var result = { d: {} };
             result.d[methodCfg.serviceOpName || this.config.methodName] = converter ? converter(data) : data;
             return result;
