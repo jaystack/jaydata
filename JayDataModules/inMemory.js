@@ -6,7 +6,7 @@
             var type = Container.resolveType(Container.getTypeName(firtsItem));
 
             if (!type.isAssignableTo || !type.isAssignableTo($data.Entity))
-                Guard.raise(new Exception("Type '" + Container.getName(type) + "' is not subclass of $data.Entity", "Not supported", type));
+                Guard.raise(new Exception("Type '" + Container.resolveName(type) + "' is not subclass of $data.Entity", "Not supported", type));
 
             for (var i = 0; i < this.length; i++) {
                 Guard.requireType('array item check', this[i], type);

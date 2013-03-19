@@ -60,6 +60,11 @@
             } else {
                 this.type = this.dataType;
             }
+
+            this.originalType = this.type;
+            if (this.elementType !== undefined) {
+                this.originalElementType = this.elementType;
+            }
         }
     }
     MemberDefinition.prototype.createPropertyDescriptor = function (classFunction, value) {
