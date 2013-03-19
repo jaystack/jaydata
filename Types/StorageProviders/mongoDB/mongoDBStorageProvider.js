@@ -134,6 +134,8 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 
                 if (type !== $data.Array){// && (type.isAssignableTo ? !type.isAssignableTo($data.Entity) : true)){
                     builder.modelBinderConfig.$selector = 'json:' + expression.selector.memberDefinition.name;
+                    //delete builder.modelBinderConfig.$source;
+                    //console.log(builder.modelBinderConfig);
                 }
                 
                 if (builder._binderConfig.$item === builder.modelBinderConfig &&
@@ -141,6 +143,8 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                     expression.selector.memberDefinition.storageModel.ComplexTypes[expression.selector.memberDefinition.name]){
                     builder.modelBinderConfig.$selectorMemberInfo = builder.modelBinderConfig.$selector;
                     delete builder.modelBinderConfig.$selector;
+                }else{
+                    delete builder.modelBinderConfig.$source;
                 }
             }
         }
@@ -159,7 +163,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 if (builder._binderConfig.$item === builder.modelBinderConfig){
                     builder._binderConfig.$item = {
                         $type: builder.modelBinderConfig.$type,
-                        $selector: builder.modelBinderConfig.$selectorMemberInfo,
+                        $selector: builder.modelBinderConfig.$selectorMemberInfo || builder.modelBinderConfig.$selector,
                         $source: expression.memberDefinition.computed ? '_id' : expression.memberName
                     };
                 }else{
