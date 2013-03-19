@@ -14,8 +14,8 @@ exports['oDataBatchTest'] = require('./UnitTests/NodeJS/oDataBatchTests.js');
 exports['argumentBinderTests'] = require('./UnitTests/NodeJS/argumentBinderTests.js');
 exports['oDataXmlResultTests'] = require('./UnitTests/NodeJS/oDataXmlResultTests.js');
 
-try{ exports['mongoProviderTests'] = require('./Pro/UnitTests/mongoProviderTests.js'); }
-catch(err){ exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js'); }
+//try{ exports['mongoProviderTests'] = require('./Pro/UnitTests/mongoProviderTests.js'); }
+//catch(err){ exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js'); }
 
 var connect = require('connect');
 var app = connect();

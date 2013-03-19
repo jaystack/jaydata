@@ -572,7 +572,7 @@ test("REST - Batch GET JSON", 8, function () {
                     }]
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(data, undefined, 'data failed');
 
                 var batch = data.__batchResponses[0];
@@ -626,7 +626,7 @@ test("REST - Batch GET multiple JSON", 15, function () {
                     }]
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(typeof data, 'undefined', 'data failed');
 
                 //People
@@ -701,7 +701,7 @@ test("REST - XML - GET", 6, function () {
                     'Accept': 'application/atom+xml'
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(data, undefined, 'data failed');
                 equal(typeof data.__metadata, 'object', 'data failed, __metadata is exists on xml result');
 
@@ -892,7 +892,7 @@ test("REST - XML - Batch GET", 8, function () {
                     }]
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(data, undefined, 'data failed');
 
                 var batch = data.__batchResponses[0];
@@ -946,7 +946,7 @@ test("REST - Batch GET / $count", 5, function () {
                     }]
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(data, undefined, 'data failed');
 
                 var batch = data.__batchResponses[0];
@@ -984,7 +984,7 @@ test("REST - Batch GET / query params", 8, function () {
                     }]
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(data, undefined, 'data failed');
 
                 var batch = data.__batchResponses[0];
@@ -1038,7 +1038,7 @@ test("REST - XML - Batch GET / query params", 8, function () {
                     }]
                 }
             }, function (data) {
-                console.log(data);
+                //console.log(data);
                 notEqual(data, undefined, 'data failed');
 
                 var batch = data.__batchResponses[0];
