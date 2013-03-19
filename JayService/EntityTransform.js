@@ -46,11 +46,11 @@
         }
 
         var memDefs = defaultType.memberDefinitions.getPublicMappedProperties();
-        if (selectedFields && selectedFields.length > 0) {
+        /*if (selectedFields && selectedFields.length > 0) {
             memDefs = memDefs.filter(function (memDef) {
                 return selectedFields.indexOf(memDef.name) >= 0 || selectedFields.filter(function(it){ return it.split('.')[0] === memDef.name }).length;
             });
-        }
+        }*/
 
         self = this;
         var binderConfig = {
@@ -84,7 +84,17 @@
     },
     addMemberConfigs: function (memberDefinitions, config, selectedFields, includes, includeStep, path) {
         var self = this;
-        memberDefinitions.forEach(function (memDef) {
+        var memDefs = memberDefinitions;
+        if (selectedFields && selectedFields.length > 0) {
+            memDefs = memDefs.filter(function (memDef) {
+                var deepMemberName = includeStep ? (includeStep + '.' + memDef.name) : memDef.name;
+                return selectedFields.indexOf(deepMemberName) >= 0 || selectedFields.filter(function (it) {
+                    return it.indexOf(deepMemberName + '.') === 0 || deepMemberName.indexOf(it + '.') === 0;
+                }).length;
+            });
+        }
+        //memberDefinitions.forEach(function (memDef) {
+        memDefs.forEach(function (memDef) {
             var step = includeStep ? (includeStep + '.' + memDef.name) : memDef.name;
 
             var type = Container.resolveType(memDef.type);
@@ -198,11 +208,11 @@
                             }
                         };
                         var map = type.memberDefinitions.getPublicMappedProperties();
-                        if (selectedFields && selectedFields.length > 0){
+                        /*if (selectedFields && selectedFields.length > 0){
                             map = map.filter(function(it){
                                 return selectedFields.indexOf(memDef.name + '.' + (path ? path + '.' : '') + it.name) >= 0;
                             });
-                        }
+                        }*/
                         this.addMemberConfigs(map, config[memDef.name], selectedFields, includes, step, memDef.name);
                     } else {
                         config[memDef.name] = {
