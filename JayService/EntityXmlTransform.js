@@ -284,7 +284,7 @@
 
         for (var i = 0; i < memDefs.length; i++) {
             var memDef = memDefs[i];
-            if (memDef.inverseProperty === undefined) {
+            if (memDef.inverseProperty === undefined && (memDef.lazyLoad !== true || (Array.isArray(selectedFields) && selectedFields.indexOf(memDef.name) >= 0))) {
                 this._buildProperty(data, memDef, m, d);
             }
         }
