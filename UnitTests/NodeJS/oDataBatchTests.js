@@ -735,9 +735,9 @@ exports.Tests = {
                                                             test.equal(o2.length, scale / 4 * 3, 'Orders result length failed')
 
                                                             for (var i = 0; i < scale / 2; i++) {
-                                                                console.log(p2[i].Age, p2[i].Age >= 1000, p2[i].initData);
+                                                                //console.log(p2[i].Age, p2[i].Age >= 1000, p2[i].initData);
                                                                 test.ok(p2[i].Age >= 1000, 'edited person failed');
-                                                                console.log(o2[i].Value, o2[i].Value >= 1000);
+                                                                //console.log(o2[i].Value, o2[i].Value >= 1000);
                                                                 test.ok(o2[i].Value >= 1000, 'edited order failed');
                                                             }
 
@@ -801,7 +801,7 @@ if ($data.storageProviders.mongoDBPro){
         var context = $example.Context.getContext();
         $example.Context.generateTestData(context, function () {
 
-            console.log(context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toTraceString());
+            //console.log(context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toTraceString());
             context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toArray(function (p) {
                 test.equal(p.length, 3, 'Places count failed');
                 //console.log(p.map(function(it){ return it.initData.Location; }));
