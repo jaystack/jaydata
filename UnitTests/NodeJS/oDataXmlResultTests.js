@@ -229,6 +229,178 @@ exports.Test = {
 
         test.done();
     },
+    'Feed Items items - LazyLoad Property': function (test) {
+        test.expect(2);
+
+        var context = $example.Context.getContext();
+        $example.Person.getMemberDefinition('Name').lazyLoad = true;
+        var persons = [
+            new $example.Person({ Id: 'idString', Name: 'Person', Description: 'desc', Age: 10 }),
+            new $example.Person({ Id: 'idString2', Name: 'Person2', Description: 'desc2', Age: 12 })
+        ]
+
+        var oDataBuidlerCfg = {
+            version: 'V2',
+            baseUrl: 'http://Example.com/testservice',
+            context: context.getType(),
+            simpleResult: false,
+            singleResult: false,
+            collectionName: 'People',
+            selectedFields: undefined,
+            includes: undefined,
+            request: reqPoc
+        }
+
+        var result = new $data.oDataResult(persons, oDataBuidlerCfg);
+
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
+        var resultData = result.toString();
+
+        var matches = resultData.split('><');
+        for (var i = 0; i < matches.length; i++) {
+            if (matches[i].slice(0, 8) === 'updated>') {
+                matches.splice(i, 1);
+                i--;
+            }
+        }
+        resultData = matches.join('><');
+        test.equal(resultData,
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
+            "<feed xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" d:dataservices=\"JayStrom\" m:metadata=\"OData\" xml:base=\"http://Example.com/testservice/People\" xmlns=\"http://www.w3.org/2005/Atom\">" +
+                '<id>' +
+                    'http://Example.com/testservice/People' +
+                '</id>' +
+                '<title type="text">People</title>' +
+                '' + //<updated>2012-08-24T13:05:48Z</updated>
+                '<link href="People" rel="self" title="People"></link>' +
+                "<entry>" +
+                    "<id>" +
+                        "http://Example.com/testservice/People('idString')" +
+                    "</id>" +
+                    "<category scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\" term=\"$example.Person\"></category>" +
+                    "<link href=\"People('idString')\" rel=\"edit\" title=\"Person\"></link>" +
+                    "<title></title>" +
+                    "" + //<updated>2012-08-24T14:03:56.084Z</updated>
+                    "<author>" +
+                        "<name></name>" +
+                    "</author>" +
+                    "<content type=\"application/xml\">" +
+                        "<m:properties>" +
+                            "<d:Id>idString</d:Id>" +
+                            "<d:Description>desc</d:Description>" +
+                            "<d:Age m:type=\"Edm.Int32\">10</d:Age>" +
+                        "</m:properties>" +
+                    "</content>" +
+                "</entry>" +
+                "<entry>" +
+                    "<id>" +
+                        "http://Example.com/testservice/People('idString2')" +
+                    "</id>" +
+                    "<category scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\" term=\"$example.Person\"></category>" +
+                    "<link href=\"People('idString2')\" rel=\"edit\" title=\"Person\"></link>" +
+                    "<title></title>" +
+                    "" + //<updated>2012-08-24T14:03:56.084Z</updated>
+                    "<author>" +
+                        "<name></name>" +
+                    "</author>" +
+                    "<content type=\"application/xml\">" +
+                        "<m:properties>" +
+                            "<d:Id>idString2</d:Id>" +
+                            "<d:Description>desc2</d:Description>" +
+                            "<d:Age m:type=\"Edm.Int32\">12</d:Age>" +
+                        "</m:properties>" +
+                    "</content>" +
+                "</entry>" +
+            "</feed>", 'entity result failed');
+
+        delete $example.Person.getMemberDefinition('Name').lazyLoad;
+        test.done();
+    },
+    'Feed Items items map - LazyLoad Property': function (test) {
+        test.expect(2);
+
+        var context = $example.Context.getContext();
+        $example.Person.getMemberDefinition('Name').lazyLoad = true;
+        var persons = [
+            new $example.Person({ Id: 'idString', Name: 'Person', Description: 'desc', Age: 10 }),
+            new $example.Person({ Id: 'idString2', Name: 'Person2', Description: 'desc2', Age: 12 })
+        ]
+
+        var oDataBuidlerCfg = {
+            version: 'V2',
+            baseUrl: 'http://Example.com/testservice',
+            context: context.getType(),
+            simpleResult: false,
+            singleResult: false,
+            collectionName: 'People',
+            selectedFields: ['Id', 'Name'],
+            includes: undefined,
+            request: reqPoc
+        }
+
+        var result = new $data.oDataResult(persons, oDataBuidlerCfg);
+
+        test.equal(result.contentType, 'application/atom+xml', 'content type failed');
+        var resultData = result.toString();
+
+        var matches = resultData.split('><');
+        for (var i = 0; i < matches.length; i++) {
+            if (matches[i].slice(0, 8) === 'updated>') {
+                matches.splice(i, 1);
+                i--;
+            }
+        }
+        resultData = matches.join('><');
+        test.equal(resultData,
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>' +
+            "<feed xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\" d:dataservices=\"JayStrom\" m:metadata=\"OData\" xml:base=\"http://Example.com/testservice/People\" xmlns=\"http://www.w3.org/2005/Atom\">" +
+                '<id>' +
+                    'http://Example.com/testservice/People' +
+                '</id>' +
+                '<title type="text">People</title>' +
+                '' + //<updated>2012-08-24T13:05:48Z</updated>
+                '<link href="People" rel="self" title="People"></link>' +
+                "<entry>" +
+                    "<id>" +
+                        "http://Example.com/testservice/People('idString')" +
+                    "</id>" +
+                    "<category scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\" term=\"$example.Person\"></category>" +
+                    "<link href=\"People('idString')\" rel=\"edit\" title=\"Person\"></link>" +
+                    "<title></title>" +
+                    "" + //<updated>2012-08-24T14:03:56.084Z</updated>
+                    "<author>" +
+                        "<name></name>" +
+                    "</author>" +
+                    "<content type=\"application/xml\">" +
+                        "<m:properties>" +
+                            "<d:Id>idString</d:Id>" +
+                            "<d:Name>Person</d:Name>" +
+                        "</m:properties>" +
+                    "</content>" +
+                "</entry>" +
+                "<entry>" +
+                    "<id>" +
+                        "http://Example.com/testservice/People('idString2')" +
+                    "</id>" +
+                    "<category scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\" term=\"$example.Person\"></category>" +
+                    "<link href=\"People('idString2')\" rel=\"edit\" title=\"Person\"></link>" +
+                    "<title></title>" +
+                    "" + //<updated>2012-08-24T14:03:56.084Z</updated>
+                    "<author>" +
+                        "<name></name>" +
+                    "</author>" +
+                    "<content type=\"application/xml\">" +
+                        "<m:properties>" +
+                            "<d:Id>idString2</d:Id>" +
+                            "<d:Name>Person2</d:Name>" +
+                        "</m:properties>" +
+                    "</content>" +
+                "</entry>" +
+            "</feed>", 'entity result failed');
+
+        delete $example.Person.getMemberDefinition('Name').lazyLoad;
+        test.done();
+    },
     'With null value field': function (test) {
         test.expect(2);
 

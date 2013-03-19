@@ -484,8 +484,8 @@ exports.Tests = {
         }
 
         test.done();
-    }
-    /*'select fields from entities with complex type': function (test) {
+    },
+    'select fields from entities with complex type': function (test) {
         test.expect(6 + 4 * 6 + 3 * 5 + 2 + 1);
 
         var entityArray = [
@@ -539,5 +539,379 @@ exports.Tests = {
         test.deepEqual(res, res2, 'object compare deep equal failed');
 
         test.done();
-    }*/
+    },
+    'transform - entity has lazyLoadProperty': function (test) {
+        test.expect(3 * 8);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string', lazyLoad: true },
+            Prop3: { type: 'string' }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0' }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1' }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2' })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A'/*, ['Prop1', 'Prop3']*/);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, i, 'result.Id Data failed');
+            test.equal(item.Id2, i+1, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, 'lead' + i, 'result.Prop3 Data failed');
+        }
+
+        test.done();
+    },
+    'transform - select entity has lazyLoadProperty': function (test) {
+        test.expect(3 * 8);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string', lazyLoad: true },
+            Prop3: { type: 'string' }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0' }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1' }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2' })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A', ['Prop1', 'Prop2']);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, undefined, 'result.Id Data failed');
+            test.equal(item.Id2, undefined, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, 'body' + i, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, undefined, 'result.Prop3 Data failed');
+        }
+
+        test.done();
+    },
+    'transform - entity has lazyLoad Complex Property': function (test) {
+        test.expect(3 * 9);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string', lazyLoad: true },
+            Prop3: { type: 'string' },
+            Prop4: { type: '$test.AComplexProperty', lazyLoad: true }
+        });
+
+        $data.Class.define('$test.AComplexProperty', $data.Entity, null, {
+            PropA: { type: 'string' },
+            PropB: { type: 'string' }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0', Prop4: new $test.AComplexProperty({ PropA: 'A0', PropB: 'B' }) }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1', Prop4: new $test.AComplexProperty({ PropA: 'A1', PropB: 'B' }) }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2', Prop4: new $test.AComplexProperty({ PropA: 'A2', PropB: 'B' }) })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A'/*, ['Prop1', 'Prop3']*/);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, i, 'result.Id Data failed');
+            test.equal(item.Id2, i + 1, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, 'lead' + i, 'result.Prop3 Data failed');
+            test.equal(item.Prop4, undefined, 'result.Prop4 Data failed');
+        }
+
+        test.done();
+    },
+    'transform - select entity has lazyLoad Complex Property': function (test) {
+        test.expect(3 * 11);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string', lazyLoad: true },
+            Prop3: { type: 'string' },
+            Prop4: { type: '$test.AComplexProperty', lazyLoad: true }
+        });
+
+        $data.Class.define('$test.AComplexProperty', $data.Entity, null, {
+            PropA: { type: 'string' },
+            PropB: { type: 'string' }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0', Prop4: new $test.AComplexProperty({ PropA: 'A0', PropB: 'B' }) }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1', Prop4: new $test.AComplexProperty({ PropA: 'A1', PropB: 'B' }) }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2', Prop4: new $test.AComplexProperty({ PropA: 'A2', PropB: 'B' }) })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A', ['Prop1', 'Prop4']);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, undefined, 'result.Id Data failed');
+            test.equal(item.Id2, undefined, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, undefined, 'result.Prop3 Data failed');
+
+            var cMeta = {
+                type: '$test.AComplexProperty'
+            };
+            test.deepEqual(item.Prop4.__metadata, cMeta, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropA, 'A' + i, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropB, 'B', 'result.Prop4 instance failed');
+        }
+
+        test.done();
+    },
+    'transform - entity has lazyLoad Complex Field': function (test) {
+        test.expect(3 * 11);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string', lazyLoad: true },
+            Prop3: { type: 'string' },
+            Prop4: { type: '$test.AComplexProperty' }
+        });
+
+        $data.Class.define('$test.AComplexProperty', $data.Entity, null, {
+            PropA: { type: 'string' },
+            PropB: { type: 'string', lazyLoad: true }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0', Prop4: new $test.AComplexProperty({ PropA: 'A0', PropB: 'B' }) }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1', Prop4: new $test.AComplexProperty({ PropA: 'A1', PropB: 'B' }) }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2', Prop4: new $test.AComplexProperty({ PropA: 'A2', PropB: 'B' }) })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A'/*, ['Prop1', 'Prop3']*/);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, i, 'result.Id Data failed');
+            test.equal(item.Id2, i + 1, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, 'lead' + i, 'result.Prop3 Data failed');
+            
+            var cMeta = {
+                type: '$test.AComplexProperty'
+            };
+            test.deepEqual(item.Prop4.__metadata, cMeta, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropA, 'A' + i, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropB, undefined, 'result.Prop4 instance failed');
+        }
+
+        test.done();
+    },
+    'transform - select entity has lazyLoad Complex Field': function (test) {
+        test.expect(3 * 11 * 3);
+
+        $data.Class.define('$test.A', $data.Entity, null, {
+            Id: { type: 'int', key: true },
+            Id2: { type: 'int', key: true },
+            Prop1: { type: 'int' },
+            Prop2: { type: 'string', lazyLoad: true },
+            Prop3: { type: 'string' },
+            Prop4: { type: '$test.AComplexProperty' }
+        });
+
+        $data.Class.define('$test.AComplexProperty', $data.Entity, null, {
+            PropA: { type: 'string' },
+            PropB: { type: 'string', lazyLoad: true }
+        });
+
+        $data.Class.define('$test.TContext', $data.EntityContext, null, {
+            A: { type: $data.EntitySet, elementType: $test.A }
+        });
+
+        var entityArray = [
+            new $test.A({ Id: 0, Id2: 1, Prop1: 'title0', Prop2: 'body0', Prop3: 'lead0', Prop4: new $test.AComplexProperty({ PropA: 'A0', PropB: 'B' }) }),
+            new $test.A({ Id: 1, Id2: 2, Prop1: 'title1', Prop2: 'body1', Prop3: 'lead1', Prop4: new $test.AComplexProperty({ PropA: 'A1', PropB: 'B' }) }),
+            new $test.A({ Id: 2, Id2: 3, Prop1: 'title2', Prop2: 'body2', Prop3: 'lead2', Prop4: new $test.AComplexProperty({ PropA: 'A2', PropB: 'B' }) })
+        ];
+
+        var tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A', ['Prop1', 'Prop4']);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, undefined, 'result.Id Data failed');
+            test.equal(item.Id2, undefined, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, undefined, 'result.Prop3 Data failed');
+
+            var cMeta = {
+                type: '$test.AComplexProperty'
+            };
+            test.deepEqual(item.Prop4.__metadata, cMeta, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropA, 'A' + i, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropB, undefined, 'result.Prop4 instance failed');
+        }
+
+        tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A', ['Prop1', 'Prop4.PropA', 'Prop4.PropB']);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, undefined, 'result.Id Data failed');
+            test.equal(item.Id2, undefined, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, undefined, 'result.Prop3 Data failed');
+
+            var cMeta = {
+                type: '$test.AComplexProperty'
+            };
+            test.deepEqual(item.Prop4.__metadata, cMeta, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropA, 'A' + i, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropB, 'B', 'result.Prop4 instance failed');
+        }
+
+        tr = new $data.oDataServer.EntityTransform($test.TContext, 'http://example.com');
+        res = tr.convertToResponse(entityArray, 'A', ['Prop1', 'Prop4.PropB']);
+        for (var i = 0; i < res.length; i++) {
+            var item = res[i];
+
+            test.equal(item instanceof $data.Entity, false, 'entity is not instanceof $data.Entity failed');
+            test.notEqual(item.__metadata, undefined, '__metadata is undefined');
+
+            test.equal(item.Id, undefined, 'result.Id Data failed');
+            test.equal(item.Id2, undefined, 'result.Id2 Data failed');
+            var meta = {
+                type: '$test.A',
+                uri: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+                id: 'http://example.com/A(Id=' + i + ',Id2=' + (i + 1) + ')',
+            };
+            test.deepEqual(item.__metadata, meta, '__metadata object failed');
+
+            test.equal(item.Prop1, 'title' + i, 'result.Prop1 Data failed');
+            test.equal(item.Prop2, undefined, 'result.Prop2 Data failed');
+            test.equal(item.Prop3, undefined, 'result.Prop3 Data failed');
+
+            var cMeta = {
+                type: '$test.AComplexProperty'
+            };
+            test.deepEqual(item.Prop4.__metadata, cMeta, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropA, undefined, 'result.Prop4 instance failed');
+            test.equal(item.Prop4.PropB, 'B', 'result.Prop4 instance failed');
+        }
+
+        test.done();
+    }
 };
