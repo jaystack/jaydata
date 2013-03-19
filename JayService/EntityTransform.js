@@ -130,16 +130,16 @@
                                 $source: memDef.name
                             };
                         }
-                    }
-                } else {
-                    config[memDef.name] = {
-                        $type: $data.Object,
-                        $value: function (meta, data) {
-                            return {
-                                __deferred: {
-                                    uri: data.uri + '/' + memDef.name
-                                }
-                            };
+                    } else {
+                        config[memDef.name] = {
+                            $type: $data.Object,
+                            $value: function (meta, data) {
+                                return {
+                                    __deferred: {
+                                        uri: data.uri + '/' + memDef.name
+                                    }
+                                };
+                            }
                         }
                     }
                 }
