@@ -551,9 +551,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         } else if (this.getType().storeToken && typeof this.getType().storeToken.factory === 'function') {
             var context = this.getType().storeToken.factory();
             return context.getFieldUrl(this, field);
-        } else {
-            return '#';
+        } else if (this.getType().storeToken){
+            try {
+                var ctx = $data.ItemStore._getContextPromise('default', this.getType());
+                if (ctx instanceof $data.EntityContext) {
+                    return ctx.getFieldUrl(this, field);
+                }
+            } catch (e) {
+            }
         }
+        return '#';
     }
 },
 {
