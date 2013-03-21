@@ -76,13 +76,18 @@
                 }
             }
         };
-        this.addMemberConfigs(memDefs, binderConfig.$item, selectedFields, includes, undefined, '');
-        var converter = new $data.ModelBinder({ storageProvider: { fieldConverter: this.converter } });
 
+        //console.log('selectedFields', selectedFields);
+        this.addMemberConfigs(memDefs, binderConfig.$item, selectedFields, includes, undefined, '');
+        //console.log('binderConfig', binderConfig.$item);
+        var converter = new $data.ModelBinder({ storageProvider: { fieldConverter: this.converter } });
+        //console.log('results', results[0].Author.Profile);
         var result = converter.call(results, binderConfig);
+        //console.log('transform', result[0].Author);
         return result;
     },
     addMemberConfigs: function (memberDefinitions, config, selectedFields, includes, includeStep, path) {
+        //console.log('includes', includes, includeStep);
         var self = this;
         var memDefs = memberDefinitions;
         if (selectedFields && selectedFields.length > 0) {
@@ -93,9 +98,11 @@
                 }).length;
             });
         }
+        //console.log(memDefs.map(function(it){ return it.name; }));
         //memberDefinitions.forEach(function (memDef) {
         memDefs.forEach(function (memDef) {
             var step = includeStep ? (includeStep + '.' + memDef.name) : memDef.name;
+            //console.log('step', step);
 
             var type = Container.resolveType(memDef.type);
             if (type === $data.Array) {
@@ -154,6 +161,7 @@
                     }
                 }
             } else if (type.isAssignableTo && type.isAssignableTo($data.Entity)) {
+                //var step = includeStep ? (includeStep + '.' + memDef.name) : memDef.name;
                 var setDef = this._getEntitySetDefByType(type);
                 if (!setDef) {
                     //ComplexType
@@ -174,6 +182,7 @@
                     }
                 } else {
                     //single side
+                    //console.log('includes2', step, includes.indexOf(step) >= 0);
                     if (includes.indexOf(step) >= 0) {
                         config[memDef.name] = {
                             $type: $data.Object,

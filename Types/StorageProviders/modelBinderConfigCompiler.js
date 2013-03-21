@@ -266,8 +266,10 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 return { name: inc.name.replace(this.mapping + '.', ''), type: inc.type };
             }, this);
 
-            if (includes.length > 0)
-                console.warn('WARN: include for mapped properties is not supported!');
+            if (includes.length > 0){
+                this.DefaultSelection(builder, expression.expression.entityType, includes);
+                //console.warn('WARN: include for mapped properties is not supported!');
+            }
         }
 
         if (expression.expression instanceof $data.Expressions.EntityExpression) {

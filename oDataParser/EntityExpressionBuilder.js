@@ -112,8 +112,36 @@
     },
     expandConverter: function (exprObjArray, rootExpr) {
         if (exprObjArray.length > 0) {
+            var included = [];
             for (var i = 0; i < exprObjArray.length; i++) {
-                rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(this._getMemberPath(exprObjArray[i]), 'string'));
+                var exprChain = [];
+                var path = this._getMemberPath(exprObjArray[i]).split('.');
+                var p = path.shift();
+                
+                //console.log('path', p);
+                if (included.indexOf(p) < 0){
+                    included.push(p);
+                    if (this.includes.indexOf(p) < 0) this.includes.push(p);
+                    exprChain.push(new $data.Expressions.ConstantExpression(p, 'string'));
+                    //rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(p, 'string'));
+                }
+                
+                while (path.length){
+                    p += '.' + path.shift();
+                    //console.log('deep path', p);
+                    if (included.indexOf(p) < 0){
+                        included.push(p);
+                        if (this.includes.indexOf(p) < 0) this.includes.push(p);
+                        exprChain.push(new $data.Expressions.ConstantExpression(p, 'string'));
+                        //rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(p, 'string'));
+                    }
+                }
+                
+                //console.log(included);
+                
+                while (exprChain.length){
+                    rootExpr = new $data.Expressions.IncludeExpression(rootExpr, exprChain.pop());
+                }
             }
         }
         return rootExpr;

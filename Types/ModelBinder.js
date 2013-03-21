@@ -97,7 +97,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 
         if (meta.$value) {
             if (typeof meta.$value === 'function') {
-                if (!context.forEach) context.src += 'var di = data;';
+                context.src += 'var di = di || data;';
                 context.src += 'var fn = function(){ return meta' + (context.meta.length ? '.' + context.meta.join('.') : '') + '.$value.call(self, meta' + (context.meta.length ? '.' + context.meta.join('.') : '') + ', di); };';
                 if (meta.$type) {
                     var type = Container.resolveName(Container.resolveType(meta.$type));
@@ -382,6 +382,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.build(meta, context);
         if (context.item) context.src += 'if (typeof result === "undefined") result = ' + context.item + ';';
         context.src += 'return result;';
+        
+        /*var beautify = require('beautifyjs');
+        console.log(beautify.js_beautify(context.src));*/
+        
         var fn = new Function('meta', 'data', context.src).bind(this);
         var ret = fn(meta, data);
         return ret;

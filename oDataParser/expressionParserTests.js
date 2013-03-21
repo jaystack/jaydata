@@ -62,6 +62,7 @@ $(document).ready(function () {
     builderTest('map navProp simple more field', c.Articles.map(function (it) { return { Author: { LoginName: it.Author.LoginName, Email: it.Author.Email } }; }), c);
     builderTest('map navProp complex', c.Articles.map(function (it) { return { Title: it.Title, Author: it.Author }; }), c);
     builderTest('map navProp complex deep prop', c.Articles.map(function (it) { return { Title: it.Title, Author: { LoginName: it.Author.LoginName } }; }), c);
+    builderTest('map navProp complex deep prop2', c.Articles.map(function (it) { return { Title: it.Title, Author: { Profile: { Bio: it.Author.Profile.Bio }/* it.Author.Profile*/, LoginName: it.Author.LoginName } }; }), c);
     builderTest('include singleProp', c.Articles.include('Category'), c, false, true);
     builderTest('include deep 1', c.Articles.include('Author.Articles'), c, false, true);
     builderTest('include deep 2', c.Articles.include('Author.Profile'), c, false, true);

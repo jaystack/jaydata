@@ -14,8 +14,8 @@ exports['oDataBatchTest'] = require('./UnitTests/NodeJS/oDataBatchTests.js');
 exports['argumentBinderTests'] = require('./UnitTests/NodeJS/argumentBinderTests.js');
 exports['oDataXmlResultTests'] = require('./UnitTests/NodeJS/oDataXmlResultTests.js');
 
-//try{ exports['mongoProviderTests'] = require('./Pro/UnitTests/mongoProviderTests.js'); }
-//catch(err){ exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js'); }
+try{ exports['mongoProviderTests'] = require('./Pro/UnitTests/mongoProviderTests.js'); }
+catch(err){ exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js'); }
 
 var connect = require('connect');
 var app = connect();
@@ -550,7 +550,25 @@ app.use("/funcservice", $data.JayService.createAdapter($exampleSrv.FuncContext, 
     return new $exampleSrv.FuncContext({ name: 'mongoDB', databaseName: 'funcserviceDb', responseLimit: 30 });
 }));
 
+$data.Class.defineEx('$news.Types.NewsContextService', [$news.Types.NewsContext, $data.ServiceBase]);
+app.use("/Services/emptyNewsReader.svc", $data.JayService.createAdapter($news.Types.NewsContextService, function () {
+    return new $news.Types.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
+}));
+app.use("/Services/emptyNewsReaderV3.svc", $data.JayService.createAdapter($news.Types.NewsContextService, function () {
+    return new $news.Types.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
+}));
 
+app.use("/Services/oDataDbDelete.asmx/Delete", function(req, res){
+    var c = new $news.Types.NewsContext({ name: 'mongoDB', databaseName: 'newsreader', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
+    c.onReady(function(){
+        res.end();
+    });
+    
+    var seed = exports['mongoProviderTests'].seed;
+    for (var i in seed){
+        seed[i] = 0;
+    }
+});
 
 app.listen(3001);
 app.listen(3002);

@@ -115,18 +115,42 @@
             var d = changeRequest.data;
             if (d.hasOwnProperty(ni)){
                 var o = d[ni];
-                if (typeof o === 'object' && o && o.__metadata && o.__metadata.uri){
-                    var uri = o.__metadata.uri;
-                    var ref;
-                    if (uri.indexOf('$') >= 0){
-                        referenceData[uri.slice(1)].requestObject;
-                    }else{
-                        console.log('URLPART', $data.JayService.OData.Utils.parseUrlPart(uri, this.context));
-                    }
-                    d[ni] = new (Container.resolveType(itemType.memberDefinitions.getMember(ni).type))(ref.data);
-                    switch (ref.method){
-                        case 'MERGE': d[ni].entityState = $data.EntityState.Modified; break;
-                        case 'POST': d[ni].entityState = $data.EntityState.Added; break;
+                if (Array.isArray(o)){
+                    //console.log('ooooooooo', o);
+                    o.forEach(function(it, i, arr){
+                        var uri = it.__metadata.uri;
+                        var ref;
+                        if (uri.indexOf('$') >= 0){
+                            ref = referenceData[uri.slice(1)].resultObject;
+                        }else{
+                            var urlPart = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
+                            ref = new urlPart.set.elementType(urlPart.idObj);
+                            ref.entityState = $data.EntityState.Unchanged;
+                            //console.log('URLPART', $data.JayService.OData.Utils.parseUrlPart(uri, this.context));
+                        }
+                        o[i] = ref;// new (Container.resolveType(itemType.memberDefinitions.getMember(ni).type))(ref.data);
+                        /*switch (ref.method){
+                            case 'MERGE': case 'PATCH': o[i].entityState = $data.EntityState.Modified; break;
+                            case 'POST': o[i].entityState = $data.EntityState.Added; break;
+                        }*/
+                    });
+                }else{
+                    if (typeof o === 'object' && o && o.__metadata && o.__metadata.uri){
+                        var uri = o.__metadata.uri;
+                        var ref;
+                        if (uri.indexOf('$') >= 0){
+                            ref = referenceData[uri.slice(1)].resultObject;
+                        }else{
+                            var urlPart = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
+                            ref = new urlPart.set.elementType(urlPart.idObj);
+                            ref.entityState = $data.EntityState.Unchanged;
+                            //console.log('URLPART', $data.JayService.OData.Utils.parseUrlPart(uri, this.context));
+                        }
+                        d[ni] = ref; //new (Container.resolveType(itemType.memberDefinitions.getMember(ni).type))(ref.data);
+                        /*switch (ref.method){
+                            case 'MERGE': case 'PATCH': d[ni].entityState = $data.EntityState.Modified; break;
+                            case 'POST': d[ni].entityState = $data.EntityState.Added; break;
+                        }*/
                     }
                 }
             }
@@ -178,6 +202,8 @@
                     break;
             }
         }
+        
+        //console.log(changeRequests.map(function(it){ return JSON.stringify(it.data); }));
 
         return this.context.saveChanges({
             success: function () {
