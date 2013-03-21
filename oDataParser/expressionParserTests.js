@@ -64,11 +64,11 @@ $(document).ready(function () {
     builderTest('map navProp complex deep prop', c.Articles.map(function (it) { return { Title: it.Title, Author: { LoginName: it.Author.LoginName } }; }), c);
     builderTest('map navProp complex deep prop2', c.Articles.map(function (it) { return { Title: it.Title, Author: { Profile: { Bio: it.Author.Profile.Bio }/* it.Author.Profile*/, LoginName: it.Author.LoginName } }; }), c);
     builderTest('include singleProp', c.Articles.include('Category'), c, false, true);
-    builderTest('include deep 1', c.Articles.include('Author.Articles'), c, false, true);
-    builderTest('include deep 2', c.Articles.include('Author.Profile'), c, false, true);
-    builderTest('include deep 3', c.Articles.include('Author.Articles.Reviewer'), c, false, true);
+    builderTest('include deep 1', c.Articles.include('Author').include('Author.Articles'), c, false, true);
+    builderTest('include deep 2', c.Articles.include('Author').include('Author.Profile'), c, false, true);
+    builderTest('include deep 3', c.Articles.include('Author').include('Author.Articles').include('Author.Articles.Reviewer'), c, false, true);
     builderTest('include multiple 1', c.Articles.include('Category').include('Author'), c, false, true);
-    builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author.Articles'), c, false, true);
+    builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author').include('Author.Articles'), c, false, true);
 
     builderTest('map - take', c.Articles.map(function (it) { return { Id: it.Id, Title: it.Title } }).take(6), c);
 

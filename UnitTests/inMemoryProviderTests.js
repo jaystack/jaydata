@@ -87,7 +87,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean1'; }).toTraceString();
-            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.name == 'ocean1');\n}".replace(/[\n ]/g, ''));
+            equal(q.$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\n return (o.name == 'ocean1');\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.name == 'ocean1'; }).toArray(function (r) {
                 start();
@@ -182,7 +182,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toTraceString();
-            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && (o.woeid == 1235));\n}".replace(/[\n ]/g, ''));
+            equal(q.$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && (o.woeid == 1235));\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toArray(function (r) {
                 start();
@@ -201,7 +201,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && (o.woeid == 1235 || o.name == 'ocean1'); }).toTraceString();
-            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && ((o.woeid == 1235) || (o.name == 'ocean1')));\n}".replace(/[\n ]/g, ''));
+            equal(q.$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn ((o.name == 'ocean2') && ((o.woeid == 1235) || (o.name == 'ocean1')));\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.name == 'ocean2' && o.woeid == 1235; }).toArray(function (r) {
                 start();
@@ -224,7 +224,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.placeTypeName.code == '1'; }).toTraceString();
-            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn (o.placeTypeName.code == '1');\n}".replace(/[\n ]/g, ''));
+            equal(q.$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn (o.placeTypeName.code == '1');\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.placeTypeName.code == '1'; }).toArray(function (r) {
                 start();
@@ -248,7 +248,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.filter(function (o) { return o.woeid in [1235, 1236, 1237]; }).toTraceString();
-            equal(q.$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn ([1235,1236,1237].indexOf(o.woeid) > -1);\n}".replace(/[\n ]/g, ''));
+            equal(q.$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn ([1235,1236,1237].indexOf(o.woeid) > -1);\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.filter(function (o) { return o.woeid in [1235, 1236, 1237]; }).toArray(function (r) {
                 start();
@@ -350,7 +350,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.orderBy(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, '').replace('/**/', ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy value failed');
 
             memoryContext.Oceans.orderBy(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -360,7 +360,7 @@
             });
 
             var q = memoryContext.Oceans.orderByDescending(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderByDescending value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, '').replace('/**/', ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderByDescending value failed');
 
             memoryContext.Oceans.orderByDescending(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -370,8 +370,8 @@
             });
 
             var q = memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderBy(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.woeid;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderBy value failed');
-            equal(q.$order[1].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderBy value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, '').replace('/**/', ''), 'function anonymous(o) {\nreturn o.woeid;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderBy value failed');
+            equal(q.$order[1].toString().replace(/[\n ]/g, '').replace('/**/', ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderBy value failed');
 
             memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderBy(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -385,8 +385,8 @@
             });
 
             var q = memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderByDescending(function (o) { return o.name; }).toTraceString();
-            equal(q.$order[0].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.woeid;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderByDescending value failed');
-            equal(q.$order[1].toString().replace(/[\n ]/g, ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderByDescending value failed');
+            equal(q.$order[0].toString().replace(/[\n ]/g, '').replace('/**/', ''), 'function anonymous(o) {\nreturn o.woeid;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderByDescending value failed');
+            equal(q.$order[1].toString().replace(/[\n ]/g, '').replace('/**/', ''), 'function anonymous(o) {\nreturn o.name;\n}'.replace(/[\n ]/g, ''), 'orderBy-orderByDescending value failed');
 
             memoryContext.Oceans.orderBy(function (o) { return o.woeid; }).orderByDescending(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -410,7 +410,7 @@
         var memoryContext = new $data.Yahoo.YQLContext({ name: 'InMemory', source: { "geo.oceans": items } });
         memoryContext.onReady(function () {
             var q = memoryContext.Oceans.map(function (o) { return o.name; }).toTraceString();
-            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn o.name;\n}".replace(/[\n ]/g, ''));
+            equal(q.$map.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn o.name;\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return o.name; }).toArray(function (r) {
                 start();
@@ -419,7 +419,7 @@
             });
 
             var q = memoryContext.Oceans.map(function (o) { return { n: o.name }; }).toTraceString();
-            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn { n: o.name };\n}".replace(/[\n ]/g, ''));
+            equal(q.$map.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn { n: o.name };\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return { n: o.name }; }).toArray(function (r) {
                 start();
@@ -428,7 +428,7 @@
             });
 
             var q = memoryContext.Oceans.map(function (o) { return { n: o.name, w: o.woeid }; }).toTraceString();
-            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn { n: o.name, w: o.woeid };\n}".replace(/[\n ]/g, ''));
+            equal(q.$map.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn { n: o.name, w: o.woeid };\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return { n: o.name, w: o.woeid }; }).toArray(function (r) {
                 start();
@@ -438,7 +438,7 @@
             });
 
             var q = memoryContext.Oceans.map(function (o) { return { n: o.name, a: { b: { w: o.woeid}} }; }).toTraceString();
-            equal(q.$map.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\nreturn { n: o.name, a: { b: { w: o.woeid } } };\n}".replace(/[\n ]/g, ''));
+            equal(q.$map.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\nreturn { n: o.name, a: { b: { w: o.woeid } } };\n}".replace(/[\n ]/g, ''));
 
             memoryContext.Oceans.map(function (o) { return { n: o.name, a: { b: { w: o.woeid}} }; }).toArray(function (r) {
                 start();
@@ -1075,7 +1075,7 @@
 
                 //string
                 var q = memoryContext.Entities.filter(function (o) { return o.Name == 'name'; });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.Name == 'name');\n}".replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\n return (o.Name == 'name');\n}".replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {
@@ -1086,7 +1086,7 @@
 
                 //date
                 var q = memoryContext.Entities.filter(function (o) { return o.propDate < this.date; }, { date: new Date('2005/01/01') });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), ("function anonymous(o) {\n return (o.propDate < new Date(Date.parse('" + (new Date('2005/01/01')).toISOString() + "')));\n}").replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), ("function anonymous(o) {\n return (o.propDate < new Date(Date.parse('" + (new Date('2005/01/01')).toISOString() + "')));\n}").replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {
@@ -1097,7 +1097,7 @@
 
                 //bool
                 var q = memoryContext.Entities.filter(function (o) { return o.propBool == false; });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propBool == false);\n}".replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\n return (o.propBool == false);\n}".replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {
@@ -1108,7 +1108,7 @@
 
                 //number
                 var q = memoryContext.Entities.filter(function (o) { return o.propNum < 4.1; });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propNum < 4.1);\n}".replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\n return (o.propNum < 4.1);\n}".replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {
@@ -1119,7 +1119,7 @@
 
                 //int
                 var q = memoryContext.Entities.filter(function (o) { return o.propInt > 50; });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propInt > 50);\n}".replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\n return (o.propInt > 50);\n}".replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {
@@ -1130,7 +1130,7 @@
 
                 //guid
                 var q = memoryContext.Entities.filter(function (o) { return o.propGuid == this.guid; }, { guid: new $data.Guid('c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2') });
-                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, ''), "function anonymous(o) {\n return (o.propGuid == 'c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2');\n}".replace(/[\n ]/g, ''));
+                equal(q.toTraceString().$filter.toString().replace(/[\n ]/g, '').replace('/**/', ''), "function anonymous(o) {\n return (o.propGuid == 'c9abb6a2-5b8c-45d8-8bb0-5d88e9dbf1a2');\n}".replace(/[\n ]/g, ''));
 
                 stop();
                 q.toArray(function (r) {

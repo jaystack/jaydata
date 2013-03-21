@@ -201,6 +201,9 @@ function metadataTests(providerConfig, msg) {
                 });
             });
 
+        }).fail(function(err){
+            console.log(err);
+            start();
         });
     });
 
@@ -283,6 +286,9 @@ function metadataTests(providerConfig, msg) {
                 })
             });
 
+        }).fail(function(err){
+            console.log(err);
+            start();
         });
     });
 }

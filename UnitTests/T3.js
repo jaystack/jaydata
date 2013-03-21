@@ -1284,7 +1284,10 @@ function T3(providerConfig, msg) {
                     equal(result.length, 22, 'Result number faild');
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
                     ok(result[1].Title.length > 0, 'Title faild');
-                })
+                }).fail(function(err){
+                    console.log(err);
+                    start(1);
+                });
             });
         });
     });
@@ -1336,7 +1339,10 @@ function T3(providerConfig, msg) {
                     equal(result.length, 5, 'Result number faild');
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
                     ok(result[1].Title.length > 0, 'Title faild');
-                })
+                }).fail(function(err){
+                    console.log(err);
+                    start(1);
+                });
             });
         });
     });
@@ -1354,7 +1360,10 @@ function T3(providerConfig, msg) {
                     equal(result.length, 5, 'Result number faild');
                     ok(!(result[0] instanceof $news.Types.Article), 'Return type faild');
                     ok(typeof result[1].T === 'number', 'Filed data type error');
-                })
+                }).fail(function(err){
+                    console.log(err);
+                    start(1);
+                });
             });
         });
     });
@@ -1497,7 +1506,10 @@ function T3(providerConfig, msg) {
                     equal(result.length, 22, 'Result number faild');
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
                     ok(result[1].Title.length > 0, 'Title faild');
-                })
+                }).fail(function(err){
+                    console.log(err);
+                    start(1);
+                });
             });
         });
     });
@@ -1549,7 +1561,10 @@ function T3(providerConfig, msg) {
                     equal(result.length, 5, 'Result number faild');
                     ok(result[0] instanceof $news.Types.Article, 'Return type faild');
                     ok(result[1].Title.length > 0, 'Title faild');
-                })
+                }).fail(function(err){
+                    console.log(err);
+                    start(1);
+                });
             });
         });
     });
@@ -1567,7 +1582,10 @@ function T3(providerConfig, msg) {
                     equal(result.length, 5, 'Result number faild');
                     ok(!(result[0] instanceof $news.Types.Article), 'Return type faild');
                     ok(typeof result[1].T === 'number', 'Filed data type error');
-                })
+                }).fail(function(err){
+                    console.log(err);
+                    start(1);
+                });
             });
         });
     });

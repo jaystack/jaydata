@@ -551,6 +551,8 @@ app.use("/funcservice", $data.JayService.createAdapter($exampleSrv.FuncContext, 
 }));
 
 $data.Class.defineEx('$news.Types.NewsContextService', [$news.Types.NewsContext, $data.ServiceBase]);
+$news.Types.NewsContextService.annotateFromVSDoc();
+
 app.use("/Services/emptyNewsReader.svc", $data.JayService.createAdapter($news.Types.NewsContextService, function () {
     return new $news.Types.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
 }));

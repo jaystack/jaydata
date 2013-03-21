@@ -33,6 +33,9 @@ $(function () {
 
                             });
                         });
+                    }).fail(function(err){
+                        console.log(err);
+                        start(2);
                     });
                 });
         });
@@ -67,6 +70,9 @@ $(function () {
                         });
 
                     });
+                }).fail(function(err){
+                    console.log(err);
+                    start(2);
                 });
             });
         });
@@ -133,6 +139,9 @@ $(function () {
 
                         });
                     });
+                }).fail(function(err){
+                    console.log(err);
+                    start(2);
                 });
             });
         });
@@ -156,7 +165,13 @@ function T3WebapiBugfix(providerConfiguration, msg) {
                     var art = items[0];
                     equal(art.CreateDate.valueOf(), date.valueOf(), 'saved and recived dates are equals');
                     start();
+                }).fail(function(err){
+                    console.log(err);
+                    start();
                 });
+            }).fail(function(err){
+                console.log(err);
+                start();
             });
 
         });
@@ -203,6 +218,9 @@ $(function () {
                 });
             });
 
+        }).fail(function(err){
+            console.log(err);
+            start();
         });
 
     });
@@ -245,6 +263,9 @@ $(function () {
                     });
                 });
             });
+        }).fail(function(err){
+            console.log(err);
+            start();
         });
 
     });

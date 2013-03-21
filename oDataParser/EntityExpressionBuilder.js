@@ -121,6 +121,7 @@
                 //console.log('path', p);
                 if (included.indexOf(p) < 0){
                     included.push(p);
+                    if (!this.includes) this.includes = [];
                     if (this.includes.indexOf(p) < 0) this.includes.push(p);
                     exprChain.push(new $data.Expressions.ConstantExpression(p, 'string'));
                     //rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(p, 'string'));
@@ -131,6 +132,7 @@
                     //console.log('deep path', p);
                     if (included.indexOf(p) < 0){
                         included.push(p);
+                        if (!this.includes) this.includes = [];
                         if (this.includes.indexOf(p) < 0) this.includes.push(p);
                         exprChain.push(new $data.Expressions.ConstantExpression(p, 'string'));
                         //rootExpr = new $data.Expressions.IncludeExpression(rootExpr, new $data.Expressions.ConstantExpression(p, 'string'));
