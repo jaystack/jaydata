@@ -19,7 +19,7 @@ function metadataTests(providerConfig, msg) {
         $data.MetadataLoader.debugMode = true;
         $data.MetadataLoader.factoryCache = {};
 
-        $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
+        $data.MetadataLoader.load('/Services/emptyNewsReader.svc', {
             success: function (f, type, code) {
 
                 equal(typeof f, 'function', 'factory is function');
@@ -32,7 +32,7 @@ function metadataTests(providerConfig, msg) {
                 ok(ctx instanceof type, 'context instance of type ');
                 ok(Object.keys($data.MetadataLoader.factoryCache).length > 0, 'factory cache has record')
 
-                $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
+                $data.MetadataLoader.load('/Services/emptyNewsReader.svc', {
                     success: function (f2, type2, code2) {
 
                         ok(f2 === f, 'factory is same if load again');
@@ -68,7 +68,7 @@ function metadataTests(providerConfig, msg) {
         $data.MetadataLoader.debugMode = true;
         $data.MetadataLoader.factoryCache = {};
 
-        $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
+        $data.MetadataLoader.load('/Services/emptyNewsReader.svc', {
             success: function (f, type, code) {
 
                 var ctx = f();
@@ -92,6 +92,7 @@ function metadataTests(providerConfig, msg) {
                 });
             },
             error: function (e) {
+                console.log(e);
                 ok(false, 'Error: ' + e);
                 $data.MetadataLoader.factoryCache = {};
                 $data.MetadataLoader.debugMode = orig;
@@ -112,7 +113,7 @@ function metadataTests(providerConfig, msg) {
         $data.MetadataLoader.debugMode = true;
         $data.MetadataLoader.factoryCache = {};
 
-        $data.MetadataLoader.load('/Services/emptyNewsreader.svc', {
+        $data.MetadataLoader.load('/Services/emptyNewsReader.svc', {
             success: function (f, type, code) {
 
                 var ctx = f();

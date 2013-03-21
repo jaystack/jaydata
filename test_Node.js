@@ -550,14 +550,14 @@ app.use("/funcservice", $data.JayService.createAdapter($exampleSrv.FuncContext, 
     return new $exampleSrv.FuncContext({ name: 'mongoDB', databaseName: 'funcserviceDb', responseLimit: 30 });
 }));
 
-$data.Class.defineEx('$news.Types.NewsContextService', [$news.Types.NewsContext, $data.ServiceBase]);
-$news.Types.NewsContextService.annotateFromVSDoc();
+$data.Class.defineEx('JayData.NewsReader.NewsContextService', [$news.Types.NewsContext, $data.ServiceBase]);
+JayData.NewsReader.NewsContextService.annotateFromVSDoc();
 
-app.use("/Services/emptyNewsReader.svc", $data.JayService.createAdapter($news.Types.NewsContextService, function () {
-    return new $news.Types.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
+app.use("/Services/emptyNewsReader.svc", $data.JayService.createAdapter(JayData.NewsReader.NewsContextService, function () {
+    return new JayData.NewsReader.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
 }));
-app.use("/Services/emptyNewsReaderV3.svc", $data.JayService.createAdapter($news.Types.NewsContextService, function () {
-    return new $news.Types.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
+app.use("/Services/emptyNewsReaderV3.svc", $data.JayService.createAdapter(JayData.NewsReader.NewsContextService, function () {
+    return new JayData.NewsReader.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
 }));
 
 app.use("/Services/oDataDbDelete.asmx/Delete", function(req, res){
