@@ -2193,7 +2193,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                 ]
             ]);
             var collection = new $data.GeographyCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -2248,7 +2248,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                         deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
                         deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
                         deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
-                        deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+                        deepEqual(resItem.GeographyCollection.geometries, collection.geometries, 'GeographyCollection data');
 
                     }
 
@@ -2292,7 +2292,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                 ]
             ]);
             var collection = new $data.GeographyCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -2333,7 +2333,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                     deepEqual(resItem.GeographyMultiPoint, null, 'GeographyMultiPoint data');
                     ok(!resItem.GeographyMultiLineString, 'GeographyMultiLineString data');
                     deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
-                    deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+                    deepEqual(resItem.GeographyCollection.geometries, collection.geometries, 'GeographyCollection data');
 
                     context.GeoTestEntities.attach(resItem);
                     resItem.Name = 'Item updated';
@@ -2357,7 +2357,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                             deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
                             deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
                             deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
-                            deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+                            deepEqual(resItem.GeographyCollection.geometries, collection.geometries, 'GeographyCollection data');
 
                             context.GeoTestEntities.remove(resItem);
                             context.saveChanges(function () {
@@ -2400,7 +2400,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                 ]
             ]);
             var collection = new $data.GeometryCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -2455,7 +2455,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                         deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
                         deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
                         deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
-                        deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+                        deepEqual(resItem.GeometryCollection.geometries, collection.geometries, 'GeometryCollection data');
 
                     }
 
@@ -2500,7 +2500,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                 ]
             ]);
             var collection = new $data.GeometryCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -2541,7 +2541,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                     deepEqual(resItem.GeometryMultiPoint, null, 'GeometryMultiPoint data');
                     ok(!resItem.GeometryMultiLineString, 'GeometryMultiLineString data');
                     deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
-                    deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+                    deepEqual(resItem.GeometryCollection.geometries, collection.geometries, 'GeometryCollection data');
 
                     context.GeometryTestEntities.attach(resItem);
                     resItem.Name = 'Item updated';
@@ -2565,7 +2565,7 @@ function GeoTests(providerConfig, msg, afterTestFn) {
                             deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
                             deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
                             deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
-                            deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+                            deepEqual(resItem.GeometryCollection.geometries, collection.geometries, 'GeometryCollection data');
 
                             context.GeometryTestEntities.remove(resItem);
                             context.saveChanges(function () {

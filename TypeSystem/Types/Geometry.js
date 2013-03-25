@@ -149,8 +149,13 @@ $data.Container.registerType(['$data.GeometryMultiPolygon', 'GeometryMultiPolygo
 
 /* $data.GeometryCollection */
 $data.GeometryCollection = function GeometryCollection(data) {
-    $data.GeometryBase.call(this, data);
+    if (Array.isArray(data)) {
+        $data.GeometryBase.call(this, { geometries: data });
+    } else {
+        $data.GeometryBase.call(this, data);
+    }
 };
+$data.GeometryCollection.validMembers = ['geometries'];
 $data.GeometryBase.registerType('GeometryCollection', $data.GeometryCollection);
 $data.Container.registerType(['$data.GeometryCollection', 'GeometryCollection'], $data.GeometryCollection);
 
