@@ -729,6 +729,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
         this.mainEntitySet = null;
     },
     compile: function(query){
+        this.query = query;
         this.provider = query.context.storageProvider;
         this.context = query.context;
         this.mainEntitySet = query.context.getEntitySetFromElementType(query.defaultType);
@@ -776,6 +777,9 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
 
         var projectionCompiler = new $data.storageProviders.mongoDB.mongoDBProjectionCompiler(this.context);
         projectionCompiler.compile(expression, context);
+    },
+    VisitInlineCountExpression: function(expression, context){
+        this.query.withInlineCount = true;
     }
 });
 
@@ -945,7 +949,16 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         collection.remove(find.query, { safe: true }, cb);
                         break;
                     default:
-                        collection.find(find.query, find.options).toArray(cb);
+                        if (query.withInlineCount){
+                            collection.find({}, {}).count(function(err, result){
+                                if (error){
+                                    callBack.error(error);
+                                    return;
+                                }
+                                query.__count = result;
+                                collection.find(find.query, find.options).toArray(cb);
+                            });
+                        }else collection.find(find.query, find.options).toArray(cb);
                         break;
                 }
             };
