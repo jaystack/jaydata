@@ -827,4 +827,39 @@ if ($data.storageProviders.mongoDBPro){
 
         });
     };
+    
+    exports.Tests.orderGeoDataFromDb = function (test) {
+        test.expect(2);
+
+        var context = $example.Context.getContext();
+        $example.Context.generateTestData(context, function () {
+
+            //console.log(context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toTraceString());
+            context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) })
+            .orderBy(function(it){ return it.Location.distance(this.point); }, { point: new $data.GeographyPoint([0.01, 0.01]) })
+            .toArray(function (p) {
+                test.equal(p.length, 3, 'Places count failed');
+                //console.log(p.map(function(it){ return it.initData.Location; }));
+                test.deepEqual(p.map(function(it){ return it.initData.Location; }), [
+                    {
+                        type: 'Point',
+                        coordinates: [0, 0],
+                        crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
+                    }, {
+                        type: 'Point',
+                        coordinates: [0.01, 0.01],
+                        crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
+                    }, {
+                        type: 'Point',
+                        coordinates: [0.02, 0.02],
+                        crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
+                    }
+                ], 'Bad places filtered');
+                test.done();
+            }).fail(function(err){
+                console.log(JSON.parse(err.data[0].response.body).error);
+            });
+
+        });
+    };
 }
