@@ -2117,3 +2117,59 @@ test("REST - load all fields on create - batch", 14, function () {
         });
     });
 });
+
+test("REST - $value", 10, function () {
+    stop(5);
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+
+        context.Orders.first(undefined, undefined, function (order) {
+            equal(order.getFieldUrl('Id'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Id/$value", 'Id property url compiled');
+            equal(order.getFieldUrl('Value'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Value/$value", 'Value property url compiled');
+            equal(order.getFieldUrl('Date'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Date/$value", 'Date property url compiled');
+            equal(order.getFieldUrl('Completed'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Completed/$value", 'Completed property url compiled');
+            equal(order.getFieldUrl('Data'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Data/$value", 'Data property url compiled');
+
+            OData.request({ requestUri: order.getFieldUrl('Id'), method: 'GET' }, function (data) {
+                equal(data, order.Id, 'Id from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Value'), method: 'GET' }, function (data) {
+                equal(data, order.Value, 'Value from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Date'), method: 'GET' }, function (data) {
+                equal(data, order.Date.toISOString().replace('Z', ''), 'Date from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Completed'), method: 'GET' }, function (data) {
+                equal(data, order.Completed.toString(), 'Completed from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Data'), method: 'GET' }, function (data) {
+                equal(data, JSON.stringify(order.Data), 'Data from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+        });
+    });
+});
