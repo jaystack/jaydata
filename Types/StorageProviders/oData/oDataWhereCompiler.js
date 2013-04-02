@@ -32,7 +32,7 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };
 
             paramValue.forEach(function (item) {
-                var idValue = Container.createConstantExpression(item);
+                var idValue = Container.createConstantExpression(item, expression.right.type);
                 var idCheck = Container.createSimpleBinaryExpression(expression.left, idValue,
                     $data.Expressions.ExpressionType.Equal, "==", "boolean", eqResolution);
                 if (result) {
@@ -154,14 +154,15 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
                 return exprParams[paramCounter++]
             };
         });
-
+        var i = 0;
         args.forEach(function (arg, index) {
             if (arg === undefined || (arg instanceof $data.Expressions.ConstantExpression && typeof arg.value === 'undefined'))
                 return;
 
-            if (index > 0) {
+            if (i > 0) {
                 context.data += ",";
             };
+            i++;
             context.data += params[index].name + '=';
             this.Visit(arg, context);
         }, this);

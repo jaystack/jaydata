@@ -433,7 +433,7 @@
             }
 
             this.lexer.nextToken();
-            return this.builder.buildConstant(g, "geography");
+            return this.builder.buildConstant(g, "GeographyPoint");
         },
         parseGeometryLiteral: function () {
             if (this.lexer.token.value != "geometry")
@@ -451,7 +451,7 @@
             }
 
             this.lexer.nextToken();
-            return this.builder.buildConstant(g, "geometry");
+            return this.builder.buildConstant(g, "GeometryPoint");
         },
         parseGeographyArg: function () {
             var exp = this.parseExpr();

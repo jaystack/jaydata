@@ -5,13 +5,13 @@ $C('$data.storageProviders.InMemory.InMemoryCompiler', $data.Expressions.EntityE
                 toDb: {
                     '$data.Integer': function (number) { return number; },
                     '$data.Number': function (number) { return number; },
-                    '$data.Date': function (date) { return date ? "new Date(Date.parse('" + date.toISOString() + "'))" : null; },
+                    '$data.Date': function (date) { return date ? "new Date(Date.parse('" + date.toISOString() + "'))" : date; },
                     '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
                     '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
                     '$data.Blob': function (blob) { return typeof blob === 'string' ? "'" + blob + "'" : blob; },
                     '$data.Object': function (o) { return JSON.stringify(o); },
                     '$data.Array': function (o) { return JSON.stringify(o); },
-                    '$data.Guid': function (guid) { return guid ? "'" + guid + "'" : null; }
+                    '$data.Guid': function (guid) { return guid ? "'" + guid + "'" : guid; }
                 }
             }
         };

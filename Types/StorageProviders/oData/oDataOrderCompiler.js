@@ -106,13 +106,15 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
             };
         });
 
+        var i = 0;
         args.forEach(function (arg, index) {
             if (arg === undefined || (arg instanceof $data.Expressions.ConstantExpression && typeof arg.value === 'undefined'))
                 return;
 
-            if (index > 0) {
+            if (i > 0) {
                 context.data += ",";
             };
+            i++;
             context.data += params[index].name + '=';
             this.Visit(arg, context);
         }, this);

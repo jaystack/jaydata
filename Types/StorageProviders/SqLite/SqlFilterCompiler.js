@@ -41,7 +41,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                         sqlBuilder.addText(SqlStatementBlocks.beginGroup);
                         set.forEach(function (item, i) {
                             if (i > 0) sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
-                            var c = Container.createConstantExpression(item);
+                            var c = Container.createConstantExpression(item, expression.right.type);
                             self.Visit(c, sqlBuilder);
                         });
                         sqlBuilder.addText(SqlStatementBlocks.endGroup);

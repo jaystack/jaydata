@@ -45,7 +45,8 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
 
         if (allLocal) {
             var params = members.map(function (member) { return { name: member.fieldName, value: member.expression.value }; });
-            return Container.createConstantExpression(eNode.implementation(params));
+            var value = eNode.implementation(params);
+            return Container.createConstantExpression(value, typeof value);
         } else {
             return Container.createObjectLiteralExpression(members);
         }
@@ -123,7 +124,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         if (left instanceof expr.ConstantExpression && right instanceof expr.ConstantExpression) 
         {
                 var result = eNode.implementation(left.value, right.value);
-                return Container.createConstantExpression(result);
+                return Container.createConstantExpression(result, typeof result);
         }
         return new Container.createSimpleBinaryExpression(left, right, eNode.nodeType, eNode.operator, eNode.type);
     },
@@ -140,7 +141,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         if (operand  instanceof expr.ConstantExpression)
         {
                 var result = eNode.operator.implementation(operand.value);
-                return Container.createConstantExpression(result);
+                return Container.createConstantExpression(result, typeof result);
         }
         return new Container.createUnaryExpression(operand, eNode.operator, eNode.nodeType);
     },
@@ -200,7 +201,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
                 Guard.raise("Constant expression is not a method...");
             }
             var value = eNode.implementation(obj.value, fn, args.map(convertToValue));
-            return new $data.Expressions.ConstantExpression(value);
+            return new $data.Expressions.ConstantExpression(value, typeof value);
         }
         return call;
     }

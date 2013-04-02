@@ -2,8 +2,12 @@ $C('$data.Expressions.ConstantExpression', $data.Expressions.ExpressionNode, nul
     constructor: function (value, type, name) {
         this.value = value;
         //TODO
-        this.type = Container.getTypeName(value);
+        //this.type = Container.getTypeName(value);
+
+        this.type = type;
         this.name = name;
+        if (!Object.isNullOrUndefined(this.value) && Container.resolveType(Container.getTypeName(this.value)) !== Container.resolveType(this.type))
+            this.value = Container.convertTo(value, this.type, true);
     },
     nodeType: { value: $data.Expressions.ExpressionType.Constant, enumerable: true },
     type: { value: Object, writable: true },

@@ -56,7 +56,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                             context = this.storeToken.factory();
                             entitySet = context.getEntitySetFromElementType(this.getType());
                         } else {
-                            Guard.raise(new Exception("entity can't resolve context", 'Not Found!', entity));
+                            Guard.raise(new Exception("entity can't resolve context", 'Not Found!', this));
                             return;
                         }
                     } else if (this instanceof $data.EntitySet) {

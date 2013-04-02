@@ -12,6 +12,34 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
         var left = this.Visit(expression.left, context);
         var right = this.Visit(expression.right, context);
 
+        if ((!(left instanceof $data.Expressions.ConstantExpression) && right instanceof $data.Expressions.ConstantExpression) ||
+            (!(right instanceof $data.Expressions.ConstantExpression) && left instanceof $data.Expressions.ConstantExpression)) {
+
+            var refExpression, constExpr;
+            if (right instanceof $data.Expressions.ConstantExpression) {
+                refExpression = left;
+                constExpr = right;
+            } else {
+                refExpression = right;
+                constExpr = left;
+            }
+
+            if (refExpression.selector instanceof $data.Expressions.MemberInfoExpression &&
+                refExpression.selector.memberDefinition instanceof $data.MemberDefinition && refExpression.selector.memberDefinition.type) {
+                var fieldType = Container.resolveType(refExpression.selector.memberDefinition.type);
+                var constExprType = Container.resolveType(constExpr.type);
+
+                if (fieldType !== constExprType) {
+                    if (right === constExpr) {
+                        right = new $data.Expressions.ConstantExpression(constExpr.value, fieldType, right.name);
+                    } else {
+                        left = new $data.Expressions.ConstantExpression(constExpr.value, fieldType, left.name);
+                    }
+                }
+            }
+
+        }
+
         var operatorResolution = this.scopeContext.resolveBinaryOperator(expression.nodeType, expression, context.frameType);
         var result = Container.createSimpleBinaryExpression(left, right, expression.nodeType, expression.operator, expression.type, operatorResolution);
         return result;

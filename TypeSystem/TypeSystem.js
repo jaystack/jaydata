@@ -1089,6 +1089,33 @@
                 type.name = namesArray[0].shortName;
             }
         };
+
+
+        this.convertTo = function (value, tType, stronglyTyped) {
+            var sourceTypeName = Container.resolveName(Container.getTypeName(value));
+            var targetType = Container.resolveType(tType);
+
+            if (typeof targetType[sourceTypeName] === 'function') {
+                return targetType[sourceTypeName].apply(targetType, arguments);
+            }
+
+            if (self.converters[sourceTypeName]) {
+                return self.converters[sourceTypeName].apply(self.converters, arguments);
+            } else {
+                return value;
+            }
+        };
+
+        this.converters = {
+            '$data.String': function (value, targetType, stronglyTyped) {
+                switch (Container.resolveType(targetType)) {
+                    case $data.Guid && stronglyTyped:
+                        return $data.parseGuid(value);
+                    default:
+                        return value;
+                }
+            }
+        };
     }
     $data.ContainerClass = ContainerCtor;
 

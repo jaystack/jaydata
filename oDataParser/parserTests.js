@@ -149,35 +149,35 @@ $(document).ready(function () {
         src.filter = "datetime'2012-07-15'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = p.builder.buildConstant(new Date("2012-07-15T00:00:00.000Z")); //{nodeType:"constant",type:"datetime",value:"2012-07-15T00:00:00.000Z"};
+        var expected = p.builder.buildConstant(new Date("2012-07-15T00:00:00.000Z"), 'datetime'); //{nodeType:"constant",type:"datetime",value:"2012-07-15T00:00:00.000Z"};
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45.123'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
         //expected.value = "2012-07-15T18:25:45.123Z";
-        expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123Z"));
+        expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123Z"), 'datetime');
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45+02:00'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
         //expected.value = "2012-07-15T16:25:45.000Z";
-        expected = p.builder.buildConstant(new Date("2012-07-15T16:25:45.000Z"));
+        expected = p.builder.buildConstant(new Date("2012-07-15T16:25:45.000Z"), 'datetime');
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45.123+02:00'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
         //expected.value = "2012-07-15T16:25:45.123Z";
-        expected = p.builder.buildConstant(new Date("2012-07-15T16:25:45.123Z"));
+        expected = p.builder.buildConstant(new Date("2012-07-15T16:25:45.123Z"), 'datetime');
         equal(current, JSON.stringify(expected));
 
         src.filter = "datetime'2012-07-15T18:25:45.123456789'";
         p.parseFilterExpr();
         current = JSON.stringify(p.req.filter);
         //expected.value = "2012-07-15T18:25:45.123Z";
-        expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123456789"));
+        expected = p.builder.buildConstant(new Date("2012-07-15T18:25:45.123456789"), 'datetime');
         equal(current, JSON.stringify(expected));
     });
     test("Filter: Geography", 1, function () {
@@ -185,7 +185,7 @@ $(document).ready(function () {
         src.filter = "geography'POINT(44.001 -33.123)'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = p.builder.buildConstant(new $data.GeographyPoint(44.001, -33.123));
+        var expected = p.builder.buildConstant(new $data.GeographyPoint(44.001, -33.123), 'GeographyPoint');
         equal(current, JSON.stringify(expected));
     });
     test("Filter: Geometry", 1, function () {
@@ -193,7 +193,7 @@ $(document).ready(function () {
         src.filter = "geometry'POINT(44.001 -33.123)'";
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
-        var expected = p.builder.buildConstant(new $data.GeometryPoint(44.001, -33.123));
+        var expected = p.builder.buildConstant(new $data.GeometryPoint(44.001, -33.123), 'GeometryPoint');
         equal(current, JSON.stringify(expected));
     });
     test("Filter: '1 eq 2'", 1, function () {
@@ -202,8 +202,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "eq" //op
         ));
         equal(current, expected);
@@ -214,8 +214,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "ne" //op
         ));
         equal(current, expected);
@@ -226,8 +226,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "lt" //op
         ));
         equal(current, expected);
@@ -238,8 +238,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "gt" //op
         ));
         equal(current, expected);
@@ -250,8 +250,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "le" //op
         ));
         equal(current, expected);
@@ -262,8 +262,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "ge" //op
         ));
         equal(current, expected);
@@ -274,8 +274,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(1), //left
-            p.builder.buildConstant(2), //right
+            p.builder.buildConstant(1, 'number'), //left
+            p.builder.buildConstant(2, 'number'), //right
             "add" //op
         ));
         equal(current, expected);
@@ -286,8 +286,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(42), //left
-            p.builder.buildConstant(12), //right
+            p.builder.buildConstant(42, 'number'), //left
+            p.builder.buildConstant(12, 'number'), //right
             "sub" //op
         ));
         equal(current, expected);
@@ -298,8 +298,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(123.5), //left
-            p.builder.buildConstant(9e2), //right
+            p.builder.buildConstant(123.5, 'number'), //left
+            p.builder.buildConstant(9e2, 'number'), //right
             "mul" //op
         ));
         equal(current, expected);
@@ -311,7 +311,7 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildUnary(
-            p.builder.buildConstant(9),
+            p.builder.buildConstant(9, 'number'),
             "minus"));
         equal(current, expected);
     });
@@ -322,7 +322,7 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildUnary(
             p.builder.buildUnary(
-                p.builder.buildConstant(9),
+                p.builder.buildConstant(9, 'number'),
                 "minus"),
             "minus"));
         equal(current, expected);
@@ -335,7 +335,7 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildUnary(
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("IntVar")
+                p.builder.buildConstant("IntVar", 'string')
             ),
             "minus"));
         equal(current, expected);
@@ -349,7 +349,7 @@ $(document).ready(function () {
             p.builder.buildUnary(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("IntVar")
+                    p.builder.buildConstant("IntVar", 'string')
                 ),
                 "minus"),
             "minus"));
@@ -361,7 +361,7 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildUnary(
-            p.builder.buildConstant(true),
+            p.builder.buildConstant(true, 'boolean'),
             "not"));
         equal(current, expected);
     });
@@ -371,7 +371,7 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildUnary(
-            p.builder.buildConstant(true),
+            p.builder.buildConstant(true, 'boolean'),
             "not"));
         equal(current, expected);
     });
@@ -382,9 +382,9 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildUnary(
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant(true),
+                p.builder.buildConstant(true, 'boolean'),
                 p.builder.buildUnary(
-                    p.builder.buildConstant(false),
+                    p.builder.buildConstant(false, 'boolean'),
                     "not"
                 ),
                 "and"
@@ -400,7 +400,7 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildUnary(
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("BoolVar")
+                p.builder.buildConstant("BoolVar", 'string')
             ),
             "not"));
         equal(current, expected);
@@ -414,7 +414,7 @@ $(document).ready(function () {
             p.builder.buildUnary(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("BoolVar")
+                    p.builder.buildConstant("BoolVar", 'string')
                 ),
                 "not"),
             "not"));
@@ -427,9 +427,9 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(123.4e-5),
+            p.builder.buildConstant(123.4e-5, 'number'),
             p.builder.buildUnary(
-                p.builder.buildConstant(9),
+                p.builder.buildConstant(9, 'number'),
                 "minus"),
             "div"
         ));
@@ -442,9 +442,9 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildUnary(
-                p.builder.buildConstant(123.456789e-53),
+                p.builder.buildConstant(123.456789e-53, 'number'),
                 "minus"),
-            p.builder.buildConstant(6),
+            p.builder.buildConstant(6, 'number'),
             "mod"
         ));
         equal(current, expected);
@@ -456,8 +456,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(12345), //left
-            p.builder.buildConstant(6), //right
+            p.builder.buildConstant(12345, 'number'), //left
+            p.builder.buildConstant(6, 'number'), //right
             "div" //op
         ));
         equal(current, expected);
@@ -468,8 +468,8 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(12345), //left
-            p.builder.buildConstant(12.34), //right
+            p.builder.buildConstant(12345, 'number'), //left
+            p.builder.buildConstant(12.34, 'number'), //right
             "div" //op
         ));
         equal(current, expected);
@@ -480,9 +480,9 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(0.12e-4),
+            p.builder.buildConstant(0.12e-4, 'number'),
             p.builder.buildUnary(
-                p.builder.buildConstant(0.12e-4),
+                p.builder.buildConstant(0.12e-4, 'number'),
                 "minus"),
             "div"
         ));
@@ -527,12 +527,12 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant("aaa"), //left
-                p.builder.buildConstant("aaa"), //right
+                p.builder.buildConstant("aaa", 'string'), //left
+                p.builder.buildConstant("aaa", 'string'), //right
                 "eq"),
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant("bbb"), //left
-                p.builder.buildConstant("bbb"), //right
+                p.builder.buildConstant("bbb", 'string'), //left
+                p.builder.buildConstant("bbb", 'string'), //right
                 "eq"),
             "and"
         ));
@@ -545,12 +545,12 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant("aaa"), //left
-                p.builder.buildConstant("aaa"), //right
+                p.builder.buildConstant("aaa", 'string'), //left
+                p.builder.buildConstant("aaa", 'string'), //right
                 "ne"),
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant("bbb"), //left
-                p.builder.buildConstant("bbb"), //right
+                p.builder.buildConstant("bbb", 'string'), //left
+                p.builder.buildConstant("bbb", 'string'), //right
                 "ne"),
             "or"
         ));
@@ -563,17 +563,17 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant("aaa"), //left
-                p.builder.buildConstant("aaa"), //right
+                p.builder.buildConstant("aaa", 'string'), //left
+                p.builder.buildConstant("aaa", 'string'), //right
                 "ne"),
             p.builder.buildSimpleBinary(
                 p.builder.buildSimpleBinary(
-                    p.builder.buildConstant("bbb"), //left
-                    p.builder.buildConstant("bbb"), //right
+                    p.builder.buildConstant("bbb", 'string'), //left
+                    p.builder.buildConstant("bbb", 'string'), //right
                     "ne"),
                 p.builder.buildSimpleBinary(
-                    p.builder.buildConstant("ccc"), //left
-                    p.builder.buildConstant("ccc"), //right
+                    p.builder.buildConstant("ccc", 'string'), //left
+                    p.builder.buildConstant("ccc", 'string'), //right
                     "ne"),
                 "or"),
             "or"
@@ -586,10 +586,10 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(true),
+            p.builder.buildConstant(true, 'boolean'),
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant(true),
-                p.builder.buildConstant(true),
+                p.builder.buildConstant(true, 'boolean'),
+                p.builder.buildConstant(true, 'boolean'),
                 "or"),
             "or"
         ));
@@ -601,10 +601,10 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
-            p.builder.buildConstant(true),
+            p.builder.buildConstant(true, 'boolean'),
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant(true),
-                p.builder.buildConstant(true),
+                p.builder.buildConstant(true, 'boolean'),
+                p.builder.buildConstant(true, 'boolean'),
                 "and"),
             "or"
         ));
@@ -617,10 +617,10 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant(true),
-                p.builder.buildConstant(true),
+                p.builder.buildConstant(true, 'boolean'),
+                p.builder.buildConstant(true, 'boolean'),
                 "and"),
-            p.builder.buildConstant(true),
+            p.builder.buildConstant(true, 'boolean'),
             "or"
         ));
         equal(current, expected);
@@ -632,10 +632,10 @@ $(document).ready(function () {
         var current = JSON.stringify(p.req.filter);
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildSimpleBinary(
-                p.builder.buildConstant(true),
-                p.builder.buildConstant(true),
+                p.builder.buildConstant(true, 'boolean'),
+                p.builder.buildConstant(true, 'boolean'),
                 "or"),
-            p.builder.buildConstant(true),
+            p.builder.buildConstant(true, 'boolean'),
             "and"
         ));
         equal(current, expected);
@@ -646,19 +646,19 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = p.builder.buildGlobalCall(null, "ceiling", [
-            p.builder.buildConstant(12.3)
+            p.builder.buildConstant(12.3, 'number')
         ]);
         equal(current, JSON.stringify(expected));
 
         src.filter = "floor(12.3)";p.parseFilterExpr();
         expected = p.builder.buildGlobalCall(null, "floor", [
-            p.builder.buildConstant(12.3)
+            p.builder.buildConstant(12.3, 'number')
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         src.filter = "round(12.3)";p.parseFilterExpr();
         expected = p.builder.buildGlobalCall(null, "round", [
-            p.builder.buildConstant(12.3)
+            p.builder.buildConstant(12.3, 'number')
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
@@ -668,38 +668,38 @@ $(document).ready(function () {
         p.parseFilterExpr();
         var current = JSON.stringify(p.req.filter);
         var expected = p.builder.buildGlobalCall(null, "substringof", [
-            p.builder.buildConstant("vadalma"),
-            p.builder.buildConstant("ada")
+            p.builder.buildConstant("vadalma", 'string'),
+            p.builder.buildConstant("ada", 'string')
         ]);
         equal(current, JSON.stringify(expected));
 
         src.filter = "startswith('vadalma', 'ada')";p.parseFilterExpr();
         expected = p.builder.buildGlobalCall(null, "startswith", [
-            p.builder.buildConstant("vadalma"),
-            p.builder.buildConstant("ada")
+            p.builder.buildConstant("vadalma", 'string'),
+            p.builder.buildConstant("ada", 'string')
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         src.filter = "endswith('vadalma', 'ada')";p.parseFilterExpr();
         expected = p.builder.buildGlobalCall(null, "endswith", [
-            p.builder.buildConstant("vadalma"),
-            p.builder.buildConstant("ada")
+            p.builder.buildConstant("vadalma", 'string'),
+            p.builder.buildConstant("ada", 'string')
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         expected.type = "string";
         src.filter = "concat('vadalma', 'ada')";p.parseFilterExpr();
         expected = p.builder.buildGlobalCall(null, "concat", [
-            p.builder.buildConstant("vadalma"),
-            p.builder.buildConstant("ada")
+            p.builder.buildConstant("vadalma", 'string'),
+            p.builder.buildConstant("ada", 'string')
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
 
         expected.type = "int";
         src.filter = "indexof('vadalma', 'ada')";p.parseFilterExpr();
         expected = p.builder.buildGlobalCall(null, "indexof", [
-            p.builder.buildConstant("vadalma"),
-            p.builder.buildConstant("ada")
+            p.builder.buildConstant("vadalma", 'string'),
+            p.builder.buildConstant("ada", 'string')
         ]);
         equal(JSON.stringify(p.req.filter), JSON.stringify(expected));
     });
@@ -815,9 +815,9 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
-            p.builder.buildConstant("John"),
+            p.builder.buildConstant("John", 'string'),
             "eq"
         ));
         equal(current, expected);
@@ -830,9 +830,9 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Age")
+                p.builder.buildConstant("Age", 'string')
             ),
-            p.builder.buildConstant(12),
+            p.builder.buildConstant(12, 'number'),
             "add"
         ));
         equal(current, expected);
@@ -845,9 +845,9 @@ $(document).ready(function () {
         var expected = JSON.stringify(p.builder.buildSimpleBinary(
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name2_a34")
+                p.builder.buildConstant("Name2_a34", 'string')
             ),
-            p.builder.buildConstant("John"),
+            p.builder.buildConstant("John", 'string'),
             "eq"
         ));
         equal(current, expected);
@@ -862,11 +862,11 @@ $(document).ready(function () {
             p.builder.buildProperty(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Author")
+                    p.builder.buildConstant("Author", 'string')
                 ),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
-            p.builder.buildConstant("John"),
+            p.builder.buildConstant("John", 'string'),
             "eq"
         ));
         equal(current, expected);
@@ -893,13 +893,13 @@ $(document).ready(function () {
                p.builder.buildProperty(
                    p.builder.buildProperty(
                        p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                       p.builder.buildConstant("MainNamespace.SubNamespace")
+                       p.builder.buildConstant("MainNamespace.SubNamespace", 'string')
                    ),
-                   p.builder.buildConstant("Author")
+                   p.builder.buildConstant("Author", 'string')
                ),
-               p.builder.buildConstant("Name")
+               p.builder.buildConstant("Name", 'string')
            ),
-           p.builder.buildConstant("John"),
+           p.builder.buildConstant("John", 'string'),
            "eq"
        ));
        equal(current, expected);
@@ -948,7 +948,7 @@ $(document).ready(function () {
         p.parseSkipExpr();
         var current = JSON.stringify(p.req.skip);
         var expected = JSON.stringify(
-            p.builder.buildConstant(42)
+            p.builder.buildConstant(42, 'number')
         );
         equal(current, expected);
     });
@@ -1006,7 +1006,7 @@ $(document).ready(function () {
         p.parseTopExpr();
         var current = JSON.stringify(p.req.top);
         var expected = JSON.stringify(
-            p.builder.buildConstant(42)
+            p.builder.buildConstant(42, 'number')
         );
         equal(current, expected);
     });
@@ -1067,7 +1067,7 @@ $(document).ready(function () {
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             nodeType:"OrderBy"}
         ]);
@@ -1080,9 +1080,9 @@ $(document).ready(function () {
             expression:p.builder.buildProperty(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Author")
+                    p.builder.buildConstant("Author", 'string')
                 ),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             nodeType:"OrderBy"}
         ]);
@@ -1094,7 +1094,7 @@ $(document).ready(function () {
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             nodeType:"OrderBy"}
         ]);
@@ -1107,9 +1107,9 @@ $(document).ready(function () {
             expression:p.builder.buildProperty(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Author")
+                    p.builder.buildConstant("Author", 'string')
                 ),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             nodeType:"OrderBy"}
         ]);
@@ -1121,7 +1121,7 @@ $(document).ready(function () {
         var expected = JSON.stringify([{
             expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             nodeType:"OrderByDescending"}
         ]);
@@ -1134,9 +1134,9 @@ $(document).ready(function () {
             expression:p.builder.buildProperty(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Author")
+                    p.builder.buildConstant("Author", 'string')
                 ),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             nodeType:"OrderByDescending"}
         ]);
@@ -1152,11 +1152,11 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),nodeType:"OrderBy"},
             {expression:p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Age")
+                    p.builder.buildConstant("Age", 'string')
             ),nodeType:"OrderBy"}
         ]);
         equal(current, expected);
@@ -1167,11 +1167,11 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Age")
+                p.builder.buildConstant("Age", 'string')
             ),nodeType:"OrderBy"},
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),nodeType:"OrderBy"}
         ]);
         equal(current, expected);
@@ -1182,11 +1182,11 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),nodeType:"OrderBy"},
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Age")
+                p.builder.buildConstant("Age", 'string')
             ),nodeType:"OrderByDescending"}
         ]);
         equal(current, expected);
@@ -1197,11 +1197,11 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),nodeType:"OrderByDescending"},
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Age")
+                p.builder.buildConstant("Age", 'string')
             ),nodeType:"OrderByDescending"}
         ]);
         equal(current, expected);
@@ -1212,11 +1212,11 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),nodeType:"OrderByDescending"},
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Age")
+                p.builder.buildConstant("Age", 'string')
             ),nodeType:"OrderBy"}
         ]);
         equal(current, expected);
@@ -1227,18 +1227,18 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             {expression:p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Body")
+                p.builder.buildConstant("Body", 'string')
             ),nodeType:"OrderBy"},
             {expression:p.builder.buildGlobalCall("string", "substring", [
                 p.builder.buildProperty(
                     p.builder.buildProperty(
                         p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                        p.builder.buildConstant("Author")
+                        p.builder.buildConstant("Author", 'string')
                     ),
-                    p.builder.buildConstant("FirstName")
+                    p.builder.buildConstant("FirstName", 'string')
                 ),
-                p.builder.buildConstant(1),
-                p.builder.buildConstant(2)
+                p.builder.buildConstant(1, 'number'),
+                p.builder.buildConstant(2, 'number')
             ]),nodeType:"OrderBy"}
         ]);
         equal(current, expected);
@@ -1252,15 +1252,15 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Age")
+                p.builder.buildConstant("Age", 'string')
             ),
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("City")
+                p.builder.buildConstant("City", 'string')
             )
         ]);
         equal(current, expected);
@@ -1273,19 +1273,19 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Name")
+                p.builder.buildConstant("Name", 'string')
             ),
             p.builder.buildSimpleBinary(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Age")
+                    p.builder.buildConstant("Age", 'string')
                 ),
-                p.builder.buildConstant(20),
+                p.builder.buildConstant(20, 'number'),
                 "add"
             ),
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("City")
+                p.builder.buildConstant("City", 'string')
             )
         ]);
         equal(current, expected);
@@ -1298,22 +1298,22 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Title")
+                p.builder.buildConstant("Title", 'string')
             ),
             p.builder.buildGlobalCall("string", "concat", [
                 p.builder.buildProperty(
                     p.builder.buildProperty(
                         p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                        p.builder.buildConstant("Author")
+                        p.builder.buildConstant("Author", 'string')
                     ),
-                    p.builder.buildConstant("FirstName")
+                    p.builder.buildConstant("FirstName", 'string')
                 ),
                 p.builder.buildProperty(
                     p.builder.buildProperty(
                         p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                        p.builder.buildConstant("Author")
+                        p.builder.buildConstant("Author", 'string')
                     ),
-                    p.builder.buildConstant("LastName")
+                    p.builder.buildConstant("LastName", 'string')
                 )]
             )
         ]);
@@ -1326,24 +1326,24 @@ $(document).ready(function () {
         var expected = JSON.stringify([
             p.builder.buildProperty(
                 p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                p.builder.buildConstant("Tags")
+                p.builder.buildConstant("Tags", 'string')
             ),
             p.builder.buildProperty(
                 p.builder.buildProperty(
                     p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                    p.builder.buildConstant("Author")
+                    p.builder.buildConstant("Author", 'string')
                 ),
-                p.builder.buildConstant("Articles")
+                p.builder.buildConstant("Articles", 'string')
             ),
             p.builder.buildProperty(
                 p.builder.buildProperty(
                     p.builder.buildProperty(
                         p.builder.buildParameter("it", "unknown","lambdaParameterReference"),
-                        p.builder.buildConstant("Reviewer")
+                        p.builder.buildConstant("Reviewer", 'string')
                     ),
-                    p.builder.buildConstant("Articles")
+                    p.builder.buildConstant("Articles", 'string')
                 ),
-                p.builder.buildConstant("Category")
+                p.builder.buildConstant("Category", 'string')
             )
         ]);
         equal(current, expected);

@@ -16,9 +16,21 @@ $C('$data.storageProviders.InMemory.InMemoryFunctionCompiler', $data.Expressions
         context.data += ")";
     },
     VisitSimpleBinaryExpression: function (expression, context) {
+        var self = this;
         if (expression.resolution.reverse) {
             context.data += "(";
-            var right = this.Visit(expression.right, context);
+
+            if (expression.resolution.name === 'in' && Array.isArray(expression.right.value)) {
+                context.data += "[";
+                expression.right.value.forEach(function (item, i) {
+                    if (i > 0) context.data += ",";
+                    var c = Container.createConstantExpression(item, expression.right.type);
+                    self.Visit(c, context);
+                });
+                context.data += "]";
+            } else {
+                var right = this.Visit(expression.right, context);
+            }
             context.data += expression.resolution.mapTo;
             var left = this.Visit(expression.left, context);
             if (expression.resolution.rightValue)
