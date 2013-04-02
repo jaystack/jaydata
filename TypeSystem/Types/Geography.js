@@ -150,8 +150,13 @@ $data.Container.registerType(['$data.GeographyMultiPolygon', 'GeographyMultiPoly
 
 /* $data.GeographyCollection */
 $data.GeographyCollection = function GeographyCollection(data) {
-    $data.GeographyBase.call(this, data);
+    if (Array.isArray(data)) {
+        $data.GeographyBase.call(this, { geometries: data });
+    } else {
+        $data.GeographyBase.call(this, data);
+    }
 };
+$data.GeographyCollection.validMembers = ['geometries'];
 $data.GeographyBase.registerType('GeometryCollection', $data.GeographyCollection);
 $data.Container.registerType(['$data.GeographyCollection', 'GeographyCollection'], $data.GeographyCollection);
 

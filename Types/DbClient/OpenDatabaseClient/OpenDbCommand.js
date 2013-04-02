@@ -47,7 +47,8 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
                                 var r = { rows: [] };
                                 try {
                                     r.insertId = result.insertId;
-                                } catch (e) {
+                                } catch (e) {}
+                                if (typeof r.insertId !== 'number') {
                                     // If insertId is present, no rows are returned
                                     r.rowsAffected = result.rowsAffected;
                                     var maxItem = result.rows.length;

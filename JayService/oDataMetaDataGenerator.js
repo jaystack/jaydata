@@ -594,7 +594,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
             maxLength: {
                 name: 'MaxLength',
                 converter: function (name, value) {
-                    return value === Number.POSITIVE_INFINITY ? 'MAX' : value
+                    return value === Number.POSITIVE_INFINITY ? 'Max' : value
                 }
             },
             concurrencyMode: {

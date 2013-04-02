@@ -170,27 +170,21 @@ $data.Class.define('$data.EntityContext', null, null,
         var callBack = null;
         var isWrite = false;
 
-        switch (arguments.length) {
-            case 3:
-                tables = arguments[0];
-                isWrite = arguments[1];
-                callBack = arguments[2];
-                break;
-            case 2:
-                if (arguments[0] instanceof $data.Array) {
-                    tables = arguments[0];
-                } else {
-                    isWrite = arguments[0];
-                }
-                callBack = arguments[1];
-                break;
-            case 1:
-                callBack = arguments[0];
-                break;
-            case 0:
-                break;
-            default: throw new Exception("Begin tran is async function!"); break;
+        function readParam(value) {
+            if (Object.isNullOrUndefined(value)) return;
+
+            if (typeof value === 'boolean') {
+                isWrite = value;
+            } else if (Array.isArray(value)) {
+                tables = value;
+            } else {
+                callBack = value;
+            }
         }
+
+        readParam(arguments[0]);
+        readParam(arguments[1]);
+        readParam(arguments[2]);
 
         var pHandler = new $data.PromiseHandler();
         callBack = pHandler.createCallback(callBack);

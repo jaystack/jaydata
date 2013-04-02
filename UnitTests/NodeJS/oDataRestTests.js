@@ -1201,7 +1201,7 @@ test("Save GeographyObjects", 19, function () {
                 ]
             ]);
             var collection = new $data.GeographyCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -1256,7 +1256,7 @@ test("Save GeographyObjects", 19, function () {
                         deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
                         deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
                         deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
-                        deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+                        deepEqual(resItem.GeographyCollection.geometries, collection.geometries, 'GeographyCollection data');
 
                     }
 
@@ -1299,7 +1299,7 @@ test("Modify GeographyObjects", 20, function () {
                 ]
             ]);
             var collection = new $data.GeographyCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -1340,7 +1340,7 @@ test("Modify GeographyObjects", 20, function () {
                     deepEqual(resItem.GeographyMultiPoint, null, 'GeographyMultiPoint data');
                     deepEqual(resItem.GeographyMultiLineString, null, 'GeographyMultiLineString data');
                     deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
-                    deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+                    deepEqual(resItem.GeographyCollection.geometries, collection.geometries, 'GeographyCollection data');
 
                     context.GeoTestEntities.attach(resItem);
                     resItem.Name = 'Item updated';
@@ -1364,7 +1364,7 @@ test("Modify GeographyObjects", 20, function () {
                             deepEqual(resItem.GeographyMultiPoint.coordinates, mPoint.coordinates, 'GeographyMultiPoint data');
                             deepEqual(resItem.GeographyMultiLineString.coordinates, mLineString.coordinates, 'GeographyMultiLineString data');
                             deepEqual(resItem.GeographyMultiPolygon.coordinates, mPolygon.coordinates, 'GeographyMultiPolygon data');
-                            deepEqual(resItem.GeographyCollection.coordinates, collection.coordinates, 'GeographyCollection data');
+                            deepEqual(resItem.GeographyCollection.geometries, collection.geometries, 'GeographyCollection data');
 
                             start();
                         });
@@ -1406,7 +1406,7 @@ test("Save GeometryObjects", 19, function () {
                 ]
             ]);
             var collection = new $data.GeometryCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -1461,7 +1461,7 @@ test("Save GeometryObjects", 19, function () {
                         deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
                         deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
                         deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
-                        deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+                        deepEqual(resItem.GeometryCollection.geometries, collection.geometries, 'GeometryCollection data');
 
                     }
 
@@ -1504,7 +1504,7 @@ test("Modify GeometryObjects", 20, function () {
                 ]
             ]);
             var collection = new $data.GeometryCollection({
-                coordinates: [
+                geometries: [
                     {
                         "type": "Point",
                         "coordinates": [100.0, 0.0]
@@ -1545,7 +1545,7 @@ test("Modify GeometryObjects", 20, function () {
                     deepEqual(resItem.GeometryMultiPoint, null, 'GeometryMultiPoint data');
                     deepEqual(resItem.GeometryMultiLineString, null, 'GeometryMultiLineString data');
                     deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
-                    deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+                    deepEqual(resItem.GeometryCollection.geometries, collection.geometries, 'GeometryCollection data');
 
                     context.GeometryTestEntities.attach(resItem);
                     resItem.Name = 'Item updated';
@@ -1569,7 +1569,7 @@ test("Modify GeometryObjects", 20, function () {
                             deepEqual(resItem.GeometryMultiPoint.coordinates, mPoint.coordinates, 'GeometryMultiPoint data');
                             deepEqual(resItem.GeometryMultiLineString.coordinates, mLineString.coordinates, 'GeometryMultiLineString data');
                             deepEqual(resItem.GeometryMultiPolygon.coordinates, mPolygon.coordinates, 'GeometryMultiPolygon data');
-                            deepEqual(resItem.GeometryCollection.coordinates, collection.coordinates, 'GeometryCollection data');
+                            deepEqual(resItem.GeometryCollection.geometries, collection.geometries, 'GeometryCollection data');
 
                             start();
                         });
@@ -2113,6 +2113,62 @@ test("REST - load all fields on create - batch", 14, function () {
 
             $example.TestItemComputed.removeAll().then(function () {
                 start();
+            });
+        });
+    });
+});
+
+test("REST - $value", 10, function () {
+    stop(5);
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+
+        context.Orders.first(undefined, undefined, function (order) {
+            equal(order.getFieldUrl('Id'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Id/$value", 'Id property url compiled');
+            equal(order.getFieldUrl('Value'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Value/$value", 'Value property url compiled');
+            equal(order.getFieldUrl('Date'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Date/$value", 'Date property url compiled');
+            equal(order.getFieldUrl('Completed'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Completed/$value", 'Completed property url compiled');
+            equal(order.getFieldUrl('Data'), $example.Context.generateTestData.serviceurl + "/Orders('" + order.Id + "')/Data/$value", 'Data property url compiled');
+
+            OData.request({ requestUri: order.getFieldUrl('Id'), method: 'GET' }, function (data) {
+                equal(data, order.Id, 'Id from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Value'), method: 'GET' }, function (data) {
+                equal(data, order.Value, 'Value from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Date'), method: 'GET' }, function (data) {
+                equal(data, order.Date.toISOString().replace('Z', ''), 'Date from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Completed'), method: 'GET' }, function (data) {
+                equal(data, order.Completed.toString(), 'Completed from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
+            });
+
+            OData.request({ requestUri: order.getFieldUrl('Data'), method: 'GET' }, function (data) {
+                equal(data, JSON.stringify(order.Data), 'Data from request');
+                start();
+            }, function () {
+                console.log(JSON.stringify(arguments));
+                stop();
             });
         });
     });

@@ -155,6 +155,8 @@ module $data {
     }
     export class GeographyCollection extends Geography { 
         constructor (initData: any);
+        constructor (geometries: Array);
+        geometries: Array;
     }
 
     export class Geometry extends Geospatial { 
@@ -196,6 +198,8 @@ module $data {
     }
     export class GeometryCollection extends Geography { 
         constructor (initData: any);
+        constructor (geometries: Array);
+        geometries: Array;
     }
 
 };

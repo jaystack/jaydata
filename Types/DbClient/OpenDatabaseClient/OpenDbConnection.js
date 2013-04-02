@@ -9,7 +9,8 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
     open: function (callBack, tran, isWrite) {
         if (isWrite === undefined)
             isWrite = true;
-	callBack.oncomplete = callBack.oncomplete || function(){};
+
+        callBack.oncomplete = callBack.oncomplete || function () { };
         if (tran) {
             callBack.success(tran.transaction);
         } else if (this.database) {
@@ -22,6 +23,11 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbConnection', $data.d
             var p = this.connectionParams;
             var con = this;
             this.database = openDatabase(p.fileName, p.version, p.displayName, p.maxSize);
+            if (!this.database.readTransaction) {
+                this.database.readTransaction = function () {
+                    con.database.transaction.apply(con.database, arguments);
+                }
+            }
 
             if (isWrite) {
                 this.database.transaction(function (tran) { callBack.success(tran); }, callBack.error, callBack.oncomplete);
