@@ -300,7 +300,7 @@ test("REST - GET ById guid", 3, function () {
                 password: 'asd'
             }, function (data) {
 
-                equal(data.Id, item.Id.value, 'Id field failed');
+                equal(data.Id, item.Id.toString(), 'Id field failed');
                 equal(data.Name, item.Name, 'Name field failed');
                 equal(data.Index, item.Index, 'Index field failed');
 
@@ -2066,10 +2066,10 @@ test("REST - load all fields on create - single", 7, function () {
 
         context.saveChanges(function () {
             //item props
-            equal(item.Id.value, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
+            equal(item.Id, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
             equal(item.Name, 'testName', 'Name property');
             equal(item.Index, 42, 'Index property');
-            equal(item.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item.GuidField, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
             equal(item.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
             equal(item.BoolField, true, 'BoolField property');
             deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
@@ -2095,18 +2095,18 @@ test("REST - load all fields on create - batch", 14, function () {
 
         context.saveChanges(function () {
             //item props
-            equal(item.Id.value, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
+            equal(item.Id, 'c33bd325-afa9-4941-b21b-bf398f8a2dac', 'GuidField property');
             equal(item.Name, 'testName', 'Name property');
             equal(item.Index, 42, 'Index property');
-            equal(item.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item.GuidField, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
             equal(item.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
             equal(item.BoolField, true, 'BoolField property');
             deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');
 
-            equal(item2.Id.value, '7eeb43b5-752f-4fc6-8f77-665e1ad48a9b', 'GuidField property');
+            equal(item2.Id, '7eeb43b5-752f-4fc6-8f77-665e1ad48a9b', 'GuidField property');
             equal(item2.Name, 'default Name', 'Name property');
             equal(item2.Index, 42, 'Index property');
-            equal(item2.GuidField.value, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
+            equal(item2.GuidField, '7b33e20d-3cca-4452-b3e2-eca9525377a1', 'GuidField property');
             equal(item2.DateField.valueOf(), new Date('2012').valueOf(), 'DateField property');
             equal(item2.BoolField, true, 'BoolField property');
             deepEqual(item.ObjectField, { work: 'item', computed: 'field' }, 'ObjectField property');

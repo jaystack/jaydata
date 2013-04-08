@@ -8,6 +8,16 @@ $data.Guid = function Guid(value) {
     }
 };
 $data.Container.registerType(['$data.Guid', 'Guid', 'guid'], $data.Guid);
+$data.Container.registerConverter('$data.Guid', {
+    '$data.String': function (value) {
+        return value ? $data.parseGuid(value).toString() : value;
+    }
+}, {
+    '$data.String': function (value) {
+        return value ? value.toString() : value;
+    }
+});
+
 
 $data.Guid.prototype.toJSON = function () {
     return this.value;

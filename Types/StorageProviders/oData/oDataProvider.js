@@ -740,15 +740,15 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
                 '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
                 '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; },
-                '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
+                '$data.Guid': function (guid) { return guid ? guid.toString() : guid; }
             },
             toDb: {
                 '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
                 '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
-                '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
-                '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
+                '$data.String': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
+                '$data.Boolean': function (bool) { return typeof bool === 'boolean' ? bool.toString() : bool; },
                 '$data.Blob': function (blob) { return blob; },
                 '$data.Object': function (o) { return JSON.stringify(o); },
                 '$data.Array': function (o) { return JSON.stringify(o); },
@@ -766,7 +766,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.GeometryMultiLineString': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
                 '$data.GeometryMultiPolygon': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
                 '$data.GeometryCollection': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
-                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
+                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.toString() + "'") : guid; }
 }
         }
     },
@@ -826,7 +826,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 switch (Container.getName(field.originalType)) {
                     case "$data.Guid":
                     case "Edm.Guid":
-                        keyValue = ("guid'" + (keyValue ? keyValue.value : keyValue)  + "'");
+                        keyValue = ("guid'" + keyValue  + "'");
                         break;
                     case "$data.Blob":
                     case "Edm.Binary":

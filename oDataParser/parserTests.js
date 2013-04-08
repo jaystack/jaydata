@@ -9,9 +9,9 @@ $(document).ready(function () {
         var src = new $data.oDataParser.QueryRequest();
         p.req = src;
         var f;
-        src.filter = "true"; p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,"boolean");equal(f.value,true);
+        src.filter = "true"; p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type, $data.Boolean);equal(f.value,true);
         //src.filter = "1";    p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,"boolean");equal(f.value,true);
-        src.filter = "false";p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,"boolean");equal(f.value,false);
+        src.filter = "false";p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,$data.Boolean);equal(f.value,false);
         //src.filter = "0";    p.parseFilterExpr();f=p.req.filter;equal(f.nodeType,"constant");equal(f.type,"boolean");equal(f.value,false);
     });
     test("Filter: 'true or false'", 1, function () {

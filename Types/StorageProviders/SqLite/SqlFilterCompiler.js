@@ -123,8 +123,8 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
     },
 
     VisitConstantExpression: function (expression, sqlBuilder) {
-        var typeNameHintFromValue = Container.getTypeName(expression.value);
-        var value = sqlBuilder.entityContext.storageProvider.fieldConverter.toDb[Container.resolveName(Container.resolveType(typeNameHintFromValue))](expression.value);;
+        //var typeNameHintFromValue = Container.getTypeName(expression.value);
+        var value = sqlBuilder.entityContext.storageProvider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);;
         sqlBuilder.addParameter(value);
         sqlBuilder.addText(SqlStatementBlocks.parameter);
     },

@@ -678,7 +678,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                     }
                     return geo;
                 },
-                '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
+                '$data.Guid': function (guid) { return guid ? guid.toString() : guid; }
             },
             toDb: {
                 '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
@@ -696,7 +696,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                         return "geography'POINT(" + geo.longitude + ' ' + geo.latitude + ")'";
                     return geo;
                 },
-                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
+                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.toString() + "'") : guid; }
             }
         }
     },
@@ -930,8 +930,8 @@ $C('$data.storageProviders.webApi.webApiCompiler', $data.Expressions.EntityExpre
         if (expression.value instanceof $data.Entity) {
             value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
         } else {
-            var valueType = Container.getTypeName(expression.value);
-            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+            //var valueType = Container.getTypeName(expression.value);
+            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
         }
         context['$urlParams'] += expression.name + '=' + value;
     },
@@ -1061,8 +1061,8 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
     },
 
     VisitConstantExpression: function (expression, context) {
-        var valueType = Container.getTypeName(expression.value);
-        context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        //var valueType = Container.getTypeName(expression.value);
+        context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
     },
 
     VisitEntityExpression: function (expression, context) {

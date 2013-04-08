@@ -208,9 +208,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                             this.initData[i] = new $data.GeometryMultiPolygon(initData[i]);
                         else if (type === $data.GeometryCollection && !(initData[i] instanceof $data.GeometryCollection))
                             this.initData[i] = new $data.GeometryCollection(initData[i]);
-                        else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
-                            this.initData[i] = initData[i] ? $data.parseGuid(initData[i]) : undefined;
-                        else {
+                        else if (type === $data.Guid) {
+                            if (initData[i] instanceof $data.Guid)
+                                this.initData[i] = initData[i].toString();
+                            else
+                                this.initData[i] = initData[i] ? $data.parseGuid(initData[i]).toString() : initData[i];
+                        } else {
                             this.initData[i] = initData[i];
                         }
                     } else {
@@ -357,11 +360,12 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
     typeConversion: function (memberDefinition, value) {
         var convertedValue = value;
         
+        var resolvedType = Container.resolveType(memberDefinition.type);
         if (typeof value === 'string' && !memberDefinition.concurrencyMode) {
-            switch (Container.resolveName(memberDefinition.type)) {
+            switch (Container.resolveName(resolvedType)) {
                 case '$data.Guid':
                     if (value === '') return undefined;
-                    convertedValue = $data.parseGuid(value);
+                    convertedValue = $data.parseGuid(value).toString();
                     break;
                 case '$data.Integer':
                     if (value === '') return undefined;
@@ -405,6 +409,9 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                 default:
                     break;
             }
+        }
+        if (resolvedType === $data.Guid && value instanceof $data.Guid) {
+            convertedValue = value.toString();
         }
 
         return convertedValue;

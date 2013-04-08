@@ -21,8 +21,8 @@ $(document).ready(function () {
             var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).toTraceString();
             equal(q.queryText, select + 'WHERE (uid = 111)', 'Simple select int');
 
-            q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: '111' }).toTraceString();
-            equal(q.queryText, select + "WHERE (uid = '111')", 'Simple select string');
+            q = context.Users.where(function (u) { return u.username == this.id1; }, { id1: '111' }).toTraceString();
+            equal(q.queryText, select + "WHERE (username = '111')", 'Simple select string');
 
             q = context.Users.where(function (u) { return u.uid == this.id1 || u.uid == this.id2; }, { id1: 111, id2: 2222 }).toTraceString();
             equal(q.queryText, select + 'WHERE ((uid = 111) OR (uid = 2222))', 'OR statement');
@@ -54,8 +54,8 @@ $(document).ready(function () {
             q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).skip(1).take(1).toTraceString();
             equal(q.queryText, select + 'WHERE (uid = 111) LIMIT 1 OFFSET 1', 'SKIP TAKE');
 
-            q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: '111' }).where(function (u2) { return u2.username == 'username' }).toTraceString();
-            equal(q.queryText, select + "WHERE ((uid = '111') AND (username = 'username'))", 'Multiple selects');
+            q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).where(function (u2) { return u2.username == 'username' }).toTraceString();
+            equal(q.queryText, select + "WHERE ((uid = 111) AND (username = 'username'))", 'Multiple selects');
 
             q = context.Users.where(function (u) { return u.uid in this.arrayArg; }, { arrayArg: [1, 2, 3, 4] }).toTraceString();
             equal(q.queryText, select + 'WHERE (uid IN (1, 2, 3, 4))', 'array In statement');
@@ -166,11 +166,11 @@ $(document).ready(function () {
         });
 
         test("fbContextTest - map", 15, function () {
-            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: '111' }).select(function (u) { return u.name; }).toTraceString();
-            equal(q.queryText, "SELECT name FROM user WHERE (uid = '111')", 'Simple select string');
+            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).select(function (u) { return u.name; }).toTraceString();
+            equal(q.queryText, "SELECT name FROM user WHERE (uid = 111)", 'Simple select string');
 
-            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: '111' }).select(function (u) { return { uid: u.uid, name: u.name }; }).toTraceString();
-            equal(q.queryText, "SELECT uid, name FROM user WHERE (uid = '111')", 'Simple select string');
+            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).select(function (u) { return { uid: u.uid, name: u.name }; }).toTraceString();
+            equal(q.queryText, "SELECT uid, name FROM user WHERE (uid = 111)", 'Simple select string');
 
             stop(3);
             context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 100002031282054 }).select(function (u) { return u.name; }).toArray(function (result) {
@@ -201,11 +201,11 @@ $(document).ready(function () {
         });
 
         test("fbContextTest - map - complex", 11, function () {
-            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: '111' }).select(function (u) { return { name: u.name }; }).toTraceString();
-            equal(q.queryText, "SELECT name FROM user WHERE (uid = '111')", 'Simple select string');
+            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).select(function (u) { return { name: u.name }; }).toTraceString();
+            equal(q.queryText, "SELECT name FROM user WHERE (uid = 111)", 'Simple select string');
 
-            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: '111' }).select(function (u) { return { uid: u.uid, a: { name: u.name } }; }).toTraceString();
-            equal(q.queryText, "SELECT uid, name FROM user WHERE (uid = '111')", 'Simple select string');
+            var q = context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 111 }).select(function (u) { return { uid: u.uid, a: { name: u.name } }; }).toTraceString();
+            equal(q.queryText, "SELECT uid, name FROM user WHERE (uid = 111)", 'Simple select string');
 
             stop(1);
             context.Users.where(function (u) { return u.uid == this.id1; }, { id1: 100002031282054 }).select(function (u) { return { name: u.name }; }).toArray(function (result) {

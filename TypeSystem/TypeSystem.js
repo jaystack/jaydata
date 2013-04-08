@@ -1091,31 +1091,55 @@
         };
 
 
-        this.convertTo = function (value, tType, stronglyTyped) {
-            var sourceTypeName = Container.resolveName(Container.getTypeName(value));
+        var _converters = {
+            from: {},
+            to: {}
+        };
+
+        this.convertTo = function (value, tType) {
+            var sourceType = Container.resolveType(Container.getTypeName(value));
+            var sourceTypeName = Container.resolveName(sourceType);
             var targetType = Container.resolveType(tType);
+            var targetTypeName = Container.resolveName(targetType);
 
-            if (typeof targetType[sourceTypeName] === 'function') {
-                return targetType[sourceTypeName].apply(targetType, arguments);
+            if (typeof targetType['from' + sourceTypeName] === 'function') {
+                return targetType['from' + sourceTypeName].apply(targetType, arguments);
+            }
+            if (typeof sourceType['to' + targetTypeName] === 'function') {
+                return sourceType['to' + targetTypeName].apply(sourceType, arguments);
             }
 
-            if (self.converters[sourceTypeName]) {
-                return self.converters[sourceTypeName].apply(self.converters, arguments);
+            if (_converters.from[targetTypeName] && _converters.from[targetTypeName][sourceTypeName]) {
+                // target from source
+                return _converters.from[targetTypeName][sourceTypeName].apply(_converters, arguments);
+            }
+            if (_converters.to[sourceTypeName] && _converters.to[sourceTypeName][targetTypeName]) {
+                // source to target
+                return _converters.to[sourceTypeName][targetTypeName].apply(_converters, arguments);
+            }
+
+            return value;
+        };
+        this.registerConverter = function (target, sourceOrFromConverters, fromConverterOrtoConverters, toConverter) {
+            //registerConverter($data.Guid, { $data.String: fn, int: fn }, { string: fn, int:fn })
+            //registerConverter($data.Guid, $data.String, fn, fn);
+
+            var targetName = Container.resolveName(target);
+            var fromConverters, toConverters;
+            if (Container.isTypeRegistered(sourceOrFromConverters)) {
+                //isSource
+                _converters.from[targetName] = _converters.from[targetName] || {};
+                _converters.to[targetName] = _converters.to[targetName] || {};
+
+                var sourceName = Container.resolveName(sourceOrFromConverters);
+                _converters.from[targetName][sourceName] = fromConverterOrtoConverters;
+                _converters.to[targetName][sourceName] = toConverter;
             } else {
-                return value;
+                // converterGroup
+                _converters.from[targetName] = sourceOrFromConverters;
+                _converters.to[targetName] = fromConverterOrtoConverters;
             }
-        };
-
-        this.converters = {
-            '$data.String': function (value, targetType, stronglyTyped) {
-                switch (Container.resolveType(targetType)) {
-                    case $data.Guid && stronglyTyped:
-                        return $data.parseGuid(value);
-                    default:
-                        return value;
-                }
-            }
-        };
+        }
     }
     $data.ContainerClass = ContainerCtor;
 
@@ -1150,6 +1174,16 @@
     c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
     c.registerType(["$data.Function", "Function", "function"], $data.Function);
     c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
+
+    $data.Container.registerConverter('$data.Date', {
+        '$data.String': function (value) {
+            return value ? new Date(value) : value;
+        }
+    }, {
+        '$data.String': function (value) {
+            return value ? value.toISOString() : value;
+        }
+    });
 
     //})(window);
 

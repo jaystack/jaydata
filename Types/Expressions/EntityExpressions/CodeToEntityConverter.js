@@ -105,7 +105,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                     Guard.raise("Unknown entity field operation: " + member.getJSON());
                 }
                 member = Container.createMemberInfoExpression(operation);
-                result = Container.createEntityFieldOperationExpression(exp, member, args);
+                result = Container.createEntityFieldOperationExpression(exp, member, this._resolveFunctionArguments(args, operation.parameters));
                 return result;
 
             case exp instanceof $data.Expressions.EntitySetExpression:
@@ -114,7 +114,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                     Guard.raise("Unknown entity field operation: " + member.getJSON());
                 }
                 member = Container.createMemberInfoExpression(operation);
-                result = Container.createFrameOperationExpression(exp, member, args);
+                result = Container.createFrameOperationExpression(exp, member, this._resolveFunctionArguments(args, operation.parameters));
                 return result;
                 
             case exp instanceof $data.Expressions.EntityExpression:
@@ -124,7 +124,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 }
 
                 member = Container.createMemberInfoExpression(operation);
-                result = Container.createEntityFunctionOperationExpression(exp, member, args);
+                result = Container.createEntityFunctionOperationExpression(exp, member, this._resolveFunctionArguments(args, operation.method.params));
                 return result;
                 break;
             case exp instanceof $data.Expressions.EntityContextExpression:
@@ -134,7 +134,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 }
 
                 member = Container.createMemberInfoExpression(operation);
-                result = Container.createContextFunctionOperationExpression(exp, member, args);
+                result = Container.createContextFunctionOperationExpression(exp, member, this._resolveFunctionArguments(args, operation.method.params));
                 return result;
                 break;
             default:
@@ -142,6 +142,31 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 //TODO we must not alter the visited tree
         }
 
+    },
+    _resolveFunctionArguments: function (args, params) {
+        if (params) // remove current field poz
+            params = params.filter(function (p, i) { return p.name !== '@expression'; });
+
+        //objectArgs
+        if (args.length === 1 && args[0] instanceof $data.Expressions.ConstantExpression && typeof args[0].value === 'object' && args[0].value && params && params[0] &&
+            args[0].value.constructor === $data.Object &&
+            (Container.resolveType(params[0].type || params[0].dataType) !== $data.Object || params.some(function (param) { return param.name in args[0].value }))) {
+
+            return params.map(function (p) {
+                var type = p.type || p.dataType || args[0].type;
+                return new $data.Expressions.ConstantExpression(args[0].value[p.name], Container.resolveType(type), p.name);
+            });
+
+        } else {
+            return args.map(function (expr, i) {
+                if (expr instanceof $data.Expressions.ConstantExpression && params && params[i]) {
+                    var type = params[i].type || params[i].dataType || expr.type;
+                    return new $data.Expressions.ConstantExpression(expr.value, Container.resolveType(type), params[i].name);
+                } else {
+                    return expr;
+                }
+            });
+        }
     },
 
     VisitProperty: function (expression, context) {

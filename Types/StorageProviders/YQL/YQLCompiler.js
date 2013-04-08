@@ -109,7 +109,19 @@ $C('$data.storageProviders.YQL.YQLCompiler', $data.Expressions.EntityExpressionV
                 Guard.raise(new Exception(expression.right.type + " not allowed in '" + expression.resolution.mapTo + "' statement", "invalid operation"));
             }
 
-        var right = this.Visit(expression.right, context);
+        if (expression.resolution.name === 'in' && expression.right.value instanceof Array) {
+            var self = this;
+            context.sql += "(";
+            expression.right.value.forEach(function (item, i) {
+                if (i > 0) context.sql += ", ";
+
+                var c = Container.createConstantExpression(item, expression.right.type);
+                self.Visit(c, context);
+            });
+            context.sql += ")";
+        } else {
+            var right = this.Visit(expression.right, context);
+        }
         context.sql += ")";
     },
 
@@ -153,17 +165,13 @@ $C('$data.storageProviders.YQL.YQLCompiler', $data.Expressions.EntityExpressionV
 
     VisitQueryParameterExpression: function (expression, context) {
         context.value = expression.value;
-        var expressionValueType = Container.resolveType(Container.getTypeName(expression.value));
-        if (this.provider.supportedDataTypes.indexOf(expressionValueType) != -1)
+        var expressionValueType = Container.resolveType(expression.type); //Container.resolveType(Container.getTypeName(expression.value));
+        if (expression.value instanceof $data.Queryable) {
+            context.sql += '(' + expression.value.toTraceString().queryText + ')';
+        } else if (this.provider.supportedDataTypes.indexOf(expressionValueType) != -1)
             context.sql += this.provider.fieldConverter.toDb[Container.resolveName(expressionValueType)](expression.value);
         else {
-            switch (expressionValueType) {
-                case $data.Queryable:
-                    context.sql += '(' + expression.value.toTraceString().queryText + ')';
-                    break;
-                default:
-                    context.sql += "" + expression.value + ""; break;
-            }
+            context.sql += "" + expression.value + "";
         }
     },
 

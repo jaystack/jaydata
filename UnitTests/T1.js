@@ -2,6 +2,41 @@
     msg = msg || '';
     module("BugFix" + msg);
 
+    test("Guid key with ' in ' structure", 6, function () {
+
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            for (var i = 0; i < 5; i++) {
+                context.TestTable2.add(new $news.Types.TestItemGuid({
+                    Id: $data.createGuid().toString(),
+                    Title: 'Title_test_' + i
+                }));
+            }
+
+            context.saveChanges(function () {
+                context.TestTable2.map('it.Id').take(2).toArray(function (res) {
+                    equal(res.length, 2, 'result count');
+                    equal(typeof res[0], 'string', 'item 0 is string');
+                    equal(typeof res[1], 'string', 'item 1 is string');
+
+                    context.TestTable2.filter(function (it) { return it.Id in this.keys }, { keys: res }).toArray(function (typedRes) {
+                        equal(res.length, 2, 'result count');
+
+                        for (var i = 0; i < 2; i++) {
+                            ok(res.indexOf(typedRes[i].Id >= 0), "key '" + typedRes[i].Id + "' in result");
+                        }
+
+
+                        start();
+                    });
+                });
+            });
+        });
+
+    });
+
     test('deep_include_fix', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(18);
@@ -451,7 +486,7 @@
         stop(1);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             var itemGrp = new $news.Types.TestItemGroup({ Id: $data.parseGuid('73304541-7f4f-4133-84a4-16ccc2ce600d'), Name: 'Group1' });
-            equal(itemGrp.Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', ' init guid value');
+            equal(itemGrp.Id, '73304541-7f4f-4133-84a4-16ccc2ce600d', ' init guid value');
             var item = new $news.Types.TestItemGuid({ Id: $data.parseGuid('bb152892-3a48-4ffa-83cd-5f952e21c6eb'), i0: 0, b0: true, s0: '0', Group: itemGrp });
 
             //db.TestItemGroups.add(itemGrp);
@@ -459,9 +494,9 @@
 
             db.saveChanges(function () {
                 db.TestItemGroups.toArray(function (res) {
-                    equal(res[0].Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
+                    equal(res[0].Id, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
                     db.TestTable2.toArray(function (res2) {
-                        equal(res2[0].Id.value, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
+                        equal(res2[0].Id, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
 
 
                         db.TestItemGroups.attach(itemGrp);
@@ -471,11 +506,11 @@
                         db.saveChanges(function () {
                             db.TestItemGroups.toArray(function (res) {
                                 equal(res.length, 1, 'res length');
-                                equal(res[0].Id.value, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
+                                equal(res[0].Id, '73304541-7f4f-4133-84a4-16ccc2ce600d', 'res init guid value');
                                 db.TestTable2.orderBy('it.i0').toArray(function (res2) {
                                     equal(res2.length, 2, 'res2 length');
-                                    equal(res2[0].Id.value, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
-                                    equal(res2[1].Id.value, '03be7d99-5dc1-464b-b890-5b997c86a798', 'res2 init guid value');
+                                    equal(res2[0].Id, 'bb152892-3a48-4ffa-83cd-5f952e21c6eb', 'res2 init guid value');
+                                    equal(res2[1].Id, '03be7d99-5dc1-464b-b890-5b997c86a798', 'res2 init guid value');
                                     start();
                                 });
                             });
@@ -603,13 +638,13 @@
                         var item = items[i];
                         switch (item.Id) {
                             case 42:
-                                equal(item.g0.valueOf(), 'ae22ffc7-8d96-488e-84f2-c04753242348', "Id:42, guid value failed");
+                                equal(item.g0, 'ae22ffc7-8d96-488e-84f2-c04753242348', "Id:42, guid value failed");
                                 break;
                             case 43:
-                                equal(item.g0.valueOf(), 'c22f0ecd-8cff-403c-89d7-8d18c457f1ef', "Id:43, guid value failed");
+                                equal(item.g0, 'c22f0ecd-8cff-403c-89d7-8d18c457f1ef', "Id:43, guid value failed");
                                 break;
                             case 44:
-                                equal(item.g0.valueOf(), '00000000-0000-0000-0000-000000000000', "Id:44, guid value failed");
+                                equal(item.g0, '00000000-0000-0000-0000-000000000000', "Id:44, guid value failed");
                                 break;
                             case 45:
                                 equal(item.g0, null, "Id:45, guid value failed");
@@ -644,7 +679,7 @@
                 db.TestTable.map(function (t) { return t.g0; }).toArray(function (items) {
                     for (var i = 0; i < items.length; i++) {
                         if (items[i]) {
-                            equal(items[i] instanceof $data.Guid, true, 'guid map failed: ' + i);
+                            equal($data.parseGuid(items[i]) instanceof $data.Guid, true, 'guid map failed: ' + i);
                         } else {
                             equal(items[i], null, 'guid map failed: ' + i);
                         }

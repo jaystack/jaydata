@@ -656,7 +656,7 @@
         });
     });
 
-    test('guid computed field',3, function(){
+    test('guid computed field',4, function(){
         stop(3);
         $data.Class.define("$test.GuidItem", $data.Entity, null, {
             Id: { type: $data.Guid, key: true, computed:true },
@@ -675,14 +675,15 @@
                     start(1);
                     equal(result.length, 1, 'number of tags failed');
                     notEqual(result[0].Id, undefined, 'PK field failed');
-                    ok(result[0].Id instanceof $data.Guid, 'PK field type failed');
+                    ok($data.parseGuid(result[0].Id) instanceof $data.Guid, 'PK field type failed');
+                    ok(typeof result[0].Id, 'string', 'PK field type failed');
                 });
             });
 
         });
     });
 
-    test('guid computed field with init data',3, function(){
+    test('guid computed field with init data',4, function(){
         stop(3);
         $data.Class.define("$test.GuidItem", $data.Entity, null, {
             Id: { type: $data.Guid, key: true, computed:true },
@@ -705,7 +706,8 @@
                     start(1);
                     equal(result.length, 3, 'number of tags failed');
                     notEqual(result[2].Id, undefined, 'PK field failed');
-                    ok(result[2].Id instanceof $data.Guid, 'PK field type failed');
+                    ok($data.parseGuid(result[2].Id) instanceof $data.Guid, 'PK field type failed');
+                    ok(typeof result[2].Id, 'string', 'PK field type failed');
                 });
             });
 

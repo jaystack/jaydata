@@ -2155,9 +2155,16 @@ $data.Class.define('$example.GeometryTestEntity', $data.Entity, null, {
     GeometryCollection: { type: 'GeometryCollection' },
 });
 
+$data.Class.define('$example.GuidTestEntity', $data.Entity, null, {
+    Id: { type: 'guid', key: true },
+    Name: { type: 'string' }
+});
+
+
 $data.Class.define('$example.Context', $data.EntityContext, null, {
     GeoTestEntities: { type: $data.EntitySet, elementType: $example.GeoTestEntity },
-    GeometryTestEntities: { type: $data.EntitySet, elementType: $example.GeometryTestEntity }
+    GeometryTestEntities: { type: $data.EntitySet, elementType: $example.GeometryTestEntity },
+    GuidTestEntities: { type: $data.EntitySet, elementType: $example.GuidTestEntity }
 });
 
 function GeoTests(providerConfig, msg, afterTestFn) {
@@ -2578,9 +2585,48 @@ function GeoTests(providerConfig, msg, afterTestFn) {
             });
         });
     });
-
-    
 }
+
+function GuidTests(providerConfig, msg, afterTestFn) {
+    msg = msg || '';
+    module("GuidTests" + msg);
+
+    test("Guid key with 'in' structure", 6, function () {
+        stop();
+
+        (new $example.Context(providerConfig)).onReady(function (context) {
+
+            for (var i = 0; i < 5; i++) {
+                context.GuidTestEntities.add(new $example.GuidTestEntity({
+                    Id: $data.createGuid().toString(),
+                    Title: 'Title_test_' + i
+                }));
+            }
+
+            context.saveChanges(function(){
+                context.GuidTestEntities.map('it.Id').take(2).toArray(function (res) {
+                    equal(res.length, 2, 'result count');
+                    equal(typeof res[0], 'string', 'item 0 is string');
+                    equal(typeof res[1], 'string', 'item 1 is string');
+
+                    context.GuidTestEntities.filter(function (it) { return it.Id in this.keys }, { keys: res }).toArray(function (typedRes) {
+                        equal(res.length, 2, 'result count');
+
+                        for (var i = 0; i < 2; i++) {
+                            ok(res.indexOf(typedRes[i].Id >= 0), "key '" + typedRes[i].Id + "' in result");
+                        }
+
+
+                        if (typeof afterTestFn === 'function') afterTestFn(context, start);
+                        else start();
+                    });
+                });
+            });
+        });
+    });
+
+};
+
 
 function GeoTestsFuncCompile(providerConfig, msg) {
     test("Geo functions compile", 1, function () {

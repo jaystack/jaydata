@@ -142,8 +142,8 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             if (expression.value instanceof $data.Entity) {
                 value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
             } else if (expression.value !== undefined) {
-                var valueType = Container.getTypeName(expression.value);
-                value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+                //var valueType = Container.getTypeName(expression.value);
+                value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
             }
 
             if (value !== undefined) {

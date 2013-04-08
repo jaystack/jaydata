@@ -11,7 +11,7 @@ $C('$data.storageProviders.InMemory.InMemoryCompiler', $data.Expressions.EntityE
                     '$data.Blob': function (blob) { return typeof blob === 'string' ? "'" + blob + "'" : blob; },
                     '$data.Object': function (o) { return JSON.stringify(o); },
                     '$data.Array': function (o) { return JSON.stringify(o); },
-                    '$data.Guid': function (guid) { return guid ? "'" + guid + "'" : guid; }
+                    '$data.Guid': function (guid) { return guid ? "'" + guid.toString() + "'" : guid; }
                 }
             }
         };

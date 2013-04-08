@@ -6,8 +6,11 @@ $C('$data.Expressions.ConstantExpression', $data.Expressions.ExpressionNode, nul
 
         this.type = type;
         this.name = name;
-        if (!Object.isNullOrUndefined(this.value) && Container.resolveType(Container.getTypeName(this.value)) !== Container.resolveType(this.type))
-            this.value = Container.convertTo(value, this.type, true);
+        if (!Object.isNullOrUndefined(this.value)) {
+            this.type = Container.resolveType(this.type)
+            if (Container.resolveType(Container.getTypeName(this.value)) !== this.type)
+                this.value = Container.convertTo(value, this.type);
+        }
     },
     nodeType: { value: $data.Expressions.ExpressionType.Constant, enumerable: true },
     type: { value: Object, writable: true },

@@ -21,7 +21,7 @@
 
             test.done();
         }
-    },
+    }/*,
 
     'Geometry': {
         'exists': function (test) {
@@ -45,5 +45,5 @@
 
             test.done();
         }
-    }
+    }*/
 }
