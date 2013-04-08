@@ -2010,7 +2010,7 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<Property MaxLength="50" Name="p2" Type="Edm.String"/>' +
-                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String"/>' +
+                            '<Property MaxLength="Max" Name="p3" Type="Edm.String"/>' +
                         '</EntityType>' +
                         '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsMax">' +
                             '<EntitySet EntityType="$test.exampleClassMax" Name="Es1"/>' +
@@ -2049,7 +2049,7 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<Property MaxLength="50" Name="p2" Type="Edm.String"/>' +
-                            '<Property MaxLength="MAX" Name="p3" Type="Edm.String"/>' +
+                            '<Property MaxLength="Max" Name="p3" Type="Edm.String"/>' +
                             '<Property ConcurrencyMode="Fixed" MaxLength="8" Name="RowVersion" Type="Edm.Binary"/>' +
                         '</EntityType>' +
                         '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsConc">' +
@@ -2089,7 +2089,7 @@ exports['entityContext'] = {
                             '</Key>' +
                             '<Property Name="p1" Type="Edm.Int32"/>' +
                             '<Property FixedLength="true" MaxLength="50" Name="p2" Precision="true" Scale="false" Type="Edm.String" Unicode="false"/>' +
-                            '<Property FixedLength="false" MaxLength="MAX" Name="p3" Precision="false" Scale="false" Type="Edm.String" Unicode="false"/>' +
+                            '<Property FixedLength="false" MaxLength="Max" Name="p3" Precision="false" Scale="false" Type="Edm.String" Unicode="false"/>' +
                             '<Property FixedLength="true" MaxLength="8" Name="p4" Precision="true" Scale="true" Type="Edm.String" Unicode="true"/>' +
                         '</EntityType>' +
                         '<EntityContainer m:IsDefaultEntityContainer="true" Name="contextESpropsCustom">' +
