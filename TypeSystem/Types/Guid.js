@@ -11,6 +11,9 @@ $data.Container.registerType(['$data.Guid', 'Guid', 'guid'], $data.Guid);
 $data.Container.registerConverter('$data.Guid', {
     '$data.String': function (value) {
         return value ? $data.parseGuid(value).toString() : value;
+    },
+    '$data.Guid': function (value) {
+        return value ? value.toString() : value;
     }
 }, {
     '$data.String': function (value) {

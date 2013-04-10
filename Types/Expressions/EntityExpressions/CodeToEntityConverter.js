@@ -30,10 +30,25 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 var constExprType = Container.resolveType(constExpr.type);
 
                 if (fieldType !== constExprType) {
-                    if (right === constExpr) {
-                        right = new $data.Expressions.ConstantExpression(constExpr.value, fieldType, right.name);
+
+                    var value = constExpr.value;
+                    if (expression.operator === $data.Expressions.ExpressionType.In) {
+                        if (Array.isArray(value)) {
+                            var resultExp = [];
+                            for (var i = 0; i < value.length; i++) {
+                                resultExp.push(new $data.Expressions.ConstantExpression(value[i], fieldType));
+                            }
+                            value = resultExp;
+                            fieldType = $data.Array;
+                        } else {
+                            fieldType = constExprType;
+                        }
+                    }
+
+                     if (right === constExpr) {
+                        right = new $data.Expressions.ConstantExpression(value, fieldType, right.name);
                     } else {
-                        left = new $data.Expressions.ConstantExpression(constExpr.value, fieldType, left.name);
+                        left = new $data.Expressions.ConstantExpression(value, fieldType, left.name);
                     }
                 }
             }
@@ -149,8 +164,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
 
         //objectArgs
         if (args.length === 1 && args[0] instanceof $data.Expressions.ConstantExpression && typeof args[0].value === 'object' && args[0].value && params && params[0] &&
-            args[0].value.constructor === $data.Object &&
-            (Container.resolveType(params[0].type || params[0].dataType) !== $data.Object || params.some(function (param) { return param.name in args[0].value }))) {
+            args[0].value.constructor === $data.Object && params.some(function (param) { return param.name in args[0].value })) {
 
             return params.map(function (p) {
                 var type = p.type || p.dataType || args[0].type;

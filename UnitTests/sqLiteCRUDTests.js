@@ -124,8 +124,8 @@
                 fromDb: function (value) {
                     start();
                     ok(true, "FromDB invoked");
-                    equal("42", value);
-                    return "43"
+                    deepEqual("42", value);
+                    return [ new $blog.Types.Meta({value:"43"})]
                 },
                 toDb: function () {
                     start();
@@ -138,7 +138,7 @@
         stop(2);
         $blog.Context.saveChanges(function () {
             $blog.Context.Blogs.toArray(function (items) {
-                equal(items[0].Metas, "43");
+                deepEqual(items[0].Metas[0].value, "43");
                 start();
             });
 

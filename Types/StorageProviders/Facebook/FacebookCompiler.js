@@ -146,9 +146,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
             context.sql += "(";
             expression.right.value.forEach(function (item, i) {
                 if (i > 0) context.sql += ", ";
-
-                var c = Container.createConstantExpression(item, expression.right.type);
-                self.Visit(c, context);
+                self.Visit(item, context);
             });
             context.sql += ")";
         } else {

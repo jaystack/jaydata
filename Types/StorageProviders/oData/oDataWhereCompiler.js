@@ -32,7 +32,7 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };
 
             paramValue.forEach(function (item) {
-                var idValue = Container.createConstantExpression(item, expression.right.type);
+                var idValue = item;
                 var idCheck = Container.createSimpleBinaryExpression(expression.left, idValue,
                     $data.Expressions.ExpressionType.Equal, "==", "boolean", eqResolution);
                 if (result) {

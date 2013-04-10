@@ -210,22 +210,22 @@ function kendoTests(providerConfig) {
         var article = new $news.Types.Article();
         var kendoArticle = article.asKendoObservable();
         equal(article.Tags, kendoArticle.get('Tags'), 'array property equal failed');
-        article.Tags = [new $news.Types.Tag({ Id: 1, Title: 'hello' })];
+        article.Tags = [new $news.Types.TagConnection({ Id: 1, Title: 'hello' })];
         //deepEqual(article.Tags, kendoArticle.get('Tags'), 'array property change equal failed');
         equal(article.Tags[0].Id, kendoArticle.get('Tags')[0].Id, 'array property element kendo change equal failed');
         equal(article.Tags[0].Id, 1, 'array property element kendo change equal failed');
-        kendoArticle.set('Tags', [new $news.Types.Tag({ Id: 2, Title: 'hello2' })]);
+        kendoArticle.set('Tags', [new $news.Types.TagConnection({ Id: 2, Title: 'hello2' })]);
         //deepEqual(article.Tags, kendoArticle.get('Tags'), 'array property kendo change equal failed');
         equal(article.Tags[0].Id, kendoArticle.get('Tags')[0].Id, 'array property element kendo change equal failed');
         equal(article.Tags[0].Id, 2, 'array property element kendo change equal failed');
 
-        article.Tags.push(new $news.Types.Tag({ Id: 3, Title: 'hello3' }));
+        article.Tags.push(new $news.Types.TagConnection({ Id: 3, Title: 'hello3' }));
         //deepEqual(article.Tags, kendoArticle.get('Tags'), 'array property push equal failed');
         equal(article.Tags.length, 2, 'array property length equal failed');
         //equal(article.Tags.length, kendoArticle.get('Tags').length, 'array property length equal failed');
 
         notEqual(kendoArticle.Tags.push, undefined, "Array property is kendoObservalble instead of kendoObservableArray!")
-        kendoArticle.Tags.push(new $news.Types.Tag({ Id: 4, Title: 'hello4' }));
+        kendoArticle.Tags.push(new $news.Types.TagConnection({ Id: 4, Title: 'hello4' }));
         //deepEqual(article.Tags, kendoArticle.get('Tags'), 'array property push equal failed');
         equal(article.Tags.length, kendoArticle.get('Tags').length, 'array property length equal failed');
     });
@@ -234,10 +234,10 @@ function kendoTests(providerConfig) {
         var article = new $news.Types.Article();
         var kendoArticle = article.asKendoObservable();
         equal(article.Author, kendoArticle.get('Author'), 'type property equal failed');
-        article.Author = new $news.Types.Tag({ Id: 1, Title: 'hello' });
+        article.Author = new $news.Types.User({ Id: 1, Title: 'hello' });
         //deepEqual(article.Author, kendoArticle.Author(), 'type property change equal failed');
         equal(article.Author.Id, kendoArticle.get('Author').Id, 'type property value kendo change equal failed');
-        kendoArticle.set('Author', new $news.Types.Tag({ Id: 2, Title: 'hello2' }));
+        kendoArticle.set('Author', new $news.Types.User({ Id: 2, Title: 'hello2' }));
         //deepEqual(article.Author, kendoArticle.Author(), 'type property kendo change equal failed');
         equal(article.Author.Id, kendoArticle.get('Author').Id, 'type property value kendo change equal failed');
 

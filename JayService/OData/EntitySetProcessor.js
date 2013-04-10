@@ -171,17 +171,20 @@
 
         config.simpleResult = config.simpleResult || this.member.valueRequeset;
 
-        var result = builder.parse(this._applyRestrictions({
-            frame: frameType,
-            filter: idFilter.length > 0 ? idFilter.join(' and ') : (req.query.$filter || ''),
-            orderby: req.query.$orderby || '',
-            select: this.member.selectedField || req.query.$select || '',
-            skip: req.query.$skip || '',
-            top: req.query.$top || '',
-            expand: /*this.member.selectedField ||*/ req.query.$expand || '',
-            inlinecount: req.query.$inlinecount || ''
-        }));
-
+        try {
+            var result = builder.parse(this._applyRestrictions({
+                frame: frameType,
+                filter: idFilter.length > 0 ? idFilter.join(' and ') : (req.query.$filter || ''),
+                orderby: req.query.$orderby || '',
+                select: this.member.selectedField || req.query.$select || '',
+                skip: req.query.$skip || '',
+                top: req.query.$top || '',
+                expand: /*this.member.selectedField ||*/ req.query.$expand || '',
+                inlinecount: req.query.$inlinecount || ''
+            }));
+        }catch(err){
+            return callback.error(new Error(err.message));
+        }
 
         config.collectionName = this.entitySet.name;
         config.selectedFields = result.selectedFields;
@@ -228,16 +231,19 @@
 
     BatchDeleteFromEntitySet: function (req, config, callback) {
         var builder = new $data.oDataParser.ODataEntityExpressionBuilder(this.context, this.entitySet.name);
-        var result = builder.parse({
-            frame: $data.Expressions.ExpressionType.BatchDelete,
-            filter: req.query.$filter || '',
-            //orderby: req.query.$orderby || '',
-            //select: req.query.$select || '',
-            //skip: req.query.$skip || '',
-            //top: req.query.$top || '',
-            //expand: req.query.$expand || ''
-        });
-
+        try {
+            var result = builder.parse({
+                frame: $data.Expressions.ExpressionType.BatchDelete,
+                filter: req.query.$filter || '',
+                //orderby: req.query.$orderby || '',
+                //select: req.query.$select || '',
+                //skip: req.query.$skip || '',
+                //top: req.query.$top || '',
+                //expand: req.query.$expand || ''
+            });
+        }catch(err){
+            return callback.error(new Error(err.message));
+        }
         //config.collectionName = this.entitySet.name;
         //config.selectedFields = result.selectedFields;
         //config.includes = result.includes;

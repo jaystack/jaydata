@@ -24,8 +24,7 @@ $C('$data.storageProviders.InMemory.InMemoryFunctionCompiler', $data.Expressions
                 context.data += "[";
                 expression.right.value.forEach(function (item, i) {
                     if (i > 0) context.data += ",";
-                    var c = Container.createConstantExpression(item, expression.right.type);
-                    self.Visit(c, context);
+                    self.Visit(item, context);
                 });
                 context.data += "]";
             } else {

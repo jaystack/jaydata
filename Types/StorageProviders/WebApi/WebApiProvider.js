@@ -101,7 +101,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             dbInstance.entityState = logicalEntity.entityState;
 
             storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (property) {
-                dbInstance[property.name] = logicalEntity[property.name];
+                dbInstance.initData[property.name] = logicalEntity[property.name];
             }, this);
 
             if (storageModel.Associations) {
@@ -112,22 +112,22 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                         var refValue = logicalEntity[association.FromPropertyName];
                         if (refValue !== null && refValue !== undefined) {
                             if (refValue instanceof $data.Array) {
-                                dbInstance[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
+                                dbInstance.initData[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
                                 refValue.forEach(function (rv) {
                                     var contentId = convertedItems.indexOf(rv);
                                     if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                    dbInstance[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
+                                    dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
                                 }, this);
                             } else {
                                 if (refValue.entityState === $data.EntityState.Modified) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
                                     var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
-                                    dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
+                                    dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
                                     if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                    dbInstance[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
+                                    dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
                                 }
                             }
                         }
@@ -136,7 +136,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             }
             if (storageModel.ComplexTypes) {
                 storageModel.ComplexTypes.forEach(function (cmpType) {
-                    dbInstance[cmpType.FromPropertyName] = logicalEntity[cmpType.FromPropertyName];
+                    dbInstance.initData[cmpType.FromPropertyName] = logicalEntity[cmpType.FromPropertyName];
                 }, this);
             }
             return dbInstance;
@@ -987,7 +987,7 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };
 
             paramValue.forEach(function (item) {
-                var idValue = Container.createConstantExpression(item);
+                var idValue = item;
                 var idCheck = Container.createSimpleBinaryExpression(expression.left, idValue,
                     $data.Expressions.ExpressionType.Equal, "==", "boolean", eqResolution);
                 if (result) {

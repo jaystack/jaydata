@@ -934,7 +934,8 @@ $data.Class.define('$data.EntityContext', null, null,
                                             if (value instanceof Array) {
                                                 if (value.indexOf(entityCachedItem.data) == -1) {
                                                     value.push(entityCachedItem.data);
-                                                    data[navPropertyName] = value;
+                                                    data.initData[navPropertyName] = value;
+                                                    data._setPropertyChanged(association.ToType.getMemberDefinition(navPropertyName));
                                                 }
                                             } else {
                                                 if (typeof intellisense === 'undefined') {
@@ -942,7 +943,8 @@ $data.Class.define('$data.EntityContext', null, null,
                                                 }
                                             }
                                         } else {
-                                            data[navPropertyName] = [entityCachedItem.data];
+                                            data.initData[navPropertyName] = [entityCachedItem.data];
+                                            data._setPropertyChanged(association.ToType.getMemberDefinition(navPropertyName));
                                         }
                                         break;
                                     default: //Item
@@ -953,7 +955,8 @@ $data.Class.define('$data.EntityContext', null, null,
                                                 }
                                             }
                                         } else {
-                                            data[navPropertyName] = entityCachedItem.data; //set back reference for live object
+                                            data.initData[navPropertyName] = entityCachedItem.data; //set back reference for live object
+                                            data._setPropertyChanged(association.ToType.getMemberDefinition(navPropertyName));
                                         }
                                         break;
                                 }

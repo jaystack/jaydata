@@ -8,7 +8,11 @@ $data.Class.define('$data.storageProviders.Facebook.EntitySets.Command', null, n
         return this.Config.CommandValue;
     },
     Config: {}
-}, null);
+}, {
+    'to$data.Integer': function (value) {
+        return value;
+    }
+});
 
 $data.Class.define("$data.Facebook.FQLContext", $data.EntityContext, null, {
     constructor: function(){
