@@ -69,6 +69,10 @@ $data.Container.registerType(['$data.GeographyBase'], $data.GeographyBase);
 $data.GeographyPoint = function GeographyPoint(lon, lat) {
     if (lon && typeof lon === 'object' && Array.isArray(lon)) {
         $data.GeographyBase.call(this, { coordinates: lon });
+    } else if (lon && typeof lon === 'object' && ('longitude' in lon || 'latitude' in lon)) {
+        $data.GeographyBase.call(this, { coordinates: [lon.longitude, lon.latitude] });
+    } else if (lon && typeof lon === 'object' && ('lng' in lon || 'lat' in lon)) {
+        $data.GeographyBase.call(this, { coordinates: [lon.lng, lon.lat] });
     } else if (lon && typeof lon === 'object') {
         $data.GeographyBase.call(this, lon);
     } else {
@@ -160,3 +164,26 @@ $data.GeographyCollection.validMembers = ['geometries'];
 $data.GeographyBase.registerType('GeometryCollection', $data.GeographyCollection);
 $data.Container.registerType(['$data.GeographyCollection', 'GeographyCollection'], $data.GeographyCollection);
 
+
+/* converters */
+$data.Container.registerConverter($data.GeographyPoint, $data.Object, function (value) {
+    return value ? new $data.GeographyPoint(value) : value;
+});
+$data.Container.registerConverter($data.GeographyLineString, $data.Object, function (value) {
+    return value ? new $data.GeographyLineString(value) : value;
+});
+$data.Container.registerConverter($data.GeographyPolygon, $data.Object, function (value) {
+    return value ? new $data.GeographyPolygon(value) : value;
+});
+$data.Container.registerConverter($data.GeographyMultiPoint, $data.Object, function (value) {
+    return value ? new $data.GeographyMultiPoint(value) : value;
+});
+$data.Container.registerConverter($data.GeographyMultiLineString, $data.Object, function (value) {
+    return value ? new $data.GeographyMultiLineString(value) : value;
+});
+$data.Container.registerConverter($data.GeographyMultiPolygon, $data.Object, function (value) {
+    return value ? new $data.GeographyMultiPolygon(value) : value;
+});
+$data.Container.registerConverter($data.GeographyCollection, $data.Object, function (value) {
+    return value ? new $data.GeographyCollection(value) : value;
+});

@@ -320,9 +320,9 @@
                     return o;
                 },
                 '$data.Guid': function (o) {
-                    if (o === undefined) {
+                    /*if (o === undefined) {
                         return new $data.Guid();
-                    }
+                    }*/
                     return o;
                 },
                 '$data.GeographyLineString': function (o) { return o === undefined ? new $data.GeographyLineString() : o; },
@@ -373,7 +373,7 @@
                     return g;
                 },
                 '$data.Guid': function (g) {
-                    return "guid'" + g.toString() + "'";
+                    return g ? "guid'" + g.toString() + "'" : g;
                 },
                 '$data.GeographyLineString': function (o) { return o; },
                 '$data.GeographyPolygon': function (o) { return o; },

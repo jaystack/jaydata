@@ -66,13 +66,16 @@ $data.SimpleBase.registerType('GeometryBase', $data.GeometryBase, $data.Geospati
 $data.Container.registerType(['$data.GeometryBase'], $data.GeometryBase);
 
 /* $data.GeometryPoint */
-$data.GeometryPoint = function GeometryPoint(lon, lat) {
-    if (lon && typeof lon === 'object' && Array.isArray(lon)) {
-        $data.GeometryBase.call(this, { coordinates: lon });
-    } else if (lon && typeof lon === 'object') {
-        $data.GeometryBase.call(this, lon);
+$data.GeometryPoint = function GeometryPoint(x, y) {
+    var param = x;
+    if (param && typeof param === 'object' && Array.isArray(param)) {
+        $data.GeometryBase.call(this, { coordinates: param });
+    } else if (param && typeof param === 'object' && ('x' in param || 'y' in param)) {
+        $data.GeometryBase.call(this, { coordinates: [param.x, param.y] });
+    } else if (param && typeof param === 'object') {
+        $data.GeometryBase.call(this, param);
     } else {
-        $data.GeometryBase.call(this, { coordinates: [lon || 0, lat || 0] });
+        $data.GeometryBase.call(this, { coordinates: [x || 0, y || 0] });
     }
 };
 $data.GeometryPoint.parseFromString = function (strData) {
@@ -159,3 +162,25 @@ $data.GeometryCollection.validMembers = ['geometries'];
 $data.GeometryBase.registerType('GeometryCollection', $data.GeometryCollection);
 $data.Container.registerType(['$data.GeometryCollection', 'GeometryCollection'], $data.GeometryCollection);
 
+/* converters */
+$data.Container.registerConverter($data.GeometryPoint, $data.Object, function (value) {
+    return value ? new $data.GeometryPoint(value) : value;
+});
+$data.Container.registerConverter($data.GeometryLineString, $data.Object, function (value) {
+    return value ? new $data.GeometryLineString(value) : value;
+});
+$data.Container.registerConverter($data.GeometryPolygon, $data.Object, function (value) {
+    return value ? new $data.GeometryPolygon(value) : value;
+});
+$data.Container.registerConverter($data.GeometryMultiPoint, $data.Object, function (value) {
+    return value ? new $data.GeometryMultiPoint(value) : value;
+});
+$data.Container.registerConverter($data.GeometryMultiLineString, $data.Object, function (value) {
+    return value ? new $data.GeometryMultiLineString(value) : value;
+});
+$data.Container.registerConverter($data.GeometryMultiPolygon, $data.Object, function (value) {
+    return value ? new $data.GeometryMultiPolygon(value) : value;
+});
+$data.Container.registerConverter($data.GeometryCollection, $data.Object, function (value) {
+    return value ? new $data.GeometryCollection(value) : value;
+});

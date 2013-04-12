@@ -466,7 +466,7 @@
     });
     if (typeof ActiveXObject === 'undefined') {
         test('indexedDbProvider_openDb_multiple_key', function () {
-            expect(12);
+            expect(14);
             stop();
 
             $data.Class.define('indexedDbProviderTest_Person2Key', $data.Entity, null, {
@@ -524,7 +524,8 @@
                                             equal(typeof item.Id, 'number', 'Id has valid type');
                                             equal(item.Id, 1, 'is has valid value');
 
-                                            equal(item.IdGuid instanceof $data.Guid, true, 'IdGuid is guid');
+                                            equal($data.parseGuid(item.IdGuid) instanceof $data.Guid, true, 'IdGuid is guid');
+                                            equal(typeof item.IdGuid, 'string', 'IdGuid is guid');
                                             equal(item.IdGuid.valueOf(), '83a2532a-bc7c-4554-b0fd-c63642a95d04', 'IdGuid valid has value');
 
                                             context.Persons.toArray({
@@ -534,7 +535,8 @@
                                                     equal(typeof res[0].Id, 'number', 'Id has valid type');
                                                     equal(res[0].Id, 1, 'is has valid value');
 
-                                                    equal(res[0].IdGuid instanceof $data.Guid, true, 'IdGuid is guid');
+                                                    equal($data.parseGuid(res[0].IdGuid) instanceof $data.Guid, true, 'IdGuid is guid');
+                                                    equal(typeof res[0].IdGuid, 'string', 'IdGuid is guid');
                                                     equal(res[0].IdGuid.valueOf(), '83a2532a-bc7c-4554-b0fd-c63642a95d04', 'IdGuid valid has value');
 
                                                     close(context);
@@ -588,7 +590,7 @@
 
     test('many_data_test', function () {
         var dataNumber = 1000;
-        expect((6 + 6) * dataNumber + 6);
+        expect((6 + 7) * dataNumber + 6);
 
 
         var context = new idbexample.idbContext({
@@ -645,7 +647,8 @@
                                         context.Items2.toArray(function (result2) {
                                             equal(result2.length, res2, 'result2 length failed');
                                             for (var i = 0; i < result2.length; i++) {
-                                                ok(result2[i].Id instanceof $data.Guid, 'result2[i].i0 failed');
+                                                ok($data.parseGuid(result2[i].Id) instanceof $data.Guid, 'result2[i].i0 failed');
+                                                equal(typeof result2[i].Id, 'string', 'result2[i].i0 failed');
                                                 equal(typeof result2[i].i0, 'number', 'result2[i].i0 failed');
                                                 equal(result2[i].b0, false, 'result2[i].b0 failed');
                                                 equal(typeof result2[i].s0, 'string', 'result2[i].s0 failed');
@@ -701,7 +704,7 @@
                     d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
                 });
                 if (i == 500) {
-                    item2_500_guid = item2.Id.value;
+                    item2_500_guid = item2.Id;
                 }
                 context.Items1.add(item1);
                 context.Items2.add(item2);
@@ -754,7 +757,7 @@
                     d0: new Date((i + 1000).toString() + '/01/01 12:13:14'),
                 });
                 if (i == 500) {
-                    item2_500_guid = item2.Id.value;
+                    item2_500_guid = item2.Id;
                 }
                 context.Items1.add(item1);
                 context.Items2.add(item2);

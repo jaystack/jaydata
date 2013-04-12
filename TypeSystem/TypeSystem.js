@@ -937,6 +937,7 @@
                     if (value instanceof Array) return '$data.Array';
                     if (value.getType) return value.getType().fullName;
                     if (value instanceof Date) return '$data.Date';
+                    if (value instanceof $data.Guid) return '$data.Guid';
                     if (value instanceof $data.GeographyPoint) return '$data.GeographyPoint';
                     if (value instanceof $data.GeographyLineString) return '$data.GeographyLineString';
                     if (value instanceof $data.GeographyPolygon) return '$data.GeographyPolygon';
@@ -955,7 +956,7 @@
                     if (value instanceof $data.GeometryBase) return '$data.GeometryBase';
                     if (value instanceof $data.Geospatial) return '$data.Geospatial';
                     if (value instanceof $data.SimpleBase) return '$data.SimpleBase';
-                    if (value instanceof $data.Guid) return '$data.Guid';
+                    if (typeof value.toHexString === 'function') return '$data.ObjectID';
                     //if(value instanceof "number") return
                 default:
                     return typeof value;
@@ -1089,6 +1090,91 @@
                 type.name = namesArray[0].shortName;
             }
         };
+
+
+        var _converters = {
+            from: {},
+            to: {}
+        };
+        this.converters = _converters;
+
+        this.convertTo = function (value, tType, eType /*if Array*/) {
+            Guard.requireValue("typeOrName", tType);
+
+            var sourceTypeName = Container.getTypeName(value);
+            if (sourceTypeName === 'undefined')
+                return value;
+
+            var sourceType = Container.resolveType(sourceTypeName);
+            var sourceTypeName = Container.resolveName(sourceType);
+            var targetType = Container.resolveType(tType);
+            var targetTypeName = Container.resolveName(targetType);
+
+            var result;
+            if (typeof targetType['from' + sourceTypeName] === 'function') {
+                result = targetType['from' + sourceTypeName].apply(targetType, arguments);
+
+            } else if (typeof sourceType['to' + targetTypeName] === 'function') {
+                result = sourceType['to' + targetTypeName].apply(sourceType, arguments);
+
+            } else if (_converters.to[targetTypeName] && _converters.to[targetTypeName][sourceTypeName]) {
+                // target from source
+                result = _converters.to[targetTypeName][sourceTypeName].apply(_converters, arguments);
+
+            } else if (_converters.from[sourceTypeName] && _converters.from[sourceTypeName][targetTypeName]) {
+                // source to target
+                result = _converters.from[sourceTypeName][targetTypeName].apply(_converters, arguments);
+
+            } else if (targetTypeName === sourceTypeName || value instanceof targetType || value === null) {
+                result = value;
+
+            } else {
+                Guard.raise(new Exception('TypeError: ',"value '" + sourceTypeName + "' not convertable to '" + targetTypeName + "'", value));
+            }
+
+            if (targetType === $data.Array && eType && Array.isArray(result)) {
+                for (var i = 0; i < result.length; i++) {
+                    result[i] = this.convertTo(result[i], eType);
+                }
+            }
+
+            return result;
+        };
+        this.registerConverter = function (target, sourceOrToConverters, toConverterOrFromConverters, fromConverter) {
+            //registerConverter($data.Guid, { $data.String: fn, int: fn }, { string: fn, int:fn })
+            //registerConverter($data.Guid, $data.String, fn, fn);
+
+            var targetName = Container.resolveName(target);
+            if (Container.isTypeRegistered(sourceOrToConverters)) {
+                //isSource
+                _converters.to[targetName] = _converters.to[targetName] || {};
+                _converters.from[targetName] = _converters.from[targetName] || {};
+
+                var sourceName = Container.resolveName(sourceOrToConverters);
+
+                if (toConverterOrFromConverters)
+                    _converters.to[targetName][sourceName] = toConverterOrFromConverters;
+                if (fromConverter)
+                    _converters.from[targetName][sourceName] = fromConverter;
+
+            } else {
+                // converterGroup
+
+                //fromConverters
+                if (_converters.to[targetName]) {
+                    _converters.to[targetName] = $data.typeSystem.extend(_converters.to[targetName], sourceOrToConverters);
+                } else {
+                    _converters.to[targetName] = sourceOrToConverters;
+                }
+
+                //toConverters
+                if (_converters.from[targetName]) {
+                    _converters.from[targetName] = $data.typeSystem.extend(_converters.from[targetName], toConverterOrFromConverters);
+                } else {
+                    _converters.from[targetName] = toConverterOrFromConverters;
+                }
+            }
+        }
     }
     $data.ContainerClass = ContainerCtor;
 
@@ -1123,6 +1209,150 @@
     c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
     c.registerType(["$data.Function", "Function", "function"], $data.Function);
     c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
+
+    $data.Container.registerConverter('$data.String', {
+        '$data.Date': function (value) {
+            return value ? value.toISOString() : value;
+        },
+        '$data.Number': function (value) {
+            return value.toString();
+        }
+    });
+
+    $data.Container.registerConverter('$data.Date', {
+        '$data.Number': function (value) {
+            var convertedValue = new Date(value);
+            if (isNaN(convertedValue.valueOf()))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', value));
+
+            return convertedValue;
+        },
+        '$data.String': function (value) {
+            if (value === '') return undefined;
+            var convertedValue = new Date(value);
+            if (isNaN(convertedValue.valueOf()))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', value));
+
+            return convertedValue;
+        }
+    });
+
+    $data.Container.registerConverter('$data.Integer', {
+        '$data.Number': function (value) {
+            var convertedValue = parseInt(value);
+            if (isNaN(convertedValue))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', value));
+
+            return convertedValue;
+        },
+        '$data.String': function (value) {
+            if (value === '') return undefined;
+            var convertedValue = parseInt(value);
+            if (isNaN(convertedValue))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', value));
+
+            return convertedValue;
+        },
+        '$data.Boolean': function (value) {
+            return value ? 1 : 0;
+        },
+        '$data.Date': function (value) {
+            var convertedValue = value.valueOf();
+            if (isNaN(convertedValue))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', value));
+
+            return convertedValue;
+        }
+    });
+    $data.Container.registerConverter('$data.Number', {
+        '$data.String': function (value) {
+            if (value === '') return undefined;
+            var convertedValue = parseFloat(value);
+            if (isNaN(convertedValue))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', value));
+
+            return convertedValue;
+        },
+        '$data.Boolean': function (value) {
+            return value ? 1 : 0;
+        },
+        '$data.Date': function (value) {
+            var convertedValue = value.valueOf();
+            if (isNaN(convertedValue))
+                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', value));
+
+            return convertedValue;
+        }
+    });
+    $data.Container.registerConverter('$data.Boolean', {
+        '$data.String': function (value) {
+            if (value === '') return undefined;
+            var convertedValue;
+            switch (value.toLowerCase()) {
+                case 'true':
+                    convertedValue = true;
+                    break;
+                case 'false':
+                    convertedValue = false;
+                    break;
+                default:
+                    Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Boolean', value));
+            }
+            return convertedValue;
+        },
+        '$data.Number': function (value) {
+            return value ? true : false;
+        }
+        //all conversations
+    });
+    $data.Container.registerConverter('$data.Object', {
+        '$data.String': function (value) {
+            if (value === '') return undefined;
+            var convertedValue;
+            try {
+                convertedValue = JSON.parse(value);
+            } catch (e) {
+                Guard.raise(new Exception('TypeError: ', e.toString(), value));
+            }
+            return convertedValue;
+        },
+        '$data.Number': function (value) {
+            return value;
+        },
+        '$data.Date': function (value) {
+            return value;
+        },
+        '$data.Array': function (value) {
+            return value;
+        }
+    });
+    $data.Container.registerConverter('$data.Blob', {
+        '$data.Number': function (value) {
+            return value;
+        },
+        '$data.String': function (value) {
+            return value;
+        },
+        '$data.Date': function (value) {
+            return value;
+        },
+        '$data.Object': function (value) {
+            return value;
+        },
+        '$data.Array': function (value) {
+            return value;
+        }
+    });
+    $data.Container.registerConverter('$data.ObjectID', {
+        '$data.String': function (value) {
+            return value;
+        }
+    }, {
+        '$data.String': function (value) {
+            return value;
+        }
+    });
+
 
     //})(window);
 
@@ -1215,7 +1445,10 @@
             return this;
         },
         storeProperty: storeProperty,
-        retrieveProperty: retrieveProperty
+        retrieveProperty: retrieveProperty,
+        'from$data.Object': function (value) {
+            return value;
+        }
     });
 
 

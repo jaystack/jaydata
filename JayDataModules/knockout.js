@@ -1,5 +1,15 @@
 (function ($data) {
 
+    /*converters*/
+    Object.keys($data.Container.converters.to).forEach(function (typeName) {
+        $data.Container.registerConverter(typeName, '$data.Function', function (value) {
+            if (ko.isObservable(value))
+                return value;
+            else
+                Guard.raise(new Exception('Type Error', 'value is not koObservable', value));
+        });
+    });
+
     function ObservableFactory(originalType, observableClassNem) {
         var instanceDefinition = {
             constructor: function () {

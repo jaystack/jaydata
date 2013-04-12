@@ -41,8 +41,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                         sqlBuilder.addText(SqlStatementBlocks.beginGroup);
                         set.forEach(function (item, i) {
                             if (i > 0) sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
-                            var c = Container.createConstantExpression(item);
-                            self.Visit(c, sqlBuilder);
+                            self.Visit(item, sqlBuilder);
                         });
                         sqlBuilder.addText(SqlStatementBlocks.endGroup);
                     } else if (set instanceof $data.Queryable) {
@@ -123,8 +122,8 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
     },
 
     VisitConstantExpression: function (expression, sqlBuilder) {
-        var typeNameHintFromValue = Container.getTypeName(expression.value);
-        var value = sqlBuilder.entityContext.storageProvider.fieldConverter.toDb[Container.resolveName(Container.resolveType(typeNameHintFromValue))](expression.value);;
+        //var typeNameHintFromValue = Container.getTypeName(expression.value);
+        var value = sqlBuilder.entityContext.storageProvider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);;
         sqlBuilder.addParameter(value);
         sqlBuilder.addText(SqlStatementBlocks.parameter);
     },

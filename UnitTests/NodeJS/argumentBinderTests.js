@@ -190,7 +190,7 @@ exports.Test = {
         });
     },
     'guid binder': function (test) {
-        test.expect(3);
+        test.expect(4);
 
         var guid = $data.parseGuid('12345678-1234-1234-1234-123412341234');
         var result = $data.ArgumentBinder.defaultBinder('a', { type: $data.Guid }, { query: { a: "guid'12345678-1234-1234-1234-123412341234'" } });
@@ -199,7 +199,8 @@ exports.Test = {
         var context = $example.Context.getContext();
         context.onReady(function () {
             context.FuncGuidParam(guid, function (res) {
-                test.equal(res instanceof $data.Guid, true, 'Guid call resolve failed');
+                test.equal(typeof res, 'string', 'Guid call resolve failed');
+                test.equal($data.parseGuid(res) instanceof $data.Guid, true, 'Guid call resolve failed');
                 test.equal(res.valueOf(), guid.valueOf(), 'Guid resolve failed');
                 test.done();
             });

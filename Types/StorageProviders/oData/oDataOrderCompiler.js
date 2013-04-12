@@ -80,39 +80,23 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
         var paramCounter = 0;
         var params = opDef.method.params || [{ name: "@expression" }];
 
-        var exprParams = [];
-        var definedParams = expression.operation.memberDefinition.method.params;
-        if (expression.parameters && expression.parameters[0] &&
-            expression.parameters[0].value && typeof expression.parameters[0].value === 'object' && expression.parameters[0].value.constructor === $data.Object && definedParams && definedParams[0] &&
-            (Container.resolveType(definedParams[0].type) !== $data.Object || definedParams[0].name in expression.parameters[0].value)) {
-
-            if (expression.parameters[0] instanceof $data.Expressions.ObjectLiteralExpression) {
-                exprParams = expression.parameters[0].members.map(function (ofe) { return ofe.expression });
-                params = expression.parameters[0].members.map(function (ofe) { return { name: ofe.fieldName } });
-            } else if (expression.parameters[0] instanceof $data.Expressions.ConstantExpression) {
-                params.forEach(function (p) {
-                    exprParams.push(Container.createConstantExpression(expression.parameters[0].value[p.name], Container.resolveType(p.type), p.name));
-                });
-            }
-        } else {
-            exprParams = expression.parameters;
-        }
-
         var args = params.map(function (item, index) {
             if (item.name === "@expression") {
                 return expression.source;
             } else {
-                return exprParams[paramCounter++]
+                return expression.parameters[paramCounter++]
             };
         });
 
+        var i = 0;
         args.forEach(function (arg, index) {
             if (arg === undefined || (arg instanceof $data.Expressions.ConstantExpression && typeof arg.value === 'undefined'))
                 return;
 
-            if (index > 0) {
+            if (i > 0) {
                 context.data += ",";
             };
+            i++;
             context.data += params[index].name + '=';
             this.Visit(arg, context);
         }, this);

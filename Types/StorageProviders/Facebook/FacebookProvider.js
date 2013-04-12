@@ -79,8 +79,8 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
     fieldConverter: {
         value: {
             fromDb: {
-                '$data.Number': function (value) { return typeof value === "number" ? value : parseInt(value); },
-                '$data.Integer': function (value) { return typeof value === "number" ? value : parseFloat(value); },
+                '$data.Number': function (value) { return value; },
+                '$data.Integer': function (value) { return value; },
                 '$data.String': function (value) { return value; },
                 '$data.Date': function (value) { return new Date(typeof value === "string" ? parseInt(value) : value); },
                 '$data.Boolean': function (value) { return !!value },

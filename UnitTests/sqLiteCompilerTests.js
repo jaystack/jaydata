@@ -397,8 +397,8 @@
     "SELECT * FROM TestTable T0 WHERE (T0.i0 = ?) | [3]");
         });
         test("Expressions (int): MathConstant", 1, function () {
-            equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.i0 == this.Math.PI; }, { Math: Math }).toTraceString()),
-    "SELECT * FROM TestTable T0 WHERE (T0.i0 = ?) | [" + Math.PI + "]");
+            equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.n0 == this.Math.PI; }, { Math: Math }).toTraceString()),
+    "SELECT * FROM TestTable T0 WHERE (T0.n0 = ?) | [" + Math.PI + "]");
         });
         test("Expressions (int): VarModuloVar", 1, function () {
             var x = 14;
@@ -430,8 +430,8 @@
         });
 
         test("MethodCall: ChainCall", 1, function () {
-            equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.i0 == this.math.PI.toString().substr(0, 6); }, { math: Math }).toTraceString()),
-    "SELECT * FROM TestTable T0 WHERE (T0.i0 = ?) | [\"" + Math.PI.toString().substr(0, 6) + "\"]");
+            equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.s0 == this.math.PI.toString().substr(0, 6); }, { math: Math }).toTraceString()),
+    "SELECT * FROM TestTable T0 WHERE (T0.s0 = ?) | [\"" + Math.PI.toString().substr(0, 6) + "\"]");
         });
         test("MethodCall (global func): parseInt literal", 1, function () {
             equal(_resultToString($data.NewsReaderContext.TestTable.where(function (m) { return m.i0 == parseInt("12"); }, {}).toTraceString()),

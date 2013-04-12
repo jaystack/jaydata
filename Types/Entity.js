@@ -176,46 +176,10 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
             for (var i in initData) {
                 if (memDefNames.indexOf(i) > -1) {
-                    var type = Container.resolveType(typeMemDefs.getMember(i).type);
-                    if (!Object.isNullOrUndefined(initData[i])) {
-                        if (type === $data.Date && typeof initData[i] === 'string')
-                            this.initData[i] = new Date(initData[i]);
-                        else if (type === $data.GeographyPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeographyPoint))
-                            this.initData[i] = new $data.GeographyPoint(initData[i]);
-                        else if(type === $data.GeographyLineString && !(initData[i] instanceof $data.GeographyLineString))
-                            this.initData[i] = new $data.GeographyLineString(initData[i]);
-                        else if (type === $data.GeographyPolygon && !(initData[i] instanceof $data.GeographyPolygon))
-                            this.initData[i] = new $data.GeographyPolygon(initData[i]);
-                        else if (type === $data.GeographyMultiPoint && !(initData[i] instanceof $data.GeographyMultiPoint))
-                            this.initData[i] = new $data.GeographyMultiPoint(initData[i]);
-                        else if (type === $data.GeographyMultiLineString && !(initData[i] instanceof $data.GeographyMultiLineString))
-                            this.initData[i] = new $data.GeographyMultiLineString(initData[i]);
-                        else if (type === $data.GeographyMultiPolygon && !(initData[i] instanceof $data.GeographyMultiPolygon))
-                            this.initData[i] = new $data.GeographyMultiPolygon(initData[i]);
-                        else if (type === $data.GeographyCollection && !(initData[i] instanceof $data.GeographyCollection))
-                            this.initData[i] = new $data.GeographyCollection(initData[i]);
-                        else if (type === $data.GeometryPoint && typeof initData[i] === 'object' && !(initData[i] instanceof $data.GeometryPoint))
-                            this.initData[i] = new $data.GeometryPoint(initData[i]);
-                        else if (type === $data.GeometryLineString && !(initData[i] instanceof $data.GeometryLineString))
-                            this.initData[i] = new $data.GeometryLineString(initData[i]);
-                        else if (type === $data.GeometryPolygon && !(initData[i] instanceof $data.GeometryPolygon))
-                            this.initData[i] = new $data.GeometryPolygon(initData[i]);
-                        else if (type === $data.GeometryMultiPoint && !(initData[i] instanceof $data.GeometryMultiPoint))
-                            this.initData[i] = new $data.GeometryMultiPoint(initData[i]);
-                        else if (type === $data.GeometryMultiLineString && !(initData[i] instanceof $data.GeometryMultiLineString))
-                            this.initData[i] = new $data.GeometryMultiLineString(initData[i]);
-                        else if (type === $data.GeometryMultiPolygon && !(initData[i] instanceof $data.GeometryMultiPolygon))
-                            this.initData[i] = new $data.GeometryMultiPolygon(initData[i]);
-                        else if (type === $data.GeometryCollection && !(initData[i] instanceof $data.GeometryCollection))
-                            this.initData[i] = new $data.GeometryCollection(initData[i]);
-                        else if (type === $data.Guid && !(initData[i] instanceof $data.Guid))
-                            this.initData[i] = initData[i] ? $data.parseGuid(initData[i]) : undefined;
-                        else {
-                            this.initData[i] = initData[i];
-                        }
-                    } else {
-                        this.initData[i] = initData[i];
-                    }
+                    var memberDef = typeMemDefs.getMember(i);
+                    var type = Container.resolveType(memberDef.type);
+
+                    this.initData[i] = Container.convertTo(initData[i], type, memberDef.elementType);
                 }
             }
 
@@ -300,7 +264,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="memberDefinition" type="MemberDefinition" />
         /// <param name="value" />
 
-        value = this.typeConversion(memberDefinition, value);
+        value = Container.convertTo(value, memberDefinition.type, memberDefinition.elementType);
         var eventData = null;
         if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
             var origValue = this[memberDefinition.name];
@@ -337,13 +301,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         if (memberDefinition.monitorChanges != false && this.entityState == $data.EntityState.Unchanged)
             this.entityState = $data.EntityState.Modified;
 
-        if (memberDefinition.monitorChanges != false) {
-            if (!this.changedProperties) {
-                this.changedProperties = [];
-            }
+        this._setPropertyChanged(memberDefinition);
 
-            if (!this.changedProperties.some(function (memDef) { return memDef.name == memberDefinition.name }))
-                this.changedProperties.push(memberDefinition);
+        if (memberDefinition.monitorChanges != false) {
+            //if (!this.changedProperties) {
+            //    this.changedProperties = [];
+            //}
+
+            //if (!this.changedProperties.some(function (memDef) { return memDef.name == memberDefinition.name }))
+            //    this.changedProperties.push(memberDefinition);
 
             if (this._propertyChanged)
                 this.propertyChanged.fire(eventData);
@@ -354,60 +320,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             }
         }
     },
-    typeConversion: function (memberDefinition, value) {
-        var convertedValue = value;
-        
-        if (typeof value === 'string' && !memberDefinition.concurrencyMode) {
-            switch (Container.resolveName(memberDefinition.type)) {
-                case '$data.Guid':
-                    if (value === '') return undefined;
-                    convertedValue = $data.parseGuid(value);
-                    break;
-                case '$data.Integer':
-                    if (value === '') return undefined;
-                    convertedValue = parseInt(value);
-                    if (isNaN(convertedValue))
-                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', [memberDefinition, value]));
-                    break;
-                case '$data.Number':
-                    if (value === '') return undefined;
-                    convertedValue = parseFloat(value);
-                    if (isNaN(convertedValue))
-                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', [memberDefinition, value]));
-                    break;
-                case '$data.Date':
-                    if (value === '') return undefined;
-                    convertedValue = new Date(value);
-                    if (isNaN(convertedValue.valueOf()))
-                        throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', [memberDefinition, value]));
-                    break;
-                case '$data.Boolean':
-                    if (value === '') return undefined;
-                    switch (value.toLowerCase()) {
-                        case 'true': 
-                            convertedValue = true;
-                            break;
-                        case 'false': 
-                            convertedValue = false;
-                            break;
-                        default:
-                            throw Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Boolean', [memberDefinition, value]));
-                    }
-                    break;
-                case '$data.Object':
-                    if (value === '') return undefined;
-                    try {
-                        convertedValue = JSON.parse(value);
-                    } catch (e) {
-                        throw Guard.raise(new Exception('TypeError: ', e.toString(), [memberDefinition, value]));
-                    }
-                    break;
-                default:
-                    break;
+    _setPropertyChanged: function (memberDefinition) {
+        if (memberDefinition.monitorChanges != false) {
+            if (!this.changedProperties) {
+                this.changedProperties = [];
             }
-        }
 
-        return convertedValue;
+            if (!this.changedProperties.some(function (memDef) { return memDef.name == memberDefinition.name }))
+                this.changedProperties.push(memberDefinition);
+        }
     },
 
     // protected
@@ -627,6 +548,14 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
 
     getFieldNames: function () {
         return this.memberDefinitions.getPublicMappedPropertyNames();
+    },
+
+    'from$data.Object': function (value) {
+        if (!Object.isNullOrUndefined(value)) {
+            return new this(value);
+        } else {
+            return value;
+        }
     }
 
 });

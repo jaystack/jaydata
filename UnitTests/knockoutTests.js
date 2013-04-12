@@ -8,6 +8,7 @@ $(document).ready(function () {
 });
 
 function knockoutTests(providerConfig) {
+    //return;
     module("knockout Tests");
 
     test("knockout observable entity", 11, function () {
@@ -130,21 +131,21 @@ function knockoutTests(providerConfig) {
         var article = new $news.Types.Article();
         var koArticle = article.asKoObservable();
         equal(article.Tags, koArticle.Tags(), 'array property equal failed');
-        article.Tags = [new $news.Types.Tag({ Id: 1, Title: 'hello' })];
+        article.Tags = [new $news.Types.TagConnection({ Id: 1 })];
         deepEqual(article.Tags, koArticle.Tags(), 'array property change equal failed');
         equal(article.Tags[0].Id, koArticle.Tags()[0].Id, 'array property element ko change equal failed');
         equal(article.Tags[0].Id, 1, 'array property element ko change equal failed');
-        koArticle.Tags([new $news.Types.Tag({ Id: 2, Title: 'hello2' })]);
+        koArticle.Tags([new $news.Types.TagConnection({ Id: 2, Title: 'hello2' })]);
         deepEqual(article.Tags, koArticle.Tags(), 'array property ko change equal failed');
         equal(article.Tags[0].Id, koArticle.Tags()[0].Id, 'array property element ko change equal failed');
         equal(article.Tags[0].Id, 2, 'array property element ko change equal failed');
 
-        article.Tags.push(new $news.Types.Tag({ Id: 3, Title: 'hello3' }));
+        article.Tags.push(new $news.Types.TagConnection({ Id: 3, Title: 'hello3' }));
         deepEqual(article.Tags, koArticle.Tags(), 'array property push equal failed');
         equal(article.Tags.length, koArticle.Tags().length, 'array property length equal failed');
 
         equal(koArticle.Tags.push, undefined, "Array property is koObservalble instead of koObservableArray!")
-        koArticle.Tags().push(new $news.Types.Tag({ Id: 4, Title: 'hello4' }));
+        koArticle.Tags().push(new $news.Types.TagConnection({ Id: 4, Title: 'hello4' }));
         deepEqual(article.Tags, koArticle.Tags(), 'array property push equal failed');
         equal(article.Tags.length, koArticle.Tags().length, 'array property length equal failed');
     });
@@ -153,10 +154,10 @@ function knockoutTests(providerConfig) {
         var article = new $news.Types.Article();
         var koArticle = article.asKoObservable();
         equal(article.Author, koArticle.Author(), 'type property equal failed');
-        article.Author = new $news.Types.Tag({ Id: 1, Title: 'hello' });
+        article.Author = new $news.Types.User({ Id: 1, Title: 'hello' });
         deepEqual(article.Author, koArticle.Author(), 'type property change equal failed');
         equal(article.Author.Id, koArticle.Author().Id, 'type property value ko change equal failed');
-        koArticle.Author(new $news.Types.Tag({ Id: 2, Title: 'hello2' }));
+        koArticle.Author(new $news.Types.User({ Id: 2, Title: 'hello2' }));
         deepEqual(article.Author, koArticle.Author(), 'type property ko change equal failed');
         equal(article.Author.Id, koArticle.Author().Id, 'type property value ko change equal failed');
 

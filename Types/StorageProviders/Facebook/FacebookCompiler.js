@@ -141,7 +141,17 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
                 Guard.raise(new Exception(expression.right.type + " not allowed in '" + expression.resolution.mapTo + "' statement", "invalid operation"));
             }
 
-        var right = this.Visit(expression.right, context);
+        if (expression.resolution.name === 'in' && expression.right.value instanceof Array) {
+            var self = this;
+            context.sql += "(";
+            expression.right.value.forEach(function (item, i) {
+                if (i > 0) context.sql += ", ";
+                self.Visit(item, context);
+            });
+            context.sql += ")";
+        } else {
+            var right = this.Visit(expression.right, context);
+        }
         context.sql += ")";
     },
 
@@ -170,16 +180,16 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
     },
 
     VisitQueryParameterExpression: function (expression, context) {
-        var expressionValueType = Container.resolveType(Container.getTypeName(expression.value));
-        if (this.provider.supportedDataTypes.indexOf(expressionValueType) != -1)
-            context.sql += this.provider.fieldConverter.toDb[Container.resolveName(expressionValueType)](expression.value);
-        else {
-            switch (expressionValueType) {
-                case $data.Queryable:
-                    context.sql += '(' + expression.value.toTraceString().queryText + ')';
-                    break;
-                default:
-                    context.sql += "" + expression.value + ""; break;
+        if (expression.value instanceof $data.storageProviders.Facebook.EntitySets.Command) {
+            context.sql += "" + expression.value + "";
+        } else if (expression.value instanceof $data.Queryable) {
+            context.sql += '(' + expression.value.toTraceString().queryText + ')';
+        } else {
+            var expressionValueType = Container.resolveType(expression.type);
+            if (this.provider.supportedDataTypes.indexOf(expressionValueType) != -1)
+                context.sql += this.provider.fieldConverter.toDb[Container.resolveName(expressionValueType)](expression.value);
+            else {
+              context.sql += "" + expression.value + "";
             }
         }
     },
@@ -262,7 +272,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
                     context.fieldOperation = undefined;
 
             } else
-                Guard.raise(new Exception(parameter.type + " not allowed in '" + expression.operation.memberName + "' statement", "invalid operation"));
+                Guard.raise(new Exception(arg.dataType + " not allowed in '" + expression.operation.memberName + "' statement", "invalid operation"));
         }, this);
 
         if (context.fieldData && context.fieldData.name)

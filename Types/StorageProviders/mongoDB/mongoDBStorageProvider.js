@@ -598,7 +598,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
     },
 
     VisitConstantExpression: function (expression, context) {
-        var valueType = Container.getTypeName(expression.value);
+        var valueType = Container.resolveName(expression.type);
         context.valueType = valueType;
         context.value = expression.value; //this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
     },
@@ -1479,7 +1479,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.GeometryMultiLineString': function (g) { if (g) { return new $data.GeometryMultiLineString(g); } return g; },
                 '$data.GeometryMultiPolygon': function (g) { if (g) { return new $data.GeometryMultiPolygon(g); } return g; },
                 '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(g); } return g; },
-                "$data.Guid": function (g) { return g ? $data.parseGuid(g) : g; }
+                "$data.Guid": function (g) { return g ? $data.parseGuid(g).toString() : g; }
             },
             toDb: {
                 '$data.Integer': function (number) { return number; },
@@ -1521,7 +1521,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 '$data.GeometryMultiLineString': function (g) { return g; },
                 '$data.GeometryMultiPolygon': function (g) { return g; },
                 '$data.GeometryCollection': function (g) { return g; },
-                "$data.Guid": function (g) { return g ? g.value : g; }
+                "$data.Guid": function (g) { return g ? g.toString() : g; }
             }
         }
     }

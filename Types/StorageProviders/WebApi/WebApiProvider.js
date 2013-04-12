@@ -101,7 +101,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             dbInstance.entityState = logicalEntity.entityState;
 
             storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (property) {
-                dbInstance[property.name] = logicalEntity[property.name];
+                dbInstance.initData[property.name] = logicalEntity[property.name];
             }, this);
 
             if (storageModel.Associations) {
@@ -112,22 +112,22 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                         var refValue = logicalEntity[association.FromPropertyName];
                         if (refValue !== null && refValue !== undefined) {
                             if (refValue instanceof $data.Array) {
-                                dbInstance[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
+                                dbInstance.initData[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
                                 refValue.forEach(function (rv) {
                                     var contentId = convertedItems.indexOf(rv);
                                     if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                    dbInstance[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
+                                    dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
                                 }, this);
                             } else {
                                 if (refValue.entityState === $data.EntityState.Modified) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
                                     var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
-                                    dbInstance[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
+                                    dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
                                     var contentId = convertedItems.indexOf(refValue);
                                     if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                    dbInstance[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
+                                    dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
                                 }
                             }
                         }
@@ -136,7 +136,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             }
             if (storageModel.ComplexTypes) {
                 storageModel.ComplexTypes.forEach(function (cmpType) {
-                    dbInstance[cmpType.FromPropertyName] = logicalEntity[cmpType.FromPropertyName];
+                    dbInstance.initData[cmpType.FromPropertyName] = logicalEntity[cmpType.FromPropertyName];
                 }, this);
             }
             return dbInstance;
@@ -678,7 +678,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                     }
                     return geo;
                 },
-                '$data.Guid': function (guid) { return guid ? new $data.Guid(guid) : guid; }
+                '$data.Guid': function (guid) { return guid ? guid.toString() : guid; }
             },
             toDb: {
                 '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
@@ -696,7 +696,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                         return "geography'POINT(" + geo.longitude + ' ' + geo.latitude + ")'";
                     return geo;
                 },
-                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.value + "'") : guid; }
+                '$data.Guid': function (guid) { return guid ? ("guid'" + guid.toString() + "'") : guid; }
             }
         }
     },
@@ -930,8 +930,8 @@ $C('$data.storageProviders.webApi.webApiCompiler', $data.Expressions.EntityExpre
         if (expression.value instanceof $data.Entity) {
             value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
         } else {
-            var valueType = Container.getTypeName(expression.value);
-            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+            //var valueType = Container.getTypeName(expression.value);
+            value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
         }
         context['$urlParams'] += expression.name + '=' + value;
     },
@@ -987,7 +987,7 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };
 
             paramValue.forEach(function (item) {
-                var idValue = Container.createConstantExpression(item);
+                var idValue = item;
                 var idCheck = Container.createSimpleBinaryExpression(expression.left, idValue,
                     $data.Expressions.ExpressionType.Equal, "==", "boolean", eqResolution);
                 if (result) {
@@ -1061,8 +1061,8 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
     },
 
     VisitConstantExpression: function (expression, context) {
-        var valueType = Container.getTypeName(expression.value);
-        context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(valueType))](expression.value);
+        //var valueType = Container.getTypeName(expression.value);
+        context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
     },
 
     VisitEntityExpression: function (expression, context) {

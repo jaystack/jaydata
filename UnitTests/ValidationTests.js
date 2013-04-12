@@ -268,7 +268,7 @@
         equal(efc.prop3, 5.5, 'number');
 
         efc.prop4 = $data.parseGuid('aaaabbbb-1111-2222-3333-ccccddddeeee');
-        equal(efc.prop4.value, 'aaaabbbb-1111-2222-3333-ccccddddeeee', 'guid');
+        equal(efc.prop4, 'aaaabbbb-1111-2222-3333-ccccddddeeee', 'guid');
 
         efc.prop5 = true;
         equal(efc.prop5, true, 'bool');
@@ -294,7 +294,7 @@
         equal(efc.prop3, 5.5, 'number');
 
         efc.prop4 = 'aaaabbbb-1111-2222-3333-ccccddddeeee';
-        equal(efc.prop4.value, 'aaaabbbb-1111-2222-3333-ccccddddeeee', 'guid');
+        equal(efc.prop4, 'aaaabbbb-1111-2222-3333-ccccddddeeee', 'guid');
 
         efc.prop5 = 'true';
         equal(efc.prop5, true, 'bool');
