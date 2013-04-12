@@ -1178,16 +1178,16 @@
     }
     $data.ContainerClass = ContainerCtor;
 
-    $data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
+    /*$data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
     $data.Integer = typeof Integer !== 'undefined' ? Integer : function JayInteger() { };
     $data.Date = typeof Date !== 'undefined' ? Date : function JayDate() { };
     $data.String = typeof String !== 'undefined' ? String : function JayString() { };
     $data.Boolean = typeof Boolean !== 'undefined' ? Boolean : function JayBoolean() { };
-    $data.Blob = /*typeof Blob !== 'undefined' ? Blob :*/ function JayBlob() { };
+    //$data.Blob = typeof Blob !== 'undefined' ? Blob : function JayBlob() { };
     $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
     $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
     $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID() { };
-    $data.Function = Function;
+    $data.Function = Function;*/
 
     var c;
         
@@ -1197,7 +1197,7 @@
         return new ContainerCtor($data.Container);
     }
 
-    c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
+    /*c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
     c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64", "JayInteger"], $data.Integer);
     c.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
     c.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
@@ -1351,7 +1351,7 @@
         '$data.String': function (value) {
             return value;
         }
-    });
+    });*/
 
 
     //})(window);

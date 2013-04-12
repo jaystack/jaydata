@@ -25,15 +25,20 @@ TYPE_SYSTEM_NPM = TypeSystem/initializeJayData.js
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/utils.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
+	$(TYPESYSTEM_DIR)/Exception.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
+	$(TYPESYSTEM_DIR)/Types/Types.js\
 	$(TYPESYSTEM_DIR)/Trace/Trace.js\
 	$(TYPESYSTEM_DIR)/Trace/Logger.js\
+	$(TYPESYSTEM_DIR)/Types/Types.js\
 	$(TYPESYSTEM_DIR)/Types/SimpleBase.js\
 	$(TYPESYSTEM_DIR)/Types/Geospatial.js\
 	$(TYPESYSTEM_DIR)/Types/Geography.js\
 	$(TYPESYSTEM_DIR)/Types/Geometry.js\
 	$(TYPESYSTEM_DIR)/Types/Guid.js\
+	$(TYPESYSTEM_DIR)/Types/Blob.js\
 	$(TYPESYSTEM_DIR)/Types/EdmTypes.js\
+	$(TYPESYSTEM_DIR)/Types/Converter.js\
 	$(TYPESYSTEM_DIR)/Extensions.js\
 
 VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
@@ -113,7 +118,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ExpressionNode2.js\
 	$(TYPES_DIR)/EntityState.js\
 	$(TYPES_DIR)/EntityStateManager.js\
 	$(TYPES_DIR)/ItemStore.js\
-	$(TYPES_DIR)/Exception.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\
 	$(TYPES_DIR)/StorageProviderBase.js\
 	$(TYPES_DIR)/ServiceOperation.js\
