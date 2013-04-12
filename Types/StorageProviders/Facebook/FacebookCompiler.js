@@ -71,7 +71,7 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
             if (i != 0) selectStr += ', ';
             selectStr += memDef.name + ': s.' + memDef.name;
         });
-        selectStr += '};';
+        selectStr += '}; }';
 
         //var projectionFunc = null;
         //eval(selectStr);

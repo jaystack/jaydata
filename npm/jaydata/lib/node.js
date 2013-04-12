@@ -1,6 +1,14 @@
 $data = {};
 
 try{
+    $data.Acorn = require('acorn');
+}catch(e){
+    try{
+        $data.Esprima = require('esprima');
+    }catch(e){}
+}
+
+try{
     $data.mongoDBDriver = require('mongodb');
 }catch(e){}
 

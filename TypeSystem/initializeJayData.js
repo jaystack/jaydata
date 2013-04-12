@@ -20,6 +20,8 @@ if (!console.error) console.error = function () { };
     $data.version = "JayData 1.2.0";
     $data.versionNumber = "1.2.0";
     $data.root = {};
+    $data.Acorn = $data.Acorn || (typeof acorn == 'object' ? acorn : undefined);
+    $data.Esprima = $data.Esprima || (typeof esprima == 'object' ? esprima : undefined);
 
 })($data);
 

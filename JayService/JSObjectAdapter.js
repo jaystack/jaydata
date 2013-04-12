@@ -44,6 +44,99 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         this.urlHelper = url;
         this.promiseHelper = q;
     },
+    
+    processRequest: function(req, res, next, serviceInstance, self){
+        var _v, member;
+        var memberName = self.resolveMemberName(req, serviceInstance);
+        if (memberName) {
+            member = self.resolveMember(req, memberName);
+            var oDataBuilderCfg;
+            if (member) {
+
+                var memberInfo = self.createMemberContext(member, serviceInstance);
+                var methodArgs = self.resolveArguments(req, serviceInstance, memberInfo);
+
+                if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
+	                //this will be something much more dynamic
+                    _v = memberInfo.invoke(methodArgs, req, res);
+
+	                oDataBuilderCfg = {
+	                    version: 'V2',
+	                    baseUrl: req.fullRoute,
+	                    context: self.type,
+	                    methodConfig: member,
+	                    methodName: memberName,
+	                    request: req,
+	                    response: res
+	                };
+	            }else{
+	                throw 'Invoke Error: Illegal method.';
+	            }
+            } else {
+                if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
+                member = self.resolveEntitySet(req, memberName, serviceInstance);
+                if (member) {
+                    var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
+
+                    oDataBuilderCfg = {
+	                    version: 'V2',
+	                    baseUrl: req.fullRoute,
+	                    request: req,
+	                    response: res
+	                };
+
+                    if (esProc.isSupported(req)) {
+                        _v = esProc.invoke(oDataBuilderCfg, req, res);
+                    } else {
+                        //405
+                        _v = self.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
+                    }
+                } else {
+                    //404
+                    _v = self.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
+                }
+            }
+        } else {
+            _v = self.promiseHelper.fcall(function () {
+                if (req.method === 'GET') {
+                    var serviceDef = new $data.oDataServer.ServiceDefinitionXml();
+                    return new $data.XmlResult(serviceDef.convertToResponse(serviceInstance, req.fullRoute));
+                } else {
+                    return new $data.EmptyServiceResult(405);
+                }
+            });
+        }
+
+        self.promiseHelper.when(_v)
+        .then(function (value) {
+            if (res._header || res._headerSent) return;
+            
+            if (!(value instanceof $data.ServiceResult)) {
+                if (member.hasOwnProperty('resultType')){
+                    if (typeof member.resultType === 'string') member.resultType = Container.resolveType(member.resultType);
+                    value = new member.resultType(value, member.resultCfg || oDataBuilderCfg);
+                } else {
+                    value = new $data.oDataResult(value, oDataBuilderCfg);
+                }
+            }
+            
+            res.statusCode = value.statusCode !== 200 ? value.statusCode : res.statusCode;
+            var resultText;
+            if (!(value instanceof $data.EmptyServiceResult) && (resultText = value.toString())) {
+                res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
+                res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=UTF-8');
+                res.end(resultText);
+            } else {
+                res.setHeader('Content-Length', 0);
+                res.end();
+            }
+        }).fail(function (err) {
+            if (err === 'Authorization failed') {
+                res.statusCode = 401;
+            }
+            next(err);
+        });
+    },
 
     handleRequest: function (req, res, next) {
         ///	<signature>
@@ -54,100 +147,27 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
         var self = this;
 
         var serviceInstance = this.instanceFactory(req, res);
-        serviceInstance.onReady(function(){
-            var _v, member;
-            var memberName = self.resolveMemberName(req, serviceInstance);
-            if (memberName) {
-                member = self.resolveMember(req, memberName);
-                var oDataBuilderCfg;
-                if (member) {
-
-                    var memberInfo = self.createMemberContext(member, serviceInstance);
-                    var methodArgs = self.resolveArguments(req, serviceInstance, memberInfo);
-
-                    if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
-		                //this will be something much more dynamic
-                        _v = memberInfo.invoke(methodArgs, req, res);
-
-		                oDataBuilderCfg = {
-		                    version: 'V2',
-		                    baseUrl: req.fullRoute,
-		                    context: self.type,
-		                    methodConfig: member,
-		                    methodName: memberName,
-		                    request: req,
-		                    response: res
-		                };
-		            }else{
-		                throw 'Invoke Error: Illegal method.';
-		            }
-                } else {
-                    if (memberName.indexOf('(') >= 0) memberName = memberName.split('(')[0];
-                    member = self.resolveEntitySet(req, memberName, serviceInstance);
-                    if (member) {
-                        var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
-
-                        oDataBuilderCfg = {
-		                    version: 'V2',
-		                    baseUrl: req.fullRoute,
-		                    request: req,
-		                    response: res
-		                };
-
-                        if (esProc.isSupported(req)) {
-                            _v = esProc.invoke(oDataBuilderCfg, req, res);
-                        } else {
-                            //405
-                            _v = self.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
-                        }
-                    } else {
-                        //404
-                        _v = self.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
-                    }
-                }
-            } else {
-                _v = self.promiseHelper.fcall(function () {
-                    if (req.method === 'GET') {
-                        var serviceDef = new $data.oDataServer.ServiceDefinitionXml();
-                        return new $data.XmlResult(serviceDef.convertToResponse(serviceInstance, req.fullRoute));
-                    } else {
-                        return new $data.EmptyServiceResult(405);
-                    }
-                });
-            }
-
-            self.promiseHelper.when(_v)
-            .then(function (value) {
-                if (res._header || res._headerSent) return;
-                
-                if (!(value instanceof $data.ServiceResult)) {
-                    if (member.hasOwnProperty('resultType')){
-                        if (typeof member.resultType === 'string') member.resultType = Container.resolveType(member.resultType);
-                        value = new member.resultType(value, member.resultCfg || oDataBuilderCfg);
-                    } else {
-                        value = new $data.oDataResult(value, oDataBuilderCfg);
-                    }
-                }
-                
-                res.statusCode = value.statusCode !== 200 ? value.statusCode : res.statusCode;
-                var resultText;
-                if (!(value instanceof $data.EmptyServiceResult) && (resultText = value.toString())) {
-                    res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
-                    res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=UTF-8');
-                    res.end(resultText);
-                } else {
-                    res.setHeader('Content-Length', 0);
-                    res.end();
-                }
-            }).fail(function (err) {
-                if (err === 'Authorization failed') {
-                    res.statusCode = 401;
-                }
+        if (serviceInstance && serviceInstance.onReady === 'function'){
+            serviceInstance.onReady(function(){
+                self.processRequest(req, res, next, serviceInstance, self);
+            }).fail(function(err){
                 next(err);
             });
-        }).fail(function(err){
-            next(err);
-        });
+        }else{
+            if (serviceInstance && self.promiseHelper.isPromise(serviceInstance.onReady)){
+                self.promiseHelper.when(serviceInstance.onReady).then(function(){
+                    self.processRequest(req, res, next, serviceInstance, self);
+                }).fail(function(err){
+                    next(err);
+                });
+            }else{
+                try{
+                    self.processRequest(req, res, next, serviceInstance, self);
+                }catch(err){
+                    next(err);
+                }
+            }
+        }
     },
 
     resolveMemberName: function (request, serviceInstance) {

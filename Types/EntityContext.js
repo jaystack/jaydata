@@ -13,7 +13,8 @@ $data.Class.define('$data.StorageModel', null, null, {
     TableOptions: { value: undefined },
     ComplexTypes: {},
     Associations: {},
-    ContextType: {}
+    ContextType: {},
+    Roles: {}
 }, null);
 $data.Class.define('$data.Association', null, null, {
     constructor: function (initParam) {
@@ -227,7 +228,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         for (var i = 0, l = this._storageModel.length; i < l; i++){
             var storageModel = this._storageModel[i];
-            this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers);
+            this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers, storageModel.Roles);
             var sm = this[storageModel.ItemName];
             sm.name = storageModel.ItemName;
             sm.tableName = storageModel.TableName;
@@ -259,6 +260,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     storageModel.LogicalTypeName = elementType.name;
                     storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
                     storageModel.ContextType = this.getType();
+                    storageModel.Roles = item.roles;
 		    if (item.indices) {
                         storageModel.indices = item.indices;
                     }
@@ -1079,7 +1081,7 @@ $data.Class.define('$data.EntityContext', null, null,
         for (var i = 0; i < changedEntities.length; i++) {
             var it = changedEntities[i];
             var n = it.entitySet.elementType.name;
-            sets.push(it.entitySet.name);
+            if (sets.indexOf(it.entitySet) < 0) sets.push(it.entitySet);
             var es = this._entitySetReferences[n];
             if (es.beforeCreate || es.beforeUpdate || es.beforeDelete || (this.user && this.checkPermission)) {
                 if (!eventData[n]) eventData[n] = {};
