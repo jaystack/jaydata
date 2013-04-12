@@ -158,6 +158,10 @@ namespace JayData.NewsReader
         public virtual User User { get; set; }
         public Guid? g0 { get; set; }
 
+        public long? l0 { get; set; }
+        public decimal de0 { get; set; }
+
+
     }
     [Table("TestTable2")]
     public class TestItemGuid

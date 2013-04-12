@@ -9,7 +9,6 @@ $data.Function = Function;
 $data.Byte = function JayByte() { };
 $data.SByte = function JaySByte() { };
 $data.Decimal = function JayDecimal() { };
-$data.Double = function JayDouble() { };
 $data.Float = $data.Single = function JayFloat() { };
 $data.Integer = function JayInteger() { };
 $data.Int16 = function JayInt16() { };
@@ -17,16 +16,15 @@ $data.Int32 = function JayInt32() { };
 $data.Int64 = function JayInt64() { };
 $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID() { };
 
-$data.Container.registerType(["$data.Number", "number", "JayNumber"], $data.Number);
+$data.Container.registerType(["$data.Number", "number", "JayNumber", "double"], $data.Number);
 $data.Container.registerType(["$data.Integer", "int", "integer", "JayInteger"], $data.Integer);
 $data.Container.registerType(["$data.Byte", "byte", "JayByte"], $data.Byte);
 $data.Container.registerType(["$data.SByte", "sbyte", "JaySByte"], $data.Byte);
 $data.Container.registerType(["$data.Decimal", "decimal", "JayDecimal"], $data.Decimal);
-$data.Container.registerType(["$data.Double", "double", "JayDouble"], $data.Double);
 $data.Container.registerType(["$data.Float", "$data.Single", "float", "single", "JayFloat"], $data.Float);
 $data.Container.registerType(["$data.Int16", "int16", "word", "JayInt16"], $data.Int16);
-$data.Container.registerType(["$data.Int32", "int32", "JayInt16"], $data.Int32);
-$data.Container.registerType(["$data.Int64", "int64", "long", "JayInt16"], $data.Int64);
+$data.Container.registerType(["$data.Int32", "int32", "JayInt32"], $data.Int32);
+$data.Container.registerType(["$data.Int64", "int64", "long", "JayInt64"], $data.Int64);
 $data.Container.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
 $data.Container.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
     return $data.Array.apply(undefined, arguments);

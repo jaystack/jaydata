@@ -178,8 +178,15 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                 if (memDefNames.indexOf(i) > -1) {
                     var memberDef = typeMemDefs.getMember(i);
                     var type = Container.resolveType(memberDef.type);
+                    var value = initData[i];
 
-                    this.initData[i] = Container.convertTo(initData[i], type, memberDef.elementType);
+                    if (newInstanceOptions && newInstanceOptions.converters) {
+                        var converter = newInstanceOptions.converters[Container.resolveName(type)];
+                        if (converter)
+                            value = converter(value);
+                    }
+
+                    this.initData[i] = Container.convertTo(value, type, memberDef.elementType, newInstanceOptions);
                 }
             }
 
@@ -550,9 +557,16 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         return this.memberDefinitions.getPublicMappedPropertyNames();
     },
 
-    'from$data.Object': function (value) {
+    'from$data.Object': function (value, type, t, options) {
         if (!Object.isNullOrUndefined(value)) {
-            return new this(value);
+            var newInstanceOptions;
+            if (options && options.converters) {
+                newInstanceOptions = {
+                    converters: options.converters
+                }
+            }
+
+            return new this(value, newInstanceOptions);
         } else {
             return value;
         }

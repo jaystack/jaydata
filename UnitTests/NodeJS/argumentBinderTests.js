@@ -205,25 +205,22 @@ exports.Test = {
                 test.done();
             });
         });
+    },
+    'entity binder': function (test) {
+        test.expect(2);
+
+        var person = new $example.Person({ Id: 'aa', Name: 'test', Description: 'desc', Age: 42 });
+        var result = $data.ArgumentBinder.defaultBinder('a', { type: $example.Person }, { query: { a: "{\"Id\":\"aa\",\"Name\":\"test\",\"Description\":\"desc\",\"Age\":42}" } });
+        test.deepEqual(result.initData, person.initData, 'person resolve failed');
+
+        var context = $example.Context.getContext();
+        context.onReady(function () {
+            context.FuncEntityParam(person, function (res) {
+                test.deepEqual(res.initData, person.initData, 'person resolve failed1');
+                test.done();
+            });
+        });
     }
-    //'entity binder': function (test) {
-    //    test.expect(2);
-
-    //    var result = $data.ArgumentBinder.defaultBinder('a', { type: $data.Date }, { query: { a: '/Date(1345672800000)/' } });
-    //    test.equal(result.valueOf(), new Date('2012-08-23 00:00').valueOf(), 'date resolve failed1');
-
-    //    result = $data.ArgumentBinder.defaultBinder('a', { type: $data.Date }, { query: { a: "datetime'2012-08-22T22:00:00.000Z'" } });
-    //    test.equal(result.valueOf(), new Date('2012-08-23 00:00').valueOf(), 'date resolve failed2');
-
-    //    var context = $example.Context.getContext();
-    //    context.onReady(function () {
-    //        context.FuncDateParam(new Date("2012/08/23"), function (res) {
-    //            //test.equal(res.valueOf(), new Date("2012/08/23").valueOf(), 'date call resolve failed');
-
-    //            test.done();
-    //        });
-    //    });
-    //},
     //'entity array binder': function (test) {
     //    test.expect(2);
 

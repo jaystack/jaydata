@@ -95,24 +95,6 @@ $data.Container.registerConverter('$data.Decimal', {
     }
 });
 
-$data.Container.registerConverter('$data.Double', {
-    '$data.Boolean': function(value){
-        return value ? '1' : '0';
-    },
-    '$data.Number': function(value){
-        return value.toString();
-    },
-    '$data.String': function(value){
-        if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        return value;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        return r.toString();
-    }
-});
-
 $data.Container.registerConverter('$data.Float', {
     '$data.Boolean': function(value){
         return value ? 1 : 0;

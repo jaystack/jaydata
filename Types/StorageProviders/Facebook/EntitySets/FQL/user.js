@@ -1,6 +1,6 @@
 
 $data.Class.define("$data.Facebook.types.FbUser", $data.Entity, null, {
-    uid: { type: "int", key: true, isPublic: true, searchable: true },
+    uid: { type: "number", key: true, isPublic: true, searchable: true },
     username: { type: "string", isPublic: true, searchable: true },
     first_name: { type: "string", isPublic: true },
     middle_name: { type: "string", isPublic: true },
@@ -12,7 +12,7 @@ $data.Class.define("$data.Facebook.types.FbUser", $data.Entity, null, {
     pic: { type: "string" },
     affiliations: { type: "Array", elementType: "Object" },
     profile_update_time: { type: "datetime" },
-    timezone: { type: "int" },
+    timezone: { type: "number" },
     religion: { type: "string" },
     birthday: { type: "string" },
     birthday_date: { type: "string" },
@@ -21,7 +21,7 @@ $data.Class.define("$data.Facebook.types.FbUser", $data.Entity, null, {
     meeting_sex: { type: "Array", elementType: "Object" },
     meeting_for: { type: "Array", elementType: "Object" },
     relationship_status: { type: "string" },
-    significant_other_id: { type: "int" /*uid*/ },
+    significant_other_id: { type: "number" /*uid*/ },
     political: { type: "string" },
     current_location: { type: "Array", elementType: "Object" },
     activities: { type: "string" },
@@ -36,8 +36,8 @@ $data.Class.define("$data.Facebook.types.FbUser", $data.Entity, null, {
     hs_info: { type: "Array", elementType: "Object" },
     education_history: { type: "Array", elementType: "Object" },
     work_history: { type: "Array", elementType: "Object" },
-    notes_count: { type: "int" },
-    wall_count: { type: "int" },
+    notes_count: { type: "number" },
+    wall_count: { type: "number" },
     status: { type: "string" },
     has_added_app: { type: "bool" },
     online_presence: { type: "string" },
@@ -68,8 +68,8 @@ $data.Class.define("$data.Facebook.types.FbUser", $data.Entity, null, {
     favorite_teams: { type: "Array", elementType: "Object" },
     inspirational_people: { type: "Array", elementType: "Object" },
     languages: { type: "Array", elementType: "Object" },
-    likes_count: { type: "int" },
-    friend_count: { type: "int" },
-    mutual_friend_count: { type: "int" },
+    likes_count: { type: "number" },
+    friend_count: { type: "number" },
+    mutual_friend_count: { type: "number" },
     can_post: { type: "bool" }
 }, null)

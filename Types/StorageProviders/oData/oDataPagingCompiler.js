@@ -16,6 +16,6 @@ $C('$data.storageProviders.oData.oDataPagingCompiler', $data.Expressions.EntityE
         }
     },
     VisitConstantExpression: function (expression, context) {
-        context.data += expression.value;
+        context.data += this.provider.convertTo(expression.value, expression.type, 'escape');
     }
 });
