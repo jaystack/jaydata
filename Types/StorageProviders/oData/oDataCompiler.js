@@ -54,7 +54,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     VisitPagingExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var pagingCompiler = Container.createoDataPagingCompiler();
+        var pagingCompiler = Container.createoDataPagingCompiler(this.provider);
         pagingCompiler.compile(expression, context);
     },
     VisitIncludeExpression: function (expression, context) {
@@ -137,14 +137,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
 
     VisitConstantExpression: function (expression, context) {
+        var value = this.provider.convertTo(expression.value, expression.type, 'toDb');
+
         if (context.method === 'GET' || !context.method) {
-            var value;
-            if (expression.value instanceof $data.Entity) {
-                value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
-            } else if (expression.value !== undefined) {
-                //var valueType = Container.getTypeName(expression.value);
-                value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
-            }
+            value = this.provider.convertTo(value, expression.type, 'escape');
 
             if (value !== undefined) {
                 if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
@@ -152,10 +148,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             }
         } else {
             context.postData = context.postData || {};
-            if(expression.value instanceof $data.Date)
-                context.postData[expression.name] = expression.value;
-            else
-                context.postData[expression.name] = JSON.parse(JSON.stringify(expression.value));
+            context.postData[expression.name] = value;
         }
     },
 //    VisitConstantExpression: function (expression, context) {

@@ -2,11 +2,15 @@
 
     /*converters*/
     Object.keys($data.Container.converters.to).forEach(function (typeName) {
+        var origConverter = $data.Container.converters.to[typeName] ? $data.Container.converters.to[typeName]['$data.Function'] : undefined;
         $data.Container.registerConverter(typeName, '$data.Function', function (value) {
-            if (ko.isObservable(value))
+            if (ko.isObservable(value)) {
                 return value;
-            else
+            } else if (origConverter) {
+                return origConverter.apply($data.Container.converters[typeName], arguments);
+            } else {
                 Guard.raise(new Exception('Type Error', 'value is not koObservable', value));
+            }
         });
     });
 

@@ -14,6 +14,17 @@ $data.Class.define('$data.StorageProviderBase', null, null,
 {
     constructor: function (schemaConfiguration, context) {
         this.providerConfiguration = schemaConfiguration || {};
+
+        this.name = this.getType().name;
+        if ($data.RegisteredStorageProviders) {
+            var keys = Object.keys($data.RegisteredStorageProviders);
+            for (var i = 0; i < keys.length; i++) {
+                if (this instanceof $data.RegisteredStorageProviders[keys[i]]) {
+                    this.name = keys[i];
+                    break;
+                }
+            }
+        }
     },
     providers: {},
     supportedDataTypes: { value: [], writable: false },
@@ -273,6 +284,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         };
     },
 
+    convertTo: function (value, type, conversationType) {
+        return $data.StorageProviderBase.convertTo(value, type, conversationType, this);
+    },
+
     supportedFieldOperations: {
         value: {
             length: { dataType: "number", allowedIn: "filter, map" },
@@ -425,6 +440,18 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     isSupported: {
         get: function () { return true; },
         set: function () { }
+    },
+    convertTo: function (value, type, conversationType, provider) {
+        var typeName = Container.resolveName(type);
+        var converterKey = conversationType + '_' + provider.name;
+
+        if (typeof type[converterKey] === 'function') {
+            return type[converterKey].apply(type, arguments);
+        } else if (provider.fieldConverter && provider.fieldConverter[conversationType] && typeof provider.fieldConverter[conversationType][typeName] === 'function') {
+            return provider.fieldConverter[conversationType][typeName](value);
+        } else {
+            return value;
+        }
     }
 });
 

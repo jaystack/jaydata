@@ -294,10 +294,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         var propType = Container.resolveType(memDef.type);
                         if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                                //unescape?
                                 item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
                             } else {
-                                var converter = that.fieldConverter.fromDb[Container.resolveName(memDef.type)];
-                                item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
+                                item[memDef.name] = that.convertTo(data[memDef.name], memDef.type, 'fromDb');
                             }
                         }
                     }, this);
@@ -397,10 +397,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             var propType = Container.resolveType(memDef.type);
                             if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
                                 if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                                    // unescape?
                                     item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
                                 } else {
-                                    var converter = that.fieldConverter.fromDb[Container.resolveName(memDef.type)];
-                                    item[memDef.name] = converter ? converter(result[i].data[memDef.name]) : result[i].data[memDef.name];
+                                    item[memDef.name] = that.convertTo(result[i].data[memDef.name], memDef.type, 'fromDb');
                                 }
                             }
                         }, this);
@@ -439,15 +439,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         OData.request.apply(this, requestData);
     },
     save_getInitData: function (item, convertedItems) {
+        var self = this;
         item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
                 if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function (def) { return def.name === memdef.name; }))) {
-                    if (item.physicalData[memdef.name] instanceof $data.Date || !item.physicalData[memdef.name])
-                        serializableObject[memdef.name] = item.physicalData[memdef.name];
-                    else
-                        serializableObject[memdef.name] = JSON.parse(JSON.stringify(item.physicalData[memdef.name]));
+                    serializableObject[memdef.name] = self.convertTo(item.physicalData[memdef.name], memdef.type, 'toDb');
                 }
             }
         }, this);
@@ -743,10 +741,36 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.Guid': function (guid) { return guid ? guid.toString() : guid; }
             },
             toDb: {
-                '$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
+                //'$data.Entity': function (e) { return e; },
+                '$data.Integer': function (e) { return e; },
+                '$data.Number': function (e) { return e; },
+                '$data.Date': function (e) { return e ? e.toISOString() : e; },
+                '$data.String': function (e) { return e; },
+                '$data.Boolean': function (e) { return e; },
+                '$data.Blob': function (e) { return e; },
+                '$data.Object': function (e) { return e; },
+                '$data.Array': function (e) { return e; },
+                '$data.GeographyPoint': function (e) { return e; },
+                '$data.GeographyLineString': function (e) { return e; },
+                '$data.GeographyPolygon': function (e) { return e; },
+                '$data.GeographyMultiPoint': function (e) { return e; },
+                '$data.GeographyMultiLineString': function (e) { return e; },
+                '$data.GeographyMultiPolygon': function (e) { return e; },
+                '$data.GeographyCollection': function (e) { return e; },
+                '$data.GeometryPoint': function (e) { return e; },
+                '$data.GeometryLineString': function (e) { return e; },
+                '$data.GeometryPolygon': function (e) { return e; },
+                '$data.GeometryMultiPoint': function (e) { return e; },
+                '$data.GeometryMultiLineString': function (e) { return e; },
+                '$data.GeometryMultiPolygon': function (e) { return e; },
+                '$data.GeometryCollection': function (e) { return e; },
+                '$data.Guid': function (e) { return e; }
+            },
+            escape: {
+                //'$data.Entity': function (e) { return "'" + JSON.stringify(e.initData) + "'" },
                 '$data.Integer': function (number) { return number; },
                 '$data.Number': function (number) { return number % 1 == 0 ? number : number + 'm'; },
-                '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
+                '$data.Date': function (date) { return date ? "datetime'" + date + "'" : null; },
                 '$data.String': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
                 '$data.Boolean': function (bool) { return typeof bool === 'boolean' ? bool.toString() : bool; },
                 '$data.Blob': function (blob) { return blob; },
@@ -767,7 +791,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 '$data.GeometryMultiPolygon': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
                 '$data.GeometryCollection': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
                 '$data.Guid': function (guid) { return guid ? ("guid'" + guid.toString() + "'") : guid; }
-}
+            }
         }
     },
     resolveTypeOperations: function (operation, expression, frameType) {
@@ -955,5 +979,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         return base64;
     }
 }, null);
+
+$data.Entity.addMember('escape_oData', function (e) { return JSON.stringify(e.initData); }, true);
 
 $data.StorageProviderBase.registerProvider("oData", $data.storageProviders.oData.oDataProvider);

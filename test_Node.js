@@ -158,6 +158,11 @@ $data.Class.defineEx('$exampleSrv.Context', [$data.EntityContext, $data.ServiceB
         ///<returns type="GeometryPoint"/>
         return a;
     }),
+    FuncEntityParam: (function (a) {
+        ///<param name="a" type="$exampleSrv.PersonSrv"/>
+        ///<returns type="$exampleSrv.PersonSrv"/>
+        return a;
+    }),
     //FuncEntityParam: (function (a) { return a; }).toServiceOperation().params([{ name: 'a', type: '$exampleSrv.OrderSrv' }]).returns('$exampleSrv.OrderSrv'),
 
     ATables: {

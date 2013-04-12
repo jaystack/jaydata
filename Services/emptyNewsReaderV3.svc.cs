@@ -77,5 +77,15 @@ namespace JayData
             this.CurrentDataSource.CreateObjectSet<Category>().AddObject(new Category { Title = title });
             this.CurrentDataSource.SaveChanges();
         }
+
+        [WebGet]
+        public TestItem Test()
+        {
+            return new TestItem()
+            {
+                l0 = long.MaxValue,
+                de0 = 153135641
+            };
+        }
     }
 }

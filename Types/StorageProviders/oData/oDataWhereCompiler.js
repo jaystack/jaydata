@@ -87,7 +87,8 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
     },
 
     VisitQueryParameterExpression: function (expression, context) {
-        context.data += this.provider.fieldConverter.toDb[expression.type](expression.value);
+        var value = this.provider.convertTo(expression.value, expression.type, 'toDb');
+        context.data += this.provider.convertTo(value, expression.type, 'escape');
     },
 
     VisitEntityFieldOperationExpression: function (expression, context) {
@@ -155,8 +156,8 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
     },
 
     VisitConstantExpression: function (expression, context) {
-        //var valueType = Container.getTypeName(expression.value);
-        context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
+        var value = this.provider.convertTo(expression.value, expression.type, 'toDb');
+        context.data += this.provider.convertTo(value, expression.type, 'escape');
     },
 
     VisitEntityExpression: function (expression, context) {

@@ -326,14 +326,14 @@
             efc.prop2 = 'a5';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Integer', 'a5 is not valid integer');
+            equal(e.name, "value '$data.String' not convertable to '$data.Integer'", 'a5 is not valid integer');
         }
 
         try {
             efc.prop2 = 'ab';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Integer', 'ab is not valid integer');
+            equal(e.name, "value '$data.String' not convertable to '$data.Integer'", 'ab is not valid integer');
         }
 
     });
@@ -351,14 +351,14 @@
             efc.prop3 = 'a5.5';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Number', 'a5.5 is not valid number');
+            equal(e.name, "value '$data.String' not convertable to '$data.Number'", 'a5.5 is not valid number');
         }
 
         try {
             efc.prop3 = 'ab';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Number', 'ab is not valid number');
+            equal(e.name, "value '$data.String' not convertable to '$data.Number'", 'ab is not valid number');
         }
 
     });
@@ -376,14 +376,14 @@
             efc.prop4 = 'aaaabbbb-1111-2222-3333-ccccddddeeeef';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Guid', 'aaaabbbb-1111-2222-3333-ccccddddeeeef is not valid guid');
+            equal(e.name, "value '$data.String' not convertable to '$data.Guid'", 'aaaabbbb-1111-2222-3333-ccccddddeeeef is not valid guid');
         }
 
         try {
             efc.prop4 = 'aaaabbbb1111-22223333-ccccddddeeeeff';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Guid', 'aaaabbbb1111-22223333-ccccddddeeeeff is not valid guid');
+            equal(e.name, "value '$data.String' not convertable to '$data.Guid'", 'aaaabbbb1111-22223333-ccccddddeeeeff is not valid guid');
         }
 
     });
@@ -394,21 +394,21 @@
         try {
             efc.prop5 = 'truea';
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Boolean', 'truea is not valid boolean');
+            equal(e.name, "value '$data.String' not convertable to '$data.Boolean'", 'truea is not valid boolean');
         }
 
         try {
             efc.prop5 = 'Falseb';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Boolean', 'Falseb is not valid boolean');
+            equal(e.name, "value '$data.String' not convertable to '$data.Boolean'", 'Falseb is not valid boolean');
         }
 
         try {
             efc.prop5 = 'world';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Boolean', 'world is not valid boolean');
+            equal(e.name, "value '$data.String' not convertable to '$data.Boolean'", 'world is not valid boolean');
         }
 
     });
@@ -420,21 +420,21 @@
             efc.prop6 = '0:01-2:1';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Date', 'truea is not valid date');
+            equal(e.name, "value '$data.String' not convertable to '$data.Date'", 'truea is not valid date');
         }
 
         try {
             efc.prop6 = '4-3*2-42';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Date', 'Falseb is not valid date');
+            equal(e.name, "value '$data.String' not convertable to '$data.Date'", 'Falseb is not valid date');
         }
 
         try {
             efc.prop6 = 'world';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name, 'value not convertable to $data.Date', 'world is not valid date');
+            equal(e.name, "value '$data.String' not convertable to '$data.Date'", 'world is not valid date');
         }
 
     });
@@ -446,21 +446,21 @@
             efc.prop7 = '{a:42}';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name.substr(0, 12), 'SyntaxError:', 'truea is not valid object');
+            equal(e.name, "value '$data.String' not convertable to '$data.Object'", 'truea is not valid object');
         }
 
         try {
             efc.prop7 = '[{ba:42}]';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name.substr(0, 12), 'SyntaxError:',  'Falseb is not valid object');
+            equal(e.name, "value '$data.String' not convertable to '$data.Object'", 'Falseb is not valid object');
         }
 
         try {
             efc.prop7 = 'world';
             ok(false, 'invalid run');
         } catch (e) {
-            equal(e.name.substr(0, 12), 'SyntaxError:', 'world is not valid object');
+            equal(e.name, "value '$data.String' not convertable to '$data.Object'", 'world is not valid object');
         }
 
     });

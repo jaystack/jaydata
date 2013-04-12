@@ -1098,43 +1098,53 @@
         };
         this.converters = _converters;
 
-        this.convertTo = function (value, tType, eType /*if Array*/) {
+        this.convertTo = function (value, tType, eType /*if Array*/, options) {
             Guard.requireValue("typeOrName", tType);
 
-            var sourceTypeName = Container.getTypeName(value);
-            if (sourceTypeName === 'undefined')
+            if(Object.isNullOrUndefined(value))
                 return value;
 
+            var sourceTypeName = Container.getTypeName(value);
             var sourceType = Container.resolveType(sourceTypeName);
             var sourceTypeName = Container.resolveName(sourceType);
             var targetType = Container.resolveType(tType);
             var targetTypeName = Container.resolveName(targetType);
 
             var result;
-            if (typeof targetType['from' + sourceTypeName] === 'function') {
-                result = targetType['from' + sourceTypeName].apply(targetType, arguments);
+            try {
+                if (typeof targetType['from' + sourceTypeName] === 'function') {
+                    // target from
+                    result = targetType['from' + sourceTypeName].apply(targetType, arguments);
 
-            } else if (typeof sourceType['to' + targetTypeName] === 'function') {
-                result = sourceType['to' + targetTypeName].apply(sourceType, arguments);
+                } else if (typeof sourceType['to' + targetTypeName] === 'function') {
+                    // source to
+                    result = sourceType['to' + targetTypeName].apply(sourceType, arguments);
 
-            } else if (_converters.to[targetTypeName] && _converters.to[targetTypeName][sourceTypeName]) {
-                // target from source
-                result = _converters.to[targetTypeName][sourceTypeName].apply(_converters, arguments);
+                } else if (_converters.to[targetTypeName] && _converters.to[targetTypeName][sourceTypeName]) {
+                    // target from source
+                    result = _converters.to[targetTypeName][sourceTypeName].apply(_converters, arguments);
 
-            } else if (_converters.from[sourceTypeName] && _converters.from[sourceTypeName][targetTypeName]) {
-                // source to target
-                result = _converters.from[sourceTypeName][targetTypeName].apply(_converters, arguments);
+                } else if (_converters.from[sourceTypeName] && _converters.from[sourceTypeName][targetTypeName]) {
+                    // source to target
+                    result = _converters.from[sourceTypeName][targetTypeName].apply(_converters, arguments);
 
-            } else if (targetTypeName === sourceTypeName || value instanceof targetType || value === null) {
-                result = value;
+                } else if (_converters.to[targetTypeName] && _converters.to[targetTypeName]['default']) {
+                    // target from anything
+                    result = _converters.to[targetTypeName]['default'].apply(_converters, arguments);
 
-            } else {
-                Guard.raise(new Exception('TypeError: ',"value '" + sourceTypeName + "' not convertable to '" + targetTypeName + "'", value));
+                } else if (targetTypeName === sourceTypeName || value instanceof targetType) {
+                    result = value;
+
+                } else {
+                    throw "converter not found";
+                }
+            } catch (e) {
+                Guard.raise(new Exception('TypeError: ', "value '" + sourceTypeName + "' not convertable to '" + targetTypeName + "'", value));
             }
 
             if (targetType === $data.Array && eType && Array.isArray(result)) {
                 for (var i = 0; i < result.length; i++) {
-                    result[i] = this.convertTo(result[i], eType);
+                    result[i] = this.convertTo.call(this, result[i], eType, undefined, options);
                 }
             }
 
@@ -1352,7 +1362,7 @@
             return value;
         }
     });
-
+    $data.Container.registerConverter('$data.Boolean', '$data.Function', function (value) { return !!value; })
 
     //})(window);
 
