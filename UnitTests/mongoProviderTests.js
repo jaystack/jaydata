@@ -981,7 +981,7 @@ exports.testUpdateArrayID = function(test){
                             test.equal(cnt, 1, 'Item not added to collection');
                             db.ArrayIDs.toArray(function(r3){
                                 test.equal(cnt, 1, 'Item not added to collection');
-                                test.equal(r3[0].Values[0], r[2].Id, 'Id mismatch');
+                                test.deepEqual(r3[0].Values[0], r[2].Id, 'Id mismatch');
                                 test.done();
                             });
                         });

@@ -11,9 +11,9 @@ $data.SByte = function JaySByte() { };
 $data.Decimal = function JayDecimal() { };
 $data.Float = $data.Single = function JayFloat() { };
 $data.Integer = function JayInteger() { };
-$data.Int16 = function JayInt16() { };
-$data.Int32 = function JayInt32() { };
-$data.Int64 = function JayInt64() { };
+$data.Int16 = function JayInt16(v) { };
+$data.Int32 = function JayInt32(v) { };
+$data.Int64 = function JayInt64(v) { };
 $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID() { };
 
 $data.Container.registerType(["$data.Number", "number", "JayNumber", "double"], $data.Number);

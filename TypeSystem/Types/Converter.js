@@ -1,7 +1,7 @@
 $data.Container.registerConverter('$data.Boolean', {
     '$data.String': function(value){
-        if (value == 'true') return true;
-        if (value == 'false') return false;
+        if (value.toLowerCase() == 'true') return true;
+        if (value.toLowerCase() == 'false') return false;
         
         return !!value;
     },
@@ -204,6 +204,9 @@ $data.Container.registerConverter('$data.String', {
     '$data.Date': function(value){
         return value.toISOString();
     },
+    '$data.ObjectID': function(value){
+        return btoa(value.toString());
+    },
     'default': function(value){
         return value.toString();
     }
@@ -220,3 +223,21 @@ $data.Container.registerConverter('$data.Array', {
         return JSON.parse(value);
     }
 });
+
+$data.Container.registerConverter('$data.ObjectID', {
+    '$data.String': function(value){
+        try{
+            
+        }catch(e){
+            try{
+                return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(value, 'base64').toString('ascii'));
+            }catch(e){
+                console.log(e);
+                throw 0;
+            }
+        }
+    }
+});
+
+$data.Container.proxyConverter = function(v){ return v; };
+$data.Container.defaultConverter = function(type){ return function(v){ return $data.Container.convertTo(v, type); }; };

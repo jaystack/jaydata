@@ -83,28 +83,7 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
         enumerable: true,
         writable: true
     },
-    fieldConverter: {
-        value: {
-            fromDb: {
-                '$data.Number': function (value) { return typeof value === "number" ? value : parseInt(value); },
-                '$data.Integer': function (value) { return typeof value === "number" ? value : parseFloat(value); },
-                '$data.String': function (value) { return value; },
-                '$data.Date': function (value) { return new Date(typeof value === "string" ? parseInt(value) : value); },
-                '$data.Boolean': function (value) { return !!value },
-                '$data.Blob': function (value) { return value; },
-                '$data.Array': function (value) { if (value === undefined) { return new $data.Array(); } return value; }
-            },
-            toDb: {
-                '$data.Number': function (value) { return value; },
-                '$data.Integer': function (value) { return value; },
-                '$data.String': function (value) { return "'" + value + "'"; },
-                '$data.Date': function (value) { return value ? value.valueOf() : null; },
-                '$data.Boolean': function (value) { return value },
-                '$data.Blob': function (value) { return value; },
-                '$data.Array': function (value) { return '(' + value.join(', ') + ')'; }
-            }
-        }
-    },
+    fieldConverter: { value: $data.YQLConverter },
     executeQuery: function (query, callBack) {
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);

@@ -11,6 +11,9 @@ $data.Class.define('$data.storageProviders.Facebook.EntitySets.Command', null, n
 }, {
     'to$data.Integer': function (value) {
         return value;
+    },
+    'to$data.Number': function (value) {
+        return value;
     }
 });
 
