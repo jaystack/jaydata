@@ -252,142 +252,16 @@
     },
     converter: {
         value: {
-            fromDb: {
-                '$data.ObjectID': function (o) {
-                    //if (o === undefined) {
-                    //    return new $data.ObjectID();
-                    //}
-                    return o;
-                },
-                '$data.Integer': function (o) {
-                    //if (o === undefined) {
-                    //    return new $data.Integer();
-                    //}
-                    return o;
-                },
-                '$data.Number': function (o) {
-                    //if (o === undefined) {
-                    //    return new $data.Number();
-                    //}
-                    return o;
-                },
+            fromDb: $data.typeSystem.extend({}, $data.oDataConverter.toDb, {
                 '$data.Date': function (o) {
                     if (o === undefined) {
                         return o;
                     }
                     return o ? '/Date(' + o.valueOf() + ')/' : null;
-                },
-                '$data.String': function (o) {
-                    //if (o === undefined) {
-                    //    return new $data.String();
-                    //}
-                    return o;
-                },
-                '$data.Boolean': function (o) {
-                    //if (o === undefined) {
-                    //    return new $data.Boolean();
-                    //}
-                    return o;
-                },
-                '$data.Blob': function (o) {
-                    //if (o === undefined) {
-                    //    return new $data.Blob();
-                    //}
-                    return o;
-                },
-                '$data.Object': function (o) {
-                    if (o === undefined) {
-                        return new $data.Object();
-                    }
-                    return o;
-                },
-                '$data.Array': function (o) {
-                    if (o === undefined) {
-                        return new $data.Array();
-                    }
-                    return o;
-                },
-                '$data.GeographyPoint': function (o) {
-                    if (o === undefined) {
-                        return new $data.GeographyPoint();
-                    }
-                    return o;
-                },
-                '$data.GeometryPoint': function (o) {
-                    if (o === undefined) {
-                        return new $data.GeometryPoint();
-                    }
-                    return o;
-                },
-                '$data.Guid': function (o) {
-                    /*if (o === undefined) {
-                        return new $data.Guid();
-                    }*/
-                    return o;
-                },
-                '$data.GeographyLineString': function (o) { return o === undefined ? new $data.GeographyLineString() : o; },
-                '$data.GeographyPolygon': function (o) { return o === undefined ? new $data.GeographyPolygon() : o; },
-                '$data.GeographyMultiPoint': function (o) { return o === undefined ? new $data.GeographyMultiPoint() : o; },
-                '$data.GeographyMultiLineString': function (o) { return o === undefined ? new $data.GeographyMultiLineString() : o; },
-                '$data.GeographyMultiPolygon': function (o) { return o === undefined ? new $data.GeographyMultiPolygon() : o; },
-                '$data.GeographyCollection': function (o) { return o === undefined ? new $data.GeographyCollection() : o; },
-                '$data.GeometryLineString': function (o) { return o === undefined ? new $data.GeometryLineString() : o; },
-                '$data.GeometryPolygon': function (o) { return o === undefined ? new $data.GeometryPolygon() : o; },
-                '$data.GeometryMultiPoint': function (o) { return o === undefined ? new $data.GeometryMultiPoint() : o; },
-                '$data.GeometryMultiLineString': function (o) { return o === undefined ? new $data.GeometryMultiLineString() : o; },
-                '$data.GeometryMultiPolygon': function (o) { return o === undefined ? new $data.GeometryMultiPolygon() : o; },
-                '$data.GeometryCollection': function (o) { return o === undefined ? new $data.GeometryCollection() : o; }
-            },
-            toDb: {
-                '$data.ObjectID': function (id) {
-                    return "'" + (id || '').toString() + "'";
-                },
-                '$data.Integer': function (number) {
-                    return number;
-                },
-                '$data.Number': function (number) {
-                    return number % 1 == 0 ? number : number + 'm';
-                },
-                '$data.Date': function (date) {
-                    return date ? "datetime'" + date.toISOString() + "'" : null;
-                },
-                '$data.String': function (text) {
-                    return Object.isNullOrUndefined(text) ? text : "'" + text.replace(/'/g, "''") + "'";
-                },
-                '$data.Boolean': function (bool) {
-                    return bool ? 'true' : 'false';
-                },
-                '$data.Blob': function (blob) {
-                    return blob;
-                },
-                '$data.Object': function (o) {
-                    return JSON.stringify(o);
-                },
-                '$data.Array': function (o) {
-                    return JSON.stringify(o);
-                },
-                '$data.GeographyPoint': function (g) {
-                    return g;
-                },
-                '$data.GeometryPoint': function (g) {
-                    return g;
-                },
-                '$data.Guid': function (g) {
-                    return g ? "guid'" + g.toString() + "'" : g;
-                },
-                '$data.GeographyLineString': function (o) { return o; },
-                '$data.GeographyPolygon': function (o) { return o; },
-                '$data.GeographyMultiPoint': function (o) { return o; },
-                '$data.GeographyMultiLineString': function (o) { return o; },
-                '$data.GeographyMultiPolygon': function (o) { return o; },
-                '$data.GeographyCollection': function (o) { return o; },
-                '$data.GeometryLineString': function (o) { return o; },
-                '$data.GeometryPolygon': function (o) { return o; },
-                '$data.GeometryMultiPoint': function (o) { return o; },
-                '$data.GeometryMultiLineString': function (o) { return o; },
-                '$data.GeometryMultiPolygon': function (o) { return o; },
-                '$data.GeometryCollection': function (o) { return o; }
-            }
+                }
+            }),
+            toDb: $data.oDataConverter.toDb,
+            escape: $data.oDataConverter.escape
         }
     },
     //helpers
@@ -402,10 +276,17 @@
         for (var i = 0, l = keys.length; i < l; i++) {
             var memDef = keys[i];
             var typeName = Container.resolveName(Container.resolveType(memDef.type));
+
+            var converter = this.converter.toDb[typeName];
+            var value = converter ? converter(entity[memDef.name]) : entity[memDef.name];
+
+            converter = this.converter.escape[typeName];
+            value = converter ? converter(value) : value;
+
             if (l === 1) {
-                keyData.push(this.converter.toDb[typeName](entity[memDef.name]));
+                keyData.push(value);
             } else {
-                keyData.push(memDef.name + '=' + this.converter.toDb[typeName](entity[memDef.name]));
+                keyData.push(memDef.name + '=' + value);
             }
         }
 

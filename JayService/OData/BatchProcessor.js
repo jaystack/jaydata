@@ -174,7 +174,7 @@
                 case 'POST':
                     //discover navigations (__metadata.uri: "$n")
                     this._discoverNavigations(changeRequest, referenceData, itemType);
-                    var entity = new itemType(changeRequest.data);
+                    var entity = new itemType(changeRequest.data, { converters: $data.oDataConverter.fromDb });
                     referenceData[refId].resultObject = entity;
                     setInfo.set.add(entity);
                     break;
@@ -182,7 +182,7 @@
                 case 'PATCH':
                     //discover navigations (__metadata.uri: "$n")
                     this._discoverNavigations(changeRequest, referenceData, itemType);
-                    var entity = new itemType(changeRequest.data);
+                    var entity = new itemType(changeRequest.data, { converters: $data.oDataConverter.fromDb });
                     referenceData[refId].resultObject = entity;
 
                     setInfo.set.attach(entity);

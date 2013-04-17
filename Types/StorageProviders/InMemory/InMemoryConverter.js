@@ -60,5 +60,22 @@ $data.InMemoryConverter = {
         '$data.GeometryMultiLineString': function (g) { if (g) { return g; } return g; },
         '$data.GeometryMultiPolygon': function (g) { if (g) { return g; } return g; },
         '$data.GeometryCollection': function (g) { if (g) { return g; } return g; }
+    },
+    escape: {
+        '$data.Byte': $data.Container.proxyConverter,
+        '$data.SByte': $data.Container.proxyConverter,
+        '$data.Decimal': $data.Container.proxyConverter,
+        '$data.Float': $data.Container.proxyConverter,
+        '$data.Int16': $data.Container.proxyConverter,
+        '$data.Int64': $data.Container.proxyConverter,
+        '$data.Integer': $data.Container.proxyConverter,
+        '$data.Number': $data.Container.proxyConverter,
+        '$data.Date': function (date) { return date ? "new Date(Date.parse('" + date.toISOString() + "'))" : date; },
+        '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
+        '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
+        '$data.Blob': function (blob) { return typeof blob === 'string' ? "'" + blob + "'" : blob; },
+        '$data.Object': function (o) { return JSON.stringify(o); },
+        '$data.Array': function (o) { return JSON.stringify(o); },
+        '$data.Guid': function (guid) { return guid ? "'" + guid.toString() + "'" : guid; }
     }
 };

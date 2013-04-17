@@ -37,6 +37,75 @@
 
     });
 
+    test("Guid key delete", 2, function () {
+
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            var item = new $news.Types.TestItemGuid({
+                Id: $data.createGuid().toString(),
+                s0: 'Title_test'
+            })
+
+            context.TestTable2.add(item);
+
+            context.saveChanges(function () {
+                context.TestTable2.toArray(function (res) {
+                    
+                    equal(res[0].Id, item.Id, 'keys');
+
+                    context.TestTable2.remove(res[0]);
+
+                    context.saveChanges(function () {
+                        context.TestTable2.toArray(function (res2) {
+                            equal(res2.length, 0, 'table is clear');
+
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test("Guid key update", 4, function () {
+
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            var item = new $news.Types.TestItemGuid({
+                Id: $data.createGuid().toString(),
+                s0: 'Title_test'
+            })
+
+            context.TestTable2.add(item);
+
+            context.saveChanges(function () {
+                context.TestTable2.toArray(function (res) {
+
+                    equal(res[0].Id, item.Id, 'keys');
+                    equal(res[0].s0, item.s0, 'Title_test');
+
+                    context.TestTable2.attach(res[0]);
+                    res[0].s0 = 'Title_test2';
+
+
+                    context.saveChanges(function () {
+                        context.TestTable2.toArray(function (res2) {
+                            equal(res2.length, 1, 'table is clear');
+                            equal(res2[0].s0, 'Title_test2', 'Title_test2');
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
     test('deep_include_fix', function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(18);

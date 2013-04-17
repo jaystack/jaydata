@@ -101,40 +101,10 @@ $data.ServiceResult.extend('$data.oDataSimpleResult', {
     },
     toString: function () {
         var typeName = Container.resolveName(this.fieldDefinition.type);
-        if (this.converter.fromDb[typeName]) {
-            return this.converter.fromDb[typeName](this.data);
+        if ($data.oDataConverter.simple[typeName]) {
+            return $data.oDataConverter.simple[typeName](this.data);
         }
         throw "The segment before '$value' must be a primitive property.";
-    },
-    converter: {
-        value: {
-            fromDb: {
-                '$data.ObjectID': function (o) { return o.toString(); },
-                '$data.Integer': function (o) { return o.toString(); },
-                '$data.Number': function (o) { return o.toString(); },
-                '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
-                '$data.String': function (o) { return o.toString(); },
-                '$data.Boolean': function (o) { return o.toString(); },
-                '$data.Blob': function (o) { return new Buffer(o, 'base64'); },
-                '$data.Object': function (o) { return JSON.stringify(o); },
-                '$data.Array': function (o) { return JSON.stringify(o); },
-                '$data.Guid': function (o) { return o.toString(); },
-                '$data.GeographyPoint': function (o) { return JSON.stringify(o); },
-                '$data.GeometryPoint': function (o) { return JSON.stringify(o); },
-                '$data.GeographyLineString': function (o) { return JSON.stringify(o); },
-                '$data.GeographyPolygon': function (o) { return JSON.stringify(o); },
-                '$data.GeographyMultiPoint': function (o) { return JSON.stringify(o); },
-                '$data.GeographyMultiLineString': function (o) { return JSON.stringify(o); },
-                '$data.GeographyMultiPolygon': function (o) { return JSON.stringify(o); },
-                '$data.GeographyCollection': function (o) { return JSON.stringify(o); },
-                '$data.GeometryLineString': function (o) { return JSON.stringify(o); },
-                '$data.GeometryPolygon': function (o) { return JSON.stringify(o); },
-                '$data.GeometryMultiPoint': function (o) { return JSON.stringify(o); },
-                '$data.GeometryMultiLineString': function (o) { return JSON.stringify(o); },
-                '$data.GeometryMultiPolygon': function (o) { return JSON.stringify(o); },
-                '$data.GeometryCollection': function (o) { return JSON.stringify(o); }
-            }
-        }
     }
 });
 

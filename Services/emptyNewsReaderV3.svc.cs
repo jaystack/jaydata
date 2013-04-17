@@ -79,12 +79,16 @@ namespace JayData
         }
 
         [WebGet]
-        public TestItem Test()
+        public TestItem Test(double dd)
         {
             return new TestItem()
             {
                 l0 = long.MaxValue,
-                de0 = 153135641
+                de0 = 153135641,
+                //n0 = 1.7976931348623157e+307,
+                d0 = DateTime.Now,
+                b1 = 34,
+                n0 = dd
             };
         }
     }

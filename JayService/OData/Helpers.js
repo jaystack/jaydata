@@ -83,26 +83,16 @@ $data.Class.define('$data.JayService.OData.Utils', null, null, null, {
                 var value = values[memDef.name];
             }
 
-            //TODO converter
             var resolvedType = Container.resolveType(memDef.type);
             if (withoutConvert)
                 result[memDef.name] = value;
             else {
-                switch (resolvedType) {
-                    case $data.String:
-                    case $data.ObjectID:
-                        result[memDef.name] = value.slice(1, value.length - 1);
-                        break;
-                    case $data.Guid:
-                        result[memDef.name] = value.slice(5, value.length - 1);
-                        break;
-                    default:
-                        result[memDef.name] = value;
-                        break;
-                }
+                var typeName = Container.resolveName(resolvedType);
+                var converter = $data.oDataConverter.unescape[typeName];
+                var resultValue = converter ? converter(value) : value;
 
-
-                //result[memDef.name] = (resolvedType === $data.String || resolvedType === $data.ObjectID) ? value.slice(1, value.length - 1) : value;
+                converter = $data.oDataConverter.fromDb[typeName];
+                result[memDef.name] = converter ? converter(resultValue) : resultValue;
             }
         }
 

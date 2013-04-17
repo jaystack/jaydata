@@ -2173,7 +2173,7 @@
             var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, false, 'Hello', new Date('2000/01/02')).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 2', 1, function (context) {
 
@@ -2187,7 +2187,7 @@
             var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, null, undefined, new Date('2000/01/02')).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 4', 1, function (context) {
 
@@ -2207,7 +2207,7 @@
             var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: new Date('2000/01/02') }).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 2 - object param', 1, function (context) {
 
@@ -2221,7 +2221,7 @@
             var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: null, p4: undefined, p5: new Date('2000/01/02') }).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000Z'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 4 - object param', 1, function (context) {
 
@@ -2238,7 +2238,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $filter param resolve 2', 3, function (context) {
 
@@ -2258,7 +2258,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $filter param resolve - object param', 3, function (context) {
 
@@ -2268,7 +2268,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $filter param resolve 2 - object param', 3, function (context) {
 
@@ -2288,7 +2288,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $orderby param resolve', 3, function (context) {
 
@@ -2298,7 +2298,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $orderby param resolve 2', 3, function (context) {
 
@@ -2318,7 +2318,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $orderby param resolve - object param', 3, function (context) {
 
@@ -2328,7 +2328,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Context Operation in $orderby param resolve 2 - object param', 3, function (context) {
 
@@ -2348,7 +2348,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$orderby=ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000') desc", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Entity Operation in $filter param resolve', 3, function (context) {
 
@@ -2358,7 +2358,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Entity Operation in $filter param resolve 2', 3, function (context) {
 
@@ -2378,7 +2378,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Entity Operation in $filter param resolve - object param', 3, function (context) {
 
@@ -2388,7 +2388,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
         checkUrlTextAndHookResult('Entity Operation in $filter param resolve 2 - object param', 3, function (context) {
 
@@ -2408,7 +2408,7 @@
                 equal(data.Name, 'Sport', 'Category, Name');
                 equal(data.Description, 'desc', 'Category, Description');
             });
-        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000Z') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
+        }, "/api/Categories?$filter=(ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000') eq 'Sport')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }] });
 
     })();
 });

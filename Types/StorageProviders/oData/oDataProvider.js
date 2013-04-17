@@ -59,7 +59,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         if (this.providerConfiguration.dataServiceVersion > this.providerConfiguration.maxDataServiceVersion) {
             this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
         }
-        
+
         if (this.providerConfiguration.setDataServiceVersionToMax === true) {
             this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
         }
@@ -176,7 +176,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             function (data, textStatus, jqXHR) {
                 if (!data && textStatus.body) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
-                    query.rawDataList = typeof data === 'string' ? [{ cnt: data }] : data;
+                    query.rawDataList = typeof data === 'string' ? [{ cnt: Container.convertTo(data, $data.Integer) }] : data;
                     if (sql.withInlineCount && typeof data === 'object' && (data.__count || ('d' in data && data.d.__count))) {
                         query.__count = new Number(data.__count || data.d.__count).valueOf();
                     }
@@ -192,7 +192,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         if (this.providerConfiguration.dataServiceVersion) {
             requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
         }
-       
+
         if (typeof this.providerConfiguration.enableJSONP !== 'undefined') {
             requestData[0].enableJsonpCallback = this.providerConfiguration.enableJSONP;
         }
@@ -297,7 +297,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                 //unescape?
                                 item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
                             } else {
-                                item[memDef.name] = that.convertTo(data[memDef.name], memDef.type, 'fromDb');
+                                var typeName = Container.resolveName(memDef.type);
+                                var converter = that.fieldConverter.fromDb[typeName];
+                                item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
                             }
                         }
                     }, this);
@@ -400,7 +402,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                                     // unescape?
                                     item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
                                 } else {
-                                    item[memDef.name] = that.convertTo(result[i].data[memDef.name], memDef.type, 'fromDb');
+                                    var typeName = Container.resolveName(memDef.type);
+                                    var converter = that.fieldConverter.fromDb[typeName];
+                                    item[memDef.name] = converter ? converter(result[i].data[memDef.name]) : result[i].data[memDef.name];
                                 }
                             }
                         }, this);
@@ -410,7 +414,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     }
                 }
                 if (errors.length > 0) {
-                    callBack.error(new Exception('See inner exceptions','Batch failed', errors));
+                    callBack.error(new Exception('See inner exceptions', 'Batch failed', errors));
                 } else if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
@@ -445,7 +449,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
                 if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function (def) { return def.name === memdef.name; }))) {
-                    serializableObject[memdef.name] = self.convertTo(item.physicalData[memdef.name], memdef.type, 'toDb');
+                    var typeName = Container.resolveName(memdef.type);
+                    var converter = self.fieldConverter.toDb[typeName];
+                    serializableObject[memdef.name] = converter ? converter(item.physicalData[memdef.name]) : item.physicalData[memdef.name];
                 }
             }
         }, this);
@@ -752,37 +758,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
-                switch (Container.getName(field.originalType)) {
-                    case "$data.Guid":
-                    case "Edm.Guid":
-                        keyValue = ("guid'" + keyValue  + "'");
-                        break;
-                    case "$data.Blob":
-                    case "Edm.Binary":
-                        keyValue = ("binary'" + keyValue + "'");
-                        break;
-                    case "Edm.Byte":
-                        var hexDigits = '0123456789ABCDEF';
-                        keyValue = (hexDigits[(i >> 4) & 15] + hexDigits[i & 15]);
-                        break;
-                    case "$data.Date":
-                    case "Edm.DateTime":
-                        keyValue = ("datetime'" + keyValue.toISOString() + "'");
-                        break;
-                    case "Edm.Decimal":
-                        keyValue = (keyValue + "M");
-                        break;
-                    case "Edm.Single":
-                        keyValue = (keyValue + "f");
-                        break;
-                    case "Edm.Int64":
-                        keyValue = (keyValue + "L");
-                        break;
-                    case 'Edm.String':
-                    case "$data.String":
-                        keyValue = ("'" + keyValue + "'");
-                        break;
-                }
+                var typeName = Container.resolveName(field.type);
+
+                var converter = this.fieldConverter.toDb[typeName];
+                keyValue = converter ? converter(keyValue) : keyValue;
+
+                converter = this.fieldConverter.escape[typeName];
+                keyValue = converter ? converter(keyValue) : keyValue;
+
                 result.push(field.name + "=" + keyValue);
             }
         }
@@ -884,7 +867,5 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         return base64;
     }
 }, null);
-
-$data.Entity.addMember('escape_oData', function (e) { return JSON.stringify(e.initData); }, true);
 
 $data.StorageProviderBase.registerProvider("oData", $data.storageProviders.oData.oDataProvider);

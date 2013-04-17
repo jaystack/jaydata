@@ -35,6 +35,7 @@
             $data.Trace = new $data.Logger();
             $data.Trace.log('hello', 'console', 42, { prop: 24 }, [1, 2, 3]);
             test.ok(true, '$data.Trace log not throw exception');
+            $data.Trace = new $data.TraceBase();
         } catch (e) {
             test.ok(false, '$data.Trace failed: ' + e);
         }

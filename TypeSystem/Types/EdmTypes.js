@@ -14,11 +14,11 @@
 
     function Edm_DateTimeOffset() { };
     $data.Container.registerType('Edm.DateTimeOffset', Edm_DateTimeOffset);
-    $data.Container.mapType(Edm_DateTimeOffset, $data.Integer);
+    $data.Container.mapType(Edm_DateTimeOffset, $data.Date);
 
     function Edm_Time() { };
     $data.Container.registerType('Edm.Time', Edm_Time);
-    $data.Container.mapType(Edm_Time, $data.Integer);
+    $data.Container.mapType(Edm_Time, $data.Date);
 
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
@@ -119,5 +119,38 @@
     function Edm_GeometryCollection() { };
     $data.Container.registerType('Edm.GeometryCollection', Edm_GeometryCollection);
     $data.Container.mapType(Edm_GeometryCollection, $data.GeometryCollection);
+
+    $data.oDataEdmMapping = {
+        '$data.Byte': 'Edm.Byte',
+        '$data.SByte': 'Edm.SByte',
+        '$data.Decimal': 'Edm.Decimal',
+        '$data.Float': 'Edm.Float',
+        '$data.Int16': 'Edm.Int16',
+        '$data.Int64': 'Edm.Int64',
+        '$data.DateTimeOffset': 'Edm.DateTimeOffset',
+        '$data.Time': 'Edm.Time',
+        '$data.Boolean': 'Edm.Boolean',
+        '$data.Blob': 'Edm.Binary',
+        '$data.Date': 'Edm.DateTime',
+        '$data.Number': 'Edm.Double',
+        '$data.Integer': 'Edm.Int32',
+        '$data.String': 'Edm.String',
+        '$data.ObjectID': 'Edm.String',
+        '$data.GeographyPoint': 'Edm.GeographyPoint',
+        '$data.GeographyLineString': 'Edm.GeographyLineString',
+        '$data.GeographyPolygon': 'Edm.GeographyPolygon',
+        '$data.GeographyMultiPoint': 'Edm.GeographyMultiPoint',
+        '$data.GeographyMultiLineString': 'Edm.GeographyMultiLineString',
+        '$data.GeographyMultiPolygon': 'Edm.GeographyMultiPolygon',
+        '$data.GeographyCollection': 'Edm.GeographyCollection',
+        '$data.GeometryPoint': 'Edm.GeometryPoint',
+        '$data.GeometryLineString': 'Edm.GeometryLineString',
+        '$data.GeometryPolygon': 'Edm.GeometryPolygon',
+        '$data.GeometryMultiPoint': 'Edm.GeometryMultiPoint',
+        '$data.GeometryMultiLineString': 'Edm.GeometryMultiLineString',
+        '$data.GeometryMultiPolygon': 'Edm.GeometryMultiPolygon',
+        '$data.GeometryCollection': 'Edm.GeometryCollection',
+        '$data.Guid': 'Edm.Guid'
+    };
 
 })($data);

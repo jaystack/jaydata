@@ -24,35 +24,39 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 constExpr = left;
             }
 
-            if (refExpression.selector instanceof $data.Expressions.MemberInfoExpression &&
-                refExpression.selector.memberDefinition instanceof $data.MemberDefinition && refExpression.selector.memberDefinition.type) {
-                var fieldType = Container.resolveType(refExpression.selector.memberDefinition.type);
-                var constExprType = Container.resolveType(constExpr.type);
+            var memInfo;
+            if ((memInfo = refExpression.selector) instanceof $data.Expressions.MemberInfoExpression ||
+                (memInfo = refExpression.operation) instanceof $data.Expressions.MemberInfoExpression) {
 
-                if (fieldType !== constExprType) {
 
-                    var value = constExpr.value;
-                    if (expression.operator === $data.Expressions.ExpressionType.In) {
-                        if (Array.isArray(value)) {
-                            var resultExp = [];
-                            for (var i = 0; i < value.length; i++) {
-                                resultExp.push(new $data.Expressions.ConstantExpression(value[i], fieldType));
+                if (memInfo.memberDefinition && (memInfo.memberDefinition.type || memInfo.memberDefinition.dataType)) {
+                    var fieldType = Container.resolveType(memInfo.memberDefinition.type || memInfo.memberDefinition.dataType);
+                    var constExprType = Container.resolveType(constExpr.type);
+
+                    if (fieldType !== constExprType) {
+
+                        var value = constExpr.value;
+                        if (expression.operator === $data.Expressions.ExpressionType.In) {
+                            if (Array.isArray(value)) {
+                                var resultExp = [];
+                                for (var i = 0; i < value.length; i++) {
+                                    resultExp.push(new $data.Expressions.ConstantExpression(value[i], fieldType));
+                                }
+                                value = resultExp;
+                                fieldType = $data.Array;
+                            } else {
+                                fieldType = constExprType;
                             }
-                            value = resultExp;
-                            fieldType = $data.Array;
-                        } else {
-                            fieldType = constExprType;
                         }
-                    }
 
-                     if (right === constExpr) {
-                        right = new $data.Expressions.ConstantExpression(value, fieldType, right.name);
-                    } else {
-                        left = new $data.Expressions.ConstantExpression(value, fieldType, left.name);
+                        if (right === constExpr) {
+                            right = new $data.Expressions.ConstantExpression(value, fieldType, right.name);
+                        } else {
+                            left = new $data.Expressions.ConstantExpression(value, fieldType, left.name);
+                        }
                     }
                 }
             }
-
         }
 
         var operatorResolution = this.scopeContext.resolveBinaryOperator(expression.nodeType, expression, context.frameType);

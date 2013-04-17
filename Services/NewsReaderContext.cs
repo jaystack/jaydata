@@ -160,6 +160,7 @@ namespace JayData.NewsReader
 
         public long? l0 { get; set; }
         public decimal de0 { get; set; }
+        public byte? b1 { get; set; }
 
 
     }

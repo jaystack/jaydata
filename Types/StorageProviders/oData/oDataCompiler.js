@@ -137,10 +137,17 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
 
     VisitConstantExpression: function (expression, context) {
-        var value = this.provider.convertTo(expression.value, expression.type, 'toDb');
+        var typeName = Container.resolveName(expression.type);
+        if (expression.value instanceof $data.Entity)
+            typeName = $data.Entity.fullName;
+
+        var converter = this.provider.fieldConverter.toDb[typeName];
+        var value = converter ? converter(expression.value) : expression.value;
+        
 
         if (context.method === 'GET' || !context.method) {
-            value = this.provider.convertTo(value, expression.type, 'escape');
+            converter = this.provider.fieldConverter.escape[typeName];
+            value = converter ? converter(value) : value;
 
             if (value !== undefined) {
                 if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }

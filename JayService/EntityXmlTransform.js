@@ -331,12 +331,13 @@
                         }
                     }
                 } else if (type.isAssignableTo && type.isAssignableTo($data.Entity)) {
-                        //complexType
+                    //complexType
                     this._buildProperties(data[memDef.name], undefined, type);
                 } else {
                     //primitive types
                     var typeName = Container.resolveName(type);
-                    this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName].call(this, value) : value.toString());
+                    var converter = this._valueConverters.xmlEscape[typeName];
+                    this.xml.addText(converter ? converter.call(this, value) : value.toString());
                 }
             } else {
                 var nullValue = this.xml.declareAttribute(m, 'null');
@@ -365,7 +366,8 @@
                 this.xml.startElement(item);
                 if (edmTypeName !== 'Edm.String')
                     this.xml.addAttribute(itemType, edmTypeName);
-                this.xml.addText(this._valueConverters[typeName] ? this._valueConverters[typeName].call(this, data[i]) : data[i].toString());
+                var converter = this._valueConverters.xmlEscape[typeName];
+                this.xml.addText(converter ? converter.call(this, data[i]) : data[i].toString());
                 this.xml.endElement();
             }
         }
@@ -424,56 +426,27 @@
         this.xml.endElement();
     },
 
-    _edmTypeMapping: {
-        value: {
-            '$data.Boolean': 'Edm.Boolean',
-            '$data.Blob': 'Edm.Binary',
-            '$data.Date': 'Edm.DateTime',
-            '$data.Number': 'Edm.Decimal',
-            '$data.Integer': 'Edm.Int32',
-            '$data.String': 'Edm.String',
-            '$data.ObjectID': 'Edm.String',
-            '$data.Guid': 'Edm.Guid',
-            '$data.GeographyPoint': 'Edm.GeographyPoint',
-            '$data.GeographyLineString': 'Edm.GeographyLineString',
-            '$data.GeographyPolygon': 'Edm.GeographyPolygon',
-            '$data.GeographyMultiPoint': 'Edm.GeographyMultiPoint',
-            '$data.GeographyMultiLineString': 'Edm.GeographyMultiLineString',
-            '$data.GeographyMultiPolygon': 'Edm.GeographyMultiPolygon',
-            '$data.GeographyCollection': 'Edm.GeographyCollection',
-            '$data.GeometryPoint': 'Edm.GeometryPoint',
-            '$data.GeometryLineString': 'Edm.GeometryLineString',
-            '$data.GeometryPolygon': 'Edm.GeometryPolygon',
-            '$data.GeometryMultiPoint': 'Edm.GeometryMultiPoint',
-            '$data.GeometryMultiLineString': 'Edm.GeometryMultiLineString',
-            '$data.GeometryMultiPolygon': 'Edm.GeometryMultiPolygon',
-            '$data.GeometryCollection': 'Edm.GeometryCollection'
-        }
+    _edmTypeMapping:{
+        value: $data.oDataEdmMapping
     },
     _valueConverters: {
-        value: {
-            '$data.Boolean': function (v) { return v.toString(); },
-            '$data.Blob': function (v) { return v.toString(); },
-            '$data.Date': function (v) { return v.toISOString(); },
-            '$data.Number': function (v) { return v.toString(); },
-            '$data.Integer': function (v) { return v.toString(); },
-            '$data.String': function (v) { return v; },
-            '$data.ObjectID': function (v) { return v.toString(); },
-            '$data.Object': function (v) { return JSON.stringify(v); },
-            '$data.Guid': function (v) { return v.toString(); }/*,
-            '$data.GeographyPoint': function (v) { return this._buildSpatialPoint(v, 'http://www.opengis.net/def/crs/EPSG/0/4326'); },
-            '$data.GeometryPoint': function (v) { return this._buildSpatialPoint(v, 'http://www.opengis.net/def/crs/EPSG/0/0'); },
-            '$data.GeographyLineString': function (v) { return this._buildSpatialLineString(v, 'http://www.opengis.net/def/crs/EPSG/0/4326'); },
-            '$data.GeometryLineString': function (v) { return this._buildSpatialLineString(v, 'http://www.opengis.net/def/crs/EPSG/0/0'); }*/
-        }
+        value: $data.oDataConverter
     },
     supports: {
         value: {
             'PowerPivot': [
+                'Edm.Byte',
+                'Edm.SByte',
+                'Edm.Decimal',
+                'Edm.Float',
+                'Edm.Int16',
+                'Edm.Int64',
+                'Edm.DateTimeOffset',
+                'Edm.Time',
                 'Edm.Boolean',
                 'Edm.Binary',
                 'Edm.DateTime',
-                'Edm.Decimal',
+                'Edm.Double',
                 'Edm.Int32',
                 'Edm.String',
                 'Edm.Guid'

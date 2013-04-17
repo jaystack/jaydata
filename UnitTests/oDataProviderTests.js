@@ -295,7 +295,7 @@
     //});
     test("filter_table_1_field_datetime_param", 2, function () {
         stop(1);
-        var dateString = new Date(Date.parse("2010/01/01")).toISOString();
+        var dateString = new Date(Date.parse("2010/01/01")).toISOString().replace('Z', '');
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var q = db.Articles.where(function (item) { return item.CreateDate > this.d; }, { d: new Date(Date.parse("2010/01/01")) }).toTraceString();
             start(1);
@@ -324,7 +324,7 @@
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var q = db.TestTable.where(function (item) { return item.n0 > 4.5; }, null).toTraceString();
             start(1);
-            equal(q.queryText, "/TestTable?$filter=(n0 gt 4.5m)", "Invalid query string");
+            equal(q.queryText, "/TestTable?$filter=(n0 gt 4.5)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
                 $selector: ['json:d.results', 'json:d', 'json:results'],
@@ -348,7 +348,7 @@
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var q = db.TestTable.where(function (item) { return item.n0 > this.num; }, { num: 4.5 }).toTraceString();
             start(1);
-            equal(q.queryText, "/TestTable?$filter=(n0 gt 4.5m)", "Invalid query string");
+            equal(q.queryText, "/TestTable?$filter=(n0 gt 4.5)", "Invalid query string");
             var expectedObject = {
                 $type: $data.Array,
                 $selector: ['json:d.results', 'json:d', 'json:results'],
@@ -437,7 +437,7 @@
     });
     test("filter_table_many_field_string_date", 2, function () {
         stop(1);
-        var dateString = new Date(Date.parse("2012/01/01")).toISOString();
+        var dateString = new Date(Date.parse("2012/01/01")).toISOString().replace('Z', '');
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var q = db.Articles.where(function (article) { return article.Title == "alma" && article.CreateDate == this.cDate; }, { cDate: new Date(Date.parse("2012/01/01")) }).toTraceString();
             start(1);
@@ -463,7 +463,7 @@
     });
     test("filter_table_many_field_string_date_orderBy", 2, function () {
         stop(1);
-        var dateString = new Date(Date.parse("2012/01/01")).toISOString();
+        var dateString = new Date(Date.parse("2012/01/01")).toISOString().replace('Z', '');
         (new $news.Types.NewsContext({ name: "oData" })).onReady(function (db) {
             var q = db.Articles
                                .where(function (article) { return article.Title == "alma" && article.CreateDate == this.cDate; }, { cDate: new Date(Date.parse("2012/01/01")) })

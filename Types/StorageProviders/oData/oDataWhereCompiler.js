@@ -48,23 +48,10 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
             context.data = temp + context.data.replace(/\(/g, '').replace(/\)/g, '');
         } else {
             this.Visit(expression.left, context);
-
-            //REFACTOR
-            if (expression.right instanceof $data.Expressions.EntityFieldOperationExpression && expression.right.operation.memberDefinition &&
-                expression.right.operation.memberDefinition.fixedDataType === 'decimal' && context.data.substring(context.data.length - 1) === 'm') {
-                context.data = context.data.substring(0, context.data.length - 1);
-            }
-
             context.data += " ";
             context.data += expression.resolution.mapTo;
             context.data += " ";
             this.Visit(expression.right, context);
-
-            //REFACTOR
-            if (expression.left instanceof $data.Expressions.EntityFieldOperationExpression && expression.left.operation.memberDefinition &&
-                expression.left.operation.memberDefinition.fixedDataType === 'decimal' && context.data.substring(context.data.length-1) === 'm') {
-                context.data = context.data.substring(0, context.data.length - 1);
-            }
         };
         context.data += ")";
 
@@ -87,8 +74,13 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
     },
 
     VisitQueryParameterExpression: function (expression, context) {
-        var value = this.provider.convertTo(expression.value, expression.type, 'toDb');
-        context.data += this.provider.convertTo(value, expression.type, 'escape');
+        var typeName = Container.resolveName(expression.type);
+
+        var converter = this.provider.fieldConverter.toDb[typeName];
+        var value = converter ? converter(expression.value) : expression.value;
+
+        converter = this.provider.fieldConverter.escape[typeName];
+        context.data += converter ? converter(value) : value;
     },
 
     VisitEntityFieldOperationExpression: function (expression, context) {
@@ -156,8 +148,13 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
     },
 
     VisitConstantExpression: function (expression, context) {
-        var value = this.provider.convertTo(expression.value, expression.type, 'toDb');
-        context.data += this.provider.convertTo(value, expression.type, 'escape');
+        var typeName = Container.resolveName(expression.type);
+
+        var converter = this.provider.fieldConverter.toDb[typeName];
+        var value = converter ? converter(expression.value) : expression.value;
+
+        converter = this.provider.fieldConverter.escape[typeName];
+        context.data += converter ? converter(value) : value;
     },
 
     VisitEntityExpression: function (expression, context) {

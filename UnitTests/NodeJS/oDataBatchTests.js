@@ -215,6 +215,8 @@ exports.Tests = {
 
                                 test.done();
                             }, error: function (e) {
+                                console.log(e);
+
                                 test.ok(false, 'test failed: ' + e)
                                 test.done();
                             }

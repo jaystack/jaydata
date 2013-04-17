@@ -47,7 +47,8 @@ $C('$data.storageProviders.InMemory.InMemoryFunctionCompiler', $data.Expressions
     VisitConstantExpression: function (expression, context) {
         var type = Container.resolveType(expression.type);
         var typeName = Container.resolveName(type);
-        context.data += this.provider.fieldConverter.toDb[typeName](expression.value);
+        var converter = this.provider.fieldConverter.escape[typeName];
+        context.data += converter ? converter(expression.value) : expression.value;
     },
     VisitMemberInfoExpression: function (expression, context) {
         context.data += expression.memberName;

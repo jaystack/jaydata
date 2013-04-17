@@ -35,7 +35,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
                 rigthValue: ') = 0'
             },
             'strpos': {
-                dataType: $data.String,
+                dataType: $data.Integer,
                 allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
                 mapTo: "strpos",
                 parameters: [{ name: "@expression", dataType: $data.String }, { name: "strFragment", dataType: $data.String }]
@@ -47,7 +47,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
                 parameters: [{ name: "@expression", dataType: $data.String }, { name: "startIdx", dataType: $data.Number }, { name: "length", dataType: $data.Number }]
             },
             'strlen': {
-                dataType: $data.String,
+                dataType: $data.Integer,
                 allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
                 mapTo: "strlen",
                 parameters: [{ name: "@expression", dataType: $data.String }]

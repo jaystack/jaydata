@@ -58,7 +58,7 @@
                             }
                         }
                         
-                        var entity = new this.entitySet.createNew(bodyData);
+                        var entity = new this.entitySet.createNew(bodyData, { converters: $data.oDataConverter.fromDb });
                         this.entitySet.add(entity);
                         this.context.saveChanges({
                             success: function () {
@@ -103,7 +103,7 @@
                             }
                         }
 
-                        var entity = new this.entitySet.createNew(bodyData);
+                        var entity = new this.entitySet.createNew(bodyData, { converters: $data.oDataConverter.fromDb });
                         this.entitySet.attach(entity);
                         entity.changedProperties = entity.getType().memberDefinitions.getPublicMappedProperties().filter(function(p){
                             if (entity[p.name] === undefined) return false;

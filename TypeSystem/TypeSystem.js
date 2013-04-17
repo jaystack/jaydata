@@ -1184,7 +1184,7 @@
                     _converters.from[targetName] = toConverterOrFromConverters;
                 }
             }
-        }
+        };
     }
     $data.ContainerClass = ContainerCtor;
 

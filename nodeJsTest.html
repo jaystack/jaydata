@@ -9,41 +9,46 @@
     <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
     <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
+    <script type="text/javascript" src="Scripts/acorn.js"></script>
     
     <!--************************************************************************************-->
     <script type="text/javascript" src="TypeSystem/initializeJayDataClient.js"></script>
-    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
+    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>
     <script type="text/javascript" src="TypeSystem/utils.js"></script>
     <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
     <script type="text/javascript" src="JayService/Scripts/datajs-1.1.0-patched.js"></script>
-    <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
+<!--    <script type="text/javascript" src="TypeSystem/JayLint.js"></script>-->
+    <script type="text/javascript" src="TypeSystem/Exception.js"></script>
     <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
     <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
     <script type="text/javascript" src="TypeSystem/Trace/Logger.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Types.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/SimpleBase.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Geospatial.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Geography.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Geometry.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Guid.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Blob.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/EdmTypes.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Converter.js"></script>
     <script type="text/javascript" src="TypeSystem/Extensions.js"></script>
     <!--*******************************Expressions****************************************-->
-    <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
+<!--    <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>-->
     <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
-    
-    <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/CallExpression.js" ></script>
+
+    <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/CallExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/CodeParser.js"></script>
-    <script type="text/javascript" src="Types/Expressions/ConstantExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/FunctionExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/ObjectFieldExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/ObjectLiteralExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/PagingExpression.js" ></script>
+    <script type="text/javascript" src="Types/Expressions/ConstantExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/FunctionExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ObjectFieldExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ObjectLiteralExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/PagingExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/ParameterExpression.js"> </script>
-    <script type="text/javascript" src="Types/Expressions/PropertyExpression.js" ></script>   
-    <script type="text/javascript" src="Types/Expressions/SimpleBinaryExpression.js" ></script>
-    <script type="text/javascript" src="Types/Expressions/ThisExpression.js" ></script>    
-    
+    <script type="text/javascript" src="Types/Expressions/PropertyExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/SimpleBinaryExpression.js"></script>
+    <script type="text/javascript" src="Types/Expressions/ThisExpression.js"></script>
+
     <script type="text/javascript" src="Types/Expressions/Visitors/ExpressionVisitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/ParameterProcessor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/GlobalContextProcessor.js"></script>
@@ -55,9 +60,9 @@
     <script type="text/javascript" src="Types/Expressions/Visitors/ExpTreeVisitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/SetExecutableVisitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/Visitors/ExecutorVisitor.js"></script>
-    
+
     <script type="text/javascript" src="Types/Expressions/ExpressionBuilder.js"></script>
-    
+
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/AssociationInfoExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/CodeToEntityConverter.js"></script>
@@ -80,17 +85,19 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/QueryExpressionCreator.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/QueryParameterExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/RepresentationExpression.js"></script>
-    
-    <!--******************************* Validation ****************************************-->  
+
+    <script type="text/javascript" src="Types/Expressions/ContinuationExpressionBuilder.js"></script>
+
+    <!--******************************* Validation ****************************************-->
     <script type="text/javascript" src="Types/Validation/EntityValidationBase.js"></script>
     <script type="text/javascript" src="Types/Validation/EntityValidation.js"></script>
-    <!--******************************* Notification ****************************************-->  
+    <!--******************************* Notification ****************************************-->
     <script type="text/javascript" src="Types/Notifications/ChangeDistributorBase.js"></script>
     <script type="text/javascript" src="Types/Notifications/ChangeCollectorBase.js"></script>
     <script type="text/javascript" src="Types/Notifications/ChangeDistributor.js"></script>
     <script type="text/javascript" src="Types/Notifications/ChangeCollector.js"></script>
-    
-    <!--******************************* Types ****************************************--> 
+
+    <!--******************************* Types ****************************************-->
     <script type="text/javascript" src="Types/Access.js"></script>
     <script type="text/javascript" src="Types/Promise.js"></script>
     <script type="text/javascript" src="Types/Entity.js"></script>
@@ -106,7 +113,6 @@
     <script type="text/javascript" src="Types/EntityState.js"></script>
     <script type="text/javascript" src="Types/EntityStateManager.js"></script>
     <script type="text/javascript" src="Types/ItemStore.js"></script>
-    <script type="text/javascript" src="Types/Exception.js"></script>
     <script type="text/javascript" src="Types/StorageProviderLoader.js"></script>
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
     <script type="text/javascript" src="Types/ServiceOperation.js"></script>
@@ -116,10 +122,10 @@
     <script type="text/javascript" src="JaySvcUtil/JaySvcUtil.js"></script>
     <script type="text/javascript" src="Types/JayStorm.js"></script>
 
-    <!--******************************* Ajax*********************************************-->    
+    <!--******************************* Ajax*********************************************-->
     <script type="text/javascript" src="Types/Ajax/jQueryAjaxWrapper.js"></script>
     <script type="text/javascript" src="Types/Ajax/WinJSAjaxWrapper.js"></script>
-    <script type="text/javascript" src="Types/Ajax/ExtJSAjaxWrapper.js"></script>        
+    <script type="text/javascript" src="Types/Ajax/ExtJSAjaxWrapper.js"></script>
     <script type="text/javascript" src="Types/Ajax/AjaxStub.js"></script>
 
     <!--******************************* DbClient ****************************************-->
@@ -134,6 +140,7 @@
 
     <script type="text/javascript" src="Types/StorageProviders/modelBinderConfigCompiler.js"></script>
     <!--******************************* StorageProvider - sqLite ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteStorageProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
@@ -143,6 +150,7 @@
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataWhereCompiler.js"></script>
@@ -150,31 +158,48 @@
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
     <!--******************************* StorageProvider - IndexDb ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
-    
+
     <!--******************************* Authentication???? ****************************************-->
     <script type="text/javascript" src="Types/Authentication/AuthenticationBase.js"></script>
     <script type="text/javascript" src="Types/Authentication/Anonymous.js"></script>
     <script type="text/javascript" src="Types/Authentication/FacebookAuth.js"></script>
 
     <!--******************************* StorageProvider - Facebook ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/user.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/friend.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/page.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQLContext.js"></script>
-    
+
     <!--******************************* StorageProvider - YQL ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/YQL/YQLConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/YQLProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/YQLCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/geo.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/YQLContext.js"></script>
-        
+
     <!--******************************* StorageProvider - inMemory ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
+
+    <!--******************************* StorageProvider - webApi ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/WebApi/WebApiConverter.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/WebApi/WebApiProvider.js"></script>
+
+    <!--******************************* OData Parser ****************************************-->
+    <script type="text/javascript" src="oDataParser/RequestExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/RequestLexer.js"></script>
+    <script type="text/javascript" src="oDataParser/RequestParser.js"></script>
+
+    <script type="text/javascript" src="oDataParser/EntityExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/ODataEntityExpressionBuilder.js"></script>
+    <script type="text/javascript" src="oDataParser/Visitors/ObjectLiteralBuilderVisitor.js"></script>
 
     <!--******************************* jsExtensions ****************************************-->
     <script type="text/javascript" src="JayDataModules/deferred.js"></script>

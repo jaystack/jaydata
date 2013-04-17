@@ -661,30 +661,7 @@ $data.Class.define('$data.oDataServer.MetaDataGenerator', null, null, {
         }
     },
     _edmTypeMapping: {
-        value: {
-            '$data.Boolean': 'Edm.Boolean',
-            '$data.Blob': 'Edm.Binary',
-            '$data.Date': 'Edm.DateTime',
-            '$data.Number': 'Edm.Double',
-            '$data.Integer': 'Edm.Int32',
-            '$data.String': 'Edm.String',
-            '$data.ObjectID': 'Edm.String',
-            '$data.GeographyPoint': 'Edm.GeographyPoint',
-            '$data.GeographyLineString': 'Edm.GeographyLineString',
-            '$data.GeographyPolygon': 'Edm.GeographyPolygon',
-            '$data.GeographyMultiPoint': 'Edm.GeographyMultiPoint',
-            '$data.GeographyMultiLineString': 'Edm.GeographyMultiLineString',
-            '$data.GeographyMultiPolygon': 'Edm.GeographyMultiPolygon',
-            '$data.GeographyCollection': 'Edm.GeographyCollection',
-            '$data.GeometryPoint': 'Edm.GeometryPoint',
-            '$data.GeometryLineString': 'Edm.GeometryLineString',
-            '$data.GeometryPolygon': 'Edm.GeometryPolygon',
-            '$data.GeometryMultiPoint': 'Edm.GeometryMultiPoint',
-            '$data.GeometryMultiLineString': 'Edm.GeometryMultiLineString',
-            '$data.GeometryMultiPolygon': 'Edm.GeometryMultiPolygon',
-            '$data.GeometryCollection': 'Edm.GeometryCollection',
-            '$data.Guid': 'Edm.Guid'
-        }
+        value: $data.oDataEdmMapping
     },
 
     _discoverFunctionImports: function () {
