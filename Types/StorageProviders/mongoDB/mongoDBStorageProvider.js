@@ -353,6 +353,7 @@ $C('$data.storageProviders.mongoDB.mongoDBWhereCompiler', $data.Expressions.Enti
                 }
                 var v = context.value;
                 if (v instanceof Array){
+                    v = v.map(function (it) { return it.value; });
                     for (var i = 0; i < v.length; i++){
                         if (context.entityType && context.entityType.memberDefinitions)
                             v[i] = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.entityType.memberDefinitions.getMember(context.complexType ? context.lastField : context.field).type))](v[i]);
@@ -1001,7 +1002,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
                         d.data[p.name] = 0;
                     }else if (!p.computed){
-                        if (Container.resolveType(p.type) === $data.Array && p.elementType && Container.resolveType(p.elementType) === $data.ObjectID){
+                        /*if (Container.resolveType(p.type) === $data.Array && p.elementType && Container.resolveType(p.elementType) === $data.ObjectID){
                             d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
                             var arr = d.data[p.name];
                             if (arr){
@@ -1009,21 +1010,23 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                     arr[k] = self._typeFactory(p.elementType, arr[k], self.fieldConverter.toDb);
                                 }
                             }
-                        }else{
+                        }else{*/
                             d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);//self.fieldConverter.toDb[Container.resolveName(Container.resolveType(p.type))](d.data[p.name]);
-                        }
+                        //}
                         if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
-                    }else if (typeof d.data[p.name] === 'string'){
-                        d.data['_id'] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
+                    }else{//} if (typeof d.data[p.name] === 'string'){
+                        d.data['_id'] = self._typeFactory(p.type, d.data._id, self.fieldConverter.toDb);
                     }
                 }
 
                 docs.push(d.data);
             }
             
+            //console.log(docs);
             collection.insert(docs, { safe: true }, function(error, result){
                 if (error){
                     callBack.error(error);
+                    client.close();
                     return;
                 }
                 
@@ -1091,6 +1094,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     collection.update(where, { $set: set }, { safe: true }, function(error, result){
                         if (error){
                             callBack.error(error);
+                            client.close();
                             return;
                         }
                         
@@ -1110,6 +1114,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             collection.find({ _id: where._id }, {}).toArray(function(error, result){
                                 if (error){
                                     callBack.error(error);
+                                    client.close();
                                     return;
                                 }
                                 
@@ -1154,6 +1159,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 collection.remove(r.data, { safe: true }, function(error, result){
                     if (error){
                         callBack.error(error);
+                        client.close();
                         return;
                     }
                     
@@ -1264,11 +1270,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
             if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                if (Container.resolveType(memdef.type) === $data.Array && memdef.kind === $data.MemberTypes.property && item.physicalData[memdef.name]){
+                /*if (Container.resolveType(memdef.type) === $data.Array && memdef.kind === $data.MemberTypes.property && item.physicalData[memdef.name]){
                     serializableObject[memdef.name] = JSON.parse(JSON.stringify(item.physicalData[memdef.name]));
-                }else{
+                }else{*/
                     serializableObject[memdef.computed ? '_id' : memdef.name] = item.physicalData[memdef.name];
-                }
+                //}
             }
         }, this);
         return serializableObject;

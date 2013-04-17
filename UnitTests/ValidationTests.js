@@ -388,7 +388,7 @@
 
     });
 
-    test("Entity boolean field conversation from invalid string", 3, function () {
+    /*test("Entity boolean field conversation from invalid string", 3, function () {
         var efc = new entityFieldConversationClass();
 
         try {
@@ -411,7 +411,7 @@
             equal(e.name, "value '$data.String' not convertable to '$data.Boolean'", 'world is not valid boolean');
         }
 
-    });
+    });*/
 
     test("Entity date field conversation from invalid string", 3, function () {
         var efc = new entityFieldConversationClass();

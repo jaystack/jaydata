@@ -159,9 +159,11 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 	$(ODATAPARSER_DIR)/Visitors/ObjectLiteralBuilderVisitor.js\
 
-IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
+IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBConverter.js\
+	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
-SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
+SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteConverter.js\
+	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlPagingCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlOrderCompiler.js\
@@ -170,35 +172,41 @@ SqLiteProvider = $(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
-oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
+oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataConverter.js\
+	$(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataPagingCompiler.js\
 	$(TYPES_DIR)/StorageProviders/oData/oDataProjectionCompiler.js\
 
-FacebookProvider = $(TYPES_DIR)/StorageProviders/Facebook/FacebookProvider.js\
+FacebookProvider = $(TYPES_DIR)/StorageProviders/Facebook/FacebookConverter.js\
+	$(TYPES_DIR)/StorageProviders/Facebook/FacebookProvider.js\
 	$(TYPES_DIR)/StorageProviders/Facebook/FacebookCompiler.js\
 	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/user.js\
 	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/friend.js\
 	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/page.js\
 	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQLContext.js\
 
-YQLProvider = $(TYPES_DIR)/StorageProviders/YQL/YQLProvider.js\
+YQLProvider = $(TYPES_DIR)/StorageProviders/YQL/YQLConverter.js\
+	$(TYPES_DIR)/StorageProviders/YQL/YQLProvider.js\
 	$(TYPES_DIR)/StorageProviders/YQL/YQLCompiler.js\
 	$(TYPES_DIR)/StorageProviders/YQL/EntitySets/geo.js\
 	$(TYPES_DIR)/StorageProviders/YQL/EntitySets/YQLContext.js\
 
-InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
+InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryConverter.js\
+	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
 	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryCompiler.js\
 	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
 
-MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
+MongoDbProvider = $(TYPES_DIR)/StorageProviders/mongoDB/mongoDBConverter.js\
+	$(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/ClientObjectID.js\
 
 StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
 
-WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
+WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiConverter.js\
+	$(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
 
 DeferredModule = $(BASEMODULE_DIR)/deferred.js\
 

@@ -35,14 +35,6 @@
     <script type="text/javascript" src="TypeSystem/Types/Blob.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/EdmTypes.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Converter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/ODataConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/FacebookConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/YQLConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/IndexedDBConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/InMemoryConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/mongoDBConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/SqLiteConverter.js"></script>
-    <script type="text/javascript" src="TypeSystem/Types/WebApiConverter.js"></script>
     <script type="text/javascript" src="TypeSystem/Extensions.js"></script>
     <!--*******************************Expressions****************************************-->
 <!--    <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>-->
@@ -152,6 +144,7 @@
 
     <script type="text/javascript" src="Types/StorageProviders/modelBinderConfigCompiler.js"></script>
     <!--******************************* StorageProvider - sqLite ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteStorageProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
@@ -161,6 +154,7 @@
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataWhereCompiler.js"></script>
@@ -168,6 +162,7 @@
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
     <!--******************************* StorageProvider - IndexDb ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
 
     <!--******************************* Authentication???? ****************************************-->
@@ -176,6 +171,7 @@
     <script type="text/javascript" src="Types/Authentication/FacebookAuth.js"></script>
 
     <!--******************************* StorageProvider - Facebook ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/FacebookCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQL/user.js"></script>
@@ -184,17 +180,20 @@
     <script type="text/javascript" src="Types/StorageProviders/Facebook/EntitySets/FQLContext.js"></script>
 
     <!--******************************* StorageProvider - YQL ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/YQL/YQLConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/YQLProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/YQLCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/geo.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/YQL/EntitySets/YQLContext.js"></script>
 
     <!--******************************* StorageProvider - inMemory ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>
 
     <!--******************************* StorageProvider - webApi ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/WebApi/WebApiConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/WebApi/WebApiProvider.js"></script>
 
     <!--******************************* OData Parser ****************************************-->

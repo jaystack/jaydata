@@ -70,7 +70,7 @@ exports.testAddEntity = function(test){
                 var add6 = new $test.Item({ Key: 'aaa6', Value: 'bbb-1', Rank: 6 });
                 db.Items.add(add6);
                 db.Items.remove(add1);
-                
+
                 db.saveChanges(function(cnt){
                     test.equal(cnt, 2, 'Not 2 items saved to collection');
                     db.Items.toArray(function(r){
@@ -981,7 +981,7 @@ exports.testUpdateArrayID = function(test){
                             test.equal(cnt, 1, 'Item not added to collection');
                             db.ArrayIDs.toArray(function(r3){
                                 test.equal(cnt, 1, 'Item not added to collection');
-                                test.deepEqual(r3[0].Values[0], r[2].Id, 'Id mismatch');
+                                test.equal(r3[0].Values[0], r[2].Id, 'Id mismatch');
                                 test.done();
                             });
                         });

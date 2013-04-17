@@ -22,11 +22,15 @@
 
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
-    $data.Container.mapType(Edm_Decimal, $data.String);
+    $data.Container.mapType(Edm_Decimal, $data.Decimal);
+    
+    function Edm_Float() { };
+    $data.Container.registerType('Edm.Float', Edm_Float);
+    $data.Container.mapType(Edm_Float, $data.Float);
 
     function Edm_Single() { };
     $data.Container.registerType('Edm.Single', Edm_Single);
-    $data.Container.mapType(Edm_Single, $data.Number);
+    $data.Container.mapType(Edm_Single, $data.Float);
 
     function Edm_Double() { };
     $data.Container.registerType('Edm.Double', Edm_Double);
@@ -38,7 +42,7 @@
 
     function Edm_Int16() { };
     $data.Container.registerType('Edm.Int16', Edm_Int16);
-    $data.Container.mapType(Edm_Int16, $data.Integer);
+    $data.Container.mapType(Edm_Int16, $data.Int16);
 
     function Edm_Int32() { };
     $data.Container.registerType('Edm.Int32', Edm_Int32);
@@ -46,11 +50,15 @@
 
     function Edm_Int64() { };
     $data.Container.registerType('Edm.Int64', Edm_Int64);
-    $data.Container.mapType(Edm_Int64, $data.Integer);
+    $data.Container.mapType(Edm_Int64, $data.Int64);
 
     function Edm_Byte() { };
     $data.Container.registerType('Edm.Byte', Edm_Byte);
-    $data.Container.mapType(Edm_Byte, $data.Integer);
+    $data.Container.mapType(Edm_Byte, $data.Byte);
+    
+    function Edm_SByte() { };
+    $data.Container.registerType('Edm.SByte', Edm_SByte);
+    $data.Container.mapType(Edm_SByte, $data.SByte);
 
     function Edm_String() { };
     $data.Container.registerType('Edm.String', Edm_String);

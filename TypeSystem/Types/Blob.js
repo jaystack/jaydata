@@ -56,6 +56,9 @@ $data.Container.registerConverter('$data.Blob',{
     '$data.Array': function(value){
         return new $data.Blob(value);
     },
+    '$data.Number': function(value){
+        return new $data.Blob(new Uint8Array(new Float64Array([value]).buffer));
+    },
     'default': function(value){
         throw 0;
     }

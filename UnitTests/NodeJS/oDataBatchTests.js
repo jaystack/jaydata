@@ -802,17 +802,20 @@ if ($data.storageProviders.mongoDBPro){
         $example.Context.generateTestData(context, function () {
 
             //console.log(context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toTraceString());
-            context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) }).toArray(function (p) {
+            console.log('filterGeoDataFromDb');
+            context.Places.filter(function(it){ return it.Location.distance(this.point) < 0.0004 }, { point: new $data.GeographyPoint([0.01, 0.01]) })
+            .orderByDescending('it.Name')
+            .toArray(function (p) {
                 test.equal(p.length, 3, 'Places count failed');
                 //console.log(p.map(function(it){ return it.initData.Location; }));
                 test.deepEqual(p.map(function(it){ return it.initData.Location; }), [
                     {
                         type: 'Point',
-                        coordinates: [0.01, 0.01],
+                        coordinates: [0.02, 0.02],
                         crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }, {
                         type: 'Point',
-                        coordinates: [0.02, 0.02],
+                        coordinates: [0.01, 0.01],
                         crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }, {
                         type: 'Point',

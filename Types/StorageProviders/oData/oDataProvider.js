@@ -698,7 +698,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         enumerable: true,
         writable: true
     },
-    fieldConverter: { value: $data.ODataConverter },
+    fieldConverter: { value: $data.oDataConverter },
     resolveTypeOperations: function (operation, expression, frameType) {
         var memDef = expression.entityType.getMemberDefinition(operation);
         if (!memDef ||

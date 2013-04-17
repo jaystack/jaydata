@@ -18,9 +18,9 @@ $data.Container.registerConverter('$data.Integer', {
         return value | 0;
     },
     '$data.String': function(value){
-        var r = parseInt(value);
+        var r = parseInt(value, 10);
         if (isNaN(r)) throw 0;
-        return r;
+        return r | 0;
     },
     '$data.Date': function(value){
         var r = value.valueOf();
@@ -137,7 +137,7 @@ $data.Container.registerConverter('$data.Int16', {
     }
 });
 
-$data.Container.registerConverter('$data.Int32', {
+/*$data.Container.registerConverter('$data.Int32', {
     '$data.Boolean': function(value){
         return value ? 1 : 0;
     },
@@ -156,7 +156,7 @@ $data.Container.registerConverter('$data.Int32', {
         r = r & 0xffffffff;
         return r;
     }
-});
+});*/
 
 $data.Container.registerConverter('$data.Int64', {
     '$data.Boolean': function(value){
@@ -205,7 +205,7 @@ $data.Container.registerConverter('$data.String', {
         return value.toISOString();
     },
     '$data.ObjectID': function(value){
-        return btoa(value.toString());
+        return value.toString();
     },
     'default': function(value){
         return value.toString();
@@ -225,17 +225,19 @@ $data.Container.registerConverter('$data.Array', {
 });
 
 $data.Container.registerConverter('$data.ObjectID', {
-    '$data.String': function(value){
-        try{
-            
-        }catch(e){
+    '$data.String': function(id){
+        if (id && typeof id === 'string'){
             try{
-                return new $data.mongoDBDriver.ObjectID.createFromHexString(new Buffer(value, 'base64').toString('ascii'));
+                return new $data.ObjectID(id);
             }catch(e){
-                console.log(e);
-                throw 0;
+                try{
+                    return new $data.ObjectID(new Buffer(id, 'base64').toString('ascii'));
+                }catch(e){
+                    console.log(e);
+                    return id;
+                }
             }
-        }
+        }else return id;
     }
 });
 

@@ -18,7 +18,7 @@
             var q = require('q');
             
             test.equal(q.isPromise(new $data.PromiseHandlerBase().getPromise()), false, '$data.PromiseHandlerBase returns Q promise failed!');
-            test.equal(q.isPromise(promise), true, '$data.PromiseHandler returns Q promise failed!');
+            test.equal(q.isPromise(promise), true, '$data.PromiseHandler returns Q promise failed!' + promise);
 
             test.done();
         });
