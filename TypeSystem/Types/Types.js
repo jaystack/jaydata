@@ -15,7 +15,7 @@ $data.Int16 = function JayInt16(v) { };
 $data.Int64 = function JayInt64(v) { };
 $data.ObjectID = typeof $data.mongoDBDriver !== 'undefined' && typeof $data.mongoDBDriver.ObjectID !== 'undefined' ? $data.mongoDBDriver.ObjectID : function JayObjectID() { };
 $data.Time = function JayTime(){};
-$data.DateTimeOffset = function JayDateTimeOffset();
+$data.DateTimeOffset = function JayDateTimeOffset(){};
 
 $data.ObjectID['to$data.ObjectID'] = function(value){
     try{
