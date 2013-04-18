@@ -37,3 +37,6 @@ try{
 try{
     window.DOMParser = require("xmldom").DOMParser;
 }catch(e){}
+
+if (typeof atob === 'undefined') atob = window.atob = function (buffer) { return new Buffer(buffer, 'base64').toString('binary'); };
+if (typeof btoa === 'undefined') btoa = window.btoa = function (buffer) { return new Buffer(buffer, 'binary').toString('base64'); };

@@ -25,8 +25,8 @@ $data.oDataConverter = {
                 return dbData;
             }
         },
-        '$data.Time': function(v){ return $data.Container.convertTo(v, $data.Time); },
-        '$data.DateTimeOffset': function(v){ return $data.Container.convertTo(v, $data.DateTimeOffset); },
+        '$data.Time': function (v) { return $data.Container.convertTo(v, $data.Time); },
+        '$data.DateTimeOffset': function (v) { return $data.Container.convertTo(v, $data.DateTimeOffset); },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function (v) { try { return $data.Container.convertTo(atob(v), '$data.Blob'); } catch (e) { return v; } },
@@ -60,8 +60,8 @@ $data.oDataConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
-        '$data.Time': function(v){ return v ? v.toTimeString().split(' ')[0] : v; },
-        '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
+        '$data.Time': function (v) { return v ? v.toTimeString().split(' ')[0] : v; },
+        '$data.DateTimeOffset': function (v) { return v ? v.toISOString() : v; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function (v) { return v ? btoa(v.toString()) : v; },
@@ -216,7 +216,7 @@ $data.oDataConverter = {
             }
             return v;
         },
-        '$data.Blob': function(v){
+        '$data.Blob': function (v) {
             if (typeof v === 'string' && /^X'/.test(v)) {
                 return $data.Blob.createFromHexString(v.slice(2, v.length - 1));
             }
@@ -249,8 +249,8 @@ $data.oDataConverter = {
         '$data.Boolean': function (v) { return v.toString(); },
         '$data.Blob': function (v) { return btoa(v.toString()); },
         '$data.Date': function (v) { return v.toISOString().replace('Z', ''); },
-        '$data.DateTimeOffset': function(v){ return v.toISOString(); },
-        '$data.Time': function(v){ return v.toTimeString().split(' ')[0]; },
+        '$data.DateTimeOffset': function (v) { return v.toISOString(); },
+        '$data.Time': function (v) { return v.toTimeString().split(' ')[0]; },
         '$data.Number': function (v) { return v.toString(); },
         '$data.Integer': function (v) { return v.toString(); },
         '$data.String': function (v) { return v.toString(); },
@@ -273,11 +273,11 @@ $data.oDataConverter = {
         '$data.Integer': function (o) { return o.toString(); },
         '$data.Number': function (o) { return o.toString(); },
         '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
-        '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
-        '$data.Time': function(v){ return v ? v.toTimeString().split(' ')[0] : v; },
+        '$data.DateTimeOffset': function (v) { return v ? v.toISOString() : v; },
+        '$data.Time': function (v) { return v ? v.toTimeString().split(' ')[0] : v; },
         '$data.String': function (o) { return o.toString(); },
         '$data.Boolean': function (o) { return o.toString(); },
-        '$data.Blob': function (o) { return btoa(o.toString()); },
+        '$data.Blob': function (o) { return new Buffer(o.valueOf()); },
         '$data.Object': function (o) { return JSON.stringify(o); },
         '$data.Array': function (o) { return JSON.stringify(o); },
         '$data.Guid': function (o) { return o.toString(); },

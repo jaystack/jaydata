@@ -584,49 +584,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.entitySet = storageModelObject;
         this.build = function () {
 
-            switch (Container.resolveType(this.fld.dataType)) {
-                case $data.Array:
-                case $data.String:
-                case $data.Guid:
-                case "text":
-                case "string":
-                case $data.GeographyPoint:
-                case $data.GeographyLineString:
-                case $data.GeographyPolygon:
-                case $data.GeographyMultiPoint:
-                case $data.GeographyMultiLineString:
-                case $data.GeographyMultiPolygon:
-                case $data.GeographyCollection:
-                case $data.GeometryPoint:
-                case $data.GeometryLineString:
-                case $data.GeometryPolygon:
-                case $data.GeometryMultiPoint:
-                case $data.GeometryMultiLineString:
-                case $data.GeometryMultiPolygon:
-                case $data.GeometryCollection:
-                    this.buildFieldNameAndType("TEXT");
-                    break;
-                case $data.Boolean:
-                case $data.Integer:
-                case "bool":
-                case "boolean":
-                case "int":
-                case "integer":
-                    this.buildFieldNameAndType("INTEGER");
-                    break;
-                case $data.Number:
-                case $data.Date:
-                case "number":
-                case "datetime":
-                case "date":
-                    this.buildFieldNameAndType("REAL");
-                    break;
-                case $data.Blob:
-                case "blob":
-                    this.buildFieldNameAndType("BLOB");
-                    break;
-                default: this.buildRelations();
-                    break;
+            var typeName = Container.resolveName(this.fld.dataType);
+            var mapping = $data.SqLiteFieldMapping[typeName];
+
+            if (mapping) {
+                this.buildFieldNameAndType(mapping);
+            } else {
+                this.buildRelations();
             }
 
             return this.fieldDef;

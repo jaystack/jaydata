@@ -64,3 +64,37 @@ $data.SqLiteConverter = {
         '$data.GeometryCollection': function (g) { if (g) { return JSON.stringify(g); } return g; }
     }
 };
+
+$data.SqLiteFieldMapping = {
+    '$data.Byte': "INTEGER",
+    '$data.SByte': "INTEGER",
+    '$data.Decimal': "TEXT",
+    '$data.Float': "REAL",
+    '$data.Int16': "INTEGER",
+    '$data.Int64': "TEXT",
+    "$data.Integer": "INTEGER",
+    "$data.Number": "REAL",
+    "$data.Date": "REAL",
+    "$data.Time": "REAL",
+    "$data.DateTimeOffset": "REAL",
+    "$data.String": "TEXT",
+    "$data.Boolean": "INTEGER",
+    "$data.Blob": "BLOB",
+    "$data.Array": "TEXT",
+    "$data.Guid": "TEXT",
+    "$data.Object": "TEXT",
+    '$data.GeographyPoint': "TEXT",
+    '$data.GeographyLineString': "TEXT",
+    '$data.GeographyPolygon': "TEXT",
+    '$data.GeographyMultiPoint': "TEXT",
+    '$data.GeographyMultiLineString': "TEXT",
+    '$data.GeographyMultiPolygon': "TEXT",
+    '$data.GeographyCollection': "TEXT",
+    '$data.GeometryPoint': "TEXT",
+    '$data.GeometryLineString': "TEXT",
+    '$data.GeometryPolygon': "TEXT",
+    '$data.GeometryMultiPoint': "TEXT",
+    '$data.GeometryMultiLineString': "TEXT",
+    '$data.GeometryMultiPolygon': "TEXT",
+    '$data.GeometryCollection': "TEXT"
+};
