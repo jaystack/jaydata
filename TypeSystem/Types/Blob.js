@@ -24,6 +24,9 @@ $data.Blob.prototype = {
         }
         
         return s.toUpperCase();
+    },
+    toDataURL: function(){
+        return 'data:application/octet-stream;base64,' + btoa(this.toString());
     }
 };
 
@@ -60,6 +63,12 @@ $data.Container.registerConverter('$data.Blob',{
         return new $data.Blob(new Uint8Array(new Float64Array([value]).buffer));
     },
     'default': function(value){
+        if (typeof Blob !== 'undefined' && value instanceof Blob){
+            var req = new XMLHttpRequest();
+            req.open('GET', URL.createObjectURL(value), false);
+            req.send(null);
+            return $data.Container.convertTo(req.responseText, $data.Blob);
+        }
         throw 0;
     }
 }, {

@@ -17,19 +17,6 @@ $data.ObjectID = typeof $data.mongoDBDriver !== 'undefined' && typeof $data.mong
 $data.Time = function JayTime(){};
 $data.DateTimeOffset = function JayDateTimeOffset(){};
 
-$data.ObjectID['to$data.ObjectID'] = function(value){
-    try{
-        return value.toString();
-    }catch(e){
-        console.log(e);
-        return value;
-    }
-};
-
-$data.ObjectID.prototype.valueOf = function(){
-    return this.toString();
-};
-
 $data.Container.registerType(["$data.Number", "number", "JayNumber", "double"], $data.Number);
 $data.Container.registerType(["$data.Integer", "$data.Int32", "int", "int32", "integer", "JayInteger"], $data.Integer);
 $data.Container.registerType(["$data.Byte", "byte", "JayByte"], $data.Byte);

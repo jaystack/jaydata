@@ -35,7 +35,7 @@ $data.WebApiConverter = {
         '$data.Date': function (date) { return date ? "datetime'" + date.toISOString() + "'" : null; },
         '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
         '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
-        '$data.Blob': function (blob) { return blob; },
+        '$data.Blob': $data.Container.proxyConverter,
         '$data.Object': function (o) { return JSON.stringify(o); },
         '$data.Array': function (o) { return JSON.stringify(o); },
         '$data.GeographyPoint': function (geo) {

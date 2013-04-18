@@ -205,7 +205,7 @@ $data.Container.registerConverter('$data.String', {
         return value.toISOString();
     },
     '$data.ObjectID': function(value){
-        return value.toString();
+        return btoa(value.toString());
     },
     'default': function(value){
         return value.toString();
@@ -225,8 +225,16 @@ $data.Container.registerConverter('$data.Array', {
 });
 
 $data.Container.registerConverter('$data.ObjectID', {
+    '$data.ObjectID': function(value){
+        try{
+            return btoa(value.toString());
+        }catch(e){
+            return value;
+        }
+    },
     '$data.String': function(id){
-        if (id && typeof id === 'string'){
+        return id;
+        /*if (id && typeof id === 'string'){
             try{
                 return new $data.ObjectID(id);
             }catch(e){
@@ -237,7 +245,7 @@ $data.Container.registerConverter('$data.ObjectID', {
                     return id;
                 }
             }
-        }else return id;
+        }else return id;*/
     }
 });
 

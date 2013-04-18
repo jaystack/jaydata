@@ -73,7 +73,7 @@ $data.InMemoryConverter = {
         '$data.Date': function (date) { return date ? "new Date(Date.parse('" + date.toISOString() + "'))" : date; },
         '$data.String': function (text) { return "'" + text.replace(/'/g, "''") + "'"; },
         '$data.Boolean': function (bool) { return bool ? 'true' : 'false'; },
-        '$data.Blob': function (blob) { return typeof blob === 'string' ? "'" + blob + "'" : blob; },
+        '$data.Blob': function (blob) { return blob.toString(); },
         '$data.Object': function (o) { return JSON.stringify(o); },
         '$data.Array': function (o) { return JSON.stringify(o); },
         '$data.Guid': function (guid) { return guid ? "'" + guid.toString() + "'" : guid; }
