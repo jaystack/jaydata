@@ -59,7 +59,11 @@ $data.Class.define('$data.Queryable', null, null,
         /// { gender: 'Male',  age: 21 });
         ///</example>
         ///</signature>
-
+        if (arguments.length === 3) {
+            predicate = "it." + arguments[0] + 
+                (arguments[1][0] === "." ? (arguments[1] + "(param)") : (" " + arguments[1] + " param"));
+            thisArg = { param : arguments[2] }
+        }
         this._checkOperation('filter');
         var expression = Container.createCodeExpression(predicate, thisArg);
         var expressionSource = this.expression;
