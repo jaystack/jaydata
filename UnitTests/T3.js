@@ -2,6 +2,70 @@ function T3(providerConfig, msg) {
     msg = msg || '';
     module("DataTests" + msg);
 
+    test('BreezeLikeAPI', 6, function () {
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles
+                    .filter("Id", "==", 1)
+                    .toArray(function (items) {
+                        start();
+                        equal(items.length, 1, "one record found");
+                        equal(items[0].Id, 1, "record is Id = 1");
+                    });
+
+                db.Articles
+                    .filter("Id", "in", [1,3,5,7])
+                    .toArray(function (items) {
+                        start();
+                        equal(items.length, 4, "one record found");
+                        equal(items[1].Id, 3, "record is Id = 3");
+                    });
+
+                db.Articles
+                    .filter("Title", ".startsWith", "Article2")
+                    .filter("Title", ".contains", "25")
+                    .toArray(function (items) {
+                        start();
+                        equal(items.length, 1, "one record found");
+                    });
+
+
+                db.Articles
+                    .include("Author")
+                    .filter("Author.LoginName", ".startsWith", "Usr1")
+                    .filter("Id", ">", 10)
+                    .toArray(function (items) {
+                        start();
+                        equal(items[0].Author.LoginName, 'Usr1', 'Author matches');
+                        //equal(items.length, 1, "one record found");
+                    });
+
+                //db.Articles
+                //    .filter("Id", "in", [1, 3, 5, 7])
+                //    .toArray(function (items) {
+                //        start();
+                //        equal(items.length, 4, "one record found");
+                //        equal(items[1].Id, 3, "record is Id = 3");
+                //    });
+                //db.Articles.take(5).toArray(function (it) {
+                //    deepEqual(it.map(function (i) { return i.Id; }), [1, 2, 3, 4, 5], 'item Id list');
+                //    equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+
+                //    it.next().then(function (it) {
+                //        deepEqual(it.map(function (i) { return i.Id; }), [6, 7, 8, 9, 10], 'next item Id list');
+                //        equal(it[0] instanceof $news.Types.Article, true, 'not anonymous type');
+                //        start();
+                //    }).fail(function (ex) {
+                //        ok(false, 'Error: ' + ex);
+                //        start();
+                //    });
+                //})
+
+            });
+        });
+    });
+
     test('paging - next - 5', 4, function () {
         stop();
 
