@@ -180,13 +180,17 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
                     var type = Container.resolveType(memberDef.type);
                     var value = initData[i];
 
-                    if (newInstanceOptions && newInstanceOptions.converters) {
-                        var converter = newInstanceOptions.converters[Container.resolveName(type)];
-                        if (converter)
-                            value = converter(value);
-                    }
+                    if (memberDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                        this.initData[i] = value;
+                    } else {
+                        if (newInstanceOptions && newInstanceOptions.converters) {
+                            var converter = newInstanceOptions.converters[Container.resolveName(type)];
+                            if (converter)
+                                value = converter(value);
+                        }
 
-                    this.initData[i] = Container.convertTo(value, type, memberDef.elementType, newInstanceOptions);
+                        this.initData[i] = Container.convertTo(value, type, memberDef.elementType, newInstanceOptions);
+                    }
                 }
             }
 
@@ -271,7 +275,10 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="memberDefinition" type="MemberDefinition" />
         /// <param name="value" />
 
-        value = Container.convertTo(value, memberDefinition.type, memberDefinition.elementType);
+        if (memberDefinition.concurrencyMode !== $data.ConcurrencyMode.Fixed) {
+            value = Container.convertTo(value, memberDefinition.type, memberDefinition.elementType);
+        }
+
         var eventData = null;
         if (memberDefinition.monitorChanges != false && (this._propertyChanging || this._propertyChanged || "instancePropertyChanged" in this.constructor)) {
             var origValue = this[memberDefinition.name];
