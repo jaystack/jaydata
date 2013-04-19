@@ -394,6 +394,7 @@
     <Content Include="Pro\UnitTests\T2.js" />
     <Content Include="Pro\UnitTests\transactionTests.js" />
     <Content Include="Scripts\acorn.js" />
+    <Content Include="Scripts\datajs-1.1.1beta.js" />
     <Content Include="Scripts\esprima.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
