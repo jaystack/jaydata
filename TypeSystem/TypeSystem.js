@@ -1574,21 +1574,28 @@ $data.typeSystem = {
             error: $data.defaultErrorCallback,
             notify: $data.defaultNotifyCallback
         };
+
         if (defaultSetting != undefined && defaultSetting != null) {
             setting = defaultSetting;
         }
+
+        var result;
         if (callBack == null || callBack == undefined) {
-            return setting;
-        }
-        if (typeof callBack == 'function') {
-            return this.extend(setting, { success: callBack });
+            result = setting;
+
+        } else if (typeof callBack == 'function') {
+            result = this.extend(setting, { success: callBack });
+
+        } else {
+            result = this.extend(setting, callBack);
         }
 
-        var clb = this.extend(setting, callBack);
         function wrapCode(fn) { var t = this; function r() { fn.apply(t, arguments); fn = function () { } } return r; }
-        clb.error = wrapCode(clb.error);
 
-        return clb;
+        if (typeof result.error === 'function')
+            result.error = wrapCode(result.error);
+
+        return result;
     },
     createCtorParams: function (source, indexes, thisObj) {
         ///<param name="source" type="Array" />Paramerter array

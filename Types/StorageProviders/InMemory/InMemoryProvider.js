@@ -18,7 +18,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
 
         var setKeys = [];
         for(var i in this.context._entitySetReferences){
-            setKeys.push(this.context._entitySetReferences[i].tableName);
+            setKeys.push(this.context._entitySetReferences[i].collectionName);
         }
         var localStorageData = null;
         if(this.providerConfiguration.persistentData && window.localStorage){
@@ -63,17 +63,21 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             if (tempSource[storageModel.TableName]) {
                 for (var i = 0; i < tempSource[storageModel.TableName].length; i++) {
                     var entity = tempSource[storageModel.TableName][i];
-                    if(entity instanceof storageModel.LogicalType){
-                        if(isIntegerPk){
-                            var keyValue = entity[computedKeys[0].name]
-                            if (keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName]) {
-                                this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = keyValue;
-                            }
+                    if (!(entity instanceof storageModel.LogicalType)) {
+                        if (localStorageData) {
+                            entity = new storageModel.LogicalType(entity);
+                        } else {
+                            Guard.raise(new Exception('Invalid element in source: ' + storageModel.TableName));
                         }
-                        this.providerConfiguration.source[storageModel.TableName].push(entity);
-                    }else{
-                        Guard.raise(new Exception('Invalid element in source: ' + storageModel.TableName));
                     }
+
+                    if(isIntegerPk){
+                        var keyValue = entity[computedKeys[0].name]
+                        if (keyValue > this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName]) {
+                            this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = keyValue;
+                        }
+                    }
+                    this.providerConfiguration.source[storageModel.TableName].push(entity);
                 }
             }
         }
