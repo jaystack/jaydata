@@ -11,10 +11,13 @@ $data.Container.registerConverter('$data.Boolean', {
 });
 
 $data.Container.registerConverter('$data.Integer', {
-    '$data.Boolean': function(value){
+    /*'$data.Boolean': function(value){
         return value ? 1 : 0;
-    },
-    '$data.Number': function(value){
+    },*/
+    'default': function(value){
+        return value | 0;
+    }
+    /*'$data.Number': function(value){
         return value | 0;
     },
     '$data.String': function(value){
@@ -26,11 +29,11 @@ $data.Container.registerConverter('$data.Integer', {
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
         return r;
-    }
+    }*/
 });
 
 $data.Container.registerConverter('$data.Number', {
-    '$data.Boolean': function(value){
+    /*'$data.Boolean': function(value){
         return value ? 1 : 0;
     },
     '$data.String': function(value){
@@ -42,11 +45,16 @@ $data.Container.registerConverter('$data.Number', {
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
         return r;
+    }*/
+    'default': function(value){
+        var r = +value;
+        if (isNaN(r)) throw 0;
+        return r;
     }
 });
 
 $data.Container.registerConverter('$data.Byte', {
-    '$data.Boolean': function(value){
+    /*'$data.Boolean': function(value){
         return value ? 1 : 0;
     },
     '$data.Number': function(value){
@@ -66,6 +74,9 @@ $data.Container.registerConverter('$data.Byte', {
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
         return r & 0xff;
+    }*/
+    'default': function(value){
+        return (value | 0) & 0xff;
     }
 });
 
@@ -96,7 +107,7 @@ $data.Container.registerConverter('$data.Decimal', {
 });
 
 $data.Container.registerConverter('$data.Float', {
-    '$data.Boolean': function(value){
+    /*'$data.Boolean': function(value){
         return value ? 1 : 0;
     },
     '$data.Number': function(value){
@@ -110,11 +121,16 @@ $data.Container.registerConverter('$data.Float', {
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
         return new Float32Array([r])[0];
+    }*/
+    'default': function(value){
+        var r = +value;
+        if (isNaN(r)) throw 0;
+        return new Float32Array([r])[0];
     }
 });
 
 $data.Container.registerConverter('$data.Int16', {
-    '$data.Boolean': function(value){
+    /*'$data.Boolean': function(value){
         return value ? 1 : 0;
     },
     '$data.Number': function(value){
@@ -132,6 +148,11 @@ $data.Container.registerConverter('$data.Int16', {
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
         r = r & 0xffff;
+        if (r >= 0x8000) return r - 0x10000;
+        return r;
+    }*/
+    'default': function(value){
+        var r = (value | 0) & 0xffff;
         if (r >= 0x8000) return r - 0x10000;
         return r;
     }
@@ -163,11 +184,11 @@ $data.Container.registerConverter('$data.Int64', {
         return value ? '1' : '0';
     },
     '$data.Number': function(value){
-        return value.toString();
+        return Math.floor(value).toString();
     },
     '$data.String': function(value){
         if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        return value;
+        return parseInt(value, 10).toString();
     },
     '$data.Date': function(value){
         var r = value.valueOf();
@@ -177,7 +198,7 @@ $data.Container.registerConverter('$data.Int64', {
 });
 
 $data.Container.registerConverter('$data.SByte', {
-    '$data.Boolean': function(value){
+    /*'$data.Boolean': function(value){
         return value ? 1 : 0;
     },
     '$data.Number': function(value){
@@ -195,6 +216,11 @@ $data.Container.registerConverter('$data.SByte', {
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
         r = r & 0xff;
+        if (r >= 0x80) return r - 0x100;
+        return r;
+    }*/
+    'default': function(value){
+        var r = (value | 0) & 0xff;
         if (r >= 0x80) return r - 0x100;
         return r;
     }
