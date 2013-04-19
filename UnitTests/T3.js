@@ -3,7 +3,7 @@ function T3(providerConfig, msg) {
     module("DataTests" + msg);
 
     test('BreezeLikeAPI', 6, function () {
-        stop(3);
+        stop(4);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             $news.Types.NewsContext.generateTestData(db, function () {
                 db.Articles

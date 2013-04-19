@@ -1,5 +1,4 @@
 try { if (typeof navigator === 'undefined') navigator = window.navigator = require('navigator'); }catch(err){}
-if (typeof btoa === 'undefined') btoa = window.btoa = function(buffer){ return new Buffer(buffer, 'ascii').toString('base64'); };
 
 $data.Class.define('$data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID', null, null, {
     constructor: function(){

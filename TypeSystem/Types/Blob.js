@@ -82,6 +82,8 @@ $data.Container.registerConverter('$data.Blob',{
             req.open('GET', URL.createObjectURL(value), false);
             req.send(null);
             return $data.Container.convertTo(req.responseText, $data.Blob);
+        } else if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
+            return new $data.Blob(value);
         }
         throw 0;
     }

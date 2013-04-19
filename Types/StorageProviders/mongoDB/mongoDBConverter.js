@@ -11,7 +11,7 @@ $data.mongoDBConverter = {
         '$data.Date': function (date) { return date ? new Date(date) : date; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
-        '$data.Blob': $data.Container.proxyConverter,
+        '$data.Blob': function (v) { return v ? new $data.Blob(v) : v; },
         '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
         '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
         '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
@@ -55,31 +55,31 @@ $data.mongoDBConverter = {
             //return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool;
             return bool === null || bool === undefined ? null : !!bool;
         },*/
-        '$data.Blob': $data.Container.proxyConverter,
+        '$data.Blob': function (v) { return v ? v.valueOf() : v; },
         '$data.Object': $data.Container.proxyConverter,
         '$data.Array': $data.Container.proxyConverter,
         '$data.ObjectID': function (id) {
-            if (id && typeof id === 'string'){
-                try{
+            if (id && typeof id === 'string') {
+                try {
                     return new $data.ObjectID(id);
-                }catch(e){
-                    try{
+                } catch (e) {
+                    try {
                         return new $data.ObjectID(new Buffer(id, 'base64').toString('ascii'));
-                    }catch(e){
+                    } catch (e) {
                         console.log(e);
                         return id;
                     }
                 }
-            }else return id;
+            } else return id;
         },
-        '$data.GeographyPoint': function (g) { return g.coordinates; },
+        '$data.GeographyPoint': function (g) { return g ? g.coordinates : g; },
         '$data.GeographyLineString': $data.Container.proxyConverter,
         '$data.GeographyPolygon': $data.Container.proxyConverter,
         '$data.GeographyMultiPoint': $data.Container.proxyConverter,
         '$data.GeographyMultiLineString': $data.Container.proxyConverter,
         '$data.GeographyMultiPolygon': $data.Container.proxyConverter,
         '$data.GeographyCollection': $data.Container.proxyConverter,
-        '$data.GeometryPoint': function (g) { return g.coordinates; },
+        '$data.GeometryPoint': function (g) { return g ? g.coordinates : g; },
         '$data.GeometryLineString': $data.Container.proxyConverter,
         '$data.GeometryPolygon': $data.Container.proxyConverter,
         '$data.GeometryMultiPoint': $data.Container.proxyConverter,
