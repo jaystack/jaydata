@@ -1,38 +1,8 @@
-$data.Blob = function Blob(value){
-    this.value = new Uint8Array(value);
-};
-
-$data.Blob.prototype = {
-    valueOf: function(){
-        return this.value;
-    },
-    toString: function(){
-        var s = '';
-        for (var i = 0; i < this.value.length; i++){
-            s += String.fromCharCode(this.value[i]);
-        }
-        
-        return s;
-    },
-    toJSON: function(){
-        return btoa(this.toString());
-    },
-    toHexString: function(){
-        var s = '';
-        for (var i = 0; i < this.value.length; i++){
-            s += this.value[i].toString(16);
-        }
-        
-        return s.toUpperCase();
-    },
-    toDataURL: function(){
-        return 'data:application/octet-stream;base64,' + btoa(this.toString());
-    }
-};
+$data.Blob = function Blob(){};
 
 $data.Blob.createFromHexString = function(value){
     if (value != value.match(new RegExp('[0-9a-fA-F]+'))[0]){
-        Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', value));
+        Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Blob', value));
     }else{
         if (value.length & 1) value = '0' + value;
         var arr = new Uint8Array(value.length >> 1);
@@ -40,27 +10,71 @@ $data.Blob.createFromHexString = function(value){
             arr[k] = parseInt('0x' + value[i] + value[j], 16);
         }
         
-        return new $data.Blob(arr);
+        return new $data.Blob(arr).toString();
     }
+};
+
+$data.Blob.toString = function(value){
+    if (!value || !value.length) return null;
+    var s = '';
+    for (var i = 0; i < value.length; i++){
+        s += String.fromCharCode(value[i]);
+    }
+    
+    return s;
+};
+
+$data.Blob.toBase64 = function(value){
+    if (!value || !value.length) return null;
+    return btoa($data.Blob.toString(value));
+};
+
+$data.Blob.toArray = function(src){
+    if (!src || !src.length) return null;
+    var arr = new Array(src.length);
+    for (var i = 0; i < src.length; i++){
+        arr[i] = src[i];
+    }
+    
+    return arr;
+};
+
+/*$data.Blob.toJSON = function(value){
+    return JSON.stringify($data.Blob.toArray(value));
+};*/
+
+$data.Blob.toHexString = function(value){
+    if (!value || !value.length) return null;
+    var s = '';
+    for (var i = 0; i < value.length; i++){
+        s += value[i].toString(16);
+    }
+    
+    return s.toUpperCase();
+};
+
+$data.Blob.toDataURL = function(value){
+    if (!value || !value.length) return null;
+    return 'data:application/octet-stream;base64,' + btoa($data.Blob.toString(value));
 };
 
 $data.Container.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
 $data.Container.registerConverter('$data.Blob',{
     '$data.String': function (value){
         if (value && value.length){
-            var blob = new $data.Blob(value.length);
+            var blob = new (Buffer || Uint8Array)(value.length);
             for (var i = 0; i < value.length; i++){
-                blob.value[i] = value.charCodeAt(i);
+                blob[i] = value.charCodeAt(i);
             }
             
             return blob;
         }else return null;
     },
     '$data.Array': function(value){
-        return new $data.Blob(value);
+        return new (Buffer || Uint8Array)(value);
     },
     '$data.Number': function(value){
-        return new $data.Blob(new Uint8Array(new Float64Array([value]).buffer));
+        return new (Buffer || Uint8Array)(new Float64Array([value]).buffer);
     },
     'default': function(value){
         if (typeof Blob !== 'undefined' && value instanceof Blob){
@@ -73,15 +87,9 @@ $data.Container.registerConverter('$data.Blob',{
     }
 }, {
     '$data.String': function(value){
-        return value.toString();
+        return $data.Blob.toString(value);
     },
     '$data.Array': function(value){
-        var src = value.valueOf();
-        var arr = new Array(src.length);
-        for (var i = 0; i < src.length; i++){
-            arr[i] = src[i];
-        }
-        
-        return arr;
+        return $data.Blob.toArray(value);
     }
 });
