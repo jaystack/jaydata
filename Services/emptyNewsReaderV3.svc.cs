@@ -83,7 +83,7 @@ namespace JayData
         {
             return new TestItem()
             {
-                l0 = long.MaxValue,
+                l0 = -56531531,
                 de0 = 153135641,
                 //n0 = 1.7976931348623157e+307,
                 d0 = DateTime.Now,
