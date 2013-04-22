@@ -308,6 +308,8 @@
             if (expr = this.parseNumberLiteral()) return expr;
             if (expr = this.parseGeographyLiteral()) return expr;
             if (expr = this.parseGeometryLiteral()) return expr;
+            if (expr = this.parseBinaryLiteral()) return expr;
+            if (expr = this.parseXLiteral()) return expr;
             return null;
         },
         parseDatetimeLiteral: function () {
@@ -360,6 +362,28 @@
             var d = token.value;
             this.lexer.nextToken();
             return this.builder.buildConstant(d, "string");
+        },
+        parseBinaryLiteral: function () {
+            if (this.lexer.token.value != "binary")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            var d = $data.Blob.createFromHexString(token.value);
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "blob");
+        },
+        parseXLiteral: function () {
+            if (this.lexer.token.value != "X")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            var d = $data.Blob.createFromHexString(token.value);
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "blob");
         },
         parseGuidLiteral: function () {
             if (this.lexer.token.value != "guid")

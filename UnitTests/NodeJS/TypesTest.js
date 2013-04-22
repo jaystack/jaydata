@@ -12,7 +12,7 @@ $data.Entity.extend('TestItemType', {
     'i0': { 'type': 'Edm.Int32' },
     'i64': { 'type': 'Edm.Int64' },
     's0': { 'type': 'Edm.String', 'maxLength': 4000 },
-    //'blob': { 'type': 'Edm.Binary' },
+    'blob': { 'type': 'Edm.Binary' },
     //'blob': { 'type': 'Array', 'elementType': 'Edm.Byte' },
     'dto': { 'type': 'Edm.DateTimeOffset' },
     'timeprop': { 'type': 'Edm.Time' },
@@ -84,7 +84,7 @@ function TypeTests(providerConfig, msg) {
                         'i0': counter * 16,
                         'i64': '13546846213' + counter,
                         's0': 'helloWorld' + counter,
-                        'blob': [1, 2, 3, 4, i],
+                        'blob': [65, 66, 67, 4, 65 + counter],
                         'dto': new Date(2100 + counter, 0, 1),
                         'timeprop': new Date(0, 0, 0, 15, 15 + counter, 05),
                         'sb0': 8 + (counter * 2)
@@ -578,19 +578,20 @@ function TypeTests(providerConfig, msg) {
             });
     });
 
-    /*test('filter binary', function () {
+    test('filter binary', function () {
+        if (providerConfig.name == 'LocalStore') { ok(true, "Not supported"); return; }
         var itemNumber = 4;
         expect(1 + itemNumber);
 
         _getDataContext(4)
             .then(function (context) {
-                context.TestItemTypes.filter('it.blob == [1,2,3,4,1]').toArray(function (item) {
+                context.TestItemTypes.filter('it.blob == [65,66,67,4,66]').toArray(function (item) {
                     var count = item.length;
-                    deepEqual(item[0].blob, [1, 2, 3, 4, 1], 'value');
+                    deepEqual(item[0].blob, $data.Container.convertTo([65, 66, 67, 4, 66], $data.Blob), 'value');
 
-                    context.TestItemTypes.filter('it.blob == [1,2,3,4,1]').toArray(function (oItem) {
+                    context.TestItemTypes.filter('it.blob != [65,66,67,4,66]').toArray(function (oItem) {
                         for (var i = 0; i < oItem.length; i++) {
-                            notDeepEqual(oItem[i].blob, [1, 2, 3, 4, 1], 'opposite value');
+                            notDeepEqual(oItem[i].blob, $data.Container.convertTo([65, 66, 67, 4, 66], $data.Blob), 'opposite value');
                         }
                         equal(count + oItem.length, itemNumber, 'data length');
 
@@ -599,7 +600,7 @@ function TypeTests(providerConfig, msg) {
                     });
                 });
             });
-    });*/
+    });
 
     test('filter time', function () {
         var itemNumber = 4;

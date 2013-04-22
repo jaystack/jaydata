@@ -4,13 +4,13 @@ $data.Blob.createFromHexString = function(value){
     if (value != value.match(new RegExp('[0-9a-fA-F]+'))[0]){
         Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Blob', value));
     }else{
-        if (value.length & 1) value = '0' + value;
-        var arr = new Uint8Array(value.length >> 1);
-        for (var i = 0, j = 1, k = 0; i < value.length; i += 2, j += 2, k++){
+        //if (value.length & 1) value = '0' + value;
+        var arr = new (typeof Buffer != 'undefined' ? Buffer : Uint8Array)(value.length >> 1);
+        for (var i = 0, j = 1, k = 0; i < value.length; i += 2, j += 2, k++) {
             arr[k] = parseInt('0x' + value[i] + value[j], 16);
         }
-        
-        return new $data.Blob(arr).toString();
+
+        return arr;
     }
 };
 
@@ -47,7 +47,7 @@ $data.Blob.toHexString = function(value){
     if (!value || !value.length) return null;
     var s = '';
     for (var i = 0; i < value.length; i++){
-        s += value[i].toString(16);
+        s += ('00' + value[i].toString(16)).slice(-2);
     }
     
     return s.toUpperCase();
@@ -91,6 +91,8 @@ $data.Container.registerConverter('$data.Blob',{
             return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
         }else if (typeof Buffer !== 'undefined' ? value instanceof Buffer : false){
             return value;
+        } else if (value.buffer) {
+            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
         }
         throw 0;
     }

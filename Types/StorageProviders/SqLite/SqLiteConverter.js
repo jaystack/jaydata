@@ -13,7 +13,7 @@ $data.SqLiteConverter = {
         "$data.Time": function (dbData) { return dbData != null ? new Date(dbData) : dbData; },
         "$data.String": $data.Container.proxyConverter,
         "$data.Boolean": function (b) { return b === 1 ? true : false; },
-        "$data.Blob": $data.Container.proxyConverter,
+        "$data.Blob": function(b){ return b ? $data.Container.convertTo(b, $data.Blob) : b; },
         "$data.Array": function () {
             if (arguments.length == 0) return [];
             return arguments[0] ? JSON.parse(arguments[0]) : undefined;
@@ -48,7 +48,7 @@ $data.SqLiteConverter = {
         "$data.Time": function (date) { return date ? date.valueOf() : null; },
         "$data.String": $data.Container.proxyConverter,
         "$data.Boolean": function (b) { return b ? 1 : 0; },
-        "$data.Blob": $data.Container.proxyConverter,
+        "$data.Blob": function(b){ return b ? $data.Blob.toString(b) : b; },
         "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
         "$data.Guid": function (g) { return g ? g.toString() : g; },
         "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; },
