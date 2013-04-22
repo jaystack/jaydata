@@ -23,9 +23,9 @@ TYPE_SYSTEM_CLIENT = ./Scripts/acorn.js\
 TYPE_SYSTEM_NPM = TypeSystem/initializeJayData.js
 
 TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
+	$(TYPESYSTEM_DIR)/Exception.js\
 	$(TYPESYSTEM_DIR)/utils.js\
 	$(TYPESYSTEM_DIR)/PreHtml5Compatible.js\
-	$(TYPESYSTEM_DIR)/Exception.js\
 	$(TYPESYSTEM_DIR)/TypeSystem.js\
 	$(TYPESYSTEM_DIR)/Types/Types.js\
 	$(TYPESYSTEM_DIR)/Trace/Trace.js\

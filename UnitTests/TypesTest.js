@@ -33,7 +33,10 @@ function TypeTests(providerConfig, msg) {
     function _getContext() {
         stop();
         var pConf = JSON.parse(JSON.stringify(providerConfig));
-        return new TestNewsReaderContext(pConf).onReady();
+        return new TestNewsReaderContext(pConf).onReady().fail(function(err){
+            console.log(err);
+            start();
+        });
     }
 
     function _getCleanContext() {
@@ -58,6 +61,9 @@ function TypeTests(providerConfig, msg) {
                     }).then(function () {
                         return context;
                     });;
+            }).fail(function(err){
+                console.log(err);
+                start();
             });
     }
 

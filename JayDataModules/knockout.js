@@ -78,7 +78,7 @@
 			while (
 				div.innerHTML = '<!--[if gt IE ' + (++version) + ']><i></i><![endif]-->',
 				iElems[0]
-			);
+			){};
 			return version > 4 ? version : undefined;
 		}());
 

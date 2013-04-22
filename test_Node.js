@@ -17,6 +17,8 @@ exports['oDataXmlResultTests'] = require('./UnitTests/NodeJS/oDataXmlResultTests
 try{ exports['mongoProviderTests'] = require('./Pro/UnitTests/mongoProviderTests.js'); }
 catch(err){ exports['mongoProviderTests'] = require('./UnitTests/mongoProviderTests.js'); }
 
+require('./UnitTests/NodeJS/TypesTest.js');
+
 var connect = require('connect');
 var app = connect();
 
@@ -555,7 +557,9 @@ app.use("/funcservice", $data.JayService.createAdapter($exampleSrv.FuncContext, 
     return new $exampleSrv.FuncContext({ name: 'mongoDB', databaseName: 'funcserviceDb', responseLimit: 30 });
 }));
 
-$data.Class.defineEx('JayData.NewsReader.NewsContextService', [$news.Types.NewsContext, $data.ServiceBase]);
+$data.Class.defineEx('JayData.NewsReader.NewsContextService', [$news.Types.NewsContext, $data.ServiceBase], null, {
+    TestItemTypes: { type: $data.EntitySet, elementType: TestItemType }
+});
 JayData.NewsReader.NewsContextService.annotateFromVSDoc();
 
 app.use("/Services/emptyNewsReader.svc", $data.JayService.createAdapter(JayData.NewsReader.NewsContextService, function () {
@@ -576,8 +580,6 @@ app.use("/Services/oDataDbDelete.asmx/Delete", function(req, res){
         seed[i] = 0;
     }
 });
-
-require('./UnitTests/NodeJS/TypesTest.js');
 
 $data.Class.defineEx('TestNewsReaderContextService', [TestNewsReaderContext, $data.ServiceBase]);
 TestItemType.addMember('Id', { 'key': true, 'type': 'Edm.Int32', 'nullable': false });
