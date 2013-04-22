@@ -1,21 +1,25 @@
-require('jaydata');
+try{ require('jaydata'); }catch(e){}
 
 function convertTo(type, tests){
+    if (typeof module == 'function') module('converterTest to type ' + (type.fullName || type.name));
     var r = {};
     for (var i in tests){
         var fn = tests[i](type);
-        r[i] = fn;
+        if (typeof test == 'function') test(i, fn);
+        else r[i] = fn;
     }
     return r;
 }
 
-function convertTest(value, expect){
+function convertTest(v, e){
     return function(type){
         return function(test){
-            //console.log(arguments, test, type.name, value, expect);
+            if (typeof stop == 'function') stop();
+            if (!test.expect) test.expect = expect;
+            if (!test.done) test.done = start;
             test.expect(2);
-            test.equal(typeof expect, typeof $data.Container.convertTo(value, type), 'Bad type of converted value ' + expect + ' != ' + $data.Container.convertTo(value, type));
-            test[typeof expect == 'object' ? 'deepEqual' : 'equal'](expect, $data.Container.convertTo(value, type), 'Bad conversion of "' + value + '" to type ' + type.fullName || type.name + ', expected value is "' + expect + '"');
+            test.equal(typeof e, typeof $data.Container.convertTo(v, type), 'Bad type of converted value ' + e + ' != ' + $data.Container.convertTo(v, type));
+            test[typeof e == 'object' ? 'deepEqual' : 'equal'](e, $data.Container.convertTo(v, type), 'Bad conversion of "' + v + '" to type ' + type.fullName || type.name + ', expected value is "' + e + '"');
             test.done();
         };
     };
@@ -24,10 +28,13 @@ function convertTest(value, expect){
 function convertTestFail(value){
     return function(type){
         return function(test){
+            if (typeof stop == 'function') stop();
+            if (!test.expect) test.expect = expect;
+            if (!test.done) test.done = start;
             test.expect(1);
             try{
                 $data.Container.convertTo(value, type);
-                test.ok(false, 'Test not failed');
+                test.ok(false, 'Test not failed from type ' + (type.fullName || type.name));
             }catch(e){
                 test.ok(true);
             }
@@ -36,6 +43,9 @@ function convertTestFail(value){
         };
     };
 }
+
+if (typeof module == 'function') module('converterTests');
+if (typeof exports == 'undefined') exports = {};
 
 exports.Converters = {
     '$data.Boolean': convertTo($data.Boolean, {
@@ -233,9 +243,134 @@ exports.Converters = {
         'from invalid string': convertTestFail('javascript'),
         'from Array': convertTest([1,2,3], [1,2,3]),
         'from Object': convertTest({a:1}, {a:1}),
+        'from Date': convertTest(new Date(1000), new Date(1000)),
+        'from Function': convertTestFail(function(){}),
+        'from null': convertTest(null, null),
+        'from undefined': convertTest(undefined, undefined)
+    }),
+    '$data.Array': convertTo($data.Array, {
+        'from Boolean true': convertTestFail(true),
+        'from Boolean false': convertTestFail(false),
+        'from integer number': convertTestFail(42),
+        'from float number': convertTestFail(3.14),
+        'from bigint': convertTestFail(0xffffffff),
+        'from Int32 max value': convertTestFail(0x7fffffff),
+        'from Int32 max value + 1': convertTestFail(0x80000000),
+        'from valid string': convertTest('[1,2,3]', [1,2,3]),
+        'from valid decimal string': convertTestFail('123123123123.123123123123'),
+        'from valid bigint string': convertTestFail('123123123123'),
+        'from valid float string': convertTestFail('3.14'),
+        'from invalid string': convertTestFail('javascript'),
+        'from Array': convertTest([1,2,3], [1,2,3]),
+        'from Object': convertTestFail({a:1}),
         'from Date': convertTestFail(new Date(1000)),
         'from Function': convertTestFail(function(){}),
         'from null': convertTest(null, null),
         'from undefined': convertTest(undefined, undefined)
+    }),
+    '$data.String': convertTo($data.String, {
+        'from Boolean true': convertTest(true, 'true'),
+        'from Boolean false': convertTest(false, 'false'),
+        'from integer number': convertTest(42, '42'),
+        'from float number': convertTest(3.14, '3.14'),
+        'from bigint': convertTest(0xffffffff, (0xffffffff).toString()),
+        'from Int32 max value': convertTest(0x7fffffff, (0x7fffffff).toString()),
+        'from Int32 max value + 1': convertTest(0x80000000, (0x80000000).toString()),
+        'from valid string': convertTest('123', '123'),
+        'from valid decimal string': convertTest('123123123123.123123123123', '123123123123.123123123123'),
+        'from valid bigint string': convertTest('123123123123', '123123123123'),
+        'from valid float string': convertTest('3.14', '3.14'),
+        'from valid string': convertTest('javascript', 'javascript'),
+        'from Array': convertTest([1,2,3], '[1,2,3]'),
+        'from Object': convertTest({a:1}, '{"a":1}'),
+        'from Date': convertTest(new Date(1000), new Date(1000).toISOString()),
+        'from Function': convertTest(function(){}, (function(){}).toString()),
+        'from null': convertTest(null, null),
+        'from undefined': convertTest(undefined, undefined)
+    }),
+    '$data.Date': convertTo($data.Date, {
+        'from Boolean true': convertTest(true, new Date(1)),
+        'from Boolean false': convertTest(false, new Date(0)),
+        'from integer number': convertTest(42, new Date(42)),
+        'from float number': convertTest(3.14, new Date(3)),
+        'from bigint': convertTest(0xffffffff, new Date(0xffffffff)),
+        'from Int32 max value': convertTest(0x7fffffff, new Date(0x7fffffff)),
+        'from Int32 max value + 1': convertTest(0x80000000, new Date(0x80000000)),
+        'from valid string': convertTest('123', new Date('123')),
+        'from invalid decimal string': convertTestFail('123123123123.123123123123'),
+        'from invalid bigint string': convertTestFail('123123123123'),
+        'from valid float string': convertTest('3.14', new Date('3.14')),
+        'from invalid string': convertTestFail('javascript'),
+        'from Array': convertTest([1,2,3], new Date([1,2,3])),
+        'from Object': convertTestFail({a:1}),
+        'from Date': convertTest(new Date(1000), new Date(1000)),
+        'from Function': convertTestFail(function(){}),
+        'from null': convertTest(null, null),
+        'from undefined': convertTest(undefined, undefined)
+    }),
+    '$data.DateTimeOffset': convertTo($data.DateTimeOffset, {
+        'from Boolean true': convertTest(true, new Date(1)),
+        'from Boolean false': convertTest(false, new Date(0)),
+        'from integer number': convertTest(42, new Date(42)),
+        'from float number': convertTest(3.14, new Date(3)),
+        'from bigint': convertTest(0xffffffff, new Date(0xffffffff)),
+        'from Int32 max value': convertTest(0x7fffffff, new Date(0x7fffffff)),
+        'from Int32 max value + 1': convertTest(0x80000000, new Date(0x80000000)),
+        'from valid string': convertTest('123', new Date('123')),
+        'from invalid decimal string': convertTestFail('123123123123.123123123123'),
+        'from invalid bigint string': convertTestFail('123123123123'),
+        'from valid float string': convertTest('3.14', new Date('3.14')),
+        'from invalid string': convertTestFail('javascript'),
+        'from Array': convertTest([1,2,3], new Date([1,2,3])),
+        'from Object': convertTestFail({a:1}),
+        'from Date': convertTest(new Date(1000), new Date(1000)),
+        'from Function': convertTestFail(function(){}),
+        'from null': convertTest(null, null),
+        'from undefined': convertTest(undefined, undefined)
+    }),
+    '$data.Time': convertTo($data.Time, {
+        'from Boolean true': convertTest(true, new Date(1)),
+        'from Boolean false': convertTest(false, new Date(0)),
+        'from integer number': convertTest(42, new Date(42)),
+        'from float number': convertTest(3.14, new Date(3)),
+        'from bigint': convertTest(0xffffffff, new Date(0xffffffff)),
+        'from Int32 max value': convertTest(0x7fffffff, new Date(0x7fffffff)),
+        'from Int32 max value + 1': convertTest(0x80000000, new Date(0x80000000)),
+        'from valid time string': convertTestFail('0:00:00'),
+        'from valid time string with tick': convertTestFail('1:23:45.678'),
+        'from invalid time string': convertTestFail('0:0:0'),
+        'from invalid decimal string': convertTestFail('123123123123.123123123123'),
+        'from invalid bigint string': convertTestFail('123123123123'),
+        'from invalid float string': convertTestFail('3.14'),
+        'from invalid string': convertTestFail('javascript'),
+        'from Array': convertTest([1,2,3], new Date([1,2,3])),
+        'from Object': convertTestFail({a:1}),
+        'from Date': convertTest(new Date(1000), new Date(1000)),
+        'from Function': convertTestFail(function(){}),
+        'from null': convertTest(null, null),
+        'from undefined': convertTest(undefined, undefined)
+    }),
+    '$data.Blob': convertTo($data.Blob, {
+        'from Boolean true': convertTest(true, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([1])),
+        'from Boolean false': convertTest(false, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0])),
+        'from integer number': convertTest(42, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0,0,0,0,0,0,0x45,0x40])),
+        'from float number': convertTest(3.14, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x1f,0x85,0xeb,0x51,0xb8,0x1e,0x09,0x40])),
+        'from bigint': convertTest(0xffffffff, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x00,0x00,0xe0,0xff,0xff,0xff,0xef,0x41])),
+        'from Int32 max value': convertTest(0x7fffffff, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x00,0x00,0xc0,0xff,0xff,0xff,0xdf,0x41])),
+        'from Int32 max value + 1': convertTest(0x80000000, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x00,0x00,0x00,0x00,0x00,0x00,0xe0,0x41])),
+        'from valid string': convertTest('ABC', new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([65,66,67])),
+        'from valid decimal string': convertTest('123123123123.123123123123', new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([49,50,51,49,50,51,49,50,51,49,50,51,46,49,50,51,49,50,51,49,50,51,49,50,51])),
+        'from valid bigint string': convertTest('123123123123', new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([49,50,51,49,50,51,49,50,51,49,50,51])),
+        'from valid float string': convertTest('3.14', new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([51,46,49,52])),
+        'from invalid string': convertTest('javascript', new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x6a,0x61,0x76,0x61,0x73,0x63,0x72,0x69,0x70,0x74])),
+        'from Array': convertTest([1,2,3], new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([1,2,3])),
+        'from Object': convertTestFail({a:1}),
+        'from Date': convertTestFail(new Date(1000)),
+        'from Function': convertTestFail(function(){}),
+        'from null': convertTest(null, null),
+        'from undefined': convertTest(undefined, undefined),
+        'from Uint8Array': convertTest(new Uint8Array([1,2,3]), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x01,0x02,0x03])),
+        'from Buffer': typeof Buffer !== 'undefined' ? convertTest(new Buffer([1,2,3]), new Buffer([1,2,3])) : convertTestFail({a:1}),
+        'from ArrayBuffer': convertTest(new ArrayBuffer(3), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0,0,0]))
     })
 };

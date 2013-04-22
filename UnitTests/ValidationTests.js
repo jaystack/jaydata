@@ -319,19 +319,23 @@
     test("Entity int field conversation from invalid string", 3, function () {
         var efc = new entityFieldConversationClass();
 
-        efc.prop2 = '5a';
-        equal(efc.prop2, 5, 'int conversation failed');
+        try {
+            efc.prop2 = '5a';
+            equal(efc.prop2, 0, 'int conversation failed');
+        } catch (e) {
+            equal(e.name, "value '$data.String' not convertable to '$data.Integer'", '5a is not valid integer');
+        }
 
         try {
             efc.prop2 = 'a5';
-            ok(false, 'invalid run');
+            equal(efc.prop2, 0, 'int conversation failed');
         } catch (e) {
             equal(e.name, "value '$data.String' not convertable to '$data.Integer'", 'a5 is not valid integer');
         }
 
         try {
             efc.prop2 = 'ab';
-            ok(false, 'invalid run');
+            equal(efc.prop2, 0, 'int conversation failed');
         } catch (e) {
             equal(e.name, "value '$data.String' not convertable to '$data.Integer'", 'ab is not valid integer');
         }
@@ -341,11 +345,19 @@
     test("Entity number field conversation from invalid string", 4, function () {
         var efc = new entityFieldConversationClass();
 
-        efc.prop3 = '5.5a';
-        equal(efc.prop3, 5.5, 'number conversation failed');
+        try {
+            efc.prop3 = '5.5a';
+            ok(false, 'invalid run');
+        } catch (e) {
+            equal(e.name, "value '$data.String' not convertable to '$data.Number'", '5.5a is not valid number');
+        }
 
-        efc.prop3 = '5,5a';
-        equal(efc.prop3, 5, 'number conversation failed');
+        try {
+            efc.prop3 = '5,5a';
+            ok(false, 'invalid run');
+        } catch (e) {
+            equal(e.name, "value '$data.String' not convertable to '$data.Number'", '5,5a is not valid number');
+        }
 
         try {
             efc.prop3 = 'a5.5';

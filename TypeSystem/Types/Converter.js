@@ -88,6 +88,28 @@ $data.Container.registerConverter('$data.Date', {
     }
 });
 
+$data.Container.registerConverter('$data.DateTimeOffset', {
+    'default': function(value){
+        var d = new Date(value);
+        if (isNaN(d)) throw 0;
+        return d;
+    }
+});
+
+$data.Container.registerConverter('$data.Time', {
+    '$data.String': function(value){
+        var s = new Date().toISOString();
+        var r = new Date(s.split('T')[0] + 'T' + value + 'Z');
+        if (isNaN(r)) throw 0;
+        return r;
+    },
+    'default': function(value){
+        var d = new Date(value);
+        if (isNaN(d)) throw 0;
+        return d;
+    }
+});
+
 $data.Container.registerConverter('$data.Decimal', {
     '$data.Boolean': function(value){
         return value ? '1' : '0';
@@ -234,6 +256,7 @@ $data.Container.registerConverter('$data.String', {
         return btoa(value.toString());
     },
     'default': function(value){
+        if (typeof value === 'object') return JSON.stringify(value);
         return value.toString();
     }
 });
@@ -241,12 +264,17 @@ $data.Container.registerConverter('$data.String', {
 $data.Container.registerConverter('$data.Object', {
     '$data.String': function(value){
         return JSON.parse(value);
+    },
+    '$data.Function': function(){
+        throw 0;
     }
 });
 
 $data.Container.registerConverter('$data.Array', {
     '$data.String': function(value){
-        return JSON.parse(value);
+        var r = JSON.parse(value);
+        if (!Array.isArray(r)) throw 0;
+        return r;
     }
 });
 
