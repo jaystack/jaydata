@@ -36,7 +36,7 @@ $data.WebApiConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
-        '$data.Time': function (v) { return v ? v.toTimeString().split(' ')[0] : v; },
+        '$data.Time': function (v) { return v ? v.toISOString().split('T')[1].replace('Z', '') : v; },
         '$data.DateTimeOffset': function (v) { return v ? v.toISOString() : v; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,

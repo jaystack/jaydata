@@ -103,7 +103,7 @@ $data.Container.registerConverter('$data.Time', {
             if (!isNaN(d)) return d;
         } catch (e) { }
 
-        var s = new Date().toISOString();
+        var s = new Date(0, 0, 0).toISOString();
         var r = new Date(s.split('T')[0] + 'T' + value + 'Z');
         if (isNaN(r)) throw 0;
         return r;

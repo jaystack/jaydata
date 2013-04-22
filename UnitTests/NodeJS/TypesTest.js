@@ -609,11 +609,11 @@ function TypeTests(providerConfig, msg) {
             .then(function (context) {
                 context.TestItemTypes.filter('it.timeprop < date', { date: new Date(0, 0, 0, 15, 16, 05) }).toArray(function (item) {
                     var count = item.length;
-                    equal(item[0].timeprop.valueOf(), new Date(0, 0, 0, 15, 16, 05).valueOf(), 'value');
+                    equal(item[0].timeprop.toTimeString(), new Date(0, 0, 0, 15, 15, 05).toTimeString(), 'value');
 
                     context.TestItemTypes.filter('it.timeprop >= date', { date: new Date(0, 0, 0, 15, 16, 05) }).toArray(function (oItem) {
                         for (var i = 0; i < oItem.length; i++) {
-                            notEqual(oItem[i].timeprop.valueOf(), new Date(0, 0, 0, 15, 16, 05).valueOf(), 'opposite value');
+                            notEqual(oItem[i].timeprop.toTimeString(), new Date(0, 0, 0, 15, 15, 05).toTimeString(), 'opposite value');
                         }
                         equal(count + oItem.length, itemNumber, 'data length');
 
