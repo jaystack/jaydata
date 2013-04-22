@@ -9,6 +9,8 @@ $data.mongoDBConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (date) { return date ? new Date(date) : date; },
+        '$data.DateTimeOffset': function (date) { return date ? new Date(date) : date; },
+        '$data.Time': function (date) { return date ? new Date(date) : date; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function (v) { return v ? new $data.Blob(v) : v; },
@@ -41,6 +43,8 @@ $data.mongoDBConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': $data.Container.proxyConverter,
+        '$data.DateTimeOffset': $data.Container.proxyConverter,
+        '$data.Time': $data.Container.proxyConverter,
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,/*function (bool) {
             if (typeof bool === 'string') {

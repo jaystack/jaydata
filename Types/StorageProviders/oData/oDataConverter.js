@@ -25,8 +25,23 @@ $data.oDataConverter = {
                 return dbData;
             }
         },
+        '$data.DateTimeOffset': function (dbData) {
+            if (dbData) {
+                if (dbData instanceof Date) {
+                    return dbData;
+                } else if (dbData.substring(0, 6) === '/Date(') {
+                    return new Date(parseInt(dbData.substr(6)));
+                } else {
+                    //ISODate without Z? Safari compatible with Z
+                    if (dbData.indexOf('Z') === -1 && !dbData.match('T.*[+-]'))
+                        dbData += 'Z';
+                    return new Date(dbData);
+                }
+            } else {
+                return dbData;
+            }
+        },
         '$data.Time': function(v){ return $data.Container.convertTo(v, $data.Time); },
-        '$data.DateTimeOffset': function(v){ return $data.Container.convertTo(v, $data.DateTimeOffset); },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function (v) { try { return $data.Container.convertTo(atob(v), '$data.Blob'); } catch (e) { return v; } },

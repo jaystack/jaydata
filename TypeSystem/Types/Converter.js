@@ -97,7 +97,12 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
 });
 
 $data.Container.registerConverter('$data.Time', {
-    '$data.String': function(value){
+    '$data.String': function (value) {
+        try {
+            var d = new Date(value);
+            if (!isNaN(d)) return d;
+        } catch (e) { }
+
         var s = new Date().toISOString();
         var r = new Date(s.split('T')[0] + 'T' + value + 'Z');
         if (isNaN(r)) throw 0;

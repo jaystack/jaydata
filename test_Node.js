@@ -577,5 +577,18 @@ app.use("/Services/oDataDbDelete.asmx/Delete", function(req, res){
     }
 });
 
+require('./UnitTests/NodeJS/TypesTest.js');
+
+$data.Class.defineEx('TestNewsReaderContextService', [TestNewsReaderContext, $data.ServiceBase]);
+TestItemType.addMember('Id', { 'key': true, 'type': 'Edm.Int32', 'nullable': false });
+var TestItemTypeKey = 0;
+TestItemType.addEventListener('beforeCreate', function (sender, item) {
+    item.Id = ++TestItemTypeKey;
+});
+
+app.use("/typetestService", $data.JayService.createAdapter(TestNewsReaderContextService, function () {
+    return new TestNewsReaderContextService({ name: 'mongoDB', databaseName: 'test', responseLimit: 100 });
+}));
+
 app.listen(3001);
 app.listen(3002);

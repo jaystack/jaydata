@@ -186,13 +186,14 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             var typeName = $data.Container.resolveName(type) + "_items";
             var typeName = typeName.replace(/\./g, "_");
 
+            var colName = storeConfig ? storeConfig.collectionName : undefined;
             var storeConfig = $data.typeSystem.extend({
                 collectionName: 'Items',
                 tableName: typeName,
                 initParam: { provider: 'local', databaseName: typeName }
             }, storeConfig);
 
-            if (storeConfig.tableName && !storeConfig.collectionName)
+            if (storeConfig.tableName && !colName)
                 storeConfig.collectionName = storeConfig.tableName;
 
             var contextDef = {};

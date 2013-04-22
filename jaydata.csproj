@@ -160,6 +160,8 @@
     <Compile Include="Controllers\GeoData\PlacesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ODataInheritance\CarsController.cs" />
+    <Compile Include="Controllers\Primitives\OData\TestItemTypesController.cs" />
+    <Compile Include="Controllers\Primitives\WebApi\TestItemTypesWebApiController.cs" />
     <Compile Include="Controllers\WebApiOData\ArticlesController.cs" />
     <Compile Include="Controllers\WebApiOData\CategoriesController.cs" />
     <Compile Include="Global.asax.cs">
@@ -394,6 +396,7 @@
     <Content Include="Pro\UnitTests\T2.js" />
     <Content Include="Pro\UnitTests\transactionTests.js" />
     <Content Include="Scripts\acorn.js" />
+    <Content Include="Scripts\datajs-1.1.1beta.js" />
     <Content Include="Scripts\esprima.js" />
     <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
@@ -424,6 +427,8 @@
     <Content Include="Types\StorageProviders\SqLite\SqLiteConverter.js" />
     <Content Include="Types\Transaction.js" />
     <Content Include="UnitTests\dataServiceVersionTests.js" />
+    <Content Include="UnitTests\NodeJS\TypesTest.js" />
+    <Content Include="UnitTests\TypesTest.js" />
     <Content Include="UnitTests\webApiTests.js" />
     <Content Include="webserver\localserver.js" />
     <Content Include="Makefile" />
