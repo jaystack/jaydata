@@ -44,7 +44,12 @@ $data.oDataConverter = {
         '$data.Time': function(v){ return $data.Container.convertTo(v, $data.Time); },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
-        '$data.Blob': function (v) { try { return $data.Container.convertTo(atob(v), '$data.Blob'); } catch (e) { return v; } },
+        '$data.Blob': function (v) {
+            if (typeof v == 'string'){
+                try { return $data.Container.convertTo(atob(v), '$data.Blob'); }
+                catch (e) { return v; }
+            }else v;
+        },
         '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
         '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
         '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(g); } return g; },
@@ -114,7 +119,7 @@ $data.oDataConverter = {
         '$data.String': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.ObjectID': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.Boolean': function (bool) { return typeof bool === 'boolean' ? bool.toString() : bool; },
-        '$data.Blob': function (b) { return b ? "X'" + $data.Blob.toHexString(b) + "'" : b; },
+        '$data.Blob': function (b) { return b ? "X'" + $data.Blob.toHexString($data.Container.convertTo(atob(b), $data.Blob)) + "'" : b; },
         '$data.Object': function (o) { return JSON.stringify(o); },
         '$data.Array': function (o) { return JSON.stringify(o); },
         '$data.GeographyPoint': function (g) { if (g) { return $data.GeographyBase.stringifyToUrl(g); } return g; },
@@ -232,8 +237,12 @@ $data.oDataConverter = {
             return v;
         },
         '$data.Blob': function(v){
-            if (typeof v === 'string' && /^X'/.test(v)) {
-                return $data.Blob.createFromHexString(v.slice(2, v.length - 1));
+            if (typeof v === 'string'){
+                if (/^X'/.test(v)){
+                    return $data.Blob.createFromHexString(v.slice(2, v.length - 1));
+                }else if (/^binary'/.test(v)){
+                    return $data.Blob.createFromHexString(v.slice(7, v.length - 1));
+                }
             }
             return v;
         },
@@ -265,7 +274,7 @@ $data.oDataConverter = {
         '$data.Blob': function (v) { return $data.Blob.toBase64(v); },
         '$data.Date': function (v) { return v.toISOString().replace('Z', ''); },
         '$data.DateTimeOffset': function(v){ return v.toISOString(); },
-        '$data.Time': function(v){ return v.toTimeString().split(' ')[0]; },
+        '$data.Time': function(v){ return v.toISOString().split('T')[1].replace('Z', ''); },
         '$data.Number': function (v) { return v.toString(); },
         '$data.Integer': function (v) { return v.toString(); },
         '$data.String': function (v) { return v.toString(); },
@@ -289,7 +298,7 @@ $data.oDataConverter = {
         '$data.Number': function (o) { return o.toString(); },
         '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
-        '$data.Time': function(v){ return v ? v.toTimeString().split(' ')[0] : v; },
+        '$data.Time': function(v){ return v ? v.toISOString().split('T')[1].replace('Z', '') : v; },
         '$data.String': function (o) { return o.toString(); },
         '$data.Boolean': function (o) { return o.toString(); },
         '$data.Blob': function (o) { return o; },

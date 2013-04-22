@@ -62,7 +62,7 @@ $data.WebApiConverter = {
         '$data.String': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.ObjectID': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.Boolean': function (bool) { return typeof bool === 'boolean' ? bool.toString() : bool; },
-        '$data.Blob': function (b) { return b ? "X'" + $data.Blob.toHexString(b) + "'" : b; },
+        '$data.Blob': function (b) { return b ? "X'" + $data.Blob.toHexString($data.Container.convertTo(atob(b), $data.Blob)) + "'" : b; },
         '$data.Object': function (o) { return JSON.stringify(o); },
         '$data.Array': function (o) { return JSON.stringify(o); },
         '$data.GeographyPoint': function (g) { if (g) { return $data.GeographyBase.stringifyToUrl(g); } return g; },
