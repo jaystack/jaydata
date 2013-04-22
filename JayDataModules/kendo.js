@@ -1,5 +1,4 @@
 (function ($data) {
-
     var oldProcessor = $data.Entity.inheritedTypeProcessor;
 
     $data.kendo = {};
@@ -8,7 +7,6 @@
             kendo.data.Model.fn.init.call(this, data);
         }
     });
-
 
     var kendoTypeMap = {
         "$data.Blob": "string",
@@ -20,19 +18,16 @@
     }
 
     $data.Entity.inheritedTypeProcessor = function (type) {
-
         var memberDefinitions = type.memberDefinitions;
 
         function getKendoTypeName(canonicType, pd) {
             return kendoTypeMap[canonicType] || 'object';
         };
 
-
-
         function createKendoModel(options) {
             ///<param name="options">Contains options.owningContextType if initialized in a scope of a context</param>
             var memberDefinitions = type.memberDefinitions,
-                fields = {};
+			fields = {};
             //debugger;
             function getNullable(canonicType, pd) {
                 if (canonicType === "$data.Boolean") {
@@ -50,28 +45,27 @@
             }
 
             memberDefinitions
-                .getPublicMappedProperties()
-                .forEach(function (pd) {
-                    var canonicType = $data.Container.resolveName(pd.type);
-                    //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
-                    fields[pd.name] = {
-                        //TODO
-                        type: getKendoTypeName(canonicType, pd),
-                        nullable: getNullable(canonicType, pd),
-                        defaultValue: pd.defaultValue,
-                        //nullable: false,
-                        //nullable:  "nullable" in pd ? pd.nullable : true,
-                        editable: !pd.computed,
-                        //defaultValue: true,
-                        //defaultValue: 'abc',
-                        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
-                        validation: {
-                            required: getRequired(canonicType, pd)
-                        }
-                    }
-
-                    //};
-                });
+			.getPublicMappedProperties()
+			.forEach(function (pd) {
+			    var canonicType = $data.Container.resolveName(pd.type);
+			    //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
+			    fields[pd.name] = {
+			        //TODO
+			        type: getKendoTypeName(canonicType, pd),
+			        nullable: getNullable(canonicType, pd),
+			        defaultValue: pd.defaultValue,
+			        //nullable: false,
+			        //nullable:  "nullable" in pd ? pd.nullable : true,
+			        editable: !pd.computed,
+			        //defaultValue: true,
+			        //defaultValue: 'abc',
+			        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
+			        validation: {
+			            required: getRequired(canonicType, pd)
+			        }
+			    }
+			    //};
+			});
 
             function setInitialValue(obj, memDef) {
                 return;
@@ -84,9 +78,7 @@
                 //            case $data.Boolean: return false;
                 //        }
                 //    }
-
                 //    obj[memDef.name] = getDefault();
-
                 //}
             }
 
@@ -95,17 +87,19 @@
                 fields: fields,
                 init: function (data) {
                     //console.dir(arguments);
-
                     var ctxType = options && options.owningContextType || undefined;
 
                     var contextSetTypes = [];
                     if (options && options.owningContextType) {
                         contextSetTypes = options.owningContextType
-                                                     .memberDefinitions
-                                                     .getPublicMappedProperties()
-                                                     .filter(function (pd) { return $data.Container.resolveType(pd.type) === $data.EntitySet })
-                                                     .map(function (pd) { return $data.Container.resolveType(pd.elementType) });
-
+						.memberDefinitions
+						.getPublicMappedProperties()
+						.filter(function (pd) {
+						    return $data.Container.resolveType(pd.type) === $data.EntitySet
+						})
+						.map(function (pd) {
+						    return $data.Container.resolveType(pd.elementType)
+						});
                     }
 
                     var newInstanceOptions = {
@@ -118,9 +112,10 @@
                                         var _data;
                                         if (data) {
                                             _data = data[memberInfo.name];
-                                        };
+                                        }
                                         instance[memberInfo.name] = new memberType(_data, newInstanceOptions);
-                                    } else {
+                                    }
+                                    else {
                                         setInitialValue(instance, memberInfo);
                                     }
                                 }
@@ -133,6 +128,7 @@
                     var seed = jayInstance.initData;
 
                     var feed = {};
+
                     //TODO create precompiled strategy
                     for (var j in seed) {
                         var md = type.getMemberDefinition(j);
@@ -140,20 +136,47 @@
                         if (seedValue instanceof $data.Entity) {
                             var kendoInstance = seedValue.asKendoObservable();
                             feed[j] = kendoInstance;
-                        } else if (md && md.type === "Array") {
+                        }
+                        else if (md && $data.Container.resolveType(md.type) === Array) {
                             var jayType = $data.Container.resolveType(md.elementType);
-                            var kendoType = jayType.asKendoModel();
+                            var kendoType = jayType;
+                            if (jayType.asKendoModel) {
+                                kendoType = jayType.asKendoModel();
+                            }
                             var feedValue = new kendo.data.ObservableArray(seed[j], kendoType);
                             feed[j] = feedValue;
-                        } else {
+                            feed[j].bind('change', function (e) {
+                                jayInstance.changeFromKendo = true;
+                                this.parent().dirty = true;
+                                jayInstance[md.name] = this.toJSON();
+                                delete jayInstance.changeFromKendo;
+                            });
+                        }
+                        else {
                             feed[j] = seedValue;
                         }
                     }
 
+                    var arrayMemberDef = type.memberDefinitions.getPublicMappedProperties().filter(function (item) {
+                        return (($data.Container.resolveType(item.dataType) === Array) && (!$data.Container.resolveType(item.elementType).asKendoModel))
+                    });
+                    for (var j = 0; j < arrayMemberDef.length; j++) {
+                        var memberDef = arrayMemberDef[j];
+                        if (seed[memberDef.name] === null || seed[memberDef.name] === undefined) {
+                            feed[memberDef.name] = new kendo.data.ObservableArray([], $data.Container.resolveType(memberDef.elementType))
+                            feed[memberDef.name].bind('change', function (e) {
+                                jayInstance.changeFromKendo = true;
+                                this.parent().dirty = true;
+                                jayInstance[memberDef.name] = this.toJSON();
+                                delete jayInstance.changeFromKendo;
+                            });
+                        }
+                    }
+
                     var self = this;
-                    this.innerInstance = function () { return jayInstance }
-
-
+                    this.innerInstance = function () {
+                        return jayInstance
+                    }
 
                     //kendo.data.Model.fn.init.call(this, feed);
                     $data.kendo.BaseModelType.fn.init.call(this, feed);
@@ -182,7 +205,8 @@
                                     jayInstance.save();
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             var rootProp = jayInstance[propNameParts[0]];
                             if (rootProp instanceof $data.Entity) {
                                 jayInstance[propNameParts[0]] = rootProp;
@@ -193,7 +217,6 @@
                     if (options && options.newInstanceCallback) {
                         options.newInstanceCallback(jayInstance);
                     }
-
                 },
                 save: function () {
                     //console.log("item.save", this, arguments);
@@ -220,7 +243,6 @@
 
             var returnValue = kendo.data.Model.define($data.kendo.BaseModelType, modelDefinition);
 
-
             //returnValue.readAll
 
             //TODO align with kendoui concept
@@ -237,7 +259,6 @@
         }
 
         function asKendoObservable(instance, options) {
-
             var kendoModel = type.asKendoModel(options);
             return new kendoModel(instance);
         }
@@ -253,11 +274,12 @@
             return kendoObservable;
         }
 
-        function r(value){
+        function r(value) {
             return value || '';
         }
         function registerStoreAlias(type, options) {
-            if (!options.provider) return;
+            if (!options.provider)
+                return;
             var key = r(options.databaseName) + r(options.tableName) + r(options.url) + r(options.apiUrl) + r(options.oDataServiceHost);
             var storeDef = {
                 provider: options.provider,
@@ -297,18 +319,18 @@
         delete columns['$showComplexFields'];
 
         this.defaultType
-            .memberDefinitions
-            .getPublicMappedProperties()
-            .forEach(function (pd) {
-                //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
-                if (showComplex || kendoTypeMap[$data.Container.resolveName(pd.type)]) {
-                    var col = columns[pd.name] || {};
-                    var colD = { field: pd.name };
-                    $.extend(colD, col)
-                    result.push(colD);
-                }
-                //}
-            });
+		.memberDefinitions
+		.getPublicMappedProperties()
+		.forEach(function (pd) {
+		    //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
+		    if (showComplex || kendoTypeMap[$data.Container.resolveName(pd.type)]) {
+		        var col = columns[pd.name] || {};
+		        var colD = { field: pd.name };
+		        $.extend(colD, col)
+		        result.push(colD);
+		    }
+		    //}
+		});
 
         function append(field) {
             field = Array.isArray(field) ? field : [field];
@@ -323,11 +345,12 @@
         }
 
         function setColumn(colName, def) {
-            var it = this.filter(function (item) { return item.field == colName })[0];
+            var it = this.filter(function (item) {
+                return item.field == colName
+            })[0];
             $.extend(it, def);
             return this;
         }
-
 
         function prepareResult(r) {
             r.prepend = prepend;
@@ -340,15 +363,14 @@
     }),
 
     //, { command: ["edit", "create", "destroy", "update"]}
-    $data.EntityContext.addProperty("EntitySetNames", function () {
-        var self = this;
-        //var sets = Object.keys(self._entitySetReferences);
-        //return sets;
-        return Object.keys(self._entitySetReferences).map(function (set) {
-            return self._entitySetReferences[set].tableName;
-        });
-    });
-
+	$data.EntityContext.addProperty("EntitySetNames", function () {
+	    var self = this;
+	    //var sets = Object.keys(self._entitySetReferences);
+	    //return sets;
+	    return Object.keys(self._entitySetReferences).map(function (set) {
+	        return self._entitySetReferences[set].tableName;
+	    });
+	});
 
     $data.Queryable.addMember("asKendoModel", function (options) {
         options.owningContextType = options.owningContextType || this.entityContext.getType();
@@ -383,7 +405,9 @@
                         var filter = "";
                         var thisArg = {};
                         options.data.filter.filters.forEach(function (f, index) {
-                            if (index > 0) { filter += options.data.filter.logic == "or" ? " || " : " && "; }
+                            if (index > 0) {
+                                filter += options.data.filter.logic == "or" ? " || " : " && ";
+                            }
 
                             //console.log(filter, f);
 
@@ -459,7 +483,8 @@
                     //var ta = q.toArray();
                     if (withLength) {
                         promises.push(allItemsQ.length());
-                    } else if (!withInlineCount) {
+                    }
+                    else if (!withInlineCount) {
                         promises.push(allItemsQ.toArray());
                     }
 
@@ -478,10 +503,10 @@
                         }
                         console.log(r);
                         options.success(r);
-                    }).fail(function() {
+                    }).fail(function () {
                         console.log("error in create");
-			options.error({}, arguments);
-		    });
+                        options.error({}, arguments);
+                    });
                 });
             },
             create: function (options, model) {
@@ -504,19 +529,20 @@
                             options.error({}, arguments);
                             ctx.stateManager.reset();
                         });
-                    } else {
+                    }
+                    else {
                         //console.log("save single");
                         console.dir(ctx.storeToken);
                         model[0]
-                            .innerInstance()
-                            .save(ctx.storeToken)
-                            .then(function () {
-                                options.success({ data: model[0].innerInstance().initData });
-                            })
-			    .fail(function() {
-                                console.log("error in create");
-				options.error({}, arguments);
-			    });
+						.innerInstance()
+						.save(ctx.storeToken)
+						.then(function () {
+						    options.success({ data: model[0].innerInstance().initData });
+						})
+						.fail(function () {
+						    console.log("error in create");
+						    options.error({}, arguments);
+						});
                     }
                 });
             },
@@ -526,7 +552,9 @@
                 var query = self;
                 query.entityContext.onReady().then(function () {
                     if (model.length > 1) {
-                        var items = model.map(function (item) { return item.innerInstance() });
+                        var items = model.map(function (item) {
+                            return item.innerInstance()
+                        });
                         items.forEach(function (item) {
                             ctx.attach(item, true);
                         });
@@ -537,13 +565,14 @@
                             //alert("error in batch update");
                             options.error({}, arguments);
                         });
-                    } else {
+                    }
+                    else {
                         model[0].innerInstance().save().then(function (item) {
                             options.success();
-                        }).fail(function () { 
-			     //alert("error in update")
+                        }).fail(function () {
+                            //alert("error in update")
                             options.error({}, arguments);
-			});
+                        });
                     }
                 });
             },
@@ -562,7 +591,8 @@
                             //alert("error in save:" + arguments[0]);
                             options.error({}, "error", options.data);
                         });
-                    } else {
+                    }
+                    else {
                         model[0].innerInstance().remove().then(function () {
                             options.success({ data: options.data });
                         }).fail(function () {
@@ -591,8 +621,8 @@
         },
         _promise: function (data, models, type) {
             var that = this,
-                extend = $.extend,
-                transport = that.transport;
+			extend = $.extend,
+			transport = that.transport;
 
             return $.Deferred(function (deferred) {
                 transport[type].call(transport, extend({
@@ -608,7 +638,7 @@
                         that.error(response, status, error);
                     }
                 }, data), models
-                );
+				);
             }).promise();
         }
     });
@@ -652,11 +682,9 @@
                     fn.apply(obj, arguments);
                     return false;
                 }
-
             });
         },
         refresh: function () {
         }
     });
-
 })($data);
