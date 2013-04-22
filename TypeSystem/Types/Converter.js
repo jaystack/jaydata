@@ -77,6 +77,33 @@ $data.Container.registerConverter('$data.Date', {
     }
 });
 
+$data.Container.registerConverter('$data.DateTimeOffset', {
+    'default': function (value) {
+        var d = new Date(value);
+        if (isNaN(d)) throw 0;
+        return d;
+    }
+});
+
+$data.Container.registerConverter('$data.Time', {
+    '$data.String': function (value) {
+        try {
+            var d = new Date(value);
+            if (!isNaN(d)) return d;
+        } catch (e) { }
+
+        var s = new Date().toISOString();
+        var r = new Date(s.split('T')[0] + 'T' + value + 'Z');
+        if (isNaN(r)) throw 0;
+        return r;
+    },
+    'default': function (value) {
+        var d = new Date(value);
+        if (isNaN(d)) throw 0;
+        return d;
+    }
+});
+
 $data.Container.registerConverter('$data.Decimal', {
     '$data.Boolean': function(value){
         return value ? '1' : '0';

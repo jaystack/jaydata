@@ -238,7 +238,17 @@
     <script type="text/javascript" src="UnitTests/NodeJS/EntityTransformTests.js"></script>
     <script type="text/javascript" src="UnitTests/NodeJS/oDataRestTests.js"></script>
     <script type="text/javascript" src="UnitTests/NodeJS/typeTests.js"></script>
-    
+    <script type="text/javascript" src="UnitTests/NodeJS/TypesTest.js"></script>
+    <script>
+        TypeTests({ name: 'oData', oDataServiceHost: "/typetestService" }, 'oData');
+        TypeTests({ name: 'LocalStore', databaseName: 'TypeTests_T2' }, 'LocalStore');
+        if ($data.StorageProviderLoader.isSupported('sqLite')) {
+            TypeTests({ name: 'sqLite', databaseName: 'TypeTests_T2' }, 'sqLite');
+        }
+        if ($data.StorageProviderLoader.isSupported('indexedDb')) {
+            TypeTests({ name: 'indexedDb', databaseName: 'TypeTests_T2' }, 'indexedDb');
+        }
+    </script>
     <script>
         var tests = [];
         function discover(obj, name) {

@@ -62,7 +62,7 @@ $data.Container.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
 $data.Container.registerConverter('$data.Blob',{
     '$data.String': function (value){
         if (value && value.length){
-            var blob = new (Buffer || Uint8Array)(value.length);
+            var blob = new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value.length);
             for (var i = 0; i < value.length; i++){
                 blob[i] = value.charCodeAt(i);
             }
@@ -71,10 +71,10 @@ $data.Container.registerConverter('$data.Blob',{
         }else return null;
     },
     '$data.Array': function(value){
-        return new (Buffer || Uint8Array)(value);
+        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
     },
     '$data.Number': function(value){
-        return new (Buffer || Uint8Array)(new Float64Array([value]).buffer);
+        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(new Float64Array([value]).buffer);
     },
     'default': function(value){
         if (typeof Blob !== 'undefined' && value instanceof Blob){

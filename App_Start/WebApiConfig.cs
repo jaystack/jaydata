@@ -16,6 +16,12 @@ namespace jaydata
         public static void Register(HttpConfiguration config)
         {
             config.Routes.MapHttpRoute(
+                name: "DefaultApi2",
+                routeTemplate: "api/{controller}/TestItemTypes/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
@@ -87,6 +93,13 @@ namespace jaydata
 
             IEdmModel modelGeoData = modelBuilderGeoData.GetEdmModel();
             config.Routes.MapODataRoute(routeName: "ODataGeoData", routePrefix: "odatageo", model: modelGeoData);
+
+
+            ODataConventionModelBuilder modelBuilderPrimitives = new ODataConventionModelBuilder();
+            var prim = modelBuilderPrimitives.EntitySet<TestItemType>("TestItemTypes");
+
+            IEdmModel modelprim = modelBuilderPrimitives.GetEdmModel();
+            config.Routes.MapODataRoute(routeName: "ODataprim", routePrefix: "odataprim", model: modelprim);
 
         }
     }

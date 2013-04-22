@@ -14,11 +14,11 @@
 
     function Edm_DateTimeOffset() { };
     $data.Container.registerType('Edm.DateTimeOffset', Edm_DateTimeOffset);
-    $data.Container.mapType(Edm_DateTimeOffset, $data.Date);
+    $data.Container.mapType(Edm_DateTimeOffset, $data.DateTimeOffset);
 
     function Edm_Time() { };
     $data.Container.registerType('Edm.Time', Edm_Time);
-    $data.Container.mapType(Edm_Time, $data.Date);
+    $data.Container.mapType(Edm_Time, $data.Time);
 
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
