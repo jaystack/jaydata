@@ -592,5 +592,18 @@ app.use("/typetestService", $data.JayService.createAdapter(TestNewsReaderContext
     return new TestNewsReaderContextService({ name: 'mongoDB', databaseName: 'test', responseLimit: 100 });
 }));
 
+
+require('./UnitTests/CollectionTests.js');
+$data.Class.defineEx('CollectionContextService', [CollectionContext, $data.ServiceBase]);
+JayData.Models.CollectionProp.TestEntity.addMember('Id', { 'key': true, 'type': 'Edm.Int32', 'nullable': false });
+var _TestEntityKey = 0;
+JayData.Models.CollectionProp.TestEntity.addEventListener('beforeCreate', function (sender, item) {
+    item.Id = ++_TestEntityKey;
+});
+
+app.use("/collectiontestService", $data.JayService.createAdapter(CollectionContextService, function () {
+    return new CollectionContextService({ name: 'mongoDB', databaseName: 'test', responseLimit: 100 });
+}));
+
 app.listen(3001);
 app.listen(3002);

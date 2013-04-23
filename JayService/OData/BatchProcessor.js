@@ -117,22 +117,25 @@
                 var o = d[ni];
                 if (Array.isArray(o)){
                     //console.log('ooooooooo', o);
-                    o.forEach(function(it, i, arr){
-                        var uri = it.__metadata.uri;
-                        var ref;
-                        if (uri.indexOf('$') >= 0){
-                            ref = referenceData[uri.slice(1)].resultObject;
-                        }else{
-                            var urlPart = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
-                            ref = new urlPart.set.elementType(urlPart.idObj);
-                            ref.entityState = $data.EntityState.Unchanged;
-                            //console.log('URLPART', $data.JayService.OData.Utils.parseUrlPart(uri, this.context));
+                    o.forEach(function (it, i, arr) {
+                        if (typeof it === 'object' && it && it.__metadata && it.__metadata.uri) {
+
+                            var uri = it.__metadata.uri;
+                            var ref;
+                            if (uri.indexOf('$') >= 0) {
+                                ref = referenceData[uri.slice(1)].resultObject;
+                            } else {
+                                var urlPart = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
+                                ref = new urlPart.set.elementType(urlPart.idObj);
+                                ref.entityState = $data.EntityState.Unchanged;
+                                //console.log('URLPART', $data.JayService.OData.Utils.parseUrlPart(uri, this.context));
+                            }
+                            o[i] = ref;// new (Container.resolveType(itemType.memberDefinitions.getMember(ni).type))(ref.data);
+                            /*switch (ref.method){
+                                case 'MERGE': case 'PATCH': o[i].entityState = $data.EntityState.Modified; break;
+                                case 'POST': o[i].entityState = $data.EntityState.Added; break;
+                            }*/
                         }
-                        o[i] = ref;// new (Container.resolveType(itemType.memberDefinitions.getMember(ni).type))(ref.data);
-                        /*switch (ref.method){
-                            case 'MERGE': case 'PATCH': o[i].entityState = $data.EntityState.Modified; break;
-                            case 'POST': o[i].entityState = $data.EntityState.Added; break;
-                        }*/
                     });
                 }else{
                     if (typeof o === 'object' && o && o.__metadata && o.__metadata.uri){

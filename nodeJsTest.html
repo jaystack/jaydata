@@ -249,6 +249,10 @@
             TypeTests({ name: 'indexedDb', databaseName: 'TypeTests_T2' }, 'indexedDb');
         }
     </script>
+    <script type="text/javascript" src="UnitTests/CollectionTests.js"></script>
+    <script>
+        CollectionTests({ name: 'oData', oDataServiceHost: "/collectiontestService" }, 'oData');
+    </script>
     <script>
         var tests = [];
         function discover(obj, name) {

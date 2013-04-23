@@ -294,13 +294,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 } else {
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         var propType = Container.resolveType(memDef.type);
-                        if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                        if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty && propType !== $data.Array)) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 //unescape?
                                 item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
                             } else {
                                 var typeName = Container.resolveName(memDef.type);
                                 var converter = that.fieldConverter.fromDb[typeName];
+
                                 item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
                             }
                         }
@@ -399,7 +400,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                             //TODO: is this correct?
                             var propType = Container.resolveType(memDef.type);
-                            if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                            if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty && propType !== $data.Array)) {
                                 if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                     // unescape?
                                     item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
@@ -475,7 +476,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         return queryable;
     },
     supportedDataTypes: {
-        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
+        value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
             $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
             $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection,
             $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int64, $data.Time, $data.DateTimeOffset],

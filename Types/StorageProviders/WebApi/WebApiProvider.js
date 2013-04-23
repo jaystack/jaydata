@@ -284,7 +284,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                     var item = convertedItem[0];
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         var propType = Container.resolveType(memDef.type);
-                        if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                        if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty)) {
                             //if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             //    item[memDef.name] = response.headers.ETag || response.headers.Etag;
                             //} else {
@@ -318,7 +318,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                 //        //}, this);
                 //        //item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                 //        //    var propType = Container.resolveType(memDef.type);
-                //        //    if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                //        //    if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty)) {
                 //        //        if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                 //        //            item[memDef.name] = response.headers.ETag || response.headers.Etag;
                 //        //        } else {

@@ -382,6 +382,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "  <xsl:param name=\"EntitySetBaseClass\"/>\r\n" +
             "  <xsl:param name=\"CollectionBaseClass\"/>\r\n" +
             "  <xsl:param name=\"DefaultNamespace\"/>\r\n" +
+            "  <xsl:param name=\"MaxDataserviceVersion\"/>\r\n" +
             "\r\n" +
             "  <xsl:template match=\"/\">\r\n" +
             "\r\n" +
@@ -442,7 +443,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "  $data.generatedContexts.push(<xsl:value-of select=\"concat(concat($DefaultNamespace,../@Namespace), '.', @Name)\" />);\r\n" +
             "  <xsl:if test=\"$AutoCreateContext = 'true'\">\r\n" +
             "  /*Context Instance*/\r\n" +
-            "  <xsl:value-of select=\"$DefaultNamespace\"/><xsl:value-of select=\"$ContextInstanceName\" /> = new <xsl:value-of select=\"concat(concat($DefaultNamespace,../@Namespace), '.', @Name)\" />({ name:'oData', oDataServiceHost: '<xsl:value-of select=\"$SerivceUri\" />' });\r\n" +
+            "  <xsl:value-of select=\"$DefaultNamespace\"/><xsl:value-of select=\"$ContextInstanceName\" /> = new <xsl:value-of select=\"concat(concat($DefaultNamespace,../@Namespace), '.', @Name)\" />({ name:'oData', oDataServiceHost: '<xsl:value-of select=\"$SerivceUri\" />', maxDataServiceVersion: '<xsl:value-of select=\"$MaxDataserviceVersion\" />' });\r\n" +
             "</xsl:if>\r\n" +
             "\r\n" +
             "</xsl:for-each>\r\n" +
@@ -590,12 +591,13 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "      <xsl:when test=\"starts-with(., 'Collection')\">\r\n" +
             "        <attribute name=\"type\">'Array'</attribute>\r\n" +
             "        <xsl:variable name=\"len\" select=\"string-length(.)-12\"/>\r\n" +
+            "        <xsl:variable name=\"currType\" select=\"substring(.,12,$len)\"/>\r\n" +
             "        <xsl:choose>\r\n" +
-            "          <xsl:when test=\"starts-with(., ../../../@Namespace)\">\r\n" +
-            "            <attribute name=\"elementType\">'<xsl:value-of select=\"$DefaultNamespace\"/><xsl:value-of select=\"substring(.,12,$len)\" />'</attribute>\r\n" +
+            "          <xsl:when test=\"starts-with($currType, ../../../@Namespace)\">\r\n" +
+            "            <attribute name=\"elementType\">'<xsl:value-of select=\"$DefaultNamespace\"/><xsl:value-of select=\"$currType\" />'</attribute>\r\n" +
             "          </xsl:when>\r\n" +
             "          <xsl:otherwise>\r\n" +
-            "            <attribute name=\"elementType\">'<xsl:value-of select=\"substring(.,12,$len)\" />'</attribute>\r\n" +
+            "            <attribute name=\"elementType\">'<xsl:value-of select=\"$currType\" />'</attribute>\r\n" +
             "          </xsl:otherwise>\r\n" +
             "        </xsl:choose>\r\n" +
             "      </xsl:when>\r\n" +
@@ -711,7 +713,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "  <!--<xsl:template match=\"*\">\r\n" +
             "    !<xsl:value-of select=\"name()\"/>!\r\n" +
             "  </xsl:template>-->\r\n" +
-            "</xsl:stylesheet>"
+            "</xsl:stylesheet>\r\n"
     }
 
 });

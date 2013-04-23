@@ -1,4 +1,5 @@
-﻿using JayData.Models.GeoData;
+﻿using JayData.Models.CollectionProp;
+using JayData.Models.GeoData;
 using JayData.Models.ODataInheritance;
 using JayData.NewsReader;
 using Microsoft.Data.Edm;
@@ -18,6 +19,12 @@ namespace jaydata
             config.Routes.MapHttpRoute(
                 name: "DefaultApi2",
                 routeTemplate: "api/{controller}/TestItemTypes/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi3",
+                routeTemplate: "api/{controller}/CollectionProps/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
 
@@ -101,6 +108,11 @@ namespace jaydata
             IEdmModel modelprim = modelBuilderPrimitives.GetEdmModel();
             config.Routes.MapODataRoute(routeName: "ODataprim", routePrefix: "odataprim", model: modelprim);
 
+            ODataConventionModelBuilder modelBuilderColl = new ODataConventionModelBuilder();
+            var coll = modelBuilderColl.EntitySet<TestEntity>("CollectionProps");
+
+            IEdmModel modelcoll = modelBuilderColl.GetEdmModel();
+            config.Routes.MapODataRoute(routeName: "ODatacoll", routePrefix: "odatacoll", model: modelcoll);
         }
     }
 }

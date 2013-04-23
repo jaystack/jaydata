@@ -56,6 +56,8 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         }
     },
     load: function (providerList, callback) {
+        $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || {};
+
         $data.Trace.log('Loading provider(s): ' + providerList);
         callback = $data.typeSystem.createCallbackSetting(callback);
 
