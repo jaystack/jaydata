@@ -48,7 +48,7 @@ $data.oDataConverter = {
             if (typeof v == 'string'){
                 try { return $data.Container.convertTo(atob(v), '$data.Blob'); }
                 catch (e) { return v; }
-            }else v;
+            }else return v;
         },
         '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
         '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
