@@ -171,5 +171,55 @@
             return fBound;
         };
     }
+    
+    if (typeof Uint8Array == 'undefined'){
+        Uint8Array = function(v){
+            if (v instanceof Uint8Array) return v;
+            var self = this;
+            var buffer = Array.isArray(v) ? v : new Array(v);
+            this.length = buffer.length;
+            this.byteLength = this.length;
+            this.byteOffset = 0;
+            this.buffer = { byteLength: self.length };
+            var getter = function(index){
+                return buffer[index];
+            };
+            var setter = function(index, value){
+                buffer[index] = (value | 0) & 0xff;
+            };
+            var makeAccessor = function(i){
+                buffer[i] = buffer[i] || 0;
+                Object.defineProperty(self, i, {
+                    enumerable: true,
+                    configurable: false,
+                    get: function(){
+                        if (isNaN(+i) || ((i | 0) < 0 || (i | 0) >= self.length)){
+                            try{
+                                if (typeof document != 'undefined') document.createTextNode("").splitText(1);
+                                return new RangeError("INDEX_SIZE_ERR");
+                            }catch(e){
+                                return e;
+                            }
+                        }
+                        return getter(i);
+                    },
+                    set: function(v){
+                        if (isNaN(+i) || ((i | 0) < 0 || (i | 0) >= self.length)){
+                            try{
+                                if (typeof document != 'undefined') document.createTextNode("").splitText(1);
+                                return new RangeError("INDEX_SIZE_ERR");
+                            }catch(e){
+                                return e;
+                            }
+                        }
+                        setter(i | 0, v);
+                    }
+                });
+            };
+            for (var i = 0; i < self.length; i++){
+                makeAccessor(i);
+            }
+        };
+    }
 
 })();

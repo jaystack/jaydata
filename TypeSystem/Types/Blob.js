@@ -74,7 +74,7 @@ $data.Container.registerConverter('$data.Blob',{
         return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
     },
     '$data.Number': function(value){
-        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(new Uint8Array(new Float64Array([value]).buffer));
+        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)($data.packIEEE754(value, 11, 52).reverse());
     },
     '$data.Boolean': function(value){
         return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([value | 0]);
@@ -91,7 +91,14 @@ $data.Container.registerConverter('$data.Blob',{
             return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
         }else if (typeof Buffer !== 'undefined' ? value instanceof Buffer : false){
             return value;
-        } else if (value.buffer) {
+        }else if (value.buffer){
+            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
+        }else if (typeof value == 'object' && value instanceof Object){
+            var arr = [];
+            for (var i in value){
+                arr[i] = value[i];
+            }
+            if (!arr.length) throw 0;
             return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
         }
         throw 0;

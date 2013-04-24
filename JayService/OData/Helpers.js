@@ -38,6 +38,7 @@ $data.Class.define('$data.JayService.OData.Utils', null, null, null, {
         return prefix + Math.random() + Math.random();
     },
     parseUrlPart: function (urlPart, context, withoutConvert) {
+        urlPart = decodeURI(urlPart);
         if (urlPart.indexOf('/') === 0)
             urlPart = urlPart.slice(1);
 
