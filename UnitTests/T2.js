@@ -36,7 +36,7 @@
             }
         );
         TypeTests({ name: 'indexedDb', databaseName: 'TypeTests_T2' }, 'indexedDb');
-        //CollectionTests({ name: 'indexedDb', databaseName: 'CollectionTests_T2' }, 'indexedDb');
+        CollectionTests({ name: 'indexedDb', databaseName: 'CollectionTests_T2' }, 'indexedDb');
 
     }
 
