@@ -230,12 +230,13 @@
       <xsl:when test="starts-with(., 'Collection')">
         <attribute name="type">'Array'</attribute>
         <xsl:variable name="len" select="string-length(.)-12"/>
+        <xsl:variable name="currType" select="substring(.,12,$len)"/>
         <xsl:choose>
-          <xsl:when test="starts-with(., ../../../@Namespace)">
-            <attribute name="elementType">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="substring(.,12,$len)" />'</attribute>
+          <xsl:when test="starts-with($currType, ../../../@Namespace)">
+            <attribute name="elementType">'<xsl:value-of select="$DefaultNamespace"/><xsl:value-of select="$currType" />'</attribute>
           </xsl:when>
           <xsl:otherwise>
-            <attribute name="elementType">'<xsl:value-of select="substring(.,12,$len)" />'</attribute>
+            <attribute name="elementType">'<xsl:value-of select="$currType" />'</attribute>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:when>

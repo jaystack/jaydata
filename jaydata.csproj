@@ -157,6 +157,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\CollectionProp\CollectionPropsController.cs" />
     <Compile Include="Controllers\GeoData\PlacesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ODataInheritance\CarsController.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CollectionProp\TestEntity.cs" />
     <Compile Include="Models\GeoData\Place.cs" />
     <Compile Include="Models\ODataInheritance\ODataInheritanceModels.cs" />
     <Compile Include="Models\TaskManager\Category.cs">
@@ -426,6 +428,7 @@
     <Content Include="Types\StorageProviders\oData\oDataConverter.js" />
     <Content Include="Types\StorageProviders\SqLite\SqLiteConverter.js" />
     <Content Include="Types\Transaction.js" />
+    <Content Include="UnitTests\CollectionTests.js" />
     <Content Include="UnitTests\dataServiceVersionTests.js" />
     <Content Include="UnitTests\NodeJS\TypesTest.js" />
     <Content Include="UnitTests\TypesTest.js" />

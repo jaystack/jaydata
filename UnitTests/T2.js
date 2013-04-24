@@ -19,6 +19,7 @@
 		GeoTests({ name: "sqLite", databaseName: 'GeoTests_T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');
 		GuidTests({ name: "sqLite", databaseName: 'GuidTests_T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');
 		TypeTests({ name: 'sqLite', databaseName: 'TypeTests_T2' }, 'sqLite');
+		CollectionTests({ name: 'sqLite', databaseName: 'CollectionTests_T2' }, 'sqLite');
     }
 
     if ($data.StorageProviderLoader.isSupported('indexedDb')) {
@@ -35,6 +36,7 @@
             }
         );
         TypeTests({ name: 'indexedDb', databaseName: 'TypeTests_T2' }, 'indexedDb');
+        //CollectionTests({ name: 'indexedDb', databaseName: 'CollectionTests_T2' }, 'indexedDb');
 
     }
 
@@ -54,5 +56,9 @@
     TypeTests({ name: 'oData', oDataServiceHost: "/odataprim", maxDataServiceVersion: '3.0', noBatch: true, noCount: true }, 'oDataWebApi');
     TypeTests({ name: 'webApi', apiUrl: "/api/TestItemTypesWebApi", noBatch: true, noCount: true }, 'webApi');
     TypeTests({ name: 'LocalStore', databaseName: 'TypeTests_T2' }, 'LocalStore');
+
+    CollectionTests({ name: 'oData', oDataServiceHost: "/odatacoll", maxDataServiceVersion: '3.0', noCreate: true }, 'oDataWebApi');
+    CollectionTests({ name: 'webApi', apiUrl: "/api/CollectionPropsWebApi", noCreate: true }, 'webApi');
+    CollectionTests({ name: 'LocalStore', databaseName: 'CollectionTests_T2' }, 'LocalStore');
 
 });
