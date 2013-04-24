@@ -4,9 +4,11 @@ function convertTo(type, tests){
     if (typeof module == 'function') module('converterTest to type ' + (type.fullName || type.name));
     var r = {};
     for (var i in tests){
-        var fn = tests[i](type);
-        if (typeof test == 'function') test(i, fn);
-        else r[i] = fn;
+        if (tests[i]){
+            var fn = tests[i](type);
+            if (typeof test == 'function') test(i, fn);
+            else r[i] = fn;
+        }
     }
     return r;
 }
@@ -19,7 +21,7 @@ function convertTest(v, e){
             if (!test.done) test.done = start;
             test.expect(2);
             test.equal(typeof e, typeof $data.Container.convertTo(v, type), 'Bad type of converted value ' + e + ' != ' + $data.Container.convertTo(v, type));
-            test[typeof e == 'object' ? 'deepEqual' : 'equal'](e, $data.Container.convertTo(v, type), 'Bad conversion of "' + v + '" to type ' + type.fullName || type.name + ', expected value is "' + e + '"');
+            test[typeof e == 'object' ? 'deepEqual' : 'equal'](e, $data.Container.convertTo(v, type), 'Bad conversion of "' + v + '" to type ' + (type.fullName || type.name) + ', expected value is "' + JSON.stringify(e) + '"');
             test.done();
         };
     };
@@ -173,8 +175,8 @@ exports.Converters = {
         'from Boolean false': convertTest(false, 0),
         'from integer number': convertTest(42, 42),
         'from float number': convertTest(3.14, 3.140000104904175),
-        'from bigint': convertTest(0xffffffff, 4294967296),
-        'from Int32 max value': convertTest(0x7fffffff, 2147483648),
+        'from bigint': convertTest(0xffffffff, 2147483648),
+        'from Int32 max value': convertTest(0x7fffffff, 1073741824),
         'from Int32 max value + 1': convertTest(0x80000000, 2147483648),
         'from valid string': convertTest('123', 123),
         'from valid decimal string': convertTest('123123123123.123123123123', 123123122176),
@@ -372,6 +374,7 @@ exports.Converters = {
         'from undefined': convertTest(undefined, undefined),
         'from Uint8Array': convertTest(new Uint8Array([1,2,3]), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x01,0x02,0x03])),
         'from Buffer': typeof Buffer !== 'undefined' ? convertTest(new Buffer([1,2,3]), new Buffer([1,2,3])) : convertTestFail({a:1}),
-        'from ArrayBuffer': convertTest(new ArrayBuffer(3), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0,0,0]))
+        'from Blob': (function(){ try{ return convertTest(new Blob(['javascript']), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x6a,0x61,0x76,0x61,0x73,0x63,0x72,0x69,0x70,0x74])) }catch(e){} })(),
+        'from ArrayBuffer': (function(){ try{ return convertTest(new ArrayBuffer(3), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0,0,0])) }catch(e){} })()
     })
 };

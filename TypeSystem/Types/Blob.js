@@ -74,7 +74,7 @@ $data.Container.registerConverter('$data.Blob',{
         return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
     },
     '$data.Number': function(value){
-        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(new Uint8Array(new Float64Array([value]).buffer));
+        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)($data.packIEEE754(value, 11, 52).reverse());
     },
     '$data.Boolean': function(value){
         return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([value | 0]);
