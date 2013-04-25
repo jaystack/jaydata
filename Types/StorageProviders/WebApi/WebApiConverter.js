@@ -6,14 +6,50 @@ $data.WebApiConverter = {
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
         '$data.Int64': $data.Container.proxyConverter,
+
         '$data.Integer': $data.Container.proxyConverter,//function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
         '$data.Number': $data.Container.proxyConverter,
-        '$data.Date': function (dbData) { return dbData ? new Date(dbData) : undefined; },
-        '$data.DateTimeOffset': function (dbData) { return dbData ? new Date(dbData) : undefined; },
+        '$data.Date': function (dbData) {
+            if (dbData) {
+                if (dbData instanceof Date) {
+                    return dbData;
+                } else if (dbData.substring(0, 6) === '/Date(') {
+                    return new Date(parseInt(dbData.substr(6)));
+                } else {
+                    //ISODate without Z? Safari compatible with Z
+                    if (dbData.indexOf('Z') === -1 && !dbData.match('T.*[+-]'))
+                        dbData += 'Z';
+                    return new Date(dbData);
+                }
+            } else {
+                return dbData;
+            }
+        },
+        '$data.DateTimeOffset': function (dbData) {
+            if (dbData) {
+                if (dbData instanceof Date) {
+                    return dbData;
+                } else if (dbData.substring(0, 6) === '/Date(') {
+                    return new Date(parseInt(dbData.substr(6)));
+                } else {
+                    //ISODate without Z? Safari compatible with Z
+                    if (dbData.indexOf('Z') === -1 && !dbData.match('T.*[+-]'))
+                        dbData += 'Z';
+                    return new Date(dbData);
+                }
+            } else {
+                return dbData;
+            }
+        },
         '$data.Time': function (v) { return $data.Container.convertTo(v, $data.Time); },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
-        '$data.Blob': $data.Container.proxyConverter,
+        '$data.Blob': function (v) {
+            if (typeof v == 'string') {
+                try { return $data.Container.convertTo(atob(v), '$data.Blob'); }
+                catch (e) { return v; }
+            } else return v;
+        },
         '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } else if (typeof o === 'string') { return JSON.parse(o); } return o; },
         '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } else if (o instanceof $data.Array) { return o; } return JSON.parse(o); },
         '$data.GeographyPoint': function (geo) {
