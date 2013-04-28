@@ -18,5 +18,11 @@ $data.Class.define('$data.dbClient.sqLiteNJClient.SqLiteNjConnection', $data.dbC
     createCommand: function (queryStr, params) {
         var cmd = new $data.dbClient.sqLiteNJClient.SqLiteNjCommand(this, queryStr, params);
         return cmd;
-    }
+    },
+	_executeHelper : {
+		value : {
+			isRunning : false,
+			queue : []
+		}
+	},
 }, null);
