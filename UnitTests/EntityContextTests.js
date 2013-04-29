@@ -2412,3 +2412,249 @@
 
     })();
 });
+
+function LocalContextTests(providerConfig, msg) {
+    msg = msg || '';
+    module("LocalContextTests_" + msg);
+
+    function _getConfig(extension) {
+        return $data.typeSystem.extend({}, JSON.parse(JSON.stringify(providerConfig)), extension);
+    }
+
+    function _getContext() {
+        stop();
+        var pConf = _getConfig();
+        return new CollectionContext(pConf).onReady();
+    };
+    function _finishCb(context) {
+        if (context.storageProvider.db && context.storageProvider.db.close)
+            context.storageProvider.db.close();
+
+        start();
+    };
+
+    test('IntegerKeyContext', 8, function () {
+        stop();
+
+        $data.Entity.extend('$lct.IntegerKey', {
+            Id: { type: 'int', key: true, computed: true },
+            Name: { type: 'string' }
+        });
+        $data.EntityContext.extend('$lct.IntegerKeyContext', {
+            Items: { type: $data.EntitySet, elementType: $lct.IntegerKey }
+        });
+
+        var context = new $lct.IntegerKeyContext(_getConfig({ databaseName: 'IntegerKeyContext' }));
+        context.onReady()
+        .then(function () {
+            ok(true, 'context created');
+
+            var item = new $lct.IntegerKey({ Name: 'test1' });
+            context.add(item);
+            return context.saveChanges().then(function () {
+                var id = item.Id;
+                equal(typeof id, 'number', 'Id is not undefined');
+                equal(item.Name, 'test1', 'item.Name');
+
+                context.attach(item);
+                item.Name = 'test2';
+
+                return context.saveChanges().then(function () {
+
+                    equal(item.Id, id, 'Id is same');
+                    equal(item.Name, 'test2', 'item.Name');
+
+                    return context.beginTransaction(true).then(function (tran) {
+                        return context.Items.toArray(undefined, tran).then(function (items) {
+
+                            equal(items[0].Id, id, 'Id is same');
+                            equal(items[0].Name, 'test2', 'item.Name');
+
+                            for (var i = 0; i < items.length; i++) {
+                                context.remove(items[i]);
+                            }
+
+                            return context.saveChanges().then(function () {
+                                return context.beginTransaction(true).then(function (tran) {
+                                    return context.Items.length(function (cnt) {
+                                        equal(cnt, 0, 'db cleared');
+
+                                        _finishCb(context);
+                                    }, tran);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        }).fail(function (e) {
+            ok(false, JSON.stringify(e));
+            _finishCb(context);
+        });
+    });
+
+    test('GuidKeyContext', 8, function () {
+        stop();
+
+        $data.Entity.extend('$lct.GuidKeyContext', {
+            Id: { type: 'guid', key: true, computed: true },
+            Name: { type: 'string' }
+        });
+        $data.EntityContext.extend('$lct.GuidKeyContextContext', {
+            Items: { type: $data.EntitySet, elementType: $lct.GuidKeyContext }
+        });
+
+        var context = new $lct.GuidKeyContextContext(_getConfig({ databaseName: 'GuidKeyContextContext' }));
+        context.onReady()
+        .then(function () {
+            ok(true, 'context created');
+
+            var item = new $lct.GuidKeyContext({ Name: 'test1' });
+            context.add(item);
+            return context.saveChanges().then(function () {
+                var id = item.Id;
+                equal(typeof id, 'string', 'Id is not undefined');
+                equal(item.Name, 'test1', 'item.Name');
+
+                context.attach(item);
+                item.Name = 'test2';
+
+                return context.saveChanges().then(function () {
+
+                    equal(item.Id, id, 'Id is same');
+                    equal(item.Name, 'test2', 'item.Name');
+
+                    return context.beginTransaction(true).then(function (tran) {
+                        return context.Items.toArray(undefined, tran).then(function (items) {
+
+                            equal(items[0].Id, id, 'Id is same');
+                            equal(items[0].Name, 'test2', 'item.Name');
+
+                            for (var i = 0; i < items.length; i++) {
+                                context.remove(items[i]);
+                            }
+
+                            return context.saveChanges().then(function () {
+                                return context.beginTransaction(true).then(function (tran) {
+                                    return context.Items.length(function (cnt) {
+                                        equal(cnt, 0, 'db cleared');
+
+                                        _finishCb(context);
+                                    }, tran);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        }).fail(function (e) {
+            ok(false, JSON.stringify(e));
+            _finishCb(context);
+        });
+    });
+
+
+    test('LongKeyContext success', 8, function () {
+        stop();
+
+        $data.Entity.extend('$lct.LongKey', {
+            Id: { type: 'long', key: true, computed: true },
+            Name: { type: 'string' }
+        });
+        $data.EntityContext.extend('$lct.LongKeyContext', {
+            Items: { type: $data.EntitySet, elementType: $lct.LongKey }
+        });
+
+        var context = new $lct.LongKeyContext(_getConfig({ databaseName: 'LongKeyContext' }));
+        context.onReady()
+        .then(function () {
+            ok(true, 'context created');
+
+            var item = new $lct.LongKey({ Id: '1234', Name: 'test1' });
+            context.add(item);
+            return context.saveChanges().then(function () {
+                var id = item.Id;
+                equal(typeof id, 'string', 'Id is not undefined');
+                equal(item.Name, 'test1', 'item.Name');
+
+                context.attach(item);
+                item.Name = 'test2';
+                return context.saveChanges().then(function () {
+
+                    equal(item.Id, id, 'Id is same');
+                    equal(item.Name, 'test2', 'item.Name');
+
+                    return context.beginTransaction(true).then(function (tran) {
+                        return context.Items.toArray(undefined, tran).then(function (items) {
+
+                            equal(items[0].Id, id, 'Id is same');
+                            equal(items[0].Name, 'test2', 'item.Name');
+
+                            for (var i = 0; i < items.length; i++) {
+                                context.remove(items[i]);
+                            }
+
+                            return context.saveChanges().then(function () {
+                                return context.beginTransaction(true).then(function (tran) {
+                                    return context.Items.length(function (cnt) {
+                                        equal(cnt, 0, 'db cleared');
+
+                                    }, tran);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        })
+        .then(function () { _finishCb(context); })
+        .fail(function (e) {
+            ok(false, JSON.stringify(e));
+            _finishCb(context);
+        });
+    });
+
+    test('LongKeyContext failed', 3, function () {
+        stop();
+
+        $data.Entity.extend('$lct.LongKey', {
+            Id: { type: 'long', key: true, computed: true },
+            Name: { type: 'string' }
+        });
+        $data.EntityContext.extend('$lct.LongKeyContext', {
+            Items: { type: $data.EntitySet, elementType: $lct.LongKey }
+        });
+
+        var context = new $lct.LongKeyContext(_getConfig({ databaseName: 'LongKeyContext' }));
+        context.onReady()
+        .then(function () {
+            ok(true, 'context created');
+
+            var item = new $lct.LongKey({ Name: 'test1' });
+            context.add(item);
+            return context.saveChanges().then(function () {
+                equal(typeof id, 'undefined', 'Id is not undefined');
+                equal(item.Name, 'test1', 'item.Name');
+
+                return context.beginTransaction(true).then(function (tran) {
+                    return context.Items.toArray(undefined, tran).then(function (items) {
+
+                        for (var i = 0; i < items.length; i++) {
+                            context.remove(items[i]);
+                        }
+
+                        return context.saveChanges();
+                    });
+                });
+
+            });
+        })
+        .then(function () { _finishCb(context); })
+        .fail(function (e) {
+            ok(true);
+            equal(e.message, 'DataError: DOM IDBDatabase Exception 0', JSON.stringify(e));
+            _finishCb(context);
+        });
+    });
+
+}

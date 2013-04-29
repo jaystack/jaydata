@@ -21,7 +21,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             setKeys.push(this.context._entitySetReferences[i].collectionName);
         }
         var localStorageData = null;
-        if(this.providerConfiguration.persistentData && window.localStorage){
+        if (this.providerConfiguration.persistentData && window.localStorage && this.providerConfiguration.dbCreation !== $data.storageProviders.DbCreationType.DropAllExistingTables) {
             var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             var that = this;
             localStorageData = JSON.parse(window.localStorage.getItem(localStoreName),
@@ -49,14 +49,17 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             }
             var isIntegerPk = false;
             if(computedKeys.length === 1){
-                var resolvedType = Container.resolveType(computedKeys[0].type);
-                if(resolvedType === $data.Integer){
+                var resolvedType = Container.resolveName(computedKeys[0].type);
+                if (this.supportedAutoincrementKeys[resolvedType] === true){
+                    //if(resolvedType === $data.Integer){
                     this.providerConfiguration.source['inmemory_sequence'][storageModel.TableName] = 0;
                     isIntegerPk = true;
-                }else if (resolvedType === $data.Guid){
+                }else if (typeof this.supportedAutoincrementKeys[resolvedType] === 'function'){
+                //}else if (resolvedType === $data.Guid){
 
-                }else{
-                    Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!', 'ComputedKeyFieldError'));
+                } else {
+                    console.log("WARRNING! '" + resolvedType + "' not supported as computed Key!");
+                    //Guard.raise(new Exception('Not supported key field type. Computed pk field type are $data.Integer or $data.Guid!', 'ComputedKeyFieldError'));
                 }
             }
             //validate init data
@@ -184,15 +187,16 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         var keys = item.entitySet.elementType.memberDefinitions.getKeyProperties();
         if(keys.length === 1 && keys[0].computed){
             var key = keys[0];
-            var keyResolveType = Container.resolveType(key.type);
-            if(keyResolveType === $data.Guid){
-                item.data[key.name] = $data.Guid.NewGuid();
-            } else if(keyResolveType === $data.Integer){
+            var keyResolveType = Container.resolveName(key.type);
+            //if(keyResolveType === $data.Guid){
+            if (typeof this.supportedAutoincrementKeys[keyResolveType] === 'function') {
+                item.data[key.name] = this.supportedAutoincrementKeys[keyResolveType]();
+            } else if (this.supportedAutoincrementKeys[keyResolveType] === true) {
                 var sequenceValue = this.providerConfiguration.source['inmemory_sequence'][item.entitySet.tableName];
                 item.data[key.name] = sequenceValue+1;
                 this.providerConfiguration.source['inmemory_sequence'][item.entitySet.tableName] = sequenceValue + 1;
-            }else{
-                Guard.raise(new Exception("Not supported data type!"))
+            //}else{
+            //    Guard.raise(new Exception("Not supported data type!"))
             }
         }
         else{
@@ -334,7 +338,13 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         enumerable: true,
         writable: true
     },
-    fieldConverter: { value: $data.InMemoryConverter }
+    fieldConverter: { value: $data.InMemoryConverter },
+    supportedAutoincrementKeys: {
+        value: {
+            '$data.Integer': true,
+            '$data.Guid': function () { return $data.createGuid(); }
+        }
+    }
 }, null);
 $C('$data.storageProviders.InMemory.LocalStorageProvider', $data.storageProviders.InMemory.InMemoryProvider, null,{
     constructor:function(cfg, ctx){

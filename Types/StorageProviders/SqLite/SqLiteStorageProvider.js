@@ -170,6 +170,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         writable: true
     },
 
+    supportedAutoincrementKeys: {
+        value:{
+            '$data.Integer': true,
+            '$data.Guid': function () { return $data.createGuid(); }
+        }       
+    },
+
     initializeStore: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         this.context._storageModel.forEach(function (item, index) {
@@ -489,6 +496,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 Guard.raise(new Exception('Key is not set', 'Value exception', item));
                 return;
             }
+            if (fieldDef.key && fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+                var typeName = Container.resolveName(fieldDef.type);
+                if (typeof this.supportedAutoincrementKeys[typeName] === 'function') {
+                    item.physicalData[fieldDef.name] = this.supportedAutoincrementKeys[typeName]();
+                }
+            }
 
             if (fieldList.length > 0 && fieldList[fieldList.length - 1] != ",") { fieldList += ","; fieldValue += ","; }
             var fieldName = fieldDef.name;
@@ -543,6 +556,13 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         if (autoincrementFieldNumber > 1 && keyFieldNumber > 1) {
             Guard.raise(new Exception('Do not use multiple computed field!'));
         }
+        
+        memberDef.PhysicalType.memberDefinitions.getKeyProperties().forEach(function (item, index) {
+            var typeName = Container.resolveName(item.type);
+            if (item.computed && !(typeName in this.supportedAutoincrementKeys)) {
+                console.log("WARRNING! '" + typeName + "' not supported as computed Key!");
+            }
+        }, this);
 
         var sql = "CREATE TABLE IF NOT EXISTS [" + memberDef.TableName + "] (";
         var pkFragment = ',PRIMARY KEY (';
@@ -602,7 +622,11 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.buildPrimaryKey = function () {
             if (this.fld.key) {
                 this.fieldDef += " PRIMARY KEY";
-                this.buildAutoIncrement();
+
+                var typeName = Container.resolveName(this.fld.dataType);
+                if (this.provider.supportedAutoincrementKeys[typeName] === true) {
+                    this.buildAutoIncrement();
+                }
             }
             else {
                 this.buildNotNull();
