@@ -218,6 +218,7 @@
     <Content Include="App_Data\TaskManagerDatabase_log.ldf">
       <DependentUpon>TaskManagerDatabase.mdf</DependentUpon>
     </Content>
+    <Content Include="client.html" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -365,6 +366,7 @@
     <Content Include="Pro\CREDITS_PRO.txt" />
     <Content Include="Pro\CREDITS_TRIAL.txt" />
     <Content Include="Pro\JayDataModules\localMigrations.js" />
+    <Content Include="Pro\JayDataModules\SchemaEvolutions.js" />
     <Content Include="Pro\localMigrations.html" />
     <Content Include="Pro\test.html" />
     <Content Include="Pro\test_JayData.html" />
@@ -431,6 +433,7 @@
     <Content Include="UnitTests\CollectionTests.js" />
     <Content Include="UnitTests\dataServiceVersionTests.js" />
     <Content Include="UnitTests\NodeJS\TypesTest.js" />
+    <Content Include="Pro\UnitTests\SchemaEvolutions.js" />
     <Content Include="UnitTests\TypesTest.js" />
     <Content Include="UnitTests\webApiTests.js" />
     <Content Include="webserver\localserver.js" />
@@ -828,6 +831,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Code\" />
+    <Folder Include="NewFolder1\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -857,6 +861,8 @@
           <DevelopmentServerPort>63560</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:64176/</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost:64176/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
