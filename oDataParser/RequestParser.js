@@ -300,12 +300,16 @@
             //bnf: LiteralExpr        : DatetimeLiteral | StringLiteral | BoolLiteral | NumberLiteral
             var expr;
             if (expr = this.parseDatetimeLiteral()) return expr;
+            if (expr = this.parseDatetimeOffsetLiteral()) return expr;
+            if (expr = this.parseTimeLiteral()) return expr;
             if (expr = this.parseStringLiteral()) return expr;
             if (expr = this.parseGuidLiteral()) return expr;
             if (expr = this.parseBoolLiteral()) return expr;
             if (expr = this.parseNumberLiteral()) return expr;
             if (expr = this.parseGeographyLiteral()) return expr;
             if (expr = this.parseGeometryLiteral()) return expr;
+            if (expr = this.parseBinaryLiteral()) return expr;
+            if (expr = this.parseXLiteral()) return expr;
             return null;
         },
         parseDatetimeLiteral: function () {
@@ -327,6 +331,59 @@
             }
             this.lexer.nextToken();
             return this.builder.buildConstant(d, "datetime");
+        },
+        parseDatetimeOffsetLiteral: function () {
+            //bnf: DatetimeLiteral    : "datetimeoffset" "'" DIGITS "-" DIGITS "-" DIGITS [ "T" DIGITS ":" DIGITS ":" DIGITS [ "." DIGITS ] [ ( SIGN ) DIGITS ":" DIGTS ] [ "Z" ]
+            //example: datetimeoffset'2010-07-15'
+            //         datetimeoffset'2010-07-15T16:19:54Z'.
+            //         datetimeoffset'2011-06-07T13:18:25.0348565-07:00'
+            if (this.lexer.token.value != "datetimeoffset")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            var d;
+            try {
+                d = new Date(token.value);
+            } catch (e) {
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            }
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "datetime");
+        },
+        parseTimeLiteral: function () {
+            if (this.lexer.token.value != "time")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            var d = token.value;
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "string");
+        },
+        parseBinaryLiteral: function () {
+            if (this.lexer.token.value != "binary")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            var d = $data.Blob.createFromHexString(token.value);
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "blob");
+        },
+        parseXLiteral: function () {
+            if (this.lexer.token.value != "X")
+                return null;
+            this.lexer.nextToken();
+            var token = this.lexer.token;
+            if (token.tokenType != TokenType.STRING)
+                $data.oDataParser.RequestParser.SyntaxError.call(this, "Invalid date format.", "parseDatetimeLiteral");
+            var d = $data.Blob.createFromHexString(token.value);
+            this.lexer.nextToken();
+            return this.builder.buildConstant(d, "blob");
         },
         parseGuidLiteral: function () {
             if (this.lexer.token.value != "guid")
@@ -382,7 +439,7 @@
             token = this.lexer.token;
             if (token.value == "L") {
                 this.lexer.nextToken();
-                return this.builder.buildConstant(parseInt(v), "number"); // long
+                return this.builder.buildConstant(v, "string"); // long
             }
             if (token.value == ASCII.DOT) {
                 isInteger = false;
@@ -413,6 +470,7 @@
             }
             if (token.value == "m" || token.value == "M") {
                 this.lexer.nextToken();
+                return this.builder.buildConstant(v, "string"); // decimal
             }
             var n = isInteger ? parseInt(v) : parseFloat(v);
             return this.builder.buildConstant(n, "number");

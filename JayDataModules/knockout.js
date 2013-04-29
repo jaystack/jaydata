@@ -2,7 +2,7 @@
 
     /*converters*/
     Object.keys($data.Container.converters.to).forEach(function (typeName) {
-        var origConverter = $data.Container.converters.to[typeName] ? $data.Container.converters.to[typeName]['$data.Function'] : undefined;
+        var origConverter = $data.Container.converters.to[typeName] ? $data.Container.converters.to[typeName]['$data.Function'] || $data.Container.converters.to[typeName]['default'] : undefined;
         $data.Container.registerConverter(typeName, '$data.Function', function (value) {
             if (ko.isObservable(value)) {
                 return value;
@@ -78,7 +78,7 @@
 			while (
 				div.innerHTML = '<!--[if gt IE ' + (++version) + ']><i></i><![endif]-->',
 				iElems[0]
-			);
+			){};
 			return version > 4 ? version : undefined;
 		}());
 

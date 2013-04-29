@@ -19,13 +19,19 @@
     var odata = window.OData || {};
 
     // AMD support
-    if (typeof define === 'function' && define.amd) {        
+    if (typeof define === 'function' && define.amd) {
         define('datajs', datajs);
         define('OData', odata);
     } else {
         window.datajs = datajs;
-        window.OData = odata; 
+        window.OData = odata;
     }
+
+    datajs.version = {
+        major: 1,
+        minor: 1,
+        build: 1
+    };
 
 
     var activeXObject = function (progId) {
@@ -394,6 +400,70 @@
         return result;
     };
 
+    var convertByteArrayToHexString = function (str) {
+        var arr = [];
+        if (window.atob == undefined) {
+            arr = decodeBase64(str);
+        } else {
+            var binaryStr = window.atob(str);
+            for (var i = 0; i < binaryStr.length; i++) {
+                arr.push(binaryStr.charCodeAt(i));
+            }
+        }
+        var hexValue = "";
+        var hexValues = "0123456789ABCDEF";
+        for (i = 0; i < arr.length; i++) {
+            var t = arr[i];
+            hexValue += hexValues[t >> 4];
+            hexValue += hexValues[t & 0x0F];
+        }
+        return hexValue;
+    };
+
+    var decodeBase64 = function (str) {
+        var binaryString = "";
+        for (var i = 0; i < str.length; i++) {
+            var base65IndexValue = getBase64IndexValue(str[i]);
+            var binaryValue = "";
+            if (base65IndexValue != null) {
+                binaryValue = base65IndexValue.toString(2);
+                binaryString += addBase64Padding(binaryValue);
+            }
+        }
+        var byteArray = [];
+        var numberOfBytes = parseInt(binaryString.length / 8);
+        for (i = 0; i < numberOfBytes; i++) {
+            var intValue = parseInt(binaryString.substring(i * 8, (i + 1) * 8), 2);
+            byteArray.push(intValue);
+        }
+        return byteArray;
+    };
+
+    var getBase64IndexValue = function (character) {
+        var asciiCode = character.charCodeAt(0);
+        var asciiOfA = 65;
+        var differenceBetweenZanda = 6;
+        if (asciiCode >= 65 && asciiCode <= 90) {           // between "A" and "Z" inclusive
+            return asciiCode - asciiOfA;
+        } else if (asciiCode >= 97 && asciiCode <= 122) {   // between 'a' and 'z' inclusive
+            return asciiCode - asciiOfA - differenceBetweenZanda;
+        } else if (asciiCode >= 48 && asciiCode <= 57) {    // between '0' and '9' inclusive
+            return asciiCode + 4;
+        } else if (character == "+") {
+            return 62;
+        } else if (character == "/") {
+            return 63;
+        } else {
+            return null;
+        };
+    };
+
+    var addBase64Padding = function (binaryString) {
+        while (binaryString.length < 6) {
+            binaryString = "0" + binaryString;
+        }
+        return binaryString;
+    };
 
 
     // URI prefixes to generate smaller code.
@@ -1305,7 +1375,7 @@
     };
 
 
-    
+
 
     var dataItemTypeName = function (value, metadata) {
         /// <summary>Gets the type name of a data item value that belongs to a feed, an entry, a complex type property, or a collection property.</summary>
@@ -1874,6 +1944,7 @@
                         }
                     }
                 }
+                return null;
             });
 
             if (association) {
@@ -1886,6 +1957,59 @@
             }
         }
         return result;
+    };
+
+    var lookupNavigationPropertyEntitySet = function (navigationProperty, sourceEntitySetName, metadata) {
+        /// <summary>Looks up the target entityset name for a navigation property.</summary>
+        /// <param name="navigationProperty" type="Object"></param>
+        /// <param name="metadata" type="Object"></param>
+        /// <returns type="String">The entityset name for the specified property, null if not found.</returns>
+
+        if (navigationProperty) {
+            var rel = navigationProperty.relationship;
+            var associationSet = forEachSchema(metadata, function (schema) {
+                var containers = schema.entityContainer;
+                for (var i = 0; i < containers.length; i++) {
+                    var associationSets = containers[i].associationSet;
+                    if (associationSets) {
+                        for (var j = 0; j < associationSets.length; j++) {
+                            if (associationSets[j].association == rel) {
+                                return associationSets[j];
+                            }
+                        }
+                    }
+                }
+                return null;
+            });
+            if (associationSet && associationSet.end[0] && associationSet.end[1]) {
+                return (associationSet.end[0].entitySet == sourceEntitySetName) ? associationSet.end[1].entitySet : associationSet.end[0].entitySet;
+            }
+        }
+        return null;
+    };
+
+    var getEntitySetInfo = function (entitySetName, metadata) {
+        /// <summary>Gets the entitySet info, container name and functionImports for an entitySet</summary>
+        /// <param name="navigationProperty" type="Object"></param>
+        /// <param name="metadata" type="Object"></param>
+        /// <returns type="Object">The info about the entitySet.</returns>
+
+        var info = forEachSchema(metadata, function (schema) {
+            var containers = schema.entityContainer;
+            for (var i = 0; i < containers.length; i++) {
+                var entitySets = containers[i].entitySet;
+                if (entitySets) {
+                    for (var j = 0; j < entitySets.length; j++) {
+                        if (entitySets[j].name == entitySetName) {
+                            return { entitySet: entitySets[j], containerName: containers[i].name, functionImport: containers[i].functionImport };
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+
+        return info;
     };
 
     var removeNamespace = function (ns, fullName) {
@@ -1990,7 +2114,7 @@
     // 4,5,6 - hours, minutes, seconds
     // 7     - optional milliseconds
     // 8     - everything else (presumably offset information)
-    var parseDateTimeRE = /^(-?\d{4,})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(.*)$/;
+    var parseDateTimeRE = /^(-?\d{4,})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:\.(\d+))?(.*)$/;
 
     var parseDateTimeMaybeOffset = function (value, withOffset, nullOnError) {
         /// <summary>Parses a string into a DateTime value.</summary>
@@ -2038,7 +2162,7 @@
         // Pre-parse other time components and offset them if necessary.
         var hours = parseInt10(parts[4]);
         var minutes = parseInt10(parts[5]);
-        var seconds = parseInt10(parts[6]);
+        var seconds = parseInt10(parts[6]) || 0;
         if (offset !== "Z") {
             // The offset is reversed to get back the UTC date, which is
             // what the API will eventually have.
@@ -2081,7 +2205,7 @@
         /// <param name="propertyValue" type="String">Value to parse.</param>
         /// <returns type="Date">The parsed value.</returns>
 
-        return parseDateTimeMaybeOffset(propertyValue, true, nullOnError); //Changed for .NET compability, that send with offset
+        return parseDateTimeMaybeOffset(propertyValue, false, nullOnError);
     };
 
     var parseDateTimeOffset = function (propertyValue, nullOnError) {
@@ -2363,26 +2487,12 @@
         return null;
     };
 
-    var headerKeysForRead = ['Content-Length', 'Connection', 'Content-Type', 'Accept', 'DataServiceVersion', 'MaxDataServiceVersion', 'Etag', 'Location', 'Content-Id', 'If-Match', 'Authorization'];
-    odata.headerKeysForRead = headerKeysForRead;
-
     var readResponseHeaders = function (xhr, headers) {
         /// <summary>Reads response headers into array.</summary>
         /// <param name="xhr" type="XMLHttpRequest">HTTP request with response available.</param>
         /// <param name="headers" type="Array">Target array to fill with name/value pairs.</param>
 
         var responseHeaders = xhr.getAllResponseHeaders().split(/\r?\n/);
-        //FF CORS fix
-        var is_firefox = navigator && typeof navigator.userAgent === 'string' ? navigator.userAgent.toLowerCase().indexOf('firefox') > -1 : false;
-        if (responseHeaders.length === 1 && responseHeaders[0] === '' && is_firefox && xhr.status > 0) {
-            for (var i = 0; i < headerKeysForRead.length; i++) {
-                var headerKey = headerKeysForRead[i];
-                var headerValue = xhr.getResponseHeader(headerKey);
-                if (headerValue) {
-                    responseHeaders.push(headerKey + ': ' + headerValue);
-                }
-            }
-        }
         var i, len;
         for (i = 0, len = responseHeaders.length; i < len; i++) {
             if (responseHeaders[i]) {
@@ -2489,10 +2599,6 @@
                     }
                 }
 
-                // Set withCredential 
-                if (request.withCredentials)
-                    xhr.withCredentials = true;
-
                 // Set the timeout if available.
                 if (request.timeoutMS) {
                     xhr.timeout = request.timeoutMS;
@@ -2524,8 +2630,16 @@
                             data = window.JSON.parse(window.JSON.stringify(data));
                         }
 
+
+                        var headers;
+                        // Adding dataServiceVersion in case of json light ( data.d doesn't exist ) 
+                        if (data.d == undefined) {
+                            headers = { "Content-Type": "application/json;odata=minimalmetadata", dataServiceVersion: "3.0" };
+                        } else {
+                            headers = { "Content-Type": "application/json" };
+                        }
                         // Call the success callback in the context of the parent window, instead of the IFRAME
-                        delay(success, { body: data, statusCode: 200, headers: { "Content-Type": "application/json"} });
+                        delay(success, { body: data, statusCode: 200, headers: headers });
                     }
                 };
 
@@ -2604,13 +2718,15 @@
         /// <param name="handler">Handler object that is processing a resquest or response.</param>
         /// <returns>Context object.</returns>
 
-        var rwContext = {
+        var rwContext = {};
+        extend(rwContext, context);
+        extend(rwContext, {
             contentType: contentType,
             dataServiceVersion: dataServiceVersion,
             handler: handler
-        };
+        });
 
-        return extend(rwContext, context);
+        return rwContext;
     };
 
     var fixRequestHeader = function (request, name, value) {
@@ -2650,7 +2766,7 @@
         /// <returns type="String">String value of the header; undefined if the header cannot be found.</returns>
 
         var headers = requestOrResponse.headers;
-        return (headers && headers[name]) || (headers && headers[name.toLowerCase()]) || undefined;
+        return (headers && headers[name]) || undefined;
     };
 
     var getContentType = function (requestOrResponse) {
@@ -2686,7 +2802,7 @@
 
         // The following check isn't as strict because if cType.mediaType = application/; it will match an accept value of "application/xml";
         // however in practice we don't not expect to see such "suffixed" mimeTypes for the handlers.
-        return cType && handler.accept.indexOf(cType.mediaType) >= 0;
+        return handler.accept.indexOf(cType.mediaType) >= 0;
     };
 
     var handlerRead = function (handler, parseCallback, response, context) {
@@ -6027,6 +6143,25 @@
         url: "uri"
     };
 
+    var jsonLightAnnotations = {
+        metadata: "odata.metadata",
+        count: "odata.count",
+        next: "odata.nextLink",
+        id: "odata.id",
+        etag: "odata.etag",
+        read: "odata.readLink",
+        edit: "odata.editLink",
+        mediaRead: "odata.mediaReadLink",
+        mediaEdit: "odata.mediaEditLink",
+        mediaEtag: "odata.mediaETag",
+        mediaContentType: "odata.mediaContentType",
+        actions: "odata.actions",
+        functions: "odata.functions",
+        navigationUrl: "odata.navigationLinkUrl",
+        associationUrl: "odata.associationLinkUrl",
+        type: "odata.type"
+    };
+
     var jsonLightAnnotationInfo = function (annotation) {
         /// <summary>Gets the name and target of an annotation in a JSON light payload.</summary>
         /// <param name="annotation" type="String">JSON light payload annotation.</param>
@@ -6145,7 +6280,7 @@
         }
         return obj;
     };
-    5
+
     var jsonLightApplyPayloadODataAnnotation = function (name, target, targetType, value, data, obj, baseURI) {
         /// <summary>
         ///   Processes a JSON Light payload OData annotation producing either a property, payload metadata, or property metadata on its owner object. 
@@ -6390,7 +6525,7 @@
         /// <param name="recognizeDates" type="Boolean" optional="true">Flag indicating whether datetime literal strings should be converted to JavaScript Date objects.</param>
         /// <returns type="Object">Complex property value in its library representation.</returns>
 
-        var complexValue = jsonLightReadObject(value, propertyType, baseURI, model, recognizeDates);
+        var complexValue = jsonLightReadObject(value, { type: propertyType }, baseURI, model, recognizeDates);
         var complexMetadata = complexValue.__metadata;
         var complexPropertiesMetadata = complexMetadata.properties;
 
@@ -6401,40 +6536,77 @@
         return complexValue;
     };
 
-    var jsonLightReadNavigationPropertyValue = function (value, propertyType, baseURI, model, recognizeDates) {
+    var jsonLightReadNavigationPropertyValue = function (value, propertyInfo, baseURI, model, recognizeDates) {
         /// <summary>Converts the value of a navigation property in a JSON light object into its library representation.</summary>
         /// <param name="value">Navigation property property value to convert.</param>
-        /// <param name="propertyType" type="String">Property type name.</param>
+        /// <param name="propertyInfo" type="String">Information about the property whether it's an entry, feed or complex type.</param>
         /// <param name="baseURI" type="String">Base URI for normalizing relative URIs found in the payload.</param>
         /// <param name="model" type="Object" optional="true">Object describing an OData conceptual schema.</param>
         /// <param name="recognizeDates" type="Boolean" optional="true">Flag indicating whether datetime literal strings should be converted to JavaScript Date objects.</param>
         /// <returns type="Object">Collection property value in its library representation.</returns>
 
         if (isArray(value)) {
-            return jsonLightReadFeed(value, propertyType, baseURI, model, recognizeDates);
+            return jsonLightReadFeed(value, propertyInfo, baseURI, model, recognizeDates);
         }
 
         if (isComplex(value)) {
-            return jsonLightReadObject(value, propertyType, baseURI, model, recognizeDates);
+            return jsonLightReadObject(value, propertyInfo, baseURI, model, recognizeDates);
         }
         return null;
     };
 
-    var jsonLightReadObject = function (data, typeName, baseURI, model, recognizeDates) {
+    var jsonLightReadObject = function (data, objectInfo, baseURI, model, recognizeDates) {
         /// <summary>Converts a JSON light entry or complex type object into its library representation.</summary>
         /// <param name="data" type="Object">JSON light entry or complex type object to convert.</param>
-        /// <param name="typeName" type="String">Type name of the entry or complex type.</param>
+        /// <param name="objectInfo" type="Object">Information about the entry or complex.</param>
         /// <param name="baseURI" type="String">Base URI for normalizing relative URIs found in the payload.</param>
         /// <param name="model" type="Object" optional="true">Object describing an OData conceptual schema.</param>
         /// <param name="recognizeDates" type="Boolean" optional="true">Flag indicating whether datetime literal strings should be converted to JavaScript Date objects.</param>
         /// <returns type="Object">Entry or complex type object.</param>
 
-        var actualType = data[typeAnnotation] || typeName;
-        var dataModel = lookupEntityType(actualType, model) || lookupComplexType(actualType, model);
+        objectInfo = objectInfo || {};
+        var actualType = data[typeAnnotation] || objectInfo.type || null;
+        var dataModel = lookupEntityType(actualType, model);
+        var isEntry = true;
+        if (!dataModel) {
+            isEntry = false;
+            dataModel = lookupComplexType(actualType, model);
+        }
 
         var metadata = { type: actualType };
         var obj = { __metadata: metadata };
         var propertiesMetadata = {};
+
+        if (isEntry && dataModel && objectInfo.entitySet && objectInfo.contentTypeOdata == "minimalmetadata") {
+            var serviceURI = baseURI.substring(0, baseURI.lastIndexOf("$metadata"));
+            var baseTypeModel = null;
+            // check if the key model is in a parent type.
+            if (!dataModel.key) {
+                baseTypeModel = dataModel;
+            }
+            while (!!baseTypeModel && !baseTypeModel.key && baseTypeModel.baseType) {
+                baseTypeModel = lookupEntityType(baseTypeModel.baseType, model);
+            }
+
+            if (dataModel.key || (!!baseTypeModel && baseTypeModel.key)) {
+                var entryKey;
+                if (dataModel.key) {
+                    entryKey = jsonLightGetEntryKey(data, dataModel);
+                } else {
+                    entryKey = jsonLightGetEntryKey(data, baseTypeModel);
+                }
+                if (entryKey) {
+                    var entryInfo = {
+                        key: entryKey,
+                        entitySet: objectInfo.entitySet,
+                        functionImport: objectInfo.functionImport,
+                        containerName: objectInfo.containerName
+                    };
+                    jsonLightComputeUrisIfMissing(data, entryInfo, actualType, serviceURI, dataModel, baseTypeModel);
+                }
+            }
+        }
+
 
         for (var name in data) {
             if (name.indexOf("#") === 0) {
@@ -6452,10 +6624,19 @@
                     var isNavigationProperty = jsonLightIsNavigationProperty(name, data, propertyModel);
                     var propertyType = jsonLightDataItemType(name, propertyValue, data, propertyModel, model);
                     var propertyMetadata = propertiesMetadata[name] = propertiesMetadata[name] || { type: propertyType };
-
-                    obj[name] = isNavigationProperty ?
-                    jsonLightReadNavigationPropertyValue(propertyValue, propertyType, baseURI, model, recognizeDates) :
-                    jsonLightReadDataItemValue(propertyValue, propertyType, propertyMetadata, baseURI, propertyModel, model, recognizeDates);
+                    if (isNavigationProperty) {
+                        propertyInfo = {};
+                        if (objectInfo.entitySet != undefined) {
+                            var navigationPropertyEntitySetName = lookupNavigationPropertyEntitySet(propertyModel, objectInfo.entitySet.name, model);
+                            var propertyInfo = getEntitySetInfo(navigationPropertyEntitySetName, model);
+                        }
+                        propertyInfo.contentTypeOdata = objectInfo.contentTypeOdata;
+                        propertyInfo.kind = objectInfo.kind;
+                        propertyInfo.type = propertyType;
+                        obj[name] = jsonLightReadNavigationPropertyValue(propertyValue, propertyInfo, baseURI, model, recognizeDates);
+                    } else {
+                        obj[name] = jsonLightReadDataItemValue(propertyValue, propertyType, propertyMetadata, baseURI, propertyModel, model, recognizeDates);
+                    }
                 }
             }
         }
@@ -6499,7 +6680,7 @@
         };
 
         var metadata = obj.__metadata;
-        var targetName = isFunction ? "functions" : "actions"
+        var targetName = isFunction ? "functions" : "actions";
         var metadataURI = normalizeURI(name, baseURI);
         var items = (isArray(value)) ? value : [value];
 
@@ -6514,7 +6695,7 @@
         }
     };
 
-    var jsonLightReadFeed = function (data, typeName, baseURI, model, recognizeDates) {
+    var jsonLightReadFeed = function (data, feedInfo, baseURI, model, recognizeDates) {
         /// <summary>Converts a JSON light feed or top level collection property object into its library representation.</summary>
         /// <param name="data" type="Object">JSON light feed object to convert.</param>
         /// <param name="typeName" type="String">Type name of the feed or collection items.</param>
@@ -6525,10 +6706,10 @@
 
         var items = isArray(data) ? data : data.value;
         var entries = [];
-
-        var i, len;
+        var i, len, entry;
         for (i = 0, len = items.length; i < len; i++) {
-            entries.push(jsonLightReadObject(items[i], typeName, baseURI, model, recognizeDates));
+            entry = jsonLightReadObject(items[i], feedInfo, baseURI, model, recognizeDates);
+            entries.push(entry);
         }
 
         var feed = { results: entries };
@@ -6544,6 +6725,224 @@
             feed = jsonLightReadDataAnnotations(data, feed, baseURI);
         }
         return feed;
+    };
+
+    var jsonLightGetEntryKey = function (data, entityModel) {
+        /// <summary>Gets the key of an entry.</summary>
+        /// <param name="data" type="Object">JSON light entry.</param>
+        /// <param name="entityModel" type="String">Object describing the entry Model</param>
+        /// <returns type="string">Entry instance key.</returns>
+
+        var entityInstanceKey;
+        var entityKeys = entityModel.key.propertyRef;
+        entityInstanceKey = "(";
+        if (entityKeys.length == 1) {
+            var type = lookupProperty(entityModel.property, entityKeys[0].name).type;
+            entityInstanceKey += formatLiteral(data[entityKeys[0].name], type);
+        } else {
+            var first = true;
+            for (var i = 0; i < entityKeys.length; i++) {
+                if (!first) {
+                    entityInstanceKey += ",";
+                } else {
+                    first = false;
+                }
+                type = lookupProperty(entityModel.property, entityKeys[i].name).type;
+                entityInstanceKey += entityKeys[i].name + "=" + formatLiteral(data[entityKeys[i].name], type);
+            }
+        }
+        entityInstanceKey += ")";
+        return entityInstanceKey;
+    };
+
+
+    var jsonLightComputeUrisIfMissing = function (data, entryInfo, actualType, serviceURI, entityModel, baseTypeModel) {
+        /// <summary>Compute the URI according to OData conventions if it doesn't exist</summary>
+        /// <param name="data" type="Object">JSON light entry.</param>
+        /// <param name="entryInfo" type="Object">Information about the entry includes type, key, entitySet and entityContainerName.</param>
+        /// <param name="actualType" type="String">Type of the entry</param>
+        /// <param name="serviceURI" type="String">Base URI the service.</param>
+        /// <param name="entityModel" type="Object">Object describing an OData conceptual schema of the entry.</param>
+        /// <param name="baseTypeModel" type="Object" optional="true">Object escribing an OData conceptual schema of the baseType if it exists.</param>
+
+        var lastIdSegment = data[jsonLightAnnotations.id] || data[jsonLightAnnotations.read] || data[jsonLightAnnotations.edit] || entryInfo.entitySet.name + entryInfo.key;
+        data[jsonLightAnnotations.id] = serviceURI + lastIdSegment;
+        if (!data[jsonLightAnnotations.edit]) {
+            data[jsonLightAnnotations.edit] = entryInfo.entitySet.name + entryInfo.key;
+            if (entryInfo.entitySet.entityType != actualType) {
+                data[jsonLightAnnotations.edit] += "/" + actualType;
+            }
+        }
+        data[jsonLightAnnotations.read] = data[jsonLightAnnotations.read] || data[jsonLightAnnotations.edit];
+        if (!data[jsonLightAnnotations.etag]) {
+            var etag = jsonLightComputeETag(data, entityModel, baseTypeModel);
+            if (!!etag) {
+                data[jsonLightAnnotations.etag] = etag;
+            }
+        }
+
+        jsonLightComputeStreamLinks(data, entityModel, baseTypeModel);
+        jsonLightComputeNavigationAndAssociationProperties(data, entityModel, baseTypeModel);
+        jsonLightComputeFunctionImports(data, entryInfo);
+    };
+
+    var jsonLightComputeETag = function (data, entityModel, baseTypeModel) {
+        /// <summary>Computes the etag of an entry</summary>
+        /// <param name="data" type="Object">JSON light entry.</param>
+        /// <param name="entryInfo" type="Object">Object describing the entry model.</param>
+        /// <param name="baseTypeModel" type="Object"  optional="true">Object describing an OData conceptual schema of the baseType if it exists.</param>
+        /// <returns type="string">Etag value</returns>
+        var etag = "";
+        for (var i = 0; entityModel.property && i < entityModel.property.length; i++) {
+            var propertyModel = entityModel.property[i];
+            etag = jsonLightAppendValueToEtag(data, etag, propertyModel);
+
+        }
+        if (baseTypeModel) {
+            for (i = 0; baseTypeModel.property && i < baseTypeModel.property.length; i++) {
+                propertyModel = baseTypeModel.property[i];
+                etag = jsonLightAppendValueToEtag(data, etag, propertyModel);
+            }
+        }
+        if (etag.length > 0) {
+            return etag + "\"";
+        }
+        return null;
+    };
+
+    var jsonLightAppendValueToEtag = function (data, etag, propertyModel) {
+        /// <summary>Adds a propery value to the etag after formatting.</summary>
+        /// <param name="data" type="Object">JSON light entry.</param>
+        /// <param name="etag" type="Object">value of the etag.</param>
+        /// <param name="propertyModel" type="Object">Object describing an OData conceptual schema of the property.</param>
+        /// <returns type="string">Etag value</returns>
+
+        if (propertyModel.concurrencyMode == "Fixed") {
+            if (etag.length > 0) {
+                etag += ",";
+            } else {
+                etag += "W/\"";
+            }
+            if (data[propertyModel.name] !== null) {
+                etag += formatLiteral(data[propertyModel.name], propertyModel.type);
+            } else {
+                etag += "null";
+            }
+        }
+        return etag;
+    };
+
+    var jsonLightComputeNavigationAndAssociationProperties = function (data, entityModel, baseTypeModel) {
+        /// <summary>Adds navigation links to the entry metadata</summary>
+        /// <param name="data" type="Object">JSON light entry.</param>
+        /// <param name="entityModel" type="Object">Object describing the entry model.</param>
+        /// <param name="baseTypeModel" type="Object"  optional="true">Object describing an OData conceptual schema of the baseType if it exists.</param>
+
+        var navigationLinkAnnotation = "@odata.navigationLinkUrl";
+        var associationLinkAnnotation = "@odata.associationLinkUrl";
+        for (var i = 0; entityModel.navigationProperty && i < entityModel.navigationProperty.length; i++) {
+            var navigationPropertyName = entityModel.navigationProperty[i].name;
+            var navigationPropertyAnnotation = navigationPropertyName + navigationLinkAnnotation;
+            if (data[navigationPropertyAnnotation] === undefined) {
+                data[navigationPropertyAnnotation] = data[jsonLightAnnotations.edit] + "/" + encodeURIComponent(navigationPropertyName);
+            }
+            var associationPropertyAnnotation = navigationPropertyName + associationLinkAnnotation;
+            if (data[associationPropertyAnnotation] === undefined) {
+                data[associationPropertyAnnotation] = data[jsonLightAnnotations.edit] + "/$links/" + encodeURIComponent(navigationPropertyName);
+            }
+        }
+        if (baseTypeModel && baseTypeModel.navigationProperty) {
+            for (i = 0; i < baseTypeModel.navigationProperty.length; i++) {
+                navigationPropertyName = baseTypeModel.navigationProperty[i].name;
+                navigationPropertyAnnotation = navigationPropertyName + navigationLinkAnnotation;
+                if (data[navigationPropertyAnnotation] === undefined) {
+                    data[navigationPropertyAnnotation] = data[jsonLightAnnotations.edit] + "/" + encodeURIComponent(navigationPropertyName);
+                }
+                associationPropertyAnnotation = navigationPropertyName + associationLinkAnnotation;
+                if (data[associationPropertyAnnotation] === undefined) {
+                    data[associationPropertyAnnotation] = data[jsonLightAnnotations.edit] + "/$links/" + encodeURIComponent(navigationPropertyName);
+                }
+            }
+        }
+    };
+
+    var formatLiteral = function (value, type) {
+        /// <summary>Formats a value according to Uri literal format</summary>
+        /// <param name="value">Value to be formatted.</param>
+        /// <param name="type">Edm type of the value</param>
+        /// <returns type="string">Value after formatting</returns>
+
+        value = "" + formatRowLiteral(value, type);
+        value = encodeURIComponent(value.replace("'", "''"));
+        switch ((type)) {
+            case "Edm.Binary":
+                return "X'" + value + "'";
+            case "Edm.DateTime":
+                return "datetime" + "'" + value + "'";
+            case "Edm.DateTimeOffset":
+                return "datetimeoffset" + "'" + value + "'";
+            case "Edm.Decimal":
+                return value + "M";
+            case "Edm.Guid":
+                return "guid" + "'" + value + "'";
+            case "Edm.Int64":
+                return value + "L";
+            case "Edm.Float":
+                return value + "f";
+            case "Edm.Double":
+                return value + "D";
+            case "Edm.Geography":
+                return "geography" + "'" + value + "'";
+            case "Edm.Geometry":
+                return "geometry" + "'" + value + "'";
+            case "Edm.Time":
+                return "time" + "'" + value + "'";
+            case "Edm.String":
+                return "'" + value + "'";
+            default:
+                return value;
+        }
+    };
+
+
+    var formatRowLiteral = function (value, type) {
+        switch (type) {
+            case "Edm.Binary":
+                return convertByteArrayToHexString(value);
+            default:
+                return value;
+        }
+    };
+
+    var jsonLightComputeFunctionImports = function (data, entryInfo) {
+        /// <summary>Adds functions and actions links to the entry metadata</summary>
+        /// <param name="entry" type="Object">JSON light entry.</param>
+        /// <param name="entityInfo" type="Object">Object describing the entry</param>
+
+        var functionImport = entryInfo.functionImport || [];
+        for (var i = 0; i < functionImport.length; i++) {
+            if (functionImport[i].isBindable && functionImport[i].parameter[0] && functionImport[i].parameter[0].type == entryInfo.entitySet.entityType) {
+                var functionImportAnnotation = "#" + entryInfo.containerName + "." + functionImport[i].name;
+                if (data[functionImportAnnotation] == undefined) {
+                    data[functionImportAnnotation] = {
+                        title: functionImport[i].name,
+                        target: data[jsonLightAnnotations.edit] + "/" + functionImport[i].name
+                    };
+                }
+            }
+        }
+    };
+
+    var jsonLightComputeStreamLinks = function (data, entityModel, baseTypeModel) {
+        /// <summary>Adds stream links to the entry metadata</summary>
+        /// <param name="data" type="Object">JSON light entry.</param>
+        /// <param name="entityModel" type="Object">Object describing the entry model.</param>
+        /// <param name="baseTypeModel" type="Object"  optional="true">Object describing an OData conceptual schema of the baseType if it exists.</param>
+
+        if (entityModel.hasStream || (baseTypeModel && baseTypeModel.hasStream)) {
+            data[jsonLightAnnotations.mediaEdit] = data[jsonLightAnnotations.mediaEdit] || data[jsonLightAnnotations.mediaEdit] + "/$value";
+            data[jsonLightAnnotations.mediaRead] = data[jsonLightAnnotations.mediaRead] || data[jsonLightAnnotations.mediaEdit];
+        }
     };
 
     var jsonLightReadTopPrimitiveProperty = function (data, typeName, baseURI, recognizeDates) {
@@ -6725,6 +7124,7 @@
             }
 
             var entityType = typeCast;
+            var entitySet, functionImport, containerName;
             if (!typeCast) {
                 var nsEnd = qualifiedName.lastIndexOf(".");
                 var simpleName = qualifiedName.substring(nsEnd + 1);
@@ -6733,17 +7133,27 @@
                     lookupEntityContainer(qualifiedName.substring(0, nsEnd), model);
 
                 if (container) {
-                    var entitySet = lookupEntitySet(container.entitySet, simpleName);
-                    entityType = !!entitySet ? entitySet.entityType : null
+                    entitySet = lookupEntitySet(container.entitySet, simpleName);
+                    functionImport = container.functionImport;
+                    containerName = container.name;
+                    entityType = !!entitySet ? entitySet.entityType : null;
                 }
             }
 
             if (elementStart > 0) {
-                return jsonLightMakePayloadInfo(PAYLOADTYPE_OBJECT, entityType);
+                var info = jsonLightMakePayloadInfo(PAYLOADTYPE_OBJECT, entityType);
+                info.entitySet = entitySet;
+                info.functionImport = functionImport;
+                info.containerName = containerName;
+                return info;
             }
 
             if (entityType) {
-                return jsonLightMakePayloadInfo(PAYLOADTYPE_FEED, entityType);
+                info = jsonLightMakePayloadInfo(PAYLOADTYPE_FEED, entityType);
+                info.entitySet = entitySet;
+                info.functionImport = functionImport;
+                info.containerName = containerName;
+                return info;
             }
 
             if (isArray(data.value) && !lookupComplexType(qualifiedName, model)) {
@@ -6761,20 +7171,25 @@
         return null;
     };
 
-    var jsonLightReadPayload = function (data, model, recognizeDates, inferFeedAsComplexType) {
+    var jsonLightReadPayload = function (data, model, recognizeDates, inferFeedAsComplexType, contentTypeOdata) {
         /// <summary>Converts a JSON light response payload object into its library's internal representation.</summary>
         /// <param name="data" type="Object">Json light response payload object.</param>
         /// <param name="model" type="Object">Object describing an OData conceptual schema.</param>
         /// <param name="recognizeDates" type="Boolean" optional="true">Flag indicating whether datetime literal strings should be converted to JavaScript Date objects.</param>
         /// <param name="inferFeedAsComplexType" type="Boolean">True if a JSON light payload that looks like a feed should be reported as a complex type property instead.</param>
+        /// <param name="contentTypeOdata" type="string">Includes the type of json ( minimalmetadata, fullmetadata .. etc )</param>
         /// <returns type="Object">Object in the library's representation.</returns>
 
         if (!isComplex(data)) {
             return data;
         }
 
+        contentTypeOdata = contentTypeOdata || "minimalmetadata";
         var baseURI = data[metadataAnnotation];
         var payloadInfo = jsonLightPayloadInfo(data, model, inferFeedAsComplexType);
+        if (assigned(payloadInfo)) {
+            payloadInfo.contentTypeOdata = contentTypeOdata;
+        }
         var typeName = null;
         if (payloadInfo) {
             delete data[metadataAnnotation];
@@ -6782,7 +7197,7 @@
             typeName = payloadInfo.type;
             switch (payloadInfo.kind) {
                 case PAYLOADTYPE_FEED:
-                    return jsonLightReadFeed(data, typeName, baseURI, model, recognizeDates);
+                    return jsonLightReadFeed(data, payloadInfo, baseURI, model, recognizeDates);
                 case PAYLOADTYPE_COLLECTION:
                     return jsonLightReadTopCollectionProperty(data, typeName, baseURI, model, recognizeDates);
                 case PAYLOADTYPE_PRIMITIVE:
@@ -6793,7 +7208,7 @@
                     return jsonLightReadLinksDocument(data, baseURI);
             }
         }
-        return jsonLightReadObject(data, typeName, baseURI, model, recognizeDates);
+        return jsonLightReadObject(data, payloadInfo, baseURI, model, recognizeDates);
     };
 
     var jsonLightSerializableMetadata = ["type", "etag", "media_src", "edit_media", "content_type", "media_etag"];
@@ -7194,7 +7609,7 @@
 
         if ((maxVersion("3.0", dataServiceVersion) === dataServiceVersion)) {
             if (isJsonLight(context.contentType)) {
-                return jsonLightReadPayload(json, model, recognizeDates, inferJsonLightFeedAsObject);
+                return jsonLightReadPayload(json, model, recognizeDates, inferJsonLightFeedAsObject, context.contentType.properties.odata);
             }
             dateParser = parseDateTime;
         }
@@ -10134,272 +10549,4 @@
 
 
 
-    /*Server Extension*/
-    var handlerDataValidator = function (handler, part) {
-        if (typeof handler.dataValidator === 'function') {
-            return handler.dataValidator(part);
-        }
-        return true;
-    };
-    var partHandlerSelector = function (context, part) {
-        if (Array.isArray(context.handler.partHandler)) {
-            var pHandlers = context.handler.partHandler;
-            var cType = getContentType(part);
-            for (var i = 0; i < pHandlers.length; i++) {
-                if (handlerAccepts(pHandlers[i], cType) && handlerDataValidator(part)) {
-                    return pHandlers[i];
-                }
-            }
-            return pHandlers[pHandlers.length - 1];
-        } else {
-            return context.handler.partHandler;
-        }
-    };
-
-    var batchServerParser = function (handler, text, context) {
-        /// <summary>Parses a batch response.</summary>
-        /// <param name="handler">This handler.</param>
-        /// <param name="text" type="String">Batch text.</param>
-        /// <param name="context" type="Object">Object with parsing context.</param>
-        /// <returns>An object representation of the batch.</returns>
-
-        var boundary = context.contentType.properties["boundary"];
-        return { __batchRequests: readRequestBatch(text, { boundaries: [boundary], handlerContext: context }) };
-    };
-    var readRequestBatch = function (text, context) {
-        /// <summary>
-        /// Parses a multipart/mixed response body from from the position defined by the context. 
-        /// </summary>
-        /// <param name="text" type="String" optional="false">Body of the multipart/mixed response.</param>
-        /// <param name="context">Context used for parsing.</param>
-        /// <returns>Array of objects representing the individual responses.</returns>
-
-        var delimiter = "--" + currentBoundary(context);
-
-        // Move beyond the delimiter and read the complete batch
-        readTo(text, context, delimiter);
-
-        // Ignore the incoming line
-        readLine(text, context);
-
-        // Read the batch parts
-        var responses = [];
-        var partEnd;
-
-        while (partEnd !== "--" && context.position < text.length) {
-            var partHeaders = readHeaders(text, context);
-            var partContentType = contentType(partHeaders["Content-Type"]);
-
-            if (partContentType && partContentType.mediaType === batchMediaType) {
-                context.boundaries.push(partContentType.properties["boundary"]);
-                try {
-                    var changeRequests = readRequestBatch(text, context);
-                } catch (e) {
-                    e.response = readRequestBatch(text, context, delimiter);
-                    changeResponses = [e];
-                }
-                responses.push({ __changeRequests: changeRequests });
-                context.boundaries.pop();
-                readTo(text, context, "--" + currentBoundary(context));
-            } else {
-                if (!partContentType || partContentType.mediaType !== "application/http") {
-                    throw { message: "invalid MIME part type " };
-                }
-                // Skip empty line
-                readLine(text, context);
-                // Read the response
-                var response = readRequest(text, context, delimiter);
-                try {
-                    partHandlerSelector(context.handlerContext, response).read(response, context.handlerContext);
-                    //partHandler(context.handlerContext, response).read(response, context.handlerContext);
-                } catch (e) {
-                    response = e;
-                }
-
-                responses.push(response);
-            }
-
-            partEnd = text.substr(context.position, 2);
-
-            // Ignore the incoming line.
-            readLine(text, context);
-        }
-        return responses;
-    };
-    var requestMethodRegex = /^(\w*) (.*) HTTP\/1\.\d$/i;
-    var readRequest = function (text, context, delimiter) {
-        /// <summary>
-        /// Parses an HTTP response. 
-        /// </summary>
-        /// <param name="text" type="String" optional="false">Text representing the http response.</param>
-        /// <param name="context" optional="false">Context used for parsing.</param>
-        /// <param name="delimiter" type="String" optional="false">String used as delimiter of the multipart response parts.</param>
-        /// <returns>Object representing the http response.</returns>
-
-        // Read the status line. 
-        var pos = context.position;
-        var line = readLine(text, context);
-        var match = requestMethodRegex.exec(line);
-
-        var method;
-        var urlPart;
-        var headers;
-
-        if (match) {
-            method = match[1];
-            urlPart = match[2];
-            headers = readHeaders(text, context);
-            readLine(text, context);
-        } else {
-            context.position = pos;
-        }
-
-        return {
-            method: method,
-            urlPart: urlPart,
-            headers: headers,
-            body: readTo(text, context, "\r\n" + delimiter)
-        };
-    };
-
-    var batchServerSerializer = function (handler, data, context) {
-        /// <summary>Serializes a batch object representation into text.</summary>
-        /// <param name="handler">This handler.</param>
-        /// <param name="data" type="Object">Representation of a batch.</param>
-        /// <param name="context" type="Object">Object with parsing context.</param>
-        /// <returns>An text representation of the batch object; undefined if not applicable.</returns>
-
-        var cType = context.contentType = context.contentType || contentType(batchMediaType);
-        if (cType.mediaType === batchMediaType) {
-            return writeServerBatch(data, context);
-        }
-    };
-    var prepareResponse = function (response, handler, context) {
-        /// <summary>Prepares a request object so that it can be sent through the network.</summary>
-        /// <param name="request">Object that represents the request to be sent.</param>
-        /// <param name="handler">Handler for data serialization</param>
-        /// <param name="context">Context used for preparing the request</param>
-
-        if (!response.headers) {
-            response.headers = {};
-        } else {
-            normalizeHeaders(response.headers);
-        }
-
-        //if (response.headers.Accept === undefined) {
-        //    response.headers.Accept = handler.accept;
-        //}
-
-        if (assigned(response.data) && response.body === undefined) {
-            handler.write(response, context);
-        }
-    };
-
-    var writeServerBatch = function (data, context) {
-        /// <summary>
-        /// Serializes a batch request object to a string.
-        /// </summary>
-        /// <param name="data" optional="false">Batch request object in payload representation format</param>
-        /// <param name="context" optional="false">Context used for the serialization</param>
-        /// <returns type="String">String representing the batch request</returns>
-
-        if (!isBatch(data)) {
-            throw { message: "Data is not a batch object." };
-        }
-
-        var batchBoundary = createBoundary("batchresponse_");
-        context.request.batchBoundary = batchBoundary;
-        var batchParts = data.__batchRequests;
-        var batch = "";
-        var i, len;
-        for (i = 0, len = batchParts.length; i < len; i++) {
-            batch += writeBatchPartDelimiter(batchBoundary, false) +
-                     writeServerBatchPart(batchParts[i], context);
-        }
-        batch += writeBatchPartDelimiter(batchBoundary, true);
-
-        // Register the boundary with the request content type.
-        var contentTypeProperties = context.contentType.properties;
-        contentTypeProperties.boundary = batchBoundary;
-
-        return batch;
-    };
-    var writeServerBatchPart = function (part, context, nested) {
-        /// <summary>
-        /// Serializes a part of a batch request to a string. A part can be either a GET request or 
-        /// a change set grouping several CUD (create, update, delete) requests.
-        /// </summary>
-        /// <param name="part" optional="false">Request or change set object in payload representation format</param>
-        /// <param name="context" optional="false">Object containing context information used for the serialization</param>
-        /// <param name="nested" type="boolean" optional="true">Flag indicating that the part is nested inside a change set</param>
-        /// <returns type="String">String representing the serialized part</returns>
-        /// <remarks>
-        /// A change set is an array of request objects and they cannot be nested inside other change sets.
-        /// </remarks>
-
-        var changeSet = part.__changeRequests;
-        var result;
-        if (isArray(changeSet)) {
-            if (nested) {
-                throw { message: "Not Supported: change set nested in other change set" };
-            }
-
-            var changeSetBoundary = createBoundary("changesetresponse_");
-            result = "Content-Type: " + batchMediaType + "; boundary=" + changeSetBoundary + "\r\n";
-            var i, len;
-            for (i = 0, len = changeSet.length; i < len; i++) {
-                result += writeBatchPartDelimiter(changeSetBoundary, false) +
-                     writeServerBatchPart(changeSet[i], context, true);
-            }
-
-            result += writeBatchPartDelimiter(changeSetBoundary, true);
-        } else {
-            result = "Content-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\n";
-            prepareResponse(part, partHandlerSelector(context, part), { metadata: context.metadata });
-            //prepareResponse(part, partHandler(context, part), { metadata: context.metadata });
-            result += writeServerResponse(part);
-        }
-
-        return result;
-    };
-    var writeServerResponse = function (response) {
-        /// <summary>
-        /// Serializes a request object to a string.
-        /// </summary>
-        /// <param name="request" optional="false">Request object to serialize</param>
-        /// <returns type="String">String representing the serialized request</returns>
-
-        //var result = (request.method ? request.method : "GET") + " " + request.requestUri + " HTTP/1.1\r\n";
-        var result = "HTTP/1.1 " + response.statusCode + " " + response.statusName + "\r\n";
-        for (var name in response.headers) {
-            if (response.headers[name]) {
-                result = result + name + ": " + response.headers[name] + "\r\n";
-            }
-        }
-
-        result += "\r\n";
-
-        if (response.body) {
-            result += response.body;
-        }
-
-        return result;
-    };
-
-
-    odata.batchServerHandler = handler(batchServerParser, batchServerSerializer, batchMediaType, MAX_DATA_SERVICE_VERSION);
-
-    var defaultJsonHandler = function (handler, text, context) {
-        return text ? window.JSON.parse(text) : undefined;
-    };
-    odata.serverJsonHandler = handler(defaultJsonHandler, jsonSerializer, jsonMediaType, MAX_DATA_SERVICE_VERSION);
-
-    var atomReadHandler = handler(atomParser, textSerialize, atomAcceptTypes.join(","), MAX_DATA_SERVICE_VERSION);
-    atomReadHandler.dataValidator = function (part) {
-        return typeof part.data === 'string';
-    };
-
-    //odata.batchServerHandler.partHandler = odata.serverJsonHandler;
-    odata.batchServerHandler.partHandler = [odata.serverJsonHandler, atomReadHandler, odata.atomHandler, odata.defaultHandler];
-
-})(window);
+})(this);

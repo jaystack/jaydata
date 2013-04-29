@@ -284,7 +284,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                     var item = convertedItem[0];
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         var propType = Container.resolveType(memDef.type);
-                        if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                        if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty)) {
                             //if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             //    item[memDef.name] = response.headers.ETag || response.headers.Etag;
                             //} else {
@@ -318,7 +318,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
                 //        //}, this);
                 //        //item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                 //        //    var propType = Container.resolveType(memDef.type);
-                //        //    if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                //        //    if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty)) {
                 //        //        if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                 //        //            item[memDef.name] = response.headers.ETag || response.headers.Etag;
                 //        //        } else {
@@ -889,13 +889,23 @@ $C('$data.storageProviders.webApi.webApiCompiler', $data.Expressions.EntityExpre
     VisitConstantExpression: function (expression, context) {
         if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
 
-        var value;
+        var typeName = Container.resolveName(expression.type);
+        if (expression.value instanceof $data.Entity)
+            typeName = $data.Entity.fullName;
+
+        var converter = this.provider.fieldConverter.toDb[typeName];
+        var value = converter ? converter(expression.value) : expression.value;
+
+        converter = this.provider.fieldConverter.escape[typeName];
+        value = converter ? converter(value) : value;
+
+        /*var value;
         if (expression.value instanceof $data.Entity) {
             value = this.provider.fieldConverter.toDb['$data.Entity'](expression.value);
         } else {
             //var valueType = Container.getTypeName(expression.value);
             value = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
-        }
+        }*/
         context['$urlParams'] += expression.name + '=' + value;
     },
     //    VisitConstantExpression: function (expression, context) {
@@ -993,7 +1003,15 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
     },
 
     VisitQueryParameterExpression: function (expression, context) {
-        context.data += this.provider.fieldConverter.toDb[expression.type](expression.value);
+        //context.data += this.provider.fieldConverter.toDb[expression.type](expression.value);
+
+        var typeName = Container.resolveName(expression.type);
+
+        var converter = this.provider.fieldConverter.toDb[typeName];
+        var value = converter ? converter(expression.value) : expression.value;
+
+        converter = this.provider.fieldConverter.escape[typeName];
+        context.data += converter ? converter(value) : value;
     },
 
     VisitEntityFieldOperationExpression: function (expression, context) {
@@ -1026,7 +1044,15 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
 
     VisitConstantExpression: function (expression, context) {
         //var valueType = Container.getTypeName(expression.value);
-        context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
+        //context.data += this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);
+
+        var typeName = Container.resolveName(expression.type);
+
+        var converter = this.provider.fieldConverter.toDb[typeName];
+        var value = converter ? converter(expression.value) : expression.value;
+
+        converter = this.provider.fieldConverter.escape[typeName];
+        context.data += converter ? converter(value) : value;
     },
 
     VisitEntityExpression: function (expression, context) {

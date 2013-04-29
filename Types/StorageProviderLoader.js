@@ -56,9 +56,34 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         }
     },
     load: function (providerList, callback) {
+        $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || {};
+
         $data.Trace.log('Loading provider(s): ' + providerList);
         callback = $data.typeSystem.createCallbackSetting(callback);
+
+        var self = this;
+        var cacheKey = providerList.join(',');
+        self._fallbackCache = self._fallbackCache || {};
+
+        if (self._fallbackCache[cacheKey]) {
+            callback.success(self._fallbackCache[cacheKey]);
+        } else {
+            this.find(providerList, {
+                success: function (provider, selectedProvider) {
+                    self._fallbackCache[cacheKey] = provider;
+                    callback.success.call(this, provider);
+                },
+                error: callback.error
+            });
+        }
+    },
+    find: function (providerList, callback) {
         var currentProvider = providerList.shift();
+        var currentProvider = this.getVirtual(currentProvider);
+        if(Array.isArray(currentProvider)){
+            providerList = currentProvider;
+            currentProvider = providerList.shift();
+        }
 
         while (currentProvider && !this.isSupported(currentProvider)) {
             currentProvider = providerList.shift();
@@ -113,7 +138,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
                     callback.success(provider);
                 } else if (providerList.length > 0) {
                     $data.Trace.log(currentProvider + ' provider failed to load, trying to fallback to ' + providerList + ' provider(s)');
-                    self.load(providerList, callback);
+                    self.find(providerList, callback);
                 } else {
                     $data.Trace.log(currentProvider + ' provider failed to load');
                     callback.error();
@@ -213,10 +238,25 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         if (provider) {
             callback.success(provider);
         } else if (providerList.length > 0) {
-            this.load(providerList, callback);
+            this.find(providerList, callback);
         } else {
             callback.error();
         }
+    },
+
+    virtualProviders: {
+        type: $data.Array,
+        value: {
+            local: {
+                fallbacks: ['webSql', 'indexedDb', 'LocalStore']
+            }
+        }
+    },
+    getVirtual: function(name){
+        if(this.virtualProviders[name])
+            return [].concat(this.virtualProviders[name].fallbacks);
+
+        return name;
     }
 });
 

@@ -106,25 +106,17 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
             elementType.memberDefinitions.getPublicMappedProperties().forEach(function (prop) {
                 if ((!storageModel) || (storageModel && !storageModel.Associations[prop.name] && !storageModel.ComplexTypes[prop.name])) {
 
-                    if (!storageModel && this._query.context.storageProvider.supportedDataTypes.indexOf(Container.resolveType(prop.dataType)) < 0) {
+                    var type = Container.resolveType(prop.dataType);
+                    if (!storageModel && this._query.context.storageProvider.supportedDataTypes.indexOf(type) < 0) {
                         //complex type
                         builder.selectModelBinderProperty(prop.name);
-                        var type = Container.resolveType(prop.dataType);
                         builder.modelBinderConfig['$type'] = type;
                         if (this._isoDataProvider) {
                             builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
                         } else {
                             builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
                         }
-                        if (type === $data.Array && prop.elementType) {
-                            builder.selectModelBinderProperty('$item');
-                            var arrayElementType = Container.resolveType(prop.elementType);
-                            builder.modelBinderConfig['$type'] = arrayElementType;
-                            this._addPropertyToModelBinderConfig(arrayElementType, builder);
-                            builder.popModelBinderProperty();
-                        } else {
-                            this._addPropertyToModelBinderConfig(type, builder);
-                        }
+                        this._addPropertyToModelBinderConfig(type, builder);
                         builder.popModelBinderProperty();
                     } else {
                         if (prop.key) {
@@ -132,6 +124,20 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                         }
                         if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                             builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
+                        } else if (type === $data.Array && prop.elementType) {
+                            builder.selectModelBinderProperty(prop.name);
+                            builder.modelBinderConfig['$type'] = type;
+                            if (this._isoDataProvider) {
+                                builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
+                            } else {
+                                builder.modelBinderConfig['$selector'] = 'json:' + prop.name;
+                            }
+                            builder.selectModelBinderProperty('$item');
+                            var arrayElementType = Container.resolveType(prop.elementType);
+                            builder.modelBinderConfig['$type'] = arrayElementType;
+                            this._addPropertyToModelBinderConfig(arrayElementType, builder);
+                            builder.popModelBinderProperty();
+                            builder.popModelBinderProperty();
                         } else {
                             builder.modelBinderConfig[prop.name] = prop.name;
                         }

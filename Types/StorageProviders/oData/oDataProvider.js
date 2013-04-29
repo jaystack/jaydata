@@ -1,7 +1,8 @@
 
 var datajsPatch;
 datajsPatch = function () {
-    if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler) {
+    // just datajs-1.1.0
+    if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler && typeof datajs === 'object' && !datajs.version) {
         console.log('!!!!!!! - patch datajs 1.1.0');
         var oldread = OData.defaultHandler.read;
         OData.defaultHandler.read = function (p, context) {
@@ -164,6 +165,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
         var schema = this.context;
 
+        var that = this;
         var requestData = [
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
@@ -184,8 +186,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     callBack.success(query);
                 }
             },
-            function (jqXHR, textStatus, errorThrow) {
-                callBack.error(errorThrow || new Exception('Request failed', 'RequestError', arguments));
+            function (error) {
+                callBack.error(that.parseError(error, arguments));
             }
         ];
 
@@ -292,13 +294,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 } else {
                     item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                         var propType = Container.resolveType(memDef.type);
-                        if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                        if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty && propType !== $data.Array)) {
                             if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                 //unescape?
                                 item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
                             } else {
                                 var typeName = Container.resolveName(memDef.type);
                                 var converter = that.fieldConverter.fromDb[typeName];
+
                                 item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
                             }
                         }
@@ -309,11 +312,11 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     callBack.success(convertedItem.length);
                 }
             } else {
-                callBack.error(response);
+                callBack.error(that.parseError(response));
             }
 
         }, function (e) {
-            callBack.error(new Exception((e.response || {}).body, e.message, e));
+            callBack.error(that.parseError(e));
         }];
 
         this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
@@ -397,7 +400,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
                             //TODO: is this correct?
                             var propType = Container.resolveType(memDef.type);
-                            if (memDef.computed || memDef.key || (!propType.isAssignableto && !memDef.inverseProperty)) {
+                            if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty && propType !== $data.Array)) {
                                 if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
                                     // unescape?
                                     item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
@@ -410,20 +413,24 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         }, this);
 
                     } else {
-                        errors.push(new Exception((result[i].response || {}).body, result[i].message, result[i]));
+                        errors.push(that.parseError(result[i]));
                     }
                 }
                 if (errors.length > 0) {
-                    callBack.error(new Exception('See inner exceptions', 'Batch failed', errors));
+                    if (errors.length === 1) {
+                        callBack.error(errors[0]);
+                    } else {
+                        callBack.error(new Exception('See inner exceptions', 'Batch failed', errors));
+                    }
                 } else if (callBack.success) {
                     callBack.success(convertedItem.length);
                 }
             } else {
-                callBack.error(response);
+                callBack.error(that.parseError(response));
             }
 
         }, function (e) {
-            callBack.error(new Exception((e.response || {}).body, e.message, e));
+            callBack.error(that.parseError(e));
         }, OData.batchHandler];
 
         if (this.providerConfiguration.dataServiceVersion) {
@@ -469,7 +476,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         return queryable;
     },
     supportedDataTypes: {
-        value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
+        value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
             $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
             $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection,
             $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int64, $data.Time, $data.DateTimeOffset],
@@ -819,6 +826,21 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     }
     */
+    parseError: function(error, data){
+
+        var message = (error.response || error || {}).body || '';
+        try {
+            if(message.indexOf('{') === 0){
+                var errorObj = JSON.parse(message);
+                errorObj = errorObj['odata.error'] || errorObj.error || errorObj;
+                if (errorObj.message) {
+                    message = errorObj.message.value || errorObj.message;
+                }
+            }
+        } catch (e) {}
+
+        return new Exception(message, error.message, data || error);
+    },
     appendBasicAuth: function (request, user, password, withCredentials) {
         request.headers = request.headers || {};
         if (!request.headers.Authorization && user && password) {

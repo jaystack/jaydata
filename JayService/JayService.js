@@ -53,7 +53,10 @@ $data.Class.define("$data.JayService", null, null, {
 
             var factory = instanceFactory || function() { return new type; };
             var adapter = new $data.JSObjectAdapter(type, factory);
-            adapter.handleRequest(req, res, next);
+            adapter.handleRequest(req, res, function (err) {
+                if (typeof err === "string") err = new Error(err);
+                self.errorHandler.call(this, err, req, res, next);
+            });
         }
     },
     resultAsXml:function (data) {
@@ -68,6 +71,22 @@ $data.Class.define("$data.JayService", null, null, {
 
                 req.fullRoute = (req.baseRoute || (schema + '://' + req.headers.host)) + app.route;
             }
+        }
+    },
+    errorHandler: function (err, req, res, next) {
+        var accept = req.headers.accept || '';
+        if (~accept.indexOf('json')) {
+            if (err.status) res.statusCode = err.status;
+            if (res.statusCode < 400) res.statusCode = 500;
+
+            var error = { message: { value: err.message, lang: err.lang || 'en-US' }, stack: err.stack };
+            for (var prop in err) { if (prop !== 'message') error[prop] = err[prop]; }
+            var json = JSON.stringify({ error: error });
+
+            res.setHeader('Content-Type', 'application/json');
+            res.end(json);
+        } else {
+            next(err);
         }
     }
 });

@@ -18,6 +18,8 @@
 
 		GeoTests({ name: "sqLite", databaseName: 'GeoTests_T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');
 		GuidTests({ name: "sqLite", databaseName: 'GuidTests_T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');
+		TypeTests({ name: 'sqLite', databaseName: 'TypeTests_T2' }, 'sqLite');
+		CollectionTests({ name: 'sqLite', databaseName: 'CollectionTests_T2' }, 'sqLite');
     }
 
     if ($data.StorageProviderLoader.isSupported('indexedDb')) {
@@ -33,6 +35,8 @@
                 start();
             }
         );
+        TypeTests({ name: 'indexedDb', databaseName: 'TypeTests_T2' }, 'indexedDb');
+        CollectionTests({ name: 'indexedDb', databaseName: 'CollectionTests_T2' }, 'indexedDb');
 
     }
 
@@ -45,4 +49,16 @@
     dataServiceVersionTest({ name: "oData", oDataServiceHost: "Services/emptyNewsReader.svc", serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oData');
     dataServiceVersionTest({ name: "oData", oDataServiceHost: "Services/emptyNewsReaderV3.svc", maxDataServiceVersion: '3.0', serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
     dataServiceVersionTest({ name: "oData", oDataServiceHost: "Services/emptyNewsReaderV3.svc", maxDataServiceVersion: '1.0', serviceUrl: 'Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV1');
+
+
+    TypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc" }, 'oData');
+    TypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", maxDataServiceVersion: '3.0' }, 'oDataV3');
+    TypeTests({ name: 'oData', oDataServiceHost: "/odataprim", maxDataServiceVersion: '3.0', noBatch: true, noCount: true }, 'oDataWebApi');
+    TypeTests({ name: 'webApi', apiUrl: "/api/TestItemTypesWebApi", noBatch: true, noCount: true }, 'webApi');
+    TypeTests({ name: 'LocalStore', databaseName: 'TypeTests_T2' }, 'LocalStore');
+
+    CollectionTests({ name: 'oData', oDataServiceHost: "/odatacoll", maxDataServiceVersion: '3.0', noCreate: true }, 'oDataWebApi');
+    CollectionTests({ name: 'webApi', apiUrl: "/api/CollectionPropsWebApi", noCreate: true }, 'webApi');
+    CollectionTests({ name: 'LocalStore', databaseName: 'CollectionTests_T2' }, 'LocalStore');
+
 });

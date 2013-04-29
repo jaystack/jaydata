@@ -97,7 +97,7 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
         ///<param name="value" type="Object" />
         ///<param name="errors" type="Array" />
         ///<param name="validationTypeName" type="string" />
-        if ((entity.entityState == $data.EntityState.Modified && entity[memberDefinition.name] == undefined))
+        if (entity.entityState == $data.EntityState.Modified && entity.changedProperties && entity.changedProperties.indexOf(memberDefinition) < 0)
             return;
 
         var validatonGroup = this.supportedValidations[validationTypeName];
