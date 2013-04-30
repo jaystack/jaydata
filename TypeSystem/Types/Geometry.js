@@ -126,13 +126,31 @@ $data.GeometryPolygon = function GeometryPolygon(data) {
         coordinates.push([].concat(bl.coordinates));
         coordinates.push([].concat(tl.coordinates));
 
-        $data.GeographyBase.call(this, { coordinates: coordinates });
+        $data.GeographyBase.call(this, { coordinates: [coordinates] });
 
     }else if (Array.isArray(data)) {
         $data.GeometryBase.call(this, { coordinates: data });
     } else {
         $data.GeometryBase.call(this, data);
     }
+};
+$data.GeometryPolygon.parseFromString = function (strData) {
+    var data = strData.substring(strData.indexOf('(') + 1, strData.lastIndexOf(')'));
+    var rings = data.substring(data.indexOf('(') + 1, data.lastIndexOf(')')).split('),(');
+
+    var data = [];
+    for (var i = 0; i < rings.length; i++) {
+        var polyPoints = [];
+        var pairs = rings[i].split(',');
+        for (var j = 0; j < pairs.length; j++) {
+            var values = pairs[j].split(' ');
+
+            polyPoints.push([parseFloat(values[0]), parseFloat(values[1])]);
+        }
+        data.push(polyPoints);
+    }
+
+    return new $data.GeometryPolygon(data);
 };
 $data.GeometryPolygon.validMembers = ['coordinates'];
 $data.GeometryBase.registerType('Polygon', $data.GeometryPolygon);
