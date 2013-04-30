@@ -504,6 +504,12 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             counterState = c.removeAll.length;
             for (var i = 0; i < c.removeAll.length; i++){
                 var r = c.removeAll[i];
+                
+                for (var j in r.data){
+                    if (r.data[j] === undefined || r.data[j] === null){
+                        delete r.data[j];
+                    }
+                }
 
                 var keys = Container.resolveType(r.type).memberDefinitions.getKeyProperties();
                 for (var j = 0; j < keys.length; j++){
@@ -516,12 +522,6 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var p = props[j];
                     if (!p.key) {
                         delete r.data[p.name];
-                    }
-                }
-                
-                for (var i in r.data){
-                    if (r.data[i] === undefined || r.data[i] === null){
-                        delete r.data[i];
                     }
                 }
                 
