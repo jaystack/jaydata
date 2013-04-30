@@ -79,43 +79,5 @@ $C('$data.storageProviders.mongoDB.mongoDBOrderCompiler', $data.storageProviders
             if (context.data) context.data += '.';
             context.data += expression.memberDefinition.computed ? '_id' : expression.memberName;
         }
-    },
-    
-    VisitEntityFieldOperationExpression: function (expression, context) {
-        Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
-        
-        var opDef = expression.operation.memberDefinition;
-        var opName = opDef.mapTo || opDef.name;
-        var paramCounter = 0;
-        var params = opDef.parameters || [{ name: "@expression" }];
-
-        var args = params.map(function (item, index) {
-            if (item.name === "@expression") {
-                return expression.source;
-            } else {
-                return expression.parameters[paramCounter++]
-            };
-        });
-
-        args.forEach(function (arg, index) {
-            this.Visit(arg, context);
-        }, this);
-        
-        var opMapTo;
-        var opValue;
-        switch (opName){
-            case '$near':
-            case '$nearSphere':
-                if (context.query[context.data]){
-                    context.query[context.data][opName] = context.value.coordinates;
-                }else{
-                    var cmd = {};
-                    cmd[opName] = context.value.coordinates;
-                    context.query[context.data] = cmd;
-                }
-                return;
-            default:
-                break;
-        }
     }
 });

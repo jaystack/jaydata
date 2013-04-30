@@ -147,15 +147,18 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         
         return ret;
     },
+    _compile: function(query){
+        return new $data.storageProviders.mongoDB.mongoDBCompiler().compile(query);
+    },
     getTraceString: function (queryable) {
-        return new $data.storageProviders.mongoDB.mongoDBCompiler().compile(queryable);
+        return this._compile(queryable);
     },
     executeQuery: function(query, callBack){
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
-        new $data.storageProviders.mongoDB.mongoDBCompiler().compile(query);
+        this._compile(query);
 
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
