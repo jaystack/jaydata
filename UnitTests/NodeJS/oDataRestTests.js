@@ -1445,7 +1445,7 @@ test("Save GeometryObjects", 19, function () {
 
             var itemsToSave = [item, item2];
             context.saveChanges(function () {
-                context.GeometryTestEntities.toArray(function (items) {
+                context.GeometryTestEntities.orderBy('it.Name').toArray(function (items) {
 
                     equal(items.length, 2, 'result length');
                     for (var i = 0; i < items.length; i++) {
