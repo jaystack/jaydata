@@ -47,7 +47,7 @@ $data.IndexedDBConverter = {
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function(b){ return b ? $data.Blob.toString(b) : b; },
-        '$data.Array': $data.Container.proxyConverter,
+        '$data.Array': function (arr) { return arr ? JSON.parse(JSON.stringify(arr)) : arr; },
         '$data.Object': $data.Container.proxyConverter,
         "$data.Guid": function (g) { return g ? g.toString() : g; },
         '$data.GeographyPoint': function (g) { if (g) { return g; } return g; },

@@ -1139,7 +1139,7 @@
                     throw "converter not found";
                 }
             } catch (e) {
-                Guard.raise(new Exception('TypeError: ', "value '" + sourceTypeName + "' not convertable to '" + targetTypeName + "'", value));
+                Guard.raise(new Exception("Value '" + sourceTypeName + "' not convertable to '" + targetTypeName + "'", 'TypeError', value));
             }
 
             if (targetType === $data.Array && eType && Array.isArray(result)) {

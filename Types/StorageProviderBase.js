@@ -414,6 +414,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
 
     getFieldUrl: function () {
         return '#';
+    },
+
+    supportedAutoincrementKeys: {
+        value: { }
     }
 },
 {

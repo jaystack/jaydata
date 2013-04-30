@@ -6,7 +6,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         this.IDBRequest = window.IDBRequest || window.webkitIDBRequest || window.mozIDBRequest || window.msIDBRequest;
         this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction || window.msIDBTransaction;
         this.IDBTransactionType = { READ_ONLY: "readonly", READ_WRITE: "readwrite", VERSIONCHANGE: "versionchange" }
-        if (this.IDBTransaction.READ_ONLY && this.IDBTransaction.READ_WRITE) {
+        if (typeof this.IDBTransaction.READ_ONLY !== 'undefined' && typeof this.IDBTransaction.READ_WRITE !== 'undefined') {
             this.IDBTransactionType.READ_ONLY = this.IDBTransaction.READ_ONLY
             this.IDBTransactionType.READ_WRITE = this.IDBTransaction.READ_WRITE
         }
@@ -107,6 +107,13 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
     fieldConverter: { value: $data.IndexedDBConverter },
 
+    supportedAutoincrementKeys: {
+        value: {
+            '$data.Integer': true,
+            '$data.Guid': function () { return $data.createGuid(); }
+        }
+    },
+
     _getObjectStoreDefinition: function (setDefinition) {
         var contextStore = {
             storeName: setDefinition.TableName
@@ -124,7 +131,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             throw error;
         }*/
         //var keyField = keyFields[0];
-        for (var i = 0; i < keyFields.length; i++) {
+        /*for (var i = 0; i < keyFields.length; i++) {
 
             if (keyFields[i].computed === true &&
                 ("$data.Integer" !== Container.resolveName(keyFields[i].type))) {
@@ -136,6 +143,17 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 var error = new Error("With multiple keys the computed field is not allowed: " + contextStore.storeName);
                 error.name = "MultipleComputedKeyFieldError";
                 throw error;
+            }
+        }*/
+
+        if (keyFields.length > 2 && keyFields.some(function (memDef) { return memDef.computed; })) {
+            Guard.raise("With multiple keys the computed field is not allowed: " + contextStore.storeName, "MultipleComputedKeyFieldError");
+        }
+
+        for (var i = 0; i < keyFields.length; i++) {
+            var typeName = Container.resolveName(keyFields[i].type);
+            if (keyFields[i].computed && !this.supportedAutoincrementKeys[typeName]) {
+                console.log("WARRNING! '" + typeName + "' not supported as computed Key!");
             }
         }
 
@@ -176,9 +194,11 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 var settings = {};
                 if (storeDef.keyFields.length == 1) {
                     settings = {
-                        keyPath: storeDef.keyFields[0].name,
-                        autoIncrement: storeDef.keyFields[0].computed
+                        keyPath: storeDef.keyFields[0].name
+                        //autoIncrement: storeDef.keyFields[0].computed
                     };
+                    var typeName = Container.resolveName(storeDef.keyFields[0].type);
+                    settings.autoIncrement = this.supportedAutoincrementKeys[typeName] ? true : false;
                 } else {
                     settings.key = [];
                     for (var i = 0; i < storeDef.keyFields.length; i++) {
@@ -496,7 +516,11 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     // AutoIncrement field, must be key
                     if (!item.key)
                         Guard.raise(new Exception('Only key field can be a computed field!'));
-                    settings.autoIncrement = true;
+
+                    var typeName = Container.resolveName(item.type);
+                    if (self.supportedAutoincrementKeys[typeName] === true) {
+                        settings.autoIncrement = true;
+                    }
                 }
             });
         if (keys.length > 1) {
@@ -532,20 +556,27 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 var convertedItems = currentBlock.map(function (item) {
                     storesObj[item.entitySet.tableName] = true;
                     item.physicalData = {};
-                    self.context._storageModel.getStorageModel(item.data.getType())
-                        .PhysicalType.memberDefinitions
+                    item.entitySet.elementType.memberDefinitions
                         .getPublicMappedProperties().forEach(function (memDef) {
+                            var typeName = Container.resolveName(memDef.type);
                             if (memDef.key && memDef.computed && item.data[memDef.name] == undefined) {
-                                // Autogenerated fields for new items should not be present in the physicalData
-                                return;
+                                if (typeof self.supportedAutoincrementKeys[typeName] === 'function') {
+                                    var keyValue = self.supportedAutoincrementKeys[typeName]();
+                                    item.data[memDef.name] = self.fieldConverter.toDb[typeName](keyValue);
+                                } else {
+                                    // Autogenerated fields for new items should not be present in the physicalData
+                                    return;
+                                }
                             }
-                            if (typeof memDef.concurrencyMode === 'undefined' && (memDef.key === true || item.data.entityState === $data.EntityState.Added || (item.data.changedProperties && item.data.changedProperties.some(function (def) { return def.name === memDef.name; })))) {
-                                var typeName = Container.resolveName(memDef.type);
+                            if (!memDef.inverseProperty && typeof memDef.concurrencyMode === 'undefined' && (memDef.key === true || item.data.entityState === $data.EntityState.Added || (item.data.changedProperties && item.data.changedProperties.some(function (def) { return def.name === memDef.name; })))) {
                                 if (self.fieldConverter.toDb[typeName]) {
                                     item.physicalData[memDef.name] = self.fieldConverter.toDb[typeName](item.data[memDef.name]);
                                 } else {
-                                    console.log('WARN!!!');
-                                    item.physicalData[memDef.name] = item.data[memDef.name];
+                                    var value = item.data[memDef.name];
+                                    if (value !== undefined) {
+                                        value = JSON.parse(JSON.stringify(value));
+                                    } 
+                                    item.physicalData[memDef.name] = value;
                                 }
                             }
                         });
@@ -559,7 +590,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     onerror: function (event) {
                         // Only call the error callback when it's not because of an abort
                         // aborted cases should call the error callback there
-                        if (event.target.errorCode !== self.IDBDatabaseException.ABORT_ERR)
+                        if (event.target && self.IDBDatabaseException && event.target.errorCode !== self.IDBDatabaseException.ABORT_ERR)
                             callBack.error(event);
                     },
                     oncomplete: function (event) {
