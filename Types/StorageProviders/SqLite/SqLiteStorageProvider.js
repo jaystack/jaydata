@@ -4,9 +4,9 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         this.SqlCommands = [];
         this.context = context;
         this.providerConfiguration = $data.typeSystem.extend({
-            databaseName: "JayDataDemo",
+            databaseName: $data.defaults.defaultDatabaseName,
             version: "",
-            displayName: "JayData demo db",
+            displayName: "JayData default db",
             maxSize: 1024 * 1024,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);

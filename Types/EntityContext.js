@@ -1,3 +1,11 @@
+(function () {
+
+    $data.defaults = $data.defaults || {};
+    $data.defaults.defaultDatabaseName = 'JayDataDefault';
+
+})();
+
+
 $data.Class.define('$data.StorageModel', null, null, {
     constructor: function () {
         ///<field name="LogicalType" type="$data.Entity">User defined type</field>
