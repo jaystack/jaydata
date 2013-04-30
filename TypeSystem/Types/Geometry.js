@@ -104,7 +104,31 @@ $data.Container.registerType(['$data.GeometryLineString', 'GeometryLineString'],
 
 /* $data.GeometryPolygon */
 $data.GeometryPolygon = function GeometryPolygon(data) {
-    if (Array.isArray(data)) {
+    if (typeof data === 'object' && (('topLeft' in data && 'bottomRight' in data) || ('topRight' in data && 'bottomLeft' in data))) {
+        var tl, tr, bl, br;
+
+        if ('topLeft' in data && 'bottomRight' in data) {
+            tl = data.topLeft instanceof $data.GeometryPoint ? data.topLeft : new $data.GeometryPoint(data.topLeft);
+            br = data.bottomRight instanceof $data.GeometryPoint ? data.bottomRight : new $data.GeometryPoint(data.bottomRight);
+            tr = new $data.GeometryPoint([br.coordinates[0], tl.coordinates[1]]);
+            bl = new $data.GeometryPoint([tl.coordinates[0], br.coordinates[1]]);
+        } else {
+            tr = data.topRight instanceof $data.GeometryPoint ? data.topRight : new $data.GeometryPoint(data.topRight);
+            bl = data.bottomLeft instanceof $data.GeometryPoint ? data.bottomLeft : new $data.GeometryPoint(data.bottomLeft);
+            tl = new $data.GeometryPoint([bl.coordinates[0], tr.coordinates[1]]);
+            br = new $data.GeometryPoint([tr.coordinates[0], bl.coordinates[1]]);
+        }
+
+        var coordinates = [];
+        coordinates.push([].concat(tl.coordinates));
+        coordinates.push([].concat(tr.coordinates));
+        coordinates.push([].concat(br.coordinates));
+        coordinates.push([].concat(bl.coordinates));
+        coordinates.push([].concat(tl.coordinates));
+
+        $data.GeographyBase.call(this, { coordinates: coordinates });
+
+    }else if (Array.isArray(data)) {
         $data.GeometryBase.call(this, { coordinates: data });
     } else {
         $data.GeometryBase.call(this, data);
