@@ -4,6 +4,7 @@ $(function () {
     module("webapi action test");
 
     test('webApi OData Entity action test', 2, function () {
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(2);
 
         (new $news.Types.NewsContext({ 
@@ -42,6 +43,7 @@ $(function () {
     });
 
     test('webApi OData Collection action test', 2, function () {
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(2);
 
         (new $news.Types.NewsContext({
@@ -79,6 +81,7 @@ $(function () {
     });
 
     test('webApi OData Entity action GeographyPoint', function () {
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop(2);
 
         (new $news.Types.NewsContext({
@@ -190,6 +193,7 @@ function webApiTests(providerConfiguration, msg) {
 $(function () {
 
     test('webapi geography types read', function () {
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop();
 
         $data.service('/odatageo', function (f) {
@@ -226,6 +230,7 @@ $(function () {
     });
 
     test('webapi geography types save', function () {
+        if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { expect(1); ok(false, "XSLTProcessor not exists"); return; }
         stop();
 
         $data.service('/odatageo', function (f) {

@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-    if (typeof XSLTProcessor === undefined) {
+    if (typeof XSLTProcessor == "undefined" && typeof ActiveXObject === 'undefined') { 
         module("JaySvcUtilTests");
         test('XSLTProcessor is not enable', 1, function () {
             ok(false, 'JaySvcUtil.js is not supported!!');
