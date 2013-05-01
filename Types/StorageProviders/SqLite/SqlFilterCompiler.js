@@ -7,9 +7,9 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
         /// <param name="expression" type="$data.Expressions.SimpleBinaryExpression"></param>
         /// <param name="sqlBuilder" type="$data.sqLite.SqlBuilder"></param>
             sqlBuilder.addText(expression.resolution.mapTo);
-            sqlBuilder.addText(SqlStatementBlocks.beginGroup);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.beginGroup);
             this.Visit(expression.operand, sqlBuilder);
-            sqlBuilder.addText(SqlStatementBlocks.endGroup);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.endGroup);
     },
 
     VisitSimpleBinaryExpression: function (expression, sqlBuilder) {
@@ -20,7 +20,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
         if (expression.nodeType == "arrayIndex") {
             this.Visit(expression.left, sqlBuilder);
         } else {
-            sqlBuilder.addText(SqlStatementBlocks.beginGroup);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.beginGroup);
 
             //check null filter
             if (expression.left instanceof $data.Expressions.EntityFieldExpression && expression.right instanceof $data.Expressions.ConstantExpression && expression.right.value === null) {
@@ -38,12 +38,12 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                     Guard.requireType("expression.right", expression.right, $data.Expressions.ConstantExpression);
                     var set = expression.right.value;
                     if (set instanceof Array) {
-                        sqlBuilder.addText(SqlStatementBlocks.beginGroup);
+                        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.beginGroup);
                         set.forEach(function (item, i) {
-                            if (i > 0) sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+                            if (i > 0) sqlBuilder.addText($data.sqLite.SqlStatementBlocks.valueSeparator);
                             self.Visit(item, sqlBuilder);
                         });
-                        sqlBuilder.addText(SqlStatementBlocks.endGroup);
+                        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.endGroup);
                     } else if (set instanceof $data.Queryable) {
                         sqlBuilder.addText("(SELECT d FROM (" + set.toTraceString().sqlText + "))");
                         //Guard.raise("Not yet... but coming!");
@@ -55,7 +55,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                 }
             }
             
-            sqlBuilder.addText(SqlStatementBlocks.endGroup);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.endGroup);
         }
     },
 
@@ -65,7 +65,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
 
         var alias = sqlBuilder.getExpressionAlias(expression);
         sqlBuilder.addText(alias);
-        sqlBuilder.addText(SqlStatementBlocks.nameSeparator);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.nameSeparator);
     },
     VisitEntityFieldOperationExpression: function (expression, sqlBuilder) {
         /// <param name="expression" type="$data.Expressions.EntityFieldOperationExpression"></param>
@@ -78,7 +78,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
         var opName = opDefinition.mapTo || opDefinition.name;
 
         sqlBuilder.addText(opName);
-        sqlBuilder.addText(SqlStatementBlocks.beginGroup);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.beginGroup);
         if (opName === "like") {
             var builder = $data.sqLite.SqlBuilder.create([], sqlBuilder.entityContext);
             builder.selectTextPart("fragment");
@@ -102,7 +102,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
             }, this);
         };
 
-        sqlBuilder.addText(SqlStatementBlocks.endGroup);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.endGroup);
     },
     VisitMemberInfoExpression: function (expression, sqlBuilder) {
         /// <param name="expression" type="$data.Expressions.MemberInfoExpression"></param>
@@ -118,14 +118,14 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
             value = expression.value;
         }
         sqlBuilder.addParameter(value);
-        sqlBuilder.addText(SqlStatementBlocks.parameter);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.parameter);
     },
 
     VisitConstantExpression: function (expression, sqlBuilder) {
         //var typeNameHintFromValue = Container.getTypeName(expression.value);
         var value = sqlBuilder.entityContext.storageProvider.fieldConverter.toDb[Container.resolveName(Container.resolveType(expression.type))](expression.value);;
         sqlBuilder.addParameter(value);
-        sqlBuilder.addText(SqlStatementBlocks.parameter);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.parameter);
     },
 
     VisitEntityFieldExpression:function(expression, sqlBuilder){

@@ -11,7 +11,7 @@ $C('$data.sqLite.SqlOrderCompiler', $data.Expressions.EntityExpressionVisitor, n
 
         var alias = sqlBuilder.getExpressionAlias(expression);
         sqlBuilder.addText(alias);
-        sqlBuilder.addText(SqlStatementBlocks.nameSeparator);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.nameSeparator);
     },
     VisitOrderExpression: function (expression, sqlBuilder) {
         this.Visit(expression.selector, sqlBuilder);

@@ -1,4 +1,4 @@
-var SqlStatementBlocks = {
+$C('$data.sqLite.SqlStatementBlocks',null,null,null,{
     beginGroup: "(",
     endGroup: ")",
     nameSeparator: ".",
@@ -14,7 +14,7 @@ var SqlStatementBlocks = {
     scalarFieldName: 'd',
     rowIdName: 'rowid$$',
     count: 'select count(*) cnt from ('
-};
+});
 $C('$data.sqLite.SqlBuilder', $data.queryBuilder, null, {
     constructor: function (sets, context) {
         this.sets = sets;
@@ -59,7 +59,7 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         var countPart = sqlBuilder.getTextPart('count');
         if (countPart !== undefined) {
             sqlBuilder.selectedFragment.text = countPart.text + sqlBuilder.selectedFragment.text;
-            sqlBuilder.addText(SqlStatementBlocks.endGroup);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.endGroup);
             sqlBuilder.selectedFragment.params = sqlBuilder.selectedFragment.params.concat(countPart.params);
         }
         sqlBuilder.resetModelBinderProperty();
@@ -72,12 +72,12 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
     VisitCountExpression: function (expression, sqlBuilder) {
         this.Visit(expression.source, sqlBuilder);
         sqlBuilder.selectTextPart('count');
-        sqlBuilder.addText(SqlStatementBlocks.count);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.count);
     },
     VisitFilterExpression: function (expression, sqlBuilder) {
         this.Visit(expression.source, sqlBuilder);
         sqlBuilder.selectTextPart('filter');
-        sqlBuilder.addText(SqlStatementBlocks.where);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.where);
         var filterCompiler = $data.sqLite.SqlFilterCompiler.create();
         filterCompiler.Visit(expression.selector, sqlBuilder);
         return expression;
@@ -87,10 +87,10 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         this.Visit(expression.source, sqlBuilder);
         sqlBuilder.selectTextPart('order');
         if (this.addOrders) {
-            sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.valueSeparator);
         } else {
             this.addOrders = true;
-            sqlBuilder.addText(SqlStatementBlocks.order);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.order);
         }
         var orderCompiler = $data.sqLite.SqlOrderCompiler.create();
         orderCompiler.Visit(expression, sqlBuilder);
@@ -103,10 +103,10 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         switch (expression.nodeType) {
             case $data.Expressions.ExpressionType.Skip:
                 sqlBuilder.selectTextPart('skip');
-                sqlBuilder.addText(SqlStatementBlocks.skip); break;
+                sqlBuilder.addText($data.sqLite.SqlStatementBlocks.skip); break;
             case $data.Expressions.ExpressionType.Take:
                 sqlBuilder.selectTextPart('take');
-                sqlBuilder.addText(SqlStatementBlocks.take); break;
+                sqlBuilder.addText($data.sqLite.SqlStatementBlocks.take); break;
             default: Guard.raise("Not supported nodeType"); break;
         }
         var pagingCompiler = $data.sqLite.SqlPagingCompiler.create();
@@ -117,13 +117,13 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         this.Visit(expression.source, sqlBuilder);
         sqlBuilder.selectTextPart('projection');
         this.hasProjection = true;
-        sqlBuilder.addText(SqlStatementBlocks.select);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.select);
         var projectonCompiler = $data.sqLite.SqlProjectionCompiler.create();
         projectonCompiler.Visit(expression, sqlBuilder);
     },
     VisitEntitySetExpression: function (expression, sqlBuilder) {
         sqlBuilder.selectTextPart('from');
-        sqlBuilder.addText(SqlStatementBlocks.from);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.from);
         sqlBuilder.sets.forEach(function (es, setIndex) {
 
             if (setIndex > 0) {
@@ -157,19 +157,19 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         sqlBuilder.selectTextPart('projection');
         var needAlias = this.infos.filter(function (i) { return i.IsMapped; }).length > 1;
         if (sqlBuilder.sets.length > 1) {
-            sqlBuilder.addText(SqlStatementBlocks.select);
+            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.select);
             sqlBuilder.sets.forEach(function (set, masterIndex) {
 
                 if (this.infos[masterIndex].IsMapped) {
                     var alias = sqlBuilder.getExpressionAlias(set);
                     set.storageModel.PhysicalType.memberDefinitions.getPublicMappedProperties().forEach(function (memberDef, index) {
                         if (index > 0 || masterIndex > 0) {
-                            sqlBuilder.addText(SqlStatementBlocks.valueSeparator);
+                            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.valueSeparator);
                         }
                         sqlBuilder.addText(alias + ".");
                         sqlBuilder.addText(memberDef.name);
                         if (needAlias) {
-                            sqlBuilder.addText(SqlStatementBlocks.as);
+                            sqlBuilder.addText($data.sqLite.SqlStatementBlocks.as);
                             sqlBuilder.addText(alias + "__" + memberDef.name);
                         }
                     }, this);
