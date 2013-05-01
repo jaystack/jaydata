@@ -278,7 +278,7 @@ npmjaydata-server: $(JAYDATA_SERVER) $(CREDITS)
 	@@echo "try{ require('jaydata-core'); }catch(e){}" >> $(NPM_DIR)/jaydata-server/lib/index.js;
 	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata-server/lib/index.js;)
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata-server/lib/index.js
-	@@sed -e 's/"name": "jaydata"/"name": "jaydata-server"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/jaydata-server/package.json
+	@@sed -e 's/"dependencies": { "jaydata-core": "1.1.0" },/"dependencies": { "jaydata-core": "1.1.0" ,"q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1"},/;s/"name": "jaydata"/"name": "jaydata-server"/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/;s/"jaydata-core": "[0-9].[0-9].[0-9]"/"jaydata-core":"$(VERSION)"/' $(NPM_BASE_DIR)/provider/package.json > $(NPM_DIR)/jaydata-server/package.json
 
 npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "Building jaydata npm package..."
