@@ -491,7 +491,8 @@
             }
 
             this.lexer.nextToken();
-            return this.builder.buildConstant(g, "GeographyPoint");
+            var typeName = Container.getTypeName(g);
+            return this.builder.buildConstant(g, typeName.substring(typeName.lastIndexOf('.') + 1));
         },
         parseGeometryLiteral: function () {
             if (this.lexer.token.value != "geometry")
@@ -509,7 +510,8 @@
             }
 
             this.lexer.nextToken();
-            return this.builder.buildConstant(g, "GeometryPoint");
+            var typeName = Container.getTypeName(g);
+            return this.builder.buildConstant(g, typeName.substring(typeName.lastIndexOf('.') + 1));
         },
         parseGeographyArg: function () {
             var exp = this.parseExpr();

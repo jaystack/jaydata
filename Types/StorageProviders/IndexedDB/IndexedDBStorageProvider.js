@@ -19,7 +19,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         this.SqlCommands = [];
         this.context = {};
         this.providerConfiguration = $data.typeSystem.extend({
-            databaseName: 'JayDataDemo',
+            databaseName: $data.defaults.defaultDatabaseName,
             version: 1,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
             memoryOperations: true
