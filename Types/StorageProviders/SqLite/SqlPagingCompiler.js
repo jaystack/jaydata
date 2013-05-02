@@ -10,6 +10,6 @@ $C('$data.sqLite.SqlPagingCompiler', $data.Expressions.EntityExpressionVisitor, 
     },
     VisitConstantExpression: function (expression, sqlBuilder) {
         sqlBuilder.addParameter(expression.value);
-        sqlBuilder.addText(SqlStatementBlocks.parameter);
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.parameter);
     }
 });
