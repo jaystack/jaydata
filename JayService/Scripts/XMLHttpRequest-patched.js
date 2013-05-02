@@ -35,7 +35,7 @@ exports.XMLHttpRequest = function() {
   // Set some default headers
   var defaultHeaders = {
     "User-Agent": "node-XMLHttpRequest",
-    "Accept": "*/*",
+    "Accept": "*/*"
   };
 
   var headers = defaultHeaders;
@@ -151,7 +151,6 @@ exports.XMLHttpRequest = function() {
     // Check for valid request method
     if (!isAllowedHttpMethod(method)) {
       throw "SecurityError: Request method not allowed";
-      return;
     }
 
     settings = {

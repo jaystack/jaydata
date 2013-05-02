@@ -155,7 +155,7 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBConverter.js\
 	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
 
-SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
+DbCommand = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/DbClient/DbConnection.js\
 	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
 	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbConnection.js\
@@ -163,6 +163,8 @@ SqLiteProvider = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/DbClient/JayStorageClient/JayStorageConnection.js\
 	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjCommand.js\
 	$(TYPES_DIR)/DbClient/SqLiteNjClient/SqLiteNjConnection.js\
+
+SqLiteProvider = $(DbCommand)\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteConverter.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqLiteCompiler.js\

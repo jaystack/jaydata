@@ -10,30 +10,35 @@ $data.Class.define("$data.JayService", null, null, {
                 fn[keys[i]] = f[keys[i]];
             }
             return fn;
-        }
+        };
 
         f.param = function (name, type) {
             f.params = f.params || [];
             f.params.push({name:name, type:type});
             return f;
-        }
+        };
 
         f.returns = function (type) {
             f.returnType = type;
             return f;
-        }
+        };
 
         f.returnsArrayOf = function (type) {
             f.returnType = "Array";
             f.elementType = type;
             return f;
-        }
+        };
 
         f.returnsCollectionOf = function (type) {
             f.returnType = "Collection";
             f.elementType = type;
             return f;
-        }
+        };
+        
+        f.httpMethod = function(type){
+            f.method = type || 'GET';
+            return f;
+        };
 
         return f;
     },

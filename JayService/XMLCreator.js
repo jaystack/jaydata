@@ -77,8 +77,6 @@ $data.Class.define('$data.Xml.XmlCreator', null, null, {
 
     declareNamespace: function (schema, schemaName) {
         return new $data.Xml.XmlNamespace(schema, schemaName);
-
-        return this;
     },
     declareElement: function (namespaceOrName, name) {
         if (typeof namespaceOrName === 'string') {
@@ -86,8 +84,6 @@ $data.Class.define('$data.Xml.XmlCreator', null, null, {
         } else {
             return new $data.Xml.XmlElement(name, namespaceOrName);
         }
-
-        return this;
     },
     declareAttribute: function (namespaceOrName, name) {
         if (typeof namespaceOrName === 'string') {
@@ -95,8 +91,6 @@ $data.Class.define('$data.Xml.XmlCreator', null, null, {
         } else {
             return new $data.Xml.XmlAttribute(name, namespaceOrName);
         }
-
-        return this;
     },
     persistNode: function (node, isInline) {
         if (!node.PersistStarted) {

@@ -234,7 +234,7 @@
         try {
             var result = builder.parse({
                 frame: $data.Expressions.ExpressionType.BatchDelete,
-                filter: req.query.$filter || '',
+                filter: req.query.$filter || ''
                 //orderby: req.query.$orderby || '',
                 //select: req.query.$select || '',
                 //skip: req.query.$skip || '',
