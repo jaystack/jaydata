@@ -3,6 +3,7 @@ $data.GeographyBase = function GeographyBase() {
     $data.Geospatial.apply(this, arguments);
 
     this.crs = $data.GeographyBase.defaultCrs;
+    $data.GeographyBase.validateGeoJSON(this);
 };
 
 $data.GeographyBase.defaultCrs = {
@@ -62,6 +63,22 @@ $data.GeographyBase.registerType = function (name, type, base) {
     $data.GeographyBase.registered = $data.GeographyBase.registered || {};
     $data.GeographyBase.registered[name.toLowerCase()] = type;
 };
+$data.GeographyBase.validateGeoJSON = function (geoData) {
+    var type = geoData.type;
+    if (type) {
+        var geoType = $data.GeographyBase.registered[type.toLowerCase()];
+        if (typeof geoType.validateGeoJSON === 'function') {
+            var isValid = geoType.validateGeoJSON(geoData);
+            if (isValid) {
+                return isValid;
+            } else {
+                Guard.raise(new Exception("Invalid '" + type + "' format!", 'Format Exception', geoData));
+            }
+        }
+    }
+    console.log('GeoJSON validation missing', geoData);
+    return;
+};
 $data.SimpleBase.registerType('GeographyBase', $data.GeographyBase, $data.Geospatial);
 $data.Container.registerType(['$data.GeographyBase'], $data.GeographyBase);
 
@@ -78,6 +95,13 @@ $data.GeographyPoint = function GeographyPoint(lon, lat) {
     } else {
         $data.GeographyBase.call(this, { coordinates: [lon || 0, lat || 0] });
     }
+};
+$data.GeographyPoint.validateGeoJSON = function (geoData) {
+    return geoData && 
+        Array.isArray(geoData.coordinates) && 
+        geoData.coordinates.length == 2 && 
+        typeof geoData.coordinates[0] === 'number' &&
+        typeof geoData.coordinates[1] === 'number';
 };
 $data.GeographyPoint.parseFromString = function (strData) {
     var data = strData.substring(strData.indexOf('(') + 1, strData.lastIndexOf(')'));
@@ -99,6 +123,21 @@ $data.GeographyLineString = function GeographyLineString(data) {
     } else {
         $data.GeographyBase.call(this, data);
     }
+};
+$data.GeographyLineString.validateGeoJSON = function (geoData) {
+    var isValid = geoData &&
+        Array.isArray(geoData.coordinates);
+
+    for (var i = 0; isValid && i < geoData.coordinates.length; i++) {
+        var point = geoData.coordinates[i];
+        isValid = isValid &&
+            Array.isArray(point) &&
+            point.length == 2 &&
+            typeof point[0] === 'number' &&
+            typeof point[1] === 'number';
+    }
+    
+    return isValid;
 };
 $data.GeographyLineString.validMembers = ['coordinates'];
 $data.GeographyBase.registerType('LineString', $data.GeographyLineString);
@@ -136,6 +175,27 @@ $data.GeographyPolygon = function GeographyPolygon(data) {
         $data.GeographyBase.call(this, data);
     }
 };
+$data.GeographyPolygon.validateGeoJSON = function (geoData) {
+    var isValid = geoData &&
+        Array.isArray(geoData.coordinates);
+
+    for (var i = 0; isValid && i < geoData.coordinates.length; i++) {
+        var polygon = geoData.coordinates[i];
+        var isValid = isValid && Array.isArray(polygon);
+            
+        for (var j = 0; isValid && j < polygon.length; j++) {
+            var point = polygon[j];
+
+            isValid = isValid &&
+                Array.isArray(point) &&
+                point.length == 2 &&
+                typeof point[0] === 'number' &&
+                typeof point[1] === 'number';
+        }
+    }
+
+    return isValid;
+};
 $data.GeographyPolygon.parseFromString = function (strData) {
     var data = strData.substring(strData.indexOf('(') + 1, strData.lastIndexOf(')'));
     var rings = data.substring(data.indexOf('(') + 1, data.lastIndexOf(')')).split('),(');
@@ -166,6 +226,21 @@ $data.GeographyMultiPoint = function GeographyMultiPoint(data) {
         $data.GeographyBase.call(this, data);
     }
 };
+$data.GeographyMultiPoint.validateGeoJSON = function (geoData) {
+    var isValid = geoData &&
+        Array.isArray(geoData.coordinates);
+
+    for (var i = 0; isValid && i < geoData.coordinates.length; i++) {
+        var point = geoData.coordinates[i];
+        isValid = isValid &&
+            Array.isArray(point) &&
+            point.length == 2 &&
+            typeof point[0] === 'number' &&
+            typeof point[1] === 'number';
+    }
+
+    return isValid;
+};
 $data.GeographyMultiPoint.validMembers = ['coordinates'];
 $data.GeographyBase.registerType('MultiPoint', $data.GeographyMultiPoint);
 $data.Container.registerType(['$data.GeographyMultiPoint', 'GeographyMultiPoint'], $data.GeographyMultiPoint);
@@ -177,6 +252,27 @@ $data.GeographyMultiLineString = function GeographyMultiLineString(data) {
     } else {
         $data.GeographyBase.call(this, data);
     }
+};
+$data.GeographyMultiLineString.validateGeoJSON = function (geoData) {
+    var isValid = geoData &&
+        Array.isArray(geoData.coordinates);
+
+    for (var i = 0; isValid && i < geoData.coordinates.length; i++) {
+        var polygon = geoData.coordinates[i];
+        var isValid = isValid && Array.isArray(polygon);
+
+        for (var j = 0; isValid && j < polygon.length; j++) {
+            var point = polygon[j];
+
+            isValid = isValid &&
+                Array.isArray(point) &&
+                point.length == 2 &&
+                typeof point[0] === 'number' &&
+                typeof point[1] === 'number';
+        }
+    }
+
+    return isValid;
 };
 $data.GeographyMultiLineString.validMembers = ['coordinates'];
 $data.GeographyBase.registerType('MultiLineString', $data.GeographyMultiLineString);
@@ -190,6 +286,32 @@ $data.GeographyMultiPolygon = function GeographyMultiPolygon(data) {
         $data.GeographyBase.call(this, data);
     }
 };
+$data.GeographyMultiPolygon.validateGeoJSON = function (geoData) {
+    var isValid = geoData &&
+        Array.isArray(geoData.coordinates);
+
+    for (var k = 0; isValid && k < geoData.coordinates.length; k++) {
+        var polygons = geoData.coordinates[k];
+        var isValid = isValid && Array.isArray(polygons);
+
+        for (var i = 0; isValid && i < polygons.length; i++) {
+            var polygon = polygons[i];
+            var isValid = isValid && Array.isArray(polygon);
+
+            for (var j = 0; isValid && j < polygon.length; j++) {
+                var point = polygon[j];
+
+                isValid = isValid &&
+                    Array.isArray(point) &&
+                    point.length == 2 &&
+                    typeof point[0] === 'number' &&
+                    typeof point[1] === 'number';
+            }
+        }
+    }
+
+    return isValid;
+};
 $data.GeographyMultiPolygon.validMembers = ['coordinates'];
 $data.GeographyBase.registerType('MultiPolygon', $data.GeographyMultiPolygon);
 $data.Container.registerType(['$data.GeographyMultiPolygon', 'GeographyMultiPolygon'], $data.GeographyMultiPolygon);
@@ -201,6 +323,21 @@ $data.GeographyCollection = function GeographyCollection(data) {
     } else {
         $data.GeographyBase.call(this, data);
     }
+};
+$data.GeographyCollection.validateGeoJSON = function (geoData) {
+    var isValid = geoData &&
+        Array.isArray(geoData.geometries);
+
+    for (var i = 0; isValid && i < geoData.geometries.length; i++) {
+        var geometry = geoData.geometries[i];
+        try {
+            isValid = isValid && $data.GeographyBase.validateGeoJSON(geometry);
+        } catch (e) {
+            isValid = false;
+        }
+    }
+
+    return isValid;
 };
 $data.GeographyCollection.validMembers = ['geometries'];
 $data.GeographyBase.registerType('GeometryCollection', $data.GeographyCollection);
