@@ -845,6 +845,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         request.headers = request.headers || {};
         if (!request.headers.Authorization && user && password) {
             request.headers.Authorization = "Basic " + this.__encodeBase64(user + ":" + password);
+        }
+        if (withCredentials){
             request.withCredentials = withCredentials;
         }
     },

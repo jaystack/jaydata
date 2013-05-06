@@ -13,7 +13,7 @@ $data.mongoDBConverter = {
         '$data.Time': function (date) { return date ? new Date(date) : date; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
-        '$data.Blob': function (v) { return v ? $data.Container.convertTo(v.buffer, $data.Blob) : v; },
+        '$data.Blob': function (v) { return v ? $data.Container.convertTo(typeof v === 'string' ? atob(v) : v.buffer, $data.Blob) : v; },
         '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
         '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
         '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
@@ -46,19 +46,7 @@ $data.mongoDBConverter = {
         '$data.DateTimeOffset': $data.Container.proxyConverter,
         '$data.Time': $data.Container.proxyConverter,
         '$data.String': $data.Container.proxyConverter,
-        '$data.Boolean': $data.Container.proxyConverter,/*function (bool) {
-            if (typeof bool === 'string') {
-                switch (bool) {
-                    case 'true': case 'true': case 'TRUE':
-                    case 'yes': case 'Yes': case 'YES':
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-            //return typeof bool === 'string' ? (bool === 'true' ? true : false) : !!bool;
-            return bool === null || bool === undefined ? null : !!bool;
-        },*/
+        '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': $data.Container.proxyConverter,
         '$data.Object': $data.Container.proxyConverter,
         '$data.Array': $data.Container.proxyConverter,
