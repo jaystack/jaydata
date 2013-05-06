@@ -1515,7 +1515,7 @@ $data.defaultErrorCallback = function () {
         console.dir(arguments);
     else
         console.log(arguments);*/
-    if (arguments[arguments.length - 1] && typeof arguments[arguments.length - 1].reject === 'function') {
+    if (arguments.length > 0 && arguments[arguments.length - 1] && typeof arguments[arguments.length - 1].reject === 'function') {
         arguments[arguments.length - 1].reject.apply(arguments[arguments.length - 1], arguments);
     } else {
         if (arguments[0] instanceof Error) {

@@ -22,10 +22,17 @@ function promiseTests(providerConfig, msg) {
         $data.PromiseHandler = $data.PromiseHandlerBase;
 
         stop(2);
-        var readyPromise = (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            start();
-            closeDbIfNeeded(db);
-            equal(db instanceof $data.EntityContext, true, 'onready result failed')
+        var readyPromise = (new $news.Types.NewsContext(providerConfig)).onReady({
+            success: function (db) {
+                start();
+                closeDbIfNeeded(db);
+                equal(db instanceof $data.EntityContext, true, 'onready result failed')
+            },
+            error: function (ex) {
+                start();
+
+                ok(false, ex);
+            }
         });
         equal(readyPromise instanceof $data.Promise, true, 'promise type failed');
 
@@ -43,27 +50,34 @@ function promiseTests(providerConfig, msg) {
 
         stop(1);
 
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
-                start(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady({
+            success: function (db) {
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start(1);
 
-                stop(2);
-                var loadPromise = db.Users.toArray(function (users) {
-                    start();
-                    closeDbIfNeeded(db);
-                    equal(users instanceof Array, true, 'load failed');
+                    stop(2);
+                    var loadPromise = db.Users.toArray(function (users) {
+                        start();
+                        closeDbIfNeeded(db);
+                        equal(users instanceof Array, true, 'load failed');
+                    });
+                    equal(loadPromise instanceof $data.Promise, true, 'promise type failed');
+
+                    try {
+                        loadPromise.then(function (r) { });
+                        ok(false, 'then not implemented');
+                    } catch (e) {
+                        start();
+                        equal(e.message, '$data.Promise.then', 'then not implemented');
+                    }
+
                 });
-                equal(loadPromise instanceof $data.Promise, true, 'promise type failed');
+            },
+            error: function (ex) {
+                start();
 
-                try {
-                    loadPromise.then(function (r) { });
-                    ok(false, 'then not implemented');
-                } catch (e) {
-                    start();
-                    equal(e.message, '$data.Promise.then', 'then not implemented');
-                }
-
-            });
+                ok(false, ex);
+            }
         });
 
     });
@@ -72,33 +86,40 @@ function promiseTests(providerConfig, msg) {
 
         stop(1);
 
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
-                start(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady({
+            success: function (db) {
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start(1);
 
-                stop(3);
-                var loadPromise = db.Users.toArray(function (users) {
-                    start();
-
-                    db.Users.attach(users[0]);
-                    users[0].LoginName = 'newLoginName';
-                    var savePromise = db.saveChanges(function (r) {
+                    stop(3);
+                    var loadPromise = db.Users.toArray(function (users) {
                         start();
-                        closeDbIfNeeded(db);
-                        ok(true, 'callback called');
+
+                        db.Users.attach(users[0]);
+                        users[0].LoginName = 'newLoginName';
+                        var savePromise = db.saveChanges(function (r) {
+                            start();
+                            closeDbIfNeeded(db);
+                            ok(true, 'callback called');
+                        });
+                        equal(savePromise instanceof $data.Promise, true, 'promise type failed');
+                        try {
+                            savePromise.then(function (r) { });
+                            ok(false, 'then not implemented');
+                        } catch (e) {
+                            start();
+                            equal(e.message, '$data.Promise.then', 'then not implemented');
+                        }
+
                     });
-                    equal(savePromise instanceof $data.Promise, true, 'promise type failed');
-                    try {
-                        savePromise.then(function (r) { });
-                        ok(false, 'then not implemented');
-                    } catch (e) {
-                        start();
-                        equal(e.message, '$data.Promise.then', 'then not implemented');
-                    }
 
                 });
+            },
+            error: function (ex) {
+                start();
 
-            });
+                ok(false, ex);
+            }
         });
 
     });
@@ -107,32 +128,39 @@ function promiseTests(providerConfig, msg) {
 
         stop(1);
 
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-            $news.Types.NewsContext.generateTestData(db, function () {
-                start(1);
+        (new $news.Types.NewsContext(providerConfig)).onReady({
+            success: function (db) {
+                $news.Types.NewsContext.generateTestData(db, function () {
+                    start(1);
 
-                stop(3);
-                var loadPromise = db.Users.toArray(function (users) {
-                    start();
-
-                    db.Users.attach(users[0]);
-                    var loadPropPromise = users[0].get_Articles(function (articles) {
+                    stop(3);
+                    var loadPromise = db.Users.toArray(function (users) {
                         start();
-                        closeDbIfNeeded(db);
-                        ok(articles.length > 0, 'callback called');
+
+                        db.Users.attach(users[0]);
+                        var loadPropPromise = users[0].get_Articles(function (articles) {
+                            start();
+                            closeDbIfNeeded(db);
+                            ok(articles.length > 0, 'callback called');
+                        });
+                        equal(loadPropPromise instanceof $data.Promise, true, 'promise type failed');
+                        try {
+                            loadPropPromise.then(function (r) { });
+                            ok(false, 'then not implemented');
+                        } catch (e) {
+                            start();
+                            equal(e.message, '$data.Promise.then', 'then not implemented');
+                        }
+
                     });
-                    equal(loadPropPromise instanceof $data.Promise, true, 'promise type failed');
-                    try {
-                        loadPropPromise.then(function (r) { });
-                        ok(false, 'then not implemented');
-                    } catch (e) {
-                        start();
-                        equal(e.message, '$data.Promise.then', 'then not implemented');
-                    }
 
                 });
+            },
+            error: function (ex) {
+                start();
 
-            });
+                ok(false, ex);
+            }
         });
 
     });
@@ -142,7 +170,8 @@ function promiseTests(providerConfig, msg) {
 
         var equalValue = undefined;
         stop(3);
-        var readyPromise = (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+        var readyPromise = (new $news.Types.NewsContext(providerConfig))
+        .onReady(function (db) {
             start();
             equal(db instanceof $data.EntityContext, true, 'onready result failed')
             equal(db._isOK, true, 'context ready failed');
@@ -150,7 +179,13 @@ function promiseTests(providerConfig, msg) {
             equalValue = equalValue == undefined ? db.getType().name : equalValue;
             notEqual(equalValue, undefined, 'equalValue failed');
             equal(db.getType().name, equalValue, 'load failed');
-        }).then(function (db) {
+        })
+        .fail(function (ex) {
+            start(3);
+            
+            ok(false, ex);
+        })
+        .then(function (db) {
             start();
             equal(db instanceof $data.EntityContext, true, 'onready result then failed')
             equal(db._isOK, true, 'context ready then failed');
@@ -216,6 +251,10 @@ function promiseTests(providerConfig, msg) {
                 });
 
             });
+        }).fail(function (ex) {
+            start(1);
+            
+            ok(false, ex);
         });
 
     });
@@ -256,6 +295,10 @@ function promiseTests(providerConfig, msg) {
                 });
 
             });
+        }).fail(function (ex) {
+            start(1);
+            
+            ok(false, ex);
         });
 
     });
@@ -294,6 +337,10 @@ function promiseTests(providerConfig, msg) {
                 });
 
             });
+        }).fail(function (ex) {
+            start(1);
+            
+            ok(false, ex);
         });
 
     });
@@ -327,6 +374,10 @@ function promiseTests(providerConfig, msg) {
                     closeDbIfNeeded(db);
                 });
             });
+        }).fail(function (ex) {
+            start(1);
+            
+            ok(false, ex);
         });
 
     });
@@ -362,6 +413,10 @@ function promiseTests(providerConfig, msg) {
                     closeDbIfNeeded(db);
                 });
             });
+        }).fail(function (ex) {
+            start(1);
+            
+            ok(false, ex);
         });
 
     });
@@ -395,6 +450,10 @@ function promiseTests(providerConfig, msg) {
                     closeDbIfNeeded(db);
                 });
             });
+        }).fail(function (ex) {
+            start(1);
+            
+            ok(false, ex);
         });
 
     });
@@ -426,6 +485,10 @@ function promiseTests(providerConfig, msg) {
                     closeDbIfNeeded(db);
                 });
             });
+        }).fail(function (ex) {
+            start(1);
+
+            ok(false, ex);
         });
 
     });
@@ -457,6 +520,10 @@ function promiseTests(providerConfig, msg) {
                     closeDbIfNeeded(db);
                 });
             });
+        }).fail(function (ex) {
+            start(1);
+
+            ok(false, ex);
         });
 
     });
@@ -489,6 +556,10 @@ function promiseTests(providerConfig, msg) {
                     closeDbIfNeeded(db);
                 });
             });
+        }).fail(function (ex) {
+            start(1);
+
+            ok(false, ex);
         });
 
     });

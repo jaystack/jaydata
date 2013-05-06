@@ -172,7 +172,16 @@ $data.Class.define('$data.EntityContext', null, null,
         };
 
 
-        this.ready = this.onReady();
+        this.ready = this.onReady({
+            success: $data.defaultSuccessCallback,
+            error: function () {
+                if ($data.PromiseHandler !== $data.PromiseHandlerBase) {
+                    $data.defaultErrorCallback.apply(this, arguments);
+                } else {
+                    $data.Trace.error(arguments);
+                }
+            }
+        });
     },
     beginTransaction: function () {
         var tables = null;

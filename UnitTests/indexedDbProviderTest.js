@@ -256,6 +256,9 @@
                     close(context);
                 }
             });
+        }).fail(function (ex) {
+            start();
+            ok(false, ex);
         });
     });
 
@@ -428,6 +431,9 @@
                     });
                 }
             });
+        }).fail(function (ex) {
+            start();
+            ok(false, ex);
         });
     });
 
@@ -462,6 +468,9 @@
                     });
                 }
             });
+        }).fail(function (ex) {
+            start();
+            ok(false, ex);
         });
     });
     if (typeof ActiveXObject === 'undefined') {
@@ -686,7 +695,7 @@
         });
         stop(1);
         context.onReady(function () {
-            var maxItemNum = 1000;
+            var maxItemNum = 30;
             for (var i = 0; i < maxItemNum; i++) {
                 var item1 = new idbexample.idbTestItem1({
                     i0: i,
