@@ -60,7 +60,7 @@
 
     test("Entity validation string", 32, function () {
         var svc = new stringValidationClass();
-        stop(3);
+        stop(4);
         svc.propertyValidationError.attach(function (sender, eventData) {
             start();
             ok(sender == svc, 'validation error fired');
