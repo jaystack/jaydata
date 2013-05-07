@@ -4,26 +4,35 @@
     <title></title>
     <link rel="stylesheet" href="Scripts/qUnit/qunit.css" type="text/css" media="screen" />
     <script type="text/javascript" src="Scripts/qUnit/qunit.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.js"></script>
     <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.js"></script>
     <script type="text/javascript" src="Scripts/jquery.validate.js"></script>
     <script type="text/javascript" src="Scripts/knockout-2.1.0.js"></script>
+    <script type="text/javascript" src="Scripts/acorn.js"></script>
 
     <!--************************************************************************************-->
     <script type="text/javascript" src="TypeSystem/initializeJayDataClient.js"></script>
-    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>    
+    <script type="text/javascript" src="TypeSystem/initializeJayData.js"></script>
     <script type="text/javascript" src="TypeSystem/utils.js"></script>
     <script type="text/javascript" src="TypeSystem/PreHtml5Compatible.js"></script>
-    <script type="text/javascript" src="JayService/Scripts/datajs-1.0.3-patched.js"></script>
-    <script type="text/javascript" src="TypeSystem/JayLint.js"></script>
+    <script type="text/javascript" src="JayService/Scripts/datajs-1.1.0-patched.js"></script>
+<!--    <script type="text/javascript" src="TypeSystem/JayLint.js"></script>-->
+    <script type="text/javascript" src="TypeSystem/Exception.js"></script>
     <script type="text/javascript" src="TypeSystem/TypeSystem.js"></script>
     <script type="text/javascript" src="TypeSystem/Trace/Trace.js"></script>
     <script type="text/javascript" src="TypeSystem/Trace/Logger.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Types.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/SimpleBase.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Geospatial.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Geography.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Geometry.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/Guid.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Blob.js"></script>
     <script type="text/javascript" src="TypeSystem/Types/EdmTypes.js"></script>
+    <script type="text/javascript" src="TypeSystem/Types/Converter.js"></script>
+    <script type="text/javascript" src="TypeSystem/Extensions.js"></script>
     <!--*******************************Expressions****************************************-->
-    <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>
+<!--    <script type="text/javascript" src="Types/Expressions/ASTParser.js"></script>-->
     <script type="text/javascript" src="Types/Expressions/ExpressionNode2.js"></script>
     
     <script type="text/javascript" src="Types/Expressions/ArrayLiteralExpression.js" ></script>
@@ -60,6 +69,7 @@
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityContextExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityExpressionVisitor.js"></script>
+    <script type="text/javascript" src="Types/Expressions/EntityExpressions/ExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js"></script>
     <script type="text/javascript" src="Types/Expressions/EntityExpressions/EntitySetExpression.js"></script>
@@ -100,11 +110,11 @@
     <script type="text/javascript" src="Types/AuthEntityContext.js"></script>
     <script type="text/javascript" src="Types/EntityState.js"></script>
     <script type="text/javascript" src="Types/EntityStateManager.js"></script>
-    <script type="text/javascript" src="Types/Exception.js"></script>
     <script type="text/javascript" src="Types/StorageProviderLoader.js"></script>
     <script type="text/javascript" src="Types/StorageProviderBase.js"></script>
 
     <script type="text/javascript" src="Types/EntityWrapper.js"></script>
+    <script type="text/javascript" src="Types/Transaction.js"></script>
 
     <!--******************************* Ajax*********************************************-->    
     <script type="text/javascript" src="Types/Ajax/jQueryAjaxWrapper.js"></script>
@@ -119,20 +129,22 @@
     <script type="text/javascript" src="Types/DbClient/OpenDatabaseClient/OpenDbConnection.js"></script>
     <script type="text/javascript" src="Types/DbClient/JayStorageClient/JayStorageCommand.js"></script>
     <script type="text/javascript" src="Types/DbClient/JayStorageClient/JayStorageConnection.js"></script>
-    <script type="text/javascript" src="Types/DbClient/SqLiteNJClient/SqLiteNjCommand.js"></script>
-    <script type="text/javascript" src="Types/DbClient/SqLiteNJClient/SqLiteNjConnection.js"></script>
+    <script type="text/javascript" src="Types/DbClient/SqLiteNjClient/SqLiteNjCommand.js"></script>
+    <script type="text/javascript" src="Types/DbClient/SqLiteNjClient/SqLiteNjConnection.js"></script>
 
     <script type="text/javascript" src="Types/StorageProviders/modelBinderConfigCompiler.js"></script>
     <!--******************************* StorageProvider - sqLite ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteStorageProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqLiteCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlOrderCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlProjectionCompiler.js"></script>
-    <script type="text/javascript" src="Types/StorageProviders/SqLite/ExpressionMonitor.js"></script>
+    <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlExpressionMonitor.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/SqlFilterCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js"></script>
     <!--******************************* StorageProvider - oData ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/oData/oDataConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataWhereCompiler.js"></script>
@@ -140,10 +152,12 @@
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataPagingCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/oData/oDataProjectionCompiler.js"></script>
     <!--******************************* StorageProvider - IndexDb ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js"></script>
     
       
     <!--******************************* StorageProvider - inMemory ****************************************-->
+    <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryConverter.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryProvider.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryCompiler.js"></script>
     <script type="text/javascript" src="Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js"></script>

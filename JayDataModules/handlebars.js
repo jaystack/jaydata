@@ -253,9 +253,13 @@
                 if (md.kind === "property") {
                     var field = {
                         name: md.name,
-                        metadata: md,
-                        get value() { return self[name]; }
-                    }
+                        metadata: md
+                    };
+                    Object.defineProperty(field, 'value', {
+                        get: function(){
+                            return self[name];
+                        }
+                    });
                     results.push(field);
                 }
             });

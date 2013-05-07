@@ -509,8 +509,8 @@ handlebarsmodule: $(HandlebarsModule) $(CREDITS)
 	@@echo "Building Handlebars module..."
 	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
 	@@cat $(CREDITS) $(HandlebarsModule) > $(MODULE_DIR)/handlebars.js
-	#@@java -jar $(COMPILER) --js $(MODULE_DIR)/handlebars.js --js_output_file $(TEMP_DIR)/handlebars.min.js
-	#@@cat $(CREDITS) $(TEMP_DIR)/handlebars.min.js > $(MODULE_DIR)/handlebars.min.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/handlebars.js --js_output_file $(TEMP_DIR)/handlebars.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/handlebars.min.js > $(MODULE_DIR)/handlebars.min.js
 
 inmemorymodule: $(InMemoryModule) $(CREDITS)
 	@@echo "Building InMemory module..."

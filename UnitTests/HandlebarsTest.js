@@ -5,7 +5,7 @@
     function xtest() { };
 
 
-    test('Handlebar render methods', 19, function () {
+    test('Handlebar render methods', 22, function () {
 
         $data.define("Todo", { Task: String });
 
@@ -64,7 +64,7 @@
             selectTodo: function (item) {
                 start(1);
                 ok(item, "item selected");
-                equal(item.Id, 1);
+                equal(item.Id, 1, 'setCommandHandler');
             }
         }, document);
         stop(1);
@@ -72,7 +72,7 @@
         $data("Todo").read(1).then(function (item) {
             start(1);
             var r13 = item.render("<li><button {{entityCommand 'select'}}></button></li>");
-            equal(r13, "<li><button data-command=select data-type=Todo data-id=1 data-cache-client=4 data-cache-item=2></button></li>");
+            equal(r13, "<li><button data-command=select data-type=Todo data-id=1 data-cache-client=4 data-cache-item=2></button></li>", 'read(1)');
             var result = $('#output').append(r13);
             stop(0);
             result.find('button').trigger("click");
@@ -88,7 +88,7 @@
             db.Items.filter("it.Task == 'hello'").take(1).renderItemsTo("#todoList2").then(function () {
                 start(1);
                 ok(true, "Queryable renderItemsTo");
-                equal($('#todoList2').html(), '<div>hello</div>');
+                equal($('#todoList2').html(), '<div>hello</div>', 'storeToken renderItemsTo');
             });
         });
 
@@ -101,7 +101,7 @@
              .renderTo("#todoList2","TodoItems").then(function () {
                 start(1);
                 ok(true, "Queryable renderTo");
-                equal($('#todoList2').html(), '<div>Total count:1</div><ul><div>hello</div></ul>');
+                equal($('#todoList2').html(), '<div>Total count:1</div><ul><div>hello</div></ul>', 'storeToken renderTo');
             });
         });
 
