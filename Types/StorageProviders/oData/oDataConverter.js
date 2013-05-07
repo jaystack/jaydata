@@ -248,16 +248,30 @@ $data.oDataConverter = {
         },
         '$data.Object': function (v) { return JSON.parse(v); },
         '$data.GeographyPoint': function (v) {
-            if (/^geography'POINT\(/.test(v)) {
-                var data = v.slice(16, v.length - 2).split(' ');
-                return new $data.GeographyPoint(data);
+            if (/^geography'POINT\(/i.test(v)) {
+                var data = v.slice(10, v.length - 1);
+                return $data.GeographyBase.parseFromString(data);
             }
             return v;
         },
-        '$data.GeographyLineString': function (v) {
-            if (/^geometry'POINT\(/.test(v)) {
-                var data = v.slice(16, v.length - 2).split(' ');
-                return new $data.GeometryPoint(data);
+        '$data.GeographyPolygon': function (v) {
+            if (/^geography'POLYGON\(/i.test(v)) {
+                var data = v.slice(10, v.length - 1);
+                return $data.GeographyBase.parseFromString(data);
+            }
+            return v;
+        },
+        '$data.GeometryPoint': function (v) {
+            if (/^geometry'POINT\(/i.test(v)) {
+                var data = v.slice(9, v.length - 1);
+                return $data.GeometryBase.parseFromString(data);
+            }
+            return v;
+        },
+        '$data.GeometryPolygon': function (v) {
+            if (/^geometry'POLYGON\(/i.test(v)) {
+                var data = v.slice(9, v.length - 1);
+                return $data.GeometryBase.parseFromString(data);
             }
             return v;
         }
