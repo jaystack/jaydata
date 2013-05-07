@@ -22,15 +22,14 @@
 
         //atom
         var atomNs = xml.declareNamespace(this.cfg.atomNs, 'atom');
-        var source = xml.declareAttribute(atomNs, 'source');
-        xml.addAttribute(source, 'JayStrom');
+        xml.addNamespace(atomNs);
 
         //xmlns
         var xmlns = xml.declareAttribute('xmlns');
         xml.addAttribute(xmlns, this.cfg.xmlns);
 
         //base
-        var base = xml.declareAttribute('xml__base');
+        var base = xml.declareAttribute('xml:base');
         xml.addAttribute(base, requestUrl + '/');
 
         this._buildWorkspaces(xml, contextInstance, atomNs);
@@ -40,7 +39,7 @@
 
         xmlResult += xml.getXmlString();
 
-        return xmlResult.replace('xml__base', 'xml:base');
+        return xmlResult;
 
     },
     _buildWorkspaces: function (xml, context, atomNs) {

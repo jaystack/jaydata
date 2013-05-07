@@ -80,7 +80,7 @@
         }
         this.xml.endDocument();
         xmlResult += this.xml.getXmlString();
-        return xmlResult.replace('xml__base', 'xml:base');
+        return xmlResult;
     },
 
     _buildFeed: function (data, esDef, elementType, memDefs, selectedFields, includes, path, rootHref) {
@@ -203,15 +203,12 @@
         this.xml.addAttribute(xmlns, this.cfg.xmlns);
 
         var d = this.xml.declareNamespace(this.cfg.d, 'd');
-        var dummyd = this.xml.declareAttribute(d, 'dataservices');
-        this.xml.addAttribute(dummyd, 'JayStrom');
+        this.xml.addNamespace(d);
 
         var m = this.xml.declareNamespace(this.cfg.m, 'm');
-        var dummym = this.xml.declareAttribute(m, 'metadata');
-        this.xml.addAttribute(dummym, 'OData');
+        this.xml.addNamespace(m);
 
-        //var xml = this.xml.declareNamespace('http://dunno', 'xml');
-        var base = this.xml.declareAttribute('xml__base');
+        var base = this.xml.declareAttribute('xml:base');
         this.xml.addAttribute(base, this.requesUrl + '/' + esDef.name);
     },
 

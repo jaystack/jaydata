@@ -69,6 +69,14 @@ $data.Class.define('$data.Xml.XmlCreator', null, null, {
         return this;
     },
 
+    addNamespace: function (namespace) {
+        if (this.currentElement.InheritedNamespaces.indexOf(namespace.Name) === -1 && this.currentElement.Namespaces.indexOf(namespace.Name) === -1) {
+            this.currentElement.Namespaces.push(namespace.Name);
+            this.namespaces[namespace.Name] = namespace;
+        }
+        return this;
+    },
+
     addText: function (text) {
         this.currentElement.Text += text;
 
