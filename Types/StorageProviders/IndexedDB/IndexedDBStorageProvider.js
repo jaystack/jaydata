@@ -590,7 +590,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                     onerror: function (event) {
                         // Only call the error callback when it's not because of an abort
                         // aborted cases should call the error callback there
-                        if (event.target && self.IDBDatabaseException && event.target.errorCode !== self.IDBDatabaseException.ABORT_ERR)
+                        if (!event.target || !self.IDBDatabaseException || (event.target && self.IDBDatabaseException && event.target.errorCode !== self.IDBDatabaseException.ABORT_ERR))
                             callBack.error(event);
                     },
                     oncomplete: function (event) {
