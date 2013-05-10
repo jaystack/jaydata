@@ -11,41 +11,12 @@ $data.Container.registerConverter('$data.Boolean', {
 });
 
 $data.Container.registerConverter('$data.Integer', {
-    /*'$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },*/
     'default': function(value){
         return value | 0;
     }
-    /*'$data.Number': function(value){
-        return value | 0;
-    },
-    '$data.String': function(value){
-        var r = parseInt(value, 10);
-        if (isNaN(r)) throw 0;
-        return r | 0;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        return r;
-    }*/
 });
 
 $data.Container.registerConverter('$data.Number', {
-    /*'$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },
-    '$data.String': function(value){
-        var r = parseFloat(value);
-        if (isNaN(r)) throw 0;
-        return r;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        return r;
-    }*/
     'default': function(value){
         var r = +value;
         if (isNaN(r)) throw 0;
@@ -54,27 +25,6 @@ $data.Container.registerConverter('$data.Number', {
 });
 
 $data.Container.registerConverter('$data.Byte', {
-    /*'$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },
-    '$data.Number': function(value){
-        return (value | 0) & 0xff;
-    },
-    '$data.String': function(value){
-        var r = parseInt(value);
-        if (isNaN(r)) throw 0;
-        return r & 0xff;
-    },
-    '$data.Decimal': function(value){
-        var r = parseInt(value.split('.')[0]);
-        if (isNaN(r)) throw 0;
-        return r & 0xff;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        return r & 0xff;
-    }*/
     'default': function(value){
         return (value | 0) & 0xff;
     }
@@ -89,6 +39,9 @@ $data.Container.registerConverter('$data.Date', {
 });
 
 $data.Container.registerConverter('$data.DateTimeOffset', {
+    '$data.Date': function(value){
+        return value;
+    },
     'default': function(value){
         var d = new Date(value);
         if (isNaN(d)) throw 0;
@@ -97,21 +50,57 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
 });
 
 $data.Container.registerConverter('$data.Time', {
-    '$data.String': function (value) {
-        try {
-            var d = new Date(value);
-            if (!isNaN(d)) return d;
-        } catch (e) { }
+    'default': function (value) {
+        var d = new Date("0000-01-01T00:00:00.000Z");
+        var v = d.getTimezoneOffset();
+        var s;
 
-        var s = new Date(0, 0, 0).toISOString();
-        var r = new Date(s.split('T')[0] + 'T' + value + 'Z');
-        if (isNaN(r)) throw 0;
-        return r;
-    },
-    'default': function(value){
-        var d = new Date(value);
-        if (isNaN(d)) throw 0;
-        return d;
+        var timeVal;
+        if (value instanceof Date) {
+            timeVal = value.toTimeString().split(' ')[0];
+            if (value.toISOString().indexOf('.')) {
+                timeVal += '.' + ('000' + value.getMilliseconds()).slice(-3);
+            }
+
+        } else if (typeof value === 'string' && /^\d\d:\d\d:\d\d(\.\d+)?$/.test(value)) {
+            timeVal = value;
+        } else {
+            var date;
+            if ((typeof value === 'string'&& /^(-)?\d{4,6}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value)) || 
+                (typeof value === 'number' && value >= 0 && value < 24 * 60 * 60 * 1000)) {
+                date = new Date(value);
+            }
+
+            if(!date || isNaN(date)){
+                throw 1;
+            } 
+
+            if (typeof value !== 'string')
+                date = new Date(date.valueOf() + (v * 60 * 1000));
+
+            timeVal = date.toTimeString().split(' ')[0];
+            if (date.toISOString().indexOf('.')) {
+                timeVal += '.' + ('000' + date.getMilliseconds()).slice(-3);
+            }
+        }
+
+        var offset = (v > 0 ? '-' : '+') + ('00' + Math.abs(Math.floor(v / 60))).slice(-2) + ('00' + Math.abs(Math.floor(v % 60))).slice(-2);
+        var r = new Date("0000-01-01T" + timeVal + offset);
+        if (isNaN(r)) {
+            var time = timeVal.split('.');
+            r = new Date('Thu Jan 01 1900 ' + time[0] + ' GMT' + offset);
+            if (isNaN(r)) throw 0;
+              
+            if (time[1])
+                r.setMilliseconds(parseInt(time[1], 10));
+            r.setFullYear(0);
+
+            if (isNaN(r)) throw 0;
+        }
+        if (value instanceof Date && r.toISOString() === value.toISOString())
+            return value;
+        else
+            return r;
     }
 });
 
@@ -217,21 +206,6 @@ $data.IEEE754 = function(v, e, f){
 };
 
 $data.Container.registerConverter('$data.Float', {
-    /*'$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },
-    '$data.Number': function(value){
-        return new Float32Array([value])[0];
-    },
-    '$data.String': function(value){
-        if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        return new Float32Array([parseFloat(value)])[0];
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        return new Float32Array([r])[0];
-    }*/
     'default': function(value){
         var r = +value;
         if (isNaN(r)) throw 0;
@@ -240,54 +214,12 @@ $data.Container.registerConverter('$data.Float', {
 });
 
 $data.Container.registerConverter('$data.Int16', {
-    /*'$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },
-    '$data.Number': function(value){
-        var r = value & 0xffff;
-        if (r >= 0x8000) return r - 0x10000;
-        return r;
-    },
-    '$data.String': function(value){
-        if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        var r = parseInt(value, 10) & 0xffff;
-        if (r >= 0x8000) return r - 0x10000;
-        return r;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        r = r & 0xffff;
-        if (r >= 0x8000) return r - 0x10000;
-        return r;
-    }*/
     'default': function(value){
         var r = (value | 0) & 0xffff;
         if (r >= 0x8000) return r - 0x10000;
         return r;
     }
 });
-
-/*$data.Container.registerConverter('$data.Int32', {
-    '$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },
-    '$data.Number': function(value){
-        var r = value & 0xffffffff;
-        return r;
-    },
-    '$data.String': function(value){
-        if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        var r = parseInt(value, 10) & 0xffffffff;
-        return r;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        r = r & 0xffffffff;
-        return r;
-    }
-});*/
 
 $data.Container.registerConverter('$data.Int64', {
     '$data.Boolean': function(value){
@@ -313,27 +245,6 @@ $data.Container.registerConverter('$data.Int64', {
 });
 
 $data.Container.registerConverter('$data.SByte', {
-    /*'$data.Boolean': function(value){
-        return value ? 1 : 0;
-    },
-    '$data.Number': function(value){
-        var r = value & 0xff;
-        if (r >= 0x80) return r - 0x100;
-        return r;
-    },
-    '$data.String': function(value){
-        if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        var r = parseInt(value, 10) & 0xff;
-        if (r >= 0x80) return r - 0x100;
-        return r;
-    },
-    '$data.Date': function(value){
-        var r = value.valueOf();
-        if (isNaN(r)) throw 0;
-        r = r & 0xff;
-        if (r >= 0x80) return r - 0x100;
-        return r;
-    }*/
     'default': function(value){
         var r = (value | 0) & 0xff;
         if (r >= 0x80) return r - 0x100;
@@ -381,18 +292,6 @@ $data.Container.registerConverter('$data.ObjectID', {
     },
     '$data.String': function(id){
         return id;
-        /*if (id && typeof id === 'string'){
-            try{
-                return new $data.ObjectID(id);
-            }catch(e){
-                try{
-                    return new $data.ObjectID(new Buffer(id, 'base64').toString('ascii'));
-                }catch(e){
-                    console.log(e);
-                    return id;
-                }
-            }
-        }else return id;*/
     }
 });
 

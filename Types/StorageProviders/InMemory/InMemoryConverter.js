@@ -43,7 +43,7 @@ $data.InMemoryConverter = {
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': $data.Container.proxyConverter,
         '$data.DateTimeOffset': $data.Container.proxyConverter,
-        '$data.Time': $data.Container.proxyConverter,
+        '$data.Time': function (date) { return date ? Container.convertTo(date, $data.Time) : date; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': $data.Container.proxyConverter,

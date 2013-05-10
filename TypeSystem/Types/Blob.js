@@ -88,7 +88,8 @@ $data.Container.registerConverter('$data.Blob',{
         } else if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
             return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(new Uint8Array(value));
         }else if (value instanceof Uint8Array){
-            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
+            if (typeof Buffer !== 'undefined') return new Buffer(value);
+            else return value;
         }else if (typeof Buffer !== 'undefined' ? value instanceof Buffer : false){
             return value;
         }else if (value.buffer){

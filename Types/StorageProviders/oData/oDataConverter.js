@@ -80,7 +80,16 @@ $data.oDataConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
-        '$data.Time': function(v){ return v ? v.toISOString().split('T')[1].replace('Z', '') : v; },
+        '$data.Time': function (v) {
+            if (v) {
+                var timeVal = v.toTimeString().split(' ')[0];
+                if (v.toISOString().indexOf('.')) {
+                    timeVal += '.' + ('000' + v.getMilliseconds()).slice(-3);
+                }
+                return timeVal;
+            }
+            return v;
+        },
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
@@ -288,7 +297,13 @@ $data.oDataConverter = {
         '$data.Blob': function (v) { return $data.Blob.toBase64(v); },
         '$data.Date': function (v) { return v.toISOString().replace('Z', ''); },
         '$data.DateTimeOffset': function(v){ return v.toISOString(); },
-        '$data.Time': function(v){ return v.toISOString().split('T')[1].replace('Z', ''); },
+        '$data.Time': function (v) {
+            var timeVal = v.toTimeString().split(' ')[0];
+            if (v.toISOString().indexOf('.')) {
+                timeVal += '.' + ('000' + v.getMilliseconds()).slice(-3);
+            }
+            return timeVal;
+        },
         '$data.Number': function (v) { return v.toString(); },
         '$data.Integer': function (v) { return v.toString(); },
         '$data.String': function (v) { return v.toString(); },
@@ -312,7 +327,16 @@ $data.oDataConverter = {
         '$data.Number': function (o) { return o.toString(); },
         '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
-        '$data.Time': function(v){ return v ? v.toISOString().split('T')[1].replace('Z', '') : v; },
+        '$data.Time': function (v) {
+            if (v) {
+                var timeVal = v.toTimeString().split(' ')[0];
+                if (v.toISOString().indexOf('.')) {
+                    timeVal += '.' + ('000' + v.getMilliseconds()).slice(-3);
+                }
+                return timeVal;
+            }
+            return v;
+        },
         '$data.String': function (o) { return o.toString(); },
         '$data.Boolean': function (o) { return o.toString(); },
         '$data.Blob': function (o) { return o; },

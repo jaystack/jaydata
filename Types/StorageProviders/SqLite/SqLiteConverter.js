@@ -45,7 +45,7 @@ $data.SqLiteConverter = {
         "$data.Number": $data.Container.proxyConverter,
         "$data.Date": function (date) { return date ? date.valueOf() : null; },
         "$data.DateTimeOffset": function (date) { return date ? date.valueOf() : null; },
-        "$data.Time": function (date) { return date ? date.valueOf() : null; },
+        "$data.Time": function (date) { return date ? Container.convertTo(date, $data.Time).valueOf() : null; },
         "$data.String": $data.Container.proxyConverter,
         "$data.Boolean": function (b) { return b ? 1 : 0; },
         "$data.Blob": function(b){ return b ? $data.Blob.toBase64(b) : b; },

@@ -72,7 +72,16 @@ $data.WebApiConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
-        '$data.Time': function (v) { return v ? v.toISOString().split('T')[1].replace('Z', '') : v; },
+        '$data.Time': function (v) {
+            if (v) {
+                var timeVal = v.toTimeString().split(' ')[0];
+                if (v.toISOString().indexOf('.')) {
+                    timeVal += '.' + ('000' + v.getMilliseconds()).slice(-3);
+                }
+                return timeVal;
+            }
+            return v;
+        },
         '$data.DateTimeOffset': function (v) { return v ? v.toISOString() : v; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,

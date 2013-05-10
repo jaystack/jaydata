@@ -625,5 +625,167 @@ function TypeTests(providerConfig, msg) {
             });
     });
 
+    test('Time save - load test 1', function () {
+        expect(3);
+
+        var timeData;
+        function loadtest(context, restart) {
+            context.TestItemTypes.toArray(function (items) {
+                var item = items[0];
+                
+                if (!timeData)
+                    timeData = item.timeprop.toISOString();
+                else
+                    equal(item.timeprop.toISOString(), timeData, 'time equals');
+
+                context.attach(item);
+                item.timeprop = item.timeprop;
+                context.saveChanges(function () {
+                    context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
+                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+
+                        if (restart) {
+                            _getContext().then(function (ctx2) {
+                                start();
+                                loadtest(ctx2, false);
+                            });
+                        } else {
+                            _finishCb(context);
+                        }
+
+                    });
+
+                });
+                
+
+            });
+        }
+
+        _getDataContext(4)
+            .then(function (context) {
+                loadtest(context, true);
+            });
+    });
+
+    test('Time save - load test 2', function () {
+        expect(2);
+
+        function loadtest(context, restart) {
+            context.TestItemTypes.toArray(function (items) {
+                var item = items[0];
+
+                context.attach(item);
+
+                var s = new Date().toISOString();
+                item.timeprop = s.substring(s.indexOf('T') + 1, s.indexOf('Z'));
+
+                var timeData = item.timeprop.toISOString();
+
+                context.saveChanges(function () {
+                    context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
+                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+
+                        if (restart) {
+                            _getContext().then(function (ctx2) {
+                                start();
+                                loadtest(ctx2, false);
+                            });
+                        } else {
+                            _finishCb(context);
+                        }
+
+                    });
+
+                });
+
+
+            });
+        }
+
+        _getDataContext(4)
+            .then(function (context) {
+                loadtest(context, true);
+            });
+    });
+
+    test('Time save - load test 3', function () {
+        expect(2);
+
+        function loadtest(context, restart) {
+            context.TestItemTypes.toArray(function (items) {
+                var item = items[0];
+
+                context.attach(item);
+
+                item.timeprop = '00:15:00';
+
+                var timeData = item.timeprop.toISOString();
+
+                context.saveChanges(function () {
+                    context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
+                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+
+                        if (restart) {
+                            _getContext().then(function (ctx2) {
+                                start();
+                                loadtest(ctx2, false);
+                            });
+                        } else {
+                            _finishCb(context);
+                        }
+
+                    });
+
+                });
+
+
+            });
+        }
+
+        _getDataContext(4)
+            .then(function (context) {
+                loadtest(context, true);
+            });
+    });
+
+    test('Time save - load test 4', function () {
+        expect(2);
+
+        function loadtest(context, restart) {
+            context.TestItemTypes.toArray(function (items) {
+                var item = items[0];
+
+                context.attach(item);
+
+                item.timeprop = 15*60*1000;
+
+                var timeData = item.timeprop.toISOString();
+
+                context.saveChanges(function () {
+                    context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
+                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+
+                        if (restart) {
+                            _getContext().then(function (ctx2) {
+                                start();
+                                loadtest(ctx2, false);
+                            });
+                        } else {
+                            _finishCb(context);
+                        }
+
+                    });
+
+                });
+
+
+            });
+        }
+
+        _getDataContext(4)
+            .then(function (context) {
+                loadtest(context, true);
+            });
+    });
 }
 
