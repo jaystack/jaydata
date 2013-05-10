@@ -868,6 +868,10 @@ $data.Class.define('$data.oDataServer.serviceDefinitionParser', null, null, {
 
                     }
                 }
+            },
+            socketio: {
+                single: true,
+                fieldName: 'socketio'
             }
         }
     }
