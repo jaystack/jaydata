@@ -100,7 +100,7 @@ $data.Container.registerConverter('$data.Blob',{
                 arr[i] = value[i];
             }
             if (!arr.length) throw 0;
-            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
+            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(arr);
         }
         throw 0;
     }
