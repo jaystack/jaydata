@@ -376,8 +376,18 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
                         d.data[p.name] = 0;
                     }else if (!p.computed){
-                        d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
-                        if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
+                        if (Container.resolveType(p.type) === $data.Array && p.elementType && Container.resolveType(p.elementType) === $data.ObjectID){
+                            d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
+                            var arr = d.data[p.name];
+                            if (arr){
+                                for (var k = 0; k < arr.length; k++){
+                                    arr[k] = self._typeFactory(p.elementType, arr[k], self.fieldConverter.toDb);
+                                }
+                            }
+                        }else{
+                            d.data[p.name] = self._typeFactory(p.type, d.data[p.name], self.fieldConverter.toDb);
+                            if (d.data[p.name] && d.data[p.name].initData) d.data[p.name] = d.data[p.name].initData;
+                        }
                     }else{
                         d.data['_id'] = self._typeFactory(p.type, d.data._id, self.fieldConverter.toDb);
                     }
@@ -385,7 +395,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
 
                 docs.push(d.data);
             }
-            
+
             collection.insert(docs, { safe: true }, function(error, result){
                 if (error){
                     callBack.error(error);
