@@ -98,7 +98,11 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
                     }
                 },
                 
-                fieldConverter: { toDb: $data.InMemoryConverter.escape }
+                fieldConverter: { toDb: $data.typeSystem.extend({
+                    '$data.ObjectID': function(id){
+                        return id ? id.toString() : id;
+                    }
+                }, $data.InMemoryConverter.escape) }
             });
             funcCompiler.compile(expression.selector, context);
             context.filter = new Function(context.lambda, 'return ' + context.data + ';');
