@@ -560,6 +560,9 @@
         parseFunctionName: function () { //returns {name:, type:}
             //bnf: FunctionName       : "startswith" | "endswith" | ...;
             var token = this.lexer.token;
+            var line = this.lexer.line;
+            var column = this.lexer.column;
+            var srcIndex = this.lexer.srcIndex;
             if (token.tokenType != TokenType.WORD)
                 return;
             var name = token.value;
@@ -582,6 +585,13 @@
             for (var i = 0; i < this.functionNames.length; i++) {
                 if (this.functionNames[i] == name) {
                     this.lexer.nextToken();
+                    if (this.lexer.token.value != ASCII.LPAREN){
+                        this.lexer.token = token;
+                        this.lexer.line = line;
+                        this.lexer.column = column;
+                        this.lexer.srcIndex = srcIndex;
+                        return null;
+                    }
                     return { name: name, type: this.functionTypes[i] };
                 }
             }

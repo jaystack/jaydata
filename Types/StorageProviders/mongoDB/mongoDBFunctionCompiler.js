@@ -39,7 +39,14 @@ $C('$data.storageProviders.mongoDB.mongoDBFunctionCompiler', $data.Expressions.E
         context.data += this.provider.fieldConverter.toDb[typeName](expression.value);
     },
     VisitMemberInfoExpression: function (expression, context) {
-        context.data += expression.memberDefinition.computed ? '_id' : expression.memberName;
+        var member = context.data.slice(context.data.lastIndexOf('(') + 1);
+        if (Container.resolveType(expression.memberDefinition.type) == $data.ObjectID){
+            context.data += expression.memberDefinition.computed
+                ? '_id ? ' + member + '_id.toString() : ' + member + '_id)'
+                : expression.memberName + ' ? ' + member + expression.memberName + '.toString() : ' + member + expression.memberName + ')';
+        }else{
+            context.data += expression.memberDefinition.computed ? '_id)' : expression.memberName + ')';
+        }
     },
 
     VisitComplexTypeExpression: function (expression, context) {
@@ -52,7 +59,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFunctionCompiler', $data.Expressions.E
         this.Visit(expression.source, context);
         context.entityType = expression.entityType;
         if (expression.selector.lambda){
-            context.data += expression.selector.lambda + '.';
+            context.data += '(' + expression.selector.lambda + '.';
             context.lambda = expression.selector.lambda;
         }
     },

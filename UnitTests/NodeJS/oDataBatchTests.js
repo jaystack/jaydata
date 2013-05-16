@@ -852,11 +852,11 @@ if ($data.storageProviders.mongoDBPro){
                         crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }, {
                         type: 'Point',
-                        coordinates: [0.01, 0.01],
+                        coordinates: [0.02, 0.02],
                         crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }, {
                         type: 'Point',
-                        coordinates: [0.02, 0.02],
+                        coordinates: [0.01, 0.01],
                         crs: { properties: { name: 'EPSG:4326' }, type: 'name' }
                     }
                 ], 'Bad places filtered');

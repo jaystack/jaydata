@@ -100,7 +100,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
                 
                 fieldConverter: { toDb: $data.typeSystem.extend({
                     '$data.ObjectID': function(id){
-                        return id ? id.toString() : id;
+                        return id ? 'atob("' + id.toString() + '")' : id;
                     }
                 }, $data.InMemoryConverter.escape) }
             });
