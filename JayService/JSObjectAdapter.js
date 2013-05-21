@@ -57,10 +57,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 var methodArgs = self.resolveArguments(req, serviceInstance, memberInfo);
 
                 if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
-	                //this will be something much more dynamic
-                    _v = memberInfo.invoke(methodArgs, req, res);
-
-	                oDataBuilderCfg = {
+                    oDataBuilderCfg = {
 	                    version: 'V2',
 	                    baseUrl: req.fullRoute,
 	                    context: self.type,
@@ -69,6 +66,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
 	                    request: req,
 	                    response: res
 	                };
+	                
+	                //this will be something much more dynamic
+                    _v = memberInfo.invoke(methodArgs, req, res, oDataBuilderCfg);
 	            }else{
 	                throw 'Invoke Error: Illegal method.';
 	            }
@@ -219,7 +219,7 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             }
         }
 
-        memberContext.invoke = function (args, request, response) {
+        memberContext.invoke = function (args, request, response, oDataBuilderCfg) {
             var defer = self.promiseHelper.defer();
 
             function success(r) {
@@ -253,6 +253,91 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 self.promiseHelper.when(result).then(function () {
                     defer.resolve(result.valueOf());
                 });
+            } else if (result instanceof $data.Queryable) {
+                var entitySet = serviceInstance._entitySetReferences[result.defaultType.name].name;
+                var esProc = new $data.JayService.OData.EntitySetProcessor(entitySet, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
+
+                if (esProc.isSupported(request)) {
+                    var builder = new $data.oDataParser.ODataEntityExpressionBuilder(serviceInstance, entitySet);
+                    builder.createRootExpression = function () {
+                        var preparator = Container.createQueryExpressionCreator(serviceInstance);
+                        var expression = preparator.Visit(result.expression);
+                        
+                        var expr = expression;
+                        while (expr){
+                            if (expr.getType().fullName === $data.Expressions.EntitySetExpression.fullName) break;
+                            expr = expr.source;
+                        }
+                        
+                        this.lambdaTypes.push(expr || expression);
+                        return expression;
+                    };
+                    builder.filterConverter = function (expr, rootExpr) {
+                        var pqExp = this._buildParametricQueryExpression(expr, $data.Expressions.FilterExpression);
+                        var expressionSource = rootExpr;
+                        var expression = pqExp;
+                        if (rootExpr instanceof $data.Expressions.FilterExpression) {
+                            expressionSource = rootExpr.source;
+                            var operatorResolution = serviceInstance.storageProvider.resolveBinaryOperator("and");
+                            expression = Container.createSimpleBinaryExpression(rootExpr.selector, expression, "and", "filter", "boolean", operatorResolution);
+                        }
+                        return new $data.Expressions.FilterExpression(expressionSource, expression);
+                    };
+                    var frameType = $data.Expressions.ExpressionType.ToArray;
+
+                    var idFilter = [];
+                    if (esProc.member.idObject) {
+                        var filter = [];
+                        for (var name in esProc.member.idObject) {
+                            idFilter.push(name + ' eq ' + esProc.member.idObject[name]);
+                        }
+                        frameType = $data.Expressions.ExpressionType.Single;
+                        oDataBuilderCfg.singleResult = true;
+                    }
+
+                    if (oDataBuilderCfg.isCountResult === true)
+                        frameType = $data.Expressions.ExpressionType.Count;
+
+                    oDataBuilderCfg.simpleResult = oDataBuilderCfg.simpleResult || esProc.member.valueRequeset;
+
+                    try {
+                        var buildResult = builder.parse({
+                            frame: frameType,
+                            filter: idFilter.length > 0 ? idFilter.join(' and ') : (request.query.$filter || ''),
+                            orderby: request.query.$orderby || '',
+                            select: esProc.member.selectedField || request.query.$select || '',
+                            skip: request.query.$skip || '',
+                            top: request.query.$top || '',
+                            expand: request.query.$expand || '',
+                            inlinecount: request.query.$inlinecount || ''
+                        });
+                    }catch(err){
+                        return defer.reject(new Error(err.message));
+                    }
+
+                    oDataBuilderCfg.collectionName = entitySet;
+                    oDataBuilderCfg.selectedFields = buildResult.selectedFields;
+                    oDataBuilderCfg.includes = buildResult.includes;
+                    serviceInstance.executeQuery(new $data.Queryable(serviceInstance[entitySet], buildResult.expression), {
+                        success: function (contextResult) {
+                            if (esProc.member.valueRequeset) {
+                                // request pattern: /EntitySet(key)/Field/$value
+                                self.prepareSimpleResponse(contextResult, esProc.member.selectedField, serviceInstance[entitySet], callback);
+                            } else if (oDataBuilderCfg.simpleResult) {
+                                defer.resolve(new $data.ServiceResult(contextResult));
+                            } else {
+                                defer.resolve(contextResult);
+                            }
+                        },
+                        error: function (err) {
+                            defer.reject(err);
+                        }
+                    });
+                } else {
+                    //405
+                    //_v = self.promiseHelper.fcall(function () { return new $data.EmptyServiceResult(404); });
+                    defer.resolve(new $data.EmptyServiceResult(404));
+                }
             } else {
                 defer.resolve(result);
             }

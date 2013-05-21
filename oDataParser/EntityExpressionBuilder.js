@@ -28,9 +28,7 @@
         return { expression: this.buildExpression(req) };
     },
     buildExpression: function (req) {
-
         var expression = this.createRootExpression(this.entitySetName);
-        this.lambdaTypes.push(expression);
 
         for (var i = 0; i < this.supportedParameters.length; i++) {
             var paramName = this.supportedParameters[i].name;
@@ -39,7 +37,6 @@
                 expression = this[funcName].call(this, req[paramName], expression, req);
             }
         }
-
 
         if (req.frame) {
             expression = Container['create' + req.frame + 'Expression'](expression);
@@ -56,6 +53,7 @@
             Container.createMemberInfoExpression(memberdef), null,
             this.scopeContext[setName]);
 
+        this.lambdaTypes.push(es);
         return es;
     },
     filterConverter: function (expr, rootExpr) {

@@ -11,8 +11,9 @@ $data.StringFunctions = {
             self = this.valueOf();
             str = arguments[0];
         } else
-            return false;;
-
+            return false;
+            
+        if (typeof self !== 'string') return false;
         return self.indexOf(str) === 0;
     },
     endsWith: function () {
@@ -29,6 +30,7 @@ $data.StringFunctions = {
         } else
             return false;
 
+        if (typeof self !== 'string') return false;
         return self.slice(-str.length) === str;
     },
     contains: function () {
@@ -45,6 +47,7 @@ $data.StringFunctions = {
         } else
             return false;
 
+        if (typeof self !== 'string') return false;
         return self.indexOf(str) >= 0;
     }
 };

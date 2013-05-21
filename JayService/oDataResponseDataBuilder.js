@@ -48,9 +48,9 @@
         if (this.config.methodConfig) {
             if (!this.config.methodConfig.returnType)
                 return undefined;
-                
-            data = $data.Container.convertTo(data, this.config.methodConfig.returnType, this.config.methodConfig.elementType);
-
+            
+            data = $data.Container.convertTo(data, Container.resolveType(this.config.methodConfig.returnType) === $data.Queryable ? $data.Array : this.config.methodConfig.returnType, this.config.methodConfig.elementType);
+            
             if (typeof this.config.context.isAssignableTo === 'function' && this.config.context.isAssignableTo($data.Base)) {
                 return this._convertJayDataFunction(data);
             } else {
