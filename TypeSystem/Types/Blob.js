@@ -83,8 +83,9 @@ $data.Container.registerConverter('$data.Blob',{
         if (typeof Blob !== 'undefined' && value instanceof Blob){
             var req = new XMLHttpRequest();
             req.open('GET', URL.createObjectURL(value), false);
+            req.responseType = 'arraybuffer';
             req.send(null);
-            return $data.Container.convertTo(req.responseText, $data.Blob);
+            return $data.Container.convertTo(req.response, $data.Blob);
         } else if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
             return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(new Uint8Array(value));
         }else if (value instanceof Uint8Array){

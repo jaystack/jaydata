@@ -195,6 +195,19 @@ test("REST - GET inlineCount", function () {
         });
     });
 });
+test("REST - GET inlineCount no result", function () {
+    stop();
+    expect(2);
+
+    var context = $example.Context.getContext();
+    $example.Context.generateTestData(context, function () {
+        context.Orders.filter(function(it){ return it.Date > this.d; }, { d: new Date() }).withInlineCount().toArray(function (orders) {
+            equal(orders.length, 0, 'length invalid');
+            equal(orders.totalCount, 10, 'totalCount invalid');
+            start();
+        });
+    });
+});
 test("REST - GET types", 9, function () {
     stop();
 

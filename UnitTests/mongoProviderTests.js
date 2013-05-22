@@ -42,6 +42,25 @@ exports.testAdd = function(test){
     });
 };
 
+exports.testInlineCount = function(test){
+    test.expect(3);
+    $test.Context.init(function(db){
+        db.Items.add(new $test.Item({ Key: 'aaa1', Value: 'bbb6', Rank: 1 }));
+        db.Items.add(new $test.Item({ Key: 'aaa2', Value: 'bbb7', Rank: 2 }));
+        db.Items.add(new $test.Item({ Key: 'bbb3', Value: 'bbb8', Rank: 3 }));
+        db.Items.add(new $test.Item({ Key: 'aaa4', Value: 'bbb9', Rank: 4 }));
+        db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
+        db.saveChanges(function(cnt){
+            test.equal(cnt, 5, 'Not 5 items added to collection');
+            db.Items.filter('it.Key == "ccc"').withInlineCount().toArray(function(r){
+                test.equal(r.length, 0, 'Items selected from collection');
+                test.equal(r.totalCount, 5, 'Not 5 (total count) items in collection');
+                test.done();
+            });
+        });
+    });
+};
+
 exports.testAddArrayArray = function (test) {
     test.expect(11);
     $test.Context.init(function (db) {
@@ -2150,6 +2169,135 @@ test = function(n, e, cb){
         if (d <= 0) test.done();
     }
 };
+
+test("OData_Function_sub_frames", function () {
+    if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
+    expect(11);
+    stop(7);
+    (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+        $news.Types.NewsContext.generateTestData(db, function () {
+
+            var q = db.Categories.filter(function (ctg) { return ctg.Articles.some(); });
+            //var c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/any()", "A0: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    equal(result.length, 5, 'A0: result length failed');
+                    equal(result[0].Title, 'Sport', 'A0: result value failed');
+                    start();
+                },
+                error: function (e) {
+                    ok(false, 'A0: Category some article, error: ' + e);
+                    start();
+                }
+            });
+
+            var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
+            q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+            //c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Title eq 'Article1'))", "A1: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    equal(result.length, 1, 'A1: result length failed');
+                    equal(result[0].Title, 'Sport', 'A1: result value failed');
+                    start();
+                },
+                error: function (e) {
+                    ok(false, 'A1: Category some article.Title == "Article1", error: ' + e);
+                    start();
+                }
+            });
+
+            q = db.Categories.filter(function (ctg) { return ctg.Articles.every(this.filter); }, { filter: articleFilter });
+            //c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/all(art: (art/Title eq 'Article1'))", "A2: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    equal(result.length, 0, 'A2: result length failed');
+                    start();
+                },
+                error: function (e) {
+                    ok(false, 'A2: Category every article.Title == "Article1", error: ' + e);
+                    start();
+                }
+            });
+
+            articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Full Name2'; });
+            q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+            //c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Author/Profile/FullName eq 'Full Name2'))", "A3: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    equal(result.length, 5, 'A3: result length failed');
+                    equal(result[0].Title, 'Sport', 'A3: result value failed');
+                    start();
+                },
+                error: function (e) {
+                    ok(false, 'A3: Category some article Author.Profile.Fullname "Full Name2", error: ' + e);
+                    start();
+                }
+            });
+
+            articleFilter = db.Articles.filter(function (art) { return art.Author.Profile.FullName == 'Starts With Test'; });
+            q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+            //c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Author/Profile/FullName eq 'Starts With Test'))", "A4: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    equal(result.length, 1, 'A4: result length failed');
+                    equal(result[0].Title, 'Politics', 'A4: result value failed');
+                    start();
+                },
+                error: function (e) {
+                    ok(false, 'A4: Category some article Author.Profile.Fullname "Starts With Test", error: ' + e);
+                    start();
+                }
+            });
+
+
+            var tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Tag.Title == 'Tag1'; });
+            articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter); }, { filter: tagFilter });
+            q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter })
+            //c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/any(art: art/Tags/any(tagCon: (tagCon/Tag/Title eq 'Tag1')))", "A5: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    equal(result.length, 5, 'A5: result length failed');
+                    equal(result[0].Title, 'Sport', 'A5: result value failed');
+                    start();
+                },
+                error: function (e) {
+                    ok(false, 'A5: Category some article Articles.Tags.some TagConnections.Tag.Title "Tag1", error: ' + e);
+                    start();
+                }
+            });
+
+            tagFilter = db.TagConnections.filter(function (tagCon) { return tagCon.Tag.Title == 'Tag3'; });
+            articleFilter = db.Articles.filter(function (art) { return art.Tags.some(this.filter) && art.Author.LoginName == 'Usr4'; }, { filter: tagFilter });
+            q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter })
+            //c = q.toTraceString();
+            //equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Tags/any(tagCon: (tagCon/Tag/Title eq 'Tag3')) and (art/Author/LoginName eq 'Usr4')))", "A6: Invalid query string");
+
+            q.toArray({
+                success: function (result) {
+                    start();
+                    equal(result.length, 3, 'A6: result length failed');
+                    equal(result[0].Title, 'World', 'A6: result value failed');
+                },
+                error: function (e) {
+                    start();
+                    ok(false, 'A6: Category some article Tags some tag connections Tag.Title "Tag3" and article Author.LoginName "Usr4", error: ' + e);
+                }
+            });
+        });
+    });
+});
 
 test('remove_navgation_property_value', function () {
     expect(4);

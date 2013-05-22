@@ -141,6 +141,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
         }
     },
     VisitInlineCountExpression: function(expression, context){
-        this.query.withInlineCount = true;
+        this.Visit(expression.source, context);
+        this.query.withInlineCount = expression.selector == 'allpages' ? true : false;
     }
 });

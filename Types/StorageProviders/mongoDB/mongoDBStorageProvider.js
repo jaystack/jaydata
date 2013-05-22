@@ -156,7 +156,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
     executeQuery: function(query, callBack){
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        
+
         var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
         this._compile(query);
 
@@ -828,7 +828,8 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             orderBy: {},
             orderByDescending: {},
             first: {},
-            include: {}
+            include: {},
+            withInlineCount: {}
         },
         enumerable: true,
         writable: true
