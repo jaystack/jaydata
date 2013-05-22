@@ -356,7 +356,7 @@ function T3(providerConfig, msg) {
                 });
 
                 db.Articles.filter('it.Title.contains("1")').withInlineCount().toArray(function (items) {
-                    equal(items.totalCount, items.length, 'inline count with filter');
+                    equal(items.totalCount, 26, 'inline count with filter');
                     start(1);
                 });
 
