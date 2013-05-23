@@ -180,17 +180,17 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 return entitySet;
             });
     },
-    _getDefaultItemStoreFactory: function (instanceOrType, storeConfig) {
+    _getDefaultItemStoreFactory: function (instanceOrType, initStoreConfig) {
         if (instanceOrType) {
             var type = ("function" === typeof instanceOrType) ? instanceOrType : instanceOrType.getType();
             var typeName = $data.Container.resolveName(type) + "_items";
             var typeName = typeName.replace(/\./g, "_");
 
             var storeConfig = $data.typeSystem.extend({
-                collectionName: storeConfig && storeConfig.collectionName ? storeConfig.collectionName : 'Items',
+                collectionName: initStoreConfig && initStoreConfig.collectionName ? initStoreConfig.collectionName : 'Items',
                 tableName: typeName,
                 initParam: { provider: 'local', databaseName: typeName }
-            }, storeConfig);
+            }, initStoreConfig);
 
             var contextDef = {};
             contextDef[storeConfig.collectionName] = { type: $data.EntitySet, elementType: type }
@@ -198,7 +198,10 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 contextDef[storeConfig.collectionName]['tableName'] = storeConfig.tableName;
 
             var inMemoryType = $data.EntityContext.extend(typeName, contextDef);
-            return new inMemoryType(storeConfig.initParam);
+            var ctx = new inMemoryType(storeConfig.initParam);
+            if (initStoreConfig && typeof initStoreConfig === 'object')
+                initStoreConfig.factory = ctx._storeToken.factory;
+            return ctx;
         }
         return undefined;
     },
@@ -637,19 +640,19 @@ $data.Class.define('$data.MemberWrapper', null, null, {
         this.memberDefinition = memberDefinition;
     },
     setKey: function (value) {
-        this.memberDefinition.key = value || true;
+        this.memberDefinition.key = value || value === undefined ? true : false;
         return this;
     },
     setComputed: function (value) {
-        this.memberDefinition.computed = value || true;
+        this.memberDefinition.computed = value || value === undefined ? true : false;
         return this;
     },
     setRequired: function (value) {
-        this.memberDefinition.required = value || true;
+        this.memberDefinition.required = value || value === undefined ? true : false;
         return this;
     },
     setNullable: function (value) {
-        this.memberDefinition.nullable = value || true;
+        this.memberDefinition.nullable = value || value === undefined ? true : false;
         return this;
     },
     changeDefinition: function (attr, value) {
