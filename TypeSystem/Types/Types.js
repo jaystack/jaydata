@@ -14,8 +14,26 @@ $data.Integer = function JayInteger() { };
 $data.Int16 = function JayInt16(v) { };
 $data.Int64 = function JayInt64(v) { };
 $data.ObjectID = typeof $data.mongoDBDriver !== 'undefined' && typeof $data.mongoDBDriver.ObjectID !== 'undefined' ? $data.mongoDBDriver.ObjectID : function JayObjectID() { };
-$data.Time = function JayTime(){};
-$data.DateTimeOffset = function JayDateTimeOffset(){};
+$data.Time = function JayTime(val) {
+    this.value = val;
+};
+$data.Time.prototype.toJSON = function () {
+    var v = this.value;
+    if (v instanceof Date) {
+        var timeVal = v.toTimeString().split(' ')[0];
+        if (v.toISOString().indexOf('.')) {
+            timeVal += '.' + ('000' + v.getMilliseconds()).slice(-3);
+        }
+        return timeVal;
+    }
+    return v;
+};
+$data.DateTimeOffset = function JayDateTimeOffset(val) {
+    this.value = val;
+};
+$data.DateTimeOffset.prototype.toJSON = function () {
+    return this.value instanceof Date ? this.value.toISOString() : this.value;
+};
 
 $data.Container.registerType(["$data.Number", "number", "JayNumber", "double"], $data.Number);
 $data.Container.registerType(["$data.Integer", "$data.Int32", "int", "int32", "integer", "JayInteger"], $data.Integer);
