@@ -58,8 +58,8 @@ $data.Class.define('$data.EntityContext', null, null,
         if ($data.ItemStore && 'ContextRegister' in $data.ItemStore)
             $data.ItemStore.ContextRegister.apply(this, arguments);
 
-        if (storageProviderCfg.clientCache)
-            this.clientCache = storageProviderCfg.clientCache;
+        if (storageProviderCfg.queryCache)
+            this.queryCache = storageProviderCfg.queryCache;
 
         if ("string" === typeof storageProviderCfg) {
             if (0 === storageProviderCfg.indexOf("http")) {
@@ -709,8 +709,8 @@ $data.Class.define('$data.EntityContext', null, null,
         var that = this;
         var clbWrapper = {};
         clbWrapper.success = function (query) {
-            if ($data.ClientCache && $data.ClientCache.isCacheable(that, query)) {
-                $data.ClientCache.addToCache(that, query);
+            if ($data.QueryCache && $data.QueryCache.isCacheable(that, query)) {
+                $data.QueryCache.addToCache(that, query);
             }
 
             query.buildResultSet(that);
@@ -803,16 +803,16 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 if (ex) {
                     if (query.transaction) {
-                        if ($data.ClientCache && $data.ClientCache.isInCache(that, query)) {
-                            $data.ClientCache.executeQuery(that, query, clbWrapper);
+                        if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
+                            $data.QueryCache.executeQuery(that, query, clbWrapper);
                         } else {
                             ctx.storageProvider.executeQuery(query, clbWrapper);
                         }
                     } else {
                         ctx.beginTransaction(function (tran) {
                             query.transaction = tran;
-                            if ($data.ClientCache && $data.ClientCache.isInCache(that, query)) {
-                                $data.ClientCache.executeQuery(that, query, clbWrapper);
+                            if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
+                                $data.QueryCache.executeQuery(that, query, clbWrapper);
                             } else {
                                 ctx.storageProvider.executeQuery(query, clbWrapper);
                             }
@@ -878,8 +878,8 @@ $data.Class.define('$data.EntityContext', null, null,
         ///     <returns type="$.Deferred" />
         /// </signature>
 
-        if ($data.ClientCache) {
-            $data.ClientCache.reset(this);
+        if ($data.QueryCache) {
+            $data.QueryCache.reset(this);
         }
 
         var changedEntities = [];

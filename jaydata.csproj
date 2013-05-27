@@ -365,6 +365,7 @@
     <Content Include="oDataParser\Visitors\ObjectLiteralBuilderVisitor.js" />
     <Content Include="Pro\CREDITS_PRO.txt" />
     <Content Include="Pro\CREDITS_TRIAL.txt" />
+    <Content Include="Pro\JayDataModules\QueryCache.js" />
     <Content Include="Pro\JayDataModules\localMigrations.js" />
     <Content Include="Pro\JayDataModules\SchemaEvolutions.js" />
     <Content Include="Pro\localMigrations.html" />
@@ -397,6 +398,7 @@
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlPagingCompiler.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlProjectionCompiler.js" />
     <Content Include="Pro\Types\StorageProviders\SqLite\SqlTransaction.js" />
+    <Content Include="Pro\UnitTests\QueryCacheTests.js" />
     <Content Include="Pro\UnitTests\T2.js" />
     <Content Include="Pro\UnitTests\transactionTests.js" />
     <Content Include="Scripts\acorn.js" />
