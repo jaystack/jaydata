@@ -568,6 +568,9 @@ app.use("/Services/emptyNewsReader.svc", $data.JayService.createAdapter(JayData.
 app.use("/Services/emptyNewsReaderV3.svc", $data.JayService.createAdapter(JayData.NewsReader.NewsContextService, function () {
     return new JayData.NewsReader.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
 }));
+app.use("/odata.svc", $data.JayService.createAdapter(JayData.NewsReader.NewsContextService, function () {
+    return new JayData.NewsReader.NewsContextService({ name: 'mongoDB', databaseName: 'newsreader', responseLimit: 100 });
+}));
 
 app.use("/Services/oDataDbDelete.asmx/Delete", function(req, res){
     var c = new $news.Types.NewsContext({ name: 'mongoDB', databaseName: 'newsreader', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });

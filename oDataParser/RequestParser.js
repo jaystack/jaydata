@@ -33,6 +33,7 @@
             this.builder = new $data.oDataParser.RequestExpressionBuilder();
 
             this.reservedNs = ['geo'];
+            this.lambdaParameter = [];
         },
         parse: function (req) {
             ///<param name="req" type="$data.oDataParser.QueryRequest" />
@@ -647,7 +648,7 @@
                 member += name;
             }
             var steps = [];
-            steps.push(member);
+            if (!this.lambdaParameter.length || this.lambdaParameter[this.lambdaParameter.length - 1] != member) steps.push(member);
 
             var hasSlash = false;
             while (token.value == ASCII.SLASH) {
@@ -658,7 +659,25 @@
                 token = this.lexer.token;
                 if (!name)
                     $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: name.", "parseMemberPath");
-                if (name != '*'){
+                if (name == 'all' || name == 'any'){
+                    var frame = { type: name == 'all' ? $data.Expressions.EveryExpression : $data.Expressions.SomeExpression, entitySet: steps[steps.length - 1] };
+                    if (token.value != ASCII.LPAREN)
+                        $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: left parenthesis.", "parseMemberPath");
+                    token = this.lexer.nextToken();
+                    if (token.value != ASCII.RPAREN){
+                        frame.lambda = token.value;
+                        token = this.lexer.nextToken();
+                        if (token.value == ASCII.COLON){
+                            this.lambdaParameter.push(frame.lambda);
+                            this.lexer.nextToken();
+                            frame.expression = this.parseExpr();
+                            this.lambdaParameter.pop();
+                        }else $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: colon (:) after lamba parameter.", "parseMemberPath");
+                    }else token = this.lexer.nextToken();
+                    this.lexer.nextToken();
+                    steps.push(frame);
+                    return this.builder.buildMemberPath(steps);
+                }else if (name != '*'){
                     member += name;
                     steps.push(name);
                 }
@@ -667,13 +686,13 @@
             if (hasDot && !hasSlash)
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: / after namespace.", "parseMemberPath");
             if (this.lexer.token.value != ASCII.LPAREN)
-                return this.builder.buildMemberPath(steps);
+                return this.builder.buildMemberPath(steps, this.lambdaParameter[this.lambdaParameter.length - 1]);
             //-- parse instance method
             this.lexer.nextToken();
             if (this.lexer.token.value != ASCII.RPAREN)
                 $data.oDataParser.RequestParser.SyntaxError.call(this, "Expected: right parenthesis: ')'.", "parseMemberPath");
             this.lexer.nextToken();
-            return this.builder.buildMemberPath(steps);
+            return this.builder.buildMemberPath(steps, this.lambdaParameter[this.lambdaParameter.length - 1]);
         },
         parseName: function () {
             //bnf: Name               : (WORD | UNDERSCORE) *(WORD | UNDERSCORE | DIGIT)

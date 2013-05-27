@@ -72,10 +72,11 @@ $data.Class.define('$data.oDataParser.RequestExpressionBuilder', null, null, {
         var memberExp = this.buildConstant(callName, 'string');
         return new $data.Expressions.CallExpression(propertyExp, memberExp, args);
     },
-    buildMemberPath: function (chain) {
-        var expr = this.buildParameter('it', 'unknown', $data.Expressions.ExpressionType.LambdaParameterReference);
-        for (var i = 0; i < chain.length; i++)
-            expr = this.buildProperty(expr, this.buildConstant(chain[i], 'string'));
+    buildMemberPath: function (chain, it) {
+        var expr = this.buildParameter(it || 'it', 'unknown', $data.Expressions.ExpressionType.LambdaParameterReference);
+        for (var i = 0; i < chain.length; i++){
+            expr = this.buildProperty(expr, this.buildConstant(chain[i], /*'string'*/ typeof chain[i]));
+        }
         return expr;
     },
     buildOrderBy: function (items) {

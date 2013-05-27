@@ -127,6 +127,7 @@
                 default:
                     throw "Unknown CharType: " + this.currentCharType;
             }
+            return this.token;
         },
         readTo: function (str) {
             if (this.srcIndex == this.srcLength )

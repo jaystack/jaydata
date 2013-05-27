@@ -23,6 +23,39 @@ exports.testFilterNavById = function(test){
     });
 };
 
+exports.testUpdateNavigation = function(test){
+    test.expect(8);
+    $test.Context.init(function(db){
+        var newItem = new db.Customers.elementType({ Name: 'Joe1' });
+        db.Customers.add(newItem);
+        db.saveChanges(function (c) {
+            test.equal(c, 1, 'Customer not saved');
+            var order = new db.Orders.elementType({ Amount: 14 });
+            db.Orders.add(order);
+            db.saveChanges(function (c) {
+                test.equal(c, 1, 'Order not saved');
+                db.Orders.include('Customer').filter('it.Amount == 14').toArray(function (o) {
+                    test.equal(o.length, 1, 'Not 1 Order');
+                    test.ok(o[0] instanceof db.Orders.elementType, 'Not Order type');
+                    test.ok(!o[0].Customer, 'Order has Customer');
+                    var order = o[0];
+                    db.Orders.attach(order);
+                    db.Customers.attach(newItem);
+                    order.Customer = newItem;
+                    db.saveChanges(function (c) {
+                        test.equal(c, 1, 'Not 1 item updated');
+                        db.Orders.include('Customer').filter('it.Amount == 14').toArray(function (o) {
+                            test.ok(o[0].Customer, 'Order with no Customer');
+                            test.equal(o[0].Customer.id, newItem.id, 'Customer id mismatch');
+                            test.done();
+                        });
+                    });
+                });
+            });
+        });
+    });
+};
+
 exports.testAdd = function(test){
     test.expect(3);
     $test.Context.init(function(db){
@@ -52,9 +85,9 @@ exports.testInlineCount = function(test){
         db.Items.add(new $test.Item({ Key: 'aaa5', Value: 'bbb0', Rank: 5 }));
         db.saveChanges(function(cnt){
             test.equal(cnt, 5, 'Not 5 items added to collection');
-            db.Items.filter('it.Key == "ccc"').withInlineCount().toArray(function(r){
-                test.equal(r.length, 0, 'Items selected from collection');
-                test.equal(r.totalCount, 5, 'Not 5 (total count) items in collection');
+            db.Items.filter('it.Key.startsWith("aaa")').withInlineCount().take(2).toArray(function(r){
+                test.equal(r.length, 2, 'Items selected from collection');
+                test.equal(r.totalCount, 4, 'Not 5 (total count) items in collection');
                 test.done();
             });
         });
@@ -2194,7 +2227,7 @@ test("OData_Function_sub_frames", function () {
             });
 
             var articleFilter = db.Articles.filter(function (art) { return art.Title == 'Article1'; });
-            q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
+            var q = db.Categories.filter(function (ctg) { return ctg.Articles.some(this.filter); }, { filter: articleFilter });
             //c = q.toTraceString();
             //equal(c.queryText, "/Categories?$filter=Articles/any(art: (art/Title eq 'Article1'))", "A1: Invalid query string");
 

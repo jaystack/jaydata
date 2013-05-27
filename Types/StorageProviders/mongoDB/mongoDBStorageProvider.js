@@ -324,7 +324,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             });
                         };
                         if (query.withInlineCount){
-                            collection.find({}, {}).count(function(err, result){
+                            collection.find(find.query, {}).count(function(err, result){
                                 if (error){
                                     callBack.error(error);
                                     return;
@@ -442,10 +442,10 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 }
                 
                 var set = {};
-                var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
+                var props = Container.resolveType(u.entity.getType()).memberDefinitions.getPublicMappedProperties().concat(Container.resolveType(u.physicalData.getType()).memberDefinitions.getPublicMappedProperties());
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
-                    if (u.entity.changedProperties.indexOf(p) >= 0){
+                    if (u.entity.changedProperties.indexOf(p) >= 0 || (u.physicalData.changedProperties && u.physicalData.changedProperties.indexOf(p) >= 0)){
                         if (p.concurrencyMode === $data.ConcurrencyMode.Fixed){
                             where[p.name] = self._typeFactory(p.type, u.data[p.name], self.fieldConverter.toDb);
                             if (!set.$inc) set.$inc = {};
@@ -453,7 +453,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         }else if (!p.computed){
                             if (typeof u.data[p.name] === 'undefined') continue;
                             if (Container.resolveType(p.type) === $data.Array && p.elementType && Container.resolveType(p.elementType) === $data.ObjectID){
-                                set[p.name] = self._typeFactory(p.type, u.data[p.name], self.fieldConverter.toDb);
+                                set[p.name] = self._typeFactory(p.type, u.physicalData[p.name], self.fieldConverter.toDb);
                                 var arr = set[p.name];
                                 if (arr){
                                     for (var k = 0; k < arr.length; k++){
@@ -461,7 +461,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                     }
                                 }
                             }else{
-                                set[p.name] = self._typeFactory(p.type, u.data[p.name], self.fieldConverter.toDb);
+                                set[p.name] = self._typeFactory(p.type, u.physicalData[p.name], self.fieldConverter.toDb);
                             }
                         }
                     }
@@ -621,7 +621,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         collections[block[i].entitySet.name] = es;
                     }
                     
-                    var initData = { entity: block[i].data, data: self.save_getInitData(block[i], convertedItems), type: Container.resolveName(block[i].data.getType()) };
+                    var initData = { entity: block[i].data, data: self.save_getInitData(block[i], convertedItems), physicalData: block[i].physicalData, type: Container.resolveName(block[i].data.getType()) };
                     switch (block[i].data.entityState){
                         case $data.EntityState.Unchanged: continue; break;
                         case $data.EntityState.Added:
@@ -682,9 +682,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                         $id: self.storageProvider._typeFactory(complexInstance.getType().memberDefinitions.getMember(constrain[association.To]).type, complexInstance[constrain[association.To]], self.storageProvider.fieldConverter.toDb)
                                     };
                                     dbInstance.initData[constrain[association.From]] = self.storageProvider._typeFactory(complexInstance.getType().memberDefinitions.getMember(constrain[association.To]).type, complexInstance[constrain[association.To]], self.storageProvider.fieldConverter.toDb);
+                                    dbInstance._setPropertyChanged(dbInstance.getType().memberDefinitions.getMember(constrain[association.From]));
                                 } else {
                                     dbInstance.initData[association.FromPropertyName] = null;
                                     dbInstance.initData[constrain[association.From]] = null;
+                                    dbInstance._setPropertyChanged(dbInstance.getType().memberDefinitions.getMember(constrain[association.From]));
                                 }
                             }, this);
                         }
@@ -829,7 +831,21 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             orderByDescending: {},
             first: {},
             include: {},
-            withInlineCount: {}
+            withInlineCount: {},
+            some: {
+                invokable: false,
+                allowedIn: [$data.Expressions.FilterExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                mapTo: 'some',
+                frameType: $data.Expressions.SomeExpression
+            },
+            every: {
+                invokable: false,
+                allowedIn: [$data.Expressions.FilterExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                mapTo: 'every',
+                frameType: $data.Expressions.EveryExpression
+            }
         },
         enumerable: true,
         writable: true

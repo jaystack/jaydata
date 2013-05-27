@@ -1,6 +1,11 @@
 $C('$data.storageProviders.mongoDB.mongoDBFunctionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (provider) {
+    constructor: function (provider, lambdaPrefix, compiler) {
         this.provider = provider;
+        if (compiler){
+            this.compiler = compiler;
+            this.includes = compiler.includes;
+            this.mainEntitySet = compiler.mainEntitySet;
+        }
     },
     compile: function (expression, context) {
         this.Visit(expression, context);
@@ -122,5 +127,42 @@ $C('$data.storageProviders.mongoDB.mongoDBFunctionCompiler', $data.Expressions.E
             }
         }, this);
         context.data += opDef.rightValue || "";
+    },
+    VisitFrameOperationExpression: function (expression, context) {
+        var self = this;
+        this.Visit(expression.source, context);
+
+        Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
+
+        var opDef = expression.operation.memberDefinition;
+        var opName = opDef.mapTo || opDef.name;
+        context.data += opName;
+        context.data += "(";
+        var paramCounter = 0;
+        var params = opDef.parameters || [{ name: "@expression" }];
+
+        var args = params.map(function (item, index) {
+            if (item.name === "@expression") {
+                return expression.source;
+            } else {
+                return expression.parameters[paramCounter++]
+            };
+        });
+
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i];
+            if (arg && arg.value instanceof $data.Queryable) {
+                var frameExpression = new opDef.frameType(arg.value.expression);
+                var preparator = new $data.Expressions.QueryExpressionCreator(arg.value.entityContext);
+                var prep_expression = preparator.Visit(frameExpression);
+
+                var compiler = new (self.constructor)(this.provider, true);
+                var frameContext = { data: "" };
+                var compiled = compiler.compile(prep_expression, frameContext);
+
+                context.data += ('function(' + frameContext.lambda + '){ return ' + frameContext.data + '; }');
+            }else context.data += 'function(){ return true; }';
+        }
+        context.data += "))";
     }
 });

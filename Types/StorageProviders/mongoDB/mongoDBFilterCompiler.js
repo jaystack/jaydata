@@ -170,8 +170,8 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                     var o = {};
                     o[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;
                     context.cursor.push(o);
-                }else context.cursor[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;;
-                    if (context.options.fields) context.options.fields[context.queryField] = 1;
+                }else context.cursor[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;
+                if (context.options && context.options.fields) context.options.fields[context.queryField] = 1;
                 if (context.unary === $data.Expressions.ExpressionType.Not) context.unary = undefined;
                 break;
             case $data.Expressions.ExpressionType.In:
@@ -210,7 +210,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                         context.cursor[context.queryField][context.unary === $data.Expressions.ExpressionType.Not ? '$nin' : expression.resolution.mapTo] = context.value;
                     }
                 }
-                if (context.options.fields) context.options.fields[context.queryField] = 1;
+                if (context.options && context.options.fields) context.options.fields[context.queryField] = 1;
                 if (context.unary === $data.Expressions.ExpressionType.Not) context.unary = undefined;
                 break;
             default:
@@ -244,7 +244,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                     context.cursor[context.queryField] = {};
                     context.cursor[context.queryField][expression.resolution.mapTo] = context.value;
                 }
-                if (context.options.fields) context.options.fields[context.queryField] = 1;
+                if (context.options && context.options.fields) context.options.fields[context.queryField] = 1;
                 break;
         }
         
@@ -423,6 +423,89 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
             context.data += "/";
         }
     },
+    
+    _frameOperation: function(opDef, args, expression, context, contextinclude){
+        var self = this;
+        var origInclude = contextinclude;
+        var frames = [];
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i];
+            if (arg && arg.value instanceof $data.Queryable) {
+                var frameExpression = new opDef.frameType(arg.value.expression);
+                var preparator = new $data.Expressions.QueryExpressionCreator(arg.value.entityContext);
+                var prep_expression = preparator.Visit(frameExpression);
+                
+                var fn = function(expression, context, contextinclude, indent){
+                    if (expression._expressionType === $data.Expressions.AssociationInfoExpression){
+                        contextinclude += '.' + expression.associationInfo.FromPropertyName;
+                        var storageModel = context.entitySet.entityContext._storageModel.getStorageModel(context.defaultType);
+                        var association = storageModel.Associations[expression.associationInfo.FromPropertyName];
+                        if (association) {
+                            var inc = context.includes.filter(function (include) { return include.name == contextinclude }, this);
+                            if (inc.length == 0){
+                                inc = { name: contextinclude, type: association.ToType, from: association.FromType, query: {}, options: {}, mapped: false };
+                                inc.options.fields = { _id: 1 };
+                                inc.options.fields[association.ToPropertyName] = 1;
+                                context.includes.push(inc);
+                            }
+                            if (!context.context.options.fields) context.context.options.fields = { _id: 1 };
+                            //context.context.options.fields[context.include] = 1;
+                            association.ReferentialConstraint.forEach(function(ref){
+                                for (var p in ref){
+                                    //context.context.options.fields[ref[p]] = 1;
+                                }
+                            });
+                        }else{
+                            Guard.raise(new Exception("The given include path is invalid: " + expression.associationInfo.FromPropertyName + ", invalid point: " + contextinclude));
+                        }
+                        context.defaultType = association.ToType;
+                    }else if (expression._expressionType === $data.Expressions.FrameOperationExpression){
+                        frames.push(function(){
+                            var opDef = expression.operation.memberDefinition;
+                            var paramCounter = 0;
+                            var params = opDef.parameters || [{ name: "@expression" }];
+
+                            var args = params.map(function (item, index) {
+                                if (item.name === "@expression") {
+                                    return expression.source;
+                                } else {
+                                    return expression.parameters[paramCounter++]
+                                };
+                            });
+                            
+                            self._frameOperation(opDef, args, expression, {
+                                entitySet: arg.value.entityContext._entitySetReferences[arg.value.expression.elementType.name],
+                                defaultType: arg.value.expression.elementType,
+                                context: context.context,
+                                includes: self.includes/*,
+                                include: { name: lastInclude }*/
+                            }, contextinclude);
+                        });
+                    }else if (expression._expressionType === $data.Expressions.MemberInfoExpression){
+                        contextinclude = origInclude;
+                        context.defaultType = arg.value.expression.elementType;
+                    }
+                    
+                    if (expression.source) contextinclude = fn(expression.source, context, contextinclude);
+                    if (expression.selector) contextinclude = fn(expression.selector, context, contextinclude);
+                    if (expression.expression) contextinclude = fn(expression.expression, context, contextinclude);
+                    if (expression.left) contextinclude = fn(expression.left, context, contextinclude);
+                    if (expression.right) contextinclude = fn(expression.right, context, contextinclude);
+                    
+                    return contextinclude;
+                };
+                
+                var c = {
+                    entitySet: arg.value.entityContext._entitySetReferences[arg.value.expression.elementType.name],
+                    defaultType: arg.value.expression.elementType,
+                    context: context.context ? context.context : context,
+                    includes: this.includes
+                };
+                fn(prep_expression, c, contextinclude, 0);
+            };
+        }
+        frames.forEach(function(it){ it(); });
+    },
 
     VisitFrameOperationExpression: function (expression, context) {
         this.Visit(expression.source, context);
@@ -430,9 +513,6 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
         Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
 
         var opDef = expression.operation.memberDefinition;
-        var opName = opDef.mapTo || opDef.name;
-        context.data += opName;
-        context.data += "(";
         var paramCounter = 0;
         var params = opDef.parameters || [{ name: "@expression" }];
 
@@ -444,20 +524,6 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
             };
         });
 
-        for (var i = 0; i < args.length; i++) {
-            var arg = args[i];
-            if (arg.value instanceof $data.Queryable) {
-                var frameExpression = new opDef.frameType(arg.value.expression);
-                var preparator = new $data.Expressions.QueryExpressionCreator(arg.value.entityContext);
-                var prep_expression = preparator.Visit(frameExpression);
-
-                var compiler = new (this.constructor)(this.provider, true);
-                var frameContext = { data: "" };
-                var compiled = compiler.compile(prep_expression, frameContext);
-
-                context.data += (frameContext.lambda + ': ' + frameContext.data);
-            };
-        }
-        context.data += ")";
+        this._frameOperation(opDef, args, expression, context, context.include.name);
     }
 });

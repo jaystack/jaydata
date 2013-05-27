@@ -207,7 +207,7 @@
 
     <script type="text/javascript" src="EntityExpressionBuilder.js"></script></head>
     <script language="javascript">
-        $(document).ready(function () { FirstRun(); });
+        $(document).ready(function () { FirstRun(); Run(); });
 
         function FirstRun(){
             $("#filterText").keyup(function () { Run(); });
@@ -243,15 +243,15 @@
     </script>
 <body>
 <b>$filter:</b><br/>
-<input type="text" id="filterText" style="width:100%;" value="ModifiedDate gt datetime'2012-07-26'"/><br/>
+<input type="text" id="filterText" style="width:100%;" value="Articles/any(art: (art/Title eq 'Article1'))"/><br/>
 <b>$select:</b><br/>
-<input type="text" id="selectText" style="width:100%;" value="concat(Author/FirstName, ' ', Author/LastName), Title, Age"/><br/>
+<input type="text" id="selectText" style="width:100%;" value=""/><br/>
 <b>$orderby:</b><br/>
-<input type="text" id="orderbyText" style="width:100%;" value="Age desc"/><br/>
+<input type="text" id="orderbyText" style="width:100%;" value=""/><br/>
 <b>$skip:</b><br/>
-<input type="text" id="skipText" style="width:100%;" value="20"/><br/>
+<input type="text" id="skipText" style="width:100%;" value=""/><br/>
 <b>$top:</b><br/>
-<input type="text" id="topText" style="width:100%;" value="10"/><br/>
+<input type="text" id="topText" style="width:100%;" value=""/><br/>
 <b>Message:</b><br/>
 <textarea id="msg" rows="8" cols="120">????</textarea><br/>
 <b>Result:</b><br/>

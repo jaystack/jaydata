@@ -15,9 +15,9 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
             query: {},
             options: {}
         };
-        
+
         this.Visit(query.expression, query.find);
-        
+
         query.includes = this.includes;
         
         query.modelBinderConfig = {};
@@ -47,7 +47,8 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
     VisitFilterExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var filterCompiler = new $data.storageProviders.mongoDB.mongoDBFilterCompiler(this.provider, null, this);
+        var self = this;
+        var filterCompiler = new $data.storageProviders.mongoDB.mongoDBFilterCompiler(this.provider, null, self);
         context.data = "";
         filterCompiler.compile(expression.selector, context);
         
@@ -103,7 +104,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
                         return id ? 'atob("' + id.toString() + '")' : id;
                     }
                 }, $data.InMemoryConverter.escape) }
-            });
+            }, null, this);
             funcCompiler.compile(expression.selector, context);
             context.filter = new Function(context.lambda, 'return ' + context.data + ';');
             context.data = "";

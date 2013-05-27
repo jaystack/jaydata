@@ -164,7 +164,9 @@
         }*/
     },
     _buildParametricQueryExpression: function (expression, frameType) {
-
+        //var frameVisitor = new $data.FrameOperationVisitor(this.scopeContext);
+        //expression = frameVisitor.Visit(expression);
+        
         var constantResolver = Container.createConstantValueResolver(undefined, window, this.scopeContext);
         var parameterProcessor = Container.createParameterResolverVisitor();
 
@@ -176,5 +178,34 @@
 
         return Container.createParametricQueryExpression(entityExpressionTree, converter.parameters);
 
+    }
+});
+
+$data.Expressions.EntityExpressionVisitor.extend('$data.FrameOperationVisitor', {
+    constructor: function(scopeContext){
+        this.scopeContext = scopeContext;
+    },
+    VisitPropertyExpression: function(expression, context){
+        return this.Visit(expression.member, context);
+    },
+    VisitConstantExpression: function(expression, context){
+        var value = expression.value;
+        if (value.type && (value.type === $data.Expressions.SomeExpression || value.type === $data.Expressions.EveryExpression)){
+            var defaultType = this.scopeContext[value.entitySet];
+            var converter = Container.createCodeToEntityConverter(this.scopeContext);
+            
+            var ec = Container.createEntityContextExpression(this.scopeContext);
+            var memberdef = this.scopeContext.getType().getMemberDefinition(value.entitySet);
+            var es = Container.createEntitySetExpression(ec, Container.createMemberInfoExpression(memberdef), null, this.scopeContext[value.entitySet]);
+
+            var r = converter.Visit(value.expression, { lambdaParameters: [es], frameType: $data.Expressions.FilterExpression });
+            
+            r = new $data.Expressions.ParametricQueryExpression(r);
+            r = new $data.Expressions.FilterExpression(es, r);
+            r = new value.type(r);
+            r = new $data.Queryable(defaultType, r);
+            
+            return new $data.Expressions.CallExpression(expression.expression, new $data.Expressions.ConstantExpression(value.type === $data.Expressions.SomeExpression ? 'some' : 'every', 'string'), [new $data.Expressions.ConstantExpression(r, r.getType())]);
+        }
     }
 });

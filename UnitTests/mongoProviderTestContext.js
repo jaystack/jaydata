@@ -110,6 +110,18 @@ $data.Entity.extend('$test.NavB', {
     NavA: { type: '$test.NavA', inverseProperty: 'NavB', required: true }
 });
 
+$data.Entity.extend('mydatabase.Order', {
+    id: { key: true, nullable: false, computed: true, type: 'id' },
+    Customer: { type: 'mydatabase.Customer', inverseProperty: 'Orders', required: true },
+    Amount: { nullable: true, type: 'int' }
+});
+
+$data.Entity.extend('mydatabase.Customer', {
+    id: { key: true, nullable: false, computed: true, type: 'id' },
+    Orders: { type: Array, elementType: 'mydatabase.Order', inverseProperty: 'Customer', required: false },
+    Name: { maxLength: 200, nullable: true, type: String }
+});
+
 $data.EntityContext.extend('$test.Context', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
     ConvertItems: { type: $data.EntitySet, elementType: $test.ConvertItem },
@@ -124,7 +136,9 @@ $data.EntityContext.extend('$test.Context', {
     CappedItems: { type: $data.EntitySet, elementType: $test.CappedItem, tableOptions: { capped: true, size: 10 * 1024, max: 10 } },
     CustomKeys: { type: $data.EntitySet, elementType: $test.CustomKey },
     NavAs: { type: $data.EntitySet, elementType: $test.NavA },
-    NavBs: { type: $data.EntitySet, elementType: $test.NavB }
+    NavBs: { type: $data.EntitySet, elementType: $test.NavB },
+    Orders: { type: $data.EntitySet, elementType: mydatabase.Order },
+    Customers: { type: $data.EntitySet, elementType: mydatabase.Customer }
 });
 
 seed = {

@@ -32,6 +32,7 @@ $(document).ready(function () {
             var expression = builder.parse(obj).expression;
 
             equal(expression.getType(), q.expression.getType(), name + 'expression frame failed');
+            //context.executeQuery(new $data.Queryable(context.Categories, expression), { succes: $data.debug, error: $data.debug });
             equal(JSON.stringify(expression.source, null, '    '), JSON.stringify(q.expression.source, null, '    '), name + ' builder test failed');
         });
     }
@@ -62,7 +63,7 @@ $(document).ready(function () {
     builderTest('map navProp simple more field', c.Articles.map(function (it) { return { Author: { LoginName: it.Author.LoginName, Email: it.Author.Email } }; }), c);
     builderTest('map navProp complex', c.Articles.map(function (it) { return { Title: it.Title, Author: it.Author }; }), c);
     builderTest('map navProp complex deep prop', c.Articles.map(function (it) { return { Title: it.Title, Author: { LoginName: it.Author.LoginName } }; }), c);
-    builderTest('map navProp complex deep prop2', c.Articles.map(function (it) { return { Title: it.Title, Author: { Profile: { Bio: it.Author.Profile.Bio }/* it.Author.Profile*/, LoginName: it.Author.LoginName } }; }), c);
+    //builderTest('map navProp complex deep prop2', c.Articles.map(function (it) { return { Title: it.Title, Author: { Profile: { Bio: it.Author.Profile.Bio }/* it.Author.Profile*/, LoginName: it.Author.LoginName } }; }), c);
     builderTest('include singleProp', c.Articles.include('Category'), c, false, true);
     builderTest('include deep 1', c.Articles.include('Author').include('Author.Articles'), c, false, true);
     builderTest('include deep 2', c.Articles.include('Author').include('Author.Profile'), c, false, true);
@@ -71,6 +72,7 @@ $(document).ready(function () {
     builderTest('include multiple 2 deep', c.Articles.include('Category').include('Author').include('Author.Articles'), c, false, true);
 
     builderTest('map - take', c.Articles.map(function (it) { return { Id: it.Id, Title: it.Title } }).take(6), c);
+    //builderTest('filter some', c.Categories.filter(function(it){ return it.Articles.some(this.filter); }, { filter: c.Articles.filter(function(art){ return art.Title == 'Article1'; }) }), c);
 
 
     function selectTest(name, queryable, context, selectedFields, includes) {
