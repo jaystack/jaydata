@@ -447,7 +447,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
             onabort: callBack.error,
             oncomplete: function (event) {
                 if (self.operationProvider) {
-                    self.operationProvider.storageProvider.providerConfiguration.source[entitySet.tableName] = query.rawDataList;
+                    self.operationProvider.storageProvider.dataSource[entitySet.tableName] = query.rawDataList;
                     self.operationProvider.storageProvider.executeQuery(query, {
                         success: function (query) {
                             if (query.expression.nodeType === $data.Expressions.ExpressionType.Count) {

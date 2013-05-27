@@ -1645,5 +1645,23 @@ $data.typeSystem = {
 };
 
 $data.debug = function () {
-    console.log.apply(console, arguments);
+    (console.debug || console.log).apply(console, arguments);
+};
+
+$data.debugWith = function () {
+    var cArgs = arguments;
+    return function (r) {
+        (console.debug || console.log).apply(console, cArgs);
+        if ((typeof Error !== 'undefined' && r instanceof Error) ||
+            (typeof Exception !== 'undefined' && r instanceof Exception)) {
+            (console.error || console.log).apply(console, arguments);
+        } else {
+            (console.debug || console.log).apply(console, arguments);
+        }
+    }
+};
+
+$data.fdebug = { 
+    success: $data.debugWith('success'),
+    error: $data.debugWith('error')
 };

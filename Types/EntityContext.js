@@ -58,6 +58,8 @@ $data.Class.define('$data.EntityContext', null, null,
         if ($data.ItemStore && 'ContextRegister' in $data.ItemStore)
             $data.ItemStore.ContextRegister.apply(this, arguments);
 
+        if (storageProviderCfg.queryCache)
+            this.queryCache = storageProviderCfg.queryCache;
 
         if ("string" === typeof storageProviderCfg) {
             if (0 === storageProviderCfg.indexOf("http")) {
@@ -707,6 +709,10 @@ $data.Class.define('$data.EntityContext', null, null,
         var that = this;
         var clbWrapper = {};
         clbWrapper.success = function (query) {
+            if ($data.QueryCache && $data.QueryCache.isCacheable(that, query)) {
+                $data.QueryCache.addToCache(that, query);
+            }
+
             query.buildResultSet(that);
 
             if ($data.ItemStore && 'QueryResultModifier' in $data.ItemStore)
@@ -797,11 +803,19 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 if (ex) {
                     if (query.transaction) {
-                        ctx.storageProvider.executeQuery(query, clbWrapper);
+                        if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
+                            $data.QueryCache.executeQuery(that, query, clbWrapper);
+                        } else {
+                            ctx.storageProvider.executeQuery(query, clbWrapper);
+                        }
                     } else {
                         ctx.beginTransaction(function (tran) {
                             query.transaction = tran;
-                            ctx.storageProvider.executeQuery(query, clbWrapper);
+                            if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
+                                $data.QueryCache.executeQuery(that, query, clbWrapper);
+                            } else {
+                                ctx.storageProvider.executeQuery(query, clbWrapper);
+                            }
                         });
                     }
                 } else {
@@ -863,6 +877,11 @@ $data.Class.define('$data.EntityContext', null, null,
         ///     </param>
         ///     <returns type="$.Deferred" />
         /// </signature>
+
+        if ($data.QueryCache) {
+            $data.QueryCache.reset(this);
+        }
+
         var changedEntities = [];
         var trackedEntities = this.stateManager.trackedEntities;
         var pHandler = new $data.PromiseHandler();
