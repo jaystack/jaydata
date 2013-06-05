@@ -8,6 +8,7 @@ $data.oDataConverter = {
         '$data.Int64': $data.Container.proxyConverter,
         '$data.ObjectID': $data.Container.proxyConverter,
         '$data.Integer': $data.Container.proxyConverter,//function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
+        '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (dbData) {
             if (dbData) {
@@ -78,6 +79,7 @@ $data.oDataConverter = {
         '$data.Int64': $data.Container.proxyConverter,
         '$data.ObjectID': $data.Container.proxyConverter,
         '$data.Integer': $data.Container.proxyConverter,
+        '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
         '$data.Time': function (v) {
@@ -115,6 +117,7 @@ $data.oDataConverter = {
     escape: {
         '$data.Entity': function (e) { return JSON.stringify(e); },
         '$data.Integer': $data.Container.proxyConverter,
+        '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter, // double: 13.5D
         '$data.Int16': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
@@ -160,6 +163,7 @@ $data.oDataConverter = {
         },
         '$data.Number': function (v) { return JSON.parse(v); },
         '$data.Integer': function (v) { return JSON.parse(v); },
+        '$data.Int32': function (v) { return JSON.parse(v); },
         '$data.Byte': function (v) { return JSON.parse(v); },
         '$data.SByte': function (v) { return JSON.parse(v); },
         '$data.Decimal': function (v) {
@@ -293,6 +297,7 @@ $data.oDataConverter = {
         '$data.Int16': function (v) { return v.toString(); },
         '$data.Int64': function (v) { return v.toString(); },
         '$data.Integer': function (v) { return v.toString(); },
+        '$data.Int32': function (v) { return v.toString(); },
         '$data.Boolean': function (v) { return v.toString(); },
         '$data.Blob': function (v) { return $data.Blob.toBase64(v); },
         '$data.Date': function (v) { return v.toISOString().replace('Z', ''); },
@@ -306,6 +311,7 @@ $data.oDataConverter = {
         },
         '$data.Number': function (v) { return v.toString(); },
         '$data.Integer': function (v) { return v.toString(); },
+        '$data.Int32': function (v) { return v.toString(); },
         '$data.String': function (v) { return v.toString(); },
         '$data.ObjectID': function (v) { return v.toString(); },
         '$data.Object': function (v) { return JSON.stringify(v); },
@@ -324,6 +330,7 @@ $data.oDataConverter = {
         '$data.Int64': function (v) { return v.toString(); },
         '$data.ObjectID': function (o) { return o.toString(); },
         '$data.Integer': function (o) { return o.toString(); },
+        '$data.Int32': function (o) { return o.toString(); },
         '$data.Number': function (o) { return o.toString(); },
         '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },

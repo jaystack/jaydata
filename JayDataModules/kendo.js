@@ -14,7 +14,16 @@
         "$data.Boolean": "boolean",
         "$data.Integer": "number",
         "$data.Number": "number",
-        "$data.Date": "date"
+        "$data.Date": "date",
+        "$data.DateTimeOffset": "date",
+        "$data.Time": "date",
+        "$data.Byte": "number",
+        "$data.SByte": "number",
+        "$data.Int16": "number",
+        "$data.Int32": "number",
+        "$data.Int64": "number",
+        "$data.Decimal": "string",
+        "$data.Float": "number"
     }
 
     $data.Entity.inheritedTypeProcessor = function (type) {

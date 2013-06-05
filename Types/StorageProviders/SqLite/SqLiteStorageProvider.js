@@ -54,7 +54,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid, $data.GeographyPoint,
             $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
             $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection,
-            $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int64, $data.Time, $data.DateTimeOffset],
+            $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int32, $data.Int64, $data.Time, $data.DateTimeOffset],
         writable: false
     },
     fieldConverter: { value: $data.SqLiteConverter },
@@ -173,6 +173,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     supportedAutoincrementKeys: {
         value:{
             '$data.Integer': true,
+            '$data.Int32': true,
             '$data.Guid': function () { return $data.createGuid(); }
         }       
     },

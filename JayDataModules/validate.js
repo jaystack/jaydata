@@ -21,19 +21,28 @@
         customValidator: { key: 'customValidator', validateMethod: true }
     };
 
+    var defaultValidationOption = {
+        required: { key: 'required' },
+        customValidator: { key: 'customValidator', validateMethod: true }
+    };
+
+    var numberValidationOption = {
+        required: { key: 'required' },
+        customValidator: { key: 'customValidator', validateMethod: true },
+        minValue: { key: 'min' },
+        maxValue: { key: 'max' }
+    };
+
     var supportedValidations = {
-        '$data.Number': {
-            required: { key: 'required' },
-            customValidator: { key: 'customValidator', validateMethod: true },
-            minValue: { key: 'min' },
-            maxValue: { key: 'max' }
-        },
-        '$data.Integer': {
-            required: { key: 'required' },
-            customValidator: { key: 'customValidator', validateMethod: true },
-            minValue: { key: 'min' },
-            maxValue: { key: 'max' }
-        },
+        '$data.Number': numberValidationOption,
+        '$data.Float': numberValidationOption,
+        '$data.Decimal': numberValidationOption,
+        '$data.Integer': numberValidationOption,
+        '$data.Int16': numberValidationOption,
+        '$data.Int32': numberValidationOption,
+        '$data.Int64': numberValidationOption,
+        '$data.Byte': numberValidationOption,
+        '$data.SByte': numberValidationOption,
         '$data.String': {
             required: { key: 'required' },
             customValidator: { key: 'customValidator', validateMethod: true },
@@ -48,19 +57,25 @@
             minValue: { key: 'min', validateMethod: true, converter: dateConverter },
             maxValue: { key: 'max', validateMethod: true, converter: dateConverter }
         },
-        '$data.Boolean': {
+        '$data.DateTimeOffset': {
             required: { key: 'required' },
-            customValidator: { key: 'customValidator', validateMethod: true }
+            customValidator: { key: 'customValidator', validateMethod: true },
+            minValue: { key: 'min', validateMethod: true, converter: dateConverter },
+            maxValue: { key: 'max', validateMethod: true, converter: dateConverter }
+        },
+        '$data.Time': {
+            required: { key: 'required' },
+            customValidator: { key: 'customValidator', validateMethod: true },
+            minValue: { key: 'min', validateMethod: true, converter: dateConverter },
+            maxValue: { key: 'max', validateMethod: true, converter: dateConverter }
         },
         '$data.Array': {
             required: { key: 'required' },
             customValidator: { key: 'customValidator', validateMethod: true },
             length: { key: 'length', validateMethod: true }
         },
-        '$data.Object': {
-            required: { key: 'required' },
-            customValidator: { key: 'customValidator', validateMethod: true }
-        }
+        '$data.Boolean': defaultValidationOption,
+        '$data.Object': defaultValidationOption
     };
 
     var createValidationItem = function (memDef, rule, typeName, result) {

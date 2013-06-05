@@ -1090,7 +1090,14 @@ $data.Class.define('$data.EntityContext', null, null,
                         switch (memDefType) {
                             case $data.String:
                             case $data.Number:
+                            case $data.Float:
+                            case $data.Decimal:
                             case $data.Integer:
+                            case $data.Int16:
+                            case $data.Int32:
+                            case $data.Int64:
+                            case $data.Byte:
+                            case $data.SByte:
                             case $data.Date:
                             case $data.Boolean:
                                 entity.data[memDef.name] = Container.getDefault(memDef.dataType);

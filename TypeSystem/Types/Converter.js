@@ -11,7 +11,15 @@ $data.Container.registerConverter('$data.Boolean', {
 });
 
 $data.Container.registerConverter('$data.Integer', {
-    'default': function(value){
+    'default': function (value) {
+        var r = parseInt(+value, 10);
+        if (isNaN(r)) throw 0;
+        return r;
+    }
+});
+
+$data.Container.registerConverter('$data.Int32', {
+    'default': function (value) {
         return value | 0;
     }
 });
