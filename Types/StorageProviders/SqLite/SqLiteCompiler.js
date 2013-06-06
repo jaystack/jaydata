@@ -8,6 +8,7 @@ $C('$data.sqLite.SqlStatementBlocks',null,null,null,{
     from: " FROM ",
     skip: " OFFSET ",
     take: " LIMIT ",
+	delete: " DELETE ",
     parameter: "?",
     order: " ORDER BY ",
     as: " AS ",
@@ -181,6 +182,16 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         else {
             sqlBuilder.addText("SELECT *");
         }
+    },
+	VisitBatchDeleteExpression: function (expression, sqlBuilder) {
+        sqlBuilder.selectTextPart('projection');
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.delete);
+		sqlBuilder.selectTextPart('from');
+        sqlBuilder.addText($data.sqLite.SqlStatementBlocks.from);
+		if (sqlBuilder.sets.length != 1) {
+			Guard.raise("Batch delete only supported with one table");
+		}
+		sqlBuilder.addText(sqlBuilder.sets[0].instance.tableName);
     }
 });
 

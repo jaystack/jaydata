@@ -158,6 +158,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             length: {},
             forEach: {},
             toArray: {},
+			batchDelete: {},
             single: {},
             take: {},
             skip: {},
