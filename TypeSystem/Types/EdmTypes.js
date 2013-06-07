@@ -134,6 +134,7 @@
         '$data.Date': 'Edm.DateTime',
         '$data.Number': 'Edm.Double',
         '$data.Integer': 'Edm.Int32',
+        '$data.Int32': 'Edm.Int32',
         '$data.String': 'Edm.String',
         '$data.ObjectID': 'Edm.String',
         '$data.GeographyPoint': 'Edm.GeographyPoint',

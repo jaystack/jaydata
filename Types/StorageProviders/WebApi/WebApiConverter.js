@@ -8,6 +8,7 @@ $data.WebApiConverter = {
         '$data.Int64': $data.Container.proxyConverter,
 
         '$data.Integer': $data.Container.proxyConverter,//function (number) { return (typeof number === 'string' && /^\d+$/.test(number)) ? parseInt(number) : number; },
+        '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (dbData) {
             if (dbData) {
@@ -70,6 +71,7 @@ $data.WebApiConverter = {
         '$data.Int64': $data.Container.proxyConverter,
         '$data.ObjectID': $data.Container.proxyConverter,
         '$data.Integer': $data.Container.proxyConverter,
+        '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
         '$data.Time': function (v) {
@@ -94,6 +96,7 @@ $data.WebApiConverter = {
     escape: {
         '$data.Entity': function (e) { return JSON.stringify(e); },
         '$data.Integer': $data.Container.proxyConverter,
+        '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter, // double: 13.5D
         '$data.Int16': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,

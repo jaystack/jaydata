@@ -478,7 +478,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
         return queryable;
     },
     supportedDataTypes: { value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
-        $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int64, $data.Time, $data.DateTimeOffset], writable: false },
+        $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int32, $data.Int64, $data.Time, $data.DateTimeOffset], writable: false },
 
     supportedBinaryOperators: {
         value: {

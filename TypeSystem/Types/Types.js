@@ -12,6 +12,7 @@ $data.Decimal = function JayDecimal() { };
 $data.Float = $data.Single = function JayFloat() { };
 $data.Integer = function JayInteger() { };
 $data.Int16 = function JayInt16(v) { };
+$data.Int32 = function JayInt32() { };
 $data.Int64 = function JayInt64(v) { };
 $data.ObjectID = typeof $data.mongoDBDriver !== 'undefined' && typeof $data.mongoDBDriver.ObjectID !== 'undefined' ? $data.mongoDBDriver.ObjectID : function JayObjectID() { };
 $data.Time = function JayTime(val) {
@@ -36,7 +37,8 @@ $data.DateTimeOffset.prototype.toJSON = function () {
 };
 
 $data.Container.registerType(["$data.Number", "number", "JayNumber", "double"], $data.Number);
-$data.Container.registerType(["$data.Integer", "$data.Int32", "int", "int32", "integer", "JayInteger"], $data.Integer);
+$data.Container.registerType(["$data.Integer", "int", "integer", "JayInteger"], $data.Integer);
+$data.Container.registerType(["$data.Int32", "int32", "JayInt32"], $data.Int32);
 $data.Container.registerType(["$data.Byte", "byte", "JayByte"], $data.Byte);
 $data.Container.registerType(["$data.SByte", "sbyte", "JaySByte"], $data.SByte);
 $data.Container.registerType(["$data.Decimal", "decimal", "JayDecimal"], $data.Decimal);

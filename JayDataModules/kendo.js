@@ -14,7 +14,16 @@
         "$data.Boolean": "boolean",
         "$data.Integer": "number",
         "$data.Number": "number",
-        "$data.Date": "date"
+        "$data.Date": "date",
+        "$data.DateTimeOffset": "date",
+        "$data.Time": "date",
+        "$data.Byte": "number",
+        "$data.SByte": "number",
+        "$data.Int16": "number",
+        "$data.Int32": "number",
+        "$data.Int64": "number",
+        "$data.Decimal": "string",
+        "$data.Float": "number"
     }
 
     $data.Entity.inheritedTypeProcessor = function (type) {
@@ -115,9 +124,6 @@
                                         }
                                         instance[memberInfo.name] = new memberType(_data, newInstanceOptions);
                                     }
-                                    /*else if (memberType === $data.Blob && _data){
-                                        instance[memberInfo.name] = atob(_data);
-                                    }*/
                                     else {
                                         setInitialValue(instance, memberInfo);
                                     }
@@ -186,7 +192,6 @@
                     }
 
                     var self = this;
-                    jayInstance._kendoObject = self;
                     this.innerInstance = function () {
                         return jayInstance
                     }
@@ -209,7 +214,6 @@
                                 self[propinfo.propertyName] = newValue;
                             }
                             delete jayInstance.changeFromJay;
-                            var hfdjfhdsjkhjfkasd = 1;
                         }else{
                             if ($data.Container.resolveType(md.type) === $data.Blob){
                                 var blob = $data.Blob.toString(newValue);

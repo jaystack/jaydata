@@ -41,8 +41,8 @@
                 this.configurable = true;
                 if (typeof memberDefinitionData === "number") {
                     this.value = memberDefinitionData;
-                    this.type = $data.Integer;
-                    this.dataType = $data.Integer;
+                    this.type = $data.Number;
+                    this.dataType = $data.Number;
                 } else if (typeof memberDefinitionData === "string") {
                     this.value = memberDefinitionData;
                     this.dataType = $data.String;
@@ -831,6 +831,16 @@
                 case t === $data.Object:
                 case t === $data.Guid:
 
+                case t === $data.Byte:
+                case t === $data.SByte:
+                case t === $data.Decimal:
+                case t === $data.Float:
+                case t === $data.Int16:
+                case t === $data.Int32:
+                case t === $data.Int64:
+                case t === $data.DateTimeOffset:
+                case t === $data.Time:
+
                 case t === $data.SimpleBase:
                 case t === $data.Geospatial:
                 case t === $data.GeographyBase:
@@ -938,6 +948,7 @@
                     if (value.getType) return value.getType().fullName;
                     if (value instanceof Date) return '$data.Date';
                     if (value instanceof $data.Guid) return '$data.Guid';
+                    if (value instanceof $data.DateTimeOffset) return '$data.DateTimeOffset';
                     if (value instanceof $data.GeographyPoint) return '$data.GeographyPoint';
                     if (value instanceof $data.GeographyLineString) return '$data.GeographyLineString';
                     if (value instanceof $data.GeographyPolygon) return '$data.GeographyPolygon';
@@ -981,7 +992,14 @@
             var t = this.resolveType(typeOrName);
             switch (t) {
                 case $data.Number: return 0.0;
+                case $data.Float: return 0.0;
+                case $data.Decimal: return '0.0';
                 case $data.Integer: return 0;
+                case $data.Int16: return 0;
+                case $data.Int32: return 0;
+                case $data.Int64: return '0';
+                case $data.Byte: return 0;
+                case $data.SByte: return 0;
                 case $data.String: return null;
                 case $data.Boolean: return false;
                 default: return null;
@@ -1188,17 +1206,6 @@
     }
     $data.ContainerClass = ContainerCtor;
 
-    /*$data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
-    $data.Integer = typeof Integer !== 'undefined' ? Integer : function JayInteger() { };
-    $data.Date = typeof Date !== 'undefined' ? Date : function JayDate() { };
-    $data.String = typeof String !== 'undefined' ? String : function JayString() { };
-    $data.Boolean = typeof Boolean !== 'undefined' ? Boolean : function JayBoolean() { };
-    //$data.Blob = typeof Blob !== 'undefined' ? Blob : function JayBlob() { };
-    $data.Array = typeof Array !== 'undefined' ? Array : function JayArray() { };
-    $data.Object = typeof Object !== 'undefined' ? Object : function JayObject() { };
-    $data.ObjectID = typeof ObjectID !== 'undefined' ? ObjectID : function JayObjectID() { };
-    $data.Function = Function;*/
-
     var c;
         
     global["Container"] = $data.Container = c = global["C$"] = new ContainerCtor();
@@ -1206,163 +1213,6 @@
     $data.createContainer = function () {
         return new ContainerCtor($data.Container);
     }
-
-    /*c.registerType(["$data.Number", "number", "float", "real", "decimal", "JayNumber"], $data.Number);
-    c.registerType(["$data.Integer", "int", "integer", "int16", "int32", "int64", "JayInteger"], $data.Integer);
-    c.registerType(["$data.String", "string", "text", "character", "JayString"], $data.String);
-    c.registerType(["$data.Array", "array", "Array", "[]", "JayArray"], $data.Array, function () {
-        return $data.Array.apply(undefined, arguments);
-    });
-    c.registerType(["$data.Date", "datetime", "date", "JayDate"], $data.Date);
-    c.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"], $data.Boolean);
-    c.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
-    c.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
-    c.registerType(["$data.Function", "Function", "function"], $data.Function);
-    c.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
-
-    $data.Container.registerConverter('$data.String', {
-        '$data.Date': function (value) {
-            return value ? value.toISOString() : value;
-        },
-        '$data.Number': function (value) {
-            return value.toString();
-        }
-    });
-
-    $data.Container.registerConverter('$data.Date', {
-        '$data.Number': function (value) {
-            var convertedValue = new Date(value);
-            if (isNaN(convertedValue.valueOf()))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', value));
-
-            return convertedValue;
-        },
-        '$data.String': function (value) {
-            if (value === '') return undefined;
-            var convertedValue = new Date(value);
-            if (isNaN(convertedValue.valueOf()))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Date', value));
-
-            return convertedValue;
-        }
-    });
-
-    $data.Container.registerConverter('$data.Integer', {
-        '$data.Number': function (value) {
-            var convertedValue = parseInt(value);
-            if (isNaN(convertedValue))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', value));
-
-            return convertedValue;
-        },
-        '$data.String': function (value) {
-            if (value === '') return undefined;
-            var convertedValue = parseInt(value);
-            if (isNaN(convertedValue))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', value));
-
-            return convertedValue;
-        },
-        '$data.Boolean': function (value) {
-            return value ? 1 : 0;
-        },
-        '$data.Date': function (value) {
-            var convertedValue = value.valueOf();
-            if (isNaN(convertedValue))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Integer', value));
-
-            return convertedValue;
-        }
-    });
-    $data.Container.registerConverter('$data.Number', {
-        '$data.String': function (value) {
-            if (value === '') return undefined;
-            var convertedValue = parseFloat(value);
-            if (isNaN(convertedValue))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', value));
-
-            return convertedValue;
-        },
-        '$data.Boolean': function (value) {
-            return value ? 1 : 0;
-        },
-        '$data.Date': function (value) {
-            var convertedValue = value.valueOf();
-            if (isNaN(convertedValue))
-                Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Number', value));
-
-            return convertedValue;
-        }
-    });
-    $data.Container.registerConverter('$data.Boolean', {
-        '$data.String': function (value) {
-            if (value === '') return undefined;
-            var convertedValue;
-            switch (value.toLowerCase()) {
-                case 'true':
-                    convertedValue = true;
-                    break;
-                case 'false':
-                    convertedValue = false;
-                    break;
-                default:
-                    Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Boolean', value));
-            }
-            return convertedValue;
-        },
-        '$data.Number': function (value) {
-            return value ? true : false;
-        }
-        //all conversations
-    });
-    $data.Container.registerConverter('$data.Object', {
-        '$data.String': function (value) {
-            if (value === '') return undefined;
-            var convertedValue;
-            try {
-                convertedValue = JSON.parse(value);
-            } catch (e) {
-                Guard.raise(new Exception('TypeError: ', e.toString(), value));
-            }
-            return convertedValue;
-        },
-        '$data.Number': function (value) {
-            return value;
-        },
-        '$data.Date': function (value) {
-            return value;
-        },
-        '$data.Array': function (value) {
-            return value;
-        }
-    });
-    $data.Container.registerConverter('$data.Blob', {
-        '$data.Number': function (value) {
-            return value;
-        },
-        '$data.String': function (value) {
-            return value;
-        },
-        '$data.Date': function (value) {
-            return value;
-        },
-        '$data.Object': function (value) {
-            return value;
-        },
-        '$data.Array': function (value) {
-            return value;
-        }
-    });
-    $data.Container.registerConverter('$data.ObjectID', {
-        '$data.String': function (value) {
-            return value;
-        }
-    }, {
-        '$data.String': function (value) {
-            return value;
-        }
-    });*/
-
 
     //})(window);
 

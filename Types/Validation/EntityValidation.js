@@ -117,6 +117,7 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
             '$data.Number': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.Int16': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.Integer': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
+            '$data.Int32': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.Int64': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.String': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minLength', 'maxLength', 'length', 'regex']),
             '$data.Date': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
