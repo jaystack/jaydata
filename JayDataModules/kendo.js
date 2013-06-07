@@ -115,6 +115,9 @@
                                         }
                                         instance[memberInfo.name] = new memberType(_data, newInstanceOptions);
                                     }
+                                    /*else if (memberType === $data.Blob && _data){
+                                        instance[memberInfo.name] = atob(_data);
+                                    }*/
                                     else {
                                         setInitialValue(instance, memberInfo);
                                     }
@@ -152,6 +155,15 @@
                                 delete jayInstance.changeFromKendo;
                             });
                         }
+                        else if (md && $data.Container.resolveType(md.type) === $data.Blob){
+                            feed[j] = $data.Blob.toBase64(seedValue);
+                            //feed[j] = new kendo.data.Observable($data.Blob.toBase64(seedValue));
+                            /*feed[j].bind('change', function(e){
+                                //jayInstance.changeFromKendo = true;
+                                jayInstance[md.name] = $data.Container.convertTo(atob(this), $data.Blob);
+                                //delete jayInstance.changeFromKendo;
+                            });*/
+                        }
                         else {
                             feed[j] = seedValue;
                         }
@@ -174,6 +186,7 @@
                     }
 
                     var self = this;
+                    jayInstance._kendoObject = self;
                     this.innerInstance = function () {
                         return jayInstance
                     }
@@ -184,11 +197,28 @@
                     jayInstance.propertyChanged.attach(function (obj, propinfo) {
                         var jay = this;
                         var newValue = propinfo.newValue;
+                        var md = jayInstance.getType().getMemberDefinition(propinfo.propertyName);
                         if (!jay.changeFromKendo) {
                             newValue = newValue ? (newValue.asKendoObservable ? newValue.asKendoObservable() : newValue) : newValue;
                             jayInstance.changeFromJay = true;
-                            self.set(propinfo.propertyName, propinfo.newValue);
+                            if ($data.Container.resolveType(md.type) === $data.Blob && newValue){
+                                newValue = $data.Blob.toBase64(newValue);
+                            }
+                            self.set(propinfo.propertyName, newValue);
+                            if (md.computed && self[propinfo.propertyName] !== newValue){
+                                self[propinfo.propertyName] = newValue;
+                            }
                             delete jayInstance.changeFromJay;
+                            var hfdjfhdsjkhjfkasd = 1;
+                        }else{
+                            if ($data.Container.resolveType(md.type) === $data.Blob){
+                                var blob = $data.Blob.toString(newValue);
+                                newValue = $data.Container.convertTo(atob(blob), $data.Blob);
+                                jayInstance.changeFromJay = true;
+                                jayInstance.initData[md.name] = newValue;
+                                //self.set(propinfo.propertyName, blob);
+                                delete jayInstance.changeFromJay;
+                            }
                         }
                     });
 
@@ -523,7 +553,7 @@
                             modelItems.forEach(function (modelItem) {
                                 data.push(modelItem.initData);
                             });
-                            options.success({ data: data });
+                            options.success(/*{ data: data }*/);
                         }).fail(function () {
                             console.log("error in create");
                             options.error({}, arguments);
@@ -537,7 +567,7 @@
 						.innerInstance()
 						.save(ctx.storeToken)
 						.then(function () {
-						    options.success({ data: model[0].innerInstance().initData });
+						    options.success(/*{ data: model[0].innerInstance().initData }*/);
 						})
 						.fail(function () {
 						    console.log("error in create");

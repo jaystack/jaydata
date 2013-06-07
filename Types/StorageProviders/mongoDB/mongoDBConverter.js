@@ -13,7 +13,7 @@ $data.mongoDBConverter = {
         '$data.Time': function (date) { return date ? new Date(date) : date; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
-        '$data.Blob': function (v) { return v ? $data.Container.convertTo(typeof v === 'string' ? atob(v) : v.buffer, $data.Blob) : v; },
+        '$data.Blob': function (v) { return v ? $data.Container.convertTo(typeof v === 'string' ? atob(v) : v.buffer || v, $data.Blob) : v; },
         '$data.Object': function (o) { if (o === undefined) { return new $data.Object(); } return o; },
         '$data.Array': function (o) { if (o === undefined) { return new $data.Array(); } return o; },
         '$data.ObjectID': function (id) { return id ? new Buffer(id.toString(), 'ascii').toString('base64') : id; },
