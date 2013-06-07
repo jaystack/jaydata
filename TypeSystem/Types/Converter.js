@@ -100,7 +100,7 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
             return parseFromString(time);
         },
         '$data.Date': function (value) {
-            var val = value.toLocaleTimeString();
+            var val = value.getHours() + ':' + value.getMinutes() + ':' + value.getSeconds();
             var ms = value.getMilliseconds()
             if (ms) {
                 val += '.' + ms;
