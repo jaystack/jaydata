@@ -1,6 +1,10 @@
 $data = {};
 
 try{
+    jQuery = require('jquery');
+}catch(e){}
+
+try{
     $data.Acorn = require('acorn');
 }catch(e){
     try{

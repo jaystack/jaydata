@@ -298,6 +298,8 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@rsync -R $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(StormProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(FacebookProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(YQLProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(JAYDATA_SERVER) $(NPM_DIR)/jaydata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
@@ -318,6 +320,10 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
 	@@rm -f $(NPM_DIR)/jaydata/lib/storm_index.js;)
 	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/storm_index.js;)
+	@@rm -f $(NPM_DIR)/jaydata/lib/facebook_index.js;)
+	@$(foreach dir,$(FacebookProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/facebook_index.js;)
+	@@rm -f $(NPM_DIR)/jaydata/lib/yql_index.js;)
+	@$(foreach dir,$(YQLProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/yql_index.js;)
 	@@rm -f $(NPM_DIR)/jaydata/lib/service_index.js;)
 	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/service_index.js;)
 	@@echo "require('./indexeddb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
@@ -327,6 +333,8 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@echo "require('./inmemory_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./facebook_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./yql_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./service_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
 	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1", "acorn": "0.1.0"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
