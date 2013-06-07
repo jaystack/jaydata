@@ -217,9 +217,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         var result = {};
         var self = this;
         this.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-            if (self[memDef.name] instanceof Date && memDef.type && Container.resolveType(memDef.type) === $data.Time) {
-                result[memDef.name] = new $data.Time(self[memDef.name]);
-            } else if (self[memDef.name] instanceof Date && memDef.type && Container.resolveType(memDef.type) === $data.DateTimeOffset) {
+            if (self[memDef.name] instanceof Date && memDef.type && Container.resolveType(memDef.type) === $data.DateTimeOffset) {
                 result[memDef.name] = new $data.DateTimeOffset(self[memDef.name]);
             } else {
                 result[memDef.name] = self[memDef.name];

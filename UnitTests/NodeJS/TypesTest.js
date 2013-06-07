@@ -86,7 +86,7 @@ function TypeTests(providerConfig, msg) {
                         's0': 'helloWorld' + counter,
                         'blob': [65, 66, 67, 4, 65 + counter],
                         'dto': new Date(2100 + counter, 0, 1),
-                        'timeprop': new Date(0, 0, 0, 15, 15 + counter, 05),
+                        'timeprop': '15:' + (15 + counter) + ':05',
                         'sb0': 8 + (counter * 2)
                     });
 
@@ -608,13 +608,13 @@ function TypeTests(providerConfig, msg) {
 
         _getDataContext(4)
             .then(function (context) {
-                context.TestItemTypes.filter('it.timeprop < date', { date: new Date(0, 0, 0, 15, 16, 05) }).toArray(function (item) {
+                context.TestItemTypes.filter('it.timeprop < "15:16:05"').toArray(function (item) {
                     var count = item.length;
-                    equal(item[0].timeprop.toTimeString(), new Date(0, 0, 0, 15, 15, 05).toTimeString(), 'value');
+                    equal(item[0].timeprop, '15:15:05', 'value');
 
-                    context.TestItemTypes.filter('it.timeprop >= date', { date: new Date(0, 0, 0, 15, 16, 05) }).toArray(function (oItem) {
+                    context.TestItemTypes.filter('it.timeprop >= "15:16:05"').toArray(function (oItem) {
                         for (var i = 0; i < oItem.length; i++) {
-                            notEqual(oItem[i].timeprop.toTimeString(), new Date(0, 0, 0, 15, 15, 05).toTimeString(), 'opposite value');
+                            notEqual(oItem[i].timeprop, '15:15:05', 'opposite value');
                         }
                         equal(count + oItem.length, itemNumber, 'data length');
 
@@ -634,15 +634,15 @@ function TypeTests(providerConfig, msg) {
                 var item = items[0];
                 
                 if (!timeData)
-                    timeData = item.timeprop.toISOString();
+                    timeData = item.timeprop;
                 else
-                    equal(item.timeprop.toISOString(), timeData, 'time equals');
+                    equal(item.timeprop, timeData, 'time equals');
 
                 context.attach(item);
                 item.timeprop = item.timeprop;
                 context.saveChanges(function () {
                     context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
-                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+                        equal(item2.timeprop, timeData, 'time equals 2');
 
                         if (restart) {
                             _getContext().then(function (ctx2) {
@@ -675,15 +675,13 @@ function TypeTests(providerConfig, msg) {
                 var item = items[0];
 
                 context.attach(item);
+                item.timeprop = new Date();
 
-                var s = new Date().toISOString();
-                item.timeprop = s.substring(s.indexOf('T') + 1, s.indexOf('Z'));
-
-                var timeData = item.timeprop.toISOString();
+                var timeData = item.timeprop;
 
                 context.saveChanges(function () {
                     context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
-                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+                        equal(item2.timeprop, timeData, 'time equals 2');
 
                         if (restart) {
                             _getContext().then(function (ctx2) {
@@ -716,14 +714,13 @@ function TypeTests(providerConfig, msg) {
                 var item = items[0];
 
                 context.attach(item);
-
                 item.timeprop = '00:15:00';
 
-                var timeData = item.timeprop.toISOString();
+                var timeData = item.timeprop;
 
                 context.saveChanges(function () {
                     context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
-                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+                        equal(item2.timeprop, timeData, 'time equals 2');
 
                         if (restart) {
                             _getContext().then(function (ctx2) {
@@ -759,11 +756,11 @@ function TypeTests(providerConfig, msg) {
 
                 item.timeprop = 15*60*1000;
 
-                var timeData = item.timeprop.toISOString();
+                var timeData = item.timeprop;
 
                 context.saveChanges(function () {
                     context.TestItemTypes.single('it.Id == id', { id: item.Id }, function (item2) {
-                        equal(item2.timeprop.toISOString(), timeData, 'time equals 2');
+                        equal(item2.timeprop, timeData, 'time equals 2');
 
                         if (restart) {
                             _getContext().then(function (ctx2) {

@@ -56,61 +56,60 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
         return d;
     }
 });
+(function () {
+    function parseFromString(value) {
+        var regex = /^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]|[0-9])(:([0-5][0-9]|[0-9])(\.(\d+))?)?$/;
 
-$data.Container.registerConverter('$data.Time', {
-    'default': function (value) {
-        var d = new Date("0000-01-01T00:00:00.000Z");
-        var v = d.getTimezoneOffset();
-        var s;
-
-        var timeVal;
-        if (value instanceof Date) {
-            timeVal = value.toTimeString().split(' ')[0];
-            if (value.toISOString().indexOf('.')) {
-                timeVal += '.' + ('000' + value.getMilliseconds()).slice(-3);
-            }
-
-        } else if (typeof value === 'string' && /^\d\d:\d\d:\d\d(\.\d+)?$/.test(value)) {
-            timeVal = value;
+        var matches = regex.exec(value)
+        if (!matches) throw 0;
+        var time = '';
+        time += ('00' + matches[1]).slice(-2);
+        time += ':' + ('00' + matches[2]).slice(-2);
+        if (matches[4]) {
+            time += ':' + ('00' + matches[4]).slice(-2);
         } else {
-            var date;
-            if ((typeof value === 'string'&& /^(-)?\d{4,6}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value)) || 
-                (typeof value === 'number' && value >= 0 && value < 24 * 60 * 60 * 1000)) {
-                date = new Date(value);
-            }
-
-            if(!date || isNaN(date)){
-                throw 1;
-            } 
-
-            if (typeof value !== 'string')
-                date = new Date(date.valueOf() + (v * 60 * 1000));
-
-            timeVal = date.toTimeString().split(' ')[0];
-            if (date.toISOString().indexOf('.')) {
-                timeVal += '.' + ('000' + date.getMilliseconds()).slice(-3);
-            }
+            time += ':00';
         }
+        if (matches[6])
+            time += '.' + (matches[6] + '000').slice(0, 3);
 
-        var offset = (v > 0 ? '-' : '+') + ('00' + Math.abs(Math.floor(v / 60))).slice(-2) + ('00' + Math.abs(Math.floor(v % 60))).slice(-2);
-        var r = new Date("0000-01-01T" + timeVal + offset);
-        if (isNaN(r)) {
-            var time = timeVal.split('.');
-            r = new Date('Thu Jan 01 1900 ' + time[0] + ' GMT' + offset);
-            if (isNaN(r)) throw 0;
-              
-            if (time[1])
-                r.setMilliseconds(parseInt(time[1], 10));
-            r.setFullYear(0);
-
-            if (isNaN(r)) throw 0;
-        }
-        if (value instanceof Date && r.toISOString() === value.toISOString())
-            return value;
-        else
-            return r;
+        return time;
     }
-});
+
+    $data.Container.registerConverter('$data.Time', {
+        '$data.String': parseFromString,
+        '$data.Number': function tt(value) {
+            var metrics = [1000, 60, 60];
+            var result = [0, 0, 0, value | 0];
+
+            for (var i = 0; i < metrics.length; i++) {
+                result[metrics.length - (i + 1)] = (result[metrics.length - i] / metrics[i]) | 0;
+                result[metrics.length - i] -= result[metrics.length - (i + 1)] * metrics[i];
+            }
+
+            var time = '';
+            for (var i = 0; i < result.length; i++) {
+                if (i < result.length - 1) {
+                    time += ('00' + result[i]).slice(-2);
+                    if (i < result.length - 2) time += ':';
+                } else {
+                    time += '.' + ('000' + result[i]).slice(-3);
+                }
+            }
+
+            return parseFromString(time);
+        },
+        '$data.Date': function (value) {
+            var val = value.toLocaleTimeString();
+            var ms = value.getMilliseconds()
+            if (ms) {
+                val += '.' + ms;
+            }
+
+            return parseFromString(val);
+        }
+    });
+})();
 
 $data.Container.registerConverter('$data.Decimal', {
     '$data.Boolean': function(value){

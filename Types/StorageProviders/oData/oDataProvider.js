@@ -179,8 +179,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 if (!data && textStatus.body) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
                     query.rawDataList = typeof data === 'string' ? [{ cnt: Container.convertTo(data, $data.Integer) }] : data;
-                    if (sql.withInlineCount && typeof data === 'object' && (typeof data.__count === 'number' || ('d' in data && typeof data.d.__count === 'number'))) {
-                        query.__count = new Number(typeof data.__count === 'number' ? data.__count : data.d.__count).valueOf();
+                    if (sql.withInlineCount && typeof data === 'object' && (typeof data.__count !== 'undefined' || ('d' in data && typeof data.d.__count !== 'undefined'))) {
+                        query.__count = new Number(typeof data.__count !== 'undefined' ? data.__count : data.d.__count).valueOf();
                     }
 
                     callBack.success(query);

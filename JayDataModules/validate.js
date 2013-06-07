@@ -66,8 +66,8 @@
         '$data.Time': {
             required: { key: 'required' },
             customValidator: { key: 'customValidator', validateMethod: true },
-            minValue: { key: 'min', validateMethod: true, converter: dateConverter },
-            maxValue: { key: 'max', validateMethod: true, converter: dateConverter }
+            minValue: { key: 'min' },
+            maxValue: { key: 'max' }
         },
         '$data.Array': {
             required: { key: 'required' },

@@ -16,7 +16,7 @@
         "$data.Number": "number",
         "$data.Date": "date",
         "$data.DateTimeOffset": "date",
-        "$data.Time": "date",
+        "$data.Time": "string",
         "$data.Byte": "number",
         "$data.SByte": "number",
         "$data.Int16": "number",

@@ -15,20 +15,7 @@ $data.Int16 = function JayInt16(v) { };
 $data.Int32 = function JayInt32() { };
 $data.Int64 = function JayInt64(v) { };
 $data.ObjectID = typeof $data.mongoDBDriver !== 'undefined' && typeof $data.mongoDBDriver.ObjectID !== 'undefined' ? $data.mongoDBDriver.ObjectID : function JayObjectID() { };
-$data.Time = function JayTime(val) {
-    this.value = val;
-};
-$data.Time.prototype.toJSON = function () {
-    var v = this.value;
-    if (v instanceof Date) {
-        var timeVal = v.toTimeString().split(' ')[0];
-        if (v.toISOString().indexOf('.')) {
-            timeVal += '.' + ('000' + v.getMilliseconds()).slice(-3);
-        }
-        return timeVal;
-    }
-    return v;
-};
+$data.Time = function JayTime() { };
 $data.DateTimeOffset = function JayDateTimeOffset(val) {
     this.value = val;
 };
