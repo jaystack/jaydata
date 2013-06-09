@@ -274,7 +274,7 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
 
         query.modelBinderConfig = {};
         var modelBinder = $data.sqLite.sqLite_ModelBinderCompiler.create(query, context);
-        modelBinder.Visit(optimizedExpression);
+        modelBinder.Visit(optimizedExpression,sqlBuilder);
 
         var result = {
             sqlText: compiler.filters[0].selectedFragment.text,
