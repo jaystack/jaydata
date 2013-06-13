@@ -591,7 +591,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 if (itemResolvedDataType && itemResolvedDataType.isAssignableTo && itemResolvedDataType.isAssignableTo($data.EntitySet)) {
                     var elementType = Container.resolveType(item.elementType);
                     if (!elementType.storeToken) {
-                        elementType.storeToken = elementType.storeToken || this.storeToken;
+                        elementType.storeToken = this.storeToken;
                     }
                 }
             }

@@ -98,15 +98,8 @@ $data.Class.define('$data.EntityContext', null, null,
         }
 
         this._storageModel.getStorageModel = function (typeName) {
-            var resolvedType = Container.resolveType(typeName);
-
-            for (var i = 0; i < ctx._storageModel.length; i++) {
-                var s = ctx._storageModel[i];
-                if (s.LogicalType === resolvedType)
-                    return s;
-            }
-
-            //return ctx._storageModel.filter(function (s) { return s.LogicalType === resolvedType; })[0];
+            var name = Container.resolveName(typeName);
+            return ctx._storageModel[name];
         };
         if (typeof storageProviderCfg.name === 'string') {
             var tmp = storageProviderCfg.name;
@@ -316,6 +309,8 @@ $data.Class.define('$data.EntityContext', null, null,
                         storageModel.EventHandlers.afterDelete = item.afterDelete;
                     }
                     this._storageModel.push(storageModel);
+                    var name = Container.resolveName(elementType);
+                    this._storageModel[name] = storageModel;
                 }
             }
         }
@@ -505,14 +500,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 Guard.raise(new Exception("Element type definition error", "Field definition", memDef));
             }
         }
-        var refereedStorageModel;
-        for (var i = 0; i < this._storageModel.length; i++) {
-            var s = this._storageModel[i];
-            if (s.LogicalType === refereedType) {
-                refereedStorageModel = s;
-                break;
-            }
-        }
+        var refereedStorageModel = this._storageModel.getStorageModel(refereedType);
         //var refereedStorageModel = this._storageModel.filter(function (s) { return s.LogicalType === refereedType; })[0];
         if (!refereedStorageModel) {
             if (typeof intellisense === 'undefined') {
@@ -533,14 +521,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 Guard.raise(new Exception("Element type definition error", "Field definition", memDef));
             }
         }
-        var refereedStorageModel;
-        for (var i = 0; i < this._storageModel.length; i++) {
-            var s = this._storageModel[i];
-            if (s.LogicalType === refereedType) {
-                refereedStorageModel = s;
-                break;
-            }
-        }
+        var refereedStorageModel = this._storageModel.getStorageModel(refereedType);
         //var refereedStorageModel = this._storageModel.filter(function (s) { return s.LogicalType === refereedType; })[0];
         if (!refereedStorageModel) {
             if (typeof intellisense === 'undefined') {
@@ -561,14 +542,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 Guard.raise(new Exception("Element type definition error", "Field definition", memDef));
             }
         }
-        var refereedStorageModel;
-        for (var i = 0; i < this._storageModel.length; i++) {
-            var s = this._storageModel[i];
-            if (s.LogicalType === refereedType) {
-                refereedStorageModel = s;
-                break;
-            }
-        }
+        var refereedStorageModel = this._storageModel.getStorageModel(refereedType);;
         //var refereedStorageModel = this._storageModel.filter(function (s) { return s.LogicalType === refereedType; })[0];
         if (!refereedStorageModel) {
             if (typeof intellisense === 'undefined') {
