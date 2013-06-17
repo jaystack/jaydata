@@ -2373,7 +2373,7 @@
 
         var responseHeaders = xhr.getAllResponseHeaders().split(/\r?\n/);
         //FF CORS fix
-        var is_firefox = navigator && typeof navigator.userAgent === 'string' ? navigator.userAgent.toLowerCase().indexOf('firefox') > -1 : false;
+        var is_firefox = typeof navigator === 'object' && navigator && typeof navigator.userAgent === 'string' ? navigator.userAgent.toLowerCase().indexOf('firefox') > -1 : false;
         if (responseHeaders.length === 1 && responseHeaders[0] === '' && is_firefox && xhr.status > 0) {
             for (var i = 0; i < headerKeysForRead.length; i++) {
                 var headerKey = headerKeysForRead[i];
