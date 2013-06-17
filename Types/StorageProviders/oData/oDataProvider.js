@@ -292,20 +292,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         }
                     }
                 } else {
-                    item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                        var propType = Container.resolveType(memDef.type);
-                        if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty && propType !== $data.Array)) {
-                            if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                //unescape?
-                                item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
-                            } else {
-                                var typeName = Container.resolveName(memDef.type);
-                                var converter = that.fieldConverter.fromDb[typeName];
-
-                                item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
-                            }
-                        }
-                    }, this);
+                    that.reload_fromResponse(item, data, response);
                 }
 
                 if (callBack.success) {
@@ -397,21 +384,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             continue;
                         }
 
-                        item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
-                            //TODO: is this correct?
-                            var propType = Container.resolveType(memDef.type);
-                            if (memDef.computed || memDef.key || (!propType.isAssignableTo && !memDef.inverseProperty && propType !== $data.Array)) {
-                                if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                                    // unescape?
-                                    item[memDef.name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
-                                } else {
-                                    var typeName = Container.resolveName(memDef.type);
-                                    var converter = that.fieldConverter.fromDb[typeName];
-                                    item[memDef.name] = converter ? converter(result[i].data[memDef.name]) : result[i].data[memDef.name];
-                                }
-                            }
-                        }, this);
-
+                        that.reload_fromResponse(item, result[i].data, result[i]);
                     } else {
                         errors.push(that.parseError(result[i]));
                     }
@@ -449,6 +422,52 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         this.context.prepareRequest.call(this, requestData);
         OData.request.apply(this, requestData);
     },
+    reload_fromResponse: function (item, data, response) {
+        var that = this;
+        item.getType().memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+            var propType = Container.resolveType(memDef.type);
+            if (memDef.computed || memDef.key || !memDef.inverseProperty) {
+                if (memDef.concurrencyMode === $data.ConcurrencyMode.Fixed) {
+                    //unescape?
+                    item[memDef.name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
+
+                } else if (memDef.isAssignableTo) {
+                    if (data[memDef.name]) {
+                        item[memDef.name] = new propType(data[memDef.name], { converters: that.fieldConverter.fromDb });
+                    } else {
+                        item[memDef.name] = data[memDef.name]
+                    }
+
+                } else if (propType === $data.Array && memDef.elementType) {
+                    var aeType = Container.resolveType(memDef.elementType);
+                    if (data[memDef.name] && Array.isArray(data[memDef.name])) {
+                        var arrayProperty = [];
+                        for (var ap = 0; ap < data[memDef.name].length; ap++) {
+                            var aitem = data[memDef.name][ap];
+                            if (aeType.isAssignableTo && !Object.isNullOrUndefined(aitem)) {
+                                arrayProperty.push(new aeType(aitem, { converters: that.fieldConverter.fromDb }));
+                            } else {
+                                var etypeName = Container.resolveName(aeType);
+                                var econverter = that.fieldConverter.fromDb[etypeName];
+
+                                arrayProperty.push(econverter ? econverter(aitem) : aitem);
+                            }
+                        }
+                        item[memDef.name] = arrayProperty;
+                    } else if (!data[memDef.name]) {
+                        item[memDef.name] = data[memDef.name]
+                    }
+
+                } else {
+                    var typeName = Container.resolveName(memDef.type);
+                    var converter = that.fieldConverter.fromDb[typeName];
+
+                    item[memDef.name] = converter ? converter(data[memDef.name]) : data[memDef.name];
+                }
+            }
+        }, this);
+    },
+
     save_getInitData: function (item, convertedItems) {
         var self = this;
         item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);

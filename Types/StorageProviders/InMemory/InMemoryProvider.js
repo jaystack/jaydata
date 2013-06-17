@@ -28,13 +28,17 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         if (this.providerConfiguration.persistentData && window.localStorage && this.providerConfiguration.dbCreation !== $data.storageProviders.DbCreationType.DropAllExistingTables) {
             var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             var that = this;
-            localStorageData = JSON.parse(window.localStorage.getItem(localStoreName),
-                function(key, value){
-                    if(setKeys.indexOf(key)>-1 && value.map){
-                        return value.map(function(item){return new that.context[key].createNew(item);});
-                    }
-                    return value;
-                });
+            var storeData = window.localStorage.getItem(localStoreName);
+
+            if (!Object.isNullOrUndefined(storeData)) {
+                localStorageData = JSON.parse(storeData,
+                    function (key, value) {
+                        if (setKeys.indexOf(key) > -1 && value.map) {
+                            return value.map(function (item) { return new that.context[key].createNew(item); });
+                        }
+                        return value;
+                    });
+            }
         }
 
         var tempSource = localStorageData || this.dataSource || {};
@@ -183,7 +187,30 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         }
         if(this.providerConfiguration.persistentData && window.localStorage){
             var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
-            localStorageData = window.localStorage.setItem(localStoreName, JSON.stringify(this.dataSource));
+
+            var that = this;
+            var setKeys = [];
+            for (var i in this.context._entitySetReferences) {
+                setKeys.push(this.context._entitySetReferences[i].collectionName);
+            }
+            localStorageData = window.localStorage.setItem(localStoreName, JSON.stringify(this.dataSource, function (key, value) {
+                if (setKeys.indexOf(key) > -1 && Array.isArray(value)) {
+                    var data = [];
+                    for (var i = 0; i < value.length; i++) {
+                        var dataItem = {};
+                        that.context[key].elementType.memberDefinitions.getPublicMappedProperties().forEach(function (memDef) {
+                            if (!memDef.inverseProperty) {
+                                var typeName = Container.resolveName(memDef.type);
+                                var converter = that.fieldConverter.fromDb[typeName];
+                                dataItem[memDef.name] = converter ? converter(value[i][memDef.name]) : value[i][memDef.name];
+                            }
+                        });
+                        data.push(dataItem);
+                    }
+                    return data;
+                }
+                return value;
+            }));
         }
         callBack.success();
     },

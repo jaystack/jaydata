@@ -108,7 +108,7 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
     },
     supportedValidations: {
         value: {
-            '$data.Entity': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator']),
+            //'$data.Entity': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator']),
             '$data.ObjectID': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator']),
             '$data.Byte': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.SByte': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),

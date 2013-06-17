@@ -51,17 +51,17 @@ $C('$data.storageProviders.InMemory.InMemoryFunctionCompiler', $data.Expressions
         context.data += converter ? converter(expression.value) : expression.value;
     },
     VisitMemberInfoExpression: function (expression, context) {
+        context.data += ".";
         context.data += expression.memberName;
     },
 
     VisitComplexTypeExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
-        context.data += ".";
     },
 
     VisitEntityExpression: function (expression, context) {
-        context.data += expression.selector.lambda + '.';
+        context.data += expression.selector.lambda;
         context.lambda = expression.selector.lambda;
         this.Visit(expression.source, context);
     },

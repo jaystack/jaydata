@@ -445,6 +445,7 @@
     <Content Include="UnitTests\dataServiceVersionTests.js" />
     <Content Include="UnitTests\NodeJS\TypesTest.js" />
     <Content Include="Pro\UnitTests\SchemaEvolutions.js" />
+    <Content Include="UnitTests\T4.js" />
     <Content Include="UnitTests\TypesTest.js" />
     <Content Include="UnitTests\webApiTests.js" />
     <Content Include="webserver\localserver.js" />
