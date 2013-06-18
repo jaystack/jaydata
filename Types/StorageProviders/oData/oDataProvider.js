@@ -44,6 +44,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             withCredentials: false,
             //enableJSONP: undefined,
             //useJsonLight: undefined
+            //disableBatch: undefined
             UpdateMethod: 'PATCH'
         }, cfg);
 
@@ -228,10 +229,17 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     },
     saveInternal: function (independentBlocks, index2, callBack) {
-        if (independentBlocks.length > 1 || (independentBlocks.length == 1 && independentBlocks[0].length > 1))
-            this._saveBatch(independentBlocks, index2, callBack);
-        else
-            this._saveRest(independentBlocks, index2, callBack);
+        if ((this.providerConfiguration.disableBatch === true || (typeof $data.defaults === 'object' && $data.defaults.disableBatch === true))
+            && typeof this._saveRestMany === 'function')
+        {
+            this._saveRestMany(independentBlocks, index2, callBack);
+        } else {
+            if (independentBlocks.length > 1 || (independentBlocks.length == 1 && independentBlocks[0].length > 1)) {
+                this._saveBatch(independentBlocks, index2, callBack);
+            } else {
+                this._saveRest(independentBlocks, index2, callBack);
+            }
+        }
     },
     _saveRest: function (independentBlocks, index2, callBack) {
         var batchRequests = [];

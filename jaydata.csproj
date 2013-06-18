@@ -365,6 +365,7 @@
     <Content Include="oDataParser\Visitors\ObjectLiteralBuilderVisitor.js" />
     <Content Include="Pro\CREDITS_PRO.txt" />
     <Content Include="Pro\CREDITS_TRIAL.txt" />
+    <Content Include="Pro\JayDataModules\NoBatch.js" />
     <Content Include="Pro\JayDataModules\QueryCache.js" />
     <Content Include="Pro\JayDataModules\localMigrations.js" />
     <Content Include="Pro\JayDataModules\SchemaEvolutions.js" />

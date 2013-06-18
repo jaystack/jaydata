@@ -83,6 +83,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
             password: null,
             withCredentials: false,
             enableJSONP: false
+            //disableBatch: undefined
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -225,10 +226,17 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
         }
     },
     saveInternal: function (independentBlocks, index2, callBack) {
-        if (independentBlocks.length > 1 || (independentBlocks.length == 1 && independentBlocks[0].length > 1))
-            this._saveBatch(independentBlocks, index2, callBack);
-        else
-            this._saveRest(independentBlocks, index2, callBack);
+        if ((this.providerConfiguration.disableBatch === true || (typeof $data.defaults === 'object' && $data.defaults.disableBatch === true))
+            && typeof this._saveRestMany === 'function')
+        {
+            this._saveRestMany(independentBlocks, index2, callBack);
+        } else {
+            if (independentBlocks.length > 1 || (independentBlocks.length == 1 && independentBlocks[0].length > 1)) {
+                this._saveBatch(independentBlocks, index2, callBack);
+            } else {
+                this._saveRest(independentBlocks, index2, callBack);
+            }
+        }
     },
     _saveRest: function (independentBlocks, index2, callBack) {
         var batchRequests = [];

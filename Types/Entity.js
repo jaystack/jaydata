@@ -382,10 +382,23 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             return;
         }
 
-        if (!this.context)
-            Guard.raise(new Exception('Entity not in context', 'Invalid operation'));
+        var context = this.context;
+        if (!this.context) {
+            try {
+                var that = this;
+                var storeToken = this.storeToken || this.getType().storeToken;
+                if (storeToken && typeof storeToken.factory === 'function') {
+                    var ctx = storeToken.factory();
+                    return ctx.onReady().then(function (context) {
+                        return context.loadItemProperty(that, memberDefinition, callback);
+                    });
+                }
+            } catch (e) { }
 
-        return this.context.loadItemProperty(this, memberDefinition, callback, tran);
+            Guard.raise(new Exception('Entity not in context', 'Invalid operation'));
+        } else {
+            return context.loadItemProperty(this, memberDefinition, callback, tran);
+        }
     },
     // protected
     setProperty: function (memberDefinition, value, callback, tran) {
