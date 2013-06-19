@@ -22,7 +22,117 @@
   <xsl:param name="CollectionBaseClass"/>
   <xsl:param name="DefaultNamespace"/>
   <xsl:param name="MaxDataserviceVersion"/>
+  <xsl:param name="AllowedTypesList" />
+  <xsl:param name="GenerateNavigationProperties" />
 
+  <xsl:param name="AllowedTypesListX">Microsoft.Crm.Sdk.Data.Services.Product;Microsoft.Crm.Sdk.Data.Services.LeadAddress:Telephone1,City,UTCOffset;</xsl:param>
+
+  <xsl:template name="createFieldsList">
+    <xsl:param name="fields" />
+    <!--<xsl:message terminate="no">
+      create field: @<xsl:value-of select="$fields"/>@
+    </xsl:message>-->
+      <xsl:variable name="thisField">
+        <xsl:choose>
+          <xsl:when test="contains($fields,',')">
+            <xsl:value-of select="substring-before($fields, ',')"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$fields"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:element name="field">
+        <xsl:attribute name="name">
+          <xsl:value-of select="$thisField"/>
+        </xsl:attribute> 
+      </xsl:element>
+      <xsl:variable name="remaining" select="substring($fields, string-length($thisField) + 2)" />
+      <xsl:if test="string-length($remaining) > 0">
+        <xsl:call-template name="createFieldsList">
+          <xsl:with-param name="fields" select="$remaining" />
+        </xsl:call-template>
+      </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="createType">
+    <xsl:param name="typeFull" />
+    <!--<xsl:message terminate="no">
+      create type: <xsl:value-of select="$typeFull"/>
+    </xsl:message>-->
+    <xsl:variable name="typeName">
+      <xsl:choose>
+        <xsl:when test="contains($typeFull,':')">
+          <xsl:value-of select="substring-before($typeFull, ':') "/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$typeFull"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="fields" select="substring($typeFull, string-length($typeName) + 2)" />
+    <xsl:element name="type">
+      <xsl:attribute name="name">
+        <xsl:value-of select="$typeName"/>
+      </xsl:attribute>
+      <xsl:if test="string-length($fields) > 0">
+        <xsl:call-template name="createFieldsList">
+          <xsl:with-param name="fields" select="$fields" />
+        </xsl:call-template>
+      </xsl:if>
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template name="createTypeList">
+    <xsl:param name="types" />
+    <!--<xsl:message terminate="no">
+      createTypeList: <xsl:value-of select="$types"/>
+    </xsl:message>-->
+        
+    <xsl:variable name="thisTypeFull">
+      <xsl:choose>
+        <xsl:when test="contains($types, ';')">
+          <xsl:value-of select="substring-before($types, ';')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$types"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <xsl:if test="string-length($thisTypeFull) > 0">
+      <xsl:call-template name="createType">
+        <xsl:with-param name="typeFull" select="$thisTypeFull" />
+      </xsl:call-template>
+    </xsl:if>
+    
+    <xsl:variable name="remaining" select="substring($types, string-length($thisTypeFull) + 2)" />
+    <!--<xsl:message terminate="no">
+      rem: @<xsl:value-of select="$remaining"/>@  
+    </xsl:message>-->
+    
+    <xsl:if test="string-length($remaining) > 0">
+      <xsl:call-template name="createTypeList">
+        <xsl:with-param name="types" select="$remaining" />
+      </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:variable name="allowedTypes">
+    <xsl:call-template name="createTypeList">
+      <xsl:with-param name="types" select="$AllowedTypesList" />
+    </xsl:call-template>
+  </xsl:variable>
+  
+
+<!-- TODO EXSLT node-set -->
+  <!--<xsl:variable name="hasTypeFilter" select="boolean(count(msxsl:node-set($allowedTypes)/type) > 0)"/>-->
+  <xsl:variable name="hasTypeFilter">
+    <xsl:choose>
+      <xsl:when test="function-available('msxsl:node-set')"><xsl:value-of select="boolean(count(msxsl:node-set($allowedTypes)/type) > 0)"/></xsl:when>
+      <xsl:otherwise><xsl:value-of select="boolean(count(exsl:node-set($allowedTypes)/type) > 0)"/></xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
   <xsl:template match="/">
 
 /*//////////////////////////////////////////////////////////////////////////////////////
@@ -31,51 +141,143 @@
 //////////////////////////////////////////////////////////////////////////////////////*/
 (function(global, $data, undefined) {
 
+    
 <xsl:for-each select="//edm:EntityType | //edm:ComplexType" xml:space="default">
-  <xsl:message terminate="no">Info: generating type <xsl:value-of select="concat(../@Namespace, '.', @Name)"/>
-</xsl:message>
-  <xsl:variable name="BaseType">
+  <xsl:variable name="thisName" select="concat(../@Namespace, '.', @Name)" />
+  <!-- TODO EXSLT node-set-->
+  <!--<xsl:variable name="thisTypeNode" select="msxsl:node-set($allowedTypes)/type[@name = $thisName]" />-->
+  <xsl:variable name="thisTypeNode">
     <xsl:choose>
-      <xsl:when test="@BaseType">
-        <xsl:value-of select="@BaseType"/>
+      <xsl:when test="function-available('msxsl:node-set')">
+        <xsl:copy-of select="msxsl:node-set($allowedTypes)/type[@name = $thisName]"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="$EntityBaseClass"  />
+        <xsl:copy-of select="exsl:node-set($allowedTypes)/type[@name = $thisName]"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:variable>
-  <xsl:variable name="props">
-    <xsl:apply-templates select="*" />
-  </xsl:variable>
-  <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$BaseType"  />.extend('<xsl:value-of select="concat($DefaultNamespace,../@Namespace)"/>.<xsl:value-of select="@Name"/>', {
-    <xsl:choose><xsl:when test="function-available('msxsl:node-set')">
-    <xsl:for-each select="msxsl:node-set($props)/*">
-      <xsl:value-of select="."/><xsl:if test="position() != last()">,
-    </xsl:if></xsl:for-each>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:for-each select="exsl:node-set($props)/*">
-      <xsl:value-of select="."/><xsl:if test="position() != last()">,
-    </xsl:if></xsl:for-each>
-    </xsl:otherwise>
+  <xsl:variable name="thisTypeNodeExists">
+    <xsl:choose>
+      <xsl:when test="function-available('msxsl:node-set')">
+        <xsl:copy-of select="(count(msxsl:node-set($allowedTypes)/type[@name = $thisName]) > 0)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:copy-of select="(count(exsl:node-set($allowedTypes)/type[@name = $thisName]) > 0)"/>
+      </xsl:otherwise>
     </xsl:choose>
-    <xsl:variable name="currentName"><xsl:value-of select="concat(../@Namespace,'.',@Name)"/></xsl:variable>
-    <xsl:for-each select="//edm:FunctionImport[@IsBindable and edm:Parameter[1]/@Type = $currentName]"><xsl:if test="position() = 1">,
-    </xsl:if>
-      <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
-    </xsl:if>
-    </xsl:for-each>
+  </xsl:variable>
+  <!--<xsl:variable name="filterFields" select="(count($thisTypeNode/field) > 0)" />-->
+  <xsl:variable name="filterFields">
+    <xsl:choose>
+      <xsl:when test="function-available('msxsl:node-set')">
+        <xsl:copy-of select="(count(msxsl:node-set($thisTypeNode)/type/field) > 0)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:copy-of select="(count(exsl:node-set($thisTypeNode)/type/field) > 0)"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
+  <xsl:if test="($hasTypeFilter = 'false') or ($thisTypeNodeExists = 'true')">
+
+      <xsl:message terminate="no">Info: generating type <xsl:value-of select="concat(../@Namespace, '.', @Name)"/></xsl:message>
+    
+      <xsl:variable name="BaseType">
+        <xsl:choose>
+          <xsl:when test="@BaseType">
+            <xsl:value-of select="@BaseType"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$EntityBaseClass"  />
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+
+
+     <xsl:variable name="props">
+       <xsl:for-each select="*[local-name() != 'NavigationProperty' or ($GenerateNavigationProperties = 'true' and local-name() = 'NavigationProperty')]">
+         <xsl:variable name="fname" select="@Name" />
+         <xsl:variable name="isAllowedField">
+           <xsl:choose>
+             <xsl:when test="function-available('msxsl:node-set')">
+               <xsl:copy-of select="(count(msxsl:node-set($thisTypeNode)/type/field[@name = $fname]) > 0)"/>
+             </xsl:when>
+             <xsl:otherwise>
+               <xsl:copy-of select="(count(exsl:node-set($thisTypeNode)/type/field[@name = $fname]) > 0)"/>
+             </xsl:otherwise>
+           </xsl:choose>
+         </xsl:variable>
+         <xsl:if test="($filterFields = 'false') or ($isAllowedField = 'true')">
+           <xsl:apply-templates select="." />
+         </xsl:if> 
+       </xsl:for-each>
+      </xsl:variable>
+    
+      <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$BaseType"  />.extend('<xsl:value-of select="concat($DefaultNamespace,../@Namespace)"/>.<xsl:value-of select="@Name"/>', {
+     <xsl:choose>
+        <xsl:when test="function-available('msxsl:node-set')">
+          <xsl:for-each select="msxsl:node-set($props)/*">
+            <xsl:value-of select="."/>
+            <xsl:if test="position() != last()">
+            <xsl:text>,&#10;     </xsl:text>  
+            </xsl:if>
+          </xsl:for-each>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:for-each select="exsl:node-set($props)/*">
+            <xsl:value-of select="."/>
+            <xsl:if test="position() != last()">,&#10;     </xsl:if>
+          </xsl:for-each>
+        </xsl:otherwise>
+      </xsl:choose>
+      <xsl:variable name="currentName"><xsl:value-of select="concat(../@Namespace,'.',@Name)"/></xsl:variable>
+      <xsl:for-each select="//edm:FunctionImport[@IsBindable and edm:Parameter[1]/@Type = $currentName]"><xsl:if test="position() = 1">,
+      </xsl:if>
+        <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
+      </xsl:if>
+      </xsl:for-each>
   });
-  
+
+</xsl:if>
 </xsl:for-each>
 
 <xsl:for-each select="//edm:EntityContainer">
   <xsl:text xml:space="preserve">  </xsl:text><xsl:value-of select="$ContextBaseClass"  />.extend('<xsl:value-of select="concat(concat($DefaultNamespace,../@Namespace), '.', @Name)"/>', {
-    <!--or (@IsBindable = 'true' and (@IsAlwaysBindable = 'false' or @m:IsAlwaysBindable = 'false' or @metadata:IsAlwaysBindable = 'false'))-->
-    <xsl:for-each select="edm:EntitySet | edm:FunctionImport[not(@IsBindable) or @IsBindable = 'false']">
-      <xsl:apply-templates select="."></xsl:apply-templates><xsl:if test="position() != last()">,
-    </xsl:if>
+     <!--or (@IsBindable = 'true' and (@IsAlwaysBindable = 'false' or @m:IsAlwaysBindable = 'false' or @metadata:IsAlwaysBindable = 'false'))-->
+
+   <xsl:variable name="subset">
+    <xsl:for-each select="edm:EntitySet | edm:FunctionImport">
+      <xsl:choose>
+        <xsl:when test="function-available('msxsl:node-set')">
+          <xsl:if test="($hasTypeFilter = 'false') or msxsl:node-set($allowedTypes)/type[@name = current()/@EntityType]">
+            <xsl:copy-of select="."/>
+          </xsl:if>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:if test="($hasTypeFilter = 'false') or exsl:node-set($allowedTypes)/type[@name = current()/@EntityType]">
+            <xsl:copy-of select="."/>
+          </xsl:if>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:for-each>
+  </xsl:variable>
+
+  
+  <xsl:choose>
+    <xsl:when test="function-available('msxsl:node-set')">
+      <xsl:for-each select="msxsl:node-set($subset)/*[local-name() != 'FunctionImport' or not(@IsBindable) or @IsBindable = 'false']">
+        <xsl:apply-templates select="."></xsl:apply-templates>
+        <xsl:if test="position() != last()">,
+     </xsl:if>
+      </xsl:for-each>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:for-each select="exsl:node-set($subset)/*[local-name() != 'FunctionImport' or not(@IsBindable) or @IsBindable = 'false']">
+        <xsl:apply-templates select="."></xsl:apply-templates>
+        <xsl:if test="position() != last()">,
+     </xsl:if>
+      </xsl:for-each>
+    </xsl:otherwise>
+  </xsl:choose>
   });
 
   $data.generatedContexts = $data.generatedContexts || [];

@@ -14,7 +14,12 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             user: undefined,
             password: undefined,
             withCredentials: undefined,
-            httpHeaders: undefined
+            httpHeaders: undefined,
+
+            typeFilter: '',
+            navigation: true,
+            generateKeys: true,
+            dependentRelationsOnly: false
         };
 
         $data.typeSystem.extend( cnf, config || {});
@@ -166,6 +171,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
     },
     _processResults: function (metadataUri, versionInfo, metadata, xsl, cnf) {
         var transformXslt = this.getCurrentXSLTVersion(versionInfo, metadata);
+        cnf.typeFilter = this._prepareTypeFilter(metadata, versionInfo, cnf);
 
         if (window.ActiveXObject) {
             var xslt = new ActiveXObject("Msxml2.XSLTemplate.6.0");
@@ -198,6 +204,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     xslproc.addParameter('CollectionBaseClass', cnf.CollectionBaseClass);
                     xslproc.addParameter('DefaultNamespace', cnf.DefaultNamespace);
                     xslproc.addParameter('MaxDataserviceVersion', versionInfo.maxVersion || '3.0');
+                    xslproc.addParameter('AllowedTypesList', cnf.typeFilter);
+                    xslproc.addParameter('GenerateNavigationProperties', cnf.navigation);
 
                     xslproc.transform();
                     return xslproc.output;
@@ -224,6 +232,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             xsltProcessor.setParameter(null, 'CollectionBaseClass', cnf.CollectionBaseClass);
             xsltProcessor.setParameter(null, 'DefaultNamespace', cnf.DefaultNamespace);
             xsltProcessor.setParameter(null, 'MaxDataserviceVersion', versionInfo.maxVersion || '3.0');
+            xsltProcessor.setParameter(null, 'AllowedTypesList', cnf.typeFilter);
+            xsltProcessor.setParameter(null, 'GenerateNavigationProperties', cnf.navigation);
             resultDocument = xsltProcessor.transformToFragment(metadata, document);
 
             return resultDocument.textContent;
@@ -239,10 +249,276 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                 'EntitySetBaseClass', "'" + cnf.EntitySetBaseClass + "'",
                 'CollectionBaseClass', "'" + cnf.CollectionBaseClass + "'",
                 'DefaultNamespace', "'" + cnf.DefaultNamespace + "'",
-                'MaxDataserviceVersion', "'" + (versionInfo.maxVersion || '3.0') + "'"
+                'MaxDataserviceVersion', "'" + (versionInfo.maxVersion || '3.0') + "'",
+                'AllowedTypesList', "'" + cnf.typeFilter + "'",
+                'GenerateNavigationProperties', "'" + cnf.navigation + "'"
             ]);
         }
     },
+    _prepareTypeFilter: function (doc, versionInfo, cnf) {
+        var result = '';
+        if (!(typeof doc === 'object' && "querySelector" in doc && "querySelectorAll" in doc))
+            return result;
+
+        var config = [];
+        if (typeof cnf.typeFilter === 'object' && cnf.typeFilter) {
+            var types = Object.keys(cnf.typeFilter);
+            for (var i = 0; i < types.length; i++) {
+                var cfg = cnf.typeFilter[types[i]];
+                var typeData = {};
+                if (typeof cfg === 'object') {
+                    if (Array.isArray(cfg)) {
+                        typeData.Name = types[i];
+                        typeData.Fields = cfg;
+                    } else {
+                        typeData.Name = cfg.name || types[i];
+                        typeData.Fields = cfg.members || [];
+                    }
+                } else {
+                    typeData.Name = types[i];
+                    typeData.Fields = [];
+                }
+
+                var typeShortName = typeData.Name;
+                var containerName = "";
+                if (typeData.Name.lastIndexOf('.') > 0)
+                {
+                    containerName = typeData.Name.substring(0, typeData.Name.lastIndexOf('.'));
+                    typeShortName = typeData.Name.substring(typeData.Name.lastIndexOf('.') + 1);
+                }
+
+                var conainers = doc.querySelectorAll("EntityContainer[Name = '" + containerName + "']");
+                for (var j = 0; j < conainers.length; j++) {
+                    var entitySetDef = conainers[j].querySelector("EntitySet[Name = '" + typeShortName + "']");
+                    if (entitySetDef != null)
+                    {
+                        typeData.Name = entitySetDef.attributes["EntityType"].value;
+                        break;
+                    }
+
+                }
+
+                config.push(typeData);
+            }
+
+            var discoveredData;
+            if (cnf.dependentRelationsOnly) {
+                discoveredData = this._discoverProperyDependencies(config, doc, cnf.navigation, cnf.generateKeys);
+            } else {
+                discoveredData = this._discoverTypeDependencies(config, doc, cnf.navigation, cnf.generateKeys);
+            }
+
+            var complex = doc.querySelectorAll("ComplexType");
+            for (var i = 0; i < complex.length; i++)
+            {
+                var cns = complex[i].parentNode.attributes["Namespace"].value;
+                var data = !cns ? complex[i].attributes["Name"].value : (cns + "." + complex[i].attributes["Name"].value);
+                discoveredData.push({ Name: data, Fields: [] });
+            }
+
+            for (var i = 0; i < discoveredData.length; i++)
+            {
+                var row = discoveredData[i];
+                if (row.Fields.length > 0) {
+                    result += row.Name + ":" + row.Fields.join(",") + ";";
+                }
+                else {
+                    result += row.Name + ";";
+                }
+            }
+
+        }
+
+        return result;
+    },
+    _discoverTypeDependencies: function (types, doc, withNavPropertis, withKeys) {
+        var allowedTypes = [];
+        var allowedTypeNames = [];
+        var collect = [];
+
+        for (var i = 0; i < types.length; i++)
+        {
+            var idx = collect.indexOf(types[i].Name);
+            if(idx >= 0){
+                collect.splice(idx, 1);
+            }
+            this._discoverType(types[i], doc, allowedTypes, allowedTypeNames, withNavPropertis, withKeys, true, collect);
+        }
+
+        for (var i = 0; i < collect.length; i++)
+        {
+            this._discoverType({ Name: collect[i], Fields: [] }, doc, allowedTypes, allowedTypeNames, withNavPropertis, withKeys, false, []);
+        }
+
+        return allowedTypes;
+    },
+    _discoverType: function(typeData, doc, allowedTypes, allowedTypeNames, withNavPropertis, withKeys, collectTypes, collectedTypes) {
+        var typeName = typeData.Name;
+
+        if (allowedTypeNames.indexOf(typeName) >= 0)
+        {
+            return;
+        }
+        console.log("Discover: " + typeName);
+
+        var typeShortName = typeName;
+        var typeNamespace = '';
+        if (typeName.lastIndexOf('.') > 0)
+        {
+            typeNamespace = typeName.substring(0, typeName.lastIndexOf('.'));
+            typeShortName = typeName.substring(typeName.lastIndexOf('.') + 1);
+        }
+
+        var schemaNode = doc.querySelector("Schema[Namespace = '" + typeNamespace + "']");
+        if (schemaNode != null)
+        {
+            var typeNode = schemaNode.querySelector("EntityType[Name = '" + typeShortName + "'], ComplexType[Name = '" + typeShortName + "']");
+            if (typeNode != null)
+            {
+                allowedTypes.push(typeData);
+                allowedTypeNames.push(typeName);
+
+                if (withKeys && typeData.Fields.length > 0) {
+                    var keys = typeNode.querySelectorAll("Key PropertyRef");
+                    if (keys != null)
+                    {
+                        for (var j = 0; j < keys.length; j++)
+                        {
+                            var keyField = keys[j].attributes["Name"].value;
+                            if (typeData.Fields.indexOf(keyField) < 0)
+                                typeData.Fields.splice(j, 0, keyField);
+                        }
+                    }
+                }
+
+                if (withNavPropertis)
+                {
+                    var navPropNodes = typeNode.querySelectorAll("NavigationProperty");
+                    for (var j = 0; j < navPropNodes.length; j++)
+                    {
+                        var navProp = navPropNodes[j];
+                        if (typeData.Fields.length == 0 || typeData.Fields.indexOf(navProp.attributes["Name"].value) >=0)
+                        {
+
+                            var FromRole = navProp.attributes["FromRole"].value;
+                            var ToRole = navProp.attributes["ToRole"].value;
+
+                            var association = schemaNode.querySelector("Association End[Role = '" + FromRole + "']:not([Type = '" + typeName + "'])");
+                            if (association == null)
+                            {
+                                association = schemaNode.querySelector("Association End[Role = '" + ToRole + "']:not([Type = '" + typeName + "'])");
+                            }
+
+                            if (association != null)
+                            {
+                                var nav_type = association.attributes["Type"].value;
+
+                                if (collectTypes)
+                                {
+                                    if (collectedTypes.indexOf(nav_type) < 0 && allowedTypeNames.indexOf(nav_type) < 0)
+                                        collectedTypes.push(nav_type);
+                                }
+                                else
+                                {
+                                    this._discoverType({ Name: nav_type, Fields: [] }, doc, allowedTypes, allowedTypeNames, withNavPropertis, withKeys, false, collectedTypes);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    _discoverProperyDependencies: function (types, doc, withNavPropertis, withKeys) {
+        var allowedTypes = [];
+        var allowedTypeNames = types.map(function(t) { return t.Name; });
+
+        for (var i = 0; i < types.length; i++)
+        {
+            this._discoverProperties(types[i], doc, allowedTypes, allowedTypeNames, withNavPropertis, withKeys);
+        }
+
+        return allowedTypes;
+    },
+    _discoverProperties: function(typeData, doc, allowedTypes, allowedTypeNames, withNavPropertis, withKeys) {
+        var typeName = typeData.Name;
+        console.log("Discover: " + typeName);
+
+        var hasProperty = typeData.Fields.length != 0;
+        var typeShortName = typeName;
+        var typeNamespace = '';
+        if (typeName.lastIndexOf('.') > 0)
+        {
+            typeNamespace = typeName.substring(0, typeName.lastIndexOf('.'));
+            typeShortName = typeName.substring(typeName.lastIndexOf('.') + 1);
+        }
+
+        var schemaNode = doc.querySelector("Schema[Namespace = '" + typeNamespace + "']");
+        if (schemaNode != null)
+        {
+            var typeNode = schemaNode.querySelector("EntityType[Name = '" + typeShortName + "'], ComplexType[Name = '" + typeShortName + "']");
+            if (typeNode != null)
+            {
+                allowedTypes.push(typeData);
+
+                if (!hasProperty)
+                {
+                    var properties = typeNode.querySelectorAll("Property");
+                    if (properties != null)
+                    {
+                        for (var j = 0; j < properties.length; j++)
+                        {
+                            var field = properties[j].attributes["Name"].value;
+                            typeData.Fields.push(field);
+                        }
+                    }
+
+                    if (withNavPropertis)
+                    {
+                        var navPropNodes = typeNode.querySelectorAll("NavigationProperty");
+                        for (var j = 0; j < navPropNodes.length; j++)
+                        {
+                            var navProp = navPropNodes[j];
+                            var nav_name = navProp.attributes["Name"].value;
+                            var types = [ navProp.attributes["FromRole"].value, navProp.attributes["ToRole"].value ];
+
+                            var nav_type = '';
+                            for (var t = 0; t < types.length; t++)
+                            {
+                                var association = schemaNode.querySelector("Association End[Role = '" + types[t] + "']");
+                                if (association != null)
+                                {
+                                    nav_type = association.attributes["Type"].value;
+                                    if (nav_type != typeName || t == 1)
+                                        break;
+                                }
+                            }
+
+                            if (allowedTypeNames.indexOf(nav_type) >= 0)
+                            {
+                                typeData.Fields.push(nav_name);
+                            }
+                        }
+                    }
+                }
+                else if (withKeys)
+                {
+                    var keys = typeNode.querySelectorAll("Key PropertyRef");
+                    if (keys != null)
+                    {
+                        for (var j = 0; j < keys.length; j++)
+                        {
+                            var keyField = keys[j].attributes["Name"].value;
+                            if (typeData.Fields.indexOf(keyField) < 0)
+                                typeData.Fields.splice(j, 0, keyField);
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     _findVersion: function (metadata) {
         var maxDSVersion = '';
 
@@ -302,10 +578,10 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
     },
     _maxDataServiceVersions: {
         value: {
-            "http://schemas.microsoft.com/ado/2006/04/edm": "1.0",
+            "http://schemas.microsoft.com/ado/2006/04/edm": "2.0",
             "http://schemas.microsoft.com/ado/2008/09/edm": "2.0",
             "http://schemas.microsoft.com/ado/2009/11/edm": "3.0",
-            "http://schemas.microsoft.com/ado/2007/05/edm": "1.0",
+            "http://schemas.microsoft.com/ado/2007/05/edm": "2.0",
             "http://schemas.microsoft.com/ado/2009/08/edm": "2.0"
         }
     },
@@ -383,7 +659,117 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "  <xsl:param name=\"CollectionBaseClass\"/>\r\n" +
             "  <xsl:param name=\"DefaultNamespace\"/>\r\n" +
             "  <xsl:param name=\"MaxDataserviceVersion\"/>\r\n" +
+            "  <xsl:param name=\"AllowedTypesList\" />\r\n" +
+            "  <xsl:param name=\"GenerateNavigationProperties\" />\r\n" +
             "\r\n" +
+            "  <xsl:param name=\"AllowedTypesListX\">Microsoft.Crm.Sdk.Data.Services.Product;Microsoft.Crm.Sdk.Data.Services.LeadAddress:Telephone1,City,UTCOffset;</xsl:param>\r\n" +
+            "\r\n" +
+            "  <xsl:template name=\"createFieldsList\">\r\n" +
+            "    <xsl:param name=\"fields\" />\r\n" +
+            "    <!--<xsl:message terminate=\"no\">\r\n" +
+            "      create field: @<xsl:value-of select=\"$fields\"/>@\r\n" +
+            "    </xsl:message>-->\r\n" +
+            "      <xsl:variable name=\"thisField\">\r\n" +
+            "        <xsl:choose>\r\n" +
+            "          <xsl:when test=\"contains($fields,',')\">\r\n" +
+            "            <xsl:value-of select=\"substring-before($fields, ',')\"/>\r\n" +
+            "          </xsl:when>\r\n" +
+            "          <xsl:otherwise>\r\n" +
+            "            <xsl:value-of select=\"$fields\"/>\r\n" +
+            "          </xsl:otherwise>\r\n" +
+            "        </xsl:choose>\r\n" +
+            "      </xsl:variable>\r\n" +
+            "      <xsl:element name=\"field\">\r\n" +
+            "        <xsl:attribute name=\"name\">\r\n" +
+            "          <xsl:value-of select=\"$thisField\"/>\r\n" +
+            "        </xsl:attribute> \r\n" +
+            "      </xsl:element>\r\n" +
+            "      <xsl:variable name=\"remaining\" select=\"substring($fields, string-length($thisField) + 2)\" />\r\n" +
+            "      <xsl:if test=\"string-length($remaining) > 0\">\r\n" +
+            "        <xsl:call-template name=\"createFieldsList\">\r\n" +
+            "          <xsl:with-param name=\"fields\" select=\"$remaining\" />\r\n" +
+            "        </xsl:call-template>\r\n" +
+            "      </xsl:if>\r\n" +
+            "  </xsl:template>\r\n" +
+            "\r\n" +
+            "  <xsl:template name=\"createType\">\r\n" +
+            "    <xsl:param name=\"typeFull\" />\r\n" +
+            "    <!--<xsl:message terminate=\"no\">\r\n" +
+            "      create type: <xsl:value-of select=\"$typeFull\"/>\r\n" +
+            "    </xsl:message>-->\r\n" +
+            "    <xsl:variable name=\"typeName\">\r\n" +
+            "      <xsl:choose>\r\n" +
+            "        <xsl:when test=\"contains($typeFull,':')\">\r\n" +
+            "          <xsl:value-of select=\"substring-before($typeFull, ':') \"/>\r\n" +
+            "        </xsl:when>\r\n" +
+            "        <xsl:otherwise>\r\n" +
+            "          <xsl:value-of select=\"$typeFull\"/>\r\n" +
+            "        </xsl:otherwise>\r\n" +
+            "      </xsl:choose>\r\n" +
+            "    </xsl:variable>\r\n" +
+            "    <xsl:variable name=\"fields\" select=\"substring($typeFull, string-length($typeName) + 2)\" />\r\n" +
+            "    <xsl:element name=\"type\">\r\n" +
+            "      <xsl:attribute name=\"name\">\r\n" +
+            "        <xsl:value-of select=\"$typeName\"/>\r\n" +
+            "      </xsl:attribute>\r\n" +
+            "      <xsl:if test=\"string-length($fields) > 0\">\r\n" +
+            "        <xsl:call-template name=\"createFieldsList\">\r\n" +
+            "          <xsl:with-param name=\"fields\" select=\"$fields\" />\r\n" +
+            "        </xsl:call-template>\r\n" +
+            "      </xsl:if>\r\n" +
+            "    </xsl:element>\r\n" +
+            "  </xsl:template>\r\n" +
+            "  \r\n" +
+            "  <xsl:template name=\"createTypeList\">\r\n" +
+            "    <xsl:param name=\"types\" />\r\n" +
+            "    <!--<xsl:message terminate=\"no\">\r\n" +
+            "      createTypeList: <xsl:value-of select=\"$types\"/>\r\n" +
+            "    </xsl:message>-->\r\n" +
+            "        \r\n" +
+            "    <xsl:variable name=\"thisTypeFull\">\r\n" +
+            "      <xsl:choose>\r\n" +
+            "        <xsl:when test=\"contains($types, ';')\">\r\n" +
+            "          <xsl:value-of select=\"substring-before($types, ';')\"/>\r\n" +
+            "        </xsl:when>\r\n" +
+            "        <xsl:otherwise>\r\n" +
+            "          <xsl:value-of select=\"$types\"/>\r\n" +
+            "        </xsl:otherwise>\r\n" +
+            "      </xsl:choose>\r\n" +
+            "    </xsl:variable>\r\n" +
+            "\r\n" +
+            "    <xsl:if test=\"string-length($thisTypeFull) > 0\">\r\n" +
+            "      <xsl:call-template name=\"createType\">\r\n" +
+            "        <xsl:with-param name=\"typeFull\" select=\"$thisTypeFull\" />\r\n" +
+            "      </xsl:call-template>\r\n" +
+            "    </xsl:if>\r\n" +
+            "    \r\n" +
+            "    <xsl:variable name=\"remaining\" select=\"substring($types, string-length($thisTypeFull) + 2)\" />\r\n" +
+            "    <!--<xsl:message terminate=\"no\">\r\n" +
+            "      rem: @<xsl:value-of select=\"$remaining\"/>@  \r\n" +
+            "    </xsl:message>-->\r\n" +
+            "    \r\n" +
+            "    <xsl:if test=\"string-length($remaining) > 0\">\r\n" +
+            "      <xsl:call-template name=\"createTypeList\">\r\n" +
+            "        <xsl:with-param name=\"types\" select=\"$remaining\" />\r\n" +
+            "      </xsl:call-template>\r\n" +
+            "    </xsl:if>\r\n" +
+            "  </xsl:template>\r\n" +
+            "\r\n" +
+            "  <xsl:variable name=\"allowedTypes\">\r\n" +
+            "    <xsl:call-template name=\"createTypeList\">\r\n" +
+            "      <xsl:with-param name=\"types\" select=\"$AllowedTypesList\" />\r\n" +
+            "    </xsl:call-template>\r\n" +
+            "  </xsl:variable>\r\n" +
+            "  \r\n" +
+            "\r\n" +
+            "<!-- TODO EXSLT node-set -->\r\n" +
+            "  <!--<xsl:variable name=\"hasTypeFilter\" select=\"boolean(count(msxsl:node-set($allowedTypes)/type) > 0)\"/>-->\r\n" +
+            "  <xsl:variable name=\"hasTypeFilter\">\r\n" +
+            "    <xsl:choose>\r\n" +
+            "      <xsl:when test=\"function-available('msxsl:node-set')\"><xsl:value-of select=\"boolean(count(msxsl:node-set($allowedTypes)/type) > 0)\"/></xsl:when>\r\n" +
+            "      <xsl:otherwise><xsl:value-of select=\"boolean(count(exsl:node-set($allowedTypes)/type) > 0)\"/></xsl:otherwise>\r\n" +
+            "    </xsl:choose>\r\n" +
+            "  </xsl:variable>\r\n" +
             "  <xsl:template match=\"/\">\r\n" +
             "\r\n" +
             "/*//////////////////////////////////////////////////////////////////////////////////////\r\n" +
@@ -392,51 +778,143 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "//////////////////////////////////////////////////////////////////////////////////////*/\r\n" +
             "(function(global, $data, undefined) {\r\n" +
             "\r\n" +
+            "    \r\n" +
             "<xsl:for-each select=\"//edm:EntityType | //edm:ComplexType\" xml:space=\"default\">\r\n" +
-            "  <xsl:message terminate=\"no\">Info: generating type <xsl:value-of select=\"concat(../@Namespace, '.', @Name)\"/>\r\n" +
-            "</xsl:message>\r\n" +
-            "  <xsl:variable name=\"BaseType\">\r\n" +
+            "  <xsl:variable name=\"thisName\" select=\"concat(../@Namespace, '.', @Name)\" />\r\n" +
+            "  <!-- TODO EXSLT node-set-->\r\n" +
+            "  <!--<xsl:variable name=\"thisTypeNode\" select=\"msxsl:node-set($allowedTypes)/type[@name = $thisName]\" />-->\r\n" +
+            "  <xsl:variable name=\"thisTypeNode\">\r\n" +
             "    <xsl:choose>\r\n" +
-            "      <xsl:when test=\"@BaseType\">\r\n" +
-            "        <xsl:value-of select=\"@BaseType\"/>\r\n" +
+            "      <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "        <xsl:copy-of select=\"msxsl:node-set($allowedTypes)/type[@name = $thisName]\"/>\r\n" +
             "      </xsl:when>\r\n" +
             "      <xsl:otherwise>\r\n" +
-            "        <xsl:value-of select=\"$EntityBaseClass\"  />\r\n" +
+            "        <xsl:copy-of select=\"exsl:node-set($allowedTypes)/type[@name = $thisName]\"/>\r\n" +
             "      </xsl:otherwise>\r\n" +
             "    </xsl:choose>\r\n" +
             "  </xsl:variable>\r\n" +
-            "  <xsl:variable name=\"props\">\r\n" +
-            "    <xsl:apply-templates select=\"*\" />\r\n" +
-            "  </xsl:variable>\r\n" +
-            "  <xsl:text xml:space=\"preserve\">  </xsl:text><xsl:value-of select=\"$BaseType\"  />.extend('<xsl:value-of select=\"concat($DefaultNamespace,../@Namespace)\"/>.<xsl:value-of select=\"@Name\"/>', {\r\n" +
-            "    <xsl:choose><xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
-            "    <xsl:for-each select=\"msxsl:node-set($props)/*\">\r\n" +
-            "      <xsl:value-of select=\".\"/><xsl:if test=\"position() != last()\">,\r\n" +
-            "    </xsl:if></xsl:for-each>\r\n" +
-            "  </xsl:when>\r\n" +
-            "  <xsl:otherwise>\r\n" +
-            "    <xsl:for-each select=\"exsl:node-set($props)/*\">\r\n" +
-            "      <xsl:value-of select=\".\"/><xsl:if test=\"position() != last()\">,\r\n" +
-            "    </xsl:if></xsl:for-each>\r\n" +
-            "    </xsl:otherwise>\r\n" +
+            "  <xsl:variable name=\"thisTypeNodeExists\">\r\n" +
+            "    <xsl:choose>\r\n" +
+            "      <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "        <xsl:copy-of select=\"(count(msxsl:node-set($allowedTypes)/type[@name = $thisName]) > 0)\"/>\r\n" +
+            "      </xsl:when>\r\n" +
+            "      <xsl:otherwise>\r\n" +
+            "        <xsl:copy-of select=\"(count(exsl:node-set($allowedTypes)/type[@name = $thisName]) > 0)\"/>\r\n" +
+            "      </xsl:otherwise>\r\n" +
             "    </xsl:choose>\r\n" +
-            "    <xsl:variable name=\"currentName\"><xsl:value-of select=\"concat(../@Namespace,'.',@Name)\"/></xsl:variable>\r\n" +
-            "    <xsl:for-each select=\"//edm:FunctionImport[@IsBindable and edm:Parameter[1]/@Type = $currentName]\"><xsl:if test=\"position() = 1\">,\r\n" +
-            "    </xsl:if>\r\n" +
-            "      <xsl:apply-templates select=\".\"></xsl:apply-templates><xsl:if test=\"position() != last()\">,\r\n" +
-            "    </xsl:if>\r\n" +
-            "    </xsl:for-each>\r\n" +
+            "  </xsl:variable>\r\n" +
+            "  <!--<xsl:variable name=\"filterFields\" select=\"(count($thisTypeNode/field) > 0)\" />-->\r\n" +
+            "  <xsl:variable name=\"filterFields\">\r\n" +
+            "    <xsl:choose>\r\n" +
+            "      <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "        <xsl:copy-of select=\"(count(msxsl:node-set($thisTypeNode)/type/field) > 0)\"/>\r\n" +
+            "      </xsl:when>\r\n" +
+            "      <xsl:otherwise>\r\n" +
+            "        <xsl:copy-of select=\"(count(exsl:node-set($thisTypeNode)/type/field) > 0)\"/>\r\n" +
+            "      </xsl:otherwise>\r\n" +
+            "    </xsl:choose>\r\n" +
+            "  </xsl:variable>\r\n" +
+            "  <xsl:if test=\"($hasTypeFilter = 'false') or ($thisTypeNodeExists = 'true')\">\r\n" +
+            "\r\n" +
+            "      <xsl:message terminate=\"no\">Info: generating type <xsl:value-of select=\"concat(../@Namespace, '.', @Name)\"/></xsl:message>\r\n" +
+            "    \r\n" +
+            "      <xsl:variable name=\"BaseType\">\r\n" +
+            "        <xsl:choose>\r\n" +
+            "          <xsl:when test=\"@BaseType\">\r\n" +
+            "            <xsl:value-of select=\"@BaseType\"/>\r\n" +
+            "          </xsl:when>\r\n" +
+            "          <xsl:otherwise>\r\n" +
+            "            <xsl:value-of select=\"$EntityBaseClass\"  />\r\n" +
+            "          </xsl:otherwise>\r\n" +
+            "        </xsl:choose>\r\n" +
+            "      </xsl:variable>\r\n" +
+            "\r\n" +
+            "\r\n" +
+            "     <xsl:variable name=\"props\">\r\n" +
+            "       <xsl:for-each select=\"*[local-name() != 'NavigationProperty' or ($GenerateNavigationProperties = 'true' and local-name() = 'NavigationProperty')]\">\r\n" +
+            "         <xsl:variable name=\"fname\" select=\"@Name\" />\r\n" +
+            "         <xsl:variable name=\"isAllowedField\">\r\n" +
+            "           <xsl:choose>\r\n" +
+            "             <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "               <xsl:copy-of select=\"(count(msxsl:node-set($thisTypeNode)/type/field[@name = $fname]) > 0)\"/>\r\n" +
+            "             </xsl:when>\r\n" +
+            "             <xsl:otherwise>\r\n" +
+            "               <xsl:copy-of select=\"(count(exsl:node-set($thisTypeNode)/type/field[@name = $fname]) > 0)\"/>\r\n" +
+            "             </xsl:otherwise>\r\n" +
+            "           </xsl:choose>\r\n" +
+            "         </xsl:variable>\r\n" +
+            "         <xsl:if test=\"($filterFields = 'false') or ($isAllowedField = 'true')\">\r\n" +
+            "           <xsl:apply-templates select=\".\" />\r\n" +
+            "         </xsl:if> \r\n" +
+            "       </xsl:for-each>\r\n" +
+            "      </xsl:variable>\r\n" +
+            "    \r\n" +
+            "      <xsl:text xml:space=\"preserve\">  </xsl:text><xsl:value-of select=\"$BaseType\"  />.extend('<xsl:value-of select=\"concat($DefaultNamespace,../@Namespace)\"/>.<xsl:value-of select=\"@Name\"/>', {\r\n" +
+            "     <xsl:choose>\r\n" +
+            "        <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "          <xsl:for-each select=\"msxsl:node-set($props)/*\">\r\n" +
+            "            <xsl:value-of select=\".\"/>\r\n" +
+            "            <xsl:if test=\"position() != last()\">\r\n" +
+            "            <xsl:text>,&#10;     </xsl:text>  \r\n" +
+            "            </xsl:if>\r\n" +
+            "          </xsl:for-each>\r\n" +
+            "        </xsl:when>\r\n" +
+            "        <xsl:otherwise>\r\n" +
+            "          <xsl:for-each select=\"exsl:node-set($props)/*\">\r\n" +
+            "            <xsl:value-of select=\".\"/>\r\n" +
+            "            <xsl:if test=\"position() != last()\">,&#10;     </xsl:if>\r\n" +
+            "          </xsl:for-each>\r\n" +
+            "        </xsl:otherwise>\r\n" +
+            "      </xsl:choose>\r\n" +
+            "      <xsl:variable name=\"currentName\"><xsl:value-of select=\"concat(../@Namespace,'.',@Name)\"/></xsl:variable>\r\n" +
+            "      <xsl:for-each select=\"//edm:FunctionImport[@IsBindable and edm:Parameter[1]/@Type = $currentName]\"><xsl:if test=\"position() = 1\">,\r\n" +
+            "      </xsl:if>\r\n" +
+            "        <xsl:apply-templates select=\".\"></xsl:apply-templates><xsl:if test=\"position() != last()\">,\r\n" +
+            "      </xsl:if>\r\n" +
+            "      </xsl:for-each>\r\n" +
             "  });\r\n" +
-            "  \r\n" +
+            "\r\n" +
+            "</xsl:if>\r\n" +
             "</xsl:for-each>\r\n" +
             "\r\n" +
             "<xsl:for-each select=\"//edm:EntityContainer\">\r\n" +
             "  <xsl:text xml:space=\"preserve\">  </xsl:text><xsl:value-of select=\"$ContextBaseClass\"  />.extend('<xsl:value-of select=\"concat(concat($DefaultNamespace,../@Namespace), '.', @Name)\"/>', {\r\n" +
-            "    <!--or (@IsBindable = 'true' and (@IsAlwaysBindable = 'false' or @m:IsAlwaysBindable = 'false' or @metadata:IsAlwaysBindable = 'false'))-->\r\n" +
-            "    <xsl:for-each select=\"edm:EntitySet | edm:FunctionImport[not(@IsBindable) or @IsBindable = 'false']\">\r\n" +
-            "      <xsl:apply-templates select=\".\"></xsl:apply-templates><xsl:if test=\"position() != last()\">,\r\n" +
-            "    </xsl:if>\r\n" +
+            "     <!--or (@IsBindable = 'true' and (@IsAlwaysBindable = 'false' or @m:IsAlwaysBindable = 'false' or @metadata:IsAlwaysBindable = 'false'))-->\r\n" +
+            "\r\n" +
+            "   <xsl:variable name=\"subset\">\r\n" +
+            "    <xsl:for-each select=\"edm:EntitySet | edm:FunctionImport\">\r\n" +
+            "      <xsl:choose>\r\n" +
+            "        <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "          <xsl:if test=\"($hasTypeFilter = 'false') or msxsl:node-set($allowedTypes)/type[@name = current()/@EntityType]\">\r\n" +
+            "            <xsl:copy-of select=\".\"/>\r\n" +
+            "          </xsl:if>\r\n" +
+            "        </xsl:when>\r\n" +
+            "        <xsl:otherwise>\r\n" +
+            "          <xsl:if test=\"($hasTypeFilter = 'false') or exsl:node-set($allowedTypes)/type[@name = current()/@EntityType]\">\r\n" +
+            "            <xsl:copy-of select=\".\"/>\r\n" +
+            "          </xsl:if>\r\n" +
+            "        </xsl:otherwise>\r\n" +
+            "      </xsl:choose>\r\n" +
             "    </xsl:for-each>\r\n" +
+            "  </xsl:variable>\r\n" +
+            "\r\n" +
+            "  \r\n" +
+            "  <xsl:choose>\r\n" +
+            "    <xsl:when test=\"function-available('msxsl:node-set')\">\r\n" +
+            "      <xsl:for-each select=\"msxsl:node-set($subset)/*[local-name() != 'FunctionImport' or not(@IsBindable) or @IsBindable = 'false']\">\r\n" +
+            "        <xsl:apply-templates select=\".\"></xsl:apply-templates>\r\n" +
+            "        <xsl:if test=\"position() != last()\">,\r\n" +
+            "     </xsl:if>\r\n" +
+            "      </xsl:for-each>\r\n" +
+            "    </xsl:when>\r\n" +
+            "    <xsl:otherwise>\r\n" +
+            "      <xsl:for-each select=\"exsl:node-set($subset)/*[local-name() != 'FunctionImport' or not(@IsBindable) or @IsBindable = 'false']\">\r\n" +
+            "        <xsl:apply-templates select=\".\"></xsl:apply-templates>\r\n" +
+            "        <xsl:if test=\"position() != last()\">,\r\n" +
+            "     </xsl:if>\r\n" +
+            "      </xsl:for-each>\r\n" +
+            "    </xsl:otherwise>\r\n" +
+            "  </xsl:choose>\r\n" +
             "  });\r\n" +
             "\r\n" +
             "  $data.generatedContexts = $data.generatedContexts || [];\r\n" +
