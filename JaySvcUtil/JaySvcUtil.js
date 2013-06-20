@@ -150,6 +150,43 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         }
     },
     _loadXMLDoc: function (cnf, callback) {
+        var that = this;
+        if ($data.postMessageODataHandler) {
+
+            if (cnf.user && cnf.password && (!cnf.httpHeaders || (cnf.httpHeaders && !cnf.httpHeaders['Authorization']))) {
+                httpHeader = httpHeader || {};
+                httpHeader["Authorization"] = "Basic " + this.__encodeBase64(cnf.user + ":" + cnf.password);
+            }
+
+            $data.postMessageODataHandler.requestProxy({
+                url: cnf.metadataUri,
+                httpHeaders: cnf.httpHeaders,
+                success: function (response) {
+                    var doc;
+                    if (typeof module !== 'undefined' && typeof require !== 'undefined') {
+                        doc = response.responseText;
+                    } else if (window.ActiveXObject) {
+                        doc = new ActiveXObject('Microsoft.XMLDOM');
+                        doc.async = 'false';
+                        doc.loadXML(response.responseText);
+                    } else {
+                        var parser = new DOMParser();
+                        doc = parser.parseFromString(response.responseText, 'text/xml');
+                    }
+
+                    callback(doc, response);
+                },
+                error: function (e) {
+                    that._loadXHTTP_XMLDoc(cnf, callback);
+                }
+
+            });
+
+        } else {
+            this._loadXHTTP_XMLDoc(cnf, callback);
+        }
+    },
+    _loadXHTTP_XMLDoc: function (cnf, callback) {
         var xhttp = new XMLHttpRequest();
         xhttp.open("GET", cnf.metadataUri, true);
         if (cnf.httpHeaders) {
@@ -266,7 +303,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             for (var i = 0; i < types.length; i++) {
                 var cfg = cnf.typeFilter[types[i]];
                 var typeData = {};
-                if (typeof cfg === 'object') {
+                if (typeof cfg === 'object' && cfg) {
                     if (Array.isArray(cfg)) {
                         typeData.Name = types[i];
                         typeData.Fields = cfg;
@@ -274,9 +311,11 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                         typeData.Name = cfg.name || types[i];
                         typeData.Fields = cfg.members || [];
                     }
-                } else {
+                } else if (cfg) {
                     typeData.Name = types[i];
                     typeData.Fields = [];
+                } else {
+                    continue;
                 }
 
                 var typeShortName = typeData.Name;
