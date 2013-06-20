@@ -390,6 +390,11 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 context.cursor[context.field][opMapTo] = opValue;
             }
         }
+        
+        if (context.complexType){
+            delete context.complexType;
+            delete context.field;
+        }
     },
 
     VisitConstantExpression: function (expression, context) {

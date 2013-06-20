@@ -1266,7 +1266,7 @@ test("Save GeographyObjects", 19, function () {
 
             var itemsToSave = [item, item2];
             context.saveChanges(function () {
-                context.GeoTestEntities.toArray(function (items) {
+                context.GeoTestEntities.orderBy('it.Name').toArray(function (items) {
 
                     equal(items.length, 2, 'result length');
                     for (var i = 0; i < items.length; i++) {
