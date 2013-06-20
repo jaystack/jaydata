@@ -281,7 +281,7 @@
     <Content Include="handlebars_examples.html" />
     <Content Include="index.html" />
     <Content Include="jaydata.d.ts" />
-    <Content Include="JayDataModules\postMessage.js" />
+    <Content Include="JayDataModules\jaydata.mscrm.js" />
     <Content Include="JayDataModules\deferred.js" />
     <Content Include="JayDataModules\errorhandler.js" />
     <Content Include="JayDataModules\formBinder.js" />
@@ -289,7 +289,7 @@
     <Content Include="JayDataModules\inMemory.js" />
     <Content Include="JayDataModules\kendo.js" />
     <Content Include="JayDataModules\knockout.js" />
-    <Content Include="JayDataModules\postMessageServer.js" />
+    <Content Include="JayDataModules\jaydata.mscrm.server.js" />
     <Content Include="JayDataModules\qDeferred.js" />
     <Content Include="JayDataModules\sencha.js" />
     <Content Include="JayDataModules\template.js" />

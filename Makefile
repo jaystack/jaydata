@@ -241,6 +241,11 @@ TemplateModule = $(BASEMODULE_DIR)/template.js\
 
 ValidateModule = $(BASEMODULE_DIR)/validate.js\
 
+MsCrmModule = $(BASEMODULE_DIR)/jaydata.mscrm.js\
+
+MsCrmServerModule = $(BASEMODULE_DIR)/jaydata.mscrm.server.js\
+
+
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 
@@ -498,7 +503,7 @@ stormprovider: $(StormProvider) $(CREDITS)
 	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/StormProvider.js --js_output_file $(TEMP_DIR)/StormProvider.min.js
 	@@cat $(CREDITS) $(TEMP_DIR)/StormProvider.min.js > $(PROVIDERS_DIR)/StormProvider.min.js
 
-jaydatamodules: deferredmodule errorhandlermodule formbindermodule handlebarsmodule inmemorymodule kendomodule knockoutmodule qdeferredmodule senchamodule templatemodule validatemodule
+jaydatamodules: deferredmodule errorhandlermodule formbindermodule handlebarsmodule inmemorymodule kendomodule knockoutmodule qdeferredmodule senchamodule templatemodule validatemodule mscrmmodule mscrmservermodule
 
 deferredmodule: $(DeferredModule) $(CREDITS)
 	@@echo "Building Deferred module..."
@@ -576,6 +581,20 @@ validatemodule: $(ValidateModule) $(CREDITS)
 	@@cat $(CREDITS) $(ValidateModule) > $(MODULE_DIR)/validate.js
 	@@java -jar $(COMPILER) --js $(MODULE_DIR)/validate.js --js_output_file $(TEMP_DIR)/validate.min.js
 	@@cat $(CREDITS) $(TEMP_DIR)/validate.min.js > $(MODULE_DIR)/validate.min.js
+
+mscrmmodule: $(MsCrmModule) $(CREDITS)
+	@@echo "Building MsCrm module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(MsCrmModule) > $(MODULE_DIR)/jaydata.mscrm.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/jaydata.mscrm.js --js_output_file $(TEMP_DIR)/jaydata.mscrm.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/jaydata.mscrm.min.js > $(MODULE_DIR)/jaydata.mscrm.min.js
+
+mscrmservermodule: $(MsCrmServerModule) $(CREDITS)
+	@@echo "Building MsCrm Server module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(MsCrmServerModule) > $(MODULE_DIR)/jaydata.mscrm.server.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/jaydata.mscrm.server.js --js_output_file $(TEMP_DIR)/jaydata.mscrm.server.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/jaydata.mscrm.server.min.js > $(MODULE_DIR)/jaydata.mscrm.server.min.js
 
 jaydatavsdoc: jaydata $(CREDITS)
 	@@echo "Building JayData vsdoc version..."

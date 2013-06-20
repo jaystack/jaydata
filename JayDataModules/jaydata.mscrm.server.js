@@ -1,4 +1,5 @@
 (function (window, undefined) {
+    window.parent.postMessage({ MessageHandlerLoaded: true }, '*');
     window.addEventListener("message", function (e) {
         if (e.data.requestProxy) {
             var cnf = e.data;
