@@ -106,7 +106,7 @@
 
     }
     $data.MsCrm.init = function (crmAddress, contextType, cb) {
-        var config;
+        var config = {};
         if (typeof crmAddress === 'object' && crmAddress) {
             config = crmAddress;
             crmAddress = config.url;
