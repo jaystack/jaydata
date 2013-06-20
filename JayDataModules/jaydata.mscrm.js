@@ -66,7 +66,9 @@
 })($data, window);
 
 (function ($data) {
-    $data.MsCrm = {};
+    $data.MsCrm = {
+        disableBatch: true
+    };
     $data.MsCrm.Auth = {
         trace: true,
         clientAuthorizationPath: "/WebResources/new_authorize.html",
@@ -123,6 +125,7 @@
         function initContext() {
             if (!(contextType.isAssignableTo && contextType.isAssignableTo($data.EntityContext))) {
                 cb = contextType;
+                config.disableBatch = $data.MsCrm.disableBatch;
                 $data.service(serviceUrl, config, function (factory) {
                     var ctx = factory();
                     ctx.onReady().then(function () {
@@ -131,7 +134,7 @@
                 });
             } else {
                 function factory() {
-                    return new contextType({ name: 'oData', oDataServiceHost: serviceUrl });
+                    return new contextType({ name: 'oData', oDataServiceHost: serviceUrl, disableBatch: $data.MsCrm.disableBatch });
                 }
                 var ctx = factory();
                 ctx.onReady().then(function () {
