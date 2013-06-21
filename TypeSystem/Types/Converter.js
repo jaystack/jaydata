@@ -12,6 +12,13 @@ $data.Container.registerConverter('$data.Boolean', {
 
 $data.Container.registerConverter('$data.Integer', {
     'default': function (value) {
+        if (value === Number.POSITIVE_INFINITY ||
+            value === Number.NEGATIVE_INFINITY ||
+            value === Number.MAX_VALUE ||
+            value === Number.MIN_VALUE) {
+            return value;
+        }
+
         var r = parseInt(+value, 10);
         if (isNaN(r)) throw 0;
         return r;
