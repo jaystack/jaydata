@@ -2,6 +2,108 @@
     msg = msg || '';
     module("BugFix" + msg);
 
+    test('no attach Child entity at save', 3, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.include('Category').filter('it.Id == 1').toArray(function (res) {
+                    var article = res[0];
+                    db.Articles.attach(article);
+                    article.Title = 'Changed_Title';
+                    article.Category = article.Category;
+                    article.Category.Title = 'Changed_Category_Title';
+
+                    db.saveChanges(function () {
+                        db.Articles.include('Category').filter('it.Id == 1').toArray(function (res) {
+                            var rarticle = res[0];
+
+                            equal(rarticle.Title, 'Changed_Title', 'Article Title Changed');
+                            equal(rarticle.Category.Id, article.Category.Id, 'Article.Category Id not Changed');
+                            equal(rarticle.Category.Title, 'Changed_Category_Title', 'Article.Category Title Changed');
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test('no attach Child entity at save 2', 3, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Articles.include('Category').filter('it.Id == 1').toArray(function (res) {
+                    var article = res[0];
+                    db.Articles.attach(article);
+                    article.Category = article.Category;
+                    article.Category.Title = 'Changed_Category_Title';
+
+                    db.saveChanges(function () {
+                        db.Articles.include('Category').filter('it.Id == 1').toArray(function (res) {
+                            var rarticle = res[0];
+
+                            equal(rarticle.Title, article.Title, 'Article not Changed');
+                            equal(rarticle.Category.Id, article.Category.Id, 'Article.Category Id not Changed');
+                            equal(rarticle.Category.Title, 'Changed_Category_Title', 'Article.Category Title Changed');
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test('no attach Child entity at save 3', 2, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Categories.include('Articles').filter('it.Id == 1').toArray(function (res) {
+                    var category = res[0];
+                    db.Categories.attach(category);
+                    category.Title = 'Changed_Title';
+                    category.Articles[0].Title = 'Changed_Articles[0]_Title';
+
+                    db.saveChanges(function () {
+                        db.Categories.include('Articles').filter('it.Id == 1').toArray(function (res) {
+                            var rcategory = res[0];
+
+                            equal(rcategory.Title, 'Changed_Title', 'Category Title Changed');
+                            equal(rcategory.Articles.filter(function (c) { return c.Title == rcategory.Articles[0].Title && c.Id == rcategory.Articles[0].Id }).length, 1, 'Article.Articles[0] Id not Changed')
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    test('no attach Child entity at save 3', 2, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            $news.Types.NewsContext.generateTestData(db, function () {
+                db.Categories.include('Articles').filter('it.Id == 1').toArray(function (res) {
+                    var category = res[0];
+                    db.Categories.attach(category);
+                    category.Articles[0].Title = 'Changed_Articles[0]_Title';
+
+                    db.saveChanges(function () {
+                        db.Categories.include('Articles').filter('it.Id == 1').toArray(function (res) {
+                            var rcategory = res[0];
+
+                            equal(rcategory.Title, category.Title, 'Article not Changed');
+                            equal(rcategory.Articles.filter(function (c) { return c.Title == rcategory.Articles[0].Title && c.Id == rcategory.Articles[0].Id }).length, 1, 'Article.Articles[0] Id not Changed')
+
+                            start();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
     test("Guid key with ' in ' structure", 6, function () {
 
         stop();

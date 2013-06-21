@@ -983,7 +983,11 @@ $data.Class.define('$data.EntityContext', null, null,
                                 }
                             }
                             if (!data.entityState) {
-                                data.entityState = $data.EntityState.Added;
+                                if (data.storeToken === this.storeToken) {
+                                    data.entityState = $data.EntityState.Modified;
+                                } else {
+                                    data.entityState = $data.EntityState.Added;
+                                }
                             }
                             if (additionalEntities.indexOf(data) == -1) {
                                 additionalEntities.push(data);

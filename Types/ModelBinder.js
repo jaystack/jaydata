@@ -32,8 +32,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 o[i] = r[i];
             }
         }
-        if (o instanceof $data.Entity)
+        return this._finalize(o);
+    },
+
+    _finalize: function(o){
+        if (o instanceof $data.Entity) {
             o.changedProperties = undefined;
+            o.storeToken = this.context.storeToken;
+        }
         return o;
     },
 
@@ -357,12 +363,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }
             }
-            if (this.references && meta.$keys) {
-                context.src += 'if (' + item + ' instanceof $data.Entity){' + item + '.changedProperties = undefined;}';
-                //context.src += '}';
-            } else {
-                context.src += 'if (' + item + ' instanceof $data.Entity){' + item + '.changedProperties = undefined;}';
-            }
+            context.src += item + ' = self._finalize(' + item + ');';
         }
     },
 

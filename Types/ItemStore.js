@@ -610,9 +610,27 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             type = query.modelBinderConfig.$item.$type;
         }
 
-        if ((type && type.isAssignableTo && type.isAssignableTo($data.Entity)) || (typeof type === 'undefined' && query.result && query.result[0] instanceof $data.Entity)) {
+        //TODO: runs when model binding missed (inmemory)
+        if ((typeof type === 'undefined' && query.result && query.result[0] instanceof $data.Entity)) {
+            var navProps = !type ? [] : type.memberDefinitions.getPublicMappedProperties().filter(function (memDef) {
+                return !!memDef.inverseProperty;
+            });
+
             for (var i = 0; i < query.result.length; i++) {
-                self._setStoreAlias(query.result[i], context.storeToken)
+                self._setStoreAlias(query.result[i], context.storeToken);
+
+                for (var j = 0; j < navProps.length; j++) {
+                    var navProp = navProps[j];
+                    if (query.result[i][navProp.name] instanceof $data.Entity) {
+                        self._setStoreAlias(query.result[i][navProp.name], context.storeToken);
+                    } else if (Array.isArray(query.result[i][navProp.name])) {
+                        for (var k = 0; k < query.result[i][navProp.name].length; k++) {
+                            if (query.result[i][navProp.name][k] instanceof $data.Entity) {
+                                self._setStoreAlias(query.result[i][navProp.name][k], context.storeToken);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

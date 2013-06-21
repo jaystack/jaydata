@@ -123,14 +123,21 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             if (refValue instanceof $data.Array) {
                                 dbInstance.initData[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
                                 refValue.forEach(function (rv) {
-                                    var contentId = convertedItems.indexOf(rv);
-                                    if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                    dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
+                                    if (rv.entityState == $data.EntityState.Modified || convertedItems.indexOf(rv) < 0) {
+                                        var sMod = context._storageModel.getStorageModel(rv.getType())
+                                        var tblName = sMod.TableName;
+                                        var pk = '(' + context.storageProvider.getEntityKeysValue({ data: rv, entitySet: context.getEntitySetFromElementType(rv.getType()) }) + ')';
+                                        dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: tblName + pk } });
+                                    } else {
+                                        var contentId = convertedItems.indexOf(rv);
+                                        if (contentId < 0) { Guard.raise("Dependency graph error"); }
+                                        dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
+                                    }
                                 }, this);
                             } else if (refValue === null) {
                                 dbInstance.initData[association.FromPropertyName] = null;
                             } else {
-                                if (convertedItems.indexOf(refValue) < 0) {
+                                if (refValue.entityState == $data.EntityState.Modified || convertedItems.indexOf(refValue) < 0) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
                                     var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
