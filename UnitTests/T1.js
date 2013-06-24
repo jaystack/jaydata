@@ -2,6 +2,27 @@
     msg = msg || '';
     module("BugFix" + msg);
 
+    test('store token set after saveChanges', 4, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            var article = new db.Articles.elementType({ Title: 'Title', Lead: 'Lead', Body: 'Body' });
+            db.Articles.add(article);
+            equal(article.storeToken, undefined, 'StoreToken is not avaliable after create');
+
+            db.saveChanges(function () {
+                db.Articles.toArray(function (res) {
+                    var rarticle = res[0];
+
+                    equal(rarticle.Title, 'Title', 'Article Title');
+                    equal(article.storeToken, db.storeToken, 'StoreToken is set');
+                    equal(article.storeToken, rarticle.storeToken, 'StoreToken is same on loaded entity');
+
+                    start();
+                });
+            });
+        });
+    });
+
     test('no attach Child entity at save', 3, function () {
         stop();
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

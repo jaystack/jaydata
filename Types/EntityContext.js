@@ -1323,6 +1323,9 @@ $data.Class.define('$data.EntityContext', null, null,
         for (var i = 0; i < changedEntities.length; i++) {
             var entity = changedEntities[i];
 
+            if (!entity.data.storeToken)
+                entity.data.storeToken = ctx.storeToken;
+
             //type after events with items
             this.processEntityTypeAfterEventHandler(entity);
 
