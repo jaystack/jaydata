@@ -37,6 +37,7 @@ function ComplexTypeTests(providerConfig, msg) {
             for (var i = 0; i < 5; i++) {
                 context.UserProfiles.add(new $news.Types.UserProfile({
                     FullName: 'FullName_' + i,
+                    Birthday: new Date(),
                     Location: new $news.Types.Location({
                         Address: 'Address' + i,
                         Zip: 1000 * (i + 1),
@@ -76,6 +77,7 @@ function ComplexTypeTests(providerConfig, msg) {
             for (var i = 0; i < 5; i++) {
                 context.UserProfiles.add(new $news.Types.UserProfile({
                     FullName: 'FullName_' + i,
+                    Birthday: new Date(),
                     Location: new $news.Types.Location({
                         Address: 'Address' + i,
                         Zip: 1000 * (i + 1),
@@ -117,6 +119,7 @@ function ComplexTypeTests(providerConfig, msg) {
             for (var i = 0; i < 5; i++) {
                 context.UserProfiles.add(new $news.Types.UserProfile({
                     FullName: 'FullName_' + i,
+                    Birthday: new Date(),
                     Location: new $news.Types.Location({
                         Address: 'Address' + i,
                         Zip: 1000 * (i + 1),
@@ -158,6 +161,7 @@ function ComplexTypeTests(providerConfig, msg) {
             for (var i = 0; i < 5; i++) {
                 context.UserProfiles.add(new $news.Types.UserProfile({
                     FullName: 'FullName_' + i,
+                    Birthday: new Date(),
                     Location: new $news.Types.Location({
                         Address: 'Address' + i,
                         Zip: 1000 * (i + 1),
@@ -191,14 +195,13 @@ function ComplexTypeTests(providerConfig, msg) {
     });
 
     test("filter string values", 5 * 7 + 1, function () {
-        if (typeof $data.storageProviders.IndexedDBPro !== 'undefined' && msg === 'indexedDb') { expect(1); ok(false, 'not supported?'); return; }
-
         stop();
         (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
             for (var i = 0; i < 5; i++) {
                 context.UserProfiles.add(new $news.Types.UserProfile({
                     FullName: 'FullName_' + i,
+                    Birthday: new Date(),
                     Location: new $news.Types.Location({
                         Address: 'Address' + i,
                         Zip: 1000 * (i + 1),
@@ -210,7 +213,7 @@ function ComplexTypeTests(providerConfig, msg) {
             }
 
             context.saveChanges(function () {
-                context.UserProfiles.filter(function (it) { return it.FullName.contains('Full') }).toArray(function (res) {
+                context.UserProfiles.filter(function (it) { return it.FullName.contains('Full') == true }).toArray(function (res) {
                     equal(res.length, 5, 'result count');
 
                     for (var i = 0; i < 5; i++) {
