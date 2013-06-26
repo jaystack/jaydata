@@ -233,4 +233,64 @@ function ComplexTypeTests(providerConfig, msg) {
         });
 
     });
+
+    test("orderby with null field Value", 5 * 2 + 1, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            for (var i = 0; i < 5; i++) {
+                context.Categories.add(new $news.Types.Category({
+                    Title: i < 3 ? null : 'Title_' + i,
+                }));
+            }
+
+            context.saveChanges(function () {
+                context.Categories.orderBy('it.Title').toArray(function (res) {
+                    equal(res.length, 5, 'result count');
+
+                    for (var i = 0; i < res.length; i++) {
+                        equal(res[i] instanceof $news.Types.Category, true, 'item is Category');
+                        if (i < 3) {
+                            equal(res[i].Title, null, 'item[i].Title is string');
+                        } else {
+                            equal(res[i].Title, 'Title_' + i, 'item[i].Title is string');
+                        }
+                    }
+
+                    _finishCb(context);
+                });
+            });
+        });
+
+    });
+
+    test("orderbyDesc with null field Value", 5 * 2 + 1, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            for (var i = 0; i < 5; i++) {
+                context.Categories.add(new $news.Types.Category({
+                    Title: i < 3 ? null : 'Title_' + i,
+                }));
+            }
+
+            context.saveChanges(function () {
+                context.Categories.orderByDescending('it.Title').toArray(function (res) {
+                    equal(res.length, 5, 'result count');
+
+                    for (var i = 0; i < res.length; i++) {
+                        equal(res[i] instanceof $news.Types.Category, true, 'item is Category');
+                        if (i > 1) {
+                            equal(res[i].Title, null, 'item[i].Title is string' + res[i].Title);
+                        } else {
+                            equal(res[i].Title, 'Title_' + (res.length - i - 1), 'item[i].Title is string' + res[i].Title);
+                        }
+                    }
+
+                    _finishCb(context);
+                });
+            });
+        });
+
+    });
 };

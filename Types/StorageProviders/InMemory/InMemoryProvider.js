@@ -119,13 +119,13 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                     result.sort(function (a, b) {
                         var aVal = sql.$order[i](a);
                         var bVal = sql.$order[i](b);
-                        return aVal === bVal ? 0 : (aVal > bVal ? 1 : -1);
+                        return aVal === bVal ? 0 : (aVal > bVal || bVal === null ? 1 : -1);
                     });
                 else
                     result.sort(function (a, b) {
                         var aVal = sql.$order[i](a);
                         var bVal = sql.$order[i](b);
-                        return aVal === bVal ? 0 : (aVal < bVal ? 1 : -1);
+                        return aVal === bVal ? 0 : (aVal < bVal || aVal === null ? 1 : -1);
                     });
             }
         }
