@@ -141,6 +141,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
         } else if (meta.$item) {
             context.meta.push('$item');
             var iter = (context.item && context.current ? context.item + '.' + context.current : (context.item ? context.item : 'result'));
+            context.iter = iter;
             if (iter.indexOf('.') < 0) context.src += 'var ' + iter + ';';
             context.src += 'var fn = function(di){';
             if (meta.$selector) {
@@ -163,7 +164,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.src += '}';*/
             context.src += iter + ' = typeof ' + iter + ' == "undefined" ? [] : ' + iter + ';';
             //context.src += iter + ' = [];';
-            context.iter = iter;
             if (this.references && meta.$item.$keys) {
                 var keycacheName = 'keycache_' + iter.replace(/\./gi, '_');
                 context.src += 'var ' + keycacheName + ';';

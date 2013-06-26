@@ -166,13 +166,20 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 else if (context.valueType)
                     v = this.provider.fieldConverter.toDb[Container.resolveName(Container.resolveType(context.valueType))](v);
                 context.value = v;
-                if (context.cursor instanceof Array){
-                    var o = {};
-                    o[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;
-                    context.cursor.push(o);
-                }else context.cursor[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;
-                if (context.options && context.options.fields) context.options.fields[context.queryField] = 1;
-                if (context.unary === $data.Expressions.ExpressionType.Not) context.unary = undefined;
+                if (context.fieldOperation){
+                    if (context.unary === $data.Expressions.ExpressionType.Not){
+                        var c = { $not: context.cursor[context.queryField] };
+                        context.cursor[context.queryField] = c;
+                    }
+                }else{
+                    if (context.cursor instanceof Array){
+                        var o = {};
+                        o[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;
+                        context.cursor.push(o);
+                    }else context.cursor[context.queryField] = context.unary === $data.Expressions.ExpressionType.Not ? { $ne: context.value } : context.value;
+                    if (context.options && context.options.fields) context.options.fields[context.queryField] = 1;
+                    if (context.unary === $data.Expressions.ExpressionType.Not) context.unary = undefined;
+                }
                 break;
             case $data.Expressions.ExpressionType.In:
                 this.Visit(expression.left, context);
@@ -248,6 +255,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 break;
         }
         
+        delete context.fieldOperation;
         delete context.complexType;
         delete context.association;
         delete context.field;
@@ -325,6 +333,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
     },
 
     _fieldOperation: function(opName, context){
+        context.fieldOperation = true;
         var opMapTo;
         var opValue;
         switch (opName){
