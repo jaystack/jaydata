@@ -113,21 +113,23 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             result = result.map(sql.$map);
         
         if (sql.$order && sql.$order.length > 0) {
-            sql.$order.reverse();
-            for (var i = 0, l = sql.$order.length; i < l; i++) {
-                if (sql.$order[i].ASC)
-                    result.sort(function (a, b) {
-                        var aVal = sql.$order[i](a);
-                        var bVal = sql.$order[i](b);
-                        return aVal === bVal ? 0 : (aVal > bVal || bVal === null ? 1 : -1);
-                    });
-                else
-                    result.sort(function (a, b) {
-                        var aVal = sql.$order[i](a);
-                        var bVal = sql.$order[i](b);
-                        return aVal === bVal ? 0 : (aVal < bVal || aVal === null ? 1 : -1);
-                    });
-            }
+            result.sort(function (a, b) {
+                var result;
+                for (var i = 0, l = sql.$order.length; i < l; i++) {
+                    result = 0;
+                    var aVal = sql.$order[i](a);
+                    var bVal = sql.$order[i](b);
+
+                    if(sql.$order[i].ASC)
+                        result = aVal === bVal ? 0 : (aVal > bVal || bVal === null ? 1 : -1);
+                    else
+                        result = aVal === bVal ? 0 : (aVal < bVal || aVal === null ? 1 : -1);
+
+                    if (result !== 0) break;
+
+                }
+                return result;
+            });
         }
 
         if (sql.$take !== undefined && sql.$skip !== undefined) {

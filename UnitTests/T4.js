@@ -293,4 +293,34 @@ function ComplexTypeTests(providerConfig, msg) {
         });
 
     });
+
+    test("orderbyDESC orderbyASC", 5 * 4*2 + 1, function () {
+        stop();
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            for (var i = 0; i < 5; i++) {
+                context.TestTable2.add({ Id: $data.createGuid(), i0: 1, s0: 'value' + i });
+                context.TestTable2.add({ Id: $data.createGuid(), i0: 1, s0: 'value' + i });
+                context.TestTable2.add({ Id: $data.createGuid(), i0: 2, s0: 'value' + i });
+                context.TestTable2.add({ Id: $data.createGuid(), i0: 2, s0: 'value' + i });
+            }
+
+            context.saveChanges(function () {
+                context.TestTable2.orderByDescending('it.i0').orderBy('it.s0').toArray(function (res) {
+                    equal(res.length, 20, 'result count');
+
+                    for (var i = 0; i < res.length; i++) {
+                        var i0 = i < 10 ? 2 : 1;
+                        equal(res[i].i0, i0, 'i0: ' + i0);
+                        var s0 = 'value' + Math.floor((i > 9 ? (i - 10) : i) / 2);
+                        equal(res[i].s0, s0, 's0: ' + s0);
+
+                    }
+
+                    _finishCb(context);
+                });
+            });
+        });
+
+    });
 };
