@@ -124,7 +124,12 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
             var resultText;
             if (!(value instanceof $data.EmptyServiceResult) && (resultText = value.toString())) {
                 res.setHeader('Content-Length', new Buffer(resultText, 'utf8').length);
-                res.setHeader('content-type', (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=UTF-8');
+                var contentType = (res.getHeader('content-type') || value.contentType || 'text/plain') + ';charset=UTF-8';
+                res.setHeader('content-type',
+                    (contentType.indexOf('application/json;odata=verbose') >= 0
+                        ? 'application/json;charset=utf-8;' + contentType.replace('application/json;', '').replace('charset=utf-8;', '')
+                        : contentType)
+                );
                 res.end(resultText);
             } else {
                 res.setHeader('Content-Length', 0);
