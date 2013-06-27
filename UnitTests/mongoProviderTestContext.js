@@ -122,7 +122,7 @@ $data.Entity.extend('mydatabase.Customer', {
     Name: { maxLength: 200, nullable: true, type: String }
 });
 
-$data.EntityContext.extend('$test.Context', {
+$data.EntityContext.extend('$test.BaseContext', {
     Items: { type: $data.EntitySet, elementType: $test.Item },
     ConvertItems: { type: $data.EntitySet, elementType: $test.ConvertItem },
     ComplexItems: { type: $data.EntitySet, elementType: $test.ComplexItem },

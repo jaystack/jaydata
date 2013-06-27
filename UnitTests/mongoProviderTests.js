@@ -1,6 +1,8 @@
-require('jaydata');
-exports.seed = require('./mongoProviderTestContext.js');
-
+if (typeof $data == 'undefined'){
+    require('jaydata');
+    exports.seed = require('./mongoProviderTestContext.js');
+}
+if (!$test.Context) $test.BaseContext.extend('$test.Context', {});
 console.log('------------------------------------------------------------------------------------------------------')
 
 $test.Context.init = function(callback){
