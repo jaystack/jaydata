@@ -291,21 +291,26 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                         
                                         if (include.options.sort) {
                                             var order = Object.keys(include.options.sort);
-                                            for (var i = order.length - 1; i >= 0; i--){
-                                                var cmp = new Function('it', 'return it.' + order[i] + ';');
-                                                if (include.options.sort[order[i]])
-                                                    results.sort(function (a, b) {
-                                                        var aVal = cmp(a);
-                                                        var bVal = cmp(b);
-                                                        return aVal === bVal ? 0 : (aVal < bVal ? 1 : -1);
-                                                    });
-                                                else
-                                                    result.sort(function (a, b) {
-                                                        var aVal = cmp(a);
-                                                        var bVal = cmp(b);
-                                                        return aVal === bVal ? 0 : (aVal > bVal ? 1 : -1);
-                                                    });
-                                            }
+                                            var cmp = order.map(function(it){
+                                                return new Function('it', 'return it.' + it + ';');
+                                            });
+                                            results.sort(function (a, b) {
+                                                var result;
+                                                for (var i = 0, l = order.length; i < l; i++) {
+                                                    result = 0;
+                                                    var aVal = cmp[i](a);
+                                                    var bVal = cmp[i](b);
+
+                                                    if (include.options.sort[order[i]] == 1)
+                                                        result = aVal === bVal ? 0 : (aVal > bVal || bVal === null ? 1 : -1);
+                                                    else
+                                                        result = aVal === bVal ? 0 : (aVal < bVal || aVal === null ? 1 : -1);
+
+                                                    if (result !== 0) break;
+
+                                                }
+                                                return result;
+                                            });
                                         }
                                         
                                         if (includes && includes.length){

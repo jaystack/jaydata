@@ -1,4 +1,4 @@
-﻿function T4_CrossProviderTests() {
+function T4_CrossProviderTests() {
 
     //oData
     ComplexTypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
@@ -27,8 +27,8 @@ function _finishCb(context) {
     start();
 }
 
-function ComplexTypeTests(providerConfig, msg) {
-    module("ComplexTypeTests_" + (msg || ''));
+ComplexTypeTests = function ComplexTypeTests(providerConfig, msg) {
+    if (typeof module == 'function') module("ComplexTypeTests_" + (msg || ''));
 
     test("Save and load complex values", 5*7+1, function () {
         stop();

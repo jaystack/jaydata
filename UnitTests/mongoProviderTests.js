@@ -4903,3 +4903,78 @@ test('Include: direct -> mixed deep Entity, EntitySet', 417, function () {
         });
     });
 });
+
+require('./T4.js');
+ComplexTypeTests(providerConfig, 'mongoDB');
+
+test("orderby with null field Value over navigation field", 5 * 2 + 1, function () {
+    stop();
+    (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+        for (var i = 0; i < 5; i++) {
+            context.Articles.add(new $news.Types.Article({
+                Title: 'Article' + (i + 1),
+                Category: new $news.Types.Category({
+                    Title: i < 3 ? null : 'Title_' + i
+                })
+            }));
+        }
+
+        context.saveChanges(function () {
+            context.Articles.include('Category').orderBy('it.Category.Title').toArray(function (res) {
+                equal(res.length, 5, 'result count');
+                
+                for (var i = 0; i < res.length; i++) {
+                    ok(res[i] instanceof $news.Types.Article, 'item is Article');
+                    ok(res[i].Category instanceof $news.Types.Category, 'item.Category is Category');
+                    if (i < 3) {
+                        equal(res[i].Category.Title, null, 'item[i].Category.Title is string');
+                    } else {
+                        equal(res[i].Category.Title, 'Title_' + i, 'item[i].Category.Title is string');
+                    }
+                }
+
+                start();
+            });
+        });
+    });
+
+});
+
+test("orderby with multiple field Value over navigation field", 1 + 6 * 5, function () {
+    stop();
+    (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+        for (var i = 0; i < 6; i++) {
+            context.Articles.add(new $news.Types.Article({
+                Title: 'Article' + (i + 1),
+                Category: new $news.Types.Category({
+                    Title: 'Title_' + (i % 2)
+                }),
+                Author: new $news.Types.User({
+                    LoginName: 'User_' + (((6 - i) / 2) | 0)
+                })
+            }));
+        }
+        
+        var catTitle = [0, 0, 1, 0, 1, 1];
+
+        context.saveChanges(function () {
+            context.Articles.include('Category').include('Author').orderByDescending('it.Author.LoginName').orderBy('it.Category.Title').toArray(function (res) {
+                equal(res.length, 6, 'result count');
+                //console.log(res.map(function(it){ return { t: it.Title, aln: it.Author.LoginName, ct: it.Category.Title }; }));
+                
+                for (var i = 0; i < res.length; i++) {
+                    ok(res[i] instanceof $news.Types.Article, 'item is Article');
+                    ok(res[i].Category instanceof $news.Types.Category, 'item.Category is Category');
+                    ok(res[i].Author instanceof $news.Types.User, 'item.Author is User');
+                    equal(res[i].Category.Title, 'Title_' + catTitle[i], 'item[i].Category.Title is string');
+                    equal(res[i].Author.LoginName, 'User_' + (((6 - i) / 2) | 0), 'item[i].Category.Title is string');
+                }
+
+                start();
+            });
+        }).fail($data.debug);
+    });
+
+});
