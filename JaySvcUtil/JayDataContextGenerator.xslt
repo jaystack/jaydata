@@ -27,6 +27,8 @@
 
   <xsl:param name="AllowedTypesListX">Microsoft.Crm.Sdk.Data.Services.Product;Microsoft.Crm.Sdk.Data.Services.LeadAddress:Telephone1,City,UTCOffset;</xsl:param>
 
+  <xsl:variable name="fullmetadata" select="/" />
+  
   <xsl:template name="createFieldsList">
     <xsl:param name="fields" />
     <!--<xsl:message terminate="no">
@@ -318,7 +320,15 @@
       <xsl:text>{ name: '</xsl:text>
       <xsl:value-of select="@Name"/>
       <xsl:text>', type: '</xsl:text>
-      <xsl:apply-templates select="@Type" mode="render-functionImport-type" />
+      <xsl:variable name="curr" select="@Type"/>
+      <xsl:choose>
+        <xsl:when test="$fullmetadata//edm:Schema[starts-with($curr, @Namespace)]">
+          <xsl:value-of select="concat($DefaultNamespace,$curr)" />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$curr" />
+        </xsl:otherwise>
+      </xsl:choose>
       <xsl:text>' }</xsl:text>
       <xsl:if test="position() != last()">, </xsl:if>
     </xsl:for-each>    
@@ -334,7 +344,15 @@
       <xsl:when test="starts-with(., 'Collection')">$data.Queryable</xsl:when>
       <xsl:otherwise>
         <xsl:text>'</xsl:text>
-        <xsl:apply-templates select="." mode="render-functionImport-type" />
+        <xsl:variable name="curr" select="."/>
+        <xsl:choose>
+          <xsl:when test="$fullmetadata//edm:Schema[starts-with($curr, @Namespace)]">
+            <xsl:value-of select="concat($DefaultNamespace,$curr)" />
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$curr" />
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:text>'</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
@@ -344,7 +362,7 @@
       <xsl:variable name="curr" select="substring(.,12,$len)"/>
       <xsl:variable name="ElementType" >
         <xsl:choose>
-          <xsl:when test="//edm:Schema[starts-with($curr, @Namespace)]">
+          <xsl:when test="$fullmetadata//edm:Schema[starts-with($curr, @Namespace)]">
             <xsl:value-of select="concat($DefaultNamespace,$curr)" />
           </xsl:when>
           <xsl:otherwise>
