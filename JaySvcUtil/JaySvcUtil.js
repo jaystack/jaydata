@@ -862,7 +862,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "      <xsl:variable name=\"BaseType\">\r\n" +
             "        <xsl:choose>\r\n" +
             "          <xsl:when test=\"@BaseType\">\r\n" +
-            "            <xsl:value-of select=\"@BaseType\"/>\r\n" +
+            "            <xsl:value-of select=\"concat($DefaultNamespace,@BaseType)\"/>\r\n" +
             "          </xsl:when>\r\n" +
             "          <xsl:otherwise>\r\n" +
             "            <xsl:value-of select=\"$EntityBaseClass\"  />\r\n" +

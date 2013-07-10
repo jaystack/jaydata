@@ -186,7 +186,7 @@
       <xsl:variable name="BaseType">
         <xsl:choose>
           <xsl:when test="@BaseType">
-            <xsl:value-of select="@BaseType"/>
+            <xsl:value-of select="concat($DefaultNamespace,@BaseType)"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:value-of select="$EntityBaseClass"  />
