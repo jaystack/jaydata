@@ -139,12 +139,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             }else fn(error, client);
         });
     },
-    _connected: function(oid, prop, prop2, _id, association){
+    _connected: function(oid, prop, prop2, it, association){
         var ret = false;
         association.ReferentialConstraint.forEach(function(ref){
-            if (ref[prop2] && oid[ref[prop2]] && _id) ret = JSON.stringify(oid[ref[prop2]]) == JSON.stringify(_id);
+            if (it && ref[prop2] && oid[ref[prop2]] != undefined) ret = JSON.stringify(oid[ref[prop2]]) == JSON.stringify(it[ref[prop]] != undefined ? it[ref[prop]] : it._id);
         });
-        
         return ret;
     },
     _compile: function(query){
@@ -245,23 +244,23 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                         var conn = function(res){
                                             if (association.FromMultiplicity == '0..1' && association.ToMultiplicity == '*'){
                                                 var r = included.filter(function(it){
-                                                    return self._connected(it, association.ToPropertyName, association.To, res._id, association);
+                                                    return self._connected(it, association.ToPropertyName, association.To, res, association);
                                                 });
                                                 res[prop] = r;
                                             }else if (association.FromMultiplicity == '*' && association.ToMultiplicity == '0..1'){
                                                 var r = included.filter(function(it){
                                                     if (res[association.FromPropertyName] === null) return false;
-                                                    return self._connected(res, association.FromPropertyName, association.From, it._id, association);
+                                                    return self._connected(res, association.FromPropertyName, association.From, it, association);
                                                 })[0];
                                                 res[prop] = r || res[prop];
                                             }else if (association.FromMultiplicity == '1' && association.ToMultiplicity == '0..1'){
                                                 var r = included.filter(function(it){
-                                                    return self._connected(it, association.ToPropertyName, association.To, res._id, association);
+                                                    return self._connected(it, association.ToPropertyName, association.To, res, association);
                                                 })[0];
                                                 res[prop] = r || res[prop];
                                             }else if (association.FromMultiplicity == '0..1' && association.ToMultiplicity == '1'){
                                                 var r = included.filter(function(it){
-                                                    return self._connected(res, association.FromPropertyName, association.From, it._id, association);
+                                                    return self._connected(res, association.FromPropertyName, association.From, it, association);
                                                 })[0];
                                                 res[prop] = r || res[prop];
                                             }
