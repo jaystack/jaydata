@@ -9,7 +9,7 @@
     <script src="../JaySvcUtil.js"></script>
     <script>
         $(function () {
-            $data.MetadataLoader.xsltRepoUrl = '../';
+            //$data.MetadataLoader.xsltRepoUrl = '../';
             $data.MetadataLoader.debugMode = true;
             //$data.MetadataLoader.load('/odatainheritance', {
             //$data.MetadataLoader.load('/odata', {
@@ -30,7 +30,7 @@
                     document.getElementById('asd').value = 'INVALID\r\n\r\n' + ex.data[1];
                 }
             }, {
-                DefaultNamespace: '',
+                DefaultNamespace: 'extra.',
                 AutoCreateContext: true,
                 xxtypeFilter: {
                     'avangradeContext.ProductSet': { members: ['Description', 'ProductNumber'] },

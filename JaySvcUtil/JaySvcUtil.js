@@ -703,6 +703,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "\r\n" +
             "  <xsl:param name=\"AllowedTypesListX\">Microsoft.Crm.Sdk.Data.Services.Product;Microsoft.Crm.Sdk.Data.Services.LeadAddress:Telephone1,City,UTCOffset;</xsl:param>\r\n" +
             "\r\n" +
+            "  <xsl:variable name=\"fullmetadata\" select=\"/\" />\r\n" +
+            "  \r\n" +
             "  <xsl:template name=\"createFieldsList\">\r\n" +
             "    <xsl:param name=\"fields\" />\r\n" +
             "    <!--<xsl:message terminate=\"no\">\r\n" +
@@ -860,7 +862,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "      <xsl:variable name=\"BaseType\">\r\n" +
             "        <xsl:choose>\r\n" +
             "          <xsl:when test=\"@BaseType\">\r\n" +
-            "            <xsl:value-of select=\"@BaseType\"/>\r\n" +
+            "            <xsl:value-of select=\"concat($DefaultNamespace,@BaseType)\"/>\r\n" +
             "          </xsl:when>\r\n" +
             "          <xsl:otherwise>\r\n" +
             "            <xsl:value-of select=\"$EntityBaseClass\"  />\r\n" +
@@ -994,7 +996,15 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "      <xsl:text>{ name: '</xsl:text>\r\n" +
             "      <xsl:value-of select=\"@Name\"/>\r\n" +
             "      <xsl:text>', type: '</xsl:text>\r\n" +
-            "      <xsl:apply-templates select=\"@Type\" mode=\"render-functionImport-type\" />\r\n" +
+            "      <xsl:variable name=\"curr\" select=\"@Type\"/>\r\n" +
+            "      <xsl:choose>\r\n" +
+            "        <xsl:when test=\"$fullmetadata//edm:Schema[starts-with($curr, @Namespace)]\">\r\n" +
+            "          <xsl:value-of select=\"concat($DefaultNamespace,$curr)\" />\r\n" +
+            "        </xsl:when>\r\n" +
+            "        <xsl:otherwise>\r\n" +
+            "          <xsl:value-of select=\"$curr\" />\r\n" +
+            "        </xsl:otherwise>\r\n" +
+            "      </xsl:choose>\r\n" +
             "      <xsl:text>' }</xsl:text>\r\n" +
             "      <xsl:if test=\"position() != last()\">, </xsl:if>\r\n" +
             "    </xsl:for-each>    \r\n" +
@@ -1010,7 +1020,15 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "      <xsl:when test=\"starts-with(., 'Collection')\">$data.Queryable</xsl:when>\r\n" +
             "      <xsl:otherwise>\r\n" +
             "        <xsl:text>'</xsl:text>\r\n" +
-            "        <xsl:apply-templates select=\".\" mode=\"render-functionImport-type\" />\r\n" +
+            "        <xsl:variable name=\"curr\" select=\".\"/>\r\n" +
+            "        <xsl:choose>\r\n" +
+            "          <xsl:when test=\"$fullmetadata//edm:Schema[starts-with($curr, @Namespace)]\">\r\n" +
+            "            <xsl:value-of select=\"concat($DefaultNamespace,$curr)\" />\r\n" +
+            "          </xsl:when>\r\n" +
+            "          <xsl:otherwise>\r\n" +
+            "            <xsl:value-of select=\"$curr\" />\r\n" +
+            "          </xsl:otherwise>\r\n" +
+            "        </xsl:choose>\r\n" +
             "        <xsl:text>'</xsl:text>\r\n" +
             "      </xsl:otherwise>\r\n" +
             "    </xsl:choose>\r\n" +
@@ -1020,7 +1038,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "      <xsl:variable name=\"curr\" select=\"substring(.,12,$len)\"/>\r\n" +
             "      <xsl:variable name=\"ElementType\" >\r\n" +
             "        <xsl:choose>\r\n" +
-            "          <xsl:when test=\"//edm:Schema[starts-with($curr, @Namespace)]\">\r\n" +
+            "          <xsl:when test=\"$fullmetadata//edm:Schema[starts-with($curr, @Namespace)]\">\r\n" +
             "            <xsl:value-of select=\"concat($DefaultNamespace,$curr)\" />\r\n" +
             "          </xsl:when>\r\n" +
             "          <xsl:otherwise>\r\n" +
