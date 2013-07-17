@@ -1311,6 +1311,32 @@ $data.Class.define('$data.EntityContext', null, null,
         }
     },
 
+    bulkInsert: function (entitySet, fields, datas, callback) {
+        var pHandler = new $data.PromiseHandler();
+        callback = pHandler.createCallback(callback);
+        if (typeof entitySet === 'string') {
+            var currentEntitySet;
+
+            for (var entitySetName in this._entitySetReferences) {
+                var actualEntitySet = this._entitySetReferences[entitySetName];
+                if (actualEntitySet.tableName === entitySet) {
+                    currentEntitySet = actualEntitySet;
+                    break;
+                }
+            }
+
+            if (!currentEntitySet)
+                currentEntitySet = this[entitySet];
+
+            entitySet = currentEntitySet;
+        }
+        if (entitySet) {
+            this.storageProvider.bulkInsert(entitySet, fields, datas, callback);
+        } else {
+            callback.error(new Exception('EntitySet not found'));
+        }
+        return pHandler.getPromise();
+    },
 
     prepareRequest: function () { },
     _postProcessSavedItems: function (callBack, changedEntities, transaction, returnTransaction) {

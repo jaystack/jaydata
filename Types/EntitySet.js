@@ -394,5 +394,8 @@ $data.Class.defineEx('$data.EntitySet',
     },
     getFieldUrl: function (keys, field) {
         return this.entityContext.getFieldUrl(keys, field, this);
+    },
+    bulkInsert: function (fields, datas, callback) {
+        return this.entityContext.bulkInsert(this, fields, datas, callback);
     }
 }, null);

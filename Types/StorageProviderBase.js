@@ -284,6 +284,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         };
     },
 
+    bulkInsert: function (a, b, c, callback) {
+        callback.error(new Exception('Not Implemented'));
+    },
+
     supportedFieldOperations: {
         value: {
             length: { dataType: "number", allowedIn: "filter, map" },
