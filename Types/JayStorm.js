@@ -39,6 +39,8 @@
                 }).fail(function () {
                     d.deferred.reject.apply(d.deferred, arguments);
                 });
+        }).fail(function(){
+            d.deferred.reject.apply(d.deferred, arguments);
         });
 
         return d.getPromise();
