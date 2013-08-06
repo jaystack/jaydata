@@ -436,64 +436,7 @@
                     }
 
                     if (options.data.filter) {
-                        var filter = "";
-                        var thisArg = {};
-                        options.data.filter.filters.forEach(function (f, index) {
-                            if (index > 0) {
-                                filter += options.data.filter.logic == "or" ? " || " : " && ";
-                            }
-
-                            //console.log(filter, f);
-
-                            switch (f.operator) {
-                                case 'eq':
-                                    filter += "it." + f.field;
-                                    filter += " == this." + f.field;
-                                    break;
-                                case 'neq':
-                                    filter += "it." + f.field;
-                                    filter += " != this." + f.field;
-                                    break;
-                                case 'startswith':
-                                    filter += "it." + f.field;
-                                    filter += ".startsWith(this." + f.field + ")";
-                                    break;
-                                case 'contains':
-                                    filter += "it." + f.field;
-                                    filter += ".contains(this." + f.field + ")";
-                                    break;
-                                case 'doesnotcontain':
-                                    filter += "!";
-                                    filter += "it." + f.field;
-                                    filter += ".contains(this." + f.field + ")";
-                                    break;
-                                case 'endswith':
-                                    filter += "it." + f.field;
-                                    filter += ".endsWith(this." + f.field + ")";
-                                    break;
-                                case 'gte':
-                                    filter += "it." + f.field;
-                                    filter += " >= this." + f.field;
-                                    break;
-                                case 'gt':
-                                    filter += "it." + f.field;
-                                    filter += " > this." + f.field;
-                                    break;
-                                case 'lte':
-                                    filter += "it." + f.field;
-                                    filter += " <= this." + f.field;
-                                    break;
-                                case 'lt':
-                                    filter += "it." + f.field;
-                                    filter += " < this." + f.field;
-                                    break;
-                                default:
-                                    console.log('unknown operator', f.operator);
-                                    break;
-                            }
-                            thisArg[f.field] = f.value;
-                        })
-                        q = q.filter(filter, thisArg);
+                        q = executeFilter(q, options.data.filter)
                     }
                     var allItemsQ = q;
 
@@ -542,6 +485,82 @@
                         options.error({}, arguments);
                     });
                 });
+
+                function executeFilter(q, filter){
+                    var result = {
+                        expression: "",
+                        index: 0,
+                        values: {}
+                    };
+
+                    createFilterExpression(filter, result);
+
+                    //console.log(result.expression);
+
+                    return q.filter(result.expression, result.values);
+                }
+
+                function createFilterExpression(filter, result){
+                    filter.filters.forEach(function(subFilter, index){
+                        if(index > 0){
+                            result.expression += filter.logic == "or" ? " || " : " && ";
+                        }
+
+                        if(subFilter.field !== undefined){
+                            createFieldExpression(subFilter, result);
+                        }
+                        else{
+                            result.expression += " ( ";
+                            createFilterExpression(subFilter, result);
+                            result.expression += " ) ";
+                        }
+                    });
+                }
+
+                function createFieldExpression(filter, result){
+                    var field = "it." + filter.field;
+                    var valueId = "value" + result.index;
+                    var value = "this." + valueId;
+
+                    switch(filter.operator){
+                        case 'eq':
+                            result.expression += field + " == " + value;
+                            break;
+                        case 'neq':
+                            result.expression += field + " != " + value;
+                            break;
+                        case 'startswith':
+                            result.expression += field + ".startsWith(" + value + ")";
+                            break;
+                        case 'contains':
+                            result.expression += field + ".contains(" + value + ")";
+                            break;
+                        case 'doesnotcontain':
+                            result.expression += "!" + field + ".contains(" + value + ")";
+                            break;
+                        case 'endswith':
+                            result.expression += field + ".endsWith(" + value + ")";
+                            break;
+                        case 'gte':
+                            result.expression += field + " >= " + value;
+                            break;
+                        case 'gt':
+                            result.expression += field + " > " + value;
+                            break;
+                        case 'lte':
+                            result.expression += field + " <= " + value;
+                            break;
+                        case 'lt':
+                            result.expression += field + " < " + value;
+                            break;
+                        default:
+                            console.log('unknown operator', f.operator);
+                            break;
+                    }
+
+                    result.values[valueId] = filter.value;
+                    result.index++;
+                }
             },
             create: function (options, model) {
                 var query = self;
