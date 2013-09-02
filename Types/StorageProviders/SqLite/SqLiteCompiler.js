@@ -196,24 +196,34 @@ $C('$data.storageProviders.sqLite.SQLiteCompiler', null, null, {
         var context = { sets: [], infos: [], entityContext: query.context };
 
         var optimizedIncludeExpression = expression.monitor({
-
             MonitorEntitySetExpression: function (expression, context) {
                 if (expression.source instanceof $data.Expressions.EntityContextExpression && context.sets.indexOf(expression) == -1) {
                     this.backupEntitySetExpression = expression;
                 }
             },
+            VisitCountExpression: function (expression, context) {
+                context.hasCountFrameOperator = true;
+                return expression;
+            },
             MutateIncludeExpression: function (expression, context) {
-                var origSelector = expression.selector.value;
-                Container.createCodeExpression("function(it){return it." + origSelector + ";}", null);
+                var result = null;
+                if (context.hasCountFrameOperator) {
+                    result = expression.source;
+                }
+                else {
+                    var origSelector = expression.selector.value;
+                    Container.createCodeExpression("function(it){return it." + origSelector + ";}", null);
 
-                var jsCodeTree = Container.createCodeParser(this.backupEntitySetExpression.source.instance).createExpression("function(it){return it." + origSelector + ";}");
-                var code2entity = Container.createCodeToEntityConverter(this.backupEntitySetExpression.source.instance);
-                var includeSelector = code2entity.Visit(jsCodeTree, { queryParameters: undefined, lambdaParameters: [this.backupEntitySetExpression] });
+                    var jsCodeTree = Container.createCodeParser(this.backupEntitySetExpression.source.instance).createExpression("function(it){return it." + origSelector + ";}");
+                    var code2entity = Container.createCodeToEntityConverter(this.backupEntitySetExpression.source.instance);
+                    var includeSelector = code2entity.Visit(jsCodeTree, { queryParameters: undefined, lambdaParameters: [this.backupEntitySetExpression] });
 
-                var result = Container.createIncludeExpression(expression.source, includeSelector);
+                    result = Container.createIncludeExpression(expression.source, includeSelector);
+                }
                 return result;
             }
         }, context);
+
         var optimizedExpression = optimizedIncludeExpression.monitor({
             MonitorEntitySetExpression: function (expression, context) {
                 if (expression.source instanceof $data.Expressions.EntityContextExpression && context.sets.indexOf(expression) == -1) {

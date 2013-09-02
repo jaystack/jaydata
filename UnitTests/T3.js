@@ -820,6 +820,54 @@ function T3(providerConfig, msg) {
             });
         });
     });
+    test('full_table_length_with_include', function () {
+        expect(2);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+
+                db.Categories.include("Articles").map(function (c) { return {i:c.Id}}).length({
+                    success: function (result) {
+                        start(1);
+                        ok(result, 'query failed');
+                        equal(result, 5, 'not only 1 row in result set');
+                        console.dir(result);
+                    },
+                    error: function (error) {
+                        start(1);
+                        console.dir(error);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
+    test('full_table_length_with_multiple_include', function () {
+        expect(2);
+        stop(3);
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
+            start(1);
+            $news.Types.NewsContext.generateTestData(db, function () {
+                start(1);
+
+                db.Categories.include("Articles").include("Articles.Author").map(function (c) { return { i: c.Id } }).length({
+                    success: function (result) {
+                        start(1);
+                        ok(result, 'query failed');
+                        equal(result, 5, 'not only 1 row in result set');
+                        console.dir(result);
+                    },
+                    error: function (error) {
+                        start(1);
+                        console.dir(error);
+                        ok(false, error);
+                    }
+                });
+            });
+        });
+    });
     test('full_table_single', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(2);

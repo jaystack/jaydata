@@ -1,6 +1,5 @@
 $C('$data.sqLite.SqlExpressionMonitor', $data.Expressions.ExpressionMonitor, null, {
     constructor: function (monitorDefinition) {
-
         this.VisitIncludeExpression = function (expression, context) {
             var newSourceExpression = this.Visit(expression.source, context);
             monitorDefinition.isMapped = true;
