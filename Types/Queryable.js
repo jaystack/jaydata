@@ -626,6 +626,68 @@ $data.Class.define('$data.Queryable', null, null,
         return pHandler.getPromise();
     },
 
+    find: function (keyValue, onResult, transaction) {
+
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult);
+
+        var keys = this.defaultType.memberDefinitions.getKeyProperties();
+
+        try {
+
+            if (keys.length === 1 && typeof keyValue !== 'object') {
+                var keyV = {};
+                keyV[keys[0].name] = keyValue;
+                keyValue = keyV;
+            }
+
+            if (typeof keyValue !== 'object') {
+                throw new Exception('Key parameter is invalid');
+            } else {
+
+
+                var parameters = [];
+                for (var i = 0; i < keys.length; i++) {
+                    var keyProp = keys[i];
+                    if (!(keyProp.name in keyValue)) {
+                        throw new Exception('Key value missing');
+                    }
+                    parameters.push(Container.createConstantExpression(keyValue[keyProp.name], keyProp.type, keyProp.name));
+                }
+
+                var operation = this.entityContext.storageProvider.supportedSetOperations['find'];
+                if (operation) {
+
+                    var findExpression = Container.createFindExpression(this.expression, parameters);
+                    var preparator = Container.createQueryExpressionCreator(this.entityContext);
+                    try {
+                        var expression = preparator.Visit(findExpression);
+                        this.entityContext.log({ event: "EntityExpression", data: expression });
+
+                        this.entityContext.executeQuery(Container.createQueryable(this, expression), cbWrapper, transaction);
+                    } catch (e) {
+                        cbWrapper.error(e);
+                    }
+
+                } else {
+                    var predicate = '';
+                    var params = {}
+                    for (var i = 0; i < parameters.length; i++) {
+                        var param = parameters[i];
+                        params[param.name] = param.value;
+                        if (i > 0) predicate += ' && ';
+                        predicate += "it." + param.name + " == this." + param.name;
+                    }
+
+                    this.single(predicate, params, cbWrapper, transaction);
+                }
+            }
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
 
     include: function (selector) {
 		///	<summary>Includes the given entity set in the query if it's an inverse property.</summary>

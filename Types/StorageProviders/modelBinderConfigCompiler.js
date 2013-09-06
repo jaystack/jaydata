@@ -17,6 +17,9 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitSomeExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
+    VisitFindExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
     VisitEveryExpression: function (expression) {
         this._defaultModelBinder(expression);
     },

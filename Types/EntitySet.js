@@ -38,14 +38,6 @@ $data.Class.defineEx('$data.EntitySet',
         }
     },
 
-
-    find: function(keyValue, cb) {
-        //var callback = $data.typeSystem.createCallbackSetting(cb);
-        //todo multifield key support
-        var key = this.defaultType.memberDefinitions.getKeyProperties()[0];
-        return this.single("it." + key.name + " == this.value", { value: keyValue }, cb);
-    },
-
     addNew: function(item, cb) {
         var callback = $data.typeSystem.createCallbackSetting(cb);
         var _item = new this.createNew(item);

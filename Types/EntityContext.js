@@ -695,6 +695,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var successResult;
 
             if (query.expression.nodeType === $data.Expressions.ExpressionType.Single ||
+                query.expression.nodeType === $data.Expressions.ExpressionType.Find ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Count ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ||
                 query.expression.nodeType === $data.Expressions.ExpressionType.Some ||

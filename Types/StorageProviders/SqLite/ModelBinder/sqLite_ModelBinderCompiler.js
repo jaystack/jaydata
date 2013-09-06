@@ -10,6 +10,9 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     VisitSomeExpression: function (expression) {
         this._defaultModelBinder(expression);
     },
+    VisitFindExpression: function (expression) {
+        this._defaultModelBinder(expression);
+    },
     VisitEveryExpression: function (expression) {
         this._defaultModelBinder(expression);
     },

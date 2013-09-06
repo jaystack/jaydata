@@ -60,6 +60,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Count: "Count",
     InlineCount: "InlineCount",
     Single: "Single",
+    Find: "Find",
     Some: "Some",
     Every: "Every",
     ToArray: "ToArray",

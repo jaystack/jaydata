@@ -48,6 +48,18 @@ $C('$data.Expressions.SingleExpression', $data.Expressions.FrameOperator, null, 
     nodeType: { value: $data.Expressions.ExpressionType.Single, enumerable: true }
 });
 
+$C('$data.Expressions.FindExpression', $data.Expressions.FrameOperator, null, {
+    constructor: function (source, params) {
+        ///<signature>
+        ///<param name="source" type="$data.Expressions.EntitySetExpression" />
+        ///</signature>
+        this.source = source;
+        this.params = params;
+        this.resultType = $data.Object;
+    },
+    nodeType: { value: $data.Expressions.ExpressionType.Find, enumerable: true }
+});
+
 $C('$data.Expressions.FirstExpression', $data.Expressions.FrameOperator, null, {
     constructor: function (source) {
         ///<signature>

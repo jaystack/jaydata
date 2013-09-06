@@ -741,7 +741,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             first: {},
             include: {},
             batchDelete: {},
-            withInlineCount: {}
+            withInlineCount: {},
+            find: {}
         },
         enumerable: true,
         writable: true
