@@ -44,9 +44,8 @@ angular.module('jaydata', ['ng', function ($provide) {
             return Object.prototype.hasOwnProperty.apply(this, arguments);
         }
 
-        $data.Queryable.prototype.toLiveArray = function (cb, options) {
+        $data.Queryable.prototype.toLiveArray = function (cb) {
             var _this = this;
-            options = options || {};
 
             var trace = this.toTraceString();
             var cacheKey = _getCacheKey(this); // trace.queryText || trace.sqlText + JSON.stringify(trace.params);
@@ -120,8 +119,8 @@ angular.module('jaydata', ['ng', function ($provide) {
         };
 
         $data.Entity.prototype.save = function () {
-            var d = $q.defer();
             var _this = this;
+            var d = $q.defer();
             originalSave.call(_this).then(function () {
                 cache = {};
                 d.resolve(_this);
@@ -130,7 +129,6 @@ angular.module('jaydata', ['ng', function ($provide) {
                 d.reject(err);
                 if (!$rootScope.$$phase) $rootScope.$apply();
             });
-
             return d.promise;
         }
 

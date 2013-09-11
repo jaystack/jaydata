@@ -28,18 +28,16 @@ function angularTests(providerConfig) {
     /*
      toLiveArray
      refresh
-
+     then/success
+     dom valtoztas
+     hasOwnProperty
      _isNew
      _isDirty
-     cacheing
      $data injected
-     hasOwnProperty
+
+     cacheing
      callback success, error
-     options
-     chainOrfire
-     then/success
      error
-     dom valtoztas
      save
      remove
      saveChanges
@@ -49,7 +47,7 @@ function angularTests(providerConfig) {
         ok(app !== undefined, 'Can not bootstrap angularjs with jaydata');
         clean();
     });
-    test("angular toLiveArray/refresh", 2, function () {
+    test("angular toLiveArray/refresh", 3, function () {
         $data.Entity.extend("Category", {
             Id: { type: "int", key: true, computed: true },
             name: { type: String, required: true, maxLength: 200 }
@@ -74,8 +72,14 @@ function angularTests(providerConfig) {
                         $scope.$digest();
                         theList = $('#theList')[0];
                         li = $(theList).children();
-                        ok(li.length === 3, 'list should have three children');
+                        ok(li.length === 3, 'list should have three children, but it has ' + li.length);
                         start();
+                        $scope.categories
+                        .then(function () {
+                            ok(true, 'then should also work after the promise is fulfilled');
+                            start();
+                        });
+                        stop;
                         clean();
                     });
                 });
@@ -83,5 +87,42 @@ function angularTests(providerConfig) {
             var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.name}}</li></ul></div>');
         });
         stop();
+    });
+    test("angular hasOwnProperty", 4, function () {
+        theController = function ($scope, $data) {
+            var categoryType = $data.Entity.extend("Category", {
+                Id: { type: "int", key: true, computed: true },
+                name: { type: String, required: true, maxLength: 200 }
+            });
+            var c = new categoryType();
+            ok(c.hasOwnProperty('Id'), 'hasOwnProperty failed for Id');
+            ok(c.hasOwnProperty('alma') === false, 'hasOwnProperty failed for alma');
+            ok(c.hasOwnProperty('changedProperties') === false, 'hasOwnProperty failed for changedProperties');
+            ok(c.hasOwnProperty('isValid') === false, 'hasOwnProperty failed for isValid');
+            clean();
+        };
+        var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.name}}</li></ul></div>');
+    });
+    test("angular _isNew/_isDirty", 6, function () {
+        theController = function ($scope, $data) {
+            var categoryType = $data.Entity.extend("Category", {
+                Id: { type: "int", key: true, computed: true },
+                name: { type: String, required: true, maxLength: 200 }
+            });
+            var c = new categoryType();
+            c.name = 'alma';
+            ok(c._isNew, '_isNew failed');
+            ok(c._isDirty === false, '_isDirty failed');
+            c.save()
+            .then(function () {
+                ok(c.Id !== undefined, 'save nem sikerult');
+                ok(c._isNew === false, '_isNew failed after save');
+                ok(c._isDirty === false, '_isDirty failed after save');
+                c.name = 'alma';
+                ok(c._isDirty, '_isDirty failed');
+                clean();
+            });
+        };
+        var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.name}}</li></ul></div>');
     });
 }
