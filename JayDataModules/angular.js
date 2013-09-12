@@ -6,13 +6,12 @@ Object.defineProperty($data.Entity.prototype, "_isNew", {
 });
 Object.defineProperty($data.Entity.prototype, "_isDirty", {
     get: function () {
-        return !this._isNew && this.changedProperties && this.changedProperties.length;
+        return !this._isNew && this.changedProperties && this.changedProperties.length > 0;
     }
 });
 
 var originalSave = $data.Entity.prototype.save;
 var originalRemove = $data.Entity.prototype.remove;
-var originalSaveChanges = $data.EntityContext.prototype.saveChanges;
 
 var _getCacheKey = function (query) {
     var key = query.expression.getJSON();
@@ -25,7 +24,6 @@ var _getCacheKey = function (query) {
     }
     return hash;
 }
-
 
 angular.module('jaydata', ['ng', function ($provide) {
 
@@ -147,10 +145,10 @@ angular.module('jaydata', ['ng', function ($provide) {
             return d.promise;
         }
 
-        $data.EntityContext.prototype.saveChanges = function () {
-            var d = $q.defer();
+        $data.EntityContext.prototype.liveSaveChanges = function () {
             var _this = this;
-            originalSaveChanges.call(_this).then(function (n) {
+            var d = $q.defer();
+            _this.saveChanges().then(function (n) {
                 cache = {};
                 d.resolve(n);
                 if (!$rootScope.$$phase) $rootScope.$apply();
@@ -158,10 +156,8 @@ angular.module('jaydata', ['ng', function ($provide) {
                 d.reject(err);
                 if (!$rootScope.$$phase) $rootScope.$apply();
             });
-
             return d.promise;
         }
-
         return $data;
     });
 }]);

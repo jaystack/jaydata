@@ -27,29 +27,29 @@ function angularTests(providerConfig) {
 
     /*
      toLiveArray
-     refresh
      then/success
      dom valtoztas
      hasOwnProperty
      _isNew
      _isDirty
      $data injected
-
+     save
+     liveSaveChanges
+     refresh
      cacheing
+
      callback success, error
      error
-     save
      remove
-     saveChanges
     */
     test("angular bootstrapping", 1, function () {
         var app = init();
         ok(app !== undefined, 'Can not bootstrap angularjs with jaydata');
         clean();
     });
-    test("angular toLiveArray/refresh", 3, function () {
+    test("angular toLiveArray/liveSaveChanges/caching", 7, function () {
         $data.Entity.extend("Category", {
-            Id: { type: "int", key: true, computed: true },
+            id: { type: "int", key: true, computed: true },
             name: { type: String, required: true, maxLength: 200 }
         });
         $data.EntityContext.extend("NorthwindDatabase", {
@@ -58,33 +58,40 @@ function angularTests(providerConfig) {
         var nwDB = new NorthwindDatabase({ name: "local", databaseName: 'angularTests', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
         nwDB.onReady()
         .then(function() {
-            theController = function ($scope, $data) {
-                $scope.categories = nwDB.Categories.toLiveArray();
-
+            theController = function ($scope, $data, $timeout) {
+                Object.defineProperty($scope, "categories", {
+                    get: function () {
+                        return nwDB.Categories.toLiveArray();
+                    }
+                });
                 var theList = $('#theList')[0];
                 var li = $(theList).children();
                 ok(li.length === 0, 'list should have no children');
                 nwDB.Categories.addMany([{ name: '1' }, { name: '2' }, { name: '3' }]);
-                nwDB.saveChanges()
+                nwDB.liveSaveChanges()
                 .then(function () {
-                    $scope.categories.refresh()
-                    .then(function () {
-                        $scope.$digest();
+                    $timeout(function() {
                         theList = $('#theList')[0];
                         li = $(theList).children();
                         ok(li.length === 3, 'list should have three children, but it has ' + li.length);
+                        ok($(li[0]).text() != '', 'item0 should have an id');
+                        ok($(li[1]).text() != '', 'item1 should have an id');
+                        ok($(li[2]).text() != '', 'item2 should have an id');
                         start();
                         $scope.categories
                         .then(function () {
                             ok(true, 'then should also work after the promise is fulfilled');
                             start();
                         });
+                        var ccopy = $scope.categories;
+                        $scope.$digest();
+                        ok($scope.categories === ccopy, 'caching failed');
                         stop;
                         clean();
-                    });
+                    }, 50); // this should not needed.... but it must run after the reread of data and angular updated the dom, maybe we could wait on categories...
                 });
             };
-            var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.name}}</li></ul></div>');
+            var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.id}}</li></ul></div>');
         });
         stop();
     });
@@ -115,7 +122,7 @@ function angularTests(providerConfig) {
             ok(c._isDirty === false, '_isDirty failed');
             c.save()
             .then(function () {
-                ok(c.Id !== undefined, 'save nem sikerult');
+                ok(c.Id !== undefined, 'save failed');
                 ok(c._isNew === false, '_isNew failed after save');
                 ok(c._isDirty === false, '_isDirty failed after save');
                 c.name = 'alma';
@@ -124,5 +131,78 @@ function angularTests(providerConfig) {
             });
         };
         var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.name}}</li></ul></div>');
+    });
+    test("angular save", 4, function () {
+        theController = function ($scope, $data,$timeout) {
+            var categoryType = $data.Entity.extend("Categoryangularsave", {
+                id: { type: "int", key: true, computed: true },
+                name: { type: String, required: true, maxLength: 200 }
+            });
+            var c = $scope.c = new categoryType();
+            c.name = 'alma';
+            $timeout(function () {
+                var id = $('#cid')[0];
+                id = $(id).text();
+                var name = $('#cname')[0];
+                name = $(name).text();
+                ok(id == '', 'id failed');
+                ok(name == 'alma', 'name failed');
+                c.save()
+                .then(function () {
+                    $timeout(function () {
+                        var id = $('#cid')[0];
+                        console.log(id);
+                        id = $(id).text();
+                        var name = $('#cname')[0];
+                        name = $(name).text();
+                        ok(id != '', 'id failed');
+                        ok(name == 'alma', 'name failed');
+                        clean();
+                    }, 50);
+                });
+            });
+        };
+        var app = init('<div ng-controller="theController"><span id="cid">{{c.id}}</span><span id="cname">{{c.name}}</span></div>');
+    });
+    test("angular refresh", 3, function () {
+        $data.Entity.extend("Category", {
+            Id: { type: "int", key: true, computed: true },
+            name: { type: String, required: true, maxLength: 200 }
+        });
+        $data.EntityContext.extend("NorthwindDatabase", {
+            Categories: { type: $data.EntitySet, elementType: Category }
+        });
+        var nwDB = new NorthwindDatabase({ name: "local", databaseName: 'angularTests', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
+        nwDB.onReady()
+        .then(function () {
+            theController = function ($scope, $data) {
+                $scope.categories = nwDB.Categories.toLiveArray();
+
+                var theList = $('#theList')[0];
+                var li = $(theList).children();
+                ok(li.length === 0, 'list should have no children');
+                nwDB.Categories.addMany([{ name: '1' }, { name: '2' }, { name: '3' }]);
+                nwDB.saveChanges()
+                .then(function () {
+                    $scope.categories.refresh()
+                    .then(function () {
+                        $scope.$digest();
+                        theList = $('#theList')[0];
+                        li = $(theList).children();
+                        ok(li.length === 3, 'list should have three children, but it has ' + li.length);
+                        start();
+                        $scope.categories
+                        .then(function () {
+                            ok(true, 'then should also work after the promise is fulfilled');
+                            start();
+                        });
+                        stop;
+                        clean();
+                    });
+                });
+            };
+            var app = init('<div ng-controller="theController"><ul id="theList"><li ng-repeat="category in categories">{{category.name}}</li></ul></div>');
+        });
+        stop();
     });
 }
