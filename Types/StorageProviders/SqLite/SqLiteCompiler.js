@@ -145,6 +145,9 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
                     fromPrefix = "T" + temp[0].AliasNumber;
                 }
                 toSet.Association.associationInfo.ReferentialConstraint.forEach(function (constrain, index) {
+                    if(index > 0){
+                        sqlBuilder.addText(" AND ");
+                    }
                     sqlBuilder.addText(fromPrefix + "." + constrain[toSet.Association.associationInfo.From]);
                     sqlBuilder.addText(" = ");
                     sqlBuilder.addText(toPrefix + "." + constrain[toSet.Association.associationInfo.To]);
