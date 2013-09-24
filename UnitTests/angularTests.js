@@ -34,7 +34,7 @@ function angularTests(providerConfig) {
      _isDirty
      $data injected
      save
-     liveSaveChanges
+     saveChanges
      refresh
      cacheing
 
@@ -47,7 +47,7 @@ function angularTests(providerConfig) {
         ok(app !== undefined, 'Can not bootstrap angularjs with jaydata');
         clean();
     });
-    test("angular toLiveArray/liveSaveChanges/caching", 7, function () {
+    test("angular toLiveArray/saveChanges/caching", 7, function () {
         $data.Entity.extend("Category", {
             id: { type: "int", key: true, computed: true },
             name: { type: String, required: true, maxLength: 200 }
@@ -68,7 +68,7 @@ function angularTests(providerConfig) {
                 var li = $(theList).children();
                 ok(li.length === 0, 'list should have no children');
                 nwDB.Categories.addMany([{ name: '1' }, { name: '2' }, { name: '3' }]);
-                nwDB.liveSaveChanges()
+                nwDB.saveChanges()
                 .then(function () {
                     $timeout(function() {
                         theList = $('#theList')[0];

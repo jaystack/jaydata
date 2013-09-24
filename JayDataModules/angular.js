@@ -1,4 +1,5 @@
-
+(function() {
+    
 Object.defineProperty($data.Entity.prototype, "_isNew", {
     get: function () {
         return !this.storeToken;
@@ -12,6 +13,7 @@ Object.defineProperty($data.Entity.prototype, "_isDirty", {
 
 var originalSave = $data.Entity.prototype.save;
 var originalRemove = $data.Entity.prototype.remove;
+var originalSaveChanges = $data.EntityContext.prototype.saveChanges;
 
 var _getCacheKey = function (query) {
     var key = query.expression.getJSON();
@@ -128,7 +130,76 @@ angular.module('jaydata', ['ng', function ($provide) {
                 if (!$rootScope.$$phase) $rootScope.$apply();
             });
             return d.promise;
-        }
+        };
+
+        $data.ItemStoreClass.prototype.EntityInstanceSave = function (storeAlias, hint) {
+            var self = $data.ItemStore;
+            var entity = this;
+            return self._getStoreEntitySet(storeAlias, entity)
+                .then(function (entitySet) {
+                    return self._getSaveMode(entity, entitySet, hint, storeAlias)
+                        .then(function (mode) {
+                            mode = mode || 'add';
+                            switch (mode) {
+                                case 'add':
+                                    entitySet.add(entity);
+                                    break;
+                                case 'attach':
+                                    entitySet.attach(entity, true);
+                                    entity.entityState = $data.EntityState.Modified;
+                                    break;
+                                default:
+                                    var d = new $data.PromiseHandler();
+                                    var callback = d.createCallback();
+                                    callback.error('save mode not supported: ' + mode);
+                                    return d.getPromise();
+                            }
+
+                            return originalSaveChanges.call(entitySet.entityContext)
+                                .then(function () { self._setStoreAlias(entity, entitySet.entityContext.storeToken); return entity; });
+                        });
+                });
+        };
+        $data.ItemStoreClass.prototype.EntityInstanceRemove = function (storeAlias) {
+            var self = $data.ItemStore;
+            var entity = this;
+            return self._getStoreEntitySet(storeAlias, entity)
+                .then(function (entitySet) {
+                    entitySet.remove(entity);
+
+                    return originalSaveChanges.call(entitySet.entityContext)
+                        .then(function () { return entity; });
+                });
+        };
+        $data.ItemStoreClass.prototype.EntityTypeRemoveAll = function (type) {
+            return function (storeAlias) {
+                var self = $data.ItemStore;
+                return self._getStoreEntitySet(storeAlias, type)
+                    .then(function (entitySet) {
+                        return entitySet.toArray().then(function (items) {
+                            items.forEach(function (item) {
+                                entitySet.remove(item);
+                            });
+
+                            return originalSaveChanges.call(entitySet.entityContext)
+                                .then(function () { return items; });
+                        });
+                    });
+            }
+        };
+        $data.ItemStoreClass.prototype.EntityTypeAddMany = function (type) {
+            return function (initDatas, storeAlias) {
+                var self = $data.ItemStore;
+                return self._getStoreEntitySet(storeAlias, type)
+                    .then(function (entitySet) {
+                        var items = entitySet.addMany(initDatas);
+                        return originalSaveChanges.call(entitySet.entityContext)
+                            .then(function () {
+                                return items;
+                            });
+                    });
+            }
+        };
 
         $data.Entity.prototype.remove = function () {
             var d = $q.defer();
@@ -145,10 +216,10 @@ angular.module('jaydata', ['ng', function ($provide) {
             return d.promise;
         }
 
-        $data.EntityContext.prototype.liveSaveChanges = function () {
+        $data.EntityContext.prototype.saveChanges = function () {
             var _this = this;
             var d = $q.defer();
-            _this.saveChanges().then(function (n) {
+            originalSaveChanges.call(_this).then(function (n) {
                 cache = {};
                 d.resolve(n);
                 if (!$rootScope.$$phase) $rootScope.$apply();
@@ -161,3 +232,5 @@ angular.module('jaydata', ['ng', function ($provide) {
         return $data;
     });
 }]);
+
+})();
