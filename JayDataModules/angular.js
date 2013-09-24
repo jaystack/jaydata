@@ -1,4 +1,4 @@
-﻿
+
 Object.defineProperty($data.Entity.prototype, "_isNew", {
     get: function () {
         return !this.storeToken;

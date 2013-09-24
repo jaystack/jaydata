@@ -1,4 +1,4 @@
-VERSION = '1.3.1'
+VERSION = '1.3.2'
 TARGET_DIR = ./build
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules
@@ -240,6 +240,8 @@ SenchaModule = $(BASEMODULE_DIR)/sencha.js\
 TemplateModule = $(BASEMODULE_DIR)/template.js\
 
 ValidateModule = $(BASEMODULE_DIR)/validate.js\
+
+AngularModule = $(BASEMODULE_DIR)/angular.js\
 
 MsCrmModule = $(BASEMODULE_DIR)/jaydata.mscrm.js\
 
@@ -503,7 +505,7 @@ stormprovider: $(StormProvider) $(CREDITS)
 	@@java -jar $(COMPILER) --js $(PROVIDERS_DIR)/StormProvider.js --js_output_file $(TEMP_DIR)/StormProvider.min.js
 	@@cat $(CREDITS) $(TEMP_DIR)/StormProvider.min.js > $(PROVIDERS_DIR)/StormProvider.min.js
 
-jaydatamodules: deferredmodule errorhandlermodule formbindermodule handlebarsmodule inmemorymodule kendomodule knockoutmodule qdeferredmodule senchamodule templatemodule validatemodule mscrmmodule mscrmservermodule
+jaydatamodules: deferredmodule errorhandlermodule formbindermodule handlebarsmodule inmemorymodule kendomodule knockoutmodule qdeferredmodule senchamodule templatemodule validatemodule mscrmmodule mscrmservermodule angularmodule
 
 deferredmodule: $(DeferredModule) $(CREDITS)
 	@@echo "Building Deferred module..."
@@ -581,6 +583,13 @@ validatemodule: $(ValidateModule) $(CREDITS)
 	@@cat $(CREDITS) $(ValidateModule) > $(MODULE_DIR)/validate.js
 	@@java -jar $(COMPILER) --js $(MODULE_DIR)/validate.js --js_output_file $(TEMP_DIR)/validate.min.js
 	@@cat $(CREDITS) $(TEMP_DIR)/validate.min.js > $(MODULE_DIR)/validate.min.js
+
+angularmodule: $(AngularModule) $(CREDITS)
+	@@echo "Building Angular module..."
+	@@test -d $(MODULE_DIR) || mkdir -p $(MODULE_DIR)
+	@@cat $(CREDITS) $(AngularModule) > $(MODULE_DIR)/angular.js
+	@@java -jar $(COMPILER) --js $(MODULE_DIR)/angular.js --js_output_file $(TEMP_DIR)/angular.min.js
+	@@cat $(CREDITS) $(TEMP_DIR)/angular.min.js > $(MODULE_DIR)/angular.min.js
 
 mscrmmodule: $(MsCrmModule) $(CREDITS)
 	@@echo "Building MsCrm module..."
