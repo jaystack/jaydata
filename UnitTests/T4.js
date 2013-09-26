@@ -6,11 +6,15 @@ function T4_CrossProviderTests() {
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
         ComplexTypeTests({ name: 'sqLite', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
+        if ($data.storageProviders.sqLitePro)
+            EntityContextOnUpdateTests({ name: 'sqLite', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
     }
 
     //indexedDb
     if ($data.StorageProviderLoader.isSupported('indexedDb')) {
         ComplexTypeTests({ name: 'indexedDb', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
+        if ($data.storageProviders.indexedDbPro)
+            EntityContextOnUpdateTests({ name: 'indexedDb', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
     }
 
     //InMemory
@@ -322,5 +326,293 @@ ComplexTypeTests = function ComplexTypeTests(providerConfig, msg) {
             });
         });
 
+    });
+};
+
+function EntityContextOnUpdateTests(providerConfig, msg) {
+    if (typeof module == 'function') module("EntityContextOnUpdateTests_" + (msg || ''));
+
+    test("onupdate dropdb", 5, function () {
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        var afterUpdate = false;
+
+        pconf.databaseName = 'onupdate_test_1';
+        pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+        pconf.onUpdate = function (ctx, callback) {
+            ok(ctx instanceof $data.EntityContext, "param1 is context");
+            equal(typeof callback.success, 'function', "param2 has success");
+            equal(typeof callback.error, 'function', "param2 has error");
+
+            equal(afterUpdate, false, "afterUpdate is false");
+            afterUpdate = true;
+            callback.success();
+        };
+
+        (new $news.Types.NewsContext(pconf)).onReady(function (context) {
+            equal(afterUpdate, true, "afterUpdate is false");
+
+            _finishCb(context);
+        });
+    });
+
+    test("onupdate fail test", 2, function () {
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        var afterUpdate = false;
+
+        pconf.databaseName = 'onupdate_test_2';
+        pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+        pconf.onUpdate = function (ctx, callback) {
+            afterUpdate = true;
+            callback.error(ctx);
+        };
+
+        var ctx;
+        (ctx = new $news.Types.NewsContext(pconf)).onReady(function (context) {
+            ok(false, "context is onready");
+            _finishCb(context);
+        }).fail(function () {
+            ok(true, "context is onready failed");
+            equal(afterUpdate, true, "afterUpdate is false");
+
+            _finishCb(ctx);
+        });
+    });
+
+    test("onupdate if db change - no changes", 1, function () {
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        var afterUpdate = false;
+
+        pconf.databaseName = 'onupdate_test_3';
+        (new $news.Types.NewsContext(pconf)).onReady(function (context) {
+            stop();
+            _finishCb(context);
+
+            pconf.dbCreation = $data.storageProviders.DbCreationType.DropTableIfChange;
+            pconf.onUpdate = function (ctx, callback) {
+                ok(false, "onUpdate is running");
+                afterUpdate = true;
+                callback.success();
+            };
+
+            (new $news.Types.NewsContext(pconf)).onReady(function (context) {
+                equal(afterUpdate, false, "afterUpdate is false");
+                _finishCb(context);
+            });
+        });
+    });
+
+    $data.Entity.extend('OUType1', {
+        Id: { type: 'int', key: true, computed: true },
+        Title: { type: 'string' }
+    });
+    $data.Entity.extend('OUType2', {
+        Id: { type: 'int', key: true, computed: true },
+        Title: { type: 'string' },
+        Lead: { type: 'string' }
+    });
+    $data.Entity.extend('OUType3', {
+        Id1: { type: 'int', key: true },
+        Id2: { type: 'int', key: true },
+        Title: { type: 'string' }
+    });
+    $data.EntityContext.extend('OUCTX1', {
+        OUTypes1: { type: $data.EntitySet, elementType: OUType1 }
+    });
+    $data.EntityContext.extend('OUCTX2', {
+        OUTypes2: { type: $data.EntitySet, elementType: OUType2 }
+    });
+    $data.EntityContext.extend('OUCTX3', {
+        OUTypes1: { type: $data.EntitySet, elementType: OUType3 }
+    });
+    $data.EntityContext.extend('OUCTX12', {
+        OUTypes1: { type: $data.EntitySet, elementType: OUType1 },
+        OUTypes2: { type: $data.EntitySet, elementType: OUType2 }
+    });
+
+    test("onupdate double context instance, first recreate", 2, function () {
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        var afterUpdate = false;
+
+        pconf.databaseName = 'onupdate_test_4';
+        pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+        pconf.onUpdate = function (ctx, callback) {
+            equal(afterUpdate, false, "onUpdate is first running");
+            afterUpdate = true;
+            callback.success();
+        };
+
+        (new OUCTX1(pconf)).onReady(function (context) {
+            equal(afterUpdate, true, "afterUpdate is true");
+
+            stop();
+            _finishCb(context);
+
+            pconf.dbCreation = $data.storageProviders.DbCreationType.DropTableIfChange;
+            (new OUCTX1(pconf)).onReady(function (context) {
+
+                _finishCb(context);
+            });
+        });
+    });
+
+    test("onupdate entity change", 4, function () {
+        if (providerConfig.name == "indexedDb") { expect(1); ok(true, "Not supported"); return; }
+
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        var afterUpdate = false;
+
+        pconf.databaseName = 'onupdate_test_5';
+        pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+        pconf.onUpdate = function (ctx, callback) {
+            //2 times run
+            ok(true, "onUpdate is running");
+            afterUpdate = true;
+            callback.success();
+        };
+
+        (new OUCTX1(pconf)).onReady(function (context) {
+            equal(afterUpdate, true, "afterUpdate is true");
+
+            stop();
+            _finishCb(context);
+
+            afterUpdate = false;
+            pconf.dbCreation = $data.storageProviders.DbCreationType.DropTableIfChange;
+            (new OUCTX2(pconf)).onReady(function (context) {
+                equal(afterUpdate, true, "afterUpdate is true");
+
+                _finishCb(context);
+            });
+        });
+    });
+
+    test("onupdate context change", 4, function () {
+        var doTest = function () {
+            stop();
+            var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+            var afterUpdate = false;
+
+            pconf.databaseName = 'onupdate_test_6';
+            pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+            pconf.onUpdate = function (ctx, callback) {
+                //2 times run
+                ok(true, "onUpdate is running");
+                afterUpdate = true;
+                callback.success();
+            };
+
+            (new OUCTX1(pconf)).onReady(function (context) {
+                equal(afterUpdate, true, "afterUpdate is true");
+
+                stop();
+                _finishCb(context);
+
+                afterUpdate = false;
+                pconf.dbCreation = $data.storageProviders.DbCreationType.DropTableIfChange;
+                (new OUCTX12(pconf)).onReady(function (context) {
+                    equal(afterUpdate, true, "afterUpdate is true");
+
+                    _finishCb(context);
+                });
+            });
+        };
+
+        if (providerConfig.name == "indexedDb") {
+            var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+            if (indexedDB.deleteDatabase) {
+                stop();
+                var tran = indexedDB.deleteDatabase('onupdate_test_6')
+                tran.onsuccess = function () {
+                    start();
+                    doTest();
+                };
+                tran.onerror = function () {
+                    start();
+                    expect(1); ok(true, "cannot delete database"); return;
+                };
+
+            } else {
+                expect(1); ok(true, "Not supported"); return;
+            }
+        } else {
+            doTest();
+        }
+    });
+
+    test("onupdate entity key change", 4, function () {
+        if (providerConfig.name == "indexedDb" && !$data.storageProviders.indexedDbPro) { expect(1); ok(true, "Not supported"); return; }
+
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        var afterUpdate = false;
+
+        pconf.databaseName = 'onupdate_test_7';
+        pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+        pconf.onUpdate = function (ctx, callback) {
+            //2 times run
+            ok(true, "onUpdate is running");
+            afterUpdate = true;
+            callback.success();
+        };
+
+        (new OUCTX1(pconf)).onReady(function (context) {
+            equal(afterUpdate, true, "afterUpdate is true");
+
+            stop();
+            _finishCb(context);
+
+            afterUpdate = false;
+            pconf.dbCreation = $data.storageProviders.DbCreationType.DropTableIfChange;
+            (new OUCTX3(pconf)).onReady(function (context) {
+                equal(afterUpdate, true, "afterUpdate is true");
+
+                _finishCb(context);
+            });
+        });
+    });
+
+    test("onupdate populate before ready", 2, function () {
+        stop();
+        var pconf = JSON.parse(JSON.stringify(providerConfig));
+
+        pconf.databaseName = 'onupdate_test_8';
+        pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
+        pconf.onUpdate = function (ctx, callback) {
+            
+            $news.Types.NewsContext.generateTestData(ctx, function () {
+                ok(true, "data created");
+                callback.success();
+            });
+
+        };
+
+        (new $news.Types.NewsContext(pconf)).onReady(function (context) {
+
+            context.Categories.toArray({
+                success: function (res) {
+                    ok(res.length > 0, "context loaded data");
+                    _finishCb(context);
+                },
+                error: function (e) {
+                    ok(false, "context loaded data");
+                    console.log(e);
+                    _finishCb(context);
+                }
+
+            });
+
+        });
     });
 };
