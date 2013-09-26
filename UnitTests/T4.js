@@ -340,7 +340,7 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
         pconf.databaseName = 'onupdate_test_1';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-        pconf.onUpdate = function (ctx, callback) {
+        pconf.onUpdated = function (ctx, callback) {
             ok(ctx instanceof $data.EntityContext, "param1 is context");
             equal(typeof callback.success, 'function', "param2 has success");
             equal(typeof callback.error, 'function', "param2 has error");
@@ -365,7 +365,7 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
         pconf.databaseName = 'onupdate_test_2';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-        pconf.onUpdate = function (ctx, callback) {
+        pconf.onUpdated = function (ctx, callback) {
             afterUpdate = true;
             callback.error(ctx);
         };
@@ -394,8 +394,8 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
             _finishCb(context);
 
             pconf.dbCreation = $data.storageProviders.DbCreationType.DropTableIfChange;
-            pconf.onUpdate = function (ctx, callback) {
-                ok(false, "onUpdate is running");
+            pconf.onUpdated = function (ctx, callback) {
+                ok(false, "onUpdated is running");
                 afterUpdate = true;
                 callback.success();
             };
@@ -443,8 +443,8 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
         pconf.databaseName = 'onupdate_test_4';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-        pconf.onUpdate = function (ctx, callback) {
-            equal(afterUpdate, false, "onUpdate is first running");
+        pconf.onUpdated = function (ctx, callback) {
+            equal(afterUpdate, false, "onUpdated is first running");
             afterUpdate = true;
             callback.success();
         };
@@ -473,9 +473,9 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
         pconf.databaseName = 'onupdate_test_5';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-        pconf.onUpdate = function (ctx, callback) {
+        pconf.onUpdated = function (ctx, callback) {
             //2 times run
-            ok(true, "onUpdate is running");
+            ok(true, "onUpdated is running");
             afterUpdate = true;
             callback.success();
         };
@@ -505,9 +505,9 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
             pconf.databaseName = 'onupdate_test_6';
             pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-            pconf.onUpdate = function (ctx, callback) {
+            pconf.onUpdated = function (ctx, callback) {
                 //2 times run
-                ok(true, "onUpdate is running");
+                ok(true, "onUpdated is running");
                 afterUpdate = true;
                 callback.success();
             };
@@ -560,9 +560,9 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
         pconf.databaseName = 'onupdate_test_7';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-        pconf.onUpdate = function (ctx, callback) {
+        pconf.onUpdated = function (ctx, callback) {
             //2 times run
-            ok(true, "onUpdate is running");
+            ok(true, "onUpdated is running");
             afterUpdate = true;
             callback.success();
         };
@@ -589,7 +589,7 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
 
         pconf.databaseName = 'onupdate_test_8';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
-        pconf.onUpdate = function (ctx, callback) {
+        pconf.onUpdated = function (ctx, callback) {
             
             $news.Types.NewsContext.generateTestData(ctx, function () {
                 ok(true, "data created");
