@@ -35,6 +35,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
     executeQuery: function (queryable, callBack) {
         Guard.raise("Pure class");
     },
+    loadRawData: function (tableName, callBack) {
+        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack.error(new Exception('loadRawData is not supported', 'Invalid Operation'));
+    },
 
     buildIndependentBlocks: function (changedItems) {
         /// <summary>

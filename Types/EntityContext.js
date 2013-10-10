@@ -131,9 +131,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 if (storageProviderCfg && storageProviderCfg.checkPermission) Object.defineProperty(ctx, 'checkPermission', { value: storageProviderCfg.checkPermission, enumerable: true });
 
                 //ctx._isOK = false;
-                if (ctx.storageProvider) {
-                    ctx.storageProvider.initializeStore(callBack);
-                }
+                ctx._initializeStore(callBack);
             },
             error: function () {
                 callBack.error('Provider fallback failed!');
@@ -252,6 +250,11 @@ $data.Class.define('$data.EntityContext', null, null,
 
         }
 
+    },
+    _initializeStore: function (callBack) {
+        if (this.storageProvider) {
+            this.storageProvider.initializeStore(callBack);
+        }
     },
 
     _initStorageModelSync: function() {
