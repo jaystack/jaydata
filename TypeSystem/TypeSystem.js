@@ -197,13 +197,21 @@
     };
 
     MemberDefinition.prototype.toJSON = function () {
-        var alma = {};
+        var property = {};
         for (var name in this) {
             if (name !== 'defineBy' && name !== 'storageModel') {
-                alma[name] = this[name];
+                if ((name === 'type' || name === 'dataType') && (this[name] && typeof this[name] === 'function')) {
+                    try {
+                        property[name] = Container.resolveName(this[name]);
+                    } catch (e) {
+                        property[name] = this[name];
+                    }
+                } else {
+                    property[name] = this[name];
+                }
             }
         }
-        return alma;
+        return property;
     }
 
     //TODO global/window

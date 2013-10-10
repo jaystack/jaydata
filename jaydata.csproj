@@ -372,6 +372,7 @@
     <Content Include="Pro\JayDataModules\QueryCache.js" />
     <Content Include="Pro\JayDataModules\localMigrations.js" />
     <Content Include="Pro\JayDataModules\SchemaEvolutions.js" />
+    <Content Include="Pro\JayDataModules\VersionedEntityContext.js" />
     <Content Include="Pro\localMigrations.html" />
     <Content Include="Pro\test.html" />
     <Content Include="Pro\test_JayData.html" />
