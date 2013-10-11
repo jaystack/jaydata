@@ -27,9 +27,9 @@ var _getCacheKey = function (query) {
     return hash;
 }
 
-angular.module('jaydata', ['ng', function ($provide) {
+angular.module('jaydata', ['ng', ['$provide', function ($provide) {
 
-    $provide.factory('$data', function ($rootScope, $q) {
+    $provide.factory('$data', ['$rootScope', '$q', function ($rootScope, $q) {
         var cache = {};
 
         $data.Entity.prototype.hasOwnProperty = function (propName) {
@@ -230,7 +230,7 @@ angular.module('jaydata', ['ng', function ($provide) {
             return d.promise;
         }
         return $data;
-    });
-}]);
+    }]);
+}]]);
 
 })();
