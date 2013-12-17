@@ -77,7 +77,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     text = text.replace('xmlns:edm="@@VERSIONNS@@"', 'xmlns:edm="' + versionInfo.ns + '"');
                     text = text.replace('@@VERSION@@', versionInfo.version);
 
-                    if (typeof ActiveXObject === 'undefined') {
+                    if (window.ActiveXObject === undefined) {
                         var parser = new DOMParser();
                         xsl = parser.parseFromString(text, "text/xml");
                     } else {
@@ -210,7 +210,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         var transformXslt = this.getCurrentXSLTVersion(versionInfo, metadata);
         cnf.typeFilter = this._prepareTypeFilter(metadata, versionInfo, cnf);
 
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             var xslt = new ActiveXObject("Msxml2.XSLTemplate.6.0");
             var xsldoc = new ActiveXObject("Msxml2.FreeThreadedDOMDocument.6.0");
             var xslproc;

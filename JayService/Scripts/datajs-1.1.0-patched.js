@@ -41,7 +41,7 @@
         ///     The ActiveXObject instance. Null if ActiveX is not supported by the 
         ///     browser.
         /// </returns>    
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             return new window.ActiveXObject(progId);
         }
         return null;
@@ -2296,7 +2296,7 @@
             return new window.XMLHttpRequest();
         }
         var exception;
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             try {
                 return new window.ActiveXObject("Msxml2.XMLHTTP.6.0");
             } catch (_) {

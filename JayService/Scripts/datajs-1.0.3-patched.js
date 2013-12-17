@@ -886,7 +886,7 @@
             return new window.XMLHttpRequest();
         }
         var exception;
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             try {
                 return new window.ActiveXObject("Msxml2.XMLHTTP.6.0");
             } catch (_) {
@@ -1444,7 +1444,7 @@
         /// <returns type="DOMParser">DOMParser object.</returns>
         var exception;
         var result;
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             try {
                 result = new ActiveXObject("Msxml2.DOMDocument.6.0");
                 result.async = false;
@@ -1814,7 +1814,7 @@
 
         var dom;
 
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             dom = createDomParser();
             dom.documentElement = dom.createNode(1, name, nsURI);
         }
