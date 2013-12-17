@@ -162,7 +162,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         function getHttpRequest() {
             if (window.XMLHttpRequest)
                 return new XMLHttpRequest();
-            else if (window.ActiveXObject)
+            else if (window.ActiveXObject !== undefined)
                 return new ActiveXObject("MsXml2.XmlHttp");
             else{
                 $data.Trace.log('XMLHttpRequest or MsXml2.XmlHttp ActiveXObject not found');

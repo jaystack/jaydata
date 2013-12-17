@@ -473,7 +473,7 @@
             ok(false, ex);
         });
     });
-    if (typeof ActiveXObject === 'undefined') {
+    if (window.ActiveXObject === undefined) {
         test('indexedDbProvider_openDb_multiple_key', function () {
             expect(14);
             stop();

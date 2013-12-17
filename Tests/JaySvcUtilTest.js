@@ -36,7 +36,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
     },
 
     _processResults: function (metadataUri, metadata, xsl) {
-        if (window.ActiveXObject) {
+        if (window.ActiveXObject !== undefined) {
             return metadata.transformNode(xsl);
         } else if (document.implementation && document.implementation.createDocument) {
             var xsltProcessor = new XSLTProcessor();
