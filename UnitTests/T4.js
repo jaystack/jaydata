@@ -2,10 +2,12 @@ function T4_CrossProviderTests() {
 
     //oData
     ComplexTypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    LiveArrayTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
 
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
         ComplexTypeTests({ name: 'sqLite', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
+        LiveArrayTests({ name: 'sqLite', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
         if ($data.storageProviders.sqLitePro)
             EntityContextOnUpdateTests({ name: 'sqLite', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
     }
@@ -13,15 +15,18 @@ function T4_CrossProviderTests() {
     //indexedDb
     if ($data.StorageProviderLoader.isSupported('indexedDb')) {
         ComplexTypeTests({ name: 'indexedDb', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
+        LiveArrayTests({ name: 'indexedDb', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
         if ($data.storageProviders.indexedDbPro)
             EntityContextOnUpdateTests({ name: 'indexedDb', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
     }
 
     //InMemory
     ComplexTypeTests({ name: 'InMemory', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
+    LiveArrayTests({ name: 'InMemory', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
 
     //LocalStore
     ComplexTypeTests({ name: 'LocalStore', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
+    LiveArrayTests({ name: 'LocalStore', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
 }
 
 function _finishCb(context) {
@@ -616,3 +621,71 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
         });
     });
 };
+
+function LiveArrayTests(providerConfig, msg) {
+    if (typeof module == 'function') module("LiveArrayTests_" + (msg || ''));
+
+    test("toLiveArray", 5, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+
+                var result = context.Articles.toLiveArray();
+                result.then(function (r) {
+                    equal(result.length, 26, 'result is not empty');
+                    ok(result === r, 'result is equal with promise result');
+
+                    result.length = 5;
+                    equal(result.length, 5, 'result is changed');
+
+                    result.refresh();
+                    result.then(function () {
+                        equal(result.length, 26, 'result is not empty 2');
+                    }).then(function () {
+                        equal(result.length, 26, 'result is not empty 3');
+
+                        _finishCb(context);
+                    });
+                });
+            });
+        });
+    });
+
+    test("toLiveArray - paging", 7, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+
+                var result = context.Articles.take(5).toLiveArray();
+                result.then(function () {
+                    equal(result.length, 5, 'result is not empty');
+
+                    var title = result[0].Title;
+                    result.next();
+                    equal(result.length, 5, 'result is not empty before next');
+
+                    result.then(function () {
+                        equal(result.length, 5, 'result is not empty 2');
+
+                        var title2 = result[0].Title;
+                        notEqual(title2, title, 'result is paged');
+
+
+                        result.prev();
+                        equal(result.length, 5, 'result is not empty before prev');
+
+                        result.then(function () {
+                            equal(result.length, 5, 'result is not empty 2');
+
+                            equal(result[0].Title, title, 'result is paged back');
+
+                            _finishCb(context);
+                        });
+                    });
+                });
+            });
+        });
+    });
+}

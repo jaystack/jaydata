@@ -271,7 +271,50 @@ $data.Class.define('$data.Queryable', null, null,
         }
 
         return pHandler.getPromise();
-    },
+	},
+	toLiveArray: function (onResult, transaction) {
+	    var self = this;
+	    var result = [];
+
+	    var doAction = function (action) {
+	        return function (onResult) {
+	            var pHandler = new $data.PromiseHandler();
+	            var callback = pHandler.createCallback(onResult);
+
+	            var successFunc = function (res) {
+	                result.length = 0;
+
+	                var data = res;
+	                $data.typeSystem.extend(result, data);
+
+	                result.prev = doAction(function (cb) {
+	                    data.prev(cb);
+	                });
+	                result.next = doAction(function (cb) {
+	                    data.next(cb);
+	                });
+
+	                callback.success.apply(this, [result].concat(Array.prototype.slice.call(arguments, 1)));
+	            }
+
+	            action({
+	                success: successFunc,
+	                error: callback.error
+	            }, transaction);
+
+	            var promise = pHandler.getPromise();
+	            $data.typeSystem.extend(result, promise);
+
+	            return result;
+	        }
+	    }
+
+	    result.refresh = doAction(function (cb) {
+	        self.toArray(cb);
+	    });
+
+	    return result.refresh.apply(result, arguments);
+	},
 
 	single: function (filterPredicate, thisArg, onResult, transaction) {
 		///	<summary>Filters a set of entities using a boolean expression and returns a single element or throws an error if more than one element is filtered.</summary>
