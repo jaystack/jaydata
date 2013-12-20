@@ -27,17 +27,17 @@ declare module $data {
         constructor(initData: {});
 
         entityState: number;
-        changedProperties: Array;
+        changedProperties: any[];
 
         propertyChanging: Event;
         propertyChanged: Event;
         propertyValidationError: Event;
-        isValid: bool;
+        isValid: boolean;
     }
 
     export class Queryable<T extends Entity> implements Object {
-        filter(predicate: (it: T) => bool): Queryable<T>;
-        filter(predicate: (it: T) => bool, thisArg: any): Queryable<T>;
+        filter(predicate: (it: T) => boolean): Queryable<T>;
+        filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
 
         map(projection: (it: T) => any): Queryable<any>;
 
@@ -51,8 +51,8 @@ declare module $data {
         toArray(handler: (result: T[]) => void ): $data.IPromise<T[]>;
         toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): $data.IPromise<T[]>;
 
-        single(predicate: (it: T) => bool, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
-        single(predicate: (it: T) => bool, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
+        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
+        single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
 
         take(amout: number): Queryable<T>;
         skip(amout: number): Queryable<T>;
@@ -61,8 +61,8 @@ declare module $data {
         orderBy(predicate: (it: any) => any): Queryable<T>;
         orderByDescending(predicate: (it: any) => any): Queryable<T>;
 
-        first(predicate: (it: T) => bool, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
-        first(predicate: (it: T) => bool, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
+        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
+        first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
 
         include(selector: string): Queryable<T>;
 
@@ -132,41 +132,41 @@ declare module $data {
 
     export class GeographyPoint extends Geography {
         constructor(initData: any);
-        constructor(coordinates: Array);
+        constructor(coordinates: any[]);
         constructor(longitude: number, latitude: number);
         longitude: number;
         latitude: number;
-        coordinates: Array;
+        coordinates: any[];
     }
     export class GeographyLineString extends Geography {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeographyPolygon extends Geography {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeographyMultiPoint extends Geography {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeographyMultiLineString extends Geography {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeographyMultiPolygon extends Geography {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeographyCollection extends Geography {
         constructor(initData: any);
-        constructor(geometries: Array);
-        geometries: Array;
+        constructor(geometries: any[]);
+        geometries: any[];
     }
 
     export class Geometry extends Geospatial {
@@ -175,41 +175,41 @@ declare module $data {
 
     export class GeometryPoint extends Geometry {
         constructor(initData: any);
-        constructor(coordinates: Array);
+        constructor(coordinates: any[]);
         constructor(x: number, y: number);
         x: number;
         y: number;
-        coordinates: Array;
+        coordinates: any[];
     }
     export class GeometryLineString extends Geometry {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeometryPolygon extends Geometry {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeometryMultiPoint extends Geometry {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeometryMultiLineString extends Geometry {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeometryMultiPolygon extends Geometry {
         constructor(initData: any);
-        constructor(coordinates: Array);
-        coordinates: Array;
+        constructor(coordinates: any[]);
+        coordinates: any[];
     }
     export class GeometryCollection extends Geography {
         constructor(initData: any);
-        constructor(geometries: Array);
-        geometries: Array;
+        constructor(geometries: any[]);
+        geometries: any[];
     }
 
 }
@@ -224,9 +224,9 @@ declare module Q {
 }
 
 interface String {
-    contains(s: string): bool;
-    startsWith(s: string): bool;
-    endsWith(s: string): bool;
+    contains(s: string): boolean;
+    startsWith(s: string): boolean;
+    endsWith(s: string): boolean;
     strLength(): number;
     indexOf(s: string): number;
     concat(s: string): string;
