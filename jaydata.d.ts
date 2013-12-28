@@ -8,7 +8,6 @@ declare module $data {
             (handler: (args: T) => void ): IPromise<any>;
             (handler: (args: T) => any): IPromise<any>;
         };
-        valueOf(): any;
     }
 
     export class Base implements Object {
