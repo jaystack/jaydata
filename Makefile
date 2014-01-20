@@ -1,5 +1,6 @@
-VERSION = '1.3.4'
+VERSION = '1.3.5'
 TARGET_DIR = ./build
+RELEASE_DIR = ./release
 TEMP_DIR = $(TARGET_DIR)/tmp
 MODULE_DIR = $(TARGET_DIR)/jaydatamodules
 PROVIDERS_DIR = $(TARGET_DIR)/jaydataproviders
@@ -250,9 +251,21 @@ MsCrmServerModule = $(BASEMODULE_DIR)/jaydata.mscrm.server.js\
 
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
+	@@test ! -d $(RELEASE_DIR) || rm -r $(RELEASE_DIR)
 
 modules: jaydatamodules
 	@@rm -r $(TEMP_DIR)
+
+release: all
+	@@echo "Create release folder..."
+	@@test -d $(RELEASE_DIR) || mkdir -p $(RELEASE_DIR)
+	@@test -d $(RELEASE_DIR)/jaydatamodules || mkdir -p $(RELEASE_DIR)/jaydatamodules
+	@@test -d $(RELEASE_DIR)/jaydataproviders || mkdir -p $(RELEASE_DIR)/jaydataproviders
+	@@cp -r $(MODULE_DIR)/* $(RELEASE_DIR)/jaydatamodules
+	@@cp -r $(PROVIDERS_DIR)/* $(RELEASE_DIR)/jaydataproviders
+	@@cp $(TARGET_DIR)/jaydata.js $(RELEASE_DIR)
+	@@cp $(TARGET_DIR)/jaydata.min.js $(RELEASE_DIR)
+	@@cp $(TARGET_DIR)/jaydata-vsdoc.js $(RELEASE_DIR)
 
 all: jaydatavsdoc jaydatamin jaydata providers jaydatamodules npms
 	@@rm -r $(TEMP_DIR)
