@@ -244,9 +244,9 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
                 
                 // Although we added the 'fail' alias, it isn't included in the promise returned from 'then',
                 // so we have to add it.
-                deferred.promise._then = deferred.promise.then;
+				var originalThen = deferred.promise.then;  
                 deferred.promise.then = function(){
-                    var promise = this._then.apply(this, arguments);
+                    var promise = originalThen.apply(this, arguments);
                     promise.fail = promise.catch;
                     return promise;
                 }
