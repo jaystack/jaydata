@@ -29,7 +29,7 @@ var _getCacheKey = function (query) {
 
 angular.module('jaydata', ['ng', ['$provide', function ($provide) {
 
-    $provide.factory('$data', ['$rootScope', '$q', function ($rootScope, $q) {
+    $provide.factory('$data', ['$rootScope', '$q', '$timeout', function ($rootScope, $q, $timeout) {
         var cache = {};
 
         $data.Entity.prototype.hasOwnProperty = function (propName) {
@@ -70,7 +70,9 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
                 if (!cb) return;
                 var targetCbArr = type === "success" ? result.successHandlers : result.errorHandlers;
                 if (result.state === "completed") {
-                    cb(result);
+                    $timeout(function(){
+                        cb(result);
+                    });
                 } else {
                     targetCbArr.push(cb);
                 }
@@ -95,22 +97,24 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
             }
 
             result.resolve = function (items) {
-                result.state = "completed";
-                items.forEach(function (item) {
-                    result.push(item);
+                $timeout(function(){
+                    result.state = "completed";
+                    items.forEach(function (item) {
+                        result.push(item);
+                    });
+                    result.successHandlers.forEach(function (handler) {
+                        handler(result);
+                    });
                 });
-                result.successHandlers.forEach(function (handler) {
-                    handler(result);
-                });
-                if (!$rootScope.$$phase) $rootScope.$apply();
             }
 
             result.reject = function (err) {
-                result.state = "failed";
-                result.errorHandlers.forEach(function (handler) {
-                    handler(err);
+                $timeout(function(){
+                    result.state = "failed";
+                    result.errorHandlers.forEach(function (handler) {
+                        handler(err);
+                    });
                 });
-                if (!$rootScope.$$phase) $rootScope.$apply();
             }
 
             this.toArray({ success: result.resolve, error: result.reject });
@@ -229,8 +233,50 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
             });
             return d.promise;
         }
+        
+        // Use $q for promises
+        $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
+            constructor: function () {
+                var deferred = new $q.defer();
+                
+                // $q promises don't have the 'fail' alias for the 'catch' method, so we have to add it.
+                deferred.promise.fail = deferred.promise.catch;
+                
+                // Although we added the 'fail' alias, it isn't included in the promise returned from 'then',
+                // so we have to add it.
+                deferred.promise._then = deferred.promise.then;
+                deferred.promise.then = function(){
+                    var promise = this._then.apply(this, arguments);
+                    promise.fail = promise.catch;
+                    return promise;
+                }
+                
+                this.deferred = deferred; 
+            },
+            deferred: {},
+            createCallback: function (callBack) {
+                callBack = $data.typeSystem.createCallbackSetting(callBack);
+                var self = this;
+
+                return cbWrapper = {
+                    success: function () {
+                        callBack.success.apply(self.deferred, arguments);
+                        self.deferred.resolve.apply(self.deferred, arguments);
+                    },
+                    error: function () {
+                        Array.prototype.push.call(arguments, self.deferred);
+                        callBack.error.apply(self.deferred, arguments);
+                    }
+                };
+            },
+            getPromise: function () {
+                return this.deferred.promise;
+            }
+        }, null);
+
+        $data.PromiseHandler = $data.Deferred;
+            
         return $data;
     }]);
 }]]);
-
 })();
