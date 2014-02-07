@@ -148,7 +148,7 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
-    attach: function (entity, keepChanges) {
+    attach: function (entity, mode) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -192,10 +192,27 @@ $data.Class.defineEx('$data.EntitySet',
                 Guard.raise(new Exception("Context already contains this entity!!!"));
             }
         }
-        if (!keepChanges) {
+
+        if (mode === true) {
+            if (data.changedProperties && data.changedProperties.length > 0) {
+                data.entityState = $data.EntityState.Modified;
+            } else {
+                data.entityState = $data.EntityState.Unchanged;
+            }
+        } else {
+            if (typeof mode === "string") mode = $data.EntityAttachMode[mode];
+            var attachMode = mode || $data.EntityAttachMode[$data.EntityAttachMode.defaultMode];
+            if (typeof attachMode === "function") {
+                attachMode.call($data.EntityAttachMode, data);
+            } else {
+                data.entityState = $data.EntityState.Unchanged;
+                data.changedProperties = undefined;
+            }
+        }
+        /*if (!keepChanges) {
             data.entityState = $data.EntityState.Unchanged;
             data.changedProperties = undefined;
-        }
+        }*/
         data.context = this.entityContext;
         this._trackEntity(data);
     },
@@ -246,7 +263,7 @@ $data.Class.defineEx('$data.EntitySet',
             return;
         }
     },
-    attachOrGet: function (entity) {
+    attachOrGet: function (entity, mode) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -292,8 +309,16 @@ $data.Class.defineEx('$data.EntitySet',
             return existsItem.data;
         }
 
-        data.entityState = $data.EntityState.Unchanged;
-        data.changedProperties = undefined;
+        if (typeof mode === "string") mode = $data.EntityAttachMode[mode];
+        var attachMode = mode || $data.EntityAttachMode[$data.EntityAttachMode.defaultMode];
+        if (typeof attachMode === "function") {
+            attachMode.call($data.EntityAttachMode, data);
+        } else {
+            data.entityState = $data.EntityState.Unchanged;
+            data.changedProperties = undefined;
+        }
+        //data.entityState = $data.EntityState.Unchanged;
+        //data.changedProperties = undefined;
         data.context = this.entityContext;
         this._trackEntity(data);
         return data;
