@@ -109,6 +109,7 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ExpressionNode2.js\
 	$(TYPES_DIR)/Queryable.js\
 	$(TYPES_DIR)/EntitySet.js\
 	$(TYPES_DIR)/EntityState.js\
+	$(TYPES_DIR)/EntityAttachModes.js\
 	$(TYPES_DIR)/EntityStateManager.js\
 	$(TYPES_DIR)/ItemStore.js\
 	$(TYPES_DIR)/StorageProviderLoader.js\

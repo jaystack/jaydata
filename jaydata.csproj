@@ -430,6 +430,7 @@
     <Content Include="TypeSystem\Types\Blob.js" />
     <Content Include="TypeSystem\Types\Converter.js" />
     <Content Include="TypeSystem\Types\Types.js" />
+    <Content Include="Types\EntityAttachModes.js" />
     <Content Include="Types\Expressions\EntityExpressions\ExpressionMonitor.js" />
     <Content Include="Types\StorageProviders\Facebook\FacebookConverter.js" />
     <Content Include="Types\StorageProviders\IndexedDB\IndexedDBConverter.js" />
