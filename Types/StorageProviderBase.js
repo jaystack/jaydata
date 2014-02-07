@@ -198,10 +198,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
             cPropertyDef.computed = false;
             return cPropertyDef;
         };
-        var buildDbType_createConstrain = function (foreignType, dataType, propertyName, prefix) {
+        var buildDbType_createConstrain = function (foreignType, dataType, propertyName, prefix, keyPropertyName) {
             var constrain = new Object();
             constrain[foreignType.name] = propertyName;
-            constrain[dataType.name] = prefix + '__' + propertyName;
+            constrain[dataType.name] = keyPropertyName ? keyPropertyName : prefix + '__' + propertyName;
             return constrain;
         };
 
@@ -212,6 +212,14 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 var dataType = association.ToType;
                 var foreignPropName = association.ToPropertyName;
 
+                var memDef = association.FromType.getMemberDefinition(association.FromPropertyName);
+                var keyProperties = [];
+                if (memDef && typeof memDef.keys === "string" && memDef.keys) {
+                    keyProperties = [memDef.keys];
+                } else if (memDef && Array.isArray(memDef.keys)) {
+                    keyProperties = [].concat(memDef.keys);
+                }
+
                 association.ReferentialConstraint = association.ReferentialConstraint || [];
 
                 if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
@@ -221,11 +229,19 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                     addToEntityDef = true;
                 }
 
-                foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d) {
+                foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d, i) {
+                    var constraint = buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName, keyProperties[i]);
                     if (addToEntityDef) {
-                        instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+                        //instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+                        instanceDefinition[constraint[dataType.name]] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+
+                        var dependentMemDef = dataType.getMemberDefinition(keyProperties[i]);
+                        if (dependentMemDef) {
+                            dependentMemDef.isDependentProperty = true;
+                            dependentMemDef.navigationPropertyName = association.FromPropertyName;
+                        }
                     }
-                    association.ReferentialConstraint.push(buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName));
+                    association.ReferentialConstraint.push(constraint);
                 }, this);
             }, this);
         }
