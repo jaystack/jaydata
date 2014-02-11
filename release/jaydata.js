@@ -6,9 +6,9 @@
 // practices to access and manipulate data from various online and offline sources.
 //
 // Credits:
-//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
-//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
-//     Zoltán Gyebrovszki, Gábor Dolla
+//     Hajnalka Battancs, Dï¿½niel Jï¿½zsef, Jï¿½nos Roden, Lï¿½szlï¿½ Horvï¿½th, Pï¿½ter Nochta
+//     Pï¿½ter Zentai, Rï¿½bert Bï¿½nay, Szabolcs Czinege, Viktor Borza, Viktor Lï¿½zï¿½r,
+//     Zoltï¿½n Gyebrovszki, Gï¿½bor Dolla
 //
 // More info: http://jaydata.org
 // Acorn is a tiny, fast JavaScript parser written in JavaScript.
@@ -5665,7 +5665,7 @@ $C('$data.Expressions.CodeParser', null, null, {
             errorDetails: ''
         };
         ///<var name="AST" type="Date" />
-        
+          code = code.replace(/("use strict";)/gi, '');
         //console.log(code.toString());
         if ($data.Acorn){
             //console.log('using acorn.js');
