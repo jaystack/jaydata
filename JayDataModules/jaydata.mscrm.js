@@ -77,9 +77,9 @@
             var iframe;
 
             var onMessagehandlerLoaded = function (e) {
-                if ($data.MsCrm.Auth.trace) console.log("Message received", crmUrl);
+                if ($data.MsCrm.Auth.trace) $data.Trace.log("Message received", crmUrl);
                 if (e.data.MessageHandlerLoaded) {
-                    if ($data.MsCrm.Auth.trace) console.log("Message handler loaded", crmUrl);
+                    if ($data.MsCrm.Auth.trace) $data.Trace.log("Message handler loaded", crmUrl);
                     window.removeEventListener("message", onMessagehandlerLoaded);
                     window.OData.defaultHttpClient.targetIframe = iframe.contentWindow;
                     cb(iframe.contentWindow, crmUrl);
@@ -89,7 +89,7 @@
             var onAuthenticated = function (e) {
                 iframe = document.createElement("iframe");
                 if (e.data.Authenticated) {
-                    console.log("Logged in to CRM: " + crmUrl);
+                    $data.Trace.log("Logged in to CRM: " + crmUrl);
                     window.removeEventListener("message", onAuthenticated);
                     window.addEventListener("message", onMessagehandlerLoaded);
                     var url = local ? "postmessage.html" : crmUrl + $data.MsCrm.Auth.messageHandlerPath;

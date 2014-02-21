@@ -3,7 +3,7 @@ var datajsPatch;
 datajsPatch = function () {
     // just datajs-1.1.0
     if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler && typeof datajs === 'object' && !datajs.version) {
-        console.log('!!!!!!! - patch datajs 1.1.0');
+        $data.Trace.log('!!!!!!! - patch datajs 1.1.0');
         var oldread = OData.defaultHandler.read;
         OData.defaultHandler.read = function (p, context) {
             delete context.contentType;
