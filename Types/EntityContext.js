@@ -1660,7 +1660,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var tempOperation = $data.EntityContext.generateServiceOperation({ serviceName: functionName, returnType: $data.Queryable, elementType: this[returnEntitySet].elementType, params: params });
         return tempOperation.apply(this, arg);
     },
-    attach: function (entity, keepChanges) {
+    attach: function (entity, mode) {
         /// <summary>
         ///     Attaches an entity to its matching entity set.
         /// </summary>
@@ -1671,9 +1671,9 @@ $data.Class.define('$data.EntityContext', null, null,
             entity = entity.getEntity();
         }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
-        return entitySet.attach(entity, keepChanges);
+        return entitySet.attach(entity, mode);
     },
-    attachOrGet: function (entity) {
+    attachOrGet: function (entity, mode) {
         /// <summary>
         ///     Attaches an entity to its matching entity set, or returns if it's already attached.
         /// </summary>
@@ -1684,7 +1684,7 @@ $data.Class.define('$data.EntityContext', null, null,
             entity = entity.getEntity();
         }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
-        return entitySet.attachOrGet(entity);
+        return entitySet.attachOrGet(entity, mode);
     },
 
     addMany: function (entities) {

@@ -273,17 +273,10 @@
                     console.warn("entity with multiple keys not supported");
                     break;
             }
-            console.log("md", modelDefinition);
+            $data.Trace.log("md", modelDefinition);
 
             var returnValue = kendo.data.Model.define($data.kendo.BaseModelType, modelDefinition);
 
-            //returnValue.readAll
-
-            //TODO align with kendoui concept
-            //for (var j in returnValue.prototype.defaults) {
-            //    returnValue.prototype.defaults[j] = undefined;
-            //}
-            //console.log("default", returnValue.prototype.defaults)
             return returnValue;
         }
 
@@ -346,7 +339,6 @@
         }
     }
     $data.Queryable.addMember("asKendoColumns", function (columns) {
-        //console.log('col', this, arguments);
         var result = [];
         columns = columns || {};
         var showComplex = columns['$showComplexFields'] === true;
@@ -443,8 +435,6 @@
                                 filter += options.data.filter.logic == "or" ? " || " : " && ";
                             }
 
-                            //console.log(filter, f);
-
                             switch (f.operator) {
                                 case 'eq':
                                     filter += "it." + f.field;
@@ -488,7 +478,7 @@
                                     filter += " < this." + f.field;
                                     break;
                                 default:
-                                    console.log('unknown operator', f.operator);
+                                    $data.Trace.log('unknown operator', f.operator);
                                     break;
                             }
                             thisArg[f.field] = f.value;
@@ -522,7 +512,7 @@
                         promises.push(allItemsQ.toArray());
                     }
 
-                    console.log(promises);
+                    $data.Trace.log(promises);
                     jQuery.when.apply(this, promises).then(function (items, total) {
                         console.dir(arguments);
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
@@ -535,7 +525,7 @@
                             data: result,
                             total: withInlineCount ? items.totalCount : (withLength ? total : total.length)
                         }
-                        console.log(r);
+                        $data.Trace.log(r);
                         options.success(r);
                     }).fail(function () {
                         console.log("error in create");
@@ -565,7 +555,6 @@
                         });
                     }
                     else {
-                        //console.log("save single");
                         console.dir(ctx.storeToken);
                         model[0]
 						.innerInstance()
@@ -581,8 +570,6 @@
                 });
             },
             update: function (options, model) {
-                //console.log("update");
-                //console.dir(arguments);
                 var query = self;
                 query.entityContext.onReady().then(function () {
                     if (model.length > 1) {
@@ -638,8 +625,8 @@
                 });
             },
             setup: function () {
-                console.log("setup");
-                console.dir(arguments);
+                $data.Trace.log("setup");
+                $data.Trace.log(arguments);
             }
         });
         return TransportClass;
