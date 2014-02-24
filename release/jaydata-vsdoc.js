@@ -1,4 +1,4 @@
-// JayData 1.3.5
+// JayData 1.3.6
 // Dual licensed under MIT and GPL v2
 // Copyright JayStack Technologies (http://jaydata.org/licensing)
 //
@@ -1782,8 +1782,8 @@ if (!console.error) console.error = function () { };
     /// Collection of JayData services
     ///</summary>
     $data.__namespace = true;
-    $data.version = "JayData 1.3.5";
-    $data.versionNumber = "1.3.5";
+    $data.version = "JayData 1.3.6";
+    $data.versionNumber = "1.3.6";
     $data.root = {};
     $data.Acorn = $data.Acorn || (typeof acorn == 'object' ? acorn : undefined);
     $data.Esprima = $data.Esprima || (typeof esprima == 'object' ? esprima : undefined);
@@ -11039,7 +11039,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     var memDef = entity.data.getType().memberDefinitions.getPublicMappedProperties()[j];
 
                     var memDefType = Container.resolveType(memDef.type);
-                    if (memDef.required && !memDef.computed && !entity.data[memDef.name]) {
+                    if (memDef.required && !memDef.computed && !entity.data[memDef.name] && !memDef.isDependentProperty) {
                         switch (memDefType) {
                             case $data.String:
                             case $data.Number:
@@ -11631,7 +11631,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var tempOperation = $data.EntityContext.generateServiceOperation({ serviceName: functionName, returnType: $data.Queryable, elementType: this[returnEntitySet].elementType, params: params });
         return tempOperation.apply(this, arg);
     },
-    attach: function (entity, keepChanges) {
+    attach: function (entity, mode) {
         /// <summary>
         ///     Attaches an entity to its matching entity set.
         /// </summary>
@@ -11642,9 +11642,9 @@ $data.Class.define('$data.EntityContext', null, null,
             entity = entity.getEntity();
         }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
-        return entitySet.attach(entity, keepChanges);
+        return entitySet.attach(entity, mode);
     },
-    attachOrGet: function (entity) {
+    attachOrGet: function (entity, mode) {
         /// <summary>
         ///     Attaches an entity to its matching entity set, or returns if it's already attached.
         /// </summary>
@@ -11655,7 +11655,7 @@ $data.Class.define('$data.EntityContext', null, null,
             entity = entity.getEntity();
         }
         var entitySet = this.getEntitySetFromElementType(entity.getType());
-        return entitySet.attachOrGet(entity);
+        return entitySet.attachOrGet(entity, mode);
     },
 
     addMany: function (entities) {
@@ -13378,7 +13378,7 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
-    attach: function (entity, keepChanges) {
+    attach: function (entity, mode) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -13422,10 +13422,27 @@ $data.Class.defineEx('$data.EntitySet',
                 Guard.raise(new Exception("Context already contains this entity!!!"));
             }
         }
-        if (!keepChanges) {
+
+        if (mode === true) {
+            if (data.changedProperties && data.changedProperties.length > 0) {
+                data.entityState = $data.EntityState.Modified;
+            } else {
+                data.entityState = $data.EntityState.Unchanged;
+            }
+        } else {
+            if (typeof mode === "string") mode = $data.EntityAttachMode[mode];
+            var attachMode = mode || $data.EntityAttachMode[$data.EntityAttachMode.defaultMode];
+            if (typeof attachMode === "function") {
+                attachMode.call($data.EntityAttachMode, data);
+            } else {
+                data.entityState = $data.EntityState.Unchanged;
+                data.changedProperties = undefined;
+            }
+        }
+        /*if (!keepChanges) {
             data.entityState = $data.EntityState.Unchanged;
             data.changedProperties = undefined;
-        }
+        }*/
         data.context = this.entityContext;
         this._trackEntity(data);
     },
@@ -13476,7 +13493,7 @@ $data.Class.defineEx('$data.EntitySet',
             return;
         }
     },
-    attachOrGet: function (entity) {
+    attachOrGet: function (entity, mode) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -13522,8 +13539,16 @@ $data.Class.defineEx('$data.EntitySet',
             return existsItem.data;
         }
 
-        data.entityState = $data.EntityState.Unchanged;
-        data.changedProperties = undefined;
+        if (typeof mode === "string") mode = $data.EntityAttachMode[mode];
+        var attachMode = mode || $data.EntityAttachMode[$data.EntityAttachMode.defaultMode];
+        if (typeof attachMode === "function") {
+            attachMode.call($data.EntityAttachMode, data);
+        } else {
+            data.entityState = $data.EntityState.Unchanged;
+            data.changedProperties = undefined;
+        }
+        //data.entityState = $data.EntityState.Unchanged;
+        //data.changedProperties = undefined;
         data.context = this.entityContext;
         this._trackEntity(data);
         return data;
@@ -13627,7 +13652,27 @@ $data.EntityState = {
     Added: 20,
     Modified: 30,
     Deleted: 40
-};$data.Class.define('$data.EntityStateManager', null, null,
+};$data.Class.define("$data.EntityAttachMode", null, null, {}, {
+    defaultMode: 'Default',
+    AllChanged: function (data) {
+        var memDefs = data.getType().memberDefinitions.getPublicMappedProperties();
+        for (var i = 0; i < memDefs.length; i++) {
+            data._setPropertyChanged(memDefs[i]);
+        }
+        data.entityState = $data.EntityState.Modified;
+    },
+    KeepChanges: function (data) {
+        if (data.changedProperties && data.changedProperties.length > 0) {
+            data.entityState = $data.EntityState.Modified;
+        } else {
+            data.entityState = $data.EntityState.Unchanged;
+        }
+    },
+    Default: function (data) {
+        data.entityState = $data.EntityState.Unchanged;
+        data.changedProperties = undefined;
+    }
+});$data.Class.define('$data.EntityStateManager', null, null,
 {
     constructor: function (entityContext) {
         this.entityContext = null;
@@ -14784,10 +14829,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
             cPropertyDef.computed = false;
             return cPropertyDef;
         };
-        var buildDbType_createConstrain = function (foreignType, dataType, propertyName, prefix) {
+        var buildDbType_createConstrain = function (foreignType, dataType, propertyName, prefix, keyPropertyName) {
             var constrain = new Object();
             constrain[foreignType.name] = propertyName;
-            constrain[dataType.name] = prefix + '__' + propertyName;
+            constrain[dataType.name] = keyPropertyName ? keyPropertyName : prefix + '__' + propertyName;
             return constrain;
         };
 
@@ -14798,6 +14843,14 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 var dataType = association.ToType;
                 var foreignPropName = association.ToPropertyName;
 
+                var memDef = association.FromType.getMemberDefinition(association.FromPropertyName);
+                var keyProperties = [];
+                if (memDef && typeof memDef.keys === "string" && memDef.keys) {
+                    keyProperties = [memDef.keys];
+                } else if (memDef && Array.isArray(memDef.keys)) {
+                    keyProperties = [].concat(memDef.keys);
+                }
+
                 association.ReferentialConstraint = association.ReferentialConstraint || [];
 
                 if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
@@ -14807,11 +14860,19 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                     addToEntityDef = true;
                 }
 
-                foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d) {
+                foreignType.memberDefinitions.getPublicMappedProperties().filter(function (d) { return d.key }).forEach(function (d, i) {
+                    var constraint = buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName, keyProperties[i]);
                     if (addToEntityDef) {
-                        instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+                        //instanceDefinition[foreignPropName + '__' + d.name] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+                        instanceDefinition[constraint[dataType.name]] = buildDbType_copyPropertyDefinition(d, foreignPropName);
+
+                        var dependentMemDef = dataType.getMemberDefinition(keyProperties[i]);
+                        if (dependentMemDef) {
+                            dependentMemDef.isDependentProperty = true;
+                            dependentMemDef.navigationPropertyName = association.FromPropertyName;
+                        }
                     }
-                    association.ReferentialConstraint.push(buildDbType_createConstrain(foreignType, dataType, d.name, foreignPropName));
+                    association.ReferentialConstraint.push(constraint);
                 }, this);
             }, this);
         }

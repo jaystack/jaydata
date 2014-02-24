@@ -1,4 +1,4 @@
-// JayData 1.3.5
+// JayData 1.3.6
 // Dual licensed under MIT and GPL v2
 // Copyright JayStack Technologies (http://jaydata.org/licensing)
 //
@@ -360,7 +360,7 @@ var datajsPatch;
 datajsPatch = function () {
     // just datajs-1.1.0
     if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler && typeof datajs === 'object' && !datajs.version) {
-        console.log('!!!!!!! - patch datajs 1.1.0');
+        $data.Trace.log('!!!!!!! - patch datajs 1.1.0');
         var oldread = OData.defaultHandler.read;
         OData.defaultHandler.read = function (p, context) {
             delete context.contentType;
