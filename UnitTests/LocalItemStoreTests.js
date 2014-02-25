@@ -331,11 +331,11 @@
         var ctx = factory();
 
         equal(ctx.storeToken.typeName, 'ItemStore.Example.Context', 'storeToken typeName');
-        deepEqual(ctx.storeToken.args, { name: 'local', databaseName: 'mine_DB' }, 'storeToken args');
+        deepEqual(ctx.storeToken.args, { name: ['local'], databaseName: 'mine_DB' }, 'storeToken args');
         equal(typeof ctx.storeToken.factory, 'function', 'storeToken factory');
 
         equal(ItemStore.Example.Article.storeToken.typeName, 'ItemStore.Example.Context', 'storeToken typeName');
-        deepEqual(ItemStore.Example.Article.storeToken.args, { name: 'local', databaseName: 'mine_DB' }, 'storeToken args');
+        deepEqual(ItemStore.Example.Article.storeToken.args, { name: ['local'], databaseName: 'mine_DB' }, 'storeToken args');
         equal(typeof ItemStore.Example.Article.storeToken.factory, 'function', 'storeToken factory');
     });
 

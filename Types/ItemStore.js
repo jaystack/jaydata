@@ -573,6 +573,10 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     ContextRegister: function (storageProviderCfg) {
         //context instance
         var self = this;
+        if (typeof storageProviderCfg.name === "string") {
+            storageProviderCfg.name = [storageProviderCfg.name];
+        }
+
         var args = JSON.parse(JSON.stringify(storageProviderCfg));
         this.storeToken = {
             typeName: this.getType().fullName,
