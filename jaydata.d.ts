@@ -11,6 +11,20 @@ declare module $data {
         valueOf(): any;
     }
 
+    interface IPromiseArray<T> extends Array<T> {
+        then: {
+            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => any): IPromise<any>;
+        };
+        fail: {
+            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => any): IPromise<any>;
+        };
+        next(): IPromiseArray<T>;
+        prev(): IPromiseArray<T>;
+        refresh(): IPromiseArray<T>;
+    }
+
     export enum EntityState {
         Detached,
         Unchanged,
@@ -64,6 +78,10 @@ declare module $data {
         toArray(): $data.IPromise<T[]>;
         toArray(handler: (result: T[]) => void ): $data.IPromise<T[]>;
         toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): $data.IPromise<T[]>;
+
+        toLiveArray(): IPromiseArray<T>;
+        toLiveArray(handler: (result: T[]) => void): IPromiseArray<T>;
+        toLiveArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): IPromiseArray<T>;
 
         single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
         single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
