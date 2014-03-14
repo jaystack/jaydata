@@ -78,8 +78,8 @@ declare module $data {
         add(item: T): T;
         add(initData: {}): T;
 
-        attach(item: T): void;
-        attach(item: {}): void;
+        attach(item: T, keepChanges?: boolean): void;
+        attach(item: {}, keepChanges?: boolean): void;
         attachOrGet(item: T): T;
         attachOrGet(item: {}): T;
 
