@@ -11,6 +11,20 @@ declare module $data {
         valueOf(): any;
     }
 
+    export enum EntityState {
+        Detached,
+        Unchanged,
+        Added,
+        Modified,
+        Deleted,
+    }
+
+    export enum EntityAttachMode {
+        AllChanged,
+        KeepChanges,
+        Default,
+    }
+
     export class Base implements Object {
         constructor(...params: any[]);
         getType: () => Base;
@@ -26,7 +40,7 @@ declare module $data {
         constructor();
         constructor(initData: {});
 
-        entityState: number;
+        entityState: EntityState;
         changedProperties: any[];
 
         propertyChanging: Event;
@@ -80,8 +94,10 @@ declare module $data {
 
         attach(item: T, keepChanges?: boolean): void;
         attach(item: {}, keepChanges?: boolean): void;
-        attachOrGet(item: T): T;
-        attachOrGet(item: {}): T;
+        attach(item: T, mode?: EntityAttachMode): void;
+        attach(item: {}, mode?: EntityAttachMode): void;
+        attachOrGet(item: T, mode?: EntityAttachMode): T;
+        attachOrGet(item: {}, mode?: EntityAttachMode): T;
 
         detach(item: T): void;
         detach(item: {}): void;
