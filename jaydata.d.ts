@@ -109,6 +109,7 @@ declare module $data {
         
         add(item: T): T;
         add(initData: {}): T;
+        addMany(items: T[]): T[];
 
         attach(item: T, keepChanges?: boolean): void;
         attach(item: {}, keepChanges?: boolean): void;
