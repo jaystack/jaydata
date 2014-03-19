@@ -248,6 +248,18 @@ declare module $data {
     }
 }
 
+declare module $data.storageProviders {
+    export enum DbCreationType {
+        Merge,
+        DropTableIfChanged,
+        DropTableIfChange,
+        DropAllExistingTables,
+        ErrorIfChange,
+        DropDbIfChange,
+
+    }
+}
+
 interface String {
     contains(s: string): boolean;
     startsWith(s: string): boolean;
