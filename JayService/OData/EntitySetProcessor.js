@@ -59,7 +59,9 @@
                         }
                         
                         var entity = new this.entitySet.createNew(bodyData, { converters: $data.oDataConverter.fromDb });
-                        this.entitySet.add(entity);
+
+                        this.entitySet.add(entity, req);
+
                         this.context.saveChanges({
                             success: function () {
                                 res.statusCode = 201;
@@ -127,7 +129,9 @@
                         self.BatchDeleteFromEntitySet(req, config, cbWrapper);
                     } else {
                         if (this.member.idObject) {
-                            this.entitySet.remove(this.member.idObject);
+
+                            this.entitySet.remove(this.member.idObject, req);
+
                             this.context.saveChanges({
                                 success: function () {
                                 //return with no content
@@ -191,6 +195,9 @@
         config.includes = result.includes;
         this.context.executeQuery(new $data.Queryable(this.entitySet, result.expression), {
             success: function (contextResult) {
+
+                req.reso.resultSize = contextResult.length;
+
                 if (self.member.valueRequeset) {
                     // request pattern: /EntitySet(key)/Field/$value
                     self.prepareSimpleResponse(contextResult, self.member.selectedField, self.entitySet, callback);

@@ -57,6 +57,10 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 var methodArgs = self.resolveArguments(req, serviceInstance, memberInfo);
 
                 if (memberInfo.method instanceof Array ? memberInfo.method.indexOf(req.method) >= 0 : memberInfo.method === req.method){
+
+                    req.reso.memberName = memberName;
+                    req.reso.namespace = "System";
+
                     oDataBuilderCfg = {
 	                    version: 'V2',
 	                    baseUrl: req.fullRoute,
@@ -77,6 +81,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                 member = self.resolveEntitySet(req, memberName, serviceInstance);
                 if (member) {
                     var esProc = new $data.JayService.OData.EntitySetProcessor(memberName, serviceInstance, { top: serviceInstance.storageProvider.providerConfiguration.responseLimit || $data.JayService.OData.Defaults.defaultResponseLimit });
+
+                    req.reso.memberName = memberName;
+                    req.reso.namespace = member.elementType.namespace;
 
                     oDataBuilderCfg = {
 	                    version: 'V2',
@@ -344,6 +351,9 @@ $data.Class.define("$data.JSObjectAdapter", null, null, {
                     defer.resolve(new $data.EmptyServiceResult(404));
                 }
             } else {
+
+                request.reso.resultSize = 1;
+
                 defer.resolve(result);
             }
 

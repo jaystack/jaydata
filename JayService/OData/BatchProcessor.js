@@ -179,7 +179,11 @@
                     this._discoverNavigations(changeRequest, referenceData, itemType);
                     var entity = new itemType(changeRequest.data, { converters: $data.oDataConverter.fromDb });
                     referenceData[refId].resultObject = entity;
-                    setInfo.set.add(entity);
+
+                    request.reso.memberName = setInfo.set.name;
+                    request.reso.namespace = itemType.namespace;
+                    setInfo.set.add(entity, request);
+
                     break;
                 case 'MERGE':
                 case 'PATCH':
@@ -199,7 +203,11 @@
                 case 'DELETE':
                     var entity = new itemType(setInfo.idObj);
                     referenceData[refId].resultObject = entity;
-                    setInfo.set.remove(entity);
+
+                    request.reso.memberName = setInfo.set.name;
+                    request.reso.namespace = itemType.namespace;
+                    setInfo.set.remove(entity, request);
+
                     break;
                 default:
                     break;

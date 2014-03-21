@@ -1,3 +1,6 @@
+
+var fs = require('fs');
+
 ///EntitySet is responsible for
 /// -creating and holding entityType through schema
 /// - provide Add method
@@ -66,7 +69,7 @@ $data.Class.defineEx('$data.EntitySet',
         }
         trackedEntities.push({ entitySet: this, data: entity });
     },
-    add: function (entity) {
+    add: function (entity, req) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the context.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -101,7 +104,28 @@ $data.Class.defineEx('$data.EntitySet',
         data.entityState = $data.EntityState.Added;
         data.changedProperties = undefined;
         data.context = this.entityContext;
-        this._trackEntity(data);
+
+        if (req.reso.externalIndex) {
+          var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+          var keyValue = data[keyName];
+          if (INDEX.indexOf(keyValue) == -1) {
+            INDEX[INDEX.length] = keyValue;
+            fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
+              if (err) throw err;
+            });
+            req.reso.resultSize = 1;
+            req.reso.keyValue = keyValue;
+            this._trackEntity(data);
+//console.dir(data);
+//          } else {
+//console.log("Item with a " + keyName + " of " + keyValue + " already exists.  Not added");
+          }
+        } else {
+console.log("INDEX IS OFF");
+          this._trackEntity(data);
+        }
+
+
         return data;
     },
 
@@ -113,7 +137,7 @@ $data.Class.defineEx('$data.EntitySet',
         });
         return result;
     },
-    remove: function (entity) {
+    remove: function (entity, req) {
         /// <signature>
         ///     <summary>Creates a typed entity and marks it as Deleted.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -145,6 +169,30 @@ $data.Class.defineEx('$data.EntitySet',
             data = new this.createNew(entity);
         }
         data.entityState = $data.EntityState.Deleted;
+
+        if (req.reso.externalIndex) {
+          var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+          if (entity[keyName]) {
+            var keyValue = entity[keyName];
+            req.reso.resultSize = 1;
+            req.reso.keyValue = entity[keyName];
+            var position = INDEX.indexOf(keyValue);
+            if (position != -1) {
+              INDEX.splice(position,1);
+              if (INDEX.length > 0) {
+                fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
+                  if (err) throw err;
+                });
+              } else {
+                fs.unlinkSync(req.reso.indexFileName);
+              }
+            }
+          }
+        } else {
+console.log("INDEX IS OFF");
+        }
+
+
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
