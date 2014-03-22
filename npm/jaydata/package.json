@@ -1,10 +1,7 @@
 {
   "name": "jaydata-reso",
-  "description": "Form of Jayadata, a cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
+  "description": "Forl of Jayadata, a cross-platform OData libray packaged for Node.JS) that is designed to support the RESO API",
   "keywords": [
-    "JavaScript",
-    "JavaScript Language Query",
-    "JSLQ",
     "OData",
     "cross-platform",
     "reso"
@@ -17,17 +14,7 @@
   },
   "dependencies": {},
   "contributors": [
-    {"name": "Dániel József"},
-    {"name": "Hajnalka Battancs"},
-    {"name": "János Roden"},
-    {"name": "László Horváth"},
-    {"name": "Péter Zentai"},
-    {"name": "Péter Nochta"},
-    {"name": "Róbert Bónay"},
-    {"name": "Szabolcs Czinege"},
-    {"name": "Viktor Borza"},
-    {"name": "Viktor Lázár"},
-    {"name": "Zoltán Gyebrovszki"},
+    {"name": "Original JayData Development Team"},
     {"name": "Mark Lesswing"}
   ],
   "repository": {
