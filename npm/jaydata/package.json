@@ -1,12 +1,12 @@
 {
   "name": "jaydata-reso",
-  "description": "Forl of Jayadata, a cross-platform OData libray packaged for Node.JS) that is designed to support the RESO API",
+  "description": "Fork of Jayadata, a cross-platform OData libray packaged for Node.JS) that is designed to support the RESO API",
   "keywords": [
     "OData",
     "cross-platform",
     "reso"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "http://blogs.crt.realtors.org",
   "author": {
     "name": "JayData-RESO",
