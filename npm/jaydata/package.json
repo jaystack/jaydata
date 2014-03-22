@@ -1,26 +1,19 @@
 {
-  "name": "jaydata",
-  "description": "Cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
+  "name": "jaydata-reso",
+  "description": "Form of Jayadata, a cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
   "keywords": [
-    "HTML5 data management",
     "JavaScript",
     "JavaScript Language Query",
     "JSLQ",
     "OData",
-    "SQLite",
-    "WebSQL",
-    "IndexedDB",
-    "YQL",
-    "Facebook",
     "cross-platform",
-    "iPhone",
-    "Android"
+    "reso"
   ],
-  "version": "1.1.0",
-  "homepage": "http://jaydata.org",
+  "version": "1.0.0",
+  "homepage": "http://blogs.crt.realtors.org",
   "author": {
-    "name": "JayData",
-    "url": "http://jaydata.org"
+    "name": "JayData-RESO",
+    "url": "http://blogs.crt.realtors.org"
   },
   "dependencies": {},
   "contributors": [
@@ -34,22 +27,23 @@
     {"name": "Szabolcs Czinege"},
     {"name": "Viktor Borza"},
     {"name": "Viktor Lázár"},
-    {"name": "Zoltán Gyebrovszki"}
+    {"name": "Zoltán Gyebrovszki"},
+    {"name": "Mark Lesswing"}
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/jaydata/jaydata.git"
+    "url": "https://github.com/mlesswing/jaydata.git"
   },
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=0.10.0"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://jaydata.org/licensing"
+      "url": "http://blogs.crt.realtors.org"
     },
     {
       "type": "GPLv2",
-      "url": "http://jaydata.org/licensing"
+      "url": "http://blogs.crt.realtors.org"
     }
   ]}
