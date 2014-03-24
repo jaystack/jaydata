@@ -656,6 +656,28 @@
     .orderByDescending(function (m) { return m.LoginName }).toTraceString()),
     "SELECT * FROM Users T0 ORDER BY T0.LoginName DESC, T0.LoginName DESC | []");
         });
+        test("Ordering: collate nocase asc", 1, function () {
+            if ($data.defaults && $data.defaults.sql && "orderCaseInsensitive" in $data.defaults.sql) {
+                $data.defaults.sql.orderCaseInsensitive = true;
+                equal(_resultToString($data.NewsReaderContext.Users
+                    .orderBy(function (m) { return m.LoginName }).toTraceString()),
+                        "SELECT * FROM Users T0 ORDER BY T0.LoginName COLLATE NOCASE ASC | []");
+                $data.defaults.sql.orderCaseInsensitive = false;
+            } else {
+                ok(true, "not supported");
+            }
+        });
+        test("Ordering: collate nocase desc", 1, function () {
+            if ($data.defaults && $data.defaults.sql && "orderCaseInsensitive" in $data.defaults.sql) {
+                $data.defaults.sql.orderCaseInsensitive = true;
+                equal(_resultToString($data.NewsReaderContext.Users
+                    .orderByDescending(function (m) { return m.LoginName }).toTraceString()),
+                        "SELECT * FROM Users T0 ORDER BY T0.LoginName COLLATE NOCASE DESC | []");
+                $data.defaults.sql.orderCaseInsensitive = false;
+            } else {
+                ok(true, "not supported");
+            }
+        });
 
         //==================================================================================================== Projection
 
