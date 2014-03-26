@@ -6,10 +6,10 @@
     "cross-platform",
     "reso"
   ],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage": "http://blogs.crt.realtors.org",
   "author": {
-    "name": "JayData-RESO",
+    "name": "Mark Lesswing",
     "url": "http://blogs.crt.realtors.org"
   },
   "dependencies": {},
@@ -33,4 +33,6 @@
       "type": "GPLv2",
       "url": "http://blogs.crt.realtors.org"
     }
-  ]}
+  ],
+  "readmeFilename": "README.md"
+}
