@@ -40,8 +40,6 @@ TYPE_SYSTEM = $(TYPESYSTEM_DIR)/initializeJayData.js\
 	$(TYPESYSTEM_DIR)/Types/Converter.js\
 	$(TYPESYSTEM_DIR)/Extensions.js\
 
-VSDOC_SOURCE = $(TYPESYSTEM_DIR)/VS2010Intellisense.js\
-
 JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ExpressionNode2.js\
 	$(TYPES_DIR)/Expressions/ArrayLiteralExpression.js\
 	$(TYPES_DIR)/Expressions/CallExpression.js\
@@ -115,7 +113,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ExpressionNode2.js\
 	$(TYPES_DIR)/ServiceOperation.js\
 	$(TYPES_DIR)/EntityWrapper.js\
 	$(TYPES_DIR)/Ajax/jQueryAjaxWrapper.js\
-	$(TYPES_DIR)/Ajax/WinJSAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/ExtJSAjaxWrapper.js\
 	$(TYPES_DIR)/Ajax/AjaxStub.js\
 	$(TYPES_DIR)/StorageProviders/modelBinderConfigCompiler.js\
@@ -125,7 +122,6 @@ JAYDATA_SOURCE = $(TYPES_DIR)/Expressions/ExpressionNode2.js\
 	$(TYPES_DIR)/Authentication/BasicAuth.js\
 	$(JAYSVCUTIL_DIR)/JaySvcUtil.js\
 	$(BASEMODULE_DIR)/deferred.js\
-	$(TYPES_DIR)/JayStorm.js\
 
 JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(JSERVICE_DIR)/Scripts/datajs-1.0.3-patched.js\
@@ -152,9 +148,6 @@ JAYDATA_SERVER = $(BASEMODULE_DIR)/qDeferred.js\
 	$(ODATAPARSER_DIR)/ODataEntityExpressionBuilder.js\
 	$(ODATAPARSER_DIR)/Visitors/ObjectLiteralBuilderVisitor.js\
 
-IndexedDbProvider = $(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBConverter.js\
-	$(TYPES_DIR)/StorageProviders/IndexedDB/IndexedDBStorageProvider.js\
-
 DbCommand = $(TYPES_DIR)/DbClient/DbCommand.js\
 	$(TYPES_DIR)/DbClient/DbConnection.js\
 	$(TYPES_DIR)/DbClient/OpenDatabaseClient/OpenDbCommand.js\
@@ -175,33 +168,6 @@ SqLiteProvider = $(DbCommand)\
 	$(TYPES_DIR)/StorageProviders/SqLite/SqlFilterCompiler.js\
 	$(TYPES_DIR)/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js\
 
-oDataProvider = $(TYPES_DIR)/StorageProviders/oData/oDataConverter.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataProvider.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataCompiler.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataWhereCompiler.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataOrderCompiler.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataPagingCompiler.js\
-	$(TYPES_DIR)/StorageProviders/oData/oDataProjectionCompiler.js\
-
-FacebookProvider = $(TYPES_DIR)/StorageProviders/Facebook/FacebookConverter.js\
-	$(TYPES_DIR)/StorageProviders/Facebook/FacebookProvider.js\
-	$(TYPES_DIR)/StorageProviders/Facebook/FacebookCompiler.js\
-	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/user.js\
-	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/friend.js\
-	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQL/page.js\
-	$(TYPES_DIR)/StorageProviders/Facebook/EntitySets/FQLContext.js\
-
-YQLProvider = $(TYPES_DIR)/StorageProviders/YQL/YQLConverter.js\
-	$(TYPES_DIR)/StorageProviders/YQL/YQLProvider.js\
-	$(TYPES_DIR)/StorageProviders/YQL/YQLCompiler.js\
-	$(TYPES_DIR)/StorageProviders/YQL/EntitySets/geo.js\
-	$(TYPES_DIR)/StorageProviders/YQL/EntitySets/YQLContext.js\
-
-InMemoryProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryConverter.js\
-	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryProvider.js\
-	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryCompiler.js\
-	$(TYPES_DIR)/StorageProviders/InMemory/InMemoryFunctionCompiler.js\
-
 MongoDbProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryConverter.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/mongoDBConverter.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/mongoDBModelBinderConfigCompiler.js\
@@ -214,40 +180,6 @@ MongoDbProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryConverter.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/ClientObjectID.js\
 
-StormProvider = $(TYPES_DIR)/StorageProviders/Storm/StormStorageProvider.js\
-
-WebApiProvider = $(TYPES_DIR)/StorageProviders/WebApi/WebApiConverter.js\
-	$(TYPES_DIR)/StorageProviders/WebApi/WebApiProvider.js\
-
-DeferredModule = $(BASEMODULE_DIR)/deferred.js\
-
-ErrorHandlerModule = $(BASEMODULE_DIR)/errorhandler.js\
-
-FormBinderModule = $(BASEMODULE_DIR)/formBinder.js\
-
-HandlebarsModule = $(BASEMODULE_DIR)/handlebars.js\
-
-InMemoryModule = $(BASEMODULE_DIR)/inMemory.js\
-
-KendoModule = $(BASEMODULE_DIR)/kendo.js\
-
-KnockoutModule = $(BASEMODULE_DIR)/knockout.js\
-
-QDeferredModule = $(BASEMODULE_DIR)/qDeferred.js\
-
-SenchaModule = $(BASEMODULE_DIR)/sencha.js\
-
-TemplateModule = $(BASEMODULE_DIR)/template.js\
-
-ValidateModule = $(BASEMODULE_DIR)/validate.js\
-
-AngularModule = $(BASEMODULE_DIR)/angular.js\
-
-MsCrmModule = $(BASEMODULE_DIR)/jaydata.mscrm.js\
-
-MsCrmServerModule = $(BASEMODULE_DIR)/jaydata.mscrm.server.js\
-
-
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 	@@test ! -d $(RELEASE_DIR) || rm -r $(RELEASE_DIR)
@@ -257,9 +189,8 @@ release: all
 	@@test -d $(RELEASE_DIR) || mkdir -p $(RELEASE_DIR)
 	@@cp $(TARGET_DIR)/jaydata.js $(RELEASE_DIR)
 	@@cp $(TARGET_DIR)/jaydata.min.js $(RELEASE_DIR)
-	@@cp $(TARGET_DIR)/jaydata-vsdoc.js $(RELEASE_DIR)
 
-all: jaydatavsdoc jaydatamin jaydata npms
+all: jaydatamin jaydata npms
 	@@rm -r $(TEMP_DIR)
 
 npms: npmjaydata
@@ -273,49 +204,22 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	sed -e 's/$data.version = "JayData [0-9].[0-9].[0-9]"/$data.version = "JayData $(VERSION)"/;s/$data.versionNumber = "[0-9].[0-9].[0-9]"/$data.versionNumber = "$(VERSION)"/' > $(NPM_DIR)/jaydata/lib/$(TYPE_SYSTEM_NPM).bak
 	@@mv $(NPM_DIR)/jaydata/lib/$(TYPE_SYSTEM_NPM).bak $(NPM_DIR)/jaydata/lib/$(TYPE_SYSTEM_NPM)
 	@@rsync -R $(JAYDATA_SOURCE) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(IndexedDbProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(SqLiteProvider) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(oDataProvider) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(WebApiProvider) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(InMemoryProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(StormProvider) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(FacebookProvider) $(NPM_DIR)/jaydata/lib
-	@@rsync -R $(YQLProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(JAYDATA_SERVER) $(NPM_DIR)/jaydata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(CREDITS) $(NPM_DIR)/jaydata
 	@$(foreach dir,$(TYPE_SYSTEM),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
-	@$(foreach dir,$(IndexedDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/indexeddb_index.js;)
 	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/sqlite_index.js;)
-	@$(foreach dir,$(oDataProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/odata_index.js;)
-	@$(foreach dir,$(WebApiProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/webapi_index.js;)
-	@$(foreach dir,$(InMemoryProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/inmemory_index.js;)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
-	@$(foreach dir,$(StormProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/storm_index.js;)
-	@$(foreach dir,$(FacebookProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/facebook_index.js;)
-	@$(foreach dir,$(YQLProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/yql_index.js;)
 	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/service_index.js;)
-	@@echo "require('./indexeddb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./sqlite_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
-	@@echo "require('./odata_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
-	@@echo "require('./webapi_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
-	@@echo "require('./inmemory_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
-	@@echo "require('./storm_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
-	@@echo "require('./facebook_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
-	@@echo "require('./yql_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./service_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
 	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "0.5.0", "xmldom": "0.1.11", "url": ">0.0.1", "acorn": "0.1.0"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
-
-jaydatavsdoc: jaydata $(CREDITS)
-	@@echo "Building JayData vsdoc version..."
-	@@test -d $(TEMP_DIR) || mkdir -p $(TEMP_DIR)
-	@@cat $(VSDOC_SOURCE) $(TEMP_DIR)/jaydata.js > $(TEMP_DIR)/jaydata-vsdoc.js
-	@@cat $(CREDITS) $(TEMP_DIR)/jaydata-vsdoc.js > $(TARGET_DIR)/jaydata-vsdoc.js
 
 jaydatamin: jaydata $(CREDITS)
 	@@echo "Minifying JayData library..."
