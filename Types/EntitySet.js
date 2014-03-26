@@ -110,9 +110,9 @@ $data.Class.defineEx('$data.EntitySet',
           var keyValue = data[keyName];
           if (INDEX.indexOf(keyValue) == -1) {
             INDEX[INDEX.length] = keyValue;
-            fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
-              if (err) throw err;
-            });
+//            fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
+//              if (err) throw err;
+//            });
             req.reso.resultSize = 1;
             req.reso.keyValue = keyValue;
             this._trackEntity(data);
@@ -179,13 +179,13 @@ console.log("INDEX IS OFF");
             var position = INDEX.indexOf(keyValue);
             if (position != -1) {
               INDEX.splice(position,1);
-              if (INDEX.length > 0) {
-                fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
-                  if (err) throw err;
-                });
-              } else {
-                fs.unlinkSync(req.reso.indexFileName);
-              }
+//              if (INDEX.length > 0) {
+//                fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
+//                  if (err) throw err;
+//                });
+//              } else {
+//                fs.unlinkSync(req.reso.indexFileName);
+//              }
             }
           }
         } else {
