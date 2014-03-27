@@ -677,9 +677,9 @@
         ds = ds || {};
         //unless user explicitly opts out server side logic
         //we just force it.
-        ds.serverPaging = ds.serverPaging || true;
-        ds.serverFiltering = ds.serverFiltering || true;
-        ds.serverSorting = ds.serverSorting || true;
+        ds.serverPaging = ds.serverPaging === undefined ? true : ds.serverPaging;
+        ds.serverFiltering = ds.serverFiltering === undefined ? true : ds.serverFiltering;
+        ds.serverSorting = ds.serverSorting === undefined ? true : ds.serverSorting;
         ds.pageSize = ds.pageSize === undefined ? $data.kendo.defaultPageSize : ds.pageSize;
 
         var TransportClass = self.asKendoRemoteTransportClass(model);
