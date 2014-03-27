@@ -1,6 +1,4 @@
 
-var fs = require('fs');
-
 ///EntitySet is responsible for
 /// -creating and holding entityType through schema
 /// - provide Add method
@@ -105,14 +103,11 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         data.context = this.entityContext;
 
+        var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+        var keyValue = data[keyName];
         if (req.reso.externalIndex) {
-          var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
-          var keyValue = data[keyName];
           if (INDEX.indexOf(keyValue) == -1) {
             INDEX[INDEX.length] = keyValue;
-//            fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
-//              if (err) throw err;
-//            });
             req.reso.resultSize = 1;
             req.reso.keyValue = keyValue;
             this._trackEntity(data);
@@ -121,7 +116,8 @@ $data.Class.defineEx('$data.EntitySet',
 //console.log("Item with a " + keyName + " of " + keyValue + " already exists.  Not added");
           }
         } else {
-console.log("INDEX IS OFF");
+          req.reso.resultSize = 1;
+          req.reso.keyValue = keyValue;
           this._trackEntity(data);
         }
 
@@ -170,8 +166,8 @@ console.log("INDEX IS OFF");
         }
         data.entityState = $data.EntityState.Deleted;
 
+        var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
         if (req.reso.externalIndex) {
-          var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
           if (entity[keyName]) {
             var keyValue = entity[keyName];
             req.reso.resultSize = 1;
@@ -179,17 +175,11 @@ console.log("INDEX IS OFF");
             var position = INDEX.indexOf(keyValue);
             if (position != -1) {
               INDEX.splice(position,1);
-//              if (INDEX.length > 0) {
-//                fs.writeFile(req.reso.indexFileName, INDEX.toString(), function(err) {
-//                  if (err) throw err;
-//                });
-//              } else {
-//                fs.unlinkSync(req.reso.indexFileName);
-//              }
             }
           }
         } else {
-console.log("INDEX IS OFF");
+          req.reso.resultSize = 1;
+          req.reso.keyValue = entity[keyName];
         }
 
 

@@ -400,7 +400,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 docs.push(d.data);
             }
 
-            collection.insert(docs, { safe: true }, function(error, result){
+            var optionsObj = { continueOnError: true };
+            if (self.providerConfiguration.externalIndex) {
+              optionsObj = { safe: true };
+            }
+            collection.insert(docs, optionsObj, function(error, result){
                 if (error){
                     callBack.error(error);
                     client.close();
