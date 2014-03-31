@@ -192,6 +192,10 @@
                     var entity = new itemType(changeRequest.data, { converters: $data.oDataConverter.fromDb });
                     referenceData[refId].resultObject = entity;
 
+                    request.reso.memberName = setInfo.set.name;
+                    request.reso.namespace = itemType.namespace;
+                    setInfo.set.attach(entity, false, request);
+
                     setInfo.set.attach(entity);
                     entity.changedProperties = entity.getType().memberDefinitions.getPublicMappedProperties().filter(function(p){
                             if (entity[p.name] === undefined) return false;

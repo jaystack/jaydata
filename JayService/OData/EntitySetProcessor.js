@@ -53,7 +53,7 @@
                                     var parsed = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
                                     var entity = new parsed.set.createNew(parsed.idObj);
                                     bodyData[i] = entity;
-                                    parsed.set.attach(entity);
+                                    parsed.set.attach(entity, false, req);
                                 }
                             }
                         }
@@ -100,13 +100,13 @@
                                     var parsed = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
                                     var entity = new parsed.set.createNew(parsed.idObj);
                                     bodyData[i] = entity;
-                                    parsed.set.attach(entity);
+                                    parsed.set.attach(entity, false, req);
                                 }
                             }
                         }
 
                         var entity = new this.entitySet.createNew(bodyData, { converters: $data.oDataConverter.fromDb });
-                        this.entitySet.attach(entity);
+                        this.entitySet.attach(entity, false, req);
                         entity.changedProperties = entity.getType().memberDefinitions.getPublicMappedProperties().filter(function(p){
                             if (entity[p.name] === undefined) return false;
                             if (p.computed) return false;

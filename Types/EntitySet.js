@@ -186,7 +186,7 @@ $data.Class.defineEx('$data.EntitySet',
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
-    attach: function (entity, mode) {
+    attach: function (entity, mode, req) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -252,6 +252,11 @@ $data.Class.defineEx('$data.EntitySet',
             data.changedProperties = undefined;
         }*/
         data.context = this.entityContext;
+        if (req) {
+          var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+          req.reso.resultSize = 1;
+          req.reso.keyValue = entity[keyName];
+        }
         this._trackEntity(data);
     },
     detach: function (entity) {
