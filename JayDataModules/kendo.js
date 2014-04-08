@@ -91,11 +91,9 @@
                 //}
             }
 
-            //console.dir(memberDefinitions.getPublicMappedMethods());
             var modelDefinition = {
                 fields: fields,
                 init: function (data) {
-                    //console.dir(arguments);
                     var ctxType = options && options.owningContextType || undefined;
 
                     var contextSetTypes = [];
@@ -514,7 +512,6 @@
 
                     $data.Trace.log(promises);
                     jQuery.when.apply(this, promises).then(function (items, total) {
-                        console.dir(arguments);
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
                         var result = items.map(function (item) {
                             var d = (item instanceof $data.Entity) ? item.initData : item;
@@ -555,7 +552,6 @@
                         });
                     }
                     else {
-                        console.dir(ctx.storeToken);
                         model[0]
 						.innerInstance()
 						.save(ctx.storeToken)
