@@ -84,8 +84,9 @@ $data.Class.define('$data.dbClient.DbCommand', null, null,
                                 try {
                                     r.insertId = result.insertId;
                                 } catch (e) {}
-                                if (typeof r.insertId !== 'number') {
-                                    // If insertId is present, no rows are returned
+                                if (typeof r.insertId !== 'number' || r.insertId ===0) {
+                                    // If insertId is present or is set to something else than 0, 
+                                    // no rows are returned
                                     r.rowsAffected = result.rowsAffected;
                                     var maxItem = result.rows.length;
                                     for (var j = 0; j < maxItem; j++) {
