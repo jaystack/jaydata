@@ -934,46 +934,120 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var updateSqlString = "UPDATE [" + item.entitySet.tableName + "]" + setSection + " " + whereSection + ");";
         return { query: updateSqlString, param: setParam.concat(whereParam) };
     },
-    save_NewEntity: function (item) {
-        var insertSqlString = "INSERT INTO [" + item.entitySet.tableName + "](";
-        var fieldList = "";
-        var fieldValue = "";
-        var fieldParam = [];
-        item.physicalData.constructor.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
-            if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+    _getFieldObject: function (entitySet, physicalData) {
+        var insertSqlString = 'INSERT INTO [' + entitySet.tableName + '](';
+        var fieldList = '';
+        var fieldValue = '';
+        entitySet.createNew.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
+            if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(physicalData[fieldDef.name])) {
                 Guard.raise(new Exception('Key is not set', 'Value exception', item));
                 return;
             }
-            if (fieldDef.key && fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+            if (fieldDef.key && fieldDef.computed && Object.isNullOrUndefined(physicalData[fieldDef.name])) {
                 var typeName = Container.resolveName(fieldDef.type);
                 if (typeof this.supportedAutoincrementKeys[typeName] === 'function') {
-                    item.physicalData[fieldDef.name] = this.supportedAutoincrementKeys[typeName]();
+                    physicalData[fieldDef.name] = this.supportedAutoincrementKeys[typeName]();
                 }
             }
 
-            if (fieldList.length > 0 && fieldList[fieldList.length - 1] != ",") { fieldList += ","; fieldValue += ","; }
+            if (fieldList.length > 0 && fieldList[fieldList.length - 1] != ',') { fieldList += ','; fieldValue += ','; }
             var fieldName = fieldDef.name;
-            if (/*item.physicalData[fieldName] !== null && */item.physicalData[fieldName] !== undefined) {
+            if (/*physicalData[fieldName] !== null && */physicalData[fieldName] !== undefined) {
                 if (fieldDef.dataType && (!fieldDef.dataType.isAssignableTo || (fieldDef.dataType.isAssignableTo && !fieldDef.dataType.isAssignableTo($data.EntitySet)))) {
                     fieldValue += '?';
-                    fieldList += "[" + fieldName + "]";
-                    var logicalFieldDef = item.data.getType().memberDefinitions.getMember(fieldDef.name);
-                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function'){
-                        fieldParam.push(logicalFieldDef.converter[this.providerName].toDb(item.physicalData[fieldName], logicalFieldDef, this.context, logicalFieldDef.dataType));
-                    }else{
-                        fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](item.physicalData[fieldName]));
+                    fieldList += '[' + fieldName + ']';
+                }
+            }
+        }, this);
+
+        var insertWithDefaultValuesSqlString = 'INSERT INTO [' + entitySet.tableName + '] Default values';
+
+        if (fieldList[fieldList.length - 1] == ',') { fieldList = fieldList.slice(0, fieldList.length - 1); }
+        if (fieldValue[fieldValue.length - 1] == ',') { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
+        insertSqlString += fieldList + ') VALUES(' + fieldValue + ');';
+
+        return {
+            insertSqlString: insertSqlString,
+            insertWithDefaultValuesSqlString: insertWithDefaultValuesSqlString
+        };
+    },
+    _getFieldParam: function (entitySet, physicalData) {
+        var fieldParam = [];
+        entitySet.createNew.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
+            var fieldName = fieldDef.name;
+            if ( /*physicalData[fieldName] !== null && */physicalData[fieldName] !== undefined) {
+                if (fieldDef.dataType && (!fieldDef.dataType.isAssignableTo || (fieldDef.dataType.isAssignableTo && !fieldDef.dataType.isAssignableTo($data.EntitySet)))) {
+                    var logicalFieldDef = entitySet.createNew.memberDefinitions.getMember(fieldDef.name);
+                    if (logicalFieldDef && logicalFieldDef.converter && logicalFieldDef.converter[this.providerName] && typeof logicalFieldDef.converter[this.providerName].toDb == 'function') {
+                        fieldParam.push(logicalFieldDef.converter[this.providerName].toDb(physicalData[fieldName], logicalFieldDef, this.context, logicalFieldDef.dataType));
+                    } else {
+                        fieldParam.push(this.fieldConverter.toDb[Container.resolveName(fieldDef.dataType)](physicalData[fieldName]));
                     }
                 }
             }
-
         }, this);
-        if (fieldParam.length < 1) {
-            insertSqlString = "INSERT INTO [" + item.entitySet.tableName + "] Default values";
-        } else {
-            if (fieldList[fieldList.length - 1] == ",") { fieldList = fieldList.slice(0, fieldList.length - 1); }
-            if (fieldValue[fieldValue.length - 1] == ",") { fieldValue = fieldValue.slice(0, fieldValue.length - 1); }
-            insertSqlString += fieldList + ") VALUES(" + fieldValue + ");";
+        return fieldParam;
+    },
+    bulkInsert: function (entitySet, fields, datas, callback) {
+
+        if (datas.length === 0) {
+            if (callback.success) {
+                callback.success();
+            }
+            return;
         }
+
+        var physicalData = datas[0];
+
+        var fieldObject = this._getFieldObject(entitySet, physicalData);
+
+        var insertSqlString = fieldObject.insertSqlString;
+        var insertWithDefaultValuesSqlString = fieldObject.insertWithDefaultValuesSqlString;
+
+        var self = this;
+        var cmds = [];
+        var cmdParams = [];
+
+        datas.forEach(function (entity) {
+            var convertedPhysicalData = dbType.convertTo(entity);
+            var fieldParam = self._getFieldParam(entitySet, convertedPhysicalData);
+            if (fieldParam.length < 1) {
+                cmds.push(insertWithDefaultValuesSqlString);
+            } else {
+                cmds.push(insertSqlString);
+            }
+            cmdParams.push(fieldParam);
+        });
+
+        var sqlConnection = this._createSqlConnection();
+        var cmd = sqlConnection.createCommand(cmds, cmdParams);
+        cmd.executeQuery({
+            success: function (sqlResult) {
+                if (callback.success) {
+                    callback.success(sqlResult);
+                }
+            },
+            error: function (error) {
+                if (callback.error) {
+                    callback.error(error)
+                }
+            }
+        });
+    },
+    save_NewEntity: function (item) {
+        var entitySet = item.entitySet;
+        var physicalData = item.physicalData;
+
+        var fieldObject = this._getFieldObject(entitySet, physicalData);
+
+        var insertSqlString = fieldObject.insertSqlString;
+        var insertWithDefaultValuesSqlString = fieldObject.insertWithDefaultValuesSqlString;
+
+        var fieldParam = this._getFieldParam(entitySet, physicalData);
+        if (fieldParam.length < 1) {
+            insertSqlString = insertWithDefaultValuesSqlString;
+        }
+
         return { query: insertSqlString, param: fieldParam };
     },
     save_reloadSavedEntity: function (rowid, tableName) {
