@@ -7,6 +7,10 @@
             kendo.data.Model.fn.init.call(this, data);
         }
     });
+    $data.kendo.attachMode = true;
+    if ($data.EntityAttachMode) {
+        $data.kendo.attachMode = $data.EntityAttachMode.KeepChanges;
+    }
 
     var kendoTypeMap = {
         "$data.Blob": "string",
@@ -573,7 +577,7 @@
                             return item.innerInstance()
                         });
                         items.forEach(function (item) {
-                            ctx.attach(item, true);
+                            ctx.attach(item, $data.kendo.attachMode);
                         });
                         ctx.saveChanges().then(function () {
                             options.success();
