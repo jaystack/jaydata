@@ -588,7 +588,7 @@
                         });
                     }
                     else {
-                        model[0].innerInstance().save().then(function (item) {
+                        model[0].innerInstance().save(undefined, undefined, $data.kendo.attachMode).then(function (item) {
                             options.success();
                         }).fail(function () {
                             //alert("error in update")

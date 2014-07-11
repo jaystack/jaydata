@@ -23,6 +23,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
         }, true);
     },
     itemStoreConfig: {},
+    attachMode: $data.EntityAttachMode ? $data.EntityAttachMode.KeepChanges : true,
 
     addItemStoreAlias: function (name, contextFactoryOrToken, isDefault) {
         var self = this;
@@ -246,7 +247,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
 
     //Entity Instance
-    EntityInstanceSave: function (storeAlias, hint) {
+    EntityInstanceSave: function (storeAlias, hint, attachMode) {
         var self = $data.ItemStore;
         var entity = this;
         return self._getStoreEntitySet(storeAlias, entity)
@@ -259,8 +260,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                                 entitySet.add(entity);
                                 break;
                             case 'attach':
-                                entitySet.attach(entity, true);
-                                entity.entityState = $data.EntityState.Modified;
+                                entitySet.attach(entity, attachMode || true);
                                 break;
                             default:
                                 var d = new $data.PromiseHandler();
