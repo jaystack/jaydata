@@ -56,7 +56,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 for (var j = 0; j < path.length; j++) {
                     context.src += 'di.' + path.slice(0, j + 1).join('.') + (j < path.length - 1 ? ' && ' : ' !== undefined && typeof di.' + selector + ' === "object"');
                 }
-                context.src += '){di = di.' + selector + ';}' + (i < meta.$selector.length - 1 ? 'else ' : '');
+                context.src += '){di = di.' + selector + ';}' + (i < meta.$selector.length - 1 ? 'else ' : 'else return di.' + selector + ';');
             }
 
             context.src += 'if (di === null){';
