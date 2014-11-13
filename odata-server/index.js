@@ -3,6 +3,7 @@ window.DOMParser = require('xmldom').DOMParser;
 
 $data.ODataServer = function(type, db){
     var connect = require('connect');
+    var basicAuth = require('basic-auth-connect');
     var domain = require('domain');
     
     var config = typeof type === 'object' ? type : {};
@@ -20,11 +21,11 @@ $data.ODataServer = function(type, db){
     
     var basicAuthFn = function(req, res, next){
         if (!config.basicAuth && !config.rootAuth) return next();
-        var callback = config.rootAuth ? function(){ connect.basicAuth(config.rootAuth)(req, res, next); } : next;
+        var callback = config.rootAuth ? function(){ basicAuth(config.rootAuth)(req, res, next); } : next;
         if (typeof config.basicAuth == 'function'){
-            connect.basicAuth(config.basicAuth)(req, res, callback);
+            basicAuth(config.basicAuth)(req, res, callback);
         }else if (typeof config.basicAuth == 'object' && config.basicAuth.username && config.basicAuth.password){
-            connect.basicAuth(config.basicAuth.username, config.basicAuth.password)(req, res, callback);
+            basicAuth(config.basicAuth.username, config.basicAuth.password)(req, res, callback);
         }else callback();
     };
     
@@ -42,16 +43,19 @@ $data.ODataServer = function(type, db){
             }
         }else next();
     };
-    
+
+    var qs = require('qs');
     var queryFn = function(req, res, next){
         if (!req.query){
-            connect.query()(req, res, next);
+            req.query = qs.parse(req._parsedUrl.query);
+            next();
         }else next();
     };
-    
+
+    var bodyParser = require('body-parser');
     var bodyFn = function(req, res, next){
         if (!req.body){
-            connect.bodyParser()(req, res, next);
+            bodyParser()(req, res, next);
         }else next();
     };
     
@@ -77,14 +81,15 @@ $data.ODataServer = function(type, db){
             callback();
         });
     };
-    
+
+    var errorHandler = require('errorhandler');
     var errorHandlerFn = function(err, req, res, next){
         if (config.errorHandler){
-            connect.errorHandler.title = typeof config.errorHandler == 'string' ?  config.errorHandler : config.provider.databaseName;
-            connect.errorHandler()(err, req, res, next);
+            errorHandler.title = typeof config.errorHandler == 'string' ?  config.errorHandler : config.provider.databaseName;
+            errorHandler()(err, req, res, next);
         }else next(err);
     };
-    
+
     return function(req, res, next){
         var self = this;
         
@@ -94,6 +99,14 @@ $data.ODataServer = function(type, db){
                 enumerable: true
             });
             config.provider.checkPermission = req.checkPermission;
+        }
+
+        var schema = 'http';
+        if (req && req.headers) {
+            if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
+                schema += 's';
+
+            req.fullRoute = (req.baseRoute || (schema + '://' + req.headers.host)) + (req.baseUrl || (req.originalUrl.replace(req.url, '')));
         }
         
         basicAuthFn(req, res, function(){
