@@ -74,7 +74,7 @@ $data.Class.define("$data.JayService", null, null, {
                 if (req.connection.encrypted || req.headers['X-Forwarded-Protocol'] === 'https' || req.headers['x-forwarded-protocol'] === 'https')
                     schema += 's';
 
-                req.fullRoute = (req.baseRoute || (schema + '://' + req.headers.host)) + app.route;
+                req.fullRoute = (req.baseRoute || (schema + '://' + req.headers.host)) + req.baseUrl;
             }
         }
     },
