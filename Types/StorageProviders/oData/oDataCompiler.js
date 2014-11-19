@@ -10,7 +10,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         this.provider = query.context.storageProvider;
         this.context = query.context;
-        this.mainEntitySet = query.context.getEntitySetFromElementType(query.defaultType);
+
+        if (query.defaultType) {
+            this.mainEntitySet = query.context.getEntitySetFromElementType(query.defaultType);
+        }
 
         var queryFragments = { urlText: "" };
         
@@ -24,7 +27,9 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var queryText = queryFragments.urlText;
         var addAmp = false;
         for (var name in queryFragments) {
-            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && name != "postData" && queryFragments[name] != "") {
+            if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && name != "postData" &&
+                name != "_isBatchExecuteQuery" && name != "_subQueries" && queryFragments[name] != "") {
+
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
                 if(name != "$urlParams"){
@@ -36,14 +41,21 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
         query.queryText = queryText;
         query.postData = queryFragments.postData;
-        
-        return {
+        var result =  {
             queryText: queryText,
             withInlineCount: '$inlinecount' in queryFragments,
             method: queryFragments.method || 'GET',
             postData: queryFragments.postData,
+            isBatchExecuteQuery: queryFragments._isBatchExecuteQuery,
+            subQueries: queryFragments._subQueries,
             params: []
         };
+
+        query._getComplitedData = function () {
+            return result;
+        }
+
+        return result;
     },
     VisitOrderExpression: function (expression, context) {
         this.Visit(expression.source, context);
@@ -203,5 +215,25 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
         context.urlText += '/$count';       
-    }
+    },
+
+    VisitBatchExecuteQueryExpression: function (expression, context) {
+        context.urlText += '/$batch'
+        context.method = 'POST';
+        context.postData = { __batchRequests: [] };
+        context._isBatchExecuteQuery = true;
+        context._subQueries = expression.members;
+
+        for (var i = 0; i < expression.members.length; i++) {
+            var queryable = expression.members[i];
+            var compiler = new $data.storageProviders.oData.oDataCompiler();
+            var compiled = compiler.compile(queryable);
+            context.postData.__batchRequests.push({
+                requestUri: compiled.queryText,
+                method: compiled.method,
+                data: compiled.data,
+                headers: compiled.headers
+            });
+        }
+    },
 }, {});

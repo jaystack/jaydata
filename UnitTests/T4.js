@@ -3,30 +3,38 @@ function T4_CrossProviderTests() {
     //oData
     ComplexTypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
     LiveArrayTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
 
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
         ComplexTypeTests({ name: 'sqLite', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
         LiveArrayTests({ name: 'sqLite', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
-        if ($data.storageProviders.sqLitePro)
+        if ($data.storageProviders.sqLitePro) {
             EntityContextOnUpdateTests({ name: 'sqLite', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
+        }
+        BatchExecuteQueryTests({ name: 'sqLite', databaseName: 'BatchExecuteQueryTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
     }
 
     //indexedDb
     if ($data.StorageProviderLoader.isSupported('indexedDb')) {
         ComplexTypeTests({ name: 'indexedDb', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
         LiveArrayTests({ name: 'indexedDb', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
-        if ($data.storageProviders.indexedDbPro)
+        if ($data.storageProviders.indexedDbPro) {
             EntityContextOnUpdateTests({ name: 'indexedDb', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
+        }
+        BatchExecuteQueryTests({ name: 'indexedDb', databaseName: 'BatchExecuteQueryTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
     }
 
     //InMemory
     ComplexTypeTests({ name: 'InMemory', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
     LiveArrayTests({ name: 'InMemory', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
+    BatchExecuteQueryTests({ name: 'InMemory', databaseName: 'BatchExecuteQueryTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
 
     //LocalStore
     ComplexTypeTests({ name: 'LocalStore', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
     LiveArrayTests({ name: 'LocalStore', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
+    BatchExecuteQueryTests({ name: 'LocalStore', databaseName: 'BatchExecuteQueryTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
 }
 
 function _finishCb(context) {
@@ -688,4 +696,225 @@ function LiveArrayTests(providerConfig, msg) {
             });
         });
     });
+}
+
+function BatchExecuteQueryTests(providerConfig, msg) {
+    if (typeof module == 'function') module("BatchExecuteQueryTests_" + (msg || ''));
+
+    test('missing queryable', 2, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            context.batchExecuteQuery("alma", {
+                success: function () {
+                    ok(false, 'success callback called');
+                }
+            }).then(function (err) {
+                ok(false, 'promise then called');
+
+            }).fail(function (err) {
+                equal(err.message, '$data.Queryable is missing in queryableOptions at index 0', 'promise fail $data.Queryable is missing in queryableOptions at index 0');
+
+            }).always(function (err) {
+                equal(err.message, '$data.Queryable is missing in queryableOptions at index 0', 'promise always $data.Queryable is missing in queryableOptions at index 0');
+
+                _finishCb(context);
+            });
+        });
+    });
+
+    test('different entity context', 2, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            var cfg = JSON.parse(JSON.stringify(providerConfig));
+            cfg.databaseName += "_test";
+            (new $news.Types.NewsContext(cfg)).onReady(function (context2) {
+
+                context.batchExecuteQuery([context2.Articles], function () {
+                    ok(false, 'success callback called');
+
+                }).then(function (err) {
+                    ok(false, 'promise then called');
+
+                }).fail(function (err) {
+                    equal(err.message, 'Queryable at index 0 contains different entity context', 'promise fail Queryable at index 0 contains different entity context');
+
+                }).always(function (err) {
+                    equal(err.message, 'Queryable at index 0 contains different entity context', 'promise fail Queryable at index 0 contains different entity context');
+
+                    _finishCb(context);
+                    _finishCb(context2);
+                });
+            });
+        });
+    });
+
+    test('invalid frame method', 2, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+
+            context.batchExecuteQuery([[context.Articles, "filter"]], function () {
+                ok(false, 'success callback called');
+
+            }).then(function (err) {
+                ok(false, 'promise then called');
+
+            }).fail(function (err) {
+                equal(err.message, 'Invalid frame method \'filter\' in queryableOptions at index 0', 'promise fail Invalid frame method \'filter\' in queryableOptions at index 0');
+
+            }).always(function (err) {
+                equal(err.message, 'Invalid frame method \'filter\' in queryableOptions at index 0', 'promise fail Invalid frame method \'filter\' in queryableOptions at index 0');
+
+                _finishCb(context);
+            });
+        });
+    });
+
+    test('one queryable', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+
+                context.batchExecuteQuery([context.Articles], function () {
+                    ok(true, 'success callback called');
+
+                }).then(function (result) {
+                    ok(result.length == 1, "has array result");
+
+                    ok(result[0].length > 0, "has result");
+                    ok(result[0][0] instanceof context.Articles.elementType);
+                }).always(function (err) {
+
+                    _finishCb(context);
+                });
+            });
+        });
+    });
+
+    test('queryables', 9, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+
+                context.batchExecuteQuery([context.Articles, context.Articles.take(5), context.Categories], function () {
+                    ok(true, 'success callback called');
+
+                }).then(function (result) {
+                    ok(result.length == 3, "has array result");
+
+                    ok(result[0].length > 0, "has result");
+                    ok(result[0][0] instanceof context.Articles.elementType);
+                    ok(result[0].length > result[1].length, "result in length");
+                    ok(result[1].length > 0, "has result");
+                    ok(result[1][0] instanceof context.Articles.elementType);
+
+                    ok(result[2].length > 0, "has result");
+                    ok(result[2][0] instanceof context.Categories.elementType);
+
+                }).always(function (err) {
+
+                    _finishCb(context);
+                });
+            });
+        });
+    });
+
+    test('queryable different params', 9, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+
+                context.batchExecuteQuery([
+                    [context.Articles],
+                    { queryable: context.Articles.take(5) },
+                    { queryable: context.Categories, method: "first" },
+                    [context.Categories, "count"]
+                ], function () {
+                    ok(true, 'success callback called');
+
+                }).then(function (result) {
+                    ok(result.length == 4, "has array result");
+
+                    ok(result[0].length > 0, "has result");
+                    ok(result[0][0] instanceof context.Articles.elementType);
+                    ok(result[0].length > result[1].length, "result in length");
+                    ok(result[1].length > 0, "has result");
+                    ok(result[1][0] instanceof context.Articles.elementType);
+
+                    ok(result[2] instanceof context.Categories.elementType);
+
+                    equal(typeof result[3], "number");
+
+                }).always(function (err) {
+
+                    _finishCb(context);
+                });
+            });
+        });
+    });
+
+    test('queryable with inline count', 4, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+                try {
+                    context.batchExecuteQuery([
+                        context.Articles.withInlineCount()
+                    ], function () {
+                        ok(true, 'success callback called');
+
+                    }).then(function (result) {
+                        ok(result[0].length > 0, "has result");
+                        ok(result[0][0] instanceof context.Articles.elementType);
+                        ok(typeof result[0].totalCount, 'number', "totalCount exists");
+
+                    }).always(function (err) {
+
+                        _finishCb(context);
+                    });
+                } catch (e) {
+                    expect(1);
+                    equal(e.message, "Operation 'withInlineCount' is not supported by the provider", "Not supported");
+
+                    _finishCb(context);
+                }
+            });
+        });
+    });
+
+    //test("toLiveArray", 5, function () {
+    //    stop();
+
+    //    (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+    //        $news.Types.NewsContext.generateTestData(context, function () {
+
+    //            var result = context.Articles.toLiveArray();
+    //            result.then(function (r) {
+    //                equal(result.length, 26, 'result is not empty');
+    //                ok(result === r, 'result is equal with promise result');
+
+    //                result.length = 5;
+    //                equal(result.length, 5, 'result is changed');
+
+    //                result.refresh();
+    //                result.then(function () {
+    //                    equal(result.length, 26, 'result is not empty 2');
+    //                }).then(function () {
+    //                    equal(result.length, 26, 'result is not empty 3');
+
+    //                    _finishCb(context);
+    //                });
+    //            });
+    //        });
+    //    });
+    //});
+
+
 }

@@ -92,6 +92,22 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         return expression;
     },
 
+    VisitBatchExecuteQueryExpression: function (expression, context) {
+        var newQueries = expression.members.map(function (expr) {
+            return this.Visit(expr, context);
+        }, this);
+
+        var equal = true;
+        for (var i = 0; i < expression.members.length; i++) {
+            equal = equal && (expression.members[i] === newQueries[i]);
+        }
+        if (!equal) {
+            return Container.createBatchExecuteQueryExpression(newQueries);
+        }
+
+        return expression;
+    },
+
     VisitObjectLiteralExpression: function (expression, context) {
         var newValues = expression.members.map(function (ofe) {
             return this.Visit(ofe, context);

@@ -685,7 +685,76 @@ $data.Class.define('$data.EntityContext', null, null,
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         var that = this;
         var clbWrapper = {};
-        clbWrapper.success = function (query) {
+        clbWrapper.success = that.executeQuerySuccess(that, returnTransaction, callBack);
+        clbWrapper.error = that.executeQueryError(that, returnTransaction, callBack);
+
+        var sets = query.getEntitySets();
+
+        var authorizedFn = function () {
+            var ex = true;
+            var wait = false;
+            var ctx = that;
+
+            var readyFn = function (cancel) {
+                if (cancel === false) ex = false;
+
+                if (ex) {
+                    if (query.transaction) {
+                        if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
+                            $data.QueryCache.executeQuery(that, query, clbWrapper);
+                        } else {
+                            ctx.storageProvider.executeQuery(query, clbWrapper);
+                        }
+                    } else {
+                        ctx.beginTransaction(function (tran) {
+                            query.transaction = tran;
+                            if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
+                                $data.QueryCache.executeQuery(that, query, clbWrapper);
+                            } else {
+                                ctx.storageProvider.executeQuery(query, clbWrapper);
+                            }
+                        });
+                    }
+                } else {
+                    query.rawDataList = [];
+                    query.result = [];
+                    clbWrapper.success(query);
+                }
+            };
+
+            var i = 0;
+            var callbackFn = function (cancel) {
+                if (cancel === false) ex = false;
+
+                var es = sets[i];
+                if (es.beforeRead) {
+                    i++;
+                    var r = es.beforeRead.call(this, sets, query);
+                    if (typeof r === 'function') {
+                        r.call(this, (i < sets.length && ex) ? callbackFn : readyFn, sets, query);
+                    } else {
+                        if (r === false) ex = false;
+
+                        if (i < sets.length && ex) {
+                            callbackFn();
+                        } else readyFn();
+                    }
+                } else readyFn();
+            };
+
+            if (sets.length) callbackFn();
+            else readyFn();
+        };
+
+        if (this.user && this.checkPermission) {
+            this.checkPermission(query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ? $data.Access.DeleteBatch : $data.Access.Read, this.user, sets, {
+                success: authorizedFn,
+                error: clbWrapper.error
+            });
+        } else authorizedFn();
+    },
+    executeQuerySuccess: function (that, returnTransaction, callBack) {
+        return function (query) {
             if ($data.QueryCache && $data.QueryCache.isCacheable(that, query)) {
                 $data.QueryCache.addToCache(that, query);
             }
@@ -762,78 +831,166 @@ $data.Class.define('$data.EntityContext', null, null,
             if (sets.length) callbackFn();
             else readyFn();
         };
-
-        clbWrapper.error = function () {
-            if(returnTransaction)
+    },
+    executeQueryError: function (that, returnTransaction, callBack) {
+        return function () {
+            if (returnTransaction)
                 callBack.error.apply(this, arguments);
             else
                 callBack.error.apply(this, Array.prototype.filter.call(arguments, function (p) { return !(p instanceof $data.Transaction); }));
         };
-        var sets = query.getEntitySets();
+    },
 
-        var authorizedFn = function () {
-            var ex = true;
-            var wait = false;
-            var ctx = that;
 
-            var readyFn = function (cancel) {
-                if (cancel === false) ex = false;
+    batchExecuteQuery: function (queryableOptions, callBack, transaction) {
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(callBack);
 
-                if (ex) {
-                    if (query.transaction) {
-                        if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
-                            $data.QueryCache.executeQuery(that, query, clbWrapper);
-                        } else {
-                            ctx.storageProvider.executeQuery(query, clbWrapper);
-                        }
-                    } else {
-                        ctx.beginTransaction(function (tran) {
-                            query.transaction = tran;
-                            if ($data.QueryCache && $data.QueryCache.isInCache(that, query)) {
-                                $data.QueryCache.executeQuery(that, query, clbWrapper);
-                            } else {
-                                ctx.storageProvider.executeQuery(query, clbWrapper);
-                            }
-                        });
-                    }
-                } else {
-                    query.rawDataList = [];
-                    query.result = [];
-                    clbWrapper.success(query);
-                }
-            };
-
-            var i = 0;
-            var callbackFn = function (cancel) {
-                if (cancel === false) ex = false;
-
-                var es = sets[i];
-                if (es.beforeRead) {
-                    i++;
-                    var r = es.beforeRead.call(this, sets, query);
-                    if (typeof r === 'function') {
-                        r.call(this, (i < sets.length && ex) ? callbackFn : readyFn, sets, query);
-                    } else {
-                        if (r === false) ex = false;
-
-                        if (i < sets.length && ex) {
-                            callbackFn();
-                        } else readyFn();
-                    }
-                } else readyFn();
-            };
-
-            if (sets.length) callbackFn();
-            else readyFn();
+        var self = this;
+        var methodOperationMappings = {
+            count: 'length',
+            length: 'length',
+            forEach: 'forEach',
+            toArray: 'toArray',
+            single: 'single',
+            some: 'some',
+            every: 'every',
+            first: 'first',
+            removeAll: 'batchDelete'
+        };
+        var methodFrameMappings = {
+            count: 'CountExpression',
+            length: 'CountExpression',
+            forEach: 'ForEachExpression',
+            toArray: 'ToArrayExpression',
+            single: 'SingleExpression',
+            some: 'SomeExpression',
+            every: 'EveryExpression',
+            first: 'FirstExpression',
+            removeAll: 'BatchDeleteExpression'
         };
 
-        if (this.user && this.checkPermission) {
-            this.checkPermission(query.expression.nodeType === $data.Expressions.ExpressionType.BatchDelete ? $data.Access.DeleteBatch : $data.Access.Read, this.user, sets, {
-                success: authorizedFn,
-                error: clbWrapper.error
-            });
-        } else authorizedFn();
+
+        var returnFunc = function () {
+            return pHandler.getPromise();
+        }
+
+        if (typeof queryableOptions.length != "number") {
+            cbWrapper.error(new Exception('QueryableOptions array parameter missing', 'Invalid arguments'));
+            return returnFunc();
+        }
+
+        var qOptions = [];
+        for (var i = 0; i < queryableOptions.length; i++) {
+            var queryOption = {};
+            if (queryableOptions[i] instanceof $data.Queryable) {
+                queryOption.queryable = queryableOptions[i];
+                queryOption.method = 'toArray';
+            } else if (queryableOptions[i].queryable instanceof $data.Queryable) {
+                queryOption.queryable = queryableOptions[i].queryable;
+                queryOption.method = queryableOptions[i].method || 'toArray';
+            } else if (queryableOptions[i][0] instanceof $data.Queryable) {
+                queryOption.queryable = queryableOptions[i][0];
+                queryOption.method = queryableOptions[i][1] || 'toArray';
+            } else {
+                cbWrapper.error(new Exception('$data.Queryable is missing in queryableOptions at index ' + i, 'Invalid arguments'));
+                return returnFunc();
+            }
+
+            if (queryOption.queryable.entityContext !== self) {
+                cbWrapper.error(new Exception('Queryable at index ' + i + ' contains different entity context', 'Invalid arguments'));
+                return returnFunc();
+            }
+
+            queryOption.queryable._checkOperation(methodOperationMappings[queryOption.method] || queryOption.method);
+            qOptions.push(queryOption);
+        }
+
+
+        var executableQueries = [];
+        for (var i = 0; i < qOptions.length; i++) {
+            var queryOption = qOptions[i];
+
+            var frameExpressionName = methodFrameMappings[queryOption.method] || queryOption.method;
+            if (frameExpressionName && $data.Expressions[frameExpressionName] && $data.Expressions[frameExpressionName].isAssignableTo($data.Expressions.FrameOperator)) {
+
+                var queryExpression = Container['create' + frameExpressionName](queryOption.queryable.expression);
+                var preparator = Container.createQueryExpressionCreator(queryOption.queryable.entityContext);
+
+                try {
+                    var expression = preparator.Visit(queryExpression);
+                    queryOption.queryable.entityContext.log({ event: "EntityExpression", data: expression });
+
+                    var queryable = Container.createQueryable(queryOption.queryable, expression);
+                    executableQueries.push(queryable);
+                } catch (e) {
+                    cbWrapper.error(e);
+                    return returnFunc();
+                }
+            } else {
+                cbWrapper.error(new Exception('Invalid frame method \'' + frameExpressionName + '\' in queryableOptions at index ' + i, 'Invalid arguments'));
+                return returnFunc();
+            }
+        }
+
+        var queryResults = [];
+        if (self.storageProvider.supportedContextOperation && self.storageProvider.supportedContextOperation.batchExecuteQuery) {
+            //wrap queries
+            var batchExecuteQueryExpression = Container.createBatchExecuteQueryExpression(executableQueries.map(function (queryable) {
+                return new $data.Query(queryable.expression, queryable.defaultType, self);
+            }));
+
+            var batchExecuteQuery = Container.createQueryable(self, batchExecuteQueryExpression);
+            self.executeQuery(batchExecuteQuery, {
+                success: function (results) {
+                    var batchResult = [];
+                    var hasError = false;
+                    for (var i = 0; i < results.length && !hasError; i++) {
+                        var query = results[i];
+                        self.executeQuerySuccess(self, returnTransaction, {
+                            success: function (result) {
+                                batchResult.push(result);
+                            },
+                            error: function () {
+                                hasError = true;
+                            }
+                        })(query);
+                    }
+                    if (!hasError) {
+                        self._applyTransaction(cbWrapper, cbWrapper.success, [batchResult], batchExecuteQuery.transaction, returnTransaction);
+                    }
+
+                },
+                error: cbWrapper.error
+            }, transaction);
+        } else {
+            var returnTransaction = this._isReturnTransaction(transaction);
+                
+            var readIterator = function (queries, index, iteratorCallback, itTransaction) {
+                var query = queries[index];
+                if (!query) {
+                    return iteratorCallback.success(itTransaction);
+                }
+
+                self.executeQuery(executableQueries[index], {
+                    success: function (result, tr) {
+                        queryResults.push(result);
+                        readIterator(executableQueries, index + 1, iteratorCallback, tr);
+                    },
+                    error: iteratorCallback.error
+                }, itTransaction);
+            }
+
+            readIterator(executableQueries, 0, {
+                success: function (lastTran) {
+                    self._applyTransaction(cbWrapper, cbWrapper.success, [queryResults], lastTran, returnTransaction);
+                },
+                error: cbWrapper.error
+            }, transaction)
+        }
+        return returnFunc();
     },
+
     saveChanges: function (callback, transaction) {
         /// <signature>
         ///     <summary>

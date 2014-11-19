@@ -36,6 +36,11 @@ $C('$data.Query', null, null,
                     ret.push(ctx._entitySetReferences[expression.elementType.name]);
             }
             if (expression.source) fn(expression.source);
+            if (expression.members) {
+                for (var i = 0; i < expression.members.length; i++) {
+                    fn(expression.members[i].expression);
+                }
+            }
         };
         
         fn(this.expression);

@@ -164,7 +164,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
-        var sql;
+        var sql = {};
         try {
             sql = this._compile(query);
         } catch (e) {
@@ -184,11 +184,33 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 }
             },
             function (data, textStatus, jqXHR) {
-                if (!data && textStatus.body) data = JSON.parse(textStatus.body);
+                if (!data && textStatus.body && !sql.isBatchExecuteQuery) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
-                    query.rawDataList = typeof data === 'string' ? [{ cnt: Container.convertTo(data, $data.Integer) }] : data;
-                    if (sql.withInlineCount && typeof data === 'object' && (typeof data.__count !== 'undefined' || ('d' in data && typeof data.d.__count !== 'undefined'))) {
-                        query.__count = new Number(typeof data.__count !== 'undefined' ? data.__count : data.d.__count).valueOf();
+                    var processSuccess = function (query, data, sql) {
+                        query.rawDataList = typeof data === 'string' ? [{ cnt: Container.convertTo(data, $data.Integer) }] : data;
+                        if (sql.withInlineCount && typeof data === 'object' && (typeof data.__count !== 'undefined' || ('d' in data && typeof data.d.__count !== 'undefined'))) {
+                            query.__count = new Number(typeof data.__count !== 'undefined' ? data.__count : data.d.__count).valueOf();
+                        }
+                    }
+
+                    if (sql.isBatchExecuteQuery) {
+                        query.rawDataList = sql.subQueries;
+                        for (var i = 0; i < data.__batchResponses.length; i++) {
+                            var resp = data.__batchResponses[i];
+                            
+                            if (!resp.data) {
+                                if (resp.body) {
+                                    resp.data = JSON.parse(resp.body);
+                                } else {
+                                    callBack.error(that.parseError(resp, arguments));
+                                    return;
+                                }
+                            }
+
+                            processSuccess(sql.subQueries[i], resp.data, sql.subQueries[i]._getComplitedData());
+                        }
+                    } else {
+                        processSuccess(query, data, sql);
                     }
 
                     callBack.success(query);
@@ -196,7 +218,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             },
             function (error) {
                 callBack.error(that.parseError(error, arguments));
-            }
+            },
+            sql.isBatchExecuteQuery ? OData.batchHandler : undefined
         ];
 
         if (this.providerConfiguration.dataServiceVersion) {
@@ -747,6 +770,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         enumerable: true,
         writable: true
     },
+    supportedContextOperation: {
+        value: {
+            batchExecuteQuery: true
+        },
+        enumerable: true,
+        writable: true
+    },
+
     fieldConverter: { value: $data.oDataConverter },
     resolveTypeOperations: function (operation, expression, frameType) {
         var memDef = expression.entityType.getMemberDefinition(operation);

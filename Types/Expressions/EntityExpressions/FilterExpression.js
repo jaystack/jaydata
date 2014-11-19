@@ -20,6 +20,13 @@ $C('$data.Expressions.InlineCountExpression', $data.Expressions.EntitySetExpress
     nodeType: { value: $data.Expressions.ExpressionType.InlineCount, enumerable: true }
 });
 
+$C('$data.Expressions.BatchExecuteQueryExpression', $data.Expressions.ExpressionNode, null, {
+    constructor: function (members) {
+        this.members = members;
+    },
+    nodeType: { value: $data.Expressions.ExpressionType.BatchExecuteQuery, enumerable: true }
+});
+
 $C('$data.Expressions.FrameOperator', $data.Expressions.ExpressionNode, null, {
     constructor: function () {
         this.isTerminated = true;
