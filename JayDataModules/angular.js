@@ -44,6 +44,42 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
             return Object.prototype.hasOwnProperty.apply(this, arguments);
         }
 
+
+        $data.Queryable.prototype.toLiveArrayEx = function (options, resultHolder) {
+            if (Array.isArray(options)) {
+                resultHolder = options;
+                otions = undefined;
+            }
+            resultHolder = resultHolder || [];
+            options = options || {};
+            var self = this, scope = options.scope || $rootScope;
+
+            function thunk(newDefer) {
+                self.toArray()
+                    .then(function (items) {
+                        resultHolder.length = 0;
+                        items.forEach(function (item) {
+                            resultHolder.push(item);
+                        })
+                        newDefer.resolve(resultHolder);
+                    })
+                    .fail(newDefer.reject)
+                    .then(function () {
+                        scope.$apply();
+                    });
+            }
+
+            function refresh() {
+                var defer = $.Deferred(thunk);
+                defer.promise(resultHolder);
+                return resultHolder;
+            }
+            resultHolder.refresh = refresh;
+
+            return refresh();
+        }
+
+
         $data.Queryable.prototype.toLiveArray = function (cb) {
             var _this = this;
 

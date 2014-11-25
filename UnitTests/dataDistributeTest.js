@@ -10,7 +10,7 @@
                 equal(data.some(function (e) { return e.entityState == $data.EntityState.Added }), true, "exists new element");
                 
                 if(data.every(function (e) { return e.entityState == $data.EntityState.Added })){
-                    equal(data.length, 2, 'changed data count');
+                    equal(data.length, 2, 'changed Added data count');
                 }
                 else
                 {
@@ -49,12 +49,12 @@
                     start();
                     equal(item.length, 2, "new items added");
 
-                    item[0].fld3 = "updateFld";
                     db.Table1Items.attach(item[0]);
-                    item[0].entityState = $data.EntityState.Modified;
-                    item[1].fld4 = "updateFld2";
+                    item[0].fld3 = "updateFld";
+
                     db.Table1Items.attach(item[1]);
-                    item[1].entityState = $data.EntityState.Modified;
+                    item[1].fld4 = "updateFld2";
+
                     db.Table1Items.add(new db.Table1Items.createNew({ fld2: 'prop32', fld3: 'prop33', fld4: 'prop34' }));
 
                     db.saveChanges(function () {

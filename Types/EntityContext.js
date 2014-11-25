@@ -1051,6 +1051,9 @@ $data.Class.define('$data.EntityContext', null, null,
                                 entityCachedItem.skipSave = true;
                                 skipItems.push(entityCachedItem.data);
                             }
+                        } else {
+                            entityCachedItem.skipSave = true;
+                            skipItems.push(entityCachedItem.data);
                         }
                     }
                 }
@@ -1424,9 +1427,9 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     discoverDependentItemEntityState: function (data) {
         if (data.storeToken === this.storeToken) {
-            data.entityState = $data.EntityState.Modified;
+            data.entityState = (data.changedProperties && data.changedProperties.length) ? $data.EntityState.Modified : $data.EntityState.Unchanged;
         } else if (data.storeToken && this.storeToken && data.storeToken.typeName === this.storeToken.typeName && JSON.stringify(data.storeToken.args) === JSON.stringify(this.storeToken.args)) {
-            data.entityState = $data.EntityState.Modified;
+            data.entityState = (data.changedProperties && data.changedProperties.length) ? $data.EntityState.Modified : $data.EntityState.Unchanged;
         } else {
             data.entityState = $data.EntityState.Added;
         }
