@@ -235,5 +235,5 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
                 headers: compiled.headers
             });
         }
-    },
+    }
 }, {});
