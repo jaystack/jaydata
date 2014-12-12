@@ -889,32 +889,85 @@ function BatchExecuteQueryTests(providerConfig, msg) {
         });
     });
 
-    //test("toLiveArray", 5, function () {
-    //    stop();
+    test('batch req error test', 1, function () {
+        if (providerConfig.name !== 'oData') { expect(1); ok(true, 'not supported'); return; }
+        stop();
 
-    //    (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
-    //        $news.Types.NewsContext.generateTestData(context, function () {
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+                context.prepareRequest = function (request) {
+                    request[0].data.__batchRequests[2].requestUri = request[0].data.__batchRequests[2].requestUri.replace('Title', 'Title2');
+                };
 
-    //            var result = context.Articles.toLiveArray();
-    //            result.then(function (r) {
-    //                equal(result.length, 26, 'result is not empty');
-    //                ok(result === r, 'result is equal with promise result');
+                context.batchExecuteQuery([
+                    [context.Articles],
+                    { queryable: context.Articles.take(5) },
+                    { queryable: context.Categories.filter("it.Title != null"), method: "first" },
+                    [context.Categories, "count"]
+                ])
+                .fail(function (err) {
+                    ok(true, 'Request error');
+                })
+                .always(function (err) {
 
-    //                result.length = 5;
-    //                equal(result.length, 5, 'result is changed');
+                    _finishCb(context);
+                });
+            });
+        });
+    });
 
-    //                result.refresh();
-    //                result.then(function () {
-    //                    equal(result.length, 26, 'result is not empty 2');
-    //                }).then(function () {
-    //                    equal(result.length, 26, 'result is not empty 3');
+    test('batch result error test', 1, function () {
+        if (providerConfig.name !== 'oData') { expect(1); ok(true, 'not supported'); return; }
+        stop();
 
-    //                    _finishCb(context);
-    //                });
-    //            });
-    //        });
-    //    });
-    //});
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
 
+                context.prepareRequest = function (request) {
+                    var origSuccess = request[1];
+                    request[1] = function (data) {
+                        data.__batchResponses = [];
+                        origSuccess.apply(this, arguments);
+                    }
 
+                };
+
+                context.batchExecuteQuery([
+                    [context.Articles],
+                    { queryable: context.Articles.take(5) },
+                    { queryable: context.Categories, method: "first" },
+                    [context.Categories, "count"]
+                ])
+                .fail(function (err) {
+                    equal(err.message, "Batch response count failed", 'Request error');
+                })
+                .always(function (err) {
+
+                    _finishCb(context);
+                });
+            });
+        });
+    });
+
+    test('batch result item error test', 1, function () {
+        stop();
+
+        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+            $news.Types.NewsContext.generateTestData(context, function () {
+                context.batchExecuteQuery([
+                    [context.Articles],
+                    { queryable: context.Articles.take(5) },
+                    { queryable: context.Categories.filter("it.Title == 'invalid category value'"), method: "single" },
+                    [context.Categories, "count"]
+                ])
+                .fail(function (err) {
+                    equal(err.message, "result count failed", 'Result error');
+                })
+                .always(function (err) {
+
+                    _finishCb(context);
+                });
+            });
+        });
+    });
 }

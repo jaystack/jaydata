@@ -194,6 +194,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     }
 
                     if (sql.isBatchExecuteQuery) {
+                        if (data.__batchResponses.length !== sql.subQueries.length) {
+                            return callBack.error(new Exception("Batch response count failed", "Http request failed!", textStatus));
+                        }
+
                         query.rawDataList = sql.subQueries;
                         for (var i = 0; i < data.__batchResponses.length; i++) {
                             var resp = data.__batchResponses[i];

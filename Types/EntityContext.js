@@ -945,19 +945,23 @@ $data.Class.define('$data.EntityContext', null, null,
                 success: function (results) {
                     var batchResult = [];
                     var hasError = false;
+                    var errorValue = null;
                     for (var i = 0; i < results.length && !hasError; i++) {
                         var query = results[i];
                         self.executeQuerySuccess(self, returnTransaction, {
                             success: function (result) {
                                 batchResult.push(result);
                             },
-                            error: function () {
+                            error: function (err) {
                                 hasError = true;
+                                errorValue = err;
                             }
                         })(query);
                     }
                     if (!hasError) {
                         self._applyTransaction(cbWrapper, cbWrapper.success, [batchResult], batchExecuteQuery.transaction, returnTransaction);
+                    } else {
+                        cbWrapper.error(errorValue);
                     }
 
                 },
