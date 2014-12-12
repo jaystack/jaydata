@@ -156,9 +156,10 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     $value: function (meta, data) { return data; }
                 }
             }*/
-            builder._binderConfig.$item = builder._binderConfig.$item || {};
-            builder.modelBinderConfig = builder._binderConfig.$item;
-
+            if (builder._binderConfig.$type === $data.Array) {
+                builder._binderConfig.$item = builder._binderConfig.$item || {};
+                builder.modelBinderConfig = builder._binderConfig.$item;
+            }
 
             
         }
