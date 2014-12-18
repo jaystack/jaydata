@@ -93,7 +93,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         var builder = Container.createqueryBuilder();
         builder.modelBinderConfig['$type'] = $data.Array;
         if (this._isoDataProvider) {
-            builder.modelBinderConfig['$selector'] = ['json:d.results', 'json:d', 'json:results'];
+            builder.modelBinderConfig['$selector'] = ['json:d.results', 'json:d', 'json:results', 'json:value'];
         }
         builder.modelBinderConfig['$item'] = {};
         builder.selectModelBinderProperty('$item');
