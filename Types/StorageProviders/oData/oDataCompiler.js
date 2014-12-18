@@ -43,7 +43,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         query.postData = queryFragments.postData;
         var result =  {
             queryText: queryText,
-            withInlineCount: '$inlinecount' in queryFragments,
+            withInlineCount: '$inlinecount' in queryFragments || '$count' in queryFragments,
             method: queryFragments.method || 'GET',
             postData: queryFragments.postData,
             isBatchExecuteQuery: queryFragments._isBatchExecuteQuery,
@@ -144,7 +144,11 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitInlineCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        context["$inlinecount"] = expression.selector.value;
+        if (this.provider.providerConfiguration.maxDataServiceVersion === "4.0") {
+            context["$count"] = expression.selector.value === 'allpages';
+        } else {
+            context["$inlinecount"] = expression.selector.value;
+        }
     },
     VisitEntitySetExpression: function (expression, context) {
         context.urlText += "/" + expression.instance.tableName;
