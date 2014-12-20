@@ -1,13 +1,11 @@
-// JayData 1.0.4
+// JayData-RESO 1.0.0
 // Dual licensed under MIT and GPL v2
-// Copyright JayStack Technologies (http://jaydata.org/licensing)
+// Copyright JayStack Technologies (http://jaydata.org/licensing) and National Association of REALTORS
 //
 // JayData is a standards-based, cross-platform Javascript library and a set of
 // practices to access and manipulate data from various online and offline sources.
 //
 // Credits:
-//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
-//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
-//     Zoltán Gyebrovszki, Gábor Dolla
+//     Original Jaydata development Team, Mark Lesswing
 //
-// More info: http://jaydata.org
+// More info: http://jaydata.org and http://crt.blogs.realtor.org

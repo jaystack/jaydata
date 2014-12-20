@@ -1,3 +1,4 @@
+
 ///EntitySet is responsible for
 /// -creating and holding entityType through schema
 /// - provide Add method
@@ -66,7 +67,7 @@ $data.Class.defineEx('$data.EntitySet',
         }
         trackedEntities.push({ entitySet: this, data: entity });
     },
-    add: function (entity) {
+    add: function (entity, req) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the context.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -101,7 +102,26 @@ $data.Class.defineEx('$data.EntitySet',
         data.entityState = $data.EntityState.Added;
         data.changedProperties = undefined;
         data.context = this.entityContext;
-        this._trackEntity(data);
+
+        var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+        var keyValue = data[keyName];
+        if (req.reso.externalIndex) {
+          if (INDEX.indexOf(keyValue) == -1) {
+            INDEX[INDEX.length] = keyValue;
+            req.reso.resultSize = 1;
+            req.reso.keyValue = keyValue;
+            this._trackEntity(data);
+//console.dir(data);
+//          } else {
+//console.log("Item with a " + keyName + " of " + keyValue + " already exists.  Not added");
+          }
+        } else {
+          req.reso.resultSize = 1;
+          req.reso.keyValue = keyValue;
+          this._trackEntity(data);
+        }
+
+
         return data;
     },
 
@@ -113,7 +133,7 @@ $data.Class.defineEx('$data.EntitySet',
         });
         return result;
     },
-    remove: function (entity) {
+    remove: function (entity, req) {
         /// <signature>
         ///     <summary>Creates a typed entity and marks it as Deleted.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -145,10 +165,28 @@ $data.Class.defineEx('$data.EntitySet',
             data = new this.createNew(entity);
         }
         data.entityState = $data.EntityState.Deleted;
+
+        var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+        if (req.reso.externalIndex) {
+          if (entity[keyName]) {
+            var keyValue = entity[keyName];
+            req.reso.resultSize = 1;
+            req.reso.keyValue = entity[keyName];
+            var position = INDEX.indexOf(keyValue);
+            if (position != -1) {
+              INDEX.splice(position,1);
+            }
+          }
+        } else {
+          req.reso.resultSize = 1;
+          req.reso.keyValue = entity[keyName];
+        }
+
+
         data.changedProperties = undefined;
         this._trackEntity(data);
     },
-    attach: function (entity, mode) {
+    attach: function (entity, mode, req) {
         /// <signature>
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
@@ -214,6 +252,11 @@ $data.Class.defineEx('$data.EntitySet',
             data.changedProperties = undefined;
         }*/
         data.context = this.entityContext;
+        if (req) {
+          var keyName =this.elementType.memberDefinitions.getKeyProperties()[0].name;
+          req.reso.resultSize = 1;
+          req.reso.keyValue = entity[keyName];
+        }
         this._trackEntity(data);
     },
     detach: function (entity) {

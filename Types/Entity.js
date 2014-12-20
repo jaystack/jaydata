@@ -514,6 +514,14 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
         return '#';
     }
+//
+// EXAMPLE of how to add function calls 
+//
+//    },
+//    findKeyName: function(es) {
+//        return es.memberDefinitions.getKeyProperties()[0].name;
+//    }
+
 },
 {
     //create get_[property] and set_[property] functions for properties

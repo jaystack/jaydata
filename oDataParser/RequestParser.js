@@ -566,7 +566,9 @@
             var srcIndex = this.lexer.srcIndex;
             if (token.tokenType != TokenType.WORD)
                 return;
-            var name = token.value;
+
+            var name = token.value.toLowerCase();
+
             for (var i = 0; i < this.reservedNs.length; i++) {
                 if (this.reservedNs[i] == name) {
 

@@ -53,13 +53,15 @@
                                     var parsed = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
                                     var entity = new parsed.set.createNew(parsed.idObj);
                                     bodyData[i] = entity;
-                                    parsed.set.attach(entity);
+                                    parsed.set.attach(entity, false, req);
                                 }
                             }
                         }
                         
                         var entity = new this.entitySet.createNew(bodyData, { converters: $data.oDataConverter.fromDb });
-                        this.entitySet.add(entity);
+
+                        this.entitySet.add(entity, req);
+
                         this.context.saveChanges({
                             success: function () {
                                 res.statusCode = 201;
@@ -98,13 +100,13 @@
                                     var parsed = $data.JayService.OData.Utils.parseUrlPart(uri, this.context);
                                     var entity = new parsed.set.createNew(parsed.idObj);
                                     bodyData[i] = entity;
-                                    parsed.set.attach(entity);
+                                    parsed.set.attach(entity, false, req);
                                 }
                             }
                         }
 
                         var entity = new this.entitySet.createNew(bodyData, { converters: $data.oDataConverter.fromDb });
-                        this.entitySet.attach(entity);
+                        this.entitySet.attach(entity, false, req);
                         entity.changedProperties = entity.getType().memberDefinitions.getPublicMappedProperties().filter(function(p){
                             if (entity[p.name] === undefined) return false;
                             if (p.computed) return false;
@@ -127,7 +129,9 @@
                         self.BatchDeleteFromEntitySet(req, config, cbWrapper);
                     } else {
                         if (this.member.idObject) {
-                            this.entitySet.remove(this.member.idObject);
+
+                            this.entitySet.remove(this.member.idObject, req);
+
                             this.context.saveChanges({
                                 success: function () {
                                 //return with no content
@@ -191,6 +195,9 @@
         config.includes = result.includes;
         this.context.executeQuery(new $data.Queryable(this.entitySet, result.expression), {
             success: function (contextResult) {
+
+                req.reso.resultSize = contextResult.length;
+
                 if (self.member.valueRequeset) {
                     // request pattern: /EntitySet(key)/Field/$value
                     self.prepareSimpleResponse(contextResult, self.member.selectedField, self.entitySet, callback);
