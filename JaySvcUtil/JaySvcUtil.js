@@ -275,21 +275,26 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
 
             return resultDocument.textContent;
         } else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
-            var xslt = require('node_xslt');
-
-            return xslt.transform(xslt.readXsltString(transformXslt), xslt.readXmlString(metadata), [
-                'SerivceUri', "'" + cnf.SerivceUri + "'",
-                'EntityBaseClass', "'" + cnf.EntityBaseClass + "'",
-                'ContextBaseClass', "'" + cnf.ContextBaseClass + "'",
-                'AutoCreateContext', "'" + cnf.AutoCreateContext + "'",
-                'ContextInstanceName', "'" + cnf.ContextInstanceName + "'",
-                'EntitySetBaseClass', "'" + cnf.EntitySetBaseClass + "'",
-                'CollectionBaseClass', "'" + cnf.CollectionBaseClass + "'",
-                'DefaultNamespace', "'" + cnf.DefaultNamespace + "'",
-                'MaxDataserviceVersion', "'" + (versionInfo.maxVersion || '3.0') + "'",
-                'AllowedTypesList', "'" + cnf.typeFilter + "'",
-                'GenerateNavigationProperties', "'" + cnf.navigation + "'"
-            ]);
+            var xslt4node = require('xslt4node');
+            var config = {
+              xslt: transformXslt,
+              source: metadata,
+              result: String,
+              params: {
+                'SerivceUri': cnf.SerivceUri,
+                 'EntityBaseClass': cnf.EntityBaseClass ,
+                 'ContextBaseClass': cnf.ContextBaseClass ,
+                 'AutoCreateContext': cnf.AutoCreateContext ,
+                 'ContextInstanceName': cnf.ContextInstanceName ,
+                 'EntitySetBaseClass': cnf.EntitySetBaseClass ,
+                 'CollectionBaseClass': cnf.CollectionBaseClass ,
+                 'DefaultNamespace': cnf.DefaultNamespace ,
+                 'MaxDataserviceVersion': (versionInfo.maxVersion || '3.0') ,
+                 'AllowedTypesList': cnf.typeFilter ,
+                 'GenerateNavigationProperties': cnf.navigation 
+             }
+            };
+           return xslt4node.transformSync(config);
         }
     },
     _prepareTypeFilter: function (doc, versionInfo, cnf) {
