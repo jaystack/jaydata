@@ -760,6 +760,9 @@ $data.Class.define('$data.Queryable', null, null,
         var inlineCountExp = Container.createInlineCountExpression(this.expression, constExp);
         return Container.createQueryable(this, inlineCountExp);
     },
+    withCount: function (selector) {
+        return this.withInlineCount(selector);
+    },
 
     removeAll: function (onResult, transaction) {
         ///	<summary>Delete the query result and returns the number of deleted entities in a query as the callback parameter.</summary>

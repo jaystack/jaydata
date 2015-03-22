@@ -612,7 +612,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "http://schemas.microsoft.com/ado/2008/09/edm": "V2",
             "http://schemas.microsoft.com/ado/2009/11/edm": "V3",
             "http://schemas.microsoft.com/ado/2007/05/edm": "V11",
-            "http://schemas.microsoft.com/ado/2009/08/edm": "V22"
+            "http://schemas.microsoft.com/ado/2009/08/edm": "V22",
+            "http://docs.oasis-open.org/odata/ns/edm": "V4"
         }
     },
     _maxDataServiceVersions: {
@@ -621,7 +622,8 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "http://schemas.microsoft.com/ado/2008/09/edm": "2.0",
             "http://schemas.microsoft.com/ado/2009/11/edm": "3.0",
             "http://schemas.microsoft.com/ado/2007/05/edm": "2.0",
-            "http://schemas.microsoft.com/ado/2009/08/edm": "2.0"
+            "http://schemas.microsoft.com/ado/2009/08/edm": "2.0",
+            "http://docs.oasis-open.org/odata/ns/edm": "4.0"
         }
     },
     _supportedODataVersionXSLT: {
@@ -1109,6 +1111,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "    <xsl:variable name=\"memberDefinition\">\r\n" +
             "      <xsl:if test=\"parent::edm:EntityType/edm:Key/edm:PropertyRef[@Name = current()/@Name]\"><attribute name=\"key\">true</attribute></xsl:if>\r\n" +
             "      <xsl:apply-templates select=\"@*[local-name() != 'Name']\" mode=\"render-field\" />\r\n" +
+            "      <xsl:if test=\"local-name() = 'NavigationProperty' and current()[not(@Partner) and current()/@Type]\"><attribute name=\"inverseProperty\">'$$unbound'</attribute></xsl:if>\r\n" +
             "    </xsl:variable>'<xsl:value-of select=\"@Name\"/>': { <xsl:choose><xsl:when test=\"function-available('msxsl:node-set')\"><xsl:for-each select=\"msxsl:node-set($memberDefinition)/*\">'<xsl:if test=\"@extended = 'true'\">$</xsl:if><xsl:value-of select=\"@name\"/>':<xsl:value-of select=\".\"/>\r\n" +
             "      <xsl:if test=\"position() != last()\">,<xsl:text> </xsl:text>\r\n" +
             "    </xsl:if> </xsl:for-each></xsl:when>\r\n" +
@@ -1119,6 +1122,10 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             "</xsl:template>\r\n" +
             "  \r\n" +
             "  <xsl:template match=\"@Name\" mode=\"render-field\">\r\n" +
+            "  </xsl:template>\r\n" +
+            "\r\n" +
+            "  <xsl:template match=\"@Partner\" mode=\"render-field\">\r\n" +
+            "    <attribute name=\"inverseProperty\">'<xsl:value-of select=\".\"/>'</attribute>\r\n" +
             "  </xsl:template>\r\n" +
             "\r\n" +
             "  <xsl:template match=\"@Type\" mode=\"render-field\">\r\n" +

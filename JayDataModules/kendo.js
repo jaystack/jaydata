@@ -7,6 +7,10 @@
             kendo.data.Model.fn.init.call(this, data);
         }
     });
+    $data.kendo.attachMode = true;
+    if ($data.EntityAttachMode) {
+        $data.kendo.attachMode = $data.EntityAttachMode.KeepChanges;
+    }
 
     var kendoTypeMap = {
         "$data.Blob": "string",
@@ -91,11 +95,9 @@
                 //}
             }
 
-            //console.dir(memberDefinitions.getPublicMappedMethods());
             var modelDefinition = {
                 fields: fields,
                 init: function (data) {
-                    //console.dir(arguments);
                     var ctxType = options && options.owningContextType || undefined;
 
                     var contextSetTypes = [];
@@ -514,7 +516,6 @@
 
                     $data.Trace.log(promises);
                     jQuery.when.apply(this, promises).then(function (items, total) {
-                        console.dir(arguments);
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
                         var result = items.map(function (item) {
                             var d = (item instanceof $data.Entity) ? item.initData : item;
@@ -555,7 +556,6 @@
                         });
                     }
                     else {
-                        console.dir(ctx.storeToken);
                         model[0]
 						.innerInstance()
 						.save(ctx.storeToken)
@@ -577,7 +577,7 @@
                             return item.innerInstance()
                         });
                         items.forEach(function (item) {
-                            ctx.attach(item, true);
+                            ctx.attach(item, $data.kendo.attachMode);
                         });
                         ctx.saveChanges().then(function () {
                             options.success();
@@ -588,7 +588,7 @@
                         });
                     }
                     else {
-                        model[0].innerInstance().save().then(function (item) {
+                        model[0].innerInstance().save(undefined, undefined, $data.kendo.attachMode).then(function (item) {
                             options.success();
                         }).fail(function () {
                             //alert("error in update")
@@ -677,9 +677,9 @@
         ds = ds || {};
         //unless user explicitly opts out server side logic
         //we just force it.
-        ds.serverPaging = ds.serverPaging || true;
-        ds.serverFiltering = ds.serverFiltering || true;
-        ds.serverSorting = ds.serverSorting || true;
+        ds.serverPaging = ds.serverPaging === undefined ? true : ds.serverPaging;
+        ds.serverFiltering = ds.serverFiltering === undefined ? true : ds.serverFiltering;
+        ds.serverSorting = ds.serverSorting === undefined ? true : ds.serverSorting;
         ds.pageSize = ds.pageSize === undefined ? $data.kendo.defaultPageSize : ds.pageSize;
 
         var TransportClass = self.asKendoRemoteTransportClass(model);

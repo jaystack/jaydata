@@ -490,7 +490,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
             throw 'not implemented'; //todo
     },
     refresh: function () {
-        if ($data.ItemStore && 'EntityInstanceSave' in $data.ItemStore)
+        if ($data.ItemStore && 'EntityInstanceRefresh' in $data.ItemStore)
             return $data.ItemStore.EntityInstanceRefresh.apply(this, arguments);
         else
             throw 'not implemented'; //todo

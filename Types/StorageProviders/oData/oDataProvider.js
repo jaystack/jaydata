@@ -1,6 +1,6 @@
 
 var datajsPatch;
-datajsPatch = function () {
+datajsPatch = function (OData) {
     // just datajs-1.1.0
     if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler && typeof datajs === 'object' && !datajs.version) {
         $data.Trace.log('!!!!!!! - patch datajs 1.1.0');
@@ -25,11 +25,6 @@ datajsPatch = function () {
 $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctx) {
-        if (typeof OData === 'undefined') {
-            Guard.raise(new Exception('datajs is required', 'Not Found!'));
-        }
-        datajsPatch();
-
         this.SqlCommands = [];
         this.context = ctx;
         this.providerConfiguration = $data.typeSystem.extend({
@@ -47,6 +42,21 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             //disableBatch: undefined
             UpdateMethod: 'PATCH'
         }, cfg);
+
+        if (this.providerConfiguration.maxDataServiceVersion === "4.0") {
+            if (typeof odatajs === 'undefined' || typeof odatajs.oData === 'undefined') {
+                Guard.raise(new Exception('odatajs is required', 'Not Found!'));
+            } else {
+                this.oData = odatajs.oData
+            }
+        } else {
+            if (typeof OData === 'undefined') {
+                Guard.raise(new Exception('datajs is required', 'Not Found!'));
+            } else {
+                this.oData = OData;
+                datajsPatch(this.oData);
+            }
+        }
 
         this.fixkDataServiceVersions(cfg);
 
@@ -94,7 +104,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     //}
 
                     this.context.prepareRequest.call(this, requestData);
-                    OData.request.apply(this, requestData);
+                    this.oData.request.apply(this, requestData);
                 } else {
                     callBack.success(that.context);
                 }
@@ -164,7 +174,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     executeQuery: function (query, callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
-        var sql;
+        var sql = {};
         try {
             sql = this._compile(query);
         } catch (e) {
@@ -174,21 +184,48 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var schema = this.context;
 
         var that = this;
+        var countProperty = "__count";
+        if (this.providerConfiguration.maxDataServiceVersion === "4.0") {
+            countProperty = "@odata.count";
+        }
+
         var requestData = [
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
                 data: sql.postData,
                 headers: {
-                    MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                 }
             },
             function (data, textStatus, jqXHR) {
-                if (!data && textStatus.body) data = JSON.parse(textStatus.body);
+
+                if (!data && textStatus.body && !sql.isBatchExecuteQuery) data = JSON.parse(textStatus.body);
                 if (callBack.success) {
-                    query.rawDataList = typeof data === 'string' ? [{ cnt: Container.convertTo(data, $data.Integer) }] : data;
-                    if (sql.withInlineCount && typeof data === 'object' && (typeof data.__count !== 'undefined' || ('d' in data && typeof data.d.__count !== 'undefined'))) {
-                        query.__count = new Number(typeof data.__count !== 'undefined' ? data.__count : data.d.__count).valueOf();
+                    var processSuccess = function (query, data, sql) {
+                        query.rawDataList = typeof data === 'string' ? [{ cnt: Container.convertTo(data, $data.Integer) }] : data;
+                        if (sql.withInlineCount && typeof data === 'object' && (typeof data[countProperty] !== 'undefined' || ('d' in data && typeof data.d[countProperty] !== 'undefined'))) {
+                            query.__count = new Number(typeof data[countProperty] !== 'undefined' ? data[countProperty] : data.d[countProperty]).valueOf();
+                        }
+                    }
+
+                    if (sql.isBatchExecuteQuery) {
+                        query.rawDataList = sql.subQueries;
+                        for (var i = 0; i < data.__batchResponses.length; i++) {
+                            var resp = data.__batchResponses[i];
+                            
+                            if (!resp.data) {
+                                if (resp.body) {
+                                    resp.data = JSON.parse(resp.body);
+                                } else {
+                                    callBack.error(that.parseError(resp, arguments));
+                                    return;
+                                }
+                            }
+
+                            processSuccess(sql.subQueries[i], resp.data, sql.subQueries[i]._getComplitedData());
+                        }
+                    } else {
+                        processSuccess(query, data, sql);
                     }
 
                     callBack.success(query);
@@ -196,10 +233,15 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             },
             function (error) {
                 callBack.error(that.parseError(error, arguments));
-            }
+            },
+            sql.isBatchExecuteQuery ? this.oData.batchHandler : undefined
         ];
 
-        if (this.providerConfiguration.dataServiceVersion) {
+        if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
+            requestData[0].headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+        }
+
+        if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
             requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
         }
 
@@ -219,7 +261,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         this.context.prepareRequest.call(this, requestData);
         //$data.ajax(requestData);
         //OData.request(requestData, requestData.success, requestData.error);
-        OData.request.apply(this, requestData);
+        this.oData.request.apply(this, requestData);
     },
     _compile: function (queryable, params) {
         var compiler = new $data.storageProviders.oData.oDataCompiler();
@@ -258,10 +300,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 request = {
                     requestUri: this.providerConfiguration.oDataServiceHost + '/',
                     headers: {
-                        MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
                     }
                 };
-                if (this.providerConfiguration.dataServiceVersion) {
+                if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
+                    request.headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+                }
+                if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
                     request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
                 }
                 if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
@@ -328,7 +372,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         //}
 
         this.context.prepareRequest.call(this, requestData);
-        OData.request.apply(this, requestData);
+        this.oData.request.apply(this, requestData);
     },
     _saveBatch: function (independentBlocks, index2, callBack) {
         var batchRequests = [];
@@ -338,9 +382,11 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 convertedItem.push(independentBlocks[index][i].data);
                 var request = {};
                 request.headers = {
-                    "Content-Id": convertedItem.length,
-                    MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
+                    "Content-Id": convertedItem.length
                 };
+                if (this.providerConfiguration.maxDataServiceVersion != "4.0") {
+                    request.headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+                }
                 switch (independentBlocks[index][i].data.entityState) {
                     case $data.EntityState.Unchanged: continue; break;
                     case $data.EntityState.Added:
@@ -364,7 +410,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     default: Guard.raise(new Exception("Not supported Entity state"));
                 }
 
-                if (this.providerConfiguration.dataServiceVersion) {
+                if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
+                    request.headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+                }
+                if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
                     request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
                 }
                 batchRequests.push(request);
@@ -379,7 +428,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 __batchRequests: [{ __changeRequests: batchRequests }]
             },
             headers: {
-                MaxDataServiceVersion: this.providerConfiguration.maxDataServiceVersion
             }
         }, function (data, response) {
             if (response.statusCode == 202) {
@@ -419,9 +467,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         }, function (e) {
             callBack.error(that.parseError(e));
-        }, OData.batchHandler];
+        }, this.oData.batchHandler];
 
-        if (this.providerConfiguration.dataServiceVersion) {
+        if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion != "4.0") {
+            requestData[0].headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+        }
+        if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion != "4.0") {
             requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
         }
         if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
@@ -435,7 +486,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         //}
 
         this.context.prepareRequest.call(this, requestData);
-        OData.request.apply(this, requestData);
+        this.oData.request.apply(this, requestData);
     },
     reload_fromResponse: function (item, data, response) {
         var that = this;
@@ -483,16 +534,43 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }, this);
     },
 
-    save_getInitData: function (item, convertedItems) {
+    //save_getInitData: function (item, convertedItems) {
+    //    var self = this;
+    //    item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
+    //    var serializableObject = {}
+    //    item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
+    //        if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
+    //            if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function (def) { return def.name === memdef.name; }))) {
+    //                var typeName = Container.resolveName(memdef.type);
+    //                var converter = self.fieldConverter.toDb[typeName];
+    //                serializableObject[memdef.name] = converter ? converter(item.physicalData[memdef.name]) : item.physicalData[memdef.name];
+    //            }
+    //        }
+    //    }, this);
+    //    return serializableObject;
+    //},
+    save_getInitData: function (item, convertedItems, isComplex, isDeep) {
         var self = this;
-        item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
+        if (!isComplex) {
+            item.physicalData = this.context._storageModel.getStorageModel(item.data.getType()).PhysicalType.convertTo(item.data, convertedItems);
+        } else {
+            item.physicalData = item.data;
+        }
         var serializableObject = {}
         item.physicalData.getType().memberDefinitions.asArray().forEach(function (memdef) {
-            if (memdef.kind == $data.MemberTypes.navProperty || memdef.kind == $data.MemberTypes.complexProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
-                if (typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || item.data.changedProperties.some(function (def) { return def.name === memdef.name; }))) {
-                    var typeName = Container.resolveName(memdef.type);
-                    var converter = self.fieldConverter.toDb[typeName];
-                    serializableObject[memdef.name] = converter ? converter(item.physicalData[memdef.name]) : item.physicalData[memdef.name];
+            if (memdef.kind == $data.MemberTypes.complexProperty && item.physicalData[memdef.name]) {
+                serializableObject[memdef.name] = self.save_getInitData({ data: item.physicalData[memdef.name] }, convertedItems, true, true);
+            }
+            else if (memdef.kind == $data.MemberTypes.navProperty || (memdef.kind == $data.MemberTypes.property && !memdef.notMapped)) {
+                if (isDeep || typeof memdef.concurrencyMode === 'undefined' && (memdef.key === true || item.data.entityState === $data.EntityState.Added || (item.data.changedProperties && item.data.changedProperties.some(function (def) { return def.name === memdef.name; })))) {
+
+                    if (memdef.kind == $data.MemberTypes.navProperty && item.physicalData[memdef.name] && this.providerConfiguration.maxDataServiceVersion === "4.0") {
+                        serializableObject[memdef.name + "@odata.bind"] = item.physicalData[memdef.name].__metadata.uri;
+                    } else {
+                        var typeName = Container.resolveName(memdef.type);
+                        var converter = self.fieldConverter.toDb[typeName];
+                        serializableObject[memdef.name] = converter ? converter(item.physicalData[memdef.name]) : item.physicalData[memdef.name];
+                    }
                 }
             }
         }, this);
@@ -747,6 +825,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         enumerable: true,
         writable: true
     },
+    supportedContextOperation: {
+        value: {
+            batchExecuteQuery: true
+        },
+        enumerable: true,
+        writable: true
+    },
+
     fieldConverter: { value: $data.oDataConverter },
     resolveTypeOperations: function (operation, expression, frameType) {
         var memDef = expression.entityType.getMemberDefinition(operation);
