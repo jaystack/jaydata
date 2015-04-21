@@ -1,4 +1,4 @@
-VERSION = '1.0.8'
+VERSION = '2.0.0'
 TARGET_DIR = ./build
 RELEASE_DIR = ./release
 TEMP_DIR = $(TARGET_DIR)/tmp

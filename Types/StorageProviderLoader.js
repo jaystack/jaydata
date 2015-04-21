@@ -22,6 +22,9 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
             case 'mongoDB':
                 supported = $data.mongoDBDriver;
                 break;
+            case 'libRETS':
+                supported = $data.libRETSDriver;
+                break;
             default:
                 break;
         }

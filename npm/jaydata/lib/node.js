@@ -16,6 +16,10 @@ try{
     $data.mongoDBDriver = require('mongodb');
 }catch(e){}
 
+try{
+    $data.libRETSDriver = require('librets');
+}catch(e){}
+
 (function(global){
     if (typeof window === "undefined") {
         window = this;
