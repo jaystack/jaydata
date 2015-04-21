@@ -1,9 +1,11 @@
 {
   "name": "jaydata-reso",
-  "description": "Fork of Jayadata that supports the RESO Web API",
+  "description": "Jaydata fork for RESO Web API",
   "keywords": [
     "OData",
     "cross-platform",
+    "librets",
+    "mongodb",
     "reso"
   ],
   "version": "2.0.2",
