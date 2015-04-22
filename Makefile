@@ -1,4 +1,4 @@
-VERSION = '2.0.2'
+VERSION = '2.0.3'
 TARGET_DIR = ./build
 RELEASE_DIR = ./release
 TEMP_DIR = $(TARGET_DIR)/tmp
@@ -180,6 +180,9 @@ MongoDbProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryConverter.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/mongoDBStorageProvider.js\
 	$(TYPES_DIR)/StorageProviders/mongoDB/ClientObjectID.js\
 
+libRETSProvider = $(TYPES_DIR)/StorageProviders/InMemory/InMemoryConverter.js\
+	$(TYPES_DIR)/StorageProviders/libRETS/libRETSStorageProvider.js\
+
 clean: 
 	@@test ! -d $(TARGET_DIR) || rm -r $(TARGET_DIR)
 	@@test ! -d $(RELEASE_DIR) || rm -r $(RELEASE_DIR)
@@ -206,6 +209,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@@rsync -R $(JAYDATA_SOURCE) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(SqLiteProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(MongoDbProvider) $(NPM_DIR)/jaydata/lib
+	@@rsync -R $(libRETSProvider) $(NPM_DIR)/jaydata/lib
 	@@rsync -R $(JAYDATA_SERVER) $(NPM_DIR)/jaydata/lib
 	@@cp -r $(GPL_LIC) $(NPM_DIR)/jaydata
 	@@cp -r $(MIT_LIC) $(NPM_DIR)/jaydata
@@ -214,6 +218,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(JAYDATA_SOURCE),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/index.js;)
 	@$(foreach dir,$(SqLiteProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/sqlite_index.js;)
 	@$(foreach dir,$(MongoDbProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/mongodb_index.js;)
+	@$(foreach dir,$(libRETSProvider),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/librets_index.js;)
 	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/service_index.js;)
 	@@echo "require('./sqlite_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
