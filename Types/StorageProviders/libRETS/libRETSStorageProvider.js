@@ -6,9 +6,8 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
         this.providerConfiguration = $data.typeSystem.extend({
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
             address: '127.0.0.1',
-            port: 27017,
-            serverOptions: {},
-            databaseName: 'test'
+            port: 6103,
+            serverOptions: {}
         }, cfg);
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
@@ -25,7 +24,7 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
         callBack = $data.typeSystem.createCallbackSetting(callBack);
         
         var server = this._getServer();
-        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
+        new this.driver.Db(server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
@@ -143,7 +142,7 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
         this._compile(query);
 
         var server = this._getServer();
-        new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
+        new this.driver.Db(server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
