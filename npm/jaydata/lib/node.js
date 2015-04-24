@@ -17,7 +17,7 @@ try{
 }catch(e){}
 
 try{
-    $data.libRETSDriver = require('librets');
+    $data.libRETSDriver = require('jaydata-librets');
 }catch(e){}
 
 (function(global){
