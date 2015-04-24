@@ -557,7 +557,7 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
 }, {
     isSupported: {
         get: function(){
-            if (!$data.mongoDBDriver) return false;
+            if (!$data.libRETSDriver) return false;
             return true;
         },
         set: function(value){}
