@@ -10,15 +10,6 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
             serverOptions: {},
             databaseName: 'test'
         }, cfg);
-        if (this.providerConfiguration.server){
-            if (typeof this.providerConfiguration.server === 'string') this.providerConfiguration.server = [{ address: this.providerConfiguration.server.split(':')[0] || '127.0.0.1', port: this.providerConfiguration.server.split(':')[1] || 27017 }];
-            if (!(this.providerConfiguration.server instanceof Array)) this.providerConfiguration.server = [this.providerConfiguration.server];
-            if (this.providerConfiguration.server.length == 1){
-                this.providerConfiguration.address = this.providerConfiguration.server[0].address || '127.0.0.1';
-                this.providerConfiguration.port = this.providerConfiguration.server[0].port || 27017;
-                delete this.providerConfiguration.server;
-            }
-        }
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -27,15 +18,6 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
         }
     },
     _getServer: function(){
-        if (this.providerConfiguration.server){
-            var replSet = [];
-            for (var i = 0; i < this.providerConfiguration.server.length; i++){
-                var s = this.providerConfiguration.server[i];
-                replSet.push(new this.driver.Server(s.address, s.port, s.serverOptions));
-            }
-            
-            return new this.driver.ReplSetServers(replSet);
-        }
         return this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
     },
     initializeStore: function(callBack){
