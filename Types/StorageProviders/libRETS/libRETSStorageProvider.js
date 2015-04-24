@@ -35,7 +35,8 @@ $C('$data.storageProviders.libRETS.libRETSProvider', $data.StorageProviderBase, 
             }
             
             return new this.driver.ReplSetServers(replSet);
-        }else return this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
+        }
+        return this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
     },
     initializeStore: function(callBack){
         var self = this;
