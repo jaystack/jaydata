@@ -1,4 +1,4 @@
-VERSION = '2.0.4'
+VERSION = '2.0.5'
 TARGET_DIR = ./build
 RELEASE_DIR = ./release
 TEMP_DIR = $(TARGET_DIR)/tmp
@@ -222,6 +222,7 @@ npmjaydata: $(TYPE_SYSTEM) $(JAYDATA_SOURCE) $(CREDITS)
 	@$(foreach dir,$(JAYDATA_SERVER),echo "require('"$(dir)"');" >> $(NPM_DIR)/jaydata/lib/service_index.js;)
 	@@echo "require('./sqlite_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./mongodb_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
+	@@echo "require('./librets_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo "require('./service_index.js');" >> $(NPM_DIR)/jaydata/lib/index.js;
 	@@echo 'module.exports = $$data;' >> $(NPM_DIR)/jaydata/lib/index.js
 	@@sed -e 's/"dependencies": {},/"dependencies": {"datajs": "1.0.3", "q": "0.8.5", "qs": "2.2.4", "xmldom": "0.1.11", "url": ">0.0.1", "acorn": "0.1.0","jaydata-librets": "*"},/;s/jaydata@[0-9].[0-9].[0-9]/jaydata@$(VERSION)/;s/"version": "[0-9].[0-9].[0-9]"/"version": "$(VERSION)"/' $(NPM_BASE_DIR)/jaydata/package.json > $(NPM_DIR)/jaydata/package.json
