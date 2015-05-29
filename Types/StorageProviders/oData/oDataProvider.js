@@ -947,20 +947,37 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     }
     */
-    parseError: function(error, data){
-
+    parseError: function(error, data)
+    {
         var message = (error.response || error || {}).body || '';
-        try {
-            if(message.indexOf('{') === 0){
+        try
+        {
+            if (message.indexOf('{') === 0)
+            {
                 var errorObj = JSON.parse(message);
-                errorObj = errorObj['odata.error'] || errorObj.error || errorObj;
-                if (errorObj.message) {
+                if (errorObj['odata.error'])
+                {
+                    errorObj = errorObj['odata.error']
+                    if(errorObj.innererror)
+                    {
+                        errorObj = errorObj.innererror;
+                    }
+                }
+                else
+                {
+                    errorObj = errorObj.error || errorObj;
+                }
+                if (errorObj.message)
+                {
                     message = errorObj.message.value || errorObj.message;
                 }
             }
-        } catch (e) {}
+        }
+        catch (e)
+        {
+        }
 
-        return new Exception(message, error.message, data || error);
+        return new Exception(message, error.message, data || errorObj);
     },
     appendBasicAuth: function (request, user, password, withCredentials) {
         request.headers = request.headers || {};
