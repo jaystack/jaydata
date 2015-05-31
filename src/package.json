@@ -1,0 +1,10 @@
+{
+  "name": "src",
+  "version": "0.0.0",
+  "description": "src",
+  "main": "server.js",
+  "author": {
+    "name": "nochtap",
+    "email": ""
+  }
+}
