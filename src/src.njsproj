@@ -32,6 +32,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="buildConfig.json" />
+    <Content Include="CREDITS.txt" />
     <Content Include="JaySvcUtil\Example\index.html" />
     <Content Include="JaySvcUtil\JayDataContextGenerator.xslt" />
     <Content Include="package.json" />

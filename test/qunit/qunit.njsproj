@@ -49,6 +49,15 @@
     <Content Include="scripts\NodeJS\JaySvcUtil\Test\oDataV3.xml" />
     <Content Include="scripts\NodeJS\JaySvcUtil\xml.xml" />
     <Content Include="scripts\NodeJS\JaySvcUtil\xslt.xslt" />
+    <Content Include="test.html" />
+    <Content Include="test_cdn_JayData.html" />
+    <Content Include="test_Handlebars.html" />
+    <Content Include="test_JayData.html" />
+    <Content Include="test_JayData_min.html" />
+    <Content Include="test_JayData_min_nuget.html" />
+    <Content Include="test_JayData_nuget.html" />
+    <Content Include="test_JayData_nuget_prov.html" />
+    <Content Include="test_odata.html" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gulpfile.js" />

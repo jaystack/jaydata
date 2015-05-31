@@ -1,4 +1,4 @@
-// JayData 1.0.4
+Ôªø// JayData <%=version%>
 // Dual licensed under MIT and GPL v2
 // Copyright JayStack Technologies (http://jaydata.org/licensing)
 //
@@ -6,8 +6,8 @@
 // practices to access and manipulate data from various online and offline sources.
 //
 // Credits:
-//     Hajnalka Battancs, D·niel JÛzsef, J·nos Roden, L·szlÛ Horv·th, PÈter Nochta
-//     PÈter Zentai, RÛbert BÛnay, Szabolcs Czinege, Viktor Borza, Viktor L·z·r,
-//     Zolt·n Gyebrovszki, G·bor Dolla
+//     Hajnalka Battancs, D√°niel J√≥zsef, J√°nos Roden, L√°szl√≥ Horv√°th, P√©ter Nochta
+//     P√©ter Zentai, R√≥bert B√≥nay, Szabolcs Czinege, Viktor Borza, Viktor L√°z√°r,
+//     Zolt√°n Gyebrovszki, G√°bor Dolla
 //
 // More info: http://jaydata.org
