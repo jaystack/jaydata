@@ -33,6 +33,97 @@
   <ItemGroup>
     <Content Include=".gitignore" />
     <Content Include="package.json" />
+    <Content Include="scripts\JaySvcUtil\%24metadata.action.xml" />
+    <Content Include="scripts\JaySvcUtil\crm_metadata.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\EdmTypeMapping.xslt" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\JayDataContextGenerator_OData.xslt.template" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\JayDataContextGenerator_OData_V1.xslt" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\JayDataContextGenerator_OData_V2.xslt" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\JayDataContextGenerator_OData_V3.xslt" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\sp2013monster.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\sp2013monster_.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\Test\EdmTypeMapping.xslt.xsl" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\Test\index.html" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\Test\netflix.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\Test\newsreader.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\Test\oDataV3.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\xml.xml" />
+    <Content Include="scripts\NodeJS\JaySvcUtil\xslt.xslt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="gulpfile.js" />
+    <Compile Include="scripts\angularTests.js" />
+    <Compile Include="scripts\CollectionTests.js" />
+    <Compile Include="scripts\converterTests.js" />
+    <Compile Include="scripts\dataDistributeTest.js" />
+    <Compile Include="scripts\dataServiceVersionTests.js" />
+    <Compile Include="scripts\EntityContextTests.js" />
+    <Compile Include="scripts\FaceBookProviderTests.js" />
+    <Compile Include="scripts\HandlebarsTest.js" />
+    <Compile Include="scripts\indexedDbProviderTest.js" />
+    <Compile Include="scripts\inMemoryProviderTests.js" />
+    <Compile Include="scripts\JaySvcUtilTests.js" />
+    <Compile Include="scripts\kendoTests.js" />
+    <Compile Include="scripts\knockoutTests.js" />
+    <Compile Include="scripts\loadPropertyTests.js" />
+    <Compile Include="scripts\LocalItemStoreTests.js" />
+    <Compile Include="scripts\mongoProviderTestContext.js" />
+    <Compile Include="scripts\mongoProviderTests.js" />
+    <Compile Include="scripts\NodeJS\argumentBinderTests.js" />
+    <Compile Include="scripts\NodeJS\commonTests.js" />
+    <Compile Include="scripts\NodeJS\context.js" />
+    <Compile Include="scripts\NodeJS\contextapiClientTests.js" />
+    <Compile Include="scripts\NodeJS\contextapiTests.js" />
+    <Compile Include="scripts\NodeJS\contextFactoryTests.js" />
+    <Compile Include="scripts\NodeJS\cuJavaScriptTest.js" />
+    <Compile Include="scripts\NodeJS\cuTests.js" />
+    <Compile Include="scripts\NodeJS\EntityTransformTests.js" />
+    <Compile Include="scripts\NodeJS\eventClientTests.js" />
+    <Compile Include="scripts\NodeJS\eventTests.js" />
+    <Compile Include="scripts\NodeJS\JaySvcUtil\jaysus-test.js" />
+    <Compile Include="scripts\NodeJS\JaySvcUtil\jaysus.js" />
+    <Compile Include="scripts\NodeJS\JaySvcUtil\JaySvcUtil.js" />
+    <Compile Include="scripts\NodeJS\JaySvcUtil\JaySvcUtilNode.js" />
+    <Compile Include="scripts\NodeJS\JaySvcUtil\Test\jaydata.js" />
+    <Compile Include="scripts\NodeJS\LStestservice.js" />
+    <Compile Include="scripts\NodeJS\oDataBatchTests.js" />
+    <Compile Include="scripts\NodeJS\oDataMetaDataGeneratorTests.js" />
+    <Compile Include="scripts\NodeJS\oDataResponseDataBuilderTests.js" />
+    <Compile Include="scripts\NodeJS\oDataRestTests.js" />
+    <Compile Include="scripts\NodeJS\oDataXmlResultTests.js" />
+    <Compile Include="scripts\NodeJS\service.js" />
+    <Compile Include="scripts\NodeJS\testservice.js" />
+    <Compile Include="scripts\NodeJS\TypesTest.js" />
+    <Compile Include="scripts\NodeJS\typeTests.js" />
+    <Compile Include="scripts\NodeJS\z.js" />
+    <Compile Include="scripts\oDataProviderTests.js" />
+    <Compile Include="scripts\oDataProviderTests_auth.js" />
+    <Compile Include="scripts\oDataProviderTests_use_service.js" />
+    <Compile Include="scripts\promiseTests.js" />
+    <Compile Include="scripts\setOperationTests.js" />
+    <Compile Include="scripts\sqLiteCompilerTests.js" />
+    <Compile Include="scripts\sqLiteCRUDTests.js" />
+    <Compile Include="scripts\sqLiteProviderTests.js" />
+    <Compile Include="scripts\storageModelTests.js" />
+    <Compile Include="scripts\stormProviderTests.js" />
+    <Compile Include="scripts\T1.js" />
+    <Compile Include="scripts\T2.js" />
+    <Compile Include="scripts\T3.js" />
+    <Compile Include="scripts\T3_jayStorm.js" />
+    <Compile Include="scripts\T4.js" />
+    <Compile Include="scripts\TypesTest.js" />
+    <Compile Include="scripts\typeSystemTests.js" />
+    <Compile Include="scripts\ValidationTests.js" />
+    <Compile Include="scripts\ValidatonPluginTest.js" />
+    <Compile Include="scripts\webApiTests.js" />
+    <Compile Include="scripts\YQLProviderTests.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="scripts\" />
+    <Folder Include="scripts\JaySvcUtil\" />
+    <Folder Include="scripts\NodeJS\" />
+    <Folder Include="scripts\NodeJS\JaySvcUtil\" />
+    <Folder Include="scripts\NodeJS\JaySvcUtil\Test\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

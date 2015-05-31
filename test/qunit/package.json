@@ -6,5 +6,8 @@
   "author": {
     "name": "nochtap",
     "email": ""
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11"
   }
 }
