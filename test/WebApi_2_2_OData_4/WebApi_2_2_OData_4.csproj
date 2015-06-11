@@ -118,6 +118,7 @@
     <Compile Include="Model\NewsReaderContext.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ContainmentRoutingConvention.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="ValuesController.cs" />
   </ItemGroup>

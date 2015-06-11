@@ -16,6 +16,6 @@ namespace JayData.Test.CommonItems.Entities
         public string Title { get; set; }
         public string Subtitle { get; set; }
         public string Description { get; set; }
-        public virtual List<Article> Articles { get; set; }
+        public virtual IList<Article> Articles { get; set; }
     }
 }

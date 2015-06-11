@@ -112,6 +112,21 @@ namespace WebApi_2_2_OData_4.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
+        [EnableQuery]
+        public SingleResult<Article> GetArticle([FromODataUri] int key1, [FromODataUri] int key2)
+        {
+            return SingleResult.Create(db.Categories.Where(c => c.Id == key1).Select(c => c.Articles.FirstOrDefault(a=>a.Id == key2)));
+        }
+        [EnableQuery]
+        public IQueryable<Article> GetArticles([FromODataUri] int key)
+        {
+            return db.Categories.Where(c => c.Id == key).SelectMany(c => c.Articles);
+        }
+        public string GetTitle([FromODataUri] int key)
+        {
+            return "catTitle";
+        }
+
         private bool ProductExists(int key)
         {
             return db.Categories.Any(p => p.Id == key);

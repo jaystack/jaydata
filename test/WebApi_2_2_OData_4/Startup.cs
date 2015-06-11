@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 
 namespace WebApi_2_2_OData_4
 {
@@ -27,6 +29,7 @@ namespace WebApi_2_2_OData_4
             );
 
             var client = new ODataConventionModelBuilder();
+            //client.Namespace = "Test";
             client.EntitySet<User>("Users");
             client.EntitySet<Article>("Articles");
             client.EntitySet<UserProfile>("UserProfiles");
@@ -39,9 +42,13 @@ namespace WebApi_2_2_OData_4
             client.EntitySet<TestItemGroup>("TestItemGroups");
             client.EntitySet<TestItemType>("TestItemTypes");
 
-            config.MapODataServiceRoute("odata", "odata", client.GetEdmModel());
+            var model = client.GetEdmModel();
+            IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting(config, model);
+            conventions.Insert(0, new ContainmentRoutingConvention());
+
+            config.MapODataServiceRoute("odata", "odata", model, new DefaultODataPathHandler(), conventions);
 
             appBuilder.UseWebApi(config);
         }
-    } 
+    }
 }
