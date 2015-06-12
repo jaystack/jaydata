@@ -235,7 +235,7 @@
                         if (propNameParts.length == 1) {
                             var propValue = e.value;
                             if (!jayInstance.changeFromJay) {
-                                propValue = propValue.innerInstance ? propValue.innerInstance() : propValue;
+                                propValue = (propValue && propValue.innerInstance) ? propValue.innerInstance() : propValue;
                                 jayInstance[propName] = propValue;
                                 if (options && options.autoSave) {
                                     jayInstance.save();
@@ -483,7 +483,13 @@
                                     $data.Trace.log('unknown operator', f.operator);
                                     break;
                             }
-                            thisArg[f.field] = f.value;
+                            
+							f.field.split('.').forEach(function (fp, index, arr) {
+                                if (index < arr.length - 1)
+                                    this.ctx = (this.ctx[fp] = this.ctx[fp] || {});
+                                else
+                                    this.ctx[fp] = f.value
+                            }, { ctx: thisArg })
                         })
                         q = q.filter(filter, thisArg);
                     }

@@ -1009,7 +1009,7 @@
 
   function isUseStrict(stmt) {
     return options.ecmaVersion >= 5 && stmt.type === "ExpressionStatement" &&
-      stmt.expression.type === "Literal" && stmt.expression.value === "use strict";
+      stmt.expression.type === "Literal" && stmt.expression.value === ("use " + "strict");
   }
 
   // Predicate that tests whether the next token is of the given

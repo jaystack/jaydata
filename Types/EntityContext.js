@@ -1153,7 +1153,7 @@ $data.Class.define('$data.EntityContext', null, null,
                                 //} else {
                                 //    data.entityState = $data.EntityState.Added;
                                 //}
-                                this.discoverDependentItemEntityState(data);
+                                this.discoverDependentItemEntityState(data, entityCachedItem.data);
                             }
                             if (additionalEntities.indexOf(data) == -1) {
                                 additionalEntities.push(data);
@@ -1426,8 +1426,10 @@ $data.Class.define('$data.EntityContext', null, null,
 
         return pHandlerResult;
     },
-    discoverDependentItemEntityState: function (data) {
-        if (data.storeToken === this.storeToken) {
+    discoverDependentItemEntityState: function (data, dependentOn) {
+		if (dependentOn.entityState === $data.EntityState.Deleted) {
+			data.entityState = $data.EntityState.Unchanged;
+		} else if (data.storeToken === this.storeToken) {
             data.entityState = $data.EntityState.Modified;
         } else if (data.storeToken && this.storeToken && data.storeToken.typeName === this.storeToken.typeName && JSON.stringify(data.storeToken.args) === JSON.stringify(this.storeToken.args)) {
             data.entityState = $data.EntityState.Modified;
