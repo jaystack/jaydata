@@ -204,6 +204,10 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         if (cnf.user && cnf.password && (!cnf.httpHeaders || (cnf.httpHeaders && !cnf.httpHeaders['Authorization'])))
             xhttp.setRequestHeader("Authorization", "Basic " + this.__encodeBase64(cnf.user + ":" + cnf.password));
 
+        // Set withCredential 
+        if (cnf.withCredentials)
+            xhttp.withCredentials = true;
+
         xhttp.send("");
     },
     _processResults: function (metadataUri, versionInfo, metadata, xsl, cnf) {
