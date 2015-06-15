@@ -28,7 +28,8 @@ namespace JayData.Test.WebApi_2_2_OData_4.Model
         public DbSet<TestItemType> TestItemTypes { get; set; }
     }
 
-    public class initdb : DropCreateDatabaseAlways<NewsReaderContext> {
+    public class initdb : DropCreateDatabaseAlways<NewsReaderContext>
+    {
         protected override void Seed(NewsReaderContext context)
         {
             var usr1 = new User { LoginName = "Usr1", Email = "usr1@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio1", Birthday = new DateTime(1975, 1, 1), Location = new Location { City = "City 1", Zip = 1117, Country = "Country 1", Address = "Test data1" } } };
@@ -120,6 +121,10 @@ namespace JayData.Test.WebApi_2_2_OData_4.Model
             context.TestTable.Add(new TestItem { Id = 16, i0 = 2, b0 = true, d0 = new DateTime(2012, 1, 10), n0 = 27.25, s0 = "banan" });
             context.TestTable.Add(new TestItem { Id = 18, i0 = 3, b0 = false, d0 = new DateTime(2012, 5, 15), n0 = 17.15, s0 = "barack" });
             context.TestTable.Add(new TestItem { Id = 20, i0 = 4, b0 = null, d0 = new DateTime(2015, 5, 15), n0 = 67.65, s0 = "árvíztűrő tükörfúrógép ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP" });
+
+            context.TestTable2.Add(new TestItemGuid { Id = Guid.NewGuid(), b0 = true, dec = (decimal)2.2, dtOffset = new DateTimeOffset(DateTime.Now), dur = DateTime.Now - DateTime.Today, flt = 3.56f, i0 = 1234, t = DateTime.Now, lng = 4324233L, s0 = "1st row" });
+            context.TestTable2.Add(new TestItemGuid { Id = Guid.NewGuid(), b0 = false, dec = (decimal)4.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99696998), flt = 5.56f, i0 = 6234, t = DateTime.Now.AddDays(-3), lng = 4344233L, s0 = "2nd row" });
+            context.TestTable2.Add(new TestItemGuid { Id = Guid.NewGuid(), b0 = null, dec = (decimal)1.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99336998), flt = 15.56f, i0 = 62341, t = DateTime.Now.AddDays(-2), lng = 4344253L, s0 = "3nd row" });
         }
     }
 }
