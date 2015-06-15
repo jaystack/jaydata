@@ -117,7 +117,15 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
         }
     });
 })();
-
+(function () {
+    function parseFromString(value) {
+        return value;
+    }
+    
+    $data.Container.registerConverter('$data.Duration', {
+        '$data.String': parseFromString
+    });
+})();
 $data.Container.registerConverter('$data.Decimal', {
     '$data.Boolean': function(value){
         return value ? '1' : '0';

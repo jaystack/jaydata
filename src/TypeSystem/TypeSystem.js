@@ -848,6 +848,7 @@
                 case t === $data.Int64:
                 case t === $data.DateTimeOffset:
                 case t === $data.Time:
+                case t === $data.Duration:
 
                 case t === $data.SimpleBase:
                 case t === $data.Geospatial:

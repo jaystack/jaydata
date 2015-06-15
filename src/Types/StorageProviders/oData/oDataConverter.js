@@ -43,6 +43,7 @@ $data.oDataConverter = {
             }
         },
         '$data.Time': $data.Container.proxyConverter,
+        '$data.Duration': $data.Container.proxyConverter,
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function (v) {
@@ -73,16 +74,17 @@ $data.oDataConverter = {
         '$data.Entity': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
-        '$data.Decimal': $data.Container.proxyConverter,
+        '$data.Decimal': function (v) { return v ? parseFloat(v) : v },
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
-        '$data.Int64': $data.Container.proxyConverter,
+        '$data.Int64': function (v) { return v ? parseInt(v) : v },
         '$data.ObjectID': $data.Container.proxyConverter,
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
         '$data.Time': $data.Container.proxyConverter,
+        '$data.Duration': $data.Container.proxyConverter,
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
@@ -115,9 +117,10 @@ $data.oDataConverter = {
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': function (v) { return v ? v + 'm' : v; },
         '$data.Float': function (v) { return v ? v + 'f' : v; },
-        '$data.Int64': function (v) { return v ? v + 'L' : v; },
+        '$data.Int64': $data.Container.proxyConverter,
         '$data.Time': function (v) { return v ? "time'" + v + "'" : v; },
-        '$data.DateTimeOffset': function (date) { return date ? "datetimeoffset'" + date + "'" : date; },
+        '$data.Duration': function (v) { return v ? "duration'" + v + "'" : v; },
+        '$data.DateTimeOffset': function (date) { return date ? "" + date + "" : date; },
         '$data.Date': function (date) { return date ? "datetime'" + date + "'" : date; },
         '$data.String': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.ObjectID': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
@@ -139,7 +142,7 @@ $data.oDataConverter = {
         '$data.GeometryMultiLineString': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
         '$data.GeometryMultiPolygon': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
         '$data.GeometryCollection': function (g) { if (g) { return $data.GeometryBase.stringifyToUrl(g); } return g; },
-        '$data.Guid': function (guid) { return guid ? ("guid'" + guid.toString() + "'") : guid; }
+        '$data.Guid': function (guid) { return guid ? ("" + guid.toString() + "") : guid; }
     },
     unescape: {
         '$data.Entity': function (v, c) {
@@ -173,11 +176,7 @@ $data.oDataConverter = {
         },
         '$data.Int16': function (v) { return JSON.parse(v); },
         '$data.Int64': function (v) {
-            if (typeof v === 'string' && v.toLowerCase().lastIndexOf('l') === v.length - 1) {
-                return v.substr(0, v.length - 1);
-            } else {
-                return v;
-            }
+            return v;
         },
         '$data.Boolean': function (v) { return JSON.parse(v); },
         '$data.Date': function (v) {
@@ -201,7 +200,7 @@ $data.oDataConverter = {
             }
         },
         '$data.Guid': function (v) {
-            if (/^guid'\w{8}-\w{4}-\w{4}-\w{4}-\w{12}'$/.test(v)) {
+            if (/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/.test(v)) {
                 var data = v.slice(5, v.length - 1)
                 return $data.parseGuid(data).toString();
             }
@@ -229,14 +228,20 @@ $data.oDataConverter = {
             return value;
         },
         '$data.DateTimeOffset': function (v) {
-            if (typeof v === 'string' && /^datetimeoffset'/.test(v)) {
-                return $data.Container.convertTo(v.slice(15, v.length - 1), $data.DateTimeOffset);
+            if (typeof v === 'string') {
+                return $data.Container.convertTo(v, $data.DateTimeOffset);
             }
             return v;
         },
         '$data.Time': function (v) {
             if (typeof v === 'string' && /^time'/.test(v)) {
                 return $data.Container.convertTo(v.slice(5, v.length - 1), $data.Time);
+            }
+            return v;
+        },
+        '$data.Duration': function (v) {
+            if (typeof v === 'string' && /^duration'/.test(v)) {
+                return $data.Container.convertTo(v.slice(9, v.length - 1), $data.Duration);
             }
             return v;
         },
@@ -294,6 +299,7 @@ $data.oDataConverter = {
         '$data.Date': function (v) { return v.toISOString().replace('Z', ''); },
         '$data.DateTimeOffset': function(v){ return v.toISOString(); },
         '$data.Time': function (v) { return v.toString(); },
+        '$data.Duration': function (v) { return v.toString(); },
         '$data.Number': function (v) { return v.toString(); },
         '$data.Integer': function (v) { return v.toString(); },
         '$data.Int32': function (v) { return v.toString(); },
@@ -320,6 +326,7 @@ $data.oDataConverter = {
         '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
         '$data.Time': function (o) { return o.toString(); },
+        '$data.Duration': function (o) { return o.toString(); },
         '$data.String': function (o) { return o.toString(); },
         '$data.Boolean': function (o) { return o.toString(); },
         '$data.Blob': function (o) { return o; },

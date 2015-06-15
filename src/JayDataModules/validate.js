@@ -69,6 +69,10 @@
             minValue: { key: 'min' },
             maxValue: { key: 'max' }
         },
+        '$data.Duration': {
+            required: { key: 'required' },
+            customValidator: { key: 'customValidator', validateMethod: true }
+        },
         '$data.Array': {
             required: { key: 'required' },
             customValidator: { key: 'customValidator', validateMethod: true },

@@ -123,6 +123,7 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
             '$data.Date': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.DateTimeOffset': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
             '$data.Time': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'minValue', 'maxValue']),
+            '$data.Duration': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator']),
             '$data.Boolean': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator']),
             '$data.Array': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator', 'length']),
             '$data.Object': $data.Validation.Defaults._getGroupValidations(['required', 'customValidator']),

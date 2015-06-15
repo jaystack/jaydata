@@ -1,27 +1,3 @@
-
-var datajsPatch;
-datajsPatch = function (OData) {
-    // just datajs-1.1.0
-    if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler && typeof datajs === 'object' && !datajs.version) {
-        $data.Trace.log('!!!!!!! - patch datajs 1.1.0');
-        var oldread = OData.defaultHandler.read;
-        OData.defaultHandler.read = function (p, context) {
-            delete context.contentType;
-            delete context.dataServiceVersion;
-
-            oldread.apply(this, arguments);
-        };
-        var oldwrite = OData.defaultHandler.write;
-        OData.defaultHandler.write = function (p, context) {
-            delete context.contentType;
-            delete context.dataServiceVersion;
-
-            oldwrite.apply(this, arguments);
-        };
-    }
-    datajsPatch = function () { };
-}
-
 $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctx) {
@@ -31,9 +7,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged,
             oDataServiceHost: "/odata.svc",
             serviceUrl: "",
-            maxDataServiceVersion: '2.0',
+            maxDataServiceVersion: '4.0',
             dataServiceVersion: undefined,
-            setDataServiceVersionToMax: true,
             user: null,
             password: null,
             withCredentials: false,
@@ -43,41 +18,17 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             UpdateMethod: 'PATCH'
         }, cfg);
 
-        if (this.providerConfiguration.maxDataServiceVersion === "4.0") {
-            if (typeof odatajs === 'undefined' || typeof odatajs.oData === 'undefined') {
-                Guard.raise(new Exception('odatajs is required', 'Not Found!'));
-            } else {
-                this.oData = odatajs.oData
-            }
+        if (typeof odatajs === 'undefined' || typeof odatajs.oData === 'undefined') {
+            Guard.raise(new Exception('odatajs is required', 'Not Found!'));
         } else {
-            if (typeof OData === 'undefined') {
-                Guard.raise(new Exception('datajs is required', 'Not Found!'));
-            } else {
-                this.oData = OData;
-                datajsPatch(this.oData);
-            }
+            this.oData = odatajs.oData
         }
-
-        this.fixkDataServiceVersions(cfg);
 
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
         if (this.context && this.context._buildDbType_modifyInstanceDefinition && this.buildDbType_modifyInstanceDefinition) {
             this.context._buildDbType_modifyInstanceDefinition = this.buildDbType_modifyInstanceDefinition;
-        }
-    },
-    fixkDataServiceVersions: function (cfg) {
-        if (this.providerConfiguration.dataServiceVersion > this.providerConfiguration.maxDataServiceVersion) {
-            this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-        }
-
-        if (this.providerConfiguration.setDataServiceVersionToMax === true) {
-            this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-        }
-
-        if ((cfg && !cfg.UpdateMethod && this.providerConfiguration.dataServiceVersion < '3.0') || !this.providerConfiguration.dataServiceVersion) {
-            this.providerConfiguration.UpdateMethod = 'MERGE';
         }
     },
     initializeStore: function (callBack) {
@@ -184,10 +135,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var schema = this.context;
 
         var that = this;
-        var countProperty = "__count";
-        if (this.providerConfiguration.maxDataServiceVersion === "4.0") {
-            countProperty = "@odata.count";
-        }
+        var countProperty = "@odata.count";
 
         var requestData = [
             {
@@ -236,14 +184,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             },
             sql.isBatchExecuteQuery ? this.oData.batchHandler : undefined
         ];
-
-        if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
-            requestData[0].headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-        }
-
-        if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
-            requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
-        }
 
         if (typeof this.providerConfiguration.enableJSONP !== 'undefined') {
             requestData[0].enableJsonpCallback = this.providerConfiguration.enableJSONP;
@@ -302,12 +242,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     headers: {
                     }
                 };
-                if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
-                    request.headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-                }
-                if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
-                    request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
-                }
+
                 if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
                     request.useJsonLight = this.providerConfiguration.useJsonLight;
                 }
@@ -384,9 +319,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 request.headers = {
                     "Content-Id": convertedItem.length
                 };
-                if (this.providerConfiguration.maxDataServiceVersion != "4.0") {
-                    request.headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-                }
+
                 switch (independentBlocks[index][i].data.entityState) {
                     case $data.EntityState.Unchanged: continue; break;
                     case $data.EntityState.Added:
@@ -410,12 +343,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     default: Guard.raise(new Exception("Not supported Entity state"));
                 }
 
-                if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
-                    request.headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-                }
-                if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion !== "4.0") {
-                    request.headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
-                }
                 batchRequests.push(request);
             }
         }
@@ -469,12 +396,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             callBack.error(that.parseError(e));
         }, this.oData.batchHandler];
 
-        if (this.providerConfiguration.maxDataServiceVersion && this.providerConfiguration.maxDataServiceVersion != "4.0") {
-            requestData[0].headers.MaxDataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
-        }
-        if (this.providerConfiguration.dataServiceVersion && this.providerConfiguration.maxDataServiceVersion != "4.0") {
-            requestData[0].headers.DataServiceVersion = this.providerConfiguration.dataServiceVersion;
-        }
         if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
             requestData[0].useJsonLight = this.providerConfiguration.useJsonLight;
         }
@@ -591,7 +512,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Object, $data.GeographyPoint, $data.Guid,
             $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
             $data.GeometryPoint, $data.GeometryLineString, $data.GeometryPolygon, $data.GeometryMultiPoint, $data.GeometryMultiLineString, $data.GeometryMultiPolygon, $data.GeometryCollection,
-            $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int32, $data.Int64, $data.Time, $data.DateTimeOffset],
+            $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int32, $data.Int64, $data.Time, $data.DateTimeOffset, $data.Duration],
         writable: false
     },
 

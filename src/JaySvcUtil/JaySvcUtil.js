@@ -108,7 +108,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                     user: cnf.user,
                     password: cnf.password,
                     withCredentials: cnf.withCredentials,
-                    maxDataServiceVersion: versionInfo.maxVersion || '3.0'
+                    maxDataServiceVersion: cnf.maxDataServiceVersion || versionInfo.maxVersion || '4.0'
                 }, config)
 
 

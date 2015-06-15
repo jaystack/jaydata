@@ -19,6 +19,10 @@
     function Edm_Time() { };
     $data.Container.registerType('Edm.Time', Edm_Time);
     $data.Container.mapType(Edm_Time, $data.Time);
+    
+    function Edm_Duration() { }    ;
+    $data.Container.registerType('Edm.Duration', Edm_Duration);
+    $data.Container.mapType(Edm_Duration, $data.Duration);
 
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
@@ -129,6 +133,7 @@
         '$data.Int64': 'Edm.Int64',
         '$data.DateTimeOffset': 'Edm.DateTimeOffset',
         '$data.Time': 'Edm.Time',
+        '$data.Duration': 'Edm.Duration',
         '$data.Boolean': 'Edm.Boolean',
         '$data.Blob': 'Edm.Binary',
         '$data.Date': 'Edm.DateTime',
