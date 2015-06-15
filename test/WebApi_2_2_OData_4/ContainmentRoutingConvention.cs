@@ -15,15 +15,15 @@ namespace WebApi_2_2_OData_4
     {
         public string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
-            var es = odataPath.Segments.First(s => s.SegmentKind == "entityset") as EntitySetPathSegment;
-            var nav = odataPath.Segments.First(s => s.SegmentKind == "navigation") as NavigationPathSegment;
+            //var es = odataPath.Segments.FirstOrDefault(s => s.SegmentKind == "entityset") as EntitySetPathSegment;
+            var nav = odataPath.Segments.FirstOrDefault(s => s.SegmentKind == "navigation") as NavigationPathSegment;
 
-            if (odataPath.PathTemplate == "~/entityset/key/navigation")
+            if (odataPath.PathTemplate == "~/entityset/key/navigation" && nav != null)
             {
                 controllerContext.RouteData.Values["key"] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
                 return "Get" + nav.NavigationPropertyName;
             }
-            else if (odataPath.PathTemplate == "~/entityset/key/navigation/key")
+            else if (odataPath.PathTemplate == "~/entityset/key/navigation/key" && nav != null)
             {
                 controllerContext.RouteData.Values["key1"] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
                 controllerContext.RouteData.Values["key2"] = (odataPath.Segments[3] as KeyValuePathSegment).Value;
