@@ -214,13 +214,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include=".gitignore" />
-    <Content Include=".gitmodules" />
     <Content Include="App_Data\TaskManagerDatabase.mdf" />
     <Content Include="App_Data\TaskManagerDatabase_log.ldf">
       <DependentUpon>TaskManagerDatabase.mdf</DependentUpon>
     </Content>
-    <Content Include="client.html" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -275,149 +272,23 @@
     <Content Include="Content\themes\base\minified\jquery.ui.slider.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
-    <Content Include="CREDITS.txt" />
-    <Content Include="datajs-1.0.3.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="GPL-LICENSE.txt" />
-    <Content Include="handlebars_examples.html" />
-    <Content Include="index.html" />
-    <Content Include="jaydata.d.ts" />
-    <Content Include="JayServiceHtmlClient.html" />
-    <Content Include="JayServiceNodeClient.js" />
-    <Content Include="JayService\app.js" />
-    <Content Include="JayService\ArgumentBinder.js" />
-    <Content Include="JayService\EntityTransform.js" />
-    <Content Include="JayService\EntityXmlTransform.js" />
-    <Content Include="JayService\Example\client.html" />
-    <Content Include="JayService\Example\context.js" />
-    <Content Include="JayService\Example\datajs-1.0.3.js" />
-    <Content Include="JayService\Example\datajs-1.0.3.min.js" />
-    <Content Include="JayService\Example\datajsTest.html" />
-    <Content Include="JayService\Example\nodejsUsage.js" />
-    <Content Include="JayService\Example\server.js" />
-    <Content Include="JayService\Example\testserver.js" />
-    <Content Include="JayService\JayService.js" />
-    <Content Include="JayService\JSObjectAdapter.js" />
-    <Content Include="JayService\oDataMetaDataGenerator.js" />
-    <Content Include="JayService\oDataResponseDataBuilder.js" />
-    <Content Include="JayService\OData\BatchProcessor.js" />
-    <Content Include="JayService\OData\EntitySetProcessor.js" />
-    <Content Include="JayService\OData\Helpers.js" />
-    <Content Include="JayService\OData\ServiceDefinitionXml.js" />
-    <Content Include="JayService\provision\.gitignore" />
-    <Content Include="JayService\provision\fileload.js" />
-    <Content Include="JayService\provision\lib\app.js" />
-    <Content Include="JayService\provision\lib\appitem.js" />
-    <Content Include="JayService\provision\lib\ApplicationDBContext.js" />
-    <Content Include="JayService\provision\lib\appowner.js" />
-    <Content Include="JayService\provision\lib\launch.js" />
-    <Content Include="JayService\provision\lib\model.js" />
-    <Content Include="JayService\provision\lib\mongo.js" />
-    <Content Include="JayService\provision\lib\notready.js" />
-    <Content Include="JayService\provision\lib\provision.js" />
-    <Content Include="JayService\provision\lib\reserve.js" />
-    <Content Include="JayService\provision\lib\tokensrv.js" />
-    <Content Include="JayService\provision\server.js" />
-    <Content Include="JayService\provision\tmp\z.js" />
-    <Content Include="JayService\Scripts\datajs-1.0.3-patched.js" />
-    <Content Include="JayService\Scripts\datajs-1.1.0-patched.js" />
-    <Content Include="JayService\Scripts\XMLHttpRequest-patched.js" />
-    <Content Include="JayService\ServiceBase.js" />
-    <Content Include="JayService\XMLCreator.js" />
-    <Content Include="JayService\XmlResult.js" />
-    <Content Include="kendo.html" />
-    <Content Include="licences.txt" />
-    <Content Include="LocalItemStore.html" />
-    <Content Include="MIT-LICENSE.txt" />
-    <Content Include="NewsReaderContext.js" />
-    <Content Include="NewsReaderContext_server.js" />
-    <Content Include="nodeJsTest.html" />
-    <Content Include="nodeJsTest.js" />
     <Content Include="npm\jaydata\index.js" />
     <Content Include="npm\jaydata\lib\index.js" />
     <Content Include="npm\jaydata\lib\node.js" />
     <Content Include="npm\provider\index.js" />
     <Content Include="npm\provider\lib\index.js" />
-    <Content Include="oDataParser\currentTests.js" />
-    <Content Include="oDataParser\EntityExpressionBuilder.js" />
-    <Content Include="oDataParser\expressionParserTests.js" />
-    <Content Include="oDataParser\lexerTests.js" />
-    <Content Include="oDataParser\ODataEntityExpressionBuilder.js" />
-    <Content Include="oDataParser\parserTests.js" />
-    <Content Include="oDataParser\RequestExpressionBuilder.js" />
-    <Content Include="oDataParser\RequestLexer.js" />
-    <Content Include="oDataParser\RequestParser.js" />
-    <Content Include="oDataParser\test.html" />
-    <Content Include="oDataParser\testConsole.html" />
-    <Content Include="oDataParser\Visitors\ObjectLiteralBuilderVisitor.js" />
-    <Content Include="Pro\CREDITS_PRO.txt" />
-    <Content Include="Pro\CREDITS_TRIAL.txt" />
-    <Content Include="Pro\JayDataModules\NoBatch.js" />
-    <Content Include="Pro\JayDataModules\QueryCache.js" />
-    <Content Include="Pro\JayDataModules\localMigrations.js" />
-    <Content Include="Pro\JayDataModules\SchemaEvolutions.js" />
-    <Content Include="Pro\JayDataModules\VersionedEntityContext.js" />
-    <Content Include="Pro\localMigrations.html" />
-    <Content Include="Pro\test.html" />
-    <Content Include="Pro\test_JayData.html" />
-    <Content Include="Pro\test_JayData_Complex.html" />
-    <Content Include="Pro\test_JayData_min.html" />
-    <Content Include="Pro\TypeSystem\initializeJayDataPro.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBConverter.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDbExpressionExecutor.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalAndFilterExpression.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalInFilterExpression.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBLogicalOrFilterExpression.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBPhysicalAndFilterExpression.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBStorageProvider.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\IndexedDBTransaction.js" />
-    <Content Include="Pro\Types\StorageProviders\IndexedDB\initializeIndexedDBPro.js" />
-    <Content Include="Pro\Types\StorageProviders\mongoDB\ClientObjectID.js" />
-    <Content Include="Pro\Types\StorageProviders\mongoDB\mongoDBConverter.js" />
-    <Content Include="Pro\Types\StorageProviders\mongoDB\mongoDBStorageProvider.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\initializeSqLitePro.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\ModelBinder\sqLite_ModelBinderCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqlExpressionMonitor.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqlFilterCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqLiteCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqLiteConverter.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqLiteStorageProvider.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqlOrderCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqlPagingCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqlProjectionCompiler.js" />
-    <Content Include="Pro\Types\StorageProviders\SqLite\SqlTransaction.js" />
-    <Content Include="Pro\UnitTests\QueryCacheTests.js" />
-    <Content Include="Pro\UnitTests\T2.js" />
-    <Content Include="Pro\UnitTests\transactionTests.js" />
     <Content Include="Scripts\acorn.js" />
     <Content Include="Scripts\angular-1.2.0-rc2.js" />
     <Content Include="Scripts\datajs-1.1.1beta.js" />
     <Content Include="Scripts\esprima.js" />
-    <Content Include="server_oData.js" />
     <Content Include="Services\emptyNewsReaderV3.svc" />
     <Content Include="Services\emptyNewsReader.svc" />
     <Content Include="Services\oDataDbDelete.asmx" />
     <Content Include="Services\Protected\emptyNewsReader.svc" />
     <Content Include="Services\TaskManagerService.svc" />
-    <Content Include="test_Node.js" />
-    <Content Include="Pro\UnitTests\SchemaEvolutions.js" />
     <Content Include="webserver\localserver.js" />
-    <Content Include="Makefile" />
-    <Content Include="README.md" />
-    <Content Include="websqlClient.html" />
-    <Content Include="JayService\provision\lib\model.js.orig" />
-    <Content Include="JayService\provision\package.json" />
-    <Content Include="JayService\provision\r53.sh" />
-    <Content Include="JayService\provision\tmp\docs\addapp.json" />
-    <Content Include="JayService\provision\tmp\docs\addappitem1.json" />
-    <Content Include="JayService\provision\tmp\docs\addappitem1_db.json" />
-    <Content Include="JayService\provision\tmp\docs\addappitem2.json" />
-    <Content Include="JayService\provision\tmp\docs\addappowner.json" />
-    <Content Include="JayService\provision\tmp\R" />
-    <Content Include="JayService\provision\tmp\Shutdown.json" />
-    <Content Include="JayService\provision\tokens" />
     <EntityDeploy Include="Models\TaskManager\TaskManagerModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>TaskManagerModel.Designer.cs</LastGenOutput>
@@ -435,9 +306,6 @@
       <DependentUpon>TaskManagerModel.edmx</DependentUpon>
       <LastGenOutput>TaskManagerModel.cs</LastGenOutput>
     </Content>
-    <Content Include="Pro\.git" />
-    <Content Include="Pro\Makefile" />
-    <Content Include="Pro\README.md" />
     <Content Include="npm\jaydata\package.json" />
     <Content Include="npm\provider\package.json" />
     <None Include="Scripts\jquery-1.9.0.intellisense.js" />
@@ -502,9 +370,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Code\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jaydata", "jaydata.csproj", "{8008D1BF-B11D-424D-A183-FC98D6032548}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jaydata", "oldEndpoint\jaydata.csproj", "{8008D1BF-B11D-424D-A183-FC98D6032548}"
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "src", "src\src.njsproj", "{ABA96BBE-4F39-42D6-A873-FDFCEA24D6DA}"
 EndProject
