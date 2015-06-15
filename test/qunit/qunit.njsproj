@@ -32,6 +32,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="client.html" />
+    <Content Include="handlebars_examples.html" />
+    <Content Include="index.html" />
+    <Content Include="JayServiceHtmlClient.html" />
+    <Content Include="kendo.html" />
+    <Content Include="LocalItemStore.html" />
+    <Content Include="nodeJsTest.html" />
     <Content Include="package.json" />
     <Content Include="scripts\JaySvcUtil\%24metadata.action.xml" />
     <Content Include="scripts\JaySvcUtil\crm_metadata.xml" />
@@ -58,9 +65,14 @@
     <Content Include="test_JayData_nuget.html" />
     <Content Include="test_JayData_nuget_prov.html" />
     <Content Include="test_odata.html" />
+    <Content Include="websqlClient.html" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gulpfile.js" />
+    <Compile Include="JayServiceNodeClient.js" />
+    <Compile Include="NewsReaderContext.js" />
+    <Compile Include="NewsReaderContext_server.js" />
+    <Compile Include="nodeJsTest.js" />
     <Compile Include="scripts\angularTests.js" />
     <Compile Include="scripts\CollectionTests.js" />
     <Compile Include="scripts\converterTests.js" />
@@ -126,6 +138,8 @@
     <Compile Include="scripts\ValidatonPluginTest.js" />
     <Compile Include="scripts\webApiTests.js" />
     <Compile Include="scripts\YQLProviderTests.js" />
+    <Compile Include="server_oData.js" />
+    <Compile Include="test_Node.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="scripts\" />
