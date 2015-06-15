@@ -15,11 +15,11 @@
             "taskName": "TypeSystemsClient",
             "fileName": "TypeSystemsClient",
             "output": "build/tmp",
-            "componentItems": ["../Scripts/acorn.js", "TypeSystem/initializeJayDataClient.js"]
+            "componentItems": ["../external/acorn.js", "TypeSystem/initializeJayDataClient.js"]
         },
         {
             "taskName": "JayData",
-            "fileName": "JayData",
+            "fileName": "jaydata",
             "dependencies": ["TypeSystems","TypeSystemsClient"],
             "componentItems": ["build/tmp/TypeSystemsClient.js","build/tmp/TypeSystems.js", "Types/Expressions/ExpressionNode2.js", "Types/Expressions/ArrayLiteralExpression.js", "Types/Expressions/CallExpression.js", "Types/Expressions/CodeParser.js", "Types/Expressions/ConstantExpression.js", "Types/Expressions/FunctionExpression.js", "Types/Expressions/ObjectFieldExpression.js", "Types/Expressions/ObjectLiteralExpression.js", "Types/Expressions/PagingExpression.js", "Types/Expressions/ParameterExpression.js", "Types/Expressions/PropertyExpression.js", "Types/Expressions/SimpleBinaryExpression.js", "Types/Expressions/ThisExpression.js", "Types/Expressions/Visitors/ExpressionVisitor.js", "Types/Expressions/Visitors/ParameterProcessor.js", "Types/Expressions/Visitors/GlobalContextProcessor.js", "Types/Expressions/Visitors/LocalContextProcessor.js", "Types/Expressions/Visitors/LambdaParameterProcessor.js", "Types/Expressions/Visitors/ParameterResolverVisitor.js", "Types/Expressions/Visitors/LogicalSchemaBinderVisitor.js", "Types/Expressions/Visitors/ExpTreeVisitor.js", "Types/Expressions/Visitors/SetExecutableVisitor.js", "Types/Expressions/Visitors/ExecutorVisitor.js", "Types/Expressions/ExpressionBuilder.js", "Types/Expressions/EntityExpressions/AssociationInfoExpression.js", "Types/Expressions/EntityExpressions/CodeExpression.js", "Types/Expressions/EntityExpressions/CodeToEntityConverter.js", "Types/Expressions/EntityExpressions/ComplexTypeExpression.js", "Types/Expressions/EntityExpressions/EntityContextExpression.js", "Types/Expressions/EntityExpressions/EntityExpression.js", "Types/Expressions/EntityExpressions/EntityExpressionVisitor.js", "Types/Expressions/EntityExpressions/ExpressionMonitor.js", "Types/Expressions/EntityExpressions/EntityFieldExpression.js", "Types/Expressions/EntityExpressions/EntityFieldOperationExpression.js", "Types/Expressions/EntityExpressions/EntitySetExpression.js", "Types/Expressions/EntityExpressions/FrameOperationExpression.js", "Types/Expressions/EntityExpressions/FilterExpression.js", "Types/Expressions/EntityExpressions/IncludeExpression.js", "Types/Expressions/EntityExpressions/MemberInfoExpression.js", "Types/Expressions/EntityExpressions/OrderExpression.js", "Types/Expressions/EntityExpressions/ParametricQueryExpression.js", "Types/Expressions/EntityExpressions/ProjectionExpression.js", "Types/Expressions/EntityExpressions/QueryExpressionCreator.js", "Types/Expressions/EntityExpressions/QueryParameterExpression.js", "Types/Expressions/EntityExpressions/RepresentationExpression.js", "Types/Expressions/EntityExpressions/ServiceOperationExpression.js", "Types/Expressions/ContinuationExpressionBuilder.js", "Types/Validation/EntityValidationBase.js", "Types/Validation/EntityValidation.js", "Types/Notifications/ChangeDistributorBase.js", "Types/Notifications/ChangeCollectorBase.js", "Types/Notifications/ChangeDistributor.js", "Types/Notifications/ChangeCollector.js", "Types/Transaction.js", "Types/Access.js", "Types/Promise.js", "Types/Entity.js", "Types/EntityContext.js", "Types/QueryProvider.js", "Types/ModelBinder.js", "Types/QueryBuilder.js", "Types/Query.js", "Types/Queryable.js", "Types/EntitySet.js", "Types/EntityState.js", "Types/EntityAttachModes.js", "Types/EntityStateManager.js", "Types/ItemStore.js", "Types/StorageProviderLoader.js", "Types/StorageProviderBase.js", "Types/ServiceOperation.js", "Types/EntityWrapper.js", "Types/Ajax/jQueryAjaxWrapper.js", "Types/Ajax/WinJSAjaxWrapper.js", "Types/Ajax/ExtJSAjaxWrapper.js", "Types/Ajax/AjaxStub.js", "Types/StorageProviders/modelBinderConfigCompiler.js", "Types/Authentication/AuthenticationBase.js", "Types/Authentication/Anonymous.js", "Types/Authentication/FacebookAuth.js", "Types/Authentication/BasicAuth.js", "JaySvcUtil/JaySvcUtil.js", "JayDataModules/deferred.js", "Types/JayStorm.js"]
         },
@@ -28,62 +28,62 @@
         {
             "taskName": "IndexedDbProvider",
             "fileName": "IndexedDbProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/IndexedDB/IndexedDBConverter.js", "Types/StorageProviders/IndexedDB/IndexedDBStorageProvider.js" ]
         },
         {
             "taskName": "DbCommand",
             "fileName": "DbCommand",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/DbClient/DbCommand.js", "Types/DbClient/DbConnection.js", "Types/DbClient/OpenDatabaseClient/OpenDbCommand.js", "Types/DbClient/OpenDatabaseClient/OpenDbConnection.js", "Types/DbClient/JayStorageClient/JayStorageCommand.js", "Types/DbClient/JayStorageClient/JayStorageConnection.js", "Types/DbClient/SqLiteNjClient/SqLiteNjCommand.js", "Types/DbClient/SqLiteNjClient/SqLiteNjConnection.js" ]
         },
         {
             "taskName": "SqLiteProvider",
             "fileName": "SqLiteProvider",
             "dependencies": [ "DbCommand" ],
-            "output": "build/jaydataProvider",
-            "componentItems": [ "build/jaydataProvider/DbCommand.js", "Types/StorageProviders/SqLite/SqLiteConverter.js", "Types/StorageProviders/SqLite/SqLiteStorageProvider.js", "Types/StorageProviders/SqLite/SqLiteCompiler.js", "Types/StorageProviders/SqLite/SqlPagingCompiler.js", "Types/StorageProviders/SqLite/SqlOrderCompiler.js", "Types/StorageProviders/SqLite/SqlProjectionCompiler.js", "Types/StorageProviders/SqLite/SqlExpressionMonitor.js", "Types/StorageProviders/SqLite/SqlFilterCompiler.js", "Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js" ]
+            "output": "build/jaydataproviders",
+            "componentItems": [ "build/jaydataproviders/DbCommand.js", "Types/StorageProviders/SqLite/SqLiteConverter.js", "Types/StorageProviders/SqLite/SqLiteStorageProvider.js", "Types/StorageProviders/SqLite/SqLiteCompiler.js", "Types/StorageProviders/SqLite/SqlPagingCompiler.js", "Types/StorageProviders/SqLite/SqlOrderCompiler.js", "Types/StorageProviders/SqLite/SqlProjectionCompiler.js", "Types/StorageProviders/SqLite/SqlExpressionMonitor.js", "Types/StorageProviders/SqLite/SqlFilterCompiler.js", "Types/StorageProviders/SqLite/ModelBinder/sqLite_ModelBinderCompiler.js" ]
         },
         {
             "taskName": "oDataProvider",
             "fileName": "oDataProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/oData/oDataConverter.js", "Types/StorageProviders/oData/oDataProvider.js", "Types/StorageProviders/oData/oDataCompiler.js", "Types/StorageProviders/oData/oDataWhereCompiler.js", "Types/StorageProviders/oData/oDataOrderCompiler.js", "Types/StorageProviders/oData/oDataPagingCompiler.js", "Types/StorageProviders/oData/oDataProjectionCompiler.js" ]
         },
         {
             "taskName": "FacebookProvider",
             "fileName": "FacebookProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/Facebook/FacebookConverter.js", "Types/StorageProviders/Facebook/FacebookProvider.js", "Types/StorageProviders/Facebook/FacebookCompiler.js", "Types/StorageProviders/Facebook/EntitySets/FQL/user.js", "Types/StorageProviders/Facebook/EntitySets/FQL/friend.js", "Types/StorageProviders/Facebook/EntitySets/FQL/page.js", "Types/StorageProviders/Facebook/EntitySets/FQLContext.js" ]
         },
         {
             "taskName": "YQLProvider",
             "fileName": "YQLProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/YQL/YQLConverter.js", "Types/StorageProviders/YQL/YQLProvider.js", "Types/StorageProviders/YQL/YQLCompiler.js", "Types/StorageProviders/YQL/EntitySets/geo.js", "Types/StorageProviders/YQL/EntitySets/YQLContext.js" ]
         },
         {
             "taskName": "InMemoryProvider",
             "fileName": "InMemoryProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/InMemory/InMemoryConverter.js", "Types/StorageProviders/InMemory/InMemoryProvider.js", "Types/StorageProviders/InMemory/InMemoryCompiler.js", "Types/StorageProviders/InMemory/InMemoryFunctionCompiler.js" ]
         },
         {
             "taskName": "MongoDbProvider",
             "fileName": "MongoDbProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/InMemory/InMemoryConverter.js", "Types/StorageProviders/mongoDB/mongoDBConverter.js", "Types/StorageProviders/mongoDB/mongoDBModelBinderConfigCompiler.js", "Types/StorageProviders/mongoDB/mongoDBProjectionCompiler.js", "Types/StorageProviders/mongoDB/mongoDBFilterCompiler.js", "Types/StorageProviders/mongoDB/mongoDBOrderCompiler.js", "Types/StorageProviders/mongoDB/mongoDBPagingCompiler.js", "Types/StorageProviders/mongoDB/mongoDBFunctionCompiler.js", "Types/StorageProviders/mongoDB/mongoDBCompiler.js", "Types/StorageProviders/mongoDB/mongoDBStorageProvider.js", "Types/StorageProviders/mongoDB/ClientObjectID.js" ]
         },
         {
             "taskName": "StormProvider",
             "fileName": "StormProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/Storm/StormStorageProvider.js" ]
         },
         {
             "taskName": "WebApiProvider",
             "fileName": "WebApiProvider",
-            "output": "build/jaydataProvider",
+            "output": "build/jaydataproviders",
             "componentItems": [ "Types/StorageProviders/WebApi/WebApiConverter.js", "Types/StorageProviders/WebApi/WebApiProvider.js" ]
         },
         {
@@ -95,90 +95,94 @@
         {
             "taskName": "DeferredModule",
             "fileName": "DeferredModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/deferred.js" ]
         },
         {
             "taskName": "ErrorHandlerModule",
             "fileName": "ErrorHandlerModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/errorhandler.js" ]
         },
         {
             "taskName": "FormBinderModule",
             "fileName": "FormBinderModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/formBinder.js" ]
         },
         {
             "taskName": "HandlebarsModule",
             "fileName": "HandlebarsModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/handlebars.js" ]
         },
         {
             "taskName": "InMemoryModule",
             "fileName": "InMemoryModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/inMemory.js" ]
         },
         {
             "taskName": "KendoModule",
             "fileName": "KendoModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/kendo.js" ]
         },
         {
             "taskName": "KnockoutModule",
             "fileName": "KnockoutModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/knockout.js" ]
         },
         {
             "taskName": "QDeferredModule",
             "fileName": "QDeferredModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/qDeferred.js" ]
         },
         {
             "taskName": "SenchaModule",
             "fileName": "SenchaModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/sencha.js" ]
         },
         {
             "taskName": "TemplateModule",
             "fileName": "TemplateModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/template.js" ]
         },
         {
             "taskName": "ValidateModule",
             "fileName": "ValidateModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/validate.js" ]
         },
         {
             "taskName": "AngularModule",
             "fileName": "AngularModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/angular.js" ]
         },
         {
             "taskName": "MsCrmModule",
             "fileName": "MsCrmModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/jaydata.mscrm.js" ]
         },
         {
             "taskName": "MsCrmServerModule",
             "fileName": "MsCrmServerModule",
-            "output": "build/jaydataModule",
+            "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/jaydata.mscrm.server.js" ]
         },
         {
             "taskName": "modules",
             "dependencies": [ "DeferredModule", "ErrorHandlerModule", "FormBinderModule", "HandlebarsModule", "InMemoryModule", "KendoModule", "KnockoutModule", "QDeferredModule", "SenchaModule", "TemplateModule", "ValidateModule", "AngularModule", "MsCrmModule", "MsCrmServerModule" ]
+        },
+        {
+            "taskName": "all",
+            "dependencies": ["JayData", "modules","providers"]
         }
     ]
 }
