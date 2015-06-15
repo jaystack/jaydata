@@ -22,6 +22,7 @@ namespace WebApi_2_2_OData_4
             System.Data.Entity.Database.SetInitializer(new JayData.Test.WebApi_2_2_OData_4.Model.initdb());
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
+            appBuilder.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
