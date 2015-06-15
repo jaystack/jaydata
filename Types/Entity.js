@@ -339,7 +339,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         }
     },
     _setPropertyChanged: function (memberDefinition) {
-        if (memberDefinition.monitorChanges != false) {
+        if (memberDefinition.monitorChanges != false && memberDefinition.name != "ValidationErrors") {
             if (!this.changedProperties) {
                 this.changedProperties = [];
             }
