@@ -198,6 +198,7 @@
     <Compile Include="Types\Queryable.js" />
     <Compile Include="Types\QueryBuilder.js" />
     <Compile Include="Types\QueryProvider.js" />
+    <Compile Include="Types\RelatedEntityProxy.js" />
     <Compile Include="Types\ServiceOperation.js" />
     <Compile Include="Types\ServiceOperation_old.js" />
     <Compile Include="Types\StorageProviderBase.js" />

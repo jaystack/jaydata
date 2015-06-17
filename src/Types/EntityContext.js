@@ -2,6 +2,9 @@
 
     $data.defaults = $data.defaults || {};
     $data.defaults.defaultDatabaseName = 'JayDataDefault';
+    $data.defaults.enableRelatedEntityReadMethods = true;
+    $data.defaults.relatedEntityReadMethodPrefix = 'get';
+    $data.defaults.relatedEntityProxyPrefix = '$relatedProxy';
 
 })();
 
@@ -122,9 +125,11 @@ $data.Class.define('$data.EntityContext', null, null,
                 if (providerType.name in contextType._storageModelCache) {
                     ctx._storageModel = contextType._storageModelCache[providerType.name];
                 } else {
+                    $data.defaults.enableRelatedEntityReadMethods && ctx._applyRelatedEntityMethodsToTypes();
                     ctx._initializeStorageModel();
                     contextType._storageModelCache[providerType.name] = ctx._storageModel;
                 }
+                $data.defaults.enableRelatedEntityReadMethods && ctx._applyRelatedEntityMethodsToContext();
 
                 //ctx._initializeEntitySets(contextType);
                 if (storageProviderCfg && storageProviderCfg.user) Object.defineProperty(ctx, 'user', { value: storageProviderCfg.user, enumerable: true });
@@ -1923,6 +1928,83 @@ $data.Class.define('$data.EntityContext', null, null,
             return this.storageProvider.getFieldUrl(entity, fieldName, entitySet);
         } catch (e) {}
         return '#';
+    },
+    
+    //xxxx
+    _applyRelatedEntityMethodsToContext: function () { 
+        if (this.storageProvider.name === "oData") {
+            for (var esName in this._entitySetReferences) {
+                var es = this._entitySetReferences[esName];
+                var newMemberName = $data.defaults.relatedEntityReadMethodPrefix + es.name;
+                //EntitiySets
+                if (!(newMemberName in es)) { 
+                    es[newMemberName] = this._relatedEntityGetMethod(es.elementType, undefined, this);
+                }
+                //Context
+                if (!(newMemberName in this)) {
+                    this[newMemberName] = this._relatedEntityGetMethod(es.elementType, undefined, this);
+                }
+            }
+        }
+    },
+    _applyRelatedEntityMethodsToTypes: function () {
+        if (this.storageProvider.name === "oData") {
+            for (var esName in this._entitySetReferences) {
+                //add to Type
+                var elementType = this._entitySetReferences[esName].elementType;
+                var members = elementType.memberDefinitions.getPublicMappedProperties();
+                for (var i = 0; i < members.length; i++) {
+                    var member = members[i];
+                    var memberElementType = null;
+                    if (member.inverseProperty && Container.resolveType(member.dataType) === $data.Array && (memberElementType = Container.resolveType(member.elementType)) &&
+                        memberElementType.isAssignableTo && memberElementType.isAssignableTo($data.Entity))
+                    { 
+                        var newMemberName = $data.defaults.relatedEntityReadMethodPrefix + member.name;
+                        if (!elementType.getMemberDefinition(newMemberName)) {
+                            elementType.addMember(newMemberName, this._relatedEntityGetMethod(memberElementType, member))
+                        }
+                    }
+                }
+            }
+        }
+    },
+    _createRelatedEntityProxyClass: function (type) {
+        var proxyClassName = type.namespace + $data.defaults.relatedEntityProxyPrefix + type.name;
+        if (!Container.isTypeRegistered(proxyClassName)) {
+            var definition = {};
+            var members = type.memberDefinitions.getPublicMappedProperties();
+            for (var i = 0; i < members.length; i++) {
+                var member = members[i];
+                var memberElementType = null;
+                if (member.inverseProperty && Container.resolveType(member.dataType) === $data.Array && (memberElementType = Container.resolveType(member.elementType)) &&
+                    memberElementType.isAssignableTo && memberElementType.isAssignableTo($data.Entity))
+                {
+                    var newMemberName = $data.defaults.relatedEntityReadMethodPrefix + member.name;
+                    definition[newMemberName] = this._relatedEntityGetMethod(memberElementType, member)
+                }
+            }
+            $data.Class.define(proxyClassName, $data.RelatedEntityProxy, null, definition, null);
+        }
+
+        return Container.resolveType(proxyClassName);
+    },
+    _relatedEntityGetMethod: function (targetType, navigation, context){
+        var proxyClass = this._createRelatedEntityProxyClass(targetType);
+        var keys = targetType.memberDefinitions.getKeyProperties();
+        
+        return function (keyValue) {
+            if (keys.length === 1 && typeof keyValue !== 'object') {
+                var keyV = {};
+                keyV[keys[0].name] = keyValue;
+                keyValue = keyV;
+            }
+            
+            if (typeof keyValue !== 'object') {
+                throw new Exception('Key parameter is invalid');
+            } else {
+                return new proxyClass(keyValue, navigation, targetType, this, context || (this.context instanceof $data.EntityContext ? this.context : undefined));
+            }
+        }
     }
 }, {
     inheritedTypeProcessor: function(type) {

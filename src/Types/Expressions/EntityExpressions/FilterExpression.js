@@ -56,12 +56,13 @@ $C('$data.Expressions.SingleExpression', $data.Expressions.FrameOperator, null, 
 });
 
 $C('$data.Expressions.FindExpression', $data.Expressions.FrameOperator, null, {
-    constructor: function (source, params) {
+    constructor: function (source, params, subMember) {
         ///<signature>
         ///<param name="source" type="$data.Expressions.EntitySetExpression" />
         ///</signature>
         this.source = source;
         this.params = params;
+        this.subMember = subMember;
         this.resultType = $data.Object;
     },
     nodeType: { value: $data.Expressions.ExpressionType.Find, enumerable: true }

@@ -96,6 +96,11 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitFindExpression: function (expression, context) {
         this.Visit(expression.source, context);
+        
+        if (expression.subMember) { 
+            context.urlText += "/" + expression.subMember.memberName;
+        }
+
         context.urlText += '(';
         if (expression.params.length === 1) {
             var param = expression.params[0];
