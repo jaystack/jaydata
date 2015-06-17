@@ -94,85 +94,85 @@
 
         {
             "taskName": "DeferredModule",
-            "fileName": "DeferredModule",
+            "fileName": "deferred",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/deferred.js" ]
         },
         {
             "taskName": "ErrorHandlerModule",
-            "fileName": "ErrorHandlerModule",
+            "fileName": "errorhandler",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/errorhandler.js" ]
         },
         {
             "taskName": "FormBinderModule",
-            "fileName": "FormBinderModule",
+            "fileName": "formBinder",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/formBinder.js" ]
         },
         {
             "taskName": "HandlebarsModule",
-            "fileName": "HandlebarsModule",
+            "fileName": "handlebars",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/handlebars.js" ]
         },
         {
             "taskName": "InMemoryModule",
-            "fileName": "InMemoryModule",
+            "fileName": "inMemory",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/inMemory.js" ]
         },
         {
             "taskName": "KendoModule",
-            "fileName": "KendoModule",
+            "fileName": "kendo",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/kendo.js" ]
         },
         {
             "taskName": "KnockoutModule",
-            "fileName": "KnockoutModule",
+            "fileName": "knockout",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/knockout.js" ]
         },
         {
             "taskName": "QDeferredModule",
-            "fileName": "QDeferredModule",
+            "fileName": "qDeferred",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/qDeferred.js" ]
         },
         {
             "taskName": "SenchaModule",
-            "fileName": "SenchaModule",
+            "fileName": "sencha",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/sencha.js" ]
         },
         {
             "taskName": "TemplateModule",
-            "fileName": "TemplateModule",
+            "fileName": "template",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/template.js" ]
         },
         {
             "taskName": "ValidateModule",
-            "fileName": "ValidateModule",
+            "fileName": "validate",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/validate.js" ]
         },
         {
             "taskName": "AngularModule",
-            "fileName": "AngularModule",
+            "fileName": "angular",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/angular.js" ]
         },
         {
             "taskName": "MsCrmModule",
-            "fileName": "MsCrmModule",
+            "fileName": "jaydata.mscrm",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/jaydata.mscrm.js" ]
         },
         {
             "taskName": "MsCrmServerModule",
-            "fileName": "MsCrmServerModule",
+            "fileName": "jaydata.mscrm.server",
             "output": "build/jaydatamodules",
             "componentItems": [ "JayDataModules/jaydata.mscrm.server.js" ]
         },
