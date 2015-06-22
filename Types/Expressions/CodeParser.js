@@ -30,6 +30,7 @@ $C('$data.Expressions.CodeParser', null, null, {
         };
         ///<var name="AST" type="Date" />
         
+        code = code.replace(/("use strict";)/gi, '');
         //console.log(code.toString());
         if ($data.Acorn){
             //console.log('using acorn.js');
