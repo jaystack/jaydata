@@ -19,3 +19,9 @@ build
 !bin/System.Web.Providers.dll
 !bin/WebGrease.dll
 packages
+node_modules
+npm-debug.log
+dist
+jaydata.js
+test.html
+test.js
