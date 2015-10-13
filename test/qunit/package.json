@@ -1,0 +1,13 @@
+{
+  "name": "qunit",
+  "version": "0.0.0",
+  "description": "qunit",
+  "main": "server.js",
+  "author": {
+    "name": "nochtap",
+    "email": ""
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11"
+  }
+}
