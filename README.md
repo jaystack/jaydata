@@ -1,5 +1,8 @@
 JayData
 =======
+
+**Update October 13, 2015** - JayStack receives **massive investment** to **boost JayData product development** and offer more premium services! http://bit.ly/jayfunding 
+
 JayData is a unified data access library for JavaScript to CRUD data from different sources like WebSQL/SQLite, 
 IndexedDB, MongoDb, ASP.NET WebAPI, OData, HTML5 localStorage, Facebook or YQL. 
 The library can be integrated with KendoUI, Knockout.js, Handlebars.js or Sencha Touch 2 and can be used on 
