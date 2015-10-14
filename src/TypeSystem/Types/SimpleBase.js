@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 /* $data.SimpleBase */
 $data.SimpleBase = function SimpleBase(data) {
     if (typeof data === 'object' && data) {
@@ -24,3 +26,5 @@ $data.SimpleBase.registerType = function (name, type, base) {
     type.prototype.constructor = type;
 }
 $data.Container.registerType(['$data.SimpleBase', 'SimpleBase'], $data.SimpleBase);
+
+export default $data

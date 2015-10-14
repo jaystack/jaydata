@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 $data.Blob = function Blob(){};
 
 $data.Blob.createFromHexString = function(value){
@@ -20,7 +22,7 @@ $data.Blob.toString = function(value){
     for (var i = 0; i < value.length; i++){
         s += String.fromCharCode(value[i]);
     }
-    
+
     return s;
 };
 
@@ -35,7 +37,7 @@ $data.Blob.toArray = function(src){
     for (var i = 0; i < src.length; i++){
         arr[i] = src[i];
     }
-    
+
     return arr;
 };
 
@@ -49,7 +51,7 @@ $data.Blob.toHexString = function(value){
     for (var i = 0; i < value.length; i++){
         s += ('00' + value[i].toString(16)).slice(-2);
     }
-    
+
     return s.toUpperCase();
 };
 
@@ -66,7 +68,7 @@ $data.Container.registerConverter('$data.Blob',{
             for (var i = 0; i < value.length; i++){
                 blob[i] = value.charCodeAt(i);
             }
-            
+
             return blob;
         }else return null;
     },

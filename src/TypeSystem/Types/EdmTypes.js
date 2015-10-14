@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 (function ($data) {
 
     function Edm_Boolean() { };
@@ -19,7 +21,7 @@
     function Edm_Time() { };
     $data.Container.registerType('Edm.Time', Edm_Time);
     $data.Container.mapType(Edm_Time, $data.Time);
-    
+
     function Edm_Duration() { }    ;
     $data.Container.registerType('Edm.Duration', Edm_Duration);
     $data.Container.mapType(Edm_Duration, $data.Duration);
@@ -27,7 +29,7 @@
     function Edm_Decimal() { };
     $data.Container.registerType('Edm.Decimal', Edm_Decimal);
     $data.Container.mapType(Edm_Decimal, $data.Decimal);
-    
+
     function Edm_Float() { };
     $data.Container.registerType('Edm.Float', Edm_Float);
     $data.Container.mapType(Edm_Float, $data.Float);
@@ -59,7 +61,7 @@
     function Edm_Byte() { };
     $data.Container.registerType('Edm.Byte', Edm_Byte);
     $data.Container.mapType(Edm_Byte, $data.Byte);
-    
+
     function Edm_SByte() { };
     $data.Container.registerType('Edm.SByte', Edm_SByte);
     $data.Container.mapType(Edm_SByte, $data.SByte);
@@ -160,3 +162,5 @@
     };
 
 })($data);
+
+export default $data

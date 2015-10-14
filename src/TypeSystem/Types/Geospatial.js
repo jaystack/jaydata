@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 $data.Geospatial = function Geospatial() {
     this.type = this.constructor.type;
     if (Array.isArray(this.constructor.validMembers)) {
@@ -30,3 +32,5 @@ $data.point = function (arg) {
         }
     }
 };
+
+export default $data

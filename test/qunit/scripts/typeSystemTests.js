@@ -284,9 +284,9 @@
     }, null);
 
     var mixClass2 = $data.Class.defineEx('mixClass2', [
-        { type: dataClass, params: [new ConstructorParameter(0), 'hello2', 1337] },
+        { type: dataClass, params: [new $data.ConstructorParameter(0), 'hello2', 1337] },
         { type: simpleClass, propagateTo: 'simpleClass' },
-        { type: simpleClass2, params: [new ConstructorParameter(1), 8080], propagateTo: 'simpleClass2' }
+        { type: simpleClass2, params: [new $data.ConstructorParameter(1), 8080], propagateTo: 'simpleClass2' }
     ], null, {
         constructor: function () {
             this.ctorArguments = arguments;
@@ -339,9 +339,9 @@
     }, null);
 
     var mixClass3 = $data.Class.defineEx('mixClass3', [
-        { type: dataClass, params: [new ConstructorParameter(0), 'almafa', 1337] },
+        { type: dataClass, params: [new $data.ConstructorParameter(0), 'almafa', 1337] },
         { type: simpleClass, propagateTo: 'simpleClass' },
-        { type: simpleClass3, params: [function () { return this; }, function () { return this.simpleClass; }, new ConstructorParameter(1), 8080], propagateTo: 'simpleClass3' }
+        { type: simpleClass3, params: [function () { return this; }, function () { return this.simpleClass; }, new $data.ConstructorParameter(1), 8080], propagateTo: 'simpleClass3' }
     ], null, {
         constructor: function () {
             this.ctorArguments = arguments;
@@ -719,7 +719,7 @@
         ok(!propDef, 'shortLead not defined');
 
         $news.Types.Article.addProperty('shortLead', 'string', function () {
-            return this.Lead && this.Lead.length > 20 ? (this.Lead.substring(0, 20) + '...') : this.Lead; 
+            return this.Lead && this.Lead.length > 20 ? (this.Lead.substring(0, 20) + '...') : this.Lead;
         });
 
         var article = new $news.Types.Article({ Title: 'Important Article', Lead: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur nec lorem est, eu ultricies quam. Proin venenatis dolor porta justo sodales laoreet. Mauris turpis risus, facilisis ac consequat quis, mollis a elit. In iaculis rutrum massa. In consectetur aliquet bibendum. Quisque tincidunt aliquet ante, eu sodales felis facilisis vel. Phasellus lacus turpis, euismod eu hendrerit vitae, elementum sit amet neque. Fusce eget justo eget ligula iaculis mollis. Aenean vitae commodo nibh. Nullam ut neque nec ante viverra sollicitudin' });
@@ -818,7 +818,7 @@
     });
 
     test('forward declaration', 16, function () {
-        
+
 
         var Apple  = $data.define("Apple", { Basket: "Basket" });
         equal(Apple.getMemberDefinition("Basket").type, "Basket", "forward declared type is not resolved yet");
@@ -888,7 +888,7 @@
         equal(TSub.getMemberDefinition("F1").type, TSubSub, "second level is resolved");
 
         //var T3 = $data.define("T2", c)
-        
+
         //var c2 = $data.createContainer();
     });
 
@@ -919,7 +919,7 @@
     });
 
     test('IoC', 4, function () {
-        
+
         var pt = $data.Entity.extend("PureType", { });
 
         var ip = $data.Entity.extend("ImplementationType", { F1: { type: 'string' } });

@@ -1,4 +1,4 @@
-$data.StringFunctions = {
+export var StringFunctions = {
     startsWith: function () {
         var self, str;
         if (arguments.length == 2) {
@@ -12,7 +12,7 @@ $data.StringFunctions = {
             str = arguments[0];
         } else
             return false;
-            
+
         if (typeof self !== 'string') return false;
         return self.indexOf(str) === 0;
     },

@@ -1,4 +1,4 @@
-Exception = function(message, name, data) {
+let Exception = function(message, name, data) {
   Error.call(this);
   if (Error.captureStackTrace)
     Error.captureStackTrace(this, this.constructor);

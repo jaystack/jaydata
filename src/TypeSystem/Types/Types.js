@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 $data.Number = typeof Number !== 'undefined' ? Number : function JayNumber() { };
 $data.Date = typeof Date !== 'undefined' ? Date : function JayDate() { };
 $data.String = typeof String !== 'undefined' ? String : function JayString() { };
@@ -45,3 +47,5 @@ $data.Container.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"],
 $data.Container.registerType(["$data.Object", "Object", "object", "{}", "JayObject"], $data.Object);
 $data.Container.registerType(["$data.Function", "Function", "function"], $data.Function);
 $data.Container.registerType(['$data.ObjectID', 'ObjectID', 'objectId', 'objectid', 'ID', 'Id', 'id', 'JayObjectID'], $data.ObjectID);
+
+export default $data

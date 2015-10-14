@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 /* $data.Geometry */
 $data.GeometryBase = function GeometryBase() {
     $data.Geospatial.apply(this, arguments);
@@ -363,3 +365,5 @@ $data.Container.registerConverter($data.GeometryMultiPolygon, $data.Object, func
 $data.Container.registerConverter($data.GeometryCollection, $data.Object, function (value) {
     return value ? new $data.GeometryCollection(value) : value;
 });
+
+export default $data

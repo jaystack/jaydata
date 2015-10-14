@@ -1,7 +1,10 @@
-import {
-  $data
-}
-from './initializeJayData.js';
+import $data from './initializeJayData.js';
+import { Guard } from './utils.js';
+import { StringFunctions } from './Extensions.js'
+
+
+$data.StringFunctions = StringFunctions
+
 let _window;
 if (typeof window === 'undefined') {
   _window = {}; //TOD check is it works?
@@ -246,7 +249,7 @@ if (typeof window === 'undefined') {
   }
 
   //TODO global/window
-  $data.MemberDefinition = global["MemberDefinition"] = MemberDefinition;
+  $data.MemberDefinition = MemberDefinition;
 
   var memberDefinitionPrefix = '$';
 
@@ -427,10 +430,10 @@ if (typeof window === 'undefined') {
       ///     <example>
       ///
       ///         var t = new $data.Class.define('Types.A', [
-      ///                         { type: $data.Base, params: [1, 'secondParameterValue', new ConstructorParameter(0)] },
+      ///                         { type: $data.Base, params: [1, 'secondParameterValue', new $data.Class.ConstructorParameter(0)] },
       ///                         { type: $data.Mixin1, },
       ///                         { type: $data.Mixin2, },
-      ///                         { type: $data.Propagation1, params: [new ConstructorParameter(1)], propagateTo:'Propagation1' },
+      ///                         { type: $data.Propagation1, params: [new $data.Class.ConstructorParameter(1)], propagateTo:'Propagation1' },
       ///                         { type: $data.Propagation2, params: ['firstParameterValue'], propagateTo:'Propagation2' }
       ///                     ], null, {
       ///             constructor: function(){ },
@@ -464,7 +467,8 @@ if (typeof window === 'undefined') {
       var classNameParts = className.split('.');
       var shortClassName = classNameParts.splice(classNameParts.length - 1, 1)[0];
 
-      var root = container === $data.Container ? _window : container;
+      $data.models = $data.models || {}
+      var root = container === $data.Container ? $data.models : container;
       for (var i = 0; i < classNameParts.length; i++) {
         var part = classNameParts[i];
         if (!root[part]) {
@@ -475,12 +479,27 @@ if (typeof window === 'undefined') {
         root = root[part];
       }
 
+      var _root = $data
+      if(classNameParts[0] == '$data') {
+        let _classNameParts = [].concat(classNameParts)
+        _classNameParts.shift()
+        for (var i = 0; i < _classNameParts.length; i++) {
+          var _part = _classNameParts[i];
+          if (!_root[_part]) {
+            var _ns = {};
+            _ns.__namespace = true;
+            _root[_part] = _ns;
+          }
+          _root = _root[_part];
+        }
+      }
+
 
       var classFunction = null;
       classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
       classFunction.fullName = className;
       classFunction.namespace = classNameParts.join('.'); //classname splitted
-      classFunction.name = shortClassName;
+      //classFunction.name = shortClassName;
       classFunction.container = container;
       classFunction.container.registerType(className, classFunction);
 
@@ -494,7 +513,7 @@ if (typeof window === 'undefined') {
         }
       }
 
-      root[shortClassName] = this.classNames[className] = classFunction;
+      _root[shortClassName] = root[shortClassName] = this.classNames[className] = classFunction;
       //classFunction.toJSON = classToJSON;
       var baseCount = classFunction.baseTypes.length;
       for (var i = 0; i < baseCount; i++) {
@@ -510,8 +529,8 @@ if (typeof window === 'undefined') {
     },
     classFunctionBuilder: function(name, base, classDefinition, instanceDefinition) {
       var body = this.bodyBuilder(base, classDefinition, instanceDefinition);
-      return new Function('base', 'classDefinition', 'instanceDefinition', 'name', 'return function ' + name + ' (){ ' +
-        body + ' \n}; ')(base, classDefinition, instanceDefinition, name);
+      return new Function('base', 'classDefinition', 'instanceDefinition', 'name', 'dataClasses', 'return function ' + name + ' (){ ' +
+        body + ' \n}; ')(base, classDefinition, instanceDefinition, name, $data.models);
     },
     bodyBuilder: function(bases, classDefinition, instanceDefinition) {
       var mixin = '';
@@ -524,18 +543,18 @@ if (typeof window === 'undefined') {
         if (index == 0) { //ctor func
           if (base && base.type && base.type !== $data.Base && base.type.fullName) {
             body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
-            body += '    ' + base.type.fullName + '.apply(this, baseArguments); \n';
+            body += '    dataClasses.' + base.type.fullName + '.apply(this, baseArguments); \n';
           }
         } else {
           if (base && base.type && base.propagateTo) {
             //propagation
             propagation += '    ' + (!propagation ? 'var ' : '' + '') + 'propagationArguments = $data.typeSystem.createCtorParams(arguments, base[' +
               index + '].params, this); \n';
-            propagation += '    this["' + base.propagateTo + '"] =  Object.create(' + base.type.fullName + '.prototype); \n' +
-              '    ' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], propagationArguments); \n';
+            propagation += '    this["' + base.propagateTo + '"] =  Object.create(dataClasses.' + base.type.fullName + '.prototype); \n' +
+              '    dataClasses.' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], propagationArguments); \n';
           } else if (base && base.type && base.type.memberDefinitions && base.type.memberDefinitions.$constructor && !base.propagateTo) {
             //mixin
-            mixin += '    ' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
+            mixin += '    dataClasses.' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
           }
         }
       }
@@ -1392,7 +1411,7 @@ if (typeof window === 'undefined') {
   //override after typeSystem initialized
 
 
-  $data.Class.ConstructorParameter = ConstructorParameter = $data.Class.define('ConstructorParameter', null, null, {
+  $data.Class.ConstructorParameter = $data.Class.define('ConstructorParameter', null, null, {
     constructor: function(paramIndex) {
       ///<param name="paramIndex" type="integer" />
       this.paramIndex = paramIndex;
@@ -1543,7 +1562,7 @@ $data.typeSystem = {
       var paramArray = [];
       for (var i = 0, l = indexes.length; i < l; i++) {
         var item = i;
-        if (indexes[item] instanceof ConstructorParameter)
+        if (indexes[item] instanceof $data.Class.ConstructorParameter)
           paramArray.push(source[indexes[item].paramIndex]);
         else if (typeof indexes[item] === "function")
           paramArray.push(indexes[item].apply(thisObj));
@@ -1604,3 +1623,5 @@ $data.fdebug = {
   success: $data.debugWith('success'),
   error: $data.debugWith('error')
 };
+
+export default $data

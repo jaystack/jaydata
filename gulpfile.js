@@ -1,5 +1,6 @@
 ﻿
 var babel = require('babel/register');
+var browserify = require('browserify');
 var config = require('./src/buildConfig.json');
 var pkg = require('./package.json');
 var gulp = require('gulp');
@@ -11,7 +12,7 @@ var replace = require('gulp-replace');
 var header = require('gulp-header');
 var sourcemaps = require('gulp-sourcemaps');
 var gulp_babel = require('gulp-babel');
-var browserify = require('gulp-browserify');
+//var browserify = require('gulp-browserify');
 var babelify = require("babelify");
 var fs = require('fs');
 
@@ -24,13 +25,14 @@ var paths = {
 
 gulp.task('default', ['babel:compile'], function() {});
 gulp.task('bundle', function() {
-  return gulp.src('src/TypeSystem/initializeJayData.js')
-    .pipe(browserify({
-      debug: true,
-      transform: [babelify]
-    }))
-    .pipe(rename('JayData.js'))
-    .pipe(gulp.dest('dist'))
+  return browserify({
+      standalone: '$data'
+    })
+    .transform(babelify)
+    .require('src/TypeSystem/index.js', { entry: true })
+    .bundle()
+    .on("error", function (err) { console.log("Error: " + err.message) })
+    .pipe(fs.createWriteStream("dist/JayData.js"));
 })
 
 gulp.task('babel:compile', function() {
@@ -46,7 +48,7 @@ gulp.task('babel:compile', function() {
 
 gulp.task('release', ['JayData', 'providers', 'modules'], function() {
   return gulp.src("build/**/*.js")
-    .pipe(header(fs.readFileSync('CREDITS.txt'), pkg))
+    .pipe(header(fs.readFileSync('src/CREDITS.txt'), pkg))
     .pipe(gulp.dest("build"));
 });
 

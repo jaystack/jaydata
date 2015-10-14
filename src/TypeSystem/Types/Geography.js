@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 /* $data.GeographyBase */
 $data.GeographyBase = function GeographyBase() {
     $data.Geospatial.apply(this, arguments);
@@ -33,7 +35,7 @@ $data.GeographyBase.stringifyToUrl = function (geoData) {
         var data = "geography'" + geoData.type.toUpperCase() + '(';
         function buildArray(d, context) {
             if (Array.isArray(d[0])) {
-                
+
                 for (var i = 0; i < d.length; i++) {
                     if (i > 0) data += ',';
                     if (Array.isArray(d[i][0]))
@@ -44,13 +46,13 @@ $data.GeographyBase.stringifyToUrl = function (geoData) {
                     if (Array.isArray(d[i][0]))
                         data += ')';
                 }
-                
+
             } else {
                 data += d.join(' ');
             }
         }
         buildArray(geoData.coordinates, data);
-        
+
         data += ")'";
         return data;
     } else {
@@ -97,9 +99,9 @@ $data.GeographyPoint = function GeographyPoint(lon, lat) {
     }
 };
 $data.GeographyPoint.validateGeoJSON = function (geoData) {
-    return geoData && 
-        Array.isArray(geoData.coordinates) && 
-        geoData.coordinates.length == 2 && 
+    return geoData &&
+        Array.isArray(geoData.coordinates) &&
+        geoData.coordinates.length == 2 &&
         typeof geoData.coordinates[0] === 'number' &&
         typeof geoData.coordinates[1] === 'number';
 };
@@ -136,7 +138,7 @@ $data.GeographyLineString.validateGeoJSON = function (geoData) {
             typeof point[0] === 'number' &&
             typeof point[1] === 'number';
     }
-    
+
     return isValid;
 };
 $data.GeographyLineString.validMembers = ['coordinates'];
@@ -182,7 +184,7 @@ $data.GeographyPolygon.validateGeoJSON = function (geoData) {
     for (var i = 0; isValid && i < geoData.coordinates.length; i++) {
         var polygon = geoData.coordinates[i];
         var isValid = isValid && Array.isArray(polygon);
-            
+
         for (var j = 0; isValid && j < polygon.length; j++) {
             var point = polygon[j];
 
@@ -366,3 +368,6 @@ $data.Container.registerConverter($data.GeographyMultiPolygon, $data.Object, fun
 $data.Container.registerConverter($data.GeographyCollection, $data.Object, function (value) {
     return value ? new $data.GeographyCollection(value) : value;
 });
+
+
+export default $data

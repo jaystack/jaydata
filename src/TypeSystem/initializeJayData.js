@@ -1,6 +1,4 @@
-import {
-  $data as $preinitData
-}
+import $data
 from './initializeJayDataClient.js';
 
 if (typeof console === 'undefined') {
@@ -31,8 +29,8 @@ if (!console.error) console.error = function() {};
   $data.Acorn = $data.Acorn || (typeof acorn == 'object' ? acorn : undefined);
   $data.Esprima = $data.Esprima || (typeof esprima == 'object' ? esprima : undefined);
 
-})($preinitData);
-export var $data = $preinitData
+})($data);
+export default $data
   // Do not remove this block, it is used by jsdoc
   /**
       @name $data.Base

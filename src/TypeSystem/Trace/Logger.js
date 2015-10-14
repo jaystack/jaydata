@@ -1,3 +1,5 @@
+import $data from '../TypeSystem.js'
+
 $data.Class.define('$data.Logger', $data.TraceBase, null, {
     log: function () {
         Array.prototype.unshift.call(arguments, this.getDateFormat());
@@ -17,3 +19,5 @@ $data.Class.define('$data.Logger', $data.TraceBase, null, {
         return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
     }
 });
+
+export default $data

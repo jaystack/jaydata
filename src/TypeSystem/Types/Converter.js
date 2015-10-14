@@ -1,8 +1,10 @@
+import $data from '../TypeSystem.js'
+
 $data.Container.registerConverter('$data.Boolean', {
     '$data.String': function(value){
         if (value.toLowerCase() == 'true') return true;
         if (value.toLowerCase() == 'false') return false;
-        
+
         return !!value;
     },
     'default': function(value){
@@ -121,7 +123,7 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
     function parseFromString(value) {
         return value;
     }
-    
+
     $data.Container.registerConverter('$data.Duration', {
         '$data.String': parseFromString
     });
@@ -186,7 +188,7 @@ $data.packIEEE754 = function(v, ebits, fbits){
         bytes.push(parseInt(str.substring(0, 8), 2));
         str = str.substring(8);
     }
-    
+
     return bytes;
 };
 
@@ -319,3 +321,5 @@ $data.Container.registerConverter('$data.ObjectID', {
 
 $data.Container.proxyConverter = function(v){ return v; };
 $data.Container.defaultConverter = function(type){ return function(v){ return $data.Container.convertTo(v, type); }; };
+
+export default $data
