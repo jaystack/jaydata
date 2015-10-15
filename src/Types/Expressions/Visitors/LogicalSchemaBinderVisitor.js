@@ -1,10 +1,12 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 //"use strict"; // suspicious code
 
 $C('$data.Expressions.LogicalSchemaBinderVisitor',
     $data.Expressions.ExpressionVisitor, null,
     {
         constructor: function (expression, binder) {
-            
+
         },
 
         VisitProperty: function (expression, context) {
@@ -19,3 +21,5 @@ $C('$data.Expressions.LogicalSchemaBinderVisitor',
         }
 
     }, {});
+
+export default $data

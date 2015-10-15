@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $C('$data.queryBuilder', null, null, {
     constructor: function () {
         this._fragments = {};
@@ -46,3 +48,5 @@ $C('$data.queryBuilder', null, null, {
         this.modelBinderConfig['$keys'].push(name);
     }
 });
+
+export default $data

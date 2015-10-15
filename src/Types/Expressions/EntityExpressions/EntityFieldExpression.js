@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.EntityFieldExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, selector) {
         ///<param name="source" type="$data.Entity.EntityExpression" />
@@ -7,10 +9,11 @@ $C('$data.Expressions.EntityFieldExpression', $data.Expressions.ExpressionNode, 
 
 
         if (this.selector instanceof $data.Expressions.MemberInfoExpression ||  this.selector.name) {
-            this.memberName = this.selector.name; 
+            this.memberName = this.selector.name;
         }
     },
 
     nodeType: { value: $data.Expressions.ExpressionType.EntityField }
 });
 
+export default $data

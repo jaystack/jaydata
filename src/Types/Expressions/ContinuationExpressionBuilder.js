@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.ContinuationExpressionBuilder', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (mode) {
         this.mode = mode;
@@ -79,3 +81,5 @@ $C('$data.Expressions.ContinuationExpressionBuilder', $data.Expressions.EntityEx
         this.Visit(expression.source, context);
     }
 });
+
+export default $data

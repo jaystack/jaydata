@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.ArrayLiteralExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (items) {
         ///<param name="name" type="string" />
@@ -19,3 +21,4 @@ $C('$data.Expressions.ArrayLiteralExpression', $data.Expressions.ExpressionNode,
     }
 }, null);
 
+export default $data

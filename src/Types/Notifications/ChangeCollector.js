@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $data.Class.define('$data.Notifications.ChangeCollector', $data.Notifications.ChangeCollectorBase, null, {
     buildData: function (entities) {
@@ -30,3 +31,5 @@ $data.Class.define('$data.Notifications.ChangeCollector', $data.Notifications.Ch
         return result;
     }
 }, null);
+
+export default $data

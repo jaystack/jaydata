@@ -45,18 +45,18 @@
         var memDef = typeAlias.getMemberDefinition('prop1');
         ok(memDef.dataType === "integer", 'type equal failed');
         ok(memDef.type === "integer", 'type equal failed');
-        ok(Container.resolveType(memDef.dataType) === $data.Integer, 'type equal failed');
+        ok($data.Container.resolveType(memDef.dataType) === $data.Integer, 'type equal failed');
 
         var memDef = typeAlias.getMemberDefinition('prop2');
         ok(memDef.dataType === "string", 'type equal failed');
         ok(memDef.type === "string", 'type equal failed');
-        ok(Container.resolveType(memDef.dataType) === $data.String, 'type equal failed');
+        ok($data.Container.resolveType(memDef.dataType) === $data.String, 'type equal failed');
 
 
         var memDef = typeAlias.getMemberDefinition('prop3');
         ok(memDef.dataType === "$data.String", 'type equal failed');
         ok(memDef.type === "$data.String", 'type equal failed');
-        ok(Container.resolveType(memDef.dataType) === $data.String, 'type equal failed');
+        ok($data.Container.resolveType(memDef.dataType) === $data.String, 'type equal failed');
 
         var memDef = typeAlias.getMemberDefinition('prop4');
         ok(memDef.dataType === undefined, 'type equal failed');
@@ -65,12 +65,12 @@
         var memDef = typeAlias.getMemberDefinition('prop5');
         ok(memDef.dataType === $data.String, 'type equal failed');
         ok(memDef.type === $data.String, 'type equal failed');
-        ok(Container.resolveType(memDef.dataType) === $data.String, 'type equal failed');
+        ok($data.Container.resolveType(memDef.dataType) === $data.String, 'type equal failed');
 
         var memDef = typeAlias.getMemberDefinition('prop6');
         ok(memDef.dataType === "date", 'type equal failed');
         ok(memDef.type === "date", 'type equal failed');
-        ok(Container.resolveType(memDef.dataType) === $data.Date, 'type equal failed');
+        ok($data.Container.resolveType(memDef.dataType) === $data.Date, 'type equal failed');
     });
 
     test("Type instance", 7, function () {
@@ -698,7 +698,7 @@
 
         var comp = Types.AAAExtendedProperty.memberDefinitions.getMember('GetTitleComputed4');
         equal(comp instanceof $data.MemberDefinition, true, 'memDef type');
-        ok(Container.resolveType(comp.type) === $data.String, 'memDef type');
+        ok($data.Container.resolveType(comp.type) === $data.String, 'memDef type');
         equal('get' in comp, true, 'memDef get');
         equal('set' in comp, true, 'memDef set');
         equal(comp.notMapped, true, 'memDef notMapped');

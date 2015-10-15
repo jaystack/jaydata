@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
 
 $C('$data.Expressions.FilterExpression', $data.Expressions.EntitySetExpression, null, {
     constructor: function (source, selector) {
@@ -132,3 +133,5 @@ $C('$data.Expressions.BatchDeleteExpression', $data.Expressions.FrameOperator, n
     },
     nodeType: { value: $data.Expressions.ExpressionType.BatchDelete, enumerable: true }
 });
+
+export default $data

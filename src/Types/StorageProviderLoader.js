@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
     isSupported: function (providerName) {
         $data.Trace.log('Detecting ' + providerName + ' provider support');
@@ -88,7 +90,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         while (currentProvider && !this.isSupported(currentProvider)) {
             currentProvider = providerList.shift();
         }
-        
+
         $data.Trace.log('First supported provider is ' + currentProvider);
 
         if (!currentProvider){
@@ -261,3 +263,5 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
 });
 
 $data.StorageProviderLoader = new $data.StorageProviderLoaderBase();
+
+export default $data

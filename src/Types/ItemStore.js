@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.ItemStoreClass', null, null, {
     constructor: function () {
         var self = this;
@@ -19,7 +21,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             },
             set: function (value) {
                 self._setTypeStoreConfig(this, 'default', value);
-            } 
+            }
         }, true);
     },
     itemStoreConfig: {},
@@ -683,3 +685,4 @@ $data.Class.define('$data.MemberWrapper', null, null, {
     }
 });
 
+export default $data

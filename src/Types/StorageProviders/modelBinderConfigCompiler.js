@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $C('$data.modelBinder.FindProjectionVisitor', $data.Expressions.EntityExpressionVisitor, null, {
     VisitProjectionExpression: function (expression) {
@@ -161,7 +162,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 builder.modelBinderConfig = builder._binderConfig.$item;
             }
 
-            
+
         }
         if (storageModel) {
             this._addComplexTypeProperties(storageModel.ComplexTypes, builder);
@@ -376,3 +377,5 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         builder.popModelBinderProperty();
     }
 });
+
+export default $data

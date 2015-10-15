@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, selector, params, cfg, boundItem) {
         ///<signature>
@@ -39,3 +41,5 @@ $C('$data.Expressions.ServiceOperationExpression', $data.Expressions.ExpressionN
     },
     nodeType: { value: $data.Expressions.ExpressionType.ServiceOperation, enumerable: true }
 });
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.ProjectionExpression', $data.Expressions.EntitySetExpression, null, {
     constructor: function (source, selector, params, instance) {
 
@@ -6,4 +8,4 @@ $C('$data.Expressions.ProjectionExpression', $data.Expressions.EntitySetExpressi
 
 });
 
-
+export default $data

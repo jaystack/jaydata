@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.EntityState = {
     Detached:0,
     Unchanged: 10,
@@ -5,3 +7,5 @@ $data.EntityState = {
     Modified: 30,
     Deleted: 40
 };
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C("$data.Expressions.LocalContextProcessor", $data.Expressions.GlobalContextProcessor, null, {
     constructor: function (evalMethod) {
         ///<param name="global" type="object" />
@@ -16,3 +18,5 @@ $C("$data.Expressions.LocalContextProcessor", $data.Expressions.GlobalContextPro
 
     }
     });
+
+export default $data

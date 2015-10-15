@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.FrameOperationExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, operation, parameters) {
         this.source = source;
@@ -15,3 +17,5 @@ $C('$data.Expressions.EntityFunctionOperationExpression', $data.Expressions.Fram
 $C('$data.Expressions.ContextFunctionOperationExpression', $data.Expressions.FrameOperationExpression, null, {
     nodeType: { value: $data.Expressions.ExpressionType.ContextFunctionOperation }
 });
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.ExpressionVisitor', null, null,
     {
         constructor: function () {
@@ -9,14 +11,14 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
             ///<param name="eNode" type="$data.Expressions.ExpressionNode"/>
             ///<param name="context" type="Object"/>
             //<return type="$data.Expressions.ExpressionNode"/>
-            
+
             //this._deep = this._deep + 1;
             if (!eNode) {
                 return eNode;
             }
 
             var result = null;
-            
+
                 switch (eNode.expressionType) {
                     case $data.Expressions.ParameterExpression:
                         result = this.VisitParameter(eNode, context);
@@ -83,7 +85,7 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
                     //default:
                     //    Guard.raise("Type isn't implemented: " + eNode.type);
                 }
-            
+
             this._deep = this._deep - 1;
             return result;
         },
@@ -170,7 +172,7 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
             var expression = this.Visit(eNode.expression, context);
             var member = this.Visit(eNode.member, context);
             return new $data.Expressions.PropertyExpression(expression, member);
-            //var member = 
+            //var member =
         },
 
         VisitUnary: function (eNode, context) {
@@ -179,7 +181,7 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
             ///<param name="context" type="Object"/>
             ///<returns type="$data.Expressions.UnaryExpression"/>
             var operand = this.Visit(eNode.operand, context);
-            if (operand === eNode.operand) 
+            if (operand === eNode.operand)
                 return eNode;
             return new $data.Expressions.UnaryExpression(operand, eNode.operator, eNode.nodeType);
         },
@@ -247,3 +249,5 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
             return [memberAccess.expression, memberAccess.member];
         }
     }, {});
+
+export default $data

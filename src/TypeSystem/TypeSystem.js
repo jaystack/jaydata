@@ -1,4 +1,5 @@
 import $data from './initializeJayData.js';
+import Exception from './Exception.js';
 import { Guard } from './utils.js';
 import { StringFunctions } from './Extensions.js'
 
@@ -9,7 +10,7 @@ let _window;
 if (typeof window === 'undefined') {
   _window = {}; //TOD check is it works?
 } else {
-  _window = window;
+  _window = {};
 }
 (function init($data, global) {
 
@@ -529,8 +530,8 @@ if (typeof window === 'undefined') {
     },
     classFunctionBuilder: function(name, base, classDefinition, instanceDefinition) {
       var body = this.bodyBuilder(base, classDefinition, instanceDefinition);
-      return new Function('base', 'classDefinition', 'instanceDefinition', 'name', 'dataClasses', 'return function ' + name + ' (){ ' +
-        body + ' \n}; ')(base, classDefinition, instanceDefinition, name, $data.models);
+      return new Function('base', 'classDefinition', 'instanceDefinition', 'name', '$data', 'return function ' + name + ' (){ ' +
+        body + ' \n}; ')(base, classDefinition, instanceDefinition, name, $data);
     },
     bodyBuilder: function(bases, classDefinition, instanceDefinition) {
       var mixin = '';
@@ -543,18 +544,18 @@ if (typeof window === 'undefined') {
         if (index == 0) { //ctor func
           if (base && base.type && base.type !== $data.Base && base.type.fullName) {
             body += '    var baseArguments = $data.typeSystem.createCtorParams(arguments, base[' + index + '].params, this); \n';
-            body += '    dataClasses.' + base.type.fullName + '.apply(this, baseArguments); \n';
+            body += '    $data.models.' + base.type.fullName + '.apply(this, baseArguments); \n';
           }
         } else {
           if (base && base.type && base.propagateTo) {
             //propagation
             propagation += '    ' + (!propagation ? 'var ' : '' + '') + 'propagationArguments = $data.typeSystem.createCtorParams(arguments, base[' +
               index + '].params, this); \n';
-            propagation += '    this["' + base.propagateTo + '"] =  Object.create(dataClasses.' + base.type.fullName + '.prototype); \n' +
-              '    dataClasses.' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], propagationArguments); \n';
+            propagation += '    this["' + base.propagateTo + '"] =  Object.create($data.models.' + base.type.fullName + '.prototype); \n' +
+              '    $data.models.' + base.type.fullName + '.apply(this["' + base.propagateTo + '"], propagationArguments); \n';
           } else if (base && base.type && base.type.memberDefinitions && base.type.memberDefinitions.$constructor && !base.propagateTo) {
             //mixin
-            mixin += '    dataClasses.' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
+            mixin += '    $data.models.' + base.type.fullName + '.memberDefinitions.$constructor.method.apply(this); \n';
           }
         }
       }
@@ -817,8 +818,8 @@ if (typeof window === 'undefined') {
     }
 
   };
-
-  $data.Class = _window['Class'] = new ClassEngineBase();
+  var Class
+  $data.Class = _window['Class'] = Class = new ClassEngineBase();
 
   //(function (global) {
   global = _window;
@@ -1300,8 +1301,7 @@ if (typeof window === 'undefined') {
   $data.ContainerClass = ContainerCtor;
 
   var c;
-
-  global["Container"] = $data.Container = c = global["C$"] = new ContainerCtor();
+  var Container = $data.Container = c = global["C$"] = new ContainerCtor();
 
   $data.createContainer = function() {
     return new ContainerCtor($data.Container);
@@ -1509,7 +1509,7 @@ $data.typeSystem = {
       var obj = arguments[i];
       if (obj === null || typeof obj === 'undefined')
         continue;
-      for (key in obj) {
+      for (var key in obj) {
         target[key] = obj[key];
       }
     }
@@ -1624,4 +1624,8 @@ $data.fdebug = {
   error: $data.debugWith('error')
 };
 
+
+export var $C = _window["$C"]
+export var Container = $data.Container
+export var MemberDefinition = $data.MemberDefinition
 export default $data

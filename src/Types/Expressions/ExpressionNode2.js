@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 //TODO: Finish refactoring ExpressionNode.js
 
 $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
@@ -294,3 +296,5 @@ $C('$data.Expressions.UnaryExpression', $data.Expressions.ExpressionNode, null, 
     operand: { value: undefined, writable: true },
     nodeType: { value: undefined, writable: true }
 });
+
+export default $data

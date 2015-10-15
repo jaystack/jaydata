@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $data.Class.define('$data.Expressions.ExecutorVisitor', $data.Expressions.ExpTreeVisitor, null,
 {
     //--
@@ -132,3 +134,5 @@ $data.Class.define('$data.Expressions.ExecutorVisitor', $data.Expressions.ExpTre
         return $data.Expressions.ExpressionNodeTypes.LiteralExpressionNode.create(true, typeof value, value);
     }
 }, null);
+
+export default $data

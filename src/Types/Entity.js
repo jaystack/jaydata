@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 var EventSubscriber = $data.Class.define("EventSubscriber", null, null, {
     constructor: function (handler, state, thisArg) {
         /// <param name="handler" type="Function">
@@ -23,7 +25,7 @@ var EventSubscriber = $data.Class.define("EventSubscriber", null, null, {
     thisArg: {}
 });
 
-$data.Event = Event = $data.Class.define("$data.Event", null, null, {
+$data.Event = $data.Class.define("$data.Event", null, null, {
     constructor: function (name, sender) {
         ///<param name="name" type="string">The name of the event</param>
         ///<param name="sender" type="Object">The originator/sender of the event. [this] in handlers will be set to this</param>
@@ -96,7 +98,7 @@ $data.Event = Event = $data.Class.define("$data.Event", null, null, {
 });
 
 
-var eventData = $data.Class.define("EventData", null, null, {
+var EventData = $data.Class.define("EventData", null, null, {
     eventName: {}
 });
 
@@ -128,10 +130,10 @@ var PropertyValidationEventData = $data.Class.define("PropertyValidationEventDat
 
 
 
-$data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
+$data.Entity = $data.Class.define("$data.Entity", null, null, {
     constructor: function (initData, newInstanceOptions) {
         /// <description>
-        ///     This class provide a light weight, object-relational interface between 
+        ///     This class provide a light weight, object-relational interface between
         ///     your javascript code and database.
         /// </description>
         ///
@@ -245,7 +247,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
             if (!this._propertyChanging)
-                this._propertyChanging = new Event('propertyChanging', this);
+                this._propertyChanging = new $data.Event('propertyChanging', this);
 
             return this._propertyChanging;
         },
@@ -256,7 +258,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
             if (!this._propertyChanged)
-                this._propertyChanged = new Event('propertyChanged', this);
+                this._propertyChanged = new $data.Event('propertyChanged', this);
 
             return this._propertyChanged;
         },
@@ -267,7 +269,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         dataType: $data.Event, storeOnObject: true, monitorChanges: false, notMapped: true, enumerable: false, prototypeProperty: true,
         get: function () {
             if (!this._propertyValidationError)
-                this._propertyValidationError = new Event('propertyValidationError', this);
+                this._propertyValidationError = new $data.Event('propertyValidationError', this);
 
             return this._propertyValidationError;
         },
@@ -406,7 +408,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="value" />
         /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
-        
+
         //callback = $data.typeSystem.createCallbackSetting(callback);
         var pHandler = new $data.PromiseHandler();
         callback = pHandler.createCallback(callback);
@@ -471,7 +473,7 @@ $data.Entity = Entity = $data.Class.define("$data.Entity", null, null, {
         return this;
     }   */
     //,
-  
+
     //onReady: function (callback) {
     //    this.__onReadyList = this.__onReadyList || [];
     //    this.__onReadyList.push(callback);
@@ -666,6 +668,6 @@ $data.implementation = function (name) {
     return Container.resolveType(name);
 };
 
-
-
-
+export var Event = $data.Event
+export var Entity = $data.Entity
+export default $data

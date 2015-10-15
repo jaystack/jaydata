@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.QueryProvider', null, null,
 {
     //TODO: instance member?????
@@ -7,3 +9,5 @@ $data.Class.define('$data.QueryProvider', null, null,
     getTraceString: function (queryable) {
     }
 }, null);
+
+export default $data

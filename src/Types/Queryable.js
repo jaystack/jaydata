@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.Queryable', null, null,
 {
     constructor: function (source, rootExpression) {
@@ -60,7 +62,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///</example>
         ///</signature>
         if (arguments.length === 3) {
-            predicate = "it." + arguments[0] + 
+            predicate = "it." + arguments[0] +
                 (arguments[1][0] === "." ? (arguments[1] + "(param)") : (" " + arguments[1] + " param"));
             thisArg = { param : arguments[2] }
         }
@@ -177,7 +179,7 @@ $data.Class.define('$data.Queryable', null, null,
         } catch (e) {
             cbWrapper.error(e);
         }
-		
+
         return pHandler.getPromise();
     },
 	count: function (onResult, transaction) {
@@ -864,3 +866,5 @@ $data.Class.define('$data.Queryable', null, null,
     defaultType: {}
 
 }, null);
+
+export default $data

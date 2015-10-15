@@ -1,4 +1,4 @@
-import $data from './TypeSystem.js';
+import $data, { $C as _$C, Container as _container } from './TypeSystem.js';
 import Types from './Types/Types.js';
 import Trace from './Trace/Trace.js';
 import Logger from './Trace/Logger.js';
@@ -10,5 +10,13 @@ import Guid from './Types/Guid.js';
 import Blob from './Types/Blob.js';
 import EdmTypes from './Types/EdmTypes.js';
 import Converter from './Types/Converter.js';
+
+import { Guard as _guard } from './utils.js';
+import _exception from './Exception.js';
+
+export var Guard = _guard
+export var Exception = _exception
+export var $C = _$C
+export var Container = _container
 
 export default $data

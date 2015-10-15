@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C("$data.Expressions.ParameterProcessor", $data.Expressions.ExpressionVisitor, null, {
     constructor: function () {
         ///<summary>Provides a base class for several ParameterProcessors like GlobalParameterProcessor or LambdaParameterProcessor</summary>
@@ -25,3 +27,5 @@ $C("$data.Expressions.ParameterProcessor", $data.Expressions.ExpressionVisitor, 
         Guard.raise("Pure method");
     }
 });
+
+export default $data

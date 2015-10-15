@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.Transaction', null, null, {
     constructor: function () {
         this._objectId = (new Date()).getTime();
@@ -16,3 +18,5 @@ $data.Class.define('$data.Transaction', null, null, {
     oncomplete: { type: $data.Event },
     onerror: { type: $data.Event }
 }, null);
+
+export default $data

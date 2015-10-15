@@ -29,7 +29,7 @@ gulp.task('bundle', function() {
       standalone: '$data'
     })
     .transform(babelify)
-    .require('src/TypeSystem/index.js', { entry: true })
+    .require('src/index.js', { entry: true })
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
     .pipe(fs.createWriteStream("dist/JayData.js"));

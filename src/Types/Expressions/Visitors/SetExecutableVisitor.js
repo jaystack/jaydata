@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $data.Class.define('$data.Expressions.SetExecutableVisitor', $data.Expressions.ExpTreeVisitor, null,
 {
     Visit: function (eNode, context) {
@@ -115,3 +117,5 @@ $data.Class.define('$data.Expressions.SetExecutableVisitor', $data.Expressions.E
         return $data.Expressions.ExpressionNodeTypes.MemberAccessExpressionNode.create(isLocalParam, eNode.expression, eNode.member);
     }
 }, null);
+
+export default $data

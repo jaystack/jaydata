@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $data.Class.define('$data.Notifications.ChangeDistributor', $data.Notifications.ChangeDistributorBase, null, {
     constructor: function (broadcastUrl) {
@@ -16,3 +17,5 @@ $data.Class.define('$data.Notifications.ChangeDistributor', $data.Notifications.
     success: function () { },
     error: function () { }
 }, null);
+
+export default $data

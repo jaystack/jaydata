@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C("$data.Expressions.LambdaParameterProcessor", $data.Expressions.ParameterProcessor, null, {
     constructor: function (lambdaParameterTypeInfos) {
         ///<param name="global" />
@@ -36,3 +38,5 @@ $C("$data.Expressions.LambdaParameterProcessor", $data.Expressions.ParameterProc
     }
 
 });
+
+export default $data

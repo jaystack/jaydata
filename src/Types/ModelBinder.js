@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.ModelBinder', null, null, {
 
     constructor: function (context) {
@@ -154,7 +156,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             //else context.src += 'var forKey = typeof itemKey !== "undefined" ? itemKey : undefined;';
             /*context.src += 'if (typeof forKey !== "undefined" && forKey){';
             context.src += 'if (cache[forKey]){';
-            context.src += iter + ' = cache[forKey];'; 
+            context.src += iter + ' = cache[forKey];';
             context.src += '}else{';
             context.src += iter + ' = [];';
             context.src += 'cache[forKey] = ' + iter + ';';
@@ -383,12 +385,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.build(meta, context);
         if (context.item) context.src += 'if (typeof result === "undefined") result = ' + context.item + ';';
         context.src += 'return result;';
-        
+
         /*var beautify = require('beautifyjs');
         console.log(beautify.js_beautify(context.src));*/
-        
+
         var fn = new Function('meta', 'data', context.src).bind(this);
         var ret = fn(meta, data);
         return ret;
     }
 });
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 if (typeof WinJS !== 'undefined' && WinJS.xhr) {
     $data.ajax = $data.ajax || function (options) {
         $data.typeSystem.extend(options, {
@@ -48,3 +50,4 @@ if (typeof WinJS !== 'undefined' && WinJS.xhr) {
     }
 }
 
+export default $data

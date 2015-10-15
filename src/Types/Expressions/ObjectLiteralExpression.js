@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.ObjectLiteralExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (members) {
         ///<summary>Represent an object initializer literal expression &#10;Ex: { prop: value}</summary>
@@ -29,3 +31,5 @@ $C('$data.Expressions.ObjectLiteralExpression', $data.Expressions.ExpressionNode
     }
 
 }, null);
+
+export default $data

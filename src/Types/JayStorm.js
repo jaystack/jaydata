@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 (function ($data) {
 
     $data.initService = function (apiKey, options) {
@@ -47,3 +49,5 @@
     };
 
 })($data);
+
+export default $data

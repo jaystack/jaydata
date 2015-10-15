@@ -1,7 +1,8 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
 
 $data.Class.define('$data.MetadataLoaderClass', null, null, {
     load: function (metadataUri, callBack, config) {
-        
+
         var cnf = {
             EntityBaseClass: '$data.Entity',
             ContextBaseClass: '$data.EntityContext',
@@ -63,7 +64,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             var versionInfo = self._findVersion(xml);
             if (self.xsltRepoUrl) {
                 console.log('XSLT: ' + self.xsltRepoUrl + self._supportedODataVersionXSLT)
-                self._loadXMLDoc({ 
+                self._loadXMLDoc({
                     metadataUri: self.xsltRepoUrl + self._supportedODataVersionXSLT,
                     user: cnf.user,
                     password: cnf.password,
@@ -274,7 +275,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             resultDocument = xsltProcessor.transformToFragment(metadata, document);
 
             return resultDocument.textContent;
-        } else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
+        /*} else if (typeof module !== 'undefined' && typeof require !== 'undefined') {
             var xslt4node = require('xslt4node');
             var config = {
               xslt: transformXslt,
@@ -291,10 +292,10 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
                  'DefaultNamespace': cnf.DefaultNamespace ,
                  'MaxDataserviceVersion': (versionInfo.maxVersion || '3.0') ,
                  'AllowedTypesList': cnf.typeFilter ,
-                 'GenerateNavigationProperties': cnf.navigation 
+                 'GenerateNavigationProperties': cnf.navigation
              }
             };
-           return xslt4node.transformSync(config);
+           return xslt4node.transformSync(config);*/
         }
     },
     _prepareTypeFilter: function (doc, versionInfo, cnf) {
@@ -593,7 +594,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             };
         }else if (typeof module !== 'undefined' && typeof require !== 'undefined'){
             var schemaXml = metadata;
-            
+
             var schemaNamespace = 'http://schemas.microsoft.com/ado/2008/09/edm';
             var version = 'nodejs';
             for (var i in this._supportedODataVersions){
@@ -1314,3 +1315,5 @@ $data.service = function (serviceUri, config, cb) {
 
     return pHandler.getPromise();
 };
+
+export default $data

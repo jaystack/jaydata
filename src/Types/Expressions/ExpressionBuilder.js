@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
  $data.Class.define('$data.Expressions.ExpressionBuilder', null, null,
 {
     constructor: function (context) {

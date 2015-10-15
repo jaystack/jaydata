@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 (function ($data) {
     if (typeof jQuery !== 'undefined') {
         $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
@@ -32,3 +34,5 @@
         $data.PromiseHandler = $data.Deferred;
     }
 })($data);
+
+export default $data

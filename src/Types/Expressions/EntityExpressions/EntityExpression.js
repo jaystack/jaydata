@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.EntityExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, selector) {
         ///<signature>
@@ -40,3 +42,5 @@ $C('$data.Expressions.EntityExpression', $data.Expressions.ExpressionNode, null,
 
     nodeType: { value: $data.Expressions.ExpressionType.Entity }
 });
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.CallExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (expression, member, args) {
         ///<summary>Represents a call to an object or global method</summary>
@@ -47,3 +49,5 @@ $C('$data.Expressions.CallExpression', $data.Expressions.ExpressionNode, null, {
     }
 
 });
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.ConstantExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (value, type, name) {
         this.value = value;
@@ -21,4 +23,4 @@ $C('$data.Expressions.ConstantExpression', $data.Expressions.ExpressionNode, nul
     }
 });
 
-
+export default $data

@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
 
 $C("$data.Expressions.GlobalContextProcessor", $data.Expressions.ParameterProcessor, null, {
     constructor: function (global) {
@@ -51,3 +52,5 @@ $C("$data.Expressions.ConstantValueResolver", $data.Expressions.ParameterProcess
     }
 
 });
+
+export default $data

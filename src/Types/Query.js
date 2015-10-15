@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $C('$data.Query', null, null,
 {
     constructor: function (expression, defaultType, context) {
@@ -9,7 +11,7 @@ $C('$data.Query', null, null,
         this.context = context;
 
         //TODO: expressions get as JSON string?!
-        
+
         this.expressions = expression;
         this.defaultType = defaultType;
         this.result = [];
@@ -17,7 +19,7 @@ $C('$data.Query', null, null,
         this.modelBinderConfig = {};
         this.context = context;
     },
-        
+
     rawDataList: { dataType: "Array" },
     result: { dataType: "Array" },
     resultType: {},
@@ -29,7 +31,7 @@ $C('$data.Query', null, null,
     getEntitySets: function(){
         var ret = [];
         var ctx = this.context;
-        
+
         var fn = function(expression){
             if (expression instanceof $data.Expressions.EntitySetExpression){
                 if (ret.indexOf(ctx._entitySetReferences[expression.elementType.name]) < 0)
@@ -42,9 +44,11 @@ $C('$data.Query', null, null,
                 }
             }
         };
-        
+
         fn(this.expression);
-        
+
         return ret;
     }
 }, null);
+
+export default $data

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 (function () {
 
     $data.defaults = $data.defaults || {};
@@ -326,14 +328,14 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _initializeStorageModel: function () {
 
-        
+
         var _memDefArray = this.getType().memberDefinitions.asArray();
-        
+
 
         if (typeof intellisense !== 'undefined')
             return;
 
-        
+
         for (var i = 0; i < this._storageModel.length; i++) {
             var storageModel = this._storageModel[i];
 
@@ -974,7 +976,7 @@ $data.Class.define('$data.EntityContext', null, null,
             }, transaction);
         } else {
             var returnTransaction = this._isReturnTransaction(transaction);
-                
+
             var readIterator = function (queries, index, iteratorCallback, itTransaction) {
                 var query = queries[index];
                 if (!query) {
@@ -1720,7 +1722,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 callback.success(entity[memberDefinition.name], transaction);
             else
                 callback.success(entity[memberDefinition.name]);*/
-                
+
             return pHandler.getPromise();
         }
 
@@ -1929,15 +1931,15 @@ $data.Class.define('$data.EntityContext', null, null,
         } catch (e) {}
         return '#';
     },
-    
+
     //xxxx
-    _applyRelatedEntityMethodsToContext: function () { 
+    _applyRelatedEntityMethodsToContext: function () {
         if (this.storageProvider.name === "oData") {
             for (var esName in this._entitySetReferences) {
                 var es = this._entitySetReferences[esName];
                 var newMemberName = $data.defaults.relatedEntityReadMethodPrefix + es.name;
                 //EntitiySets
-                if (!(newMemberName in es)) { 
+                if (!(newMemberName in es)) {
                     es[newMemberName] = this._relatedEntityGetMethod(es.elementType, undefined, this);
                 }
                 //Context
@@ -1958,7 +1960,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     var memberElementType = null;
                     if (member.inverseProperty && Container.resolveType(member.dataType) === $data.Array && (memberElementType = Container.resolveType(member.elementType)) &&
                         memberElementType.isAssignableTo && memberElementType.isAssignableTo($data.Entity))
-                    { 
+                    {
                         var newMemberName = $data.defaults.relatedEntityReadMethodPrefix + member.name;
                         if (!elementType.getMemberDefinition(newMemberName)) {
                             elementType.addMember(newMemberName, this._relatedEntityGetMethod(memberElementType, member))
@@ -1991,14 +1993,14 @@ $data.Class.define('$data.EntityContext', null, null,
     _relatedEntityGetMethod: function (targetType, navigation, context){
         var proxyClass = this._createRelatedEntityProxyClass(targetType);
         var keys = targetType.memberDefinitions.getKeyProperties();
-        
+
         return function (keyValue) {
             if (keys.length === 1 && typeof keyValue !== 'object') {
                 var keyV = {};
                 keyV[keys[0].name] = keyValue;
                 keyValue = keyV;
             }
-            
+
             if (typeof keyValue !== 'object') {
                 throw new Exception('Key parameter is invalid');
             } else {
@@ -2155,3 +2157,5 @@ $data.Class.define('$data.EntityContext', null, null,
         }
     }
 });
+
+export default $data

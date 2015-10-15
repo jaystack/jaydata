@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (scopeContext) {
         ///<param name="scopeContext" type="$data.Expressions.EntityContext" />
@@ -93,3 +95,5 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
         return expression;
     }
 });
+
+export default $data

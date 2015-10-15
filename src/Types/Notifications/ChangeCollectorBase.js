@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $data.Class.define('$data.Notifications.ChangeCollectorBase', null, null, {
     buildData: function (entityContextData) {
@@ -9,3 +10,5 @@ $data.Class.define('$data.Notifications.ChangeCollectorBase', null, null, {
     },
     Distrbutor: { enumerable: false, dataType: $data.Notifications.ChangeDistributorBase, storeOnObject: true }
 }, null);
+
+export default $data

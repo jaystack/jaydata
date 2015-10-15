@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.CodeParser', null, null, {
 
     constructor: function (scopeContext) {
@@ -29,7 +31,7 @@ $C('$data.Expressions.CodeParser', null, null, {
             errorDetails: ''
         };
         ///<var name="AST" type="Date" />
-        
+
         //console.log(code.toString());
         if ($data.Acorn){
             //console.log('using acorn.js');
@@ -74,31 +76,31 @@ $C('$data.Expressions.CodeParser', null, null, {
         }
         return result.expression;
     },
-    
+
     ParserBuild: function(node){
         //console.log(node);
         return this['Parser' + node.type](node);
     },
-    
+
     ParserExpressionStatement: function(node){
         return this.ParserBuild(node.expression);
     },
-    
+
     ParserBlockStatement: function(node){
         return this.ParserBuild(node.body[0]);
     },
-    
+
     ParserReturnStatement: function(node){
         return this.ParserBuild(node.argument);
     },
-    
+
     ParserMemberExpression: function(node){
         return new $data.Expressions.PropertyExpression(
             this.ParserBuild(node.object),
             new $data.Expressions.ConstantExpression(node.property.name || node.property.value, typeof (node.property.name || node.property.value))
         );
     },
-    
+
     ParserIdentifier: function(node){
         return this.ParserParameter(node,
             this.lambdaParams.indexOf(node.name) > -1
@@ -106,29 +108,29 @@ $C('$data.Expressions.CodeParser', null, null, {
                 : $data.Expressions.ExpressionType.Parameter
             );
     },
-    
+
     ParserObjectExpression: function(node){
         var props = new Array(node.properties.length);
         for (var i = 0; i < node.properties.length; i++){
             props[i] = this.ParserProperty(node.properties[i]);
         }
-        
+
         return new $data.Expressions.ObjectLiteralExpression(props);
     },
-    
+
     ParserArrayExpression: function(node){
         var items = new Array(node.elements.length);
         for (var i = 0; i < node.elements.length; i++){
             items[i] = this.ParserBuild(node.elements[i]);
         }
-        
+
         return new $data.Expressions.ArrayLiteralExpression(items);
     },
-    
+
     ParserProperty: function(node){
         return new $data.Expressions.ObjectFieldExpression(node.key.name, this.ParserBuild(node.value));
     },
-    
+
     ParserFunctionExpression: function(node){
         var params = new Array(node.params.length);
         for (var i = 0; i < node.params.length; i++){
@@ -140,20 +142,20 @@ $C('$data.Expressions.CodeParser', null, null, {
 
         return result;
     },
-    
+
     ParserParameter: function(node, nodeType){
         var result = new $data.Expressions.ParameterExpression(node.name, null, nodeType);
         if (nodeType == $data.Expressions.ExpressionType.LambdaParameterReference){
             result.paramIndex = this.lambdaParams.indexOf(node.name);
         }
-        
+
         return result;
     },
-    
+
     ParserLogicalExpression: function(node){
         return this.ParserBinaryExpression(node);
     },
-    
+
     ParserOperators: {
         value: {
             "==": { expressionType: $data.Expressions.ExpressionType.Equal, type: "boolean", implementation: function (a, b) { return a == b; } },
@@ -177,7 +179,7 @@ $C('$data.Expressions.CodeParser', null, null, {
             "in": { expressionType: $data.Expressions.ExpressionType.In, type: 'boolean', implementation: function (a, b) { return a in b; } }
         }
     },
-    
+
     ParserUnaryOperators: {
         value: {
             "+": { arity: "prefix", expressionType: $data.Expressions.ExpressionType.Positive, type: "number", implementation: function (operand) { return +operand; } },
@@ -189,15 +191,15 @@ $C('$data.Expressions.CodeParser', null, null, {
             "--false": { arity: "suffix", expressionType: $data.Expressions.ExpressionType.Decrement, type: "number", implementation: function (operand) { return operand--; } }
         }
     },
-    
+
     ParserUnaryExpression: function(node){
         return new $data.Expressions.UnaryExpression(this.ParserBuild(node.argument), this.ParserUnaryOperators[node.operator], this.ParserUnaryOperators[node.operator].expressionType);
     },
-    
+
     ParserUpdateExpression: function(node){
         return new $data.Expressions.UnaryExpression(this.ParserBuild(node.argument), this.ParserUnaryOperators[node.operator + node.prefix], this.ParserUnaryOperators[node.operator + node.prefix].nodeType);
     },
-    
+
     ParserBinaryExpression: function(node){
         return new $data.Expressions.SimpleBinaryExpression(
             this.ParserBuild(node.left),
@@ -207,22 +209,22 @@ $C('$data.Expressions.CodeParser', null, null, {
             this.ParserOperators[node.operator].type
         );
     },
-    
+
     ParserThisExpression: function(node){
         return new $data.Expressions.ThisExpression();
     },
-    
+
     ParserLiteral: function(node){
         return new $data.Expressions.ConstantExpression(node.value, typeof node.value);
     },
-    
+
     ParserCallExpression: function(node){
         var method = this.ParserBuild(node.callee);
         var args = new Array(node.arguments.length);
         for (var i = 0; i < node.arguments.length; i++){
             args[i] = this.ParserBuild(node.arguments[i]);
         }
-        
+
         var member;
         var expression;
         switch (true){
@@ -250,7 +252,7 @@ $C('$data.Expressions.CodeParser', null, null, {
                 break;
             case "prefix":
                 switch (node.value) {
-                    case "{": 
+                    case "{":
                         n = this.BuildObjectLiteral(node);
                         break;
                     case "[":
@@ -344,7 +346,7 @@ $C('$data.Expressions.CodeParser', null, null, {
     BuildFunctionParameter: function (node) {
 
     },
-    
+
     BuildArray: function (node) {
         switch (node.second.type) {
             case "string":
@@ -435,7 +437,7 @@ $C('$data.Expressions.CodeParser', null, null, {
                 member = method.member;
                 break;
             case method instanceof $data.Expressions.ParameterExpression:
-                expression = Container.createConstantExpression(null, typeof null);  
+                expression = Container.createConstantExpression(null, typeof null);
                 member = method;
                 break;
             //TODO: missing default case
@@ -483,7 +485,7 @@ $C('$data.Expressions.CodeParser', null, null, {
         var right = this.Build2(node.second || node.right);
         var result = new $data.Expressions.SimpleBinaryExpression(left, right, nodeType, node.value, operator.type);
         return result;
-    }   
+    }
 
     //Build: function (node, expNode) {
     //    var n;
@@ -503,3 +505,4 @@ $C('$data.Expressions.CodeParser', null, null, {
 
 });
 
+export default $data

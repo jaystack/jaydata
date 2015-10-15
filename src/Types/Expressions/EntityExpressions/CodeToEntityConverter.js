@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisitor, null, {
     constructor: function (scopeContext) {
         ///<summary>This visitor converts a JS language tree into a semantical Entity Expression Tree &#10;This visitor should be invoked on a CodeExpression</summary>
@@ -135,7 +137,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 member = Container.createMemberInfoExpression(operation);
                 result = Container.createFrameOperationExpression(exp, member, this._resolveFunctionArguments(args, operation.parameters));
                 return result;
-                
+
             case exp instanceof $data.Expressions.EntityExpression:
                 var operation = this.scopeContext.resolveTypeOperations(member.value, exp, context.frameType);
                 if (!operation) {
@@ -274,3 +276,5 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
         }
     }
 });
+
+export default $data

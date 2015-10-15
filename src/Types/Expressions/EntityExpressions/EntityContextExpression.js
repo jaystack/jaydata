@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.EntityContextExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (instance) {
         ///<param name="instance" type="$data.EntityContext" />
@@ -10,3 +12,5 @@ $C('$data.Expressions.EntityContextExpression', $data.Expressions.ExpressionNode
     nodeType : { value: $data.Expressions.ExpressionType.EntityContext, enumerable: true }
 
 });
+
+export default $data

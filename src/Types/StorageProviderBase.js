@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.storageProviders = {
     DbCreationType: {
         Merge: 10,
@@ -466,3 +468,5 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         set: function () { }
     }
 });
+
+export default $data

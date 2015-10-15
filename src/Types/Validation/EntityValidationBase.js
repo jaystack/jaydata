@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $data.Class.define('$data.Validation.ValidationError', null, null, {
     constructor: function (message, propertyDefinition, type) {
@@ -37,3 +38,5 @@ $data.Class.define('$data.Validation.EntityValidationBase', null, null, {
 
 $data.Validation = $data.Validation || {};
 $data.Validation.Entity = new $data.Validation.EntityValidationBase();
+
+export default $data

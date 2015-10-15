@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 ///EntitySet is responsible for
 /// -creating and holding entityType through schema
 /// - provide Add method
@@ -12,7 +14,7 @@ $data.entitySetState = { created: 0, defined: 1, active: 2 };
 
 $data.Class.defineEx('$data.EntitySet',
     [
-        { type: $data.Queryable, params: [new ConstructorParameter(1)] }
+        { type: $data.Queryable, params: [new $data.ConstructorParameter(1)] }
     ], null,
 {
     constructor: function (elementType, context, collectionName, eventHandlers, roles) {
@@ -32,7 +34,7 @@ $data.Class.defineEx('$data.EntitySet',
 
         this.collectionName = collectionName;
         this.roles = roles;
-        
+
         for (var i in eventHandlers){
             this[i] = eventHandlers[i];
         }
@@ -71,9 +73,9 @@ $data.Class.defineEx('$data.EntitySet',
         ///     <summary>Creates a typed entity and adds to the context.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
         ///     <example>
-        ///         
+        ///
         ///         Persons.add({ Name: 'John', Email: 'john@example.com', Age: 30, Gender: 'Male' });
-        ///         
+        ///
         ///     </example>
         /// </signature>
         /// <signature>
@@ -127,7 +129,7 @@ $data.Class.defineEx('$data.EntitySet',
         ///     <summary>Marks the given entity as Deleted.</summary>
         ///     <param name="entity" type="$data.Entity">The entity to remove</param>
         ///     <example>
-        ///         
+        ///
         ///         Persons.remove(person);
         ///
         ///     </example>
@@ -153,7 +155,7 @@ $data.Class.defineEx('$data.EntitySet',
         ///     <summary>Creates a typed entity and adds to the Context with Unchanged state.</summary>
         ///     <param name="entity" type="Object">The init parameters whish is based on Entity</param>
         ///     <example>
-        ///         
+        ///
         ///         Persons.attach({ Id: 5, Email: 'newEmail@example.com' });
         ///
         ///     </example>
@@ -167,7 +169,7 @@ $data.Class.defineEx('$data.EntitySet',
         ///
         ///     </example>
         ///     <example>
-        ///         Set an entity's related entities without loading 
+        ///         Set an entity's related entities without loading
         ///
         ///         var categoryPromo = new $news.Types.Category({ Id: 5 });
         ///         Category.attach(categoryPromo);
@@ -183,7 +185,7 @@ $data.Class.defineEx('$data.EntitySet',
         } else if (!(entity instanceof this.createNew)) {
             data = new this.createNew(entity);
         }
-        
+
         for (var i = 0; i < this.entityContext.stateManager.trackedEntities.length; i++) {
             var current = this.entityContext.stateManager.trackedEntities[i];
             if (current.data === data)
@@ -416,3 +418,5 @@ $data.Class.defineEx('$data.EntitySet',
         return this.entityContext.bulkInsert(this, fields, datas, callback);
     }
 }, null);
+
+export default $data

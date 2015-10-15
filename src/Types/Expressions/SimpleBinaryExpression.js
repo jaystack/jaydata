@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $C('$data.Expressions.SimpleBinaryExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (left, right, nodeType, operator, type, resolution) {
@@ -23,3 +24,5 @@ $C('$data.Expressions.SimpleBinaryExpression', $data.Expressions.ExpressionNode,
     //nodeType: { value: $data.Expressions.ExpressionType },
     type: { value: "number", writable: true }
 });
+
+export default $data

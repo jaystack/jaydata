@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.EntityStateManager', null, null,
 {
     constructor: function (entityContext) {
@@ -12,3 +14,5 @@ $data.Class.define('$data.EntityStateManager', null, null,
         this.trackedEntities = [];
     }
 }, null);
+
+export default $data

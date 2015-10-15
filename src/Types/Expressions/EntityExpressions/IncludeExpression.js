@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.IncludeExpression', $data.Expressions.EntitySetExpression, null, {
     constructor: function (source, selector) {
     },
@@ -11,3 +13,5 @@ $C('$data.Expressions.IncludeExpression', $data.Expressions.EntitySetExpression,
         return result;
     }
 }, null);
+
+export default $data

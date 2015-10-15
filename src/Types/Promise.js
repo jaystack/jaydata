@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.Promise', null, null, {
     always: function () { Guard.raise(new Exception('$data.Promise.always', 'Not implemented!')); },
     done: function () { Guard.raise(new Exception('$data.Promise.done', 'Not implemented!')); },
@@ -34,3 +36,5 @@ $data.Class.define('$data.PromiseHandlerBase', null, null, {
 }, null);
 
 $data.PromiseHandler = $data.PromiseHandlerBase;
+
+export default $data

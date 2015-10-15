@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVisitor, null, {
 
     constructor: function (expression, resolver) {
@@ -86,7 +88,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
                 return eNode;
 
         }
-            
+
 
         return eNode;
     },
@@ -121,7 +123,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         var right = this.Visit(eNode.right, context);
         var expr = $data.Expressions;
 
-        if (left instanceof expr.ConstantExpression && right instanceof expr.ConstantExpression) 
+        if (left instanceof expr.ConstantExpression && right instanceof expr.ConstantExpression)
         {
                 var result = eNode.implementation(left.value, right.value);
                 return Container.createConstantExpression(result, typeof result);
@@ -165,7 +167,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         }
         if (expression === eNode.expression && member === eNode.member)
             return eNode;
-  
+
         result = Container.createPropertyExpression(expression, member);
         return result;
     },
@@ -221,3 +223,5 @@ $C("$data.Expressions.AggregatedVisitor", $data.Expressions.ExpressionVisitor, n
     }
 
 });
+
+export default $data

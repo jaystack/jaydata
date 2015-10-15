@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.ExpressionMonitor', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (monitorDefinition) {
         this.Visit = function (expression, context) {
@@ -52,3 +54,5 @@ $C('$data.Expressions.ExpressionMonitor', $data.Expressions.EntityExpressionVisi
         };
     }
 });
+
+export default $data

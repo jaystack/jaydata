@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $data.Class.define("$data.Authentication.FacebookAuth", $data.Authentication.AuthenticationBase, null, {
     constructor: function (cfg) {
         this.configuration = $data.typeSystem.extend({
@@ -85,3 +87,5 @@ $data.Class.define("$data.Authentication.FacebookAuth", $data.Authentication.Aut
         });
     }
 }, null);
+
+export default $data

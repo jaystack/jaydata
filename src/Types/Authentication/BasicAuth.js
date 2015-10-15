@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $data.Class.define("$data.Authentication.BasicAuth.BasicAuth", $data.Authentication.AuthenticationBase, null, {
     constructor: function (cfg) {
         this.configuration = $data.typeSystem.extend({
@@ -23,7 +25,7 @@ $data.Class.define("$data.Authentication.BasicAuth.BasicAuth", $data.Authenticat
             if(typeof origBeforeSend == "function")
                 origBeforeSend(xhr);
         };
-        
+
         $data.ajax(cfg);
     },
     __encodeBase64: function (val) {
@@ -68,3 +70,5 @@ $data.Class.define("$data.Authentication.BasicAuth.BasicAuth", $data.Authenticat
         return base64;
     }
 }, null);
+
+export default $data

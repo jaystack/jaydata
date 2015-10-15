@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.CodeExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, parameters) {
         if (Container.resolveType(Container.getTypeName(source)) == $data.String && source.replace(/^[\s\xA0]+/, "").match("^function") != "function") {
@@ -9,3 +11,5 @@ $C('$data.Expressions.CodeExpression', $data.Expressions.ExpressionNode, null, {
     },
     nodeType: { value: $data.Expressions.ExpressionType.Code, enumerable: true }
 });
+
+export default $data

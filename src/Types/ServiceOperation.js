@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define('$data.ServiceOperation', null, null, {}, {
     translateDefinition: function (propertyDef, name, definedBy) {
         propertyDef.serviceName = name;
@@ -168,3 +170,5 @@ $data.Class.define('$data.ServiceAction', $data.ServiceOperation, null, {}, {
         return $data.ServiceOperation.generateServiceOperation.apply(this, arguments);
     }
 });
+
+export default $data

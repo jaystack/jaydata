@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $C('$data.Expressions.EntityExpressionVisitor', null, null, {
 
     constructor: function () {
@@ -276,3 +278,5 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
         return expression;
     }
 });
+
+export default $data

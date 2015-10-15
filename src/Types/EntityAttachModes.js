@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define("$data.EntityAttachMode", null, null, {}, {
     defaultMode: 'Default',
     AllChanged: function (data) {
@@ -19,3 +21,5 @@ $data.Class.define("$data.EntityAttachMode", null, null, {}, {
         data.changedProperties = undefined;
     }
 });
+
+export default $data

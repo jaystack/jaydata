@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.ObjectFieldExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (fieldName, expression) {
         ///<param name="name" type="string" />
@@ -16,3 +18,4 @@ $C('$data.Expressions.ObjectFieldExpression', $data.Expressions.ExpressionNode, 
     }
 }, null);
 
+export default $data

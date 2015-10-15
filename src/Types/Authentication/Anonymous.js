@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $data.Class.define("$data.Authentication.Anonymous", $data.Authentication.AuthenticationBase, null, {
     constructor: function (cfg) {
         this.configuration = cfg || {};
@@ -13,3 +15,5 @@ $data.Class.define("$data.Authentication.Anonymous", $data.Authentication.Authen
     }
 
 }, null);
+
+export default $data

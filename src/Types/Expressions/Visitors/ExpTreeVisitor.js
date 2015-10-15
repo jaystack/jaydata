@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../../TypeSystem/index.js';
+
 $data.Class.define('$data.Expressions.ExpTreeVisitor',
     null, null,
     {
@@ -35,7 +37,7 @@ $data.Class.define('$data.Expressions.ExpTreeVisitor',
             ///<param name="eNode" type="$data.Expressions.ExpressionNodeTypes.LiteralExpressionNode"/>
             ///<param name="context" type="Object"/>
             //<return type="$data.Expressions.ExpressionNodeTypes.LiteralExpressionNode"/>
-            
+
             return eNode;
         },
         VisitVariable: function (eNode, context) {

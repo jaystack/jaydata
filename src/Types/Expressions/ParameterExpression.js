@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.ParameterExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (name, type, nodeType) {
         ///<param name="name" type="string" />
@@ -21,3 +23,5 @@ $C('$data.Expressions.ParameterExpression', $data.Expressions.ExpressionNode, nu
         return result;
     }
 }, null);
+
+export default $data

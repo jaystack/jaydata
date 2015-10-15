@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $C('$data.Expressions.PagingExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, expression, nType) {
         ///<param name="name" type="string" />
@@ -16,3 +18,5 @@ $C('$data.Expressions.PagingExpression', $data.Expressions.ExpressionNode, null,
         return result;
     }
 }, null);
+
+export default $data

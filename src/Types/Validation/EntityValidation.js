@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
+
 $data.Class.define('$data.Validation.Defaults', null, null, null, {
     validators: {
         value: {
@@ -171,3 +173,5 @@ $data.Class.define('$data.Validation.EntityValidation', $data.Validation.EntityV
 }, null);
 
 $data.Validation.Entity = new $data.Validation.EntityValidation();
+
+export default $data
