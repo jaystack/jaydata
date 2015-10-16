@@ -6,6 +6,11 @@ import { StringFunctions } from './Extensions.js'
 
 $data.StringFunctions = StringFunctions
 
+var _modelHolder = null;
+$data.setModelContainer = function(modelHolder){
+  _modelHolder = modelHolder;
+}
+
 let _window;
 if (typeof window === 'undefined') {
   _window = {}; //TOD check is it works?
@@ -470,31 +475,7 @@ if (typeof window === 'undefined') {
 
       $data.models = $data.models || {}
       var root = container === $data.Container ? $data.models : container;
-      for (var i = 0; i < classNameParts.length; i++) {
-        var part = classNameParts[i];
-        if (!root[part]) {
-          var ns = {};
-          ns.__namespace = true;
-          root[part] = ns;
-        }
-        root = root[part];
-      }
-
-      var _root = $data
-      if(classNameParts[0] == '$data') {
-        let _classNameParts = [].concat(classNameParts)
-        _classNameParts.shift()
-        for (var i = 0; i < _classNameParts.length; i++) {
-          var _part = _classNameParts[i];
-          if (!_root[_part]) {
-            var _ns = {};
-            _ns.__namespace = true;
-            _root[_part] = _ns;
-          }
-          _root = _root[_part];
-        }
-      }
-
+      root = $data.Container.createOrGetNamespace(classNameParts, root)
 
       var classFunction = null;
       classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
@@ -514,7 +495,19 @@ if (typeof window === 'undefined') {
         }
       }
 
-      _root[shortClassName] = root[shortClassName] = this.classNames[className] = classFunction;
+      root[shortClassName] = this.classNames[className] = classFunction;
+
+      if(classNameParts[0] == '$data') {
+        var _classNameParts = [].concat(classNameParts)
+        _classNameParts.shift()
+        var _root = $data.Container.createOrGetNamespace(_classNameParts, $data)
+        _root[shortClassName] = classFunction
+      }
+      if(_modelHolder && container == $data.Container){
+        var innerNS = $data.Container.createOrGetNamespace(classNameParts, _modelHolder)
+        innerNS[shortClassName] = classFunction
+      }
+
       //classFunction.toJSON = classToJSON;
       var baseCount = classFunction.baseTypes.length;
       for (var i = 0; i < baseCount; i++) {
@@ -1296,6 +1289,19 @@ if (typeof window === 'undefined') {
           _converters.from[targetName] = toConverterOrFromConverters;
         }
       }
+    };
+
+    this.createOrGetNamespace = function(parts, root) {
+      for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        if (!root[part]) {
+          var ns = {};
+          ns.__namespace = true;
+          root[part] = ns;
+        }
+        root = root[part];
+      }
+      return root;
     };
   }
   $data.ContainerClass = ContainerCtor;

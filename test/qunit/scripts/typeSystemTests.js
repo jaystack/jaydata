@@ -284,9 +284,9 @@
     }, null);
 
     var mixClass2 = $data.Class.defineEx('mixClass2', [
-        { type: dataClass, params: [new $data.ConstructorParameter(0), 'hello2', 1337] },
+        { type: dataClass, params: [new $data.Class.ConstructorParameter(0), 'hello2', 1337] },
         { type: simpleClass, propagateTo: 'simpleClass' },
-        { type: simpleClass2, params: [new $data.ConstructorParameter(1), 8080], propagateTo: 'simpleClass2' }
+        { type: simpleClass2, params: [new $data.Class.ConstructorParameter(1), 8080], propagateTo: 'simpleClass2' }
     ], null, {
         constructor: function () {
             this.ctorArguments = arguments;
@@ -339,9 +339,9 @@
     }, null);
 
     var mixClass3 = $data.Class.defineEx('mixClass3', [
-        { type: dataClass, params: [new $data.ConstructorParameter(0), 'almafa', 1337] },
+        { type: dataClass, params: [new $data.Class.ConstructorParameter(0), 'almafa', 1337] },
         { type: simpleClass, propagateTo: 'simpleClass' },
-        { type: simpleClass3, params: [function () { return this; }, function () { return this.simpleClass; }, new $data.ConstructorParameter(1), 8080], propagateTo: 'simpleClass3' }
+        { type: simpleClass3, params: [function () { return this; }, function () { return this.simpleClass; }, new $data.Class.ConstructorParameter(1), 8080], propagateTo: 'simpleClass3' }
     ], null, {
         constructor: function () {
             this.ctorArguments = arguments;

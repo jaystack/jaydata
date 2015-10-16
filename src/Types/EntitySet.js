@@ -14,7 +14,7 @@ $data.entitySetState = { created: 0, defined: 1, active: 2 };
 
 $data.Class.defineEx('$data.EntitySet',
     [
-        { type: $data.Queryable, params: [new $data.ConstructorParameter(1)] }
+        { type: $data.Queryable, params: [new $data.Class.ConstructorParameter(1)] }
     ], null,
 {
     constructor: function (elementType, context, collectionName, eventHandlers, roles) {
