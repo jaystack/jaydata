@@ -88,6 +88,15 @@
     "gulp-replace": "^0.5.3",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.2.0",
+    "karma": "^0.13.11",
+    "karma-chrome-launcher": "^0.2.1",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-ie-launcher": "^0.2.0",
+    "karma-coverage": "^0.5.2",
+    "karma-html-reporter": "^0.2.7",
+    "karma-istanbul-reporter": "^0.0.1",
+    "karma-qunit": "^0.1.5",
+    "istanbul": "^0.3.22",
     "minimist": "^1.1.1"
   }
 }
