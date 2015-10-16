@@ -15,7 +15,7 @@ var gulp_babel = require('gulp-babel');
 //var browserify = require('gulp-browserify');
 var babelify = require("babelify");
 var fs = require('fs');
-
+var karma = require('karma').server;
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -25,7 +25,8 @@ var paths = {
 
 gulp.task('default', ['babel:compile'], function() {});
 gulp.task('bundle', function() {
-  return browserify({
+    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+    return browserify({
       standalone: '$data'
     })
     .transform(babelify)
@@ -33,7 +34,16 @@ gulp.task('bundle', function() {
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
     .pipe(fs.createWriteStream("dist/JayData.js"));
-})
+});
+
+gulp.task('test', ['bundle'], function(done){
+    karma.start({
+    	configFile: __dirname + '/karma.conf.js',
+    	singleRun: true
+    }, function(){
+        done();
+    });
+});
 
 gulp.task('babel:compile', function() {
   return gulp.src(paths.js)

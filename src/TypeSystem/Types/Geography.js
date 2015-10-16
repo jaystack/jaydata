@@ -1,4 +1,6 @@
 import $data from '../TypeSystem.js'
+import Exception from '../Exception.js';
+import { Guard } from '../utils.js';
 
 /* $data.GeographyBase */
 $data.GeographyBase = function GeographyBase() {

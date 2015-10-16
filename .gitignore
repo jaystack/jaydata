@@ -21,7 +21,10 @@ build
 packages
 node_modules
 npm-debug.log
-dist
+/dist/*
+!dist/package.json
+coverage
+docs
 jaydata.js
 test.html
 test.js

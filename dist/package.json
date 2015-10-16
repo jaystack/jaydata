@@ -1,5 +1,6 @@
 {
   "name": "jaydata",
+  "version": "1.4.1",
   "description": "Cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
   "keywords": [
     "HTML5 data management",
@@ -16,13 +17,15 @@
     "iPhone",
     "Android"
   ],
-  "version": "1.4.1",
   "homepage": "http://jaydata.org",
   "author": {
     "name": "JayData",
     "url": "http://jaydata.org"
   },
-  "dependencies": {},
+  "main": "JayData.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "contributors": [
     {
       "name": "Dániel József"
@@ -60,10 +63,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/jaydata/jaydata.git"
-  },
-  "engines": {
-    "node": ">=0.6.0"
+    "url": "git+ssh://git@github.com/jaydata/jaydata.git"
   },
   "licenses": [
     {
@@ -75,28 +75,8 @@
       "url": "http://jaydata.org/licensing"
     }
   ],
-  "devDependencies": {
-    "babel": "^5.8.23",
-    "babelify": "^6.3.0",
-    "browserify": "^11.2.0",
-    "gulp": "^3.8.11",
-    "gulp-babel": "^5.2.1",
-    "gulp-browserify": "^0.5.1",
-    "gulp-concat": "^2.5.2",
-    "gulp-header": "^1.2.2",
-    "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.5.3",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "^1.2.0",
-    "karma": "^0.13.11",
-    "karma-chrome-launcher": "^0.2.1",
-    "karma-firefox-launcher": "^0.1.6",
-    "karma-ie-launcher": "^0.2.0",
-    "karma-coverage": "^0.5.2",
-    "karma-html-reporter": "^0.2.7",
-    "karma-istanbul-reporter": "^0.0.1",
-    "karma-qunit": "^0.1.5",
-    "istanbul": "^0.3.22",
-    "minimist": "^1.1.1"
-  }
+  "bugs": {
+    "url": "https://github.com/jaydata/jaydata/issues"
+  },
+  "homepage": "https://github.com/jaydata/jaydata#readme"
 }

@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from '../TypeSystem/index.js';
 
 var EventSubscriber = $data.Class.define("EventSubscriber", null, null, {
     constructor: function (handler, state, thisArg) {
@@ -444,7 +444,7 @@ $data.Entity = $data.Class.define("$data.Entity", null, null, {
 
     changedProperties: {
         dataType: Array,
-        elementType: window["MemberDefinition"],
+        elementType: MemberDefinition,
         storeOnObject: true,
         monitorChanges: false,
         notMapped: true,
