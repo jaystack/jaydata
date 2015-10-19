@@ -6,7 +6,7 @@ $data.Class.define('$data.Expressions.ExecutorVisitor', $data.Expressions.ExpTre
     VisitVariable: function (eNode, context) {
         if (!eNode.executable)
             return eNode;
-        var value = (eNode.name == context.paramsName) ? context.paramContext : window[eNode.name];
+        var value = (eNode.name == context.paramsName) ? context.paramContext : $data.__global[eNode.name];
         if (typeof value == 'undefined')
 			Guard.raise(
 				new Exception("Unknown variable in '" + context.operation + "' operation. The variable isn't referenced in the parameter context and it's not a global variable: '" + eNode.name + "'.",

@@ -109,7 +109,7 @@ import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.j
                     subType = "PARAMETERROOT";
                 else if (this._isParam(node.value))
                     subType = "PARAMETER";
-                else if (window[node.value] != undefined)
+                else if ($data.__global[node.value] != undefined)
                     subType = "GLOBALOBJECT";
                 else
 					Guard.raise(

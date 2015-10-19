@@ -29,8 +29,8 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
 
         //TODO rename classes to reflex variable names
         //TODO engage localValueResolver here
-        //var globalVariableResolver = Container.createGlobalContextProcessor(window);
-        var constantResolver = Container.createConstantValueResolver(expression.parameters, window, this.scopeContext);
+        //var globalVariableResolver = Container.createGlobalContextProcessor($data.__global);
+        var constantResolver = Container.createConstantValueResolver(expression.parameters, $data.__global, this.scopeContext);
         var parameterProcessor = Container.createParameterResolverVisitor();
 
         jsCodeTree = parameterProcessor.Visit(jsCodeTree, constantResolver);

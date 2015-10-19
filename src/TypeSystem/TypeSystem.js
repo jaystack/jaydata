@@ -9,15 +9,14 @@ $data.StringFunctions = StringFunctions
 var _modelHolder = null;
 $data.setModelContainer = function(modelHolder){
   _modelHolder = modelHolder;
-}
+};
 
-let _window;
-if (typeof window === 'undefined') {
-  _window = {}; //TOD check is it works?
-} else {
-  _window = {};
-}
-(function init($data, global) {
+$data.__global = {}
+$data.setGlobal = function(globla){
+  $data.__global = globla;
+};
+
+(function init($data) {
 
   function il(msg) {
     if (typeof intellisense !== 'undefined') {
@@ -254,7 +253,6 @@ if (typeof window === 'undefined') {
     return property;
   }
 
-  //TODO global/window
   $data.MemberDefinition = MemberDefinition;
 
   var memberDefinitionPrefix = '$';
@@ -339,7 +337,7 @@ if (typeof window === 'undefined') {
     }
   };
   MemberDefinitionCollection.prototype.constructor = MemberDefinitionCollection;
-  $data.MemberDefinitionCollection = global["MemberDefinitionCollection"] = MemberDefinitionCollection;
+  $data.MemberDefinitionCollection = MemberDefinitionCollection;
 
   function ClassEngineBase() {
     this.classNames = {};
@@ -812,10 +810,7 @@ if (typeof window === 'undefined') {
 
   };
   var Class
-  $data.Class = _window['Class'] = Class = new ClassEngineBase();
-
-  //(function (global) {
-  global = _window;
+  $data.Class = Class = new ClassEngineBase();
 
   function ContainerCtor(parentContainer) {
     var parent = parentContainer;
@@ -1307,18 +1302,11 @@ if (typeof window === 'undefined') {
   $data.ContainerClass = ContainerCtor;
 
   var c;
-  var Container = $data.Container = c = global["C$"] = new ContainerCtor();
+  var Container = $data.Container = c = new ContainerCtor();
 
   $data.createContainer = function() {
     return new ContainerCtor($data.Container);
   }
-
-  //})(window);
-
-  global["$C"] = function() {
-    Class.define.apply(Class, arguments);
-  };
-
 
   var storeProperty = function(memberDefinition, value) {
     var backingFieldName = "_" + memberDefinition.name;
@@ -1459,7 +1447,7 @@ if (typeof window === 'undefined') {
 
 
 
-})($data, _window);
+})($data);
 
 $data.defaultErrorCallback = function() {
   //console.log('DEFAULT ERROR CALLBACK:');
@@ -1631,7 +1619,9 @@ $data.fdebug = {
 };
 
 
-export var $C = _window["$C"]
+export var $C = function() {
+  $data.Class.define.apply($data.Class, arguments);
+}
 export var Container = $data.Container
 export var MemberDefinition = $data.MemberDefinition
 export default $data
