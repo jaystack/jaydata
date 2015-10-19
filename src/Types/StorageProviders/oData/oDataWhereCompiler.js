@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata';
+
 $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix) {
         this.provider = provider;

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata';
+
 $data.oDataConverter = {
     fromDb: {
         '$data.Byte': $data.Container.proxyConverter,

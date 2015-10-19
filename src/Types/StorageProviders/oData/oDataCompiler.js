@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata';
+
 $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function () {
         this.context = {};
@@ -16,7 +18,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
 
         var queryFragments = { urlText: "" };
-        
+
         this.Visit(query.expression, queryFragments);
 
         query.modelBinderConfig = {};
@@ -96,8 +98,8 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitFindExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        
-        if (expression.subMember) { 
+
+        if (expression.subMember) {
             context.urlText += "/" + expression.subMember.memberName;
         }
 
@@ -194,7 +196,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         var converter = this.provider.fieldConverter.toDb[typeName];
         var value = converter ? converter(expression.value) : expression.value;
-        
+
 
         if (context.method === 'GET' || !context.method) {
             converter = this.provider.fieldConverter.escape[typeName];
@@ -223,7 +225,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        context.urlText += '/$count';       
+        context.urlText += '/$count';
     },
 
     VisitBatchExecuteQueryExpression: function (expression, context) {

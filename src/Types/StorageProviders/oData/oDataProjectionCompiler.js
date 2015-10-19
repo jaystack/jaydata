@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata';
+
 $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (entityContext) {
         this.entityContext = entityContext;
@@ -78,7 +80,7 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
     },
-    
+
     VisitEntityFieldExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);

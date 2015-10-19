@@ -12,6 +12,8 @@ var replace = require('gulp-replace');
 var header = require('gulp-header');
 var sourcemaps = require('gulp-sourcemaps');
 var gulp_babel = require('gulp-babel');
+//var derequire = require('gulp-derequire');
+var derequire = require('browserify-derequire');
 //var browserify = require('gulp-browserify');
 var babelify = require("babelify");
 var fs = require('fs');
@@ -27,13 +29,33 @@ gulp.task('default', ['babel:compile'], function() {});
 gulp.task('bundle', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
     return browserify({
-      standalone: '$data'
+      standalone: '$data',
+      plugin: [
+        [ "browserify-derequire" ]
+    ]
     })
     .transform(babelify)
     .require('src/index.js', { entry: true })
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
+    //.pipe(derequire())
     .pipe(fs.createWriteStream("dist/JayData.js"));
+});
+
+gulp.task('odataprovider', function() {
+    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+    return browserify(/*{
+        plugin: [
+            [ "browserify-derequire" ]
+        ]
+    }*/)
+    .ignore('jaydata')
+    .transform(babelify)
+    .require('src/Types/StorageProviders/oData/index.js', { entry: true })
+    .bundle()
+    .on("error", function (err) { console.log("Error: " + err.message) })
+    //.pipe(derequire())
+    .pipe(fs.createWriteStream("dist/oDataProvider.js"));
 });
 
 gulp.task('test', ['bundle'], function(done){
