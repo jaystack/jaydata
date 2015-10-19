@@ -24,7 +24,7 @@ $data.Class.define('$data.PromiseHandlerBase', null, null, {
     createCallback: function (callBack) {
         callBack = $data.typeSystem.createCallbackSetting(callBack);
 
-        return cbWrapper = {
+        return {
             success: callBack.success,
             error: callBack.error,
             notify: callBack.notify
