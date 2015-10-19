@@ -19,9 +19,6 @@ if (!console.error) console.error = function() {};
   ///<summary>
   /// Collection of JayData services
   ///</summary>
-  if (typeof window !== 'undefined') {
-    //window['$data'] = $data
-  }
   $data.__namespace = true;
   $data.version = "JayData 1.2.0";
   $data.versionNumber = "1.2.0";

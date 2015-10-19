@@ -6,13 +6,17 @@ import { StringFunctions } from './Extensions.js'
 
 $data.StringFunctions = StringFunctions
 
-let _window;
-if (typeof window === 'undefined') {
-  _window = {}; //TOD check is it works?
-} else {
-  _window = {};
-}
-(function init($data, global) {
+var _modelHolder = null;
+$data.setModelContainer = function(modelHolder){
+  _modelHolder = modelHolder;
+};
+
+$data.__global = {}
+$data.setGlobal = function(globla){
+  $data.__global = globla;
+};
+
+(function init($data) {
 
   function il(msg) {
     if (typeof intellisense !== 'undefined') {
@@ -249,7 +253,6 @@ if (typeof window === 'undefined') {
     return property;
   }
 
-  //TODO global/window
   $data.MemberDefinition = MemberDefinition;
 
   var memberDefinitionPrefix = '$';
@@ -334,7 +337,7 @@ if (typeof window === 'undefined') {
     }
   };
   MemberDefinitionCollection.prototype.constructor = MemberDefinitionCollection;
-  $data.MemberDefinitionCollection = global["MemberDefinitionCollection"] = MemberDefinitionCollection;
+  $data.MemberDefinitionCollection = MemberDefinitionCollection;
 
   function ClassEngineBase() {
     this.classNames = {};
@@ -470,31 +473,7 @@ if (typeof window === 'undefined') {
 
       $data.models = $data.models || {}
       var root = container === $data.Container ? $data.models : container;
-      for (var i = 0; i < classNameParts.length; i++) {
-        var part = classNameParts[i];
-        if (!root[part]) {
-          var ns = {};
-          ns.__namespace = true;
-          root[part] = ns;
-        }
-        root = root[part];
-      }
-
-      var _root = $data
-      if(classNameParts[0] == '$data') {
-        let _classNameParts = [].concat(classNameParts)
-        _classNameParts.shift()
-        for (var i = 0; i < _classNameParts.length; i++) {
-          var _part = _classNameParts[i];
-          if (!_root[_part]) {
-            var _ns = {};
-            _ns.__namespace = true;
-            _root[_part] = _ns;
-          }
-          _root = _root[_part];
-        }
-      }
-
+      root = $data.Container.createOrGetNamespace(classNameParts, root)
 
       var classFunction = null;
       classFunction = this.classFunctionBuilder(shortClassName, baseClasses, classDefinition, instanceDefinition);
@@ -514,7 +493,19 @@ if (typeof window === 'undefined') {
         }
       }
 
-      _root[shortClassName] = root[shortClassName] = this.classNames[className] = classFunction;
+      root[shortClassName] = this.classNames[className] = classFunction;
+
+      if(classNameParts[0] == '$data') {
+        var _classNameParts = [].concat(classNameParts)
+        _classNameParts.shift()
+        var _root = $data.Container.createOrGetNamespace(_classNameParts, $data)
+        _root[shortClassName] = classFunction
+      }
+      if(_modelHolder && container == $data.Container){
+        var innerNS = $data.Container.createOrGetNamespace(classNameParts, _modelHolder)
+        innerNS[shortClassName] = classFunction
+      }
+
       //classFunction.toJSON = classToJSON;
       var baseCount = classFunction.baseTypes.length;
       for (var i = 0; i < baseCount; i++) {
@@ -819,10 +810,7 @@ if (typeof window === 'undefined') {
 
   };
   var Class
-  $data.Class = _window['Class'] = Class = new ClassEngineBase();
-
-  //(function (global) {
-  global = _window;
+  $data.Class = Class = new ClassEngineBase();
 
   function ContainerCtor(parentContainer) {
     var parent = parentContainer;
@@ -1297,22 +1285,28 @@ if (typeof window === 'undefined') {
         }
       }
     };
+
+    this.createOrGetNamespace = function(parts, root) {
+      for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        if (!root[part]) {
+          var ns = {};
+          ns.__namespace = true;
+          root[part] = ns;
+        }
+        root = root[part];
+      }
+      return root;
+    };
   }
   $data.ContainerClass = ContainerCtor;
 
   var c;
-  var Container = $data.Container = c = global["C$"] = new ContainerCtor();
+  var Container = $data.Container = c = new ContainerCtor();
 
   $data.createContainer = function() {
     return new ContainerCtor($data.Container);
   }
-
-  //})(window);
-
-  global["$C"] = function() {
-    Class.define.apply(Class, arguments);
-  };
-
 
   var storeProperty = function(memberDefinition, value) {
     var backingFieldName = "_" + memberDefinition.name;
@@ -1453,7 +1447,7 @@ if (typeof window === 'undefined') {
 
 
 
-})($data, _window);
+})($data);
 
 $data.defaultErrorCallback = function() {
   //console.log('DEFAULT ERROR CALLBACK:');
@@ -1625,7 +1619,9 @@ $data.fdebug = {
 };
 
 
-export var $C = _window["$C"]
+export var $C = function() {
+  $data.Class.define.apply($data.Class, arguments);
+}
 export var Container = $data.Container
 export var MemberDefinition = $data.MemberDefinition
 export default $data

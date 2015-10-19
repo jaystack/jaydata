@@ -167,7 +167,7 @@
         //var frameVisitor = new $data.FrameOperationVisitor(this.scopeContext);
         //expression = frameVisitor.Visit(expression);
         
-        var constantResolver = Container.createConstantValueResolver(undefined, window, this.scopeContext);
+        var constantResolver = Container.createConstantValueResolver(undefined, $data.__global, this.scopeContext);
         var parameterProcessor = Container.createParameterResolverVisitor();
 
         var exp = parameterProcessor.Visit(expression, constantResolver);
