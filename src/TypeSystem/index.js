@@ -14,9 +14,16 @@ import Converter from './Types/Converter.js';
 import { Guard as _guard } from './utils.js';
 import _exception from './Exception.js';
 
-export var Guard = _guard
-export var Exception = _exception
-export var $C = _$C
-export var Container = _container
 
-export default $data
+
+export var Guard = _guard;
+$data.Guard = _guard;
+
+export var Exception = _exception;
+$data.Exception = _exception;
+
+export var $C = _$C;
+$data.$C = _$C;
+
+export var Container = _container;
+export default $data;

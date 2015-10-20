@@ -24,8 +24,10 @@ module.exports = function(config) {
 			'karma-qunit'
 		],
     	files: [
-			'oldEndpoint/Scripts/jquery-1.9.0.min.js',
+			'oldEndpoint/Scripts/jquery-1.8.0.js',
 			'dist/JayData.js',
+			'test/compatiblity.js',
+			'test/qunit/NewsReaderContext.js',
 			'test/qunit/scripts/converterTests.js',
 			'test/qunit/scripts/typeSystemTests.js'
     	],

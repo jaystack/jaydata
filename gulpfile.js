@@ -29,13 +29,13 @@ gulp.task('default', ['babel:compile'], function() {});
 gulp.task('bundle', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
     return browserify({
-      standalone: '$data',
-      plugin: [
+        entries: ['./src/index.js'],
+      standalone: '$data'
+      /*plugin: [
         [ "browserify-derequire" ]
-    ]
+    ]*/
     })
     .transform(babelify)
-    .require('src/index.js', { entry: true })
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
     //.pipe(derequire())
@@ -44,14 +44,15 @@ gulp.task('bundle', function() {
 
 gulp.task('odataprovider', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
-    return browserify(/*{
-        plugin: [
+    return browserify({
+        entries: ['src/Types/StorageProviders/oData/index.js']
+        /*plugin: [
             [ "browserify-derequire" ]
-        ]
-    }*/)
-    .ignore('jaydata')
+        ]*/
+    })
+    //.require('./src/index.js', { expose: 'jaydata' })
     .transform(babelify)
-    .require('src/Types/StorageProviders/oData/index.js', { entry: true })
+    .external('jaydata')
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
     //.pipe(derequire())
