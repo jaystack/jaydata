@@ -26,37 +26,39 @@ var paths = {
 }
 
 gulp.task('default', ['babel:compile'], function() {});
-gulp.task('bundle', function() {
+gulp.task('core', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
-    return browserify({
-        entries: ['./src/index.js'],
-      standalone: '$data'
-      /*plugin: [
-        [ "browserify-derequire" ]
-    ]*/
-    })
+    return browserify()
     .transform(babelify)
+    .require('./src/index.js', { expose: 'jaydata/core' })
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
-    //.pipe(derequire())
-    .pipe(fs.createWriteStream("dist/JayData.js"));
+    .pipe(fs.createWriteStream("dist/core.js"));
 });
 
 gulp.task('odataprovider', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
-    return browserify({
-        entries: ['src/Types/StorageProviders/oData/index.js']
-        /*plugin: [
-            [ "browserify-derequire" ]
-        ]*/
-    })
-    //.require('./src/index.js', { expose: 'jaydata' })
+    return browserify()
     .transform(babelify)
-    .external('jaydata')
+    .require('./src/Types/StorageProviders/oData/index.js', { expose: 'jaydata/oDataProvider' })
+    .external('jaydata/core')
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
-    //.pipe(derequire())
     .pipe(fs.createWriteStream("dist/oDataProvider.js"));
+});
+
+gulp.task('jaydata', ['core', 'odataprovider'], function() {
+    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+    return browserify({
+        entries: ['./src/standalone.js'],
+        standalone: '$data'
+    })
+    .transform(babelify)
+    .external('jaydata/core')
+    .external('jaydata/oDataProvider')
+    .bundle()
+    .on("error", function (err) { console.log("Error: " + err.message) })
+    .pipe(fs.createWriteStream("dist/jaydata.js"));
 });
 
 gulp.task('test', ['bundle'], function(done){

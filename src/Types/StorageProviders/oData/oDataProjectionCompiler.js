@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
 $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (entityContext) {

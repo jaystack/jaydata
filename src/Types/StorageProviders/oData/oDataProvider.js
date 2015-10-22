@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
 var datajsPatch;
 datajsPatch = function (OData) {
