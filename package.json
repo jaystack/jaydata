@@ -22,7 +22,9 @@
     "name": "JayData",
     "url": "http://jaydata.org"
   },
-  "dependencies": {},
+  "dependencies": {
+    "acorn": "^2.4.0"
+  },
   "contributors": [
     {
       "name": "Dániel József"
@@ -80,16 +82,18 @@
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
     "browserify-derequire": "^0.9.4",
+    "google-closure-compiler": "^20151015.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.2.1",
     "gulp-browserify": "^0.5.1",
+    "gulp-closure-compiler": "^0.3.1",
     "gulp-concat": "^2.5.2",
     "gulp-derequire": "^2.1.0",
     "gulp-header": "^1.2.2",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.3",
     "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "^1.2.0",
+    "gulp-uglify": "^1.4.2",
     "istanbul": "^0.3.22",
     "karma": "^0.13.11",
     "karma-chrome-launcher": "^0.2.1",
@@ -99,6 +103,8 @@
     "karma-ie-launcher": "^0.2.0",
     "karma-istanbul-reporter": "^0.0.1",
     "karma-qunit": "^0.1.5",
-    "minimist": "^1.1.1"
+    "minimist": "^1.1.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

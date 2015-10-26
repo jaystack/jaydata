@@ -6,9 +6,9 @@
 // practices to access and manipulate data from various online and offline sources.
 //
 // Credits:
-//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
-//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
-//     Zoltán Gyebrovszki, Gábor Dolla
+//     Hajnalka Battancs, Dï¿½niel Jï¿½zsef, Jï¿½nos Roden, Lï¿½szlï¿½ Horvï¿½th, Pï¿½ter Nochta
+//     Pï¿½ter Zentai, Rï¿½bert Bï¿½nay, Szabolcs Czinege, Viktor Borza, Viktor Lï¿½zï¿½r,
+//     Zoltï¿½n Gyebrovszki, Gï¿½bor Dolla
 //
 // More info: http://jaydata.org
 $data.oDataConverter = {
@@ -1301,7 +1301,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         this.mainEntitySet = query.context.getEntitySetFromElementType(query.defaultType);
 
         var queryFragments = { urlText: "" };
-        
+
         this.Visit(query.expression, queryFragments);
 
         query.modelBinderConfig = {};
@@ -1324,7 +1324,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
         query.queryText = queryText;
         query.postData = queryFragments.postData;
-        
+
         return {
             queryText: queryText,
             withInlineCount: '$inlinecount' in queryFragments,
@@ -1461,7 +1461,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         var converter = this.provider.fieldConverter.toDb[typeName];
         var value = converter ? converter(expression.value) : expression.value;
-        
+
 
         if (context.method === 'GET' || !context.method) {
             converter = this.provider.fieldConverter.escape[typeName];
@@ -1490,7 +1490,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        context.urlText += '/$count';       
+        context.urlText += '/$count';
     }
 }, {});$C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix) {
@@ -1520,7 +1520,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         if (expression.nodeType == "in") {
             Guard.requireType("expression.right", expression.type, $data.Expressions.ConstantExpression);
             var paramValue = expression.right.value;
-            if (!paramValue instanceof Array) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
+            if (!(paramValue instanceof Array)) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
             var result = null;
             var orResolution = { mapTo: "or", dataType: "boolean", name: "or" };
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };
@@ -1920,7 +1920,7 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
     },
-    
+
     VisitEntityFieldExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);

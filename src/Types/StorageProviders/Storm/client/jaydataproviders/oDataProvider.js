@@ -584,7 +584,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         this.mainEntitySet = query.context.getEntitySetFromElementType(query.defaultType);
 
         var queryFragments = { urlText: "" };
-        
+
         this.Visit(query.expression, queryFragments);
 
         query.modelBinderConfig = {};
@@ -606,7 +606,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             }
         }
         query.queryText = queryText;
-        
+
         return {
             queryText: queryText,
             params: []
@@ -693,7 +693,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitCountExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        context.urlText += '/$count';       
+        context.urlText += '/$count';
     }
 }, {});$C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix) {
@@ -723,7 +723,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         if (expression.nodeType == "in") {
             Guard.requireType("expression.right", expression.type, $data.Expressions.ConstantExpression);
             var paramValue = expression.right.value;
-            if (!paramValue instanceof Array) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
+            if (!(paramValue instanceof Array)) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
             var result = null;
             var orResolution = { mapTo: "or", dataType: "boolean", name: "or" };
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };
@@ -1007,7 +1007,7 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
     },
-    
+
     VisitEntityFieldExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);

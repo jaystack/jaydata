@@ -962,7 +962,7 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
         if (expression.nodeType == "in") {
             Guard.requireType("expression.right", expression.type, $data.Expressions.ConstantExpression);
             var paramValue = expression.right.value;
-            if (!paramValue instanceof Array) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
+            if (!(paramValue instanceof Array)) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
             var result = null;
             var orResolution = { mapTo: "or", dataType: "boolean", name: "or" };
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };

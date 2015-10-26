@@ -6,9 +6,9 @@
 // practices to access and manipulate data from various online and offline sources.
 //
 // Credits:
-//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
-//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
-//     Zoltán Gyebrovszki, Gábor Dolla
+//     Hajnalka Battancs, Dï¿½niel Jï¿½zsef, Jï¿½nos Roden, Lï¿½szlï¿½ Horvï¿½th, Pï¿½ter Nochta
+//     Pï¿½ter Zentai, Rï¿½bert Bï¿½nay, Szabolcs Czinege, Viktor Borza, Viktor Lï¿½zï¿½r,
+//     Zoltï¿½n Gyebrovszki, Gï¿½bor Dolla
 //
 // More info: http://jaydata.org
 $data.WebApiConverter = {
@@ -1085,7 +1085,7 @@ $C('$data.storageProviders.webApi.webApiWhereCompiler', $data.Expressions.Entity
         if (expression.nodeType == "in") {
             Guard.requireType("expression.right", expression.type, $data.Expressions.ConstantExpression);
             var paramValue = expression.right.value;
-            if (!paramValue instanceof Array) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
+            if (!(paramValue instanceof Array)) { Guard.raise(new Exception("Right to the 'in' operator must be an array value")); }
             var result = null;
             var orResolution = { mapTo: "or", dataType: "boolean", name: "or" };
             var eqResolution = { mapTo: "eq", dataType: "boolean", name: "equal" };

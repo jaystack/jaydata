@@ -23,6 +23,8 @@ node_modules
 npm-debug.log
 /dist/*
 !dist/package.json
+!dist/core.js
+!dist/odataprovider.js
 coverage
 docs
 jaydata.js

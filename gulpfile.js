@@ -1,5 +1,4 @@
-﻿
-var babel = require('babel/register');
+﻿require('babel/register');
 var browserify = require('browserify');
 var config = require('./src/buildConfig.json');
 var pkg = require('./package.json');
@@ -11,11 +10,13 @@ var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var header = require('gulp-header');
 var sourcemaps = require('gulp-sourcemaps');
-var gulp_babel = require('gulp-babel');
-//var derequire = require('gulp-derequire');
+var babel = require('gulp-babel');
+var uglify = require('gulp-uglify');
+var closureCompiler = require('gulp-closure-compiler');
 var derequire = require('browserify-derequire');
-//var browserify = require('gulp-browserify');
-var babelify = require("babelify");
+var babelify = require('babelify');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
 var fs = require('fs');
 var karma = require('karma').server;
 
@@ -26,40 +27,53 @@ var paths = {
 }
 
 gulp.task('default', ['babel:compile'], function() {});
-gulp.task('core', function() {
-    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+
+gulp.task('jaydata', function() {
     return browserify()
     .transform(babelify)
     .require('./src/index.js', { expose: 'jaydata/core' })
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
-    .pipe(fs.createWriteStream("dist/core.js"));
+    .pipe(source('jaydata.js'))
+    .pipe(buffer())
+    //.pipe(uglify())
+    .pipe(gulp.dest('./dist/public'));
 });
 
 gulp.task('odataprovider', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
-    return browserify()
-    .transform(babelify)
-    .require('./src/Types/StorageProviders/oData/index.js', { expose: 'jaydata/oDataProvider' })
-    .external('jaydata/core')
-    .bundle()
-    .on("error", function (err) { console.log("Error: " + err.message) })
-    .pipe(fs.createWriteStream("dist/oDataProvider.js"));
-});
-
-gulp.task('jaydata', ['core', 'odataprovider'], function() {
-    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
     return browserify({
-        entries: ['./src/standalone.js'],
         standalone: '$data'
     })
     .transform(babelify)
+    .require('./src/Types/StorageProviders/oData/index.js', { entry: true })
     .external('jaydata/core')
-    .external('jaydata/oDataProvider')
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
-    .pipe(fs.createWriteStream("dist/jaydata.js"));
+    .pipe(source('oDataProvider.js'))
+    .pipe(buffer())
+    //.pipe(uglify())
+    .pipe(gulp.dest('./dist/public/jaydataproviders'));
 });
+
+gulp.task('nodejs', function() {
+    return gulp.src(['src/**/*.js'])
+    .pipe(babel())
+    .on('error', function(err){
+		console.log('>>> ERROR', err);
+		this.emit('end');
+	})
+    .pipe(gulp.dest('./dist/lib'));
+});
+
+/*gulp.task('jaydata.min', function(){
+    return gulp.src('./dist/jaydata.js')
+    .pipe(closureCompiler({
+        compilerPath: './node_modules/google-closure-compiler/compiler.jar',
+        fileName: 'dist/jaydata.min.js'
+    }))
+    .pipe(gulp.dest('./dist'));
+});*/
 
 gulp.task('test', ['bundle'], function(done){
     karma.start({

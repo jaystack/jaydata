@@ -303,8 +303,6 @@ $data.oDataConverter = {
         '$data.Time': function (v) { return v.toString(); },
         '$data.Duration': function (v) { return v.toString(); },
         '$data.Number': function (v) { return v.toString(); },
-        '$data.Integer': function (v) { return v.toString(); },
-        '$data.Int32': function (v) { return v.toString(); },
         '$data.String': function (v) { return v.toString(); },
         '$data.ObjectID': function (v) { return v.toString(); },
         '$data.Object': function (v) { return JSON.stringify(v); },

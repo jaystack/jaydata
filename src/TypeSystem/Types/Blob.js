@@ -1,5 +1,6 @@
 import $data from '../TypeSystem.js'
 
+var bufferOrArray = eval('typeof Buf' + 'fer !== "undefined" ? Buf' + 'fer : Uint8Array');
 $data.Blob = function Blob(){};
 
 $data.Blob.createFromHexString = function(value){
@@ -7,7 +8,7 @@ $data.Blob.createFromHexString = function(value){
         Guard.raise(new Exception('TypeError: ', 'value not convertable to $data.Blob', value));
     }else{
         //if (value.length & 1) value = '0' + value;
-        var arr = new (typeof Buffer != 'undefined' ? Buffer : Uint8Array)(value.length >> 1);
+        var arr = new (bufferOrArray)(value.length >> 1);
         for (var i = 0, j = 1, k = 0; i < value.length; i += 2, j += 2, k++) {
             arr[k] = parseInt('0x' + value[i] + value[j], 16);
         }
@@ -64,7 +65,7 @@ $data.Container.registerType(["$data.Blob", "blob", "JayBlob"], $data.Blob);
 $data.Container.registerConverter('$data.Blob',{
     '$data.String': function (value){
         if (value && value.length){
-            var blob = new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value.length);
+            var blob = new (bufferOrArray)(value.length);
             for (var i = 0; i < value.length; i++){
                 blob[i] = value.charCodeAt(i);
             }
@@ -73,13 +74,13 @@ $data.Container.registerConverter('$data.Blob',{
         }else return null;
     },
     '$data.Array': function(value){
-        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
+        return new (bufferOrArray)(value);
     },
     '$data.Number': function(value){
-        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)($data.packIEEE754(value, 11, 52).reverse());
+        return new (bufferOrArray)($data.packIEEE754(value, 11, 52).reverse());
     },
     '$data.Boolean': function(value){
-        return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([value | 0]);
+        return new (bufferOrArray)([value | 0]);
     },
     'default': function(value){
         if (typeof Blob !== 'undefined' && value instanceof Blob){
@@ -88,21 +89,22 @@ $data.Container.registerConverter('$data.Blob',{
             req.send(null);
             return $data.Container.convertTo(req.response, $data.Blob);
         } else if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
-            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(new Uint8Array(value));
+            return new (bufferOrArray)(new Uint8Array(value));
         }else if (value instanceof Uint8Array){
-            if (typeof Buffer !== 'undefined') return new Buffer(value);
-            else return value;
-        }else if (typeof Buffer !== 'undefined' ? value instanceof Buffer : false){
+            //if (typeof Buffer !== 'undefined') return new Buffer(value);
+            //else
             return value;
-        }else if (value.buffer){
-            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(value);
+        }else /*if (typeof Buffer !== 'undefined' ? value instanceof Buffer : false){
+            return value;
+        }else*/ if (value.buffer){
+            return new (bufferOrArray)(value);
         }else if (typeof value == 'object' && value instanceof Object){
             var arr = [];
             for (var i in value){
                 arr[i] = value[i];
             }
             if (!arr.length) throw 0;
-            return new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)(arr);
+            return new (bufferOrArray)(arr);
         }
         throw 0;
     }
