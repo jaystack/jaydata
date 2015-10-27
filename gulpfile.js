@@ -19,6 +19,7 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var fs = require('fs');
 var karma = require('karma').server;
+var exec = require('child_process').exec;
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -99,6 +100,15 @@ gulp.task('release', ['JayData', 'providers', 'modules'], function() {
   return gulp.src("build/**/*.js")
     .pipe(header(fs.readFileSync('src/CREDITS.txt'), pkg))
     .pipe(gulp.dest("build"));
+});
+
+
+gulp.task('apidocs', ['jaydata'], function (cb) {
+    exec('node_modules\\.bin\\jsdoc dist\\public\\jaydata.js -t node_modules\\jaguarjs-jsdoc -d apidocs', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        cb(err);
+    });
 });
 
 for (var i = 0; i < config.components.length; i++) {
