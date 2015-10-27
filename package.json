@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "acorn": "^2.4.0",
-    "atob": "^1.1.2"
+    "atob": "^1.1.2",
+    "odatajs": "^4.0.0"
   },
   "contributors": [
     {
