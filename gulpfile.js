@@ -59,11 +59,11 @@ gulp.task('odataprovider', function() {
 gulp.task('nodejs', function() {
     return gulp.src(['src/**/*.js'])
     .pipe(babel())
+    .pipe(gulp.dest('./dist/lib'))
     .on('error', function(err){
 		console.log('>>> ERROR', err);
 		this.emit('end');
-	})
-    .pipe(gulp.dest('./dist/lib'));
+	});
 });
 
 /*gulp.task('jaydata.min', function(){

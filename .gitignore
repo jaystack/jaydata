@@ -24,7 +24,8 @@ npm-debug.log
 /dist/*
 !dist/package.json
 !dist/core.js
-!dist/odataprovider.js
+!dist/odata.js
+!dist/mongodb.js
 coverage
 docs
 jaydata.js

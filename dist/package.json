@@ -8,12 +8,14 @@
     "JavaScript Language Query",
     "JSLQ",
     "OData",
+    "MongoDB",
     "SQLite",
     "WebSQL",
     "IndexedDB",
     "YQL",
     "Facebook",
     "cross-platform",
+    "Node.js",
     "iPhone",
     "Android"
   ],
@@ -25,6 +27,10 @@
   "main": "core.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "acorn": "^2.4.0",
+    "atob": "^1.1.2"
   },
   "contributors": [
     {

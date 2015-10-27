@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.storageProviders.mongoDB.mongoDBFunctionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix, compiler) {
         this.provider = provider;

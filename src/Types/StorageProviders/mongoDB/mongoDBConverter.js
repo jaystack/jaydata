@@ -1,3 +1,6 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import atob from 'atob';
+
 $data.mongoDBConverter = {
     fromDb: {
         '$data.Byte': $data.Container.proxyConverter,

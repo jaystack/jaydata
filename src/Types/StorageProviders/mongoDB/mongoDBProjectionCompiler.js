@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix, compiler) {
         this.provider = provider;
@@ -35,7 +37,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
     },
-    
+
     VisitEntityFieldExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);

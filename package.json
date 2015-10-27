@@ -23,7 +23,8 @@
     "url": "http://jaydata.org"
   },
   "dependencies": {
-    "acorn": "^2.4.0"
+    "acorn": "^2.4.0",
+    "atob": "^1.1.2"
   },
   "contributors": [
     {
@@ -78,6 +79,7 @@
     }
   ],
   "devDependencies": {
+    "acorn": "^2.4.0",
     "babel": "^5.8.23",
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
