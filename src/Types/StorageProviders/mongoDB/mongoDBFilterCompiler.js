@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix, compiler) {
         this.provider = provider;
@@ -43,7 +45,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
             context.value = expression.expression.value;
             context.queryField = context.field = $data.Guid.NewGuid();
             if (context.value === true) context.value = null;
-            
+
             if (context.cursor instanceof Array){
                 var o = {};
                 o[context.queryField] = context.value;
@@ -56,13 +58,13 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
         context.unary = expression.nodeType;
         this.Visit(expression.operand, context);
     },
-    
+
     _constExpressionFilter: function(expression, context){
         if (expression.left && expression.left.nodeType === $data.Expressions.ExpressionType.Constant && expression.right && [$data.Expressions.ExpressionType.Or, $data.Expressions.ExpressionType.And].indexOf(expression.nodeType) >= 0){
             context.value = expression.left.value;
             context.queryField = context.field = $data.Guid.NewGuid();
             if (context.value === true) context.value = null;
-            
+
             if (context.cursor instanceof Array){
                 var o = {};
                 o[context.queryField] = context.value;
@@ -72,13 +74,13 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
     },
 
     VisitSimpleBinaryExpression: function (expression, context) {
-     
+
         var cursor = context.cursor;
-        
+
         switch (expression.nodeType){
             case $data.Expressions.ExpressionType.Or:
                 var orCursor = context.cursor;
-                
+
                 if (context.cursor instanceof Array){
                     var or = context.unary === $data.Expressions.ExpressionType.Not ? { $nor: [] } : { $or: [] };
                     context.cursor.push(or);
@@ -91,7 +93,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
                 this._constExpressionFilter(expression, context);
-                
+
                 if (orCursor instanceof Array){
                     for (var i = 0; i < orCursor.length; i++){
                         var o = orCursor[i];
@@ -116,7 +118,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 break;
             case $data.Expressions.ExpressionType.And:
                 var andCursor = context.cursor;
-                
+
                 if (context.cursor instanceof Array){
                     var and = { $and: [] };
                     context.cursor.push(and);
@@ -128,7 +130,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 this.Visit(expression.left, context);
                 this.Visit(expression.right, context);
                 this._constExpressionFilter(expression, context);
-                
+
                 if (andCursor instanceof Array){
                     for (var i = 0; i < andCursor.length; i++){
                         var a = andCursor[i];
@@ -254,7 +256,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 if (context.options && context.options.fields) context.options.fields[context.queryField] = 1;
                 break;
         }
-        
+
         delete context.fieldOperation;
         delete context.complexType;
         delete context.association;
@@ -320,7 +322,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
         }
         if (context.complexType) context.lastField = expression.memberName;
     },
-    
+
     VisitComplexTypeExpression: function(expression, context){
         context.complexType = true;
         this.Visit(expression.source, context);
@@ -352,13 +354,13 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
             default:
                 break;
         }
-        
+
         return { opMapTo: opMapTo, opValue: opValue };
     },
-    
+
     VisitEntityFieldOperationExpression: function (expression, context) {
         Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
-        
+
         this.Visit(expression.source, context);
 
         var opDef = expression.operation.memberDefinition;
@@ -377,17 +379,17 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
         args.forEach(function (arg, index) {
             this.Visit(arg, context);
         }, this);
-        
+
         var op = this._fieldOperation(opName, context);
         var opMapTo = op.opMapTo;
         var opValue = op.opValue;
-        
+
         if (context.unary === $data.Expressions.ExpressionType.Not){
             opValue = '^((?!' + opValue + ').)*$';
         }
-        
+
         if (context.options.fields) context.options.fields[context.field] = 1;
-        
+
         if (!context.include && opMapTo && opValue){
             if (context.cursor instanceof Array){
                 var o = {};
@@ -399,7 +401,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 context.cursor[context.field][opMapTo] = opValue;
             }
         }
-        
+
         if (context.complexType){
             delete context.complexType;
             delete context.field;
@@ -437,7 +439,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
             context.data += "/";
         }
     },
-    
+
     _frameOperation: function(opDef, args, expression, context, contextinclude){
         var self = this;
         var origInclude = contextinclude;
@@ -448,7 +450,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                 var frameExpression = new opDef.frameType(arg.value.expression);
                 var preparator = new $data.Expressions.QueryExpressionCreator(arg.value.entityContext);
                 var prep_expression = preparator.Visit(frameExpression);
-                
+
                 var fn = function(expression, context, contextinclude, indent){
                     if (expression._expressionType === $data.Expressions.AssociationInfoExpression){
                         contextinclude += '.' + expression.associationInfo.FromPropertyName;
@@ -486,7 +488,7 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                                     return expression.parameters[paramCounter++]
                                 };
                             });
-                            
+
                             self._frameOperation(opDef, args, expression, {
                                 entitySet: arg.value.entityContext._entitySetReferences[arg.value.expression.elementType.name],
                                 defaultType: arg.value.expression.elementType,
@@ -499,16 +501,16 @@ $C('$data.storageProviders.mongoDB.mongoDBFilterCompiler', $data.Expressions.Ent
                         contextinclude = origInclude;
                         context.defaultType = arg.value.expression.elementType;
                     }
-                    
+
                     if (expression.source) contextinclude = fn(expression.source, context, contextinclude);
                     if (expression.selector) contextinclude = fn(expression.selector, context, contextinclude);
                     if (expression.expression) contextinclude = fn(expression.expression, context, contextinclude);
                     if (expression.left) contextinclude = fn(expression.left, context, contextinclude);
                     if (expression.right) contextinclude = fn(expression.right, context, contextinclude);
-                    
+
                     return contextinclude;
                 };
-                
+
                 var c = {
                     entitySet: arg.value.entityContext._entitySetReferences[arg.value.expression.elementType.name],
                     defaultType: arg.value.expression.elementType,

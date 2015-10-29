@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function(){
         this.context = {};
@@ -19,17 +21,17 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
         this.Visit(query.expression, query.find);
 
         query.includes = this.includes;
-        
+
         query.modelBinderConfig = {};
         var modelBinder = new $data.modelBinder.mongoDBModelBinderConfigCompiler(query, this.includes.filter(function(it){ return it.mapped; }), true);
         modelBinder.Visit(query.expression);
-        
+
         delete query.find.field;
         delete query.find.value;
         delete query.find.data;
         delete query.find.stack;
         delete query.find.or;
-        
+
         return query;
     },
     VisitOrderExpression: function (expression, context) {
@@ -51,7 +53,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
         var filterCompiler = new $data.storageProviders.mongoDB.mongoDBFilterCompiler(this.provider, null, self);
         context.data = "";
         filterCompiler.compile(expression.selector, context);
-        
+
         if (this.includes && this.includes.length){
             context.data = "";
             context.lambda = "";
@@ -98,7 +100,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
                         parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
                     }
                 },
-                
+
                 fieldConverter: { toDb: $data.typeSystem.extend({
                     '$data.ObjectID': function(id){
                         return id ? 'atob("' + id.toString() + '")' : id;
@@ -119,7 +121,7 @@ $C('$data.storageProviders.mongoDB.mongoDBCompiler', $data.Expressions.EntityExp
     },
     VisitIncludeExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        
+
         this.includes = this.includes || [];
         var includeFragment = expression.selector.value.split('.');
         var tempData = null;

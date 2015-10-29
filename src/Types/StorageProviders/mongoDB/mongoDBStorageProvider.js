@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, null,
 {
     constructor: function(cfg, ctx){
@@ -33,21 +35,21 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var s = this.providerConfiguration.server[i];
                 replSet.push(new this.driver.Server(s.address, s.port, s.serverOptions));
             }
-            
+
             return new this.driver.ReplSetServers(replSet);
         }else return this.driver.Server(this.providerConfiguration.address, this.providerConfiguration.port, this.providerConfiguration.serverOptions);
     },
     initializeStore: function(callBack){
         var self = this;
         callBack = $data.typeSystem.createCallbackSetting(callBack);
-        
+
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
             }
-            
+
             var fn = function(error, client){
                 var cnt = 0;
                 var collectionCount = 0;
@@ -66,12 +68,12 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         }else countFn();
                     }else countFn();
                 };
-                
+
                 for (var i in self.context._entitySetReferences){
                     if (self.context._entitySetReferences.hasOwnProperty(i))
                         cnt++;
                 }
-                
+
                 collectionCount = cnt;
                 var sets = Object.keys(self.context._entitySetReferences);
                 if (!sets.length) return readyFn(client);
@@ -123,14 +125,14 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     }
                 });
             };
-            
+
             if (self.providerConfiguration.username){
                 client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password || '', function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
-                    
+
                     if (result){
                         fn(error, client);
                         return;
@@ -165,7 +167,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 callBack.error(error);
                 return;
             }
-            
+
             var collection = new self.driver.Collection(client, entitySet.tableName);
             var includes = query.includes && query.includes.length ? query.includes.map(function(it){
                 //if (it.full){
@@ -180,10 +182,10 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     options: it.options || {}
                 };
             }) : null;
-            
+
             query.context = self.context;
             var find = query.find;
-            
+
             var cb = function(error, results){
                 if (error){
                     callBack.error(error);
@@ -202,11 +204,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 }else{
                     query.rawDataList = results;
                 }
-                
+
                 callBack.success(query);
                 client.close();
             };
-            
+
             var fn = function(){
                 switch (query.expression.nodeType){
                     case $data.Expressions.ExpressionType.BatchDelete:
@@ -227,20 +229,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                     callBack.error(error);
                                     return;
                                 }
-                                
+
                                 var fn = function(include){
                                     include.collection.find({}, include.options).toArray(function(error, included){
                                         if (error){
                                             callBack.error(error);
                                             return;
                                         }
-                                        
+
                                         var path = include.name.split('.');
                                         var prop = path[path.length - 1];
                                         var sm = self.context._storageModel.getStorageModel(include.from);
-                                        
+
                                         var association = sm.Associations[prop];
-                                        
+
                                         var conn = function(res){
                                             if (association.FromMultiplicity == '0..1' && association.ToMultiplicity == '*'){
                                                 var r = included.filter(function(it){
@@ -265,7 +267,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                                 res[prop] = r || res[prop];
                                             }
                                         };
-                                        
+
                                         var respath = function(res, path){
                                             var _conn = true;
                                             for (var j = 0; j < path.length; j++){
@@ -283,11 +285,11 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                                 conn(res);
                                             }
                                         };
-                                        
+
                                         for (var i = 0; i < results.length; i++){
                                             respath(results[i], path.slice(0, -1));
                                         }
-                                        
+
                                         if (include.options.sort) {
                                             var order = Object.keys(include.options.sort);
                                             var cmp = order.map(function(it){
@@ -311,7 +313,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                                 return result;
                                             });
                                         }
-                                        
+
                                         if (includes && includes.length){
                                             fn(includes.shift());
                                         }else{
@@ -319,7 +321,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                         }
                                     });
                                 };
-                                
+
                                 if (includes && includes.length){
                                     fn(includes.shift());
                                 }else{
@@ -340,14 +342,14 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         break;
                 }
             };
-            
+
             if (self.providerConfiguration.username){
                 client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password, function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
-                    
+
                     if (result) fn();
                     else callBack.error('Authentication failed');
                 });
@@ -364,12 +366,12 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         var self = this;
         var successItems = 0;
         var server = this._getServer();
-        
+
         var counterState = 0;
         var counterFn = function(callback){
             if (--counterState <= 0) callback();
         }
-        
+
         var insertFn = function(client, c, collection){
             var docs = [];
             for (var i = 0; i < c.insertAll.length; i++){
@@ -406,7 +408,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     client.close();
                     return;
                 }
-                
+
                 for (var k = 0; k < result.length; k++){
                     var it = result[k];
                     var d = c.insertAll[k];
@@ -418,9 +420,9 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         }
                     }
                 }
-                
+
                 successItems += result.length;
-                
+
                 if (c.removeAll && c.removeAll.length){
                     removeFn(client, c, collection);
                 }else{
@@ -432,19 +434,19 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 }
             });
         };
-        
+
         var updateFn = function(client, c, collection){
             counterState = c.updateAll.length;
             for (var i = 0; i < c.updateAll.length; i++){
                 var u = c.updateAll[i];
                 var where = {};
-                
+
                 var keys = Container.resolveType(u.type).memberDefinitions.getKeyProperties();
                 for (var j = 0; j < keys.length; j++){
                     var k = keys[j];
                     where[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](u.entity[k.name]);
                 }
-                
+
                 var set = {};
                 var props = Container.resolveType(u.entity.getType()).memberDefinitions.getPublicMappedProperties().concat(Container.resolveType(u.physicalData.getType()).memberDefinitions.getPublicMappedProperties());
                 for (var j = 0; j < props.length; j++){
@@ -470,7 +472,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         }
                     }
                 }
-                
+
                 var fn = function(u){
                     collection.update(where, { $set: set }, { safe: true }, function(error, result){
                         if (error){
@@ -478,7 +480,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                             client.close();
                             return;
                         }
-                        
+
                         if (result){
                             successItems++;
                             var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
@@ -486,7 +488,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                 var p = props[j];
                                 if (p.concurrencyMode === $data.ConcurrencyMode.Fixed) u.entity[p.name]++;
                             }
-                            
+
                             counterFn(function(){
                                 esFn(client, successItems);
                             });
@@ -497,14 +499,14 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                                     callBack.error(error);
                                     return;
                                 }
-                                
+
                                 var it = result[0];
                                 var props = Container.resolveType(u.type).memberDefinitions.getPublicMappedProperties();
                                 for (var j = 0; j < props.length; j++){
                                     var p = props[j];
                                     u.entity[p.name] = self._typeFactory(p.type, it[p.computed ? '_id' : p.name], self.fieldConverter.fromDb);
                                 }
-                                
+
                                 counterFn(function(){
                                     esFn(client, successItems);
                                 });
@@ -512,16 +514,16 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         }
                     });
                 };
-                
+
                 fn(u);
             }
         };
-        
+
         var removeFn = function(client, c, collection){
             counterState = c.removeAll.length;
             for (var i = 0; i < c.removeAll.length; i++){
                 var r = c.removeAll[i];
-                
+
                 for (var j in r.data){
                     if (r.data[j] === undefined || r.data[j] === null){
                         delete r.data[j];
@@ -533,7 +535,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     var k = keys[j];
                     r.data[k.computed ? '_id' : k.name] = self.fieldConverter.toDb[Container.resolveName(Container.resolveType(k.type))](r.entity[k.name]);
                 }
-                
+
                 var props = Container.resolveType(r.type).memberDefinitions.getPublicMappedProperties();
                 for (var j = 0; j < props.length; j++){
                     var p = props[j];
@@ -541,17 +543,17 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         delete r.data[p.name];
                     }
                 }
-                
+
                 collection.remove(r.data, { safe: true }, function(error, result){
                     if (error){
                         callBack.error(error);
                         client.close();
                         return;
                     }
-                    
+
                     if (result) successItems++;
                     else counterState--;
-                    
+
                     counterFn(function(){
                         if (c.updateAll && c.updateAll.length){
                             updateFn(client, c, collection);
@@ -560,13 +562,13 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 });
             }
         };
-        
+
         var keys = Object.keys(collections);
         var readyFn = function(client, value){
             callBack.success(value);
             client.close();
         };
-        
+
         var esFn = function(client, value){
             if (keys.length){
                 var es = keys.pop();
@@ -589,20 +591,20 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 }
             }else readyFn(client, value);
         };
-        
+
         new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
             if (error){
                 callBack.error(error);
                 return;
             }
-            
+
             if (self.providerConfiguration.username){
                 client.authenticate(self.providerConfiguration.username, self.providerConfiguration.password, function(error, result){
                     if (error){
                         callBack.error(error);
                         return;
                     }
-                    
+
                     if (result) esFn(client);
                 });
             }else esFn(client);
@@ -618,13 +620,13 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var collections = {};
                 for (var i = 0; i < block.length; i++) {
                     convertedItems.push(block[i].data);
-                    
+
                     var es = collections[block[i].entitySet.name];
                     if (!es){
                         es = {};
                         collections[block[i].entitySet.name] = es;
                     }
-                    
+
                     var initData = { entity: block[i].data, data: self.save_getInitData(block[i], convertedItems), physicalData: block[i].physicalData, type: Container.resolveName(block[i].data.getType()) };
                     switch (block[i].data.entityState){
                         case $data.EntityState.Unchanged: continue; break;
@@ -643,7 +645,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                         default: Guard.raise(new Exception("Not supported Entity state"));
                     }
                 }
-                
+
                 self._saveCollections({
                     success: function(cnt){
                         successCount += cnt;
@@ -656,7 +658,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     error: callBack.error
                 }, collections);
             };
-            
+
             if (independentBlocks.length){
                 fn(independentBlocks.shift());
             }
@@ -767,7 +769,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
         }, this);
         return serializableObject;
     },
-    
+
     supportedDataTypes: {
         value: [$data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.ObjectID, $data.Object, $data.GeographyPoint, $data.Guid,
             $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
@@ -775,7 +777,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
             $data.Byte, $data.SByte, $data.Decimal, $data.Float, $data.Int16, $data.Int32, $data.Int64, $data.Time, $data.DateTimeOffset],
         writable: false
     },
-    
+
     supportedBinaryOperators: {
         value: {
             equal: { mapTo: ':', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression] },

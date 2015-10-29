@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.ModelBinderConfigCompiler, null, {
     _addPropertyToModelBinderConfig: function (elementType, builder) {
         var storageModel = this._query.context._storageModel.getStorageModel(elementType);
@@ -8,7 +10,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                     if (!storageModel && this._query.context.storageProvider.supportedDataTypes.indexOf(Container.resolveType(prop.dataType)) < 0) {
                         builder.selectModelBinderProperty(prop.name);
                         builder.modelBinderConfig['$type'] = Container.resolveType(prop.dataType);
-                        
+
                         if (this._isoDataProvider) {
                             builder.modelBinderConfig['$selector'] = ['json:' + prop.name + '.results', 'json:' + prop.name];
                         } else {
@@ -97,7 +99,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
     VisitComplexTypeExpression: function (expression, builder) {
         this.Visit(expression.source, builder);
         this.Visit(expression.selector, builder);
-        
+
         if (('$selector' in builder.modelBinderConfig) && (builder.modelBinderConfig.$selector.length > 0)) {
             if (builder.modelBinderConfig.$selector instanceof $data.Array) {
                 var temp = builder.modelBinderConfig.$selector[1];
@@ -117,11 +119,11 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
                 this._addComplexType(expression.selector.memberDefinition.storageModel.ComplexTypes[expression.selector.memberDefinition.name], builder);
             }else{
                 builder.modelBinderConfig.$source = expression.selector.memberName;
-                
+
                 if (type !== $data.Array){
                     builder.modelBinderConfig.$selector = 'json:' + expression.selector.memberDefinition.name;
                 }
-                
+
                 if (builder._binderConfig.$item === builder.modelBinderConfig &&
                     expression.selector.memberDefinition.storageModel &&
                     expression.selector.memberDefinition.storageModel.ComplexTypes[expression.selector.memberDefinition.name]){
@@ -137,7 +139,7 @@ $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.Model
         var type = Container.resolveType(expression.memberDefinition.type);
         var elementType = type === $data.Array && expression.memberDefinition.elementType ? Container.resolveType(expression.memberDefinition.elementType) : undefined;
         builder.modelBinderConfig['$type'] = type;
-        
+
         if (type === $data.Array && elementType && elementType.isAssignableTo && elementType.isAssignableTo($data.Entity)){
             this._addComplexType(expression.memberDefinition.storageModel.ComplexTypes[expression.memberName], builder);
         }else{

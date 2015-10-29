@@ -1,4 +1,5 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import odatajs from 'odatajs';
 
 var datajsPatch;
 datajsPatch = function (OData) {
@@ -65,6 +66,19 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
         if (this.context && this.context._buildDbType_modifyInstanceDefinition && this.buildDbType_modifyInstanceDefinition) {
             this.context._buildDbType_modifyInstanceDefinition = this.buildDbType_modifyInstanceDefinition;
+        }
+    },
+    fixkDataServiceVersions: function (cfg) {
+        if (this.providerConfiguration.dataServiceVersion > this.providerConfiguration.maxDataServiceVersion) {
+            this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+        }
+
+        if (this.providerConfiguration.setDataServiceVersionToMax === true) {
+            this.providerConfiguration.dataServiceVersion = this.providerConfiguration.maxDataServiceVersion;
+        }
+
+        if ((cfg && !cfg.UpdateMethod && this.providerConfiguration.dataServiceVersion < '3.0') || !this.providerConfiguration.dataServiceVersion) {
+            this.providerConfiguration.UpdateMethod = 'MERGE';
         }
     },
     initializeStore: function (callBack) {

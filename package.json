@@ -23,7 +23,9 @@
     "url": "http://jaydata.org"
   },
   "dependencies": {
-    "acorn": "^2.4.0"
+    "acorn": "^2.4.0",
+    "atob": "^1.1.2",
+    "odatajs": "^4.0.0"
   },
   "contributors": [
     {
@@ -95,6 +97,8 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.4.2",
     "istanbul": "^0.3.22",
+    "jaguarjs-jsdoc": "0.0.1",
+    "jsdoc": "^3.3.3",
     "karma": "^0.13.11",
     "karma-chrome-launcher": "^0.2.1",
     "karma-coverage": "^0.5.2",

@@ -54,12 +54,46 @@ $data.Class.define('$data.Association', null, null, {
 }, null);
 $data.Class.define('$data.ComplexType', $data.Association, null, {}, null);
 
+/** 
+ * @public
+ * @module $data.EntityContext 
+ */
+/**
+* Provides facilities for querying and working with entity data as objects
+*/
 $data.Class.define('$data.EntityContext', null, null,
 {
+    /**
+     * @constructs $data.EntityContext
+     * Provides facilities for querying and working with entity data as objects
+     * @param {Object} storageProviderCfg - Storage provider specific configuration object
+     * @param {string} storageProviderCfg.provider - Storage provider type name: 'oData', 'indexedDb', 'webSql', 'sqLite', 'mongoDB'
+     * @param {string} [storageProviderCfg.oDataServiceHost=/odata.svc] - URI of OData endpoint. Provider: OData
+     * @param {string} [storageProviderCfg.maxDataServiceVersion=4.0] - Maximal OData version. Provider: OData
+     * @param {string} [storageProviderCfg.dataServiceVersion] - version of your OData endpoint. Provider: OData
+     * @param {string} [storageProviderCfg.user] - login name for basic auth. Provider: OData
+     * @param {string} [storageProviderCfg.password] - password for basic auth. Provider: OData
+     * @param {string} [storageProviderCfg.UpdateMethod=PATCH] - HTTP verb used while updating entities, this should be configured according the accepted verb by your OData endpoint. Provider: OData
+     * @param {string} [storageProviderCfg.databaseName] - database name created by the following providers: webSql, sqLite, indexedDb, mongoDB
+     * @example <caption>initialize OData context</caption>
+     * var northwind = new Northwind({
+     *  provider: 'oData',
+     *  oDataServiceHost: '/api/odata.svc'
+     * });
+     * northwind.onReady(function() {
+     *  //work with your context
+     * });
+     * 
+     * @example <caption>initialize webSql context</caption>
+     * var northwind = new Northwind({
+     *  provider: 'webSql',
+     *  databaseName: 'Northwind'
+     * });
+     * northwind.onReady(function() {
+     *  //work with your context
+     * });
+     */
     constructor: function (storageProviderCfg) {
-        /// <description>Provides facilities for querying and working with entity data as objects.</description>
-        ///<param name="storageProviderCfg" type="Object">Storage provider specific configuration object.</param>
-
         if ($data.ItemStore && 'ContextRegister' in $data.ItemStore)
             $data.ItemStore.ContextRegister.apply(this, arguments);
 
@@ -630,16 +664,22 @@ $data.Class.define('$data.EntityContext', null, null,
             }
         }
     },
+    /**
+     * Sets the callback function to be called when the initialization of the {@link $data.EntityContext} has successfully finished.
+     * @event $data.EntityContext#onReady
+     * @param {function|function[]} fn - Success callback
+     * @returns {$.Deferred} 
+     */
     onReady: function (fn) {
         /// <signature>
         ///     <summary>
-        ///         Sets the callback function to be called when the initialization of the EntityContext has successfully finished.
+        ///         
         ///     </summary>
         ///     <param name="successCallback" type="Function">
         ///         <summary>Success callback</summary>
         ///         <param name="entityContext" type="$data.EntityContext">Current entityContext object</param>
         ///     </param>
-        ///     <returns type="$.Deferred" />
+        ///     <returns type="" />
         /// </signature>
         /// <signature>
         ///     <summary>
@@ -1002,28 +1042,28 @@ $data.Class.define('$data.EntityContext', null, null,
         return returnFunc();
     },
 
+    /**
+     * Saves the changes made to the context.
+     * 
+     * @memberof $data.EntityContext
+     * @instance
+     * @param {Function|Object} callback - callback function or callback object with success & error properties
+     * @param {$data.Transaction} transaction - Transaction object
+     * @returns $.Deferred
+     * 
+     * @example <caption>saveChanges with simple callback function</caption>
+     * context.saveChanges(function(db) {
+     *  //success
+     * });
+     * 
+     * @example <caption>saveChanges with callback object</caption>
+     * var myCallback = {
+     *  success: function(db) { //succeess },
+     *  error: function(errors) { console.log(errors); }
+     * }
+     * context.saveChanges(myCallback);
+     */
     saveChanges: function (callback, transaction) {
-        /// <signature>
-        ///     <summary>
-        ///         Saves the changes made to the context.
-        ///     </summary>
-        ///     <param name="successCallback" type="Function">
-        ///         <summary>Success callback</summary>
-        ///         <param name="entityContext" type="$data.EntityContext">Current entityContext object</param>
-        ///     </param>
-        ///     <returns type="$.Deferred" />
-        /// </signature>
-        /// <signature>
-        ///     <summary>
-        ///         Saves the changes made to the context.
-        ///     </summary>
-        ///     <param name="callbacks" type="Object">
-        ///         Success and error callbacks definition.
-        ///         Example: [code]{ success: function(db) { .. }, error: function() { .. } }[/code]
-        ///     </param>
-        ///     <returns type="$.Deferred" />
-        /// </signature>
-
         if ($data.QueryCache) {
             $data.QueryCache.reset(this);
         }
