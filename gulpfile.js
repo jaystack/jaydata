@@ -20,6 +20,7 @@ var buffer = require('vinyl-buffer');
 var fs = require('fs');
 var karma = require('karma').server;
 var exec = require('child_process').exec;
+var eslint = require('gulp-eslint');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -74,7 +75,29 @@ gulp.task('sqliteprovider', function() {
     .pipe(gulp.dest('./dist/public/jaydataproviders'));
 });
 
-gulp.task('bundle', ['jaydata', 'odataprovider', 'sqliteprovider'])
+gulp.task('lint', function(){
+    return gulp.src(['src/**/*.js'])
+    .pipe(eslint({
+        parser: 'babel-eslint',
+        env: {
+            browser: true,
+            node: true,
+            es6: true
+        },
+        ecmaFeatures: {
+            modules: true
+        },
+        rules: {
+            'no-undef': 1,
+            'no-unused-vars': 1,
+            'no-use-before-define': 1
+        }
+    }))
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
+});
+
+gulp.task('bundle', ['lint', 'jaydata', 'odataprovider', 'sqliteprovider'])
 
 gulp.task('nodejs', function() {
     return gulp.src(['src/**/*.js'])
