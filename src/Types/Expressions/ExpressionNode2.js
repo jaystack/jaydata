@@ -215,7 +215,11 @@ $C('$data.Expressions.ExpressionNode', null, null, {
         ///TODO
         this.expressionType = this.constructor;
     },
-
+    toJSON: function(){
+      var res = JSON.parse(JSON.stringify(this))
+      res.expressionType = Container.resolveName(this._expressionType);
+      return res
+    },
     getJSON: function () { return jsonify(this); },
 
     //TOBLOG maybe
@@ -257,9 +261,9 @@ $C('$data.Expressions.ExpressionNode', null, null, {
         get: function (value) {
             //IE ommits listing JSON.stringify in call chain
 
-            if (arguments.callee.caller == jsonify || arguments.callee.caller == JSON.stringify) {
-                return Container.resolveName(this._expressionType);
-            }
+            // if (arguments.callee.caller == jsonify || arguments.callee.caller == JSON.stringify) {
+            //     return Container.resolveName(this._expressionType);
+            // }
             return this._expressionType;
         },
         enumerable: true

@@ -1,4 +1,6 @@
-var SqlStatementBlocks = {
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
+export const SqlStatementBlocks = {
     beginGroup: "(",
     endGroup: ")",
     nameSeparator: ".",

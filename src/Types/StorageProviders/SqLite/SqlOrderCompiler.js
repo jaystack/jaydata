@@ -1,3 +1,6 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import { SqlStatementBlocks } from './SqLiteCompiler.js';
+
 $C('$data.sqLite.SqlOrderCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider) {
         this.provider = provider;
@@ -31,7 +34,7 @@ $C('$data.sqLite.SqlOrderCompiler', $data.Expressions.EntityExpressionVisitor, n
     VisitMemberInfoExpression: function (expression, sqlBuilder) {
         sqlBuilder.addText(expression.memberName);
     },
-    VisitComplexTypeExpression: function (expression, sqlBuilder) { 
+    VisitComplexTypeExpression: function (expression, sqlBuilder) {
         this.Visit(expression.source, sqlBuilder);
         this.Visit(expression.selector, sqlBuilder);
         sqlBuilder.addText('__');

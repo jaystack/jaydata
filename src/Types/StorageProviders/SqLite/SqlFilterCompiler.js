@@ -1,3 +1,6 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import { SqlStatementBlocks } from './SqLiteCompiler.js';
+
 $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     VisitParametricQueryExpression: function (expression, sqlBuilder) {
         this.Visit(expression.expression, sqlBuilder);
@@ -54,7 +57,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                     this.Visit(expression.right, sqlBuilder);
                 }
             }
-            
+
             sqlBuilder.addText(SqlStatementBlocks.endGroup);
         }
     },

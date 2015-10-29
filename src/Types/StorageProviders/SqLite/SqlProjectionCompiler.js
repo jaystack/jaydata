@@ -1,3 +1,6 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import { SqlStatementBlocks } from './SqLiteCompiler.js';
+
 $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null,
 {
     constructor: function () {
@@ -153,7 +156,7 @@ $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisit
             this.Visit(expression.source, sqlBuilder);
             this.Visit(expression.selector, sqlBuilder);
         }
-        
+
     },
 
     VisitEntitySetExpression: function (expression, sqlBuilder) {

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.sqLite.SqlExpressionMonitor', $data.Expressions.ExpressionMonitor, null, {
     constructor: function (monitorDefinition) {
         this.VisitIncludeExpression = function (expression, context) {

@@ -58,7 +58,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         }
 
-        this.fixkDataServiceVersions(cfg);
+        //this.fixkDataServiceVersions(cfg);
 
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;

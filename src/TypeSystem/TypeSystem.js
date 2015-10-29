@@ -11,9 +11,11 @@ $data.setModelContainer = function(modelHolder){
   _modelHolder = modelHolder;
 };
 
-$data.__global = {}
-$data.setGlobal = function(globla){
-  $data.__global = globla;
+
+
+$data.__global = process.browser ? window : global
+$data.setGlobal = function(obj){
+  $data.__global = obj;
 };
 
 (function init($data) {

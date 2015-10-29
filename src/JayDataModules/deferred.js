@@ -11,7 +11,7 @@ import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
                 callBack = $data.typeSystem.createCallbackSetting(callBack);
                 var self = this;
 
-                return cbWrapper = {
+                return {
                     success: function () {
                         callBack.success.apply(self.deferred, arguments);
                         self.deferred.resolve.apply(self.deferred, arguments);

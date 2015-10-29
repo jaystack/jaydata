@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (query, context) {
         this._query = query;
@@ -27,7 +29,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
     },
     VisitCountExpression: function (expression) {
         var builder = Container.createqueryBuilder();
-        
+
         builder.modelBinderConfig['$type'] = $data.Array;
         builder.selectModelBinderProperty('$item');
         builder.modelBinderConfig['$type'] = $data.Integer;
@@ -103,7 +105,7 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = this._query.defaultType;
         var storageModel = this._query.context._storageModel.getStorageModel(this._query.defaultType);
-        
+
         var needPrefix = this.sqlContext.infos.filter(function (i) { return i.IsMapped; }).length > 1;
         if (needPrefix) {
             this.currentObjectFieldName = this._sqlBuilder.getExpressionAlias(this.sqlContext.sets[0]);

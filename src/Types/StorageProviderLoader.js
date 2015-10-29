@@ -6,20 +6,20 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         var supported = true;
         switch (providerName) {
             case 'indexedDb':
-                supported = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || (window.msIndexedDB && !(/^file:/.test(window.location.href)));
+                supported = $data.__global.indexedDB || $data.__global.webkitIndexedDB || $data.__global.mozIndexedDB || ($data.__global.msIndexedDB && !(/^file:/.test($data.__global.location && $data.__global.location.href)));
                 break;
             case 'storm':
-                supported = 'XMLHttpRequest' in window;
+                supported = 'XMLHttpRequest' in $data.__global;
                 break;
             case 'webSql':
             case 'sqLite':
-                supported = 'openDatabase' in window;
+                supported = 'openDatabase' in $data.__global;
                 break;
             case 'LocalStore':
-                supported = 'localStorage' in window && window.localStorage ? true : false;
+                supported = 'localStorage' in $data.__global && $data.__global.localStorage ? true : false;
                 break;
             case 'sqLite':
-                supported = 'openDatabase' in window;
+                supported = 'openDatabase' in $data.__global;
                 break;
             case 'mongoDB':
                 supported = $data.mongoDBDriver;
@@ -162,9 +162,9 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         }
 
         function getHttpRequest() {
-            if (window.XMLHttpRequest)
+            if ($data.__global.XMLHttpRequest)
                 return new XMLHttpRequest();
-            else if (window.ActiveXObject !== undefined)
+            else if ($data.__global.ActiveXObject !== undefined)
                 return new ActiveXObject("MsXml2.XmlHttp");
             else{
                 $data.Trace.log('XMLHttpRequest or MsXml2.XmlHttp ActiveXObject not found');
@@ -180,7 +180,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
                 if (oXmlHttp.status == 200 || oXmlHttp.status == 304) {
                     $data.Trace.log('HTTP request succeeded');
                     $data.Trace.log('HTTP request response text: ' + oXmlHttp.responseText);
-                    eval.call(window, oXmlHttp.responseText);
+                    eval.call($data.__global, oXmlHttp.responseText);
                     if (typeof callback === 'function')
                         callback(true);
                     else $data.Trace.log('Callback function is undefined');

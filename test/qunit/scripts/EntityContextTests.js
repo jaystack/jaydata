@@ -23,7 +23,7 @@
             ok(db, "Database create error");
 
             //Initialize state
-            var cat1 = Container.createCategory({ Id: 3, Title: 'Category 1' });
+            var cat1 = $data.Container.createCategory({ Id: 3, Title: 'Category 1' });
             equal(cat1.entityState, undefined, 'Initialize state of entity faild');
             ok(cat1 instanceof $news.Types.Category, "New object type is faild");
             if (cat1.changedProperties) {
@@ -62,7 +62,7 @@
             ok(db, "Database create error");
 
             //Initialize state
-            var cat1 = Container.createCategory({ Id: 3, Title: 'Category 1' });
+            var cat1 = $data.Container.createCategory({ Id: 3, Title: 'Category 1' });
             equal(cat1.entityState, undefined, 'Initialize state of entity faild');
             ok(cat1 instanceof $news.Types.Category, "New object type is faild");
             if (cat1.changedProperties) {
@@ -98,7 +98,7 @@
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
         test('Crate context', 1, function () {
             stop(1);
-            $C('$t.EntityContextTest.TestItem', $data.Entity, null, {
+            $data.Class.define('$t.EntityContextTest.TestItem', $data.Entity, null, {
                 Id: { dataType: $data.Integer, key: true, computed: true },
                 Str1: { dataType: $data.String },
                 Num1: { dataType: $data.Number },
@@ -106,7 +106,7 @@
                 Bool1: { dataType: $data.Boolean },
                 Date1: { dataType: $data.Date }
             });
-            $C('$t.EntityContextTest.TestItemFromString', $data.Entity, null, {
+            $data.Class.define('$t.EntityContextTest.TestItemFromString', $data.Entity, null, {
                 Id: { dataType: '$data.Integer', key: true, computed: true },
                 Str1: { dataType: '$data.String' },
                 Num1: { dataType: '$data.Number' },
@@ -114,7 +114,7 @@
                 Bool1: { dataType: '$data.Boolean' },
                 Date1: { dataType: '$data.Date' }
             });
-            $C('$t.EntityContextTest.DataTypeContext', $data.EntityContext, null, {
+            $data.Class.define('$t.EntityContextTest.DataTypeContext', $data.EntityContext, null, {
                 TestTable1: { dataType: '$data.EntitySet', elementType: '$t.EntityContextTest.TestItemFromString' },
                 TestTable2: { dataType: $data.EntitySet, elementType: $t.EntityContextTest.TestItem }
             });

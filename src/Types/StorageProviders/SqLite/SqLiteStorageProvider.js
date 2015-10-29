@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, context) {
@@ -10,14 +12,14 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             maxSize: 1024 * 1024,
             dbCreation: $data.storageProviders.DbCreationType.DropTableIfChanged
         }, cfg);
-        
+
         this.providerName = '';
         for (var i in $data.RegisteredStorageProviders) {
             if ($data.RegisteredStorageProviders[i] === this.getType()) {
                 this.providerName = i;
             }
         }
-        
+
         if (this.context && this.context._buildDbType_generateConvertToFunction && this.buildDbType_generateConvertToFunction) {
             this.context._buildDbType_generateConvertToFunction = this.buildDbType_generateConvertToFunction;
         }
@@ -49,7 +51,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
         return connection;
     },
-    //$data.Array, 
+    //$data.Array,
     supportedDataTypes: {
         value: [$data.Array, $data.Integer, $data.String, $data.Number, $data.Blob, $data.Boolean, $data.Date, $data.Guid, $data.GeographyPoint,
             $data.GeographyLineString, $data.GeographyPolygon, $data.GeographyMultiPoint, $data.GeographyMultiLineString, $data.GeographyMultiPolygon, $data.GeographyCollection,
@@ -175,7 +177,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             '$data.Integer': true,
             '$data.Int32': true,
             '$data.Guid': function () { return $data.createGuid(); }
-        }       
+        }
     },
 
     initializeStore: function (callBack) {
@@ -320,7 +322,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
             } catch (e) {
                 callback.error(e);
             }
-            
+
         }
         saveNextIndependentBlock();
     },
@@ -557,7 +559,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         if (autoincrementFieldNumber > 1 && keyFieldNumber > 1) {
             Guard.raise(new Exception('Do not use multiple computed field!'));
         }
-        
+
         memberDef.PhysicalType.memberDefinitions.getKeyProperties().forEach(function (item, index) {
             var typeName = Container.resolveName(item.type);
             if (item.computed && !(typeName in this.supportedAutoincrementKeys)) {
@@ -644,7 +646,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     }
 }, {
     isSupported: {
-        get: function () { return "openDatabase" in window; },
+        get: function () { return "openDatabase" in $data.__global; },
         set: function () { }
     }
 });

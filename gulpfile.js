@@ -56,6 +56,24 @@ gulp.task('odataprovider', function() {
     .pipe(gulp.dest('./dist/public/jaydataproviders'));
 });
 
+gulp.task('sqliteprovider', function() {
+    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+    return browserify({
+        standalone: '$data'
+    })
+    .transform(babelify)
+    .require('./src/Types/StorageProviders/SqLite/index.js', { entry: true })
+    .external('jaydata/core')
+    .bundle()
+    .on("error", function (err) { console.log("Error: " + err.message) })
+    .pipe(source('SqLiteProvider.js'))
+    .pipe(buffer())
+    //.pipe(uglify())
+    .pipe(gulp.dest('./dist/public/jaydataproviders'));
+});
+
+gulp.task('bundle', ['jaydata', 'odataprovider', 'sqliteprovider'])
+
 gulp.task('nodejs', function() {
     return gulp.src(['src/**/*.js'])
     .pipe(babel())
