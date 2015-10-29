@@ -25,7 +25,8 @@
   "dependencies": {
     "acorn": "^2.4.0",
     "atob": "^1.1.2",
-    "odatajs": "^4.0.0"
+    "odatajs": "^4.0.0",
+    "xmldom": "^0.1.19"
   },
   "contributors": [
     {

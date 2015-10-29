@@ -110,7 +110,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
             }
         }
 
-        if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+        if (!process.browser) {
             // NodeJS
             $data.Trace.log('node.js detected trying to load NPM module');
             this.loadNpmModule(currentProvider, providerList, callback);

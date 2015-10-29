@@ -1,5 +1,5 @@
 import $data from './initializeJayDataClient.js';
-import acorn from 'acorn';
+import * as acorn from 'acorn';
 
 if (typeof console === 'undefined') {
   console = {

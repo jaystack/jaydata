@@ -49,6 +49,7 @@ gulp.task('odataprovider', function() {
     .transform(babelify)
     .require('./src/Types/StorageProviders/oData/index.js', { entry: true })
     .external('jaydata/core')
+    .ignore('odatajs')
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message) })
     .pipe(source('oDataProvider.js'))

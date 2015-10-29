@@ -95,7 +95,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 // Setting edge in 'to' array
                 to[ixDependendOn] = true;
                 // Setting edge in 'from' array
-                from = edgesFrom[ixDependendOn] || {};
+                var from = edgesFrom[ixDependendOn] || {};
                 from[i] = true;
                 edgesFrom[ixDependendOn] = from;
             }
