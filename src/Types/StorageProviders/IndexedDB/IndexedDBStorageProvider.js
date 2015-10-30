@@ -1,20 +1,22 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctxInstance) {
         // mapping IndexedDB types to browser invariant name
-        this.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
-        this.IDBRequest = window.IDBRequest || window.webkitIDBRequest || window.mozIDBRequest || window.msIDBRequest;
-        this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction || window.msIDBTransaction;
+        this.indexedDB = $data.__global.indexedDB || $data.__global.webkitIndexedDB || $data.__global.mozIndexedDB || $data.__global.msIndexedDB;
+        this.IDBRequest = $data.__global.IDBRequest || $data.__global.webkitIDBRequest || $data.__global.mozIDBRequest || $data.__global.msIDBRequest;
+        this.IDBTransaction = $data.__global.IDBTransaction || $data.__global.webkitIDBTransaction || $data.__global.mozIDBTransaction || $data.__global.msIDBTransaction;
         this.IDBTransactionType = { READ_ONLY: "readonly", READ_WRITE: "readwrite", VERSIONCHANGE: "versionchange" }
         if (typeof this.IDBTransaction.READ_ONLY !== 'undefined' && typeof this.IDBTransaction.READ_WRITE !== 'undefined') {
             this.IDBTransactionType.READ_ONLY = this.IDBTransaction.READ_ONLY
             this.IDBTransactionType.READ_WRITE = this.IDBTransaction.READ_WRITE
         }
 
-        this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.mozIDBKeyRange || window.msIDBKeyRange;
-        this.IDBDatabaseException = window.IDBDatabaseException || window.webkitIDBDatabaseException || window.mozIDBDatabaseException || window.msIDBDatabaseException;
-        this.IDBOpenDBRequest = window.IDBOpenDBRequest || window.webkitIDBOpenDBRequest || window.mozIDBOpenDBRequest || window.msIDBOpenDBRequest;
-        this.newVersionAPI = !!(window.IDBFactory && IDBFactory.prototype.deleteDatabase);
+        this.IDBKeyRange = $data.__global.IDBKeyRange || $data.__global.webkitIDBKeyRange || $data.__global.mozIDBKeyRange || $data.__global.msIDBKeyRange;
+        this.IDBDatabaseException = $data.__global.IDBDatabaseException || $data.__global.webkitIDBDatabaseException || $data.__global.mozIDBDatabaseException || $data.__global.msIDBDatabaseException;
+        this.IDBOpenDBRequest = $data.__global.IDBOpenDBRequest || $data.__global.webkitIDBOpenDBRequest || $data.__global.mozIDBOpenDBRequest || $data.__global.msIDBOpenDBRequest;
+        this.newVersionAPI = !!($data.__global.IDBFactory && IDBFactory.prototype.deleteDatabase);
         this.sequenceStore = '__jayData_sequence';
         this.SqlCommands = [];
         this.context = {};
@@ -689,7 +691,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
 }, {
     isSupported: {
         get: function () {
-            return window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB ? true : false;
+            return $data.__global.indexedDB || $data.__global.webkitIndexedDB || $data.__global.mozIndexedDB || $data.__global.msIndexedDB ? true : false;
         },
         set: function () { }
     }

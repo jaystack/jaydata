@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
 $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.StorageProviderBase, null,
 {

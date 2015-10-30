@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $data.FacebookConverter = {
     fromDb: {
         '$data.Byte': $data.Container.proxyConverter,

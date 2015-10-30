@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
 //"use strict";	// suspicious code
 
@@ -284,4 +285,3 @@ $C('$data.storageProviders.Facebook.FacebookCompiler', $data.Expressions.EntityE
         context.sql += ')';
     }
 }, null);
-
