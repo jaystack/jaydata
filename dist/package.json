@@ -72,16 +72,7 @@
     "type": "git",
     "url": "git+ssh://git@github.com/jaydata/jaydata.git"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://jaydata.org/licensing"
-    },
-    {
-      "type": "GPLv2",
-      "url": "http://jaydata.org/licensing"
-    }
-  ],
+  "license": "(MIT OR GPL-2.0)",
   "bugs": {
     "url": "https://github.com/jaydata/jaydata/issues"
   },
