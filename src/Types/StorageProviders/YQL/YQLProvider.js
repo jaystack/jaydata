@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg) {

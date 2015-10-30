@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $data.Class.define("$data.Facebook.types.FbPage", $data.Entity, null, {
     page_id: { type: "number", key: true, isPublic: true, searchable: true },
     name: { type: "string", isPublic: true, searchable: true },
@@ -10,7 +12,7 @@ $data.Class.define("$data.Facebook.types.FbPage", $data.Entity, null, {
     pic_square: { type: "string", isPublic: true },
     pic: { type: "string", isPublic: true },
     pic_large: { type: "string", isPublic: true },
-    pic_cover: { type: "object", isPublic: true },	//object	The JSON object containing three fields: cover_id (the ID of the cover photo), source (the URL for the cover photo), andoffset_y (indicating percentage offset from top [0-100])
+    pic_cover: { type: "object", isPublic: true },	//object	The JSON object containing three fields:ï¿½cover_idï¿½(the ID of the cover photo),ï¿½sourceï¿½(the URL for the cover photo), andoffset_yï¿½(indicating percentage offset from top [0-100])
     unread_notif_count: { type: "number", isPublic: false },
     new_like_count: { type: "number", isPublic: false },
     fan_count: { type: "number", isPublic: true },
@@ -25,18 +27,18 @@ $data.Class.define("$data.Facebook.types.FbPage", $data.Entity, null, {
     company_overview: { type: "string", isPublic: true },
     mission: { type: "string", isPublic: true },
     products: { type: "string", isPublic: true },
-    location: { type: "object", isPublic: true }, //	array	Applicable to all Places.
-    parking: { type: "object", isPublic: true }, //     array	Applicable to Businesses and Places. Can be one of street, lot orvalet
-    hours: { type: "array", isPublic: true }, //	array	Applicable to Businesses and Places.
+    location: { type: "object", isPublic: true }, //	array	Applicable to allï¿½Places.
+    parking: { type: "object", isPublic: true }, //     array	Applicable toï¿½Businessesï¿½andï¿½Places. Can be one ofï¿½street,ï¿½lotï¿½orvalet
+    hours: { type: "array", isPublic: true }, //	array	Applicable toï¿½Businessesï¿½andï¿½Places.
     pharma_safety_info: { type: "string", isPublic: true },
     public_transit: { type: "string", isPublic: true },
     attire: { type: "string", isPublic: true },
-    payment_options: { type: "object", isPublic: true },	//array	Applicable to Restaurants or Nightlife.
+    payment_options: { type: "object", isPublic: true },	//array	Applicable toï¿½Restaurantsï¿½orï¿½Nightlife.
     culinary_team: { type: "string", isPublic: true },
     general_manager: { type: "string", isPublic: true },
     price_range: { type: "string", isPublic: true },
-    restaurant_services: { type: "object", isPublic: true },//	array	Applicable to Restaurants.
-    restaurant_specialties: { type: "object", isPublic: true },//	array	Applicable to Restaurants.
+    restaurant_services: { type: "object", isPublic: true },//	array	Applicable toï¿½Restaurants.
+    restaurant_specialties: { type: "object", isPublic: true },//	array	Applicable toï¿½Restaurants.
     phone: { type: "string", isPublic: true },
     release_date: { type: "string", isPublic: true },
     genre: { type: "string", isPublic: true },
@@ -69,4 +71,3 @@ $data.Class.define("$data.Facebook.types.FbPage", $data.Entity, null, {
     features: { type: "string", isPublic: true },
     mpg: { type: "string", isPublic: true }
 }, null);
-

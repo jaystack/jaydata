@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase, null,
 {
     constructor: function (cfg, ctx) {
@@ -25,10 +27,10 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             setKeys.push(this.context._entitySetReferences[i].collectionName);
         }
         var localStorageData = null;
-        if (this.providerConfiguration.persistentData && window.localStorage && this.providerConfiguration.dbCreation !== $data.storageProviders.DbCreationType.DropAllExistingTables) {
+        if (this.providerConfiguration.persistentData && $data.__global.localStorage && this.providerConfiguration.dbCreation !== $data.storageProviders.DbCreationType.DropAllExistingTables) {
             var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
             var that = this;
-            var storeData = window.localStorage.getItem(localStoreName);
+            var storeData = $data.__global.localStorage.getItem(localStoreName);
 
             if (!Object.isNullOrUndefined(storeData)) {
                 localStorageData = JSON.parse(storeData,
@@ -187,7 +189,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                     break;
             }
         }
-        if(this.providerConfiguration.persistentData && window.localStorage){
+        if(this.providerConfiguration.persistentData && $data.__global.localStorage){
             var localStoreName = this.providerConfiguration.databaseName || "JayData_InMemory_Provider";
 
             var that = this;
@@ -195,7 +197,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             for (var i in this.context._entitySetReferences) {
                 setKeys.push(this.context._entitySetReferences[i].collectionName);
             }
-            localStorageData = window.localStorage.setItem(localStoreName, JSON.stringify(this.dataSource, function (key, value) {
+            var localStorageData = $data.__global.localStorage.setItem(localStoreName, JSON.stringify(this.dataSource, function (key, value) {
                 if (setKeys.indexOf(key) > -1 && Array.isArray(value)) {
                     var data = [];
                     for (var i = 0; i < value.length; i++) {
@@ -242,7 +244,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
     },
     _save_getEntity:function(item, collection){
         var keys = item.entitySet.elementType.memberDefinitions.getKeyProperties();
-        entities = collection.filter(function(entity){
+        var entities = collection.filter(function(entity){
             var isEqual = true;
             for(var i = 0;i<keys.length;i++){
                 isEqual = isEqual && entity[keys[i].name] === item.data[keys[i].name];

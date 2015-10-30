@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $C('$data.Expressions.ExpressionWalker', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (monitorDefinition) {
         this.Visit = function (expression, context) {

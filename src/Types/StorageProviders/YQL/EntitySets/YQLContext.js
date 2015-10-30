@@ -1,3 +1,4 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
 $data.Class.define("$data.Yahoo.YQLContext", $data.EntityContext, null, {
     //Geo

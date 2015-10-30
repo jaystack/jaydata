@@ -30,7 +30,7 @@ var paths = {
 
 gulp.task('default', ['babel:compile'], function() {});
 
-gulp.task('jaydata', function() {
+/*gulp.task('jaydata_tmp', function() {
     return browserify()
     .transform(babelify)
     .require('./src/index.js', { expose: 'jaydata/core' })
@@ -42,7 +42,7 @@ gulp.task('jaydata', function() {
     .pipe(gulp.dest('./dist/public'));
 });
 
-gulp.task('odataprovider', function() {
+gulp.task('odataprovider_tmp', function() {
     if (!fs.existsSync('dist')) fs.mkdirSync('dist');
     return browserify({
         standalone: '$data'
@@ -57,23 +57,7 @@ gulp.task('odataprovider', function() {
     .pipe(buffer())
     //.pipe(uglify())
     .pipe(gulp.dest('./dist/public/jaydataproviders'));
-});
-
-gulp.task('sqliteprovider', function() {
-    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
-    return browserify({
-        standalone: '$data'
-    })
-    .transform(babelify)
-    .require('./src/Types/StorageProviders/SqLite/index.js', { entry: true })
-    .external('jaydata/core')
-    .bundle()
-    .on("error", function (err) { console.log("Error: " + err.message) })
-    .pipe(source('SqLiteProvider.js'))
-    .pipe(buffer())
-    //.pipe(uglify())
-    .pipe(gulp.dest('./dist/public/jaydataproviders'));
-});
+});*/
 
 gulp.task('lint', function(){
     return gulp.src(['src/**/*.js'])
@@ -97,7 +81,7 @@ gulp.task('lint', function(){
     .pipe(eslint.failAfterError());
 });
 
-gulp.task('bundle', ['lint', 'jaydata', 'odataprovider', 'sqliteprovider'])
+//gulp.task('bundle', ['lint', 'jaydata', 'odataprovider', 'sqliteprovider'])
 
 gulp.task('nodejs', function() {
     return gulp.src(['src/**/*.js'])
@@ -153,28 +137,49 @@ gulp.task('apidocs', ['jaydata'], function (cb) {
     });
 });
 
+
 for (var i = 0; i < config.components.length; i++) {
-  (function(taskName, dep, source, name, output) {
-    if (source) {
-      gulp.task(taskName, dep, function() {
-        return gulpTask(source, name, output || config.options.output);
+  (function(td) {
+    if (td.browserify) {
+      gulp.task(td.taskName, td.dependencies, function() {
+        return gulpTask(td, config);
       });
     } else {
-      gulp.task(taskName, dep);
+      gulp.task(td.taskName, td.dependencies);
     }
-  })(config.components[i].taskName, config.components[i].dependencies, config.components[i].componentItems, config.components[i].fileName, config.components[i]
-    .output);
+  })(config.components[i]);
 }
 
-function gulpTask(srcList, resultName, destFolder) {
-  var task = gulp.src(srcList)
-    .pipe(concat(resultName + '.js'))
-    .pipe(gulp.dest(destFolder));
+function gulpTask(td, config) {
 
-  if (config.options.min) {
-    task = task.pipe(rename(resultName + '.min.js'))
-      .pipe(uglify())
-      .pipe(gulp.dest(destFolder));
-  }
-  return task;
+    var task = browserify(td.browserify)
+        .transform(babelify)
+
+    task = task.require.apply(task, td.require)
+
+    if(td.external){
+        for (var i = 0; i < td.external.length; i++){
+            task = task.external(td.external[i])
+        }
+    }
+
+    if(td.ignore){
+        for (var i = 0; i < td.ignore.length; i++){
+            task = task.ignore(td.ignore[i])
+        }
+    }
+
+    task = task.bundle()
+        .on("error", function (err) { console.log("Error: " + err.message) })
+        .pipe(source(td.destFile))
+        .pipe(buffer())
+
+    if(config.options.min){
+        task = task.pipe(uglify())
+    }
+
+    task = task.pipe(gulp.dest(td.destFolder));
+
+    return task;
+
 }

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 //"use strict" // suspicious code;
 
 $C('$data.storageProviders.YQL.YQLCompiler', $data.Expressions.EntityExpressionVisitor, null, {

@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 
 $data.Class.define("$data.Facebook.types.FbUser", $data.Entity, null, {
     uid: { type: "number", key: true, isPublic: true, searchable: true },

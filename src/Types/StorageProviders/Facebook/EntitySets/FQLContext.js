@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 $data.Class.define('$data.storageProviders.Facebook.EntitySets.Command', null, null, {
     constructor: function (cfg) {
         this.Config = $data.typeSystem.extend({
@@ -48,5 +50,3 @@ $data.Facebook.FQLCommands = {
     me: new $data.storageProviders.Facebook.EntitySets.Command({ CommandValue: "me()" }),
     now: new $data.storageProviders.Facebook.EntitySets.Command({ CommandValue: "now()" })
 };
-
-
