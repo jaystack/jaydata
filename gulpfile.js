@@ -21,6 +21,8 @@ var fs = require('fs');
 var karma = require('karma').server;
 var exec = require('child_process').exec;
 var eslint = require('gulp-eslint');
+var header = require('gulp-header');
+var footer = require('gulp-footer');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -150,32 +152,40 @@ for (var i = 0; i < config.components.length; i++) {
   })(config.components[i]);
 }
 
-function gulpTask(td, config) {
+function gulpTask(td, config){
 
-    var task = browserify(td.browserify)
-        .transform(babelify)
-
-    task = task.require.apply(task, td.require)
+    var task = browserify(td.browserify).transform(babelify.configure({
+        compact: false
+    }));
+    task = task.require.apply(task, td.require);
 
     if(td.external){
         for (var i = 0; i < td.external.length; i++){
-            task = task.external(td.external[i])
+            task = task.external(td.external[i]);
         }
     }
 
     if(td.ignore){
         for (var i = 0; i < td.ignore.length; i++){
-            task = task.ignore(td.ignore[i])
+            task = task.ignore(td.ignore[i]);
         }
     }
 
     task = task.bundle()
         .on("error", function (err) { console.log("Error: " + err.message) })
         .pipe(source(td.destFile))
-        .pipe(buffer())
+        .pipe(buffer());
 
     if(config.options.min){
-        task = task.pipe(uglify())
+        task = task.pipe(uglify());
+    }
+
+    if (td.header){
+        task = task.pipe(header(fs.readFileSync(td.header, 'utf8')));
+    }
+
+    if (td.footer){
+        task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8')));
     }
 
     task = task.pipe(gulp.dest(td.destFolder));
