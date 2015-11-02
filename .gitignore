@@ -7,7 +7,6 @@ CommandLine.dll
 JayData_readme.txt
 JaySvcUtil.exe
 Scripts/jaydata*
-build
 /obj/*
 /3rdparty/*
 /bin/*

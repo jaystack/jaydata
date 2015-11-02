@@ -1,6 +1,6 @@
 ﻿require('babel/register');
 var browserify = require('browserify');
-var config = require('./src/buildConfig.json');
+var config = require('./build/config.json');
 var pkg = require('./package.json');
 var gulp = require('gulp');
 var concat = require('gulp-concat');
@@ -23,7 +23,6 @@ var exec = require('child_process').exec;
 var eslint = require('gulp-eslint');
 var header = require('gulp-header');
 var footer = require('gulp-footer');
-var pkg = require('./package.json');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -31,36 +30,7 @@ var paths = {
   test: ['test/**/*.js']
 }
 
-gulp.task('default', ['babel:compile'], function() {});
-
-/*gulp.task('jaydata_tmp', function() {
-    return browserify()
-    .transform(babelify)
-    .require('./src/index.js', { expose: 'jaydata/core' })
-    .bundle()
-    .on("error", function (err) { console.log("Error: " + err.message) })
-    .pipe(source('jaydata.js'))
-    .pipe(buffer())
-    //.pipe(uglify())
-    .pipe(gulp.dest('./dist/public'));
-});
-
-gulp.task('odataprovider_tmp', function() {
-    if (!fs.existsSync('dist')) fs.mkdirSync('dist');
-    return browserify({
-        standalone: '$data'
-    })
-    .transform(babelify)
-    .require('./src/Types/StorageProviders/oData/index.js', { entry: true })
-    .external('jaydata/core')
-    .ignore('odatajs')
-    .bundle()
-    .on("error", function (err) { console.log("Error: " + err.message) })
-    .pipe(source('oDataProvider.js'))
-    .pipe(buffer())
-    //.pipe(uglify())
-    .pipe(gulp.dest('./dist/public/jaydataproviders'));
-});*/
+gulp.task('default', ['all']);
 
 gulp.task('lint', function(){
     return gulp.src(['src/**/*.js'])
@@ -80,15 +50,15 @@ gulp.task('lint', function(){
             'no-use-before-define': 1
         }
     }))
-    .pipe(eslint.format())
-    .pipe(eslint.failAfterError());
+    .pipe(eslint.format('compact', fs.createWriteStream('./dist/.eslint')))
+    .pipe(eslint.failAfterError())
 });
-
-//gulp.task('bundle', ['lint', 'jaydata', 'odataprovider', 'sqliteprovider'])
 
 gulp.task('nodejs', function() {
     return gulp.src(['src/**/*.js'])
-    .pipe(babel())
+    .pipe(babel({
+        compact: false
+    }))
     .pipe(gulp.dest('./dist/lib'))
     .on('error', function(err){
 		console.log('>>> ERROR', err);
@@ -96,14 +66,14 @@ gulp.task('nodejs', function() {
 	});
 });
 
-/*gulp.task('jaydata.min', function(){
-    return gulp.src('./dist/jaydata.js')
+gulp.task('jaydata.min', function(){
+    return gulp.src('./dist/public/jaydata.js')
     .pipe(closureCompiler({
         compilerPath: './node_modules/google-closure-compiler/compiler.jar',
-        fileName: 'dist/jaydata.min.js'
+        fileName: 'dist/public/jaydata.min.js'
     }))
-    .pipe(gulp.dest('./dist'));
-});*/
+    .pipe(gulp.dest('./dist/public'));
+});
 
 gulp.task('test', ['bundle'], function(done){
     karma.start({
@@ -113,24 +83,6 @@ gulp.task('test', ['bundle'], function(done){
         done();
     });
 });
-
-gulp.task('babel:compile', function() {
-  return gulp.src(paths.js)
-    .pipe(sourcemaps.init())
-    .pipe(gulp_babel({
-      modules: 'umd',
-      comments: false
-    }))
-    .pipe(sourcemaps.write())
-    .pipe(gulp.dest('build'));
-});
-
-gulp.task('release', ['JayData', 'providers', 'modules'], function() {
-  return gulp.src("build/**/*.js")
-    .pipe(header(fs.readFileSync('src/CREDITS.txt'), pkg))
-    .pipe(gulp.dest("build"));
-});
-
 
 gulp.task('apidocs', ['jaydata'], function (cb) {
     exec('node_modules\\.bin\\jsdoc dist\\public\\jaydata.js -t node_modules\\jaguarjs-jsdoc -d apidocs', function (err, stdout, stderr) {
@@ -184,6 +136,7 @@ function gulpTask(td, config){
     if (td.header){
         task = task.pipe(header(fs.readFileSync(td.header, 'utf8'), { pkg: pkg }));
     }
+    task = task.pipe(header(fs.readFileSync('./build/CREDITS.txt'), pkg));
 
     if (td.footer){
         task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8'), { pkg: pkg }));

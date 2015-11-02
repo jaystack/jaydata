@@ -11,8 +11,8 @@
             "require": ["./src/index.js", { "expose": "jaydata/core" }],
             "destFile": "jaydata.js",
             "destFolder": "./dist/public",
-            "header": "./src/jaydata-header.js",
-            "footer": "./src/jaydata-footer.js"
+            "header": "./build/jaydata-header.js",
+            "footer": "./build/jaydata-footer.js"
         },
         {
             "taskName": "odataprovider",
@@ -22,8 +22,8 @@
             "ignore": ["odatajs"],
             "destFile": "oDataProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "sqliteprovider",
@@ -32,8 +32,8 @@
             "external": ["jaydata/core"],
             "destFile": "SqLiteProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "inmemoryprovider",
@@ -42,8 +42,8 @@
             "external": ["jaydata/core"],
             "destFile": "InMemoryProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "yqlprovider",
@@ -52,8 +52,8 @@
             "external": ["jaydata/core"],
             "destFile": "YQLProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "indexeddbprovider",
@@ -62,8 +62,8 @@
             "external": ["jaydata/core"],
             "destFile": "IndexedDbProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "webapiprovider",
@@ -72,8 +72,8 @@
             "external": ["jaydata/core"],
             "destFile": "WebApiProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "facebookprovider",
@@ -82,8 +82,8 @@
             "external": ["jaydata/core"],
             "destFile": "FacebookProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
-            "header": "./src/jaydata-dep-header.js",
-            "footer": "./src/jaydata-dep-footer.js"
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "jaydataproviders",
@@ -91,7 +91,7 @@
         },
         {
             "taskName": "bundle",
-            "dependencies": ["jaydata","jaydataproviders"]
+            "dependencies": ["jaydata", "jaydataproviders"]
         },
         {
             "taskName": "all",

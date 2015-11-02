@@ -1,5 +1,6 @@
 import $data from './initializeJayDataClient.js';
 import * as acorn from 'acorn';
+import * as pkg from '../../package.json';
 
 if (typeof console === 'undefined') {
   console = {
@@ -20,8 +21,8 @@ if (!console.error) console.error = function() {};
   /// Collection of JayData services
   ///</summary>
   $data.__namespace = true;
-  // $data.version = "JayData 1.2.0";
-  // $data.versionNumber = "1.2.0";
+  $data.version = "JayData " + pkg.version;
+  $data.versionNumber = pkg.version;
   $data.root = {};
   $data.Acorn = acorn;
   //$data.Acorn = $data.Acorn || (typeof acorn == 'object' ? acorn : undefined);
