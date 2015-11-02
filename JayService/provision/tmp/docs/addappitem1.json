@@ -1,9 +1,0 @@
-{
-"test":true,
-"computeunittype":"Spot",
-"type":"MicroApplicationLayer",
-"method":"AddAppItem",
-"_id":"c1bdb484-d31a-44b2-b081-309d87006935",
-"appid":"2e94391cd-7902-4c27-ab57-89b4dd2bdca7",
-"token":"7d1e2b4c-4207-43d9-88f0-8c7f0e79d328"
-}
