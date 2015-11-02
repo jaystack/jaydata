@@ -1,3 +1,7 @@
+	var $data = require('jaydata/core');
+	$data.version = 'JayData <%=pkg.version %>';
+	$data.versionNumber = '<%=pkg.version %>';
+
 	if (typeof window !== "undefined"){
 		window.require = require;
 	}

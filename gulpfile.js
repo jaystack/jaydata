@@ -23,6 +23,7 @@ var exec = require('child_process').exec;
 var eslint = require('gulp-eslint');
 var header = require('gulp-header');
 var footer = require('gulp-footer');
+var pkg = require('./package.json');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -181,11 +182,11 @@ function gulpTask(td, config){
     }
 
     if (td.header){
-        task = task.pipe(header(fs.readFileSync(td.header, 'utf8')));
+        task = task.pipe(header(fs.readFileSync(td.header, 'utf8'), { pkg: pkg }));
     }
 
     if (td.footer){
-        task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8')));
+        task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8'), { pkg: pkg }));
     }
 
     task = task.pipe(gulp.dest(td.destFolder));
