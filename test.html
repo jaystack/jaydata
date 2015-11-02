@@ -8,16 +8,23 @@
     <link rel="stylesheet" href="oldEndpoint/Scripts/qUnit/qunit.css" type="text/css" media="screen" />
     <script type="text/javascript" src="oldEndpoint/Scripts/qUnit/qunit.js"></script>
     <script type="text/javascript" src="oldEndpoint/Scripts/jquery-1.8.0.js"></script>
-    <script type="text/javascript" src="oldEndpoint/Scripts/jquery-1.8.0.js"></script>
+    <script type="text/javascript" src="oldEndpoint/Scripts/jquery.validate.js"></script>
+    <script type="text/javascript" src="oldEndpoint/Scripts/knockout-2.1.0.js"></script>
 
     <script type="text/javascript" src="external/odatajs-4.0.0/odatajs-4.0.0.js"></script>
 
     <script type="text/javascript" src="external/acorn.js"></script>
     <script type="text/javascript" src="dist/public/jaydata.js" /></script>
     <script type="text/javascript" src="dist/public/jaydataproviders/YQLProvider.js" /></script>
-    <!-- <script type="text/javascript" src="dist/public/jaydataproviders/FacebookProvider.js" /></script> -->
+    <script type="text/javascript" src="dist/public/jaydataproviders/FacebookProvider.js" /></script>
     <!-- <script type="text/javascript" src="dist/public/jaydataproviders/oDataProvider.js" /></script> -->
     <!-- <script type="text/javascript" src="dist/public/jaydataproviders/SqLiteProvider.js" /></script> -->
+     <!-- <script type="text/javascript" src="dist/public/jaydataproviders/InMemoryProvider.js" /></script> -->
+
+     <script type="text/javascript" src="dist/public/jaydatamodules/inMemory.js" /></script>
+     <script type="text/javascript" src="dist/public/jaydatamodules/knockout.js" /></script>
+     <script type="text/javascript" src="dist/public/jaydatamodules/validate.js" /></script>
+
     <script>
       var $data = require('jaydata/core')
       Container = $data.Container
@@ -35,39 +42,39 @@
     </script>
     <script type="text/javascript" src="test/qunit/NewsReaderContext.js" /></script>
 
-    <!--<script src="test/qunit/scripts/converterTests.js" type="text/javascript"></script>-->
-    <!--<script src="test/qunit/scripts/inMemoryProviderTests.js" type="text/javascript"></script> -->
+    <script src="test/qunit/scripts/converterTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/inMemoryProviderTests.js" type="text/javascript"></script>
     <!-- <script src="UnitTests/storageModelTests.js" type="text/javascript"></script> -->
-    <!--<script src="test/qunit/scripts/typeSystemTests.js" type="text/javascript"></script>-->
-    <!--<script src="test/qunit/scripts/EntityContextTests.js" type="text/javascript"></script>-->
-    <!--<script src="test/qunit/scripts/dataDistributeTest.js" type="text/javascript"></script>-->
-    <!--<script src="test/qunit/scripts/ValidationTests.js" type="text/javascript"></script>-->
-    <!--<script src="test/qunit/scripts/indexedDbProviderTest.js" type="text/javascript"></script> -->
+    <script src="test/qunit/scripts/typeSystemTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/EntityContextTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/dataDistributeTest.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/ValidationTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/indexedDbProviderTest.js" type="text/javascript"></script>
 
-    <!-- <script src="UnitTests/knockoutTests.js" type="text/javascript"></script> -->
+    <script src="test/qunit/scripts/knockoutTests.js" type="text/javascript"></script>
     <!-- <script src="UnitTests/setOperationTests.js" type="text/javascript"></script> -->
 
-    <!-- <script src="UnitTests/sqLiteProviderTests.js" type="text/javascript"></script> -->
-    <!--<script src="test/qunit/scripts/sqLiteCompilerTests.js" type="text/javascript"></script>-->
-    <!--<script src="test/qunit/scripts/sqLiteCRUDTests.js" type="text/javascript"></script>-->
-    <!-- <script src="UnitTests/LocalItemStoreTests.js" type="text/javascript"></script> -->
+    <script src="test/qunit/scripts/sqLiteProviderTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/sqLiteCompilerTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/sqLiteCRUDTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/LocalItemStoreTests.js" type="text/javascript"></script>
 
     <!-- <script src="UnitTests/oDataProviderTests.js" type="text/javascript"></script> -->
 
     <!--Commented out because of popups-->
     <!--<script src="UnitTests/oDataProviderTests_auth.js" type="text/javascript"></script>-->
 
-    <!-- <script src="UnitTests/T1.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/T3.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/T4.js" type="text/javascript"></script> -->
+    <script src="test/qunit/scripts/T1.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/T3.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/T4.js" type="text/javascript"></script>
     <!-- <script src="UnitTests/webApiTests.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/dataServiceVersionTests.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/TypesTest.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/CollectionTests.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/T2.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/loadPropertyTests.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/ValidatonPluginTest.js" type="text/javascript"></script> -->
-    <!-- <script src="UnitTests/promiseTests.js" type="text/javascript"></script> -->
+    <script src="test/qunit/scripts/dataServiceVersionTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/TypesTest.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/CollectionTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/T2.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/loadPropertyTests.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/ValidatonPluginTest.js" type="text/javascript"></script>
+    <script src="test/qunit/scripts/promiseTests.js" type="text/javascript"></script>
     <!-- <script src="UnitTests/JaySvcUtilTests.js" type="text/javascript"></script> -->
 
     <!-- <script src="test/qunit/scripts/FaceBookProviderTests.js" type="text/javascript"></script> -->

@@ -1,12 +1,14 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import jQuery from 'jQuery'
 
-(function ($data) {
+(function ($data, $) {
     var toTemplate = function (templateId, targetId, callback) {
         ///<summary></summary>
         ///<param name="templateId" type="string"/>
         ///<param name="targetId" type="string"/>
         ///<param name="callback" type="function"/>
 
-        //Adat tulajdons·g jelˆlÈse. Ak·r ugy is mint tmpl-ben: prefix: '\\${', postfix: '}'
+        //Adat tulajdons√°g jel√∂l√©se. Ak√°r √∫gy is mint tmpl-ben: prefix: '\\${', postfix: '}'
         var prefix = '\\${', postfix = '}';
         return this.toArray(function (data) {
             var template = document.getElementById(templateId);
@@ -60,11 +62,13 @@
     if (typeof $ != 'undefined' && typeof $.tmpl != 'undefined') {
         $data.Queryable.prototype.tojQueryTemplate = $data.Queryable.prototype.tojQueryTemplate || tojQueryTemplate;
         $data.EntitySet.prototype.tojQueryTemplate = $data.EntitySet.prototype.tojQueryTemplate || tojQueryTemplate;
-    } else { 
-        $data.Queryable.prototype.tojQueryTemplate = 
+    } else {
+        $data.Queryable.prototype.tojQueryTemplate =
         $data.EntitySet.prototype.tojQueryTemplate = function() {
             Guard.raise(new Exception('jQuery and jQuery tmpl plugin is required', 'Not Found!'));
         };
     }
 
-})($data);
+})($data, jQuery);
+
+export default $data

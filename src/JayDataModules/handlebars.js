@@ -1,8 +1,12 @@
-(function ($data, Handlebars) {
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import jQuery from 'jQuery';
+import Handlebars from 'Handlebars'
+
+(function ($data, Handlebars, $) {
     var oldProcessor = $data.Entity.inheritedTypeProcessor;
     var templateCache = {};
 
-    
+
 
 
     function getTemplate(templateName) {
@@ -43,13 +47,13 @@
         return $('#' + templateName).html();
     }
 
-    
+
     var templateEngine = {
         templateResolvers: [htmlTemplateResolver, typeTemplateResolver, globalTemplateNameResolver],
         templateCompiler: handleBarTemplateCompiler,
         templateCache: { },
         getTemplate: function (type, templateName) {
-            var template, incache;
+            var template, incache, i;
             var cacheKey = type.fullName + "::" + templateName;
             incache = template = this.templateCache[cacheKey], i = 0;
             while (!template && i < this.templateResolvers.length) {
@@ -60,11 +64,11 @@
             }
             if (!template) {
                 console.log("Can not find template: " + templateName);
-            } 
+            }
             return template;
         }
     };
-    
+
     $data.templateEngine = templateEngine;
 
     $data.render = function (data, templateName) {
@@ -118,7 +122,7 @@
                     $(selector).before(result);
                     break;
             }
-            
+
             return data;
         }
     }
@@ -159,7 +163,7 @@
             oldProcessor(type);
         }
 
-        
+
         function render(item, templateName) {
             var template = templateEngine.getTemplate(type, templateName);
             if (! (item instanceof $data.Entity)) {
@@ -201,7 +205,7 @@
 
         type.renderTo = function (item, selector, templateName, renderMode) {
             if (typeof item !== 'object') {
-                replaceMode = templateName;
+                renderMode = templateName;
                 templateName = selector;
                 selector = item;
                 return type.readAll().then($data.renderTo(selector, templateName, renderMode));
@@ -211,7 +215,7 @@
 
         type.renderItemsTo = function (items, selector, templateName, renderMode) {
             if (!(Array.isArray(items))) {
-                replaceMode = templateName;
+                renderMode = templateName;
                 templateName = selector;
                 selector = items;
                 return type.readAll().then($data.renderItemsTo(selector, templateName, renderMode));
@@ -306,7 +310,7 @@
         var name = sname[sname.length - 1];
         var key = this.getType().memberDefinitions.getKeyProperties()[0];
         var id = this[key.name];
-        
+
         var result = "data-" + name.toLowerCase() + "-" + id;
         var cacheInfo = addToCache(this);
         result += " data-cache-client=" + cacheInfo.clientId;
@@ -351,4 +355,6 @@
         $(this).children().removeClass("active");
         result.addClass("active");
     });
-})($data, Handlebars);
+})($data, Handlebars, jQuery);
+
+export default $data

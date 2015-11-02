@@ -1,5 +1,9 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import jQuery from 'jQuery';
+import angular from 'angular';
+
 (function() {
-    
+
 Object.defineProperty($data.Entity.prototype, "_isNew", {
     get: function () {
         return !this.storeToken;
@@ -48,7 +52,7 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
         $data.Queryable.prototype.toLiveArrayEx = function (options, resultHolder) {
             if (Array.isArray(options)) {
                 resultHolder = options;
-                otions = undefined;
+                options = undefined;
             }
             resultHolder = resultHolder || [];
             options = options || {};
@@ -70,7 +74,7 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
             }
 
             function refresh() {
-                var defer = $.Deferred(thunk);
+                var defer = jQuery.Deferred(thunk);
                 defer.promise(resultHolder);
                 return resultHolder;
             }
@@ -97,7 +101,7 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
             result.successHandlers = [];
             result.errorHandlers = [];
 
-            
+
             if (cb && typeof cb === 'function') {
                 chainOrFire(cb, "success");
             }
@@ -248,7 +252,7 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
                 d.reject(err);
                 if (!$rootScope.$$phase) $rootScope.$apply();
             });
-            
+
             return d.promise;
         }
 
@@ -270,3 +274,5 @@ angular.module('jaydata', ['ng', ['$provide', function ($provide) {
 }]]);
 
 })();
+
+export default $data

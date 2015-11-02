@@ -1,9 +1,11 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 (function(){
-	window.onerror = function(msg, url, line){
+	$data.__global.onerror = function(msg, url, line){
 		alert('Error' + (line ? ' in line ' + line : '') + '\n' + (url || '') + '\n' + msg);
 	};
 
-	/*window.onerror = function(msg, url, line){
+	/*$data.__global.onerror = function(msg, url, line){
 		var html = '<div class="error"><span class="url">{url}</span><p class="msg">{msg}</p><span class="line">{line}</span></div>';
 		html = html.replace('{url}', url || '');
 		html = html.replace('{msg}', msg || '');
@@ -16,7 +18,9 @@
 			container.className = 'jaydata-errorhandler';
 			document.body.appendChild(container);
 		}
-		
+
 		container.innerHTML += html;
 	};*/
 })();
+
+export default $data

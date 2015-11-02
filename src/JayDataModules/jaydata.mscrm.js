@@ -1,7 +1,10 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
+
 /* data js patch to support window messaging */
 /* will be implemented as customHttpClient in next version */
-(function ($data, window, undefined) {
-    var odata = window.OData;
+(function ($data, undefined) {
+    var odata = $data.__global.OData;
 
     odata.originalHttpClient = odata.defaultHttpClient;
     $data.postMessageODataHandler = {
@@ -14,7 +17,7 @@
                 if (targetIframe) {
                     var listener = function (event) {
                         $data.Trace.log('in listener');
-                        window.removeEventListener('message', listener);
+                        $data.__global.removeEventListener('message', listener);
                         var statusCode = event.data.statusCode;
                         if (statusCode >= 200 && statusCode <= 299) {
                             success(event.data);
@@ -22,7 +25,7 @@
                             error(event.data);
                         }
                     };
-                    window.addEventListener('message', listener, false);
+                    $data.__global.addEventListener('message', listener, false);
                     $data.Trace.log('before post', targetIframe);
                     targetIframe.postMessage(request, targetOrigin);
                 } else {
@@ -45,7 +48,7 @@
                 request.requestProxy = true;
                 var listener = function (event) {
                     $data.Trace.log('in listener');
-                    window.removeEventListener('message', listener);
+                    $data.__global.removeEventListener('message', listener);
                     var statusCode = event.data.statusCode;
                     if (statusCode >= 200 && statusCode <= 299) {
                         success(event.data);
@@ -53,7 +56,7 @@
                         error(event.data);
                     }
                 };
-                window.addEventListener('message', listener, false);
+                $data.__global.addEventListener('message', listener, false);
                 $data.Trace.log('before post', targetIframe);
                 targetIframe.postMessage(request, targetOrigin);
             } else {
@@ -63,7 +66,7 @@
     };
     odata.defaultHttpClient = $data.postMessageODataHandler.postMessageHttpClient;
 
-})($data, window);
+})($data);
 
 (function ($data) {
     $data.MsCrm = {
@@ -80,8 +83,8 @@
                 if ($data.MsCrm.Auth.trace) $data.Trace.log("Message received", crmUrl);
                 if (e.data.MessageHandlerLoaded) {
                     if ($data.MsCrm.Auth.trace) $data.Trace.log("Message handler loaded", crmUrl);
-                    window.removeEventListener("message", onMessagehandlerLoaded);
-                    window.OData.defaultHttpClient.targetIframe = iframe.contentWindow;
+                    $data.__global.removeEventListener("message", onMessagehandlerLoaded);
+                    $data.__global.OData.defaultHttpClient.targetIframe = iframe.contentWindow;
                     cb(iframe.contentWindow, crmUrl);
                 }
             }
@@ -90,18 +93,18 @@
                 iframe = document.createElement("iframe");
                 if (e.data.Authenticated) {
                     $data.Trace.log("Logged in to CRM: " + crmUrl);
-                    window.removeEventListener("message", onAuthenticated);
-                    window.addEventListener("message", onMessagehandlerLoaded);
+                    $data.__global.removeEventListener("message", onAuthenticated);
+                    $data.__global.addEventListener("message", onMessagehandlerLoaded);
                     var url = local ? "postmessage.html" : crmUrl + $data.MsCrm.Auth.messageHandlerPath;
                     iframe.src = url;
                     iframe.style.display = "none";
                     document.body.appendChild(iframe);
                 }
             }
-            window.addEventListener("message", onAuthenticated);
+            $data.__global.addEventListener("message", onAuthenticated);
             var url = local ? "authorize.html" : crmUrl + $data.MsCrm.Auth.clientAuthorizationPath;
             url = url;
-            var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=400,height=600");
+            var w = $data.__global.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=400,height=600");
         }
 
     }
@@ -114,7 +117,7 @@
         }
         var serviceUrl = crmAddress + '/XRMServices/2011/OrganizationData.svc';
 
-        if (window.location.href.indexOf(crmAddress) > -1) {
+        if ($data.__global.location.href.indexOf(crmAddress) > -1) {
             initContext();
         } else {
             $data.MsCrm.Auth.login(crmAddress, function () {
@@ -145,3 +148,5 @@
     }
 
 })($data);
+
+export default $data
