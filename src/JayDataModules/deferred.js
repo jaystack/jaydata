@@ -1,10 +1,11 @@
 import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+var jQuery = $data.__global['jQuery'];
 
 (function ($data) {
     if (typeof jQuery !== 'undefined') {
         $data.Class.define('$data.Deferred', $data.PromiseHandlerBase, null, {
             constructor: function () {
-                this.deferred = new $.Deferred();
+                this.deferred = new jQuery.Deferred();
             },
             deferred: {},
             createCallback: function (callBack) {

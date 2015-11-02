@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+
 (function ($data) {
 
     $data.Array.prototype.toQueryable = function () {
@@ -30,3 +32,5 @@
     }
 
 })($data);
+
+export default $data

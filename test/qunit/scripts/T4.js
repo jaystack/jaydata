@@ -1,10 +1,10 @@
 function T4_CrossProviderTests() {
 
     //oData
-    ComplexTypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
-    LiveArrayTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
-    BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
-    BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
+    //ComplexTypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    //LiveArrayTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
 
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
@@ -603,7 +603,7 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
         pconf.databaseName = 'onupdate_test_8';
         pconf.dbCreation = $data.storageProviders.DbCreationType.DropAllExistingTables;
         pconf.onUpdated = function (ctx, callback) {
-            
+
             $news.Types.NewsContext.generateTestData(ctx, function () {
                 ok(true, "data created");
                 callback.success();

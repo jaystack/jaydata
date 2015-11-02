@@ -1,3 +1,6 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import Ext from 'Ext'
+
 (function ($data, Ext) {
 
     $data.Entity.buildExtFields = function (type, config) {
@@ -81,7 +84,7 @@
 
             return request;
         },
-        
+
         buildQueryable: function (operation, queryable) {
             if (!queryable)
                 return queryable;
@@ -121,3 +124,5 @@
     });
 
 })($data, Ext);
+
+export default $data

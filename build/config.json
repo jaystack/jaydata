@@ -90,8 +90,112 @@
             "dependencies": ["odataprovider", "sqliteprovider", "inmemoryprovider", "yqlprovider", "indexeddbprovider", "webapiprovider", "facebookprovider"]
         },
         {
+            "taskName": "angularmodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/angular.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "angular.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "errorhandlermodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/errorhandler.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "errorhandler.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "formbindermodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/formBinder.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "formBinder.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "handlebarsmodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/handlebars.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "handlebars.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "inmemorymodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/inMemory.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "inMemory.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "mscrmclientmodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/jaydata.mscrm.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "jaydata.mscrm.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+
+
+        {
+            "taskName": "kendomodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/kendo.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "kendo.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "knockoutmodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/knockout.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "knockout.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "qdeferredmodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/qDeferred.js", { "entry": true }],
+            "external": ["jaydata/core", "q"],
+            "destFile": "qDeferred.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "senchamodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/sencha.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "sencha.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "templatemodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/template.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "template.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "validatemodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/validate.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "validate.js",
+            "destFolder": "./dist/public/jaydatamodules"
+        },
+        {
+            "taskName": "jaydatamodules",
+            "dependencies": ["angularmodule", "errorhandlermodule", "formbindermodule",
+              "handlebarsmodule", "inmemorymodule", "mscrmclientmodule", "kendomodule", "knockoutmodule",
+              "qdeferredmodule", "senchamodule", "templatemodule", "validatemodule"]
+        },
+        {
             "taskName": "bundle",
-            "dependencies": ["jaydata", "jaydataproviders"]
+            "dependencies": ["jaydata", "jaydataproviders", "jaydatamodules"]
         },
         {
             "taskName": "all",

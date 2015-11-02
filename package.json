@@ -77,6 +77,7 @@
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
     "browserify-derequire": "^0.9.4",
+    "browserify-shim": "^3.8.11",
     "google-closure-compiler": "^20151015.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.2.1",
@@ -105,5 +106,18 @@
     "minimist": "^1.1.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
+  },
+  "browserify": {
+    "transform": [ "browserify-shim" ]
+  },
+  "browserify-shim": {
+    "jQuery": "global:jQuery",
+    "odatajs": "global:odatajs",
+    "angular": "global:angular",
+    "Handlebars": "global:Handlebars",
+    "kendo": "global:kendo",
+    "ko": "global:ko",
+    "q": "global:Q",
+    "Ext": "global:Ext"
   }
 }

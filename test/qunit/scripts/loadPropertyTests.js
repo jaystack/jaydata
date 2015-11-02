@@ -1,6 +1,6 @@
 ﻿
 $(document).ready(function () {
-    loadPropertyTests({ name: "oData", databaseName: 'loadPropertyTests', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
+    //loadPropertyTests({ name: "oData", databaseName: 'loadPropertyTests', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
 
     if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
 

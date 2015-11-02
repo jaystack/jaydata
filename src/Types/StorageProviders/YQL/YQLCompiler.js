@@ -288,7 +288,7 @@ $C('$data.storageProviders.YQL.YQLCompiler', $data.Expressions.EntityExpressionV
                 }
 
             } else
-                Guard.raise(new Exception(parameter.type + " not allowed in '" + expression.operation.memberName + "' statement", "invalid operation"));
+                Guard.raise(new Exception(itemType + " not allowed in '" + expression.operation.memberName + "' statement", "invalid operation"));
         }, this);
 
         if (opDef.rigthValue) context.sql += opDef.rigthValue;

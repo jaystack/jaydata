@@ -1,7 +1,8 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
-import odatajsLib from 'odatajs';
+import odatajs from 'odatajs';
 
-var innerODatajs = odatajsLib.version ?  odatajsLib : (typeof odatajs !== "undefined" && odatajs)
+var OData = $data.__global['OData'];
+var datajs = $data.__global['datajs'];
 
 var datajsPatch;
 datajsPatch = function (OData) {
@@ -47,10 +48,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }, cfg);
 
         if (this.providerConfiguration.maxDataServiceVersion === "4.0") {
-            if (typeof innerODatajs === 'undefined' || typeof innerODatajs.oData === 'undefined') {
+            if (typeof odatajs === 'undefined' || typeof odatajs.oData === 'undefined') {
                 Guard.raise(new Exception('odatajs is required', 'Not Found!'));
             } else {
-                this.oData = innerODatajs.oData
+                this.oData = odatajs.oData
             }
         } else {
             if (typeof OData === 'undefined') {

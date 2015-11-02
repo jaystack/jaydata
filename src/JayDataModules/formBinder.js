@@ -1,3 +1,6 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import jQuery from 'jQuery'
+
 /* Base: http://bitovi.com/blog/2010/06/convert-form-elements-to-javascript-object-literals-with-jquery-formBinder-plugin.html */
 (function ($) {
     var radioCheck = /radio|checkbox/i,
@@ -106,3 +109,5 @@
         }
     });
 })(jQuery);
+
+export default $data

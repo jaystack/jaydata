@@ -1,3 +1,7 @@
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import ko from 'ko'
+
+
 (function ($data) {
 
     /*converters*/
@@ -32,7 +36,7 @@
                 var backingFieldName = "_" + propertyName;
 
                 if (!_this[backingFieldName]) {
-                    koProperty = new ko.observable(_this.getEntity()[propertyName]);
+                    var koProperty = new ko.observable(_this.getEntity()[propertyName]);
 
                     koProperty.subscribe(function (val) {
                         _this.getEntity()[propertyName] = val;
@@ -50,7 +54,7 @@
 
         var properties = originalType.memberDefinitions.getPublicMappedProperties();
         for (var i = 0, l = properties.length; i < l; i++) {
-            propName = properties[i].name;
+            var propName = properties[i].name;
             instanceDefinition[propName] = {
                 type: ko.observable
             };
@@ -61,7 +65,7 @@
 
         $data.Class.defineEx(
             observableClassNem,
-            [{ type: $data.KoObservableEntity, params: [new ConstructorParameter(0), function () { return originalType }] }],
+            [{ type: $data.KoObservableEntity, params: [new $data.Class.ConstructorParameter(0), function () { return originalType }] }],
             null,
             instanceDefinition,
             {
@@ -258,8 +262,8 @@
 
             //TODO rename classes to reflex variable names
             //TODO engage localValueResolver here
-            //var globalVariableResolver = Container.createGlobalContextProcessor(window);
-            var constantResolver = Container.createConstantValueResolver(expression.parameters, window, this.scopeContext);
+            //var globalVariableResolver = Container.createGlobalContextProcessor($data.__global);
+            var constantResolver = Container.createConstantValueResolver(expression.parameters, $data.__global, this.scopeContext);
             var parameterProcessor = Container.createParameterResolverVisitor();
 
             jsCodeTree = parameterProcessor.Visit(jsCodeTree, constantResolver);
@@ -365,7 +369,7 @@
                 }
 
             },
-            
+
             getProperties: function() {
                 //todo cache!
                 var self = this;
@@ -428,10 +432,12 @@
 
     } else {
         function requiredError() {
-            Guard.raise(new Exception('Knockput js is required', 'Not Found!'));
+            Guard.raise(new Exception('Knockout js is required', 'Not Found!'));
         }
 
         $data.Entity.prototype.asKoObservable = requiredError
     }
 
 })($data);
+
+export default $data

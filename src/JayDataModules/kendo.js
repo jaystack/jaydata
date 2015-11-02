@@ -1,4 +1,8 @@
-(function ($data) {
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import jQuery from 'jQuery';
+import kendo from 'kendo'
+
+(function ($data, $) {
     var oldProcessor = $data.Entity.inheritedTypeProcessor;
 
     $data.kendo = {};
@@ -709,4 +713,6 @@
         refresh: function () {
         }
     });
-})($data);
+})($data, jQuery);
+
+export default $data

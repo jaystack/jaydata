@@ -54,9 +54,9 @@ $data.Class.define('$data.Association', null, null, {
 }, null);
 $data.Class.define('$data.ComplexType', $data.Association, null, {}, null);
 
-/** 
+/**
  * @public
- * @module $data.EntityContext 
+ * @module $data.EntityContext
  */
 /**
 * Provides facilities for querying and working with entity data as objects
@@ -83,7 +83,7 @@ $data.Class.define('$data.EntityContext', null, null,
      * northwind.onReady(function() {
      *  //work with your context
      * });
-     * 
+     *
      * @example <caption>initialize webSql context</caption>
      * var northwind = new Northwind({
      *  provider: 'webSql',
@@ -668,12 +668,12 @@ $data.Class.define('$data.EntityContext', null, null,
      * Sets the callback function to be called when the initialization of the {@link $data.EntityContext} has successfully finished.
      * @event $data.EntityContext#onReady
      * @param {function|function[]} fn - Success callback
-     * @returns {$.Deferred} 
+     * @returns {$.Deferred}
      */
     onReady: function (fn) {
         /// <signature>
         ///     <summary>
-        ///         
+        ///
         ///     </summary>
         ///     <param name="successCallback" type="Function">
         ///         <summary>Success callback</summary>
@@ -1044,18 +1044,18 @@ $data.Class.define('$data.EntityContext', null, null,
 
     /**
      * Saves the changes made to the context.
-     * 
+     *
      * @memberof $data.EntityContext
      * @instance
      * @param {Function|Object} callback - callback function or callback object with success & error properties
      * @param {$data.Transaction} transaction - Transaction object
      * @returns $.Deferred
-     * 
+     *
      * @example <caption>saveChanges with simple callback function</caption>
      * context.saveChanges(function(db) {
      *  //success
      * });
-     * 
+     *
      * @example <caption>saveChanges with callback object</caption>
      * var myCallback = {
      *  success: function(db) { //succeess },
@@ -1756,7 +1756,7 @@ $data.Class.define('$data.EntityContext', null, null,
         if (entity[memberDefinition.name] != undefined) {
 
             var pHandler = new $data.PromiseHandler();
-            callBack = pHandler.createCallback(callback);
+            var callBack = pHandler.createCallback(callback);
             this._applyTransaction(callback, callback.success, [entity[memberDefinition.name]], transaction, returnTransaction);
             /*if (returnTransaction)
                 callback.success(entity[memberDefinition.name], transaction);
