@@ -14,12 +14,12 @@ function knockoutTests(providerConfig) {
     test("knockout observable entity", 11, function () {
         var article = new $news.Types.Article();
         stop(1);
-        equal(Container.isTypeRegistered('$news.Types.ObservableArticle'), false, 'Observable article not exists failed');
+        equal($data.Container.isTypeRegistered('$news.Types.ObservableArticle'), false, 'Observable article not exists failed');
         start();
         equal(typeof article.asKoObservable, 'function', 'Entity observable convert function failed');
 
         var koArticle = article.asKoObservable();
-        equal(Container.isTypeRegistered('$news.Types.ObservableArticle'), true, 'Observable article exists failed');
+        equal($data.Container.isTypeRegistered('$news.Types.ObservableArticle'), true, 'Observable article exists failed');
         ok(article === koArticle.innerInstance, 'Inner instance reference failed');
         equal(koArticle instanceof $news.Types.ObservableArticle, true, 'Observable type failed');
         equal(koArticle instanceof $data.Entity, false, 'Observable instance not subclass of $data.Entity failed');

@@ -389,8 +389,8 @@ $data.Class.define('$data.ModelBinder', null, null, {
         /*var beautify = require('beautifyjs');
         console.log(beautify.js_beautify(context.src));*/
 
-        var fn = new Function('meta', 'data', context.src).bind(this);
-        var ret = fn(meta, data);
+        var fn = new Function('meta', 'data', 'Container', context.src).bind(this);
+        var ret = fn(meta, data, Container);
         return ret;
     }
 });
