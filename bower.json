@@ -10,5 +10,8 @@
   "keywords": ["mobile data", "javascipt data", "local storage", "mobile platform", "html5", "html5 application", "html5 applications", "html5 local", "html5 local storage", "html5 mobile", "crossplatform mobile developement", "opensource mobile", "opensource data library", "html5 library", "hybrid mobile", "nodejs data",
     "jadata","odata", "web api", "kendo ui", "sencha touch", "websql", "sqlite", "mongodb"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "ignore": [],
+  "dependencies": {},
+  "devDependencies": {}
 }
