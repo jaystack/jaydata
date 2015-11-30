@@ -1,7 +1,4 @@
 import $data from 'jaydata/core';
-
-$data.mongoDBDriver = require('mongodb');
-
 import objectid from './ClientObjectID.js';
 import converter from './mongoDBConverter.js';
 import modelbinder from './mongoDBModelBinderConfigCompiler.js';

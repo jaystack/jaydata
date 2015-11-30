@@ -79,8 +79,10 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 if (!sets.length) return readyFn(client);
                 sets.forEach(function(i){
                     if (self.context._entitySetReferences.hasOwnProperty(i)){
-                        client.collectionNames({ namesOnly: true }, function(error, names){
-                            names = names.map(function(it){ return it.slice(it.lastIndexOf('.') + 1); });
+                        client.listCollections().toArray(function (error, collections) {
+                            var names = collections.map(function (it) {
+                                return it.name.slice(it.name.lastIndexOf('.') + 1);
+                            });
                             switch (self.providerConfiguration.dbCreation){
                                 case $data.storageProviders.DbCreationType.DropAllExistingTables:
                                     if (names.indexOf(self.context._entitySetReferences[i].tableName) >= 0){
@@ -168,7 +170,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 return;
             }
 
-            var collection = new self.driver.Collection(client, entitySet.tableName);
+            var collection = client.collection(entitySet.tableName); //new self.driver.Collection(client, entitySet.tableName);
             var includes = query.includes && query.includes.length ? query.includes.map(function(it){
                 //if (it.full){
                     delete it.options.fields;
@@ -177,7 +179,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                     name: it.name,
                     type: it.type,
                     from: it.from,
-                    collection: new self.driver.Collection(client, query.context.getEntitySetFromElementType(it.type).tableName),
+                    collection: client.collection(query.context.getEntitySetFromElementType(it.type).tableName), //new self.driver.Collection(client, query.context.getEntitySetFromElementType(it.type).tableName),
                     query: it.query || {},
                     options: it.options || {}
                 };
@@ -574,7 +576,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
                 var es = keys.pop();
                 if (collections.hasOwnProperty(es)){
                     var c = collections[es];
-                    var collection = new self.driver.Collection(client, es);
+                    var collection = client.collection(es); //new self.driver.Collection(client, es);
                     if (c.insertAll && c.insertAll.length){
                         insertFn(client, c, collection);
                     }else{
@@ -860,7 +862,15 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
 }, {
     isSupported: {
         get: function(){
-            if (!$data.mongoDBDriver) return false;
+            if (!$data.mongoDBDriver){
+                try{
+                    $data.mongoDBDriver = require('mongodb');
+                    $data.StorageProviderBase.registerProvider('mongoDB', $data.storageProviders.mongoDB.mongoDBProvider);
+                    return true;
+                }catch(err){
+                    return false;
+                }
+            }
             return true;
         },
         set: function(value){}
