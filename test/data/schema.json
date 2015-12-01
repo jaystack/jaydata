@@ -1,0 +1,1799 @@
+{
+  "version": "4.0",
+  "dataServices": {
+    "schema": [
+      {
+        "namespace": "NorthwindModel",
+        "entityType": [
+          {
+            "name": "Category",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CategoryID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CategoryID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CategoryName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "15"
+              },
+              {
+                "name": "Description",
+                "type": "Edm.String",
+                "maxLength": "max"
+              },
+              {
+                "name": "Picture",
+                "type": "Edm.Binary",
+                "maxLength": "max"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Products",
+                "type": "Collection(NorthwindModel.Product)",
+                "partner": "Category"
+              }
+            ]
+          },
+          {
+            "name": "CustomerDemographic",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CustomerTypeID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CustomerTypeID",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "10"
+              },
+              {
+                "name": "CustomerDesc",
+                "type": "Edm.String",
+                "maxLength": "max"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Customers",
+                "type": "Collection(NorthwindModel.Customer)",
+                "partner": "CustomerDemographics"
+              }
+            ]
+          },
+          {
+            "name": "Customer",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CustomerID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CustomerID",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "5"
+              },
+              {
+                "name": "CompanyName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ContactName",
+                "type": "Edm.String",
+                "maxLength": "30"
+              },
+              {
+                "name": "ContactTitle",
+                "type": "Edm.String",
+                "maxLength": "30"
+              },
+              {
+                "name": "Address",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "City",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Region",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "PostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "Country",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Phone",
+                "type": "Edm.String",
+                "maxLength": "24"
+              },
+              {
+                "name": "Fax",
+                "type": "Edm.String",
+                "maxLength": "24"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Orders",
+                "type": "Collection(NorthwindModel.Order)",
+                "partner": "Customer"
+              },
+              {
+                "name": "CustomerDemographics",
+                "type": "Collection(NorthwindModel.CustomerDemographic)",
+                "partner": "Customers"
+              }
+            ]
+          },
+          {
+            "name": "Employee",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "EmployeeID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "EmployeeID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "LastName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "20"
+              },
+              {
+                "name": "FirstName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "10"
+              },
+              {
+                "name": "Title",
+                "type": "Edm.String",
+                "maxLength": "30"
+              },
+              {
+                "name": "TitleOfCourtesy",
+                "type": "Edm.String",
+                "maxLength": "25"
+              },
+              {
+                "name": "BirthDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "HireDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "Address",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "City",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Region",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "PostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "Country",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "HomePhone",
+                "type": "Edm.String",
+                "maxLength": "24"
+              },
+              {
+                "name": "Extension",
+                "type": "Edm.String",
+                "maxLength": "4"
+              },
+              {
+                "name": "Photo",
+                "type": "Edm.Binary",
+                "maxLength": "max"
+              },
+              {
+                "name": "Notes",
+                "type": "Edm.String",
+                "maxLength": "max"
+              },
+              {
+                "name": "ReportsTo",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "PhotoPath",
+                "type": "Edm.String",
+                "maxLength": "255"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Employees1",
+                "type": "Collection(NorthwindModel.Employee)",
+                "partner": "Employee1"
+              },
+              {
+                "name": "Employee1",
+                "type": "NorthwindModel.Employee",
+                "partner": "Employees1",
+                "referentialConstraint": [
+                  {
+                    "property": "ReportsTo",
+                    "referencedProperty": "EmployeeID"
+                  }
+                ]
+              },
+              {
+                "name": "Orders",
+                "type": "Collection(NorthwindModel.Order)",
+                "partner": "Employee"
+              },
+              {
+                "name": "Territories",
+                "type": "Collection(NorthwindModel.Territory)",
+                "partner": "Employees"
+              }
+            ]
+          },
+          {
+            "name": "Order_Detail",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "OrderID"
+                  },
+                  {
+                    "name": "ProductID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "UnitPrice",
+                "type": "Edm.Decimal",
+                "nullable": "false",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "Quantity",
+                "type": "Edm.Int16",
+                "nullable": "false"
+              },
+              {
+                "name": "Discount",
+                "type": "Edm.Single",
+                "nullable": "false"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Order",
+                "type": "NorthwindModel.Order",
+                "nullable": "false",
+                "partner": "Order_Details",
+                "referentialConstraint": [
+                  {
+                    "property": "OrderID",
+                    "referencedProperty": "OrderID"
+                  }
+                ]
+              },
+              {
+                "name": "Product",
+                "type": "NorthwindModel.Product",
+                "nullable": "false",
+                "partner": "Order_Details",
+                "referentialConstraint": [
+                  {
+                    "property": "ProductID",
+                    "referencedProperty": "ProductID"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Order",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "OrderID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CustomerID",
+                "type": "Edm.String",
+                "maxLength": "5"
+              },
+              {
+                "name": "EmployeeID",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "OrderDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "RequiredDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "ShippedDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "ShipVia",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "Freight",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "ShipName",
+                "type": "Edm.String",
+                "maxLength": "40"
+              },
+              {
+                "name": "ShipAddress",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "ShipCity",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "ShipRegion",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "ShipPostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "ShipCountry",
+                "type": "Edm.String",
+                "maxLength": "15"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Customer",
+                "type": "NorthwindModel.Customer",
+                "partner": "Orders",
+                "referentialConstraint": [
+                  {
+                    "property": "CustomerID",
+                    "referencedProperty": "CustomerID"
+                  }
+                ]
+              },
+              {
+                "name": "Employee",
+                "type": "NorthwindModel.Employee",
+                "partner": "Orders",
+                "referentialConstraint": [
+                  {
+                    "property": "EmployeeID",
+                    "referencedProperty": "EmployeeID"
+                  }
+                ]
+              },
+              {
+                "name": "Order_Details",
+                "type": "Collection(NorthwindModel.Order_Detail)",
+                "partner": "Order"
+              },
+              {
+                "name": "Shipper",
+                "type": "NorthwindModel.Shipper",
+                "partner": "Orders",
+                "referentialConstraint": [
+                  {
+                    "property": "ShipVia",
+                    "referencedProperty": "ShipperID"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Product",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "ProductID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ProductID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "SupplierID",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "CategoryID",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "QuantityPerUnit",
+                "type": "Edm.String",
+                "maxLength": "20"
+              },
+              {
+                "name": "UnitPrice",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "UnitsInStock",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "UnitsOnOrder",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "ReorderLevel",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "Discontinued",
+                "type": "Edm.Boolean",
+                "nullable": "false"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Category",
+                "type": "NorthwindModel.Category",
+                "partner": "Products",
+                "referentialConstraint": [
+                  {
+                    "property": "CategoryID",
+                    "referencedProperty": "CategoryID"
+                  }
+                ]
+              },
+              {
+                "name": "Order_Details",
+                "type": "Collection(NorthwindModel.Order_Detail)",
+                "partner": "Product"
+              },
+              {
+                "name": "Supplier",
+                "type": "NorthwindModel.Supplier",
+                "partner": "Products",
+                "referentialConstraint": [
+                  {
+                    "property": "SupplierID",
+                    "referencedProperty": "SupplierID"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Region",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "RegionID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "RegionID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "RegionDescription",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "50"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Territories",
+                "type": "Collection(NorthwindModel.Territory)",
+                "partner": "Region"
+              }
+            ]
+          },
+          {
+            "name": "Shipper",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "ShipperID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ShipperID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CompanyName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "Phone",
+                "type": "Edm.String",
+                "maxLength": "24"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Orders",
+                "type": "Collection(NorthwindModel.Order)",
+                "partner": "Shipper"
+              }
+            ]
+          },
+          {
+            "name": "Supplier",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "SupplierID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "SupplierID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CompanyName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ContactName",
+                "type": "Edm.String",
+                "maxLength": "30"
+              },
+              {
+                "name": "ContactTitle",
+                "type": "Edm.String",
+                "maxLength": "30"
+              },
+              {
+                "name": "Address",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "City",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Region",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "PostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "Country",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Phone",
+                "type": "Edm.String",
+                "maxLength": "24"
+              },
+              {
+                "name": "Fax",
+                "type": "Edm.String",
+                "maxLength": "24"
+              },
+              {
+                "name": "HomePage",
+                "type": "Edm.String",
+                "maxLength": "max"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Products",
+                "type": "Collection(NorthwindModel.Product)",
+                "partner": "Supplier"
+              }
+            ]
+          },
+          {
+            "name": "Territory",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "TerritoryID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "TerritoryID",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "20"
+              },
+              {
+                "name": "TerritoryDescription",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "50"
+              },
+              {
+                "name": "RegionID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Region",
+                "type": "NorthwindModel.Region",
+                "nullable": "false",
+                "partner": "Territories",
+                "referentialConstraint": [
+                  {
+                    "property": "RegionID",
+                    "referencedProperty": "RegionID"
+                  }
+                ]
+              },
+              {
+                "name": "Employees",
+                "type": "Collection(NorthwindModel.Employee)",
+                "partner": "Territories"
+              }
+            ]
+          },
+          {
+            "name": "Alphabetical_list_of_product",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CategoryName"
+                  },
+                  {
+                    "name": "Discontinued"
+                  },
+                  {
+                    "name": "ProductID"
+                  },
+                  {
+                    "name": "ProductName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ProductID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "SupplierID",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "CategoryID",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "QuantityPerUnit",
+                "type": "Edm.String",
+                "maxLength": "20"
+              },
+              {
+                "name": "UnitPrice",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "UnitsInStock",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "UnitsOnOrder",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "ReorderLevel",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "Discontinued",
+                "type": "Edm.Boolean",
+                "nullable": "false"
+              },
+              {
+                "name": "CategoryName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "15"
+              }
+            ]
+          },
+          {
+            "name": "Category_Sales_for_1997",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CategoryName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CategoryName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "15"
+              },
+              {
+                "name": "CategorySales",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Current_Product_List",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "ProductID"
+                  },
+                  {
+                    "name": "ProductName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ProductID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              }
+            ]
+          },
+          {
+            "name": "Customer_and_Suppliers_by_City",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CompanyName"
+                  },
+                  {
+                    "name": "Relationship"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "City",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "CompanyName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ContactName",
+                "type": "Edm.String",
+                "maxLength": "30"
+              },
+              {
+                "name": "Relationship",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "9",
+                "unicode": "false"
+              }
+            ]
+          },
+          {
+            "name": "Invoice",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CustomerName"
+                  },
+                  {
+                    "name": "Discount"
+                  },
+                  {
+                    "name": "OrderID"
+                  },
+                  {
+                    "name": "ProductID"
+                  },
+                  {
+                    "name": "ProductName"
+                  },
+                  {
+                    "name": "Quantity"
+                  },
+                  {
+                    "name": "Salesperson"
+                  },
+                  {
+                    "name": "ShipperName"
+                  },
+                  {
+                    "name": "UnitPrice"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ShipName",
+                "type": "Edm.String",
+                "maxLength": "40"
+              },
+              {
+                "name": "ShipAddress",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "ShipCity",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "ShipRegion",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "ShipPostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "ShipCountry",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "CustomerID",
+                "type": "Edm.String",
+                "maxLength": "5"
+              },
+              {
+                "name": "CustomerName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "Address",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "City",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Region",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "PostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "Country",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Salesperson",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "31"
+              },
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "OrderDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "RequiredDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "ShippedDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "ShipperName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ProductID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "UnitPrice",
+                "type": "Edm.Decimal",
+                "nullable": "false",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "Quantity",
+                "type": "Edm.Int16",
+                "nullable": "false"
+              },
+              {
+                "name": "Discount",
+                "type": "Edm.Single",
+                "nullable": "false"
+              },
+              {
+                "name": "ExtendedPrice",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "Freight",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Order_Details_Extended",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "Discount"
+                  },
+                  {
+                    "name": "OrderID"
+                  },
+                  {
+                    "name": "ProductID"
+                  },
+                  {
+                    "name": "ProductName"
+                  },
+                  {
+                    "name": "Quantity"
+                  },
+                  {
+                    "name": "UnitPrice"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "UnitPrice",
+                "type": "Edm.Decimal",
+                "nullable": "false",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "Quantity",
+                "type": "Edm.Int16",
+                "nullable": "false"
+              },
+              {
+                "name": "Discount",
+                "type": "Edm.Single",
+                "nullable": "false"
+              },
+              {
+                "name": "ExtendedPrice",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Order_Subtotal",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "OrderID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "Subtotal",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Orders_Qry",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CompanyName"
+                  },
+                  {
+                    "name": "OrderID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CustomerID",
+                "type": "Edm.String",
+                "maxLength": "5"
+              },
+              {
+                "name": "EmployeeID",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "OrderDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "RequiredDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "ShippedDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "ShipVia",
+                "type": "Edm.Int32"
+              },
+              {
+                "name": "Freight",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "ShipName",
+                "type": "Edm.String",
+                "maxLength": "40"
+              },
+              {
+                "name": "ShipAddress",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "ShipCity",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "ShipRegion",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "ShipPostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "ShipCountry",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "CompanyName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "Address",
+                "type": "Edm.String",
+                "maxLength": "60"
+              },
+              {
+                "name": "City",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "Region",
+                "type": "Edm.String",
+                "maxLength": "15"
+              },
+              {
+                "name": "PostalCode",
+                "type": "Edm.String",
+                "maxLength": "10"
+              },
+              {
+                "name": "Country",
+                "type": "Edm.String",
+                "maxLength": "15"
+              }
+            ]
+          },
+          {
+            "name": "Product_Sales_for_1997",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CategoryName"
+                  },
+                  {
+                    "name": "ProductName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CategoryName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "15"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ProductSales",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Products_Above_Average_Price",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "ProductName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "UnitPrice",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Products_by_Category",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CategoryName"
+                  },
+                  {
+                    "name": "Discontinued"
+                  },
+                  {
+                    "name": "ProductName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CategoryName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "15"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "QuantityPerUnit",
+                "type": "Edm.String",
+                "maxLength": "20"
+              },
+              {
+                "name": "UnitsInStock",
+                "type": "Edm.Int16"
+              },
+              {
+                "name": "Discontinued",
+                "type": "Edm.Boolean",
+                "nullable": "false"
+              }
+            ]
+          },
+          {
+            "name": "Sales_by_Category",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CategoryID"
+                  },
+                  {
+                    "name": "CategoryName"
+                  },
+                  {
+                    "name": "ProductName"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "CategoryID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CategoryName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "15"
+              },
+              {
+                "name": "ProductName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ProductSales",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Sales_Totals_by_Amount",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "CompanyName"
+                  },
+                  {
+                    "name": "OrderID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "SaleAmount",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              },
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "CompanyName",
+                "type": "Edm.String",
+                "nullable": "false",
+                "maxLength": "40"
+              },
+              {
+                "name": "ShippedDate",
+                "type": "Edm.DateTimeOffset"
+              }
+            ]
+          },
+          {
+            "name": "Summary_of_Sales_by_Quarter",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "OrderID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ShippedDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "Subtotal",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          },
+          {
+            "name": "Summary_of_Sales_by_Year",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "OrderID"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "ShippedDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "OrderID",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "Subtotal",
+                "type": "Edm.Decimal",
+                "precision": "19",
+                "scale": "4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "namespace": "ODataWebExperimental.Northwind.Model",
+        "entityContainer": {
+          "name": "NorthwindEntities",
+          "entitySet": [
+            {
+              "name": "Categories",
+              "entityType": "NorthwindModel.Category",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Products",
+                  "target": "Products"
+                }
+              ]
+            },
+            {
+              "name": "CustomerDemographics",
+              "entityType": "NorthwindModel.CustomerDemographic",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Customers",
+                  "target": "Customers"
+                }
+              ]
+            },
+            {
+              "name": "Customers",
+              "entityType": "NorthwindModel.Customer",
+              "navigationPropertyBinding": [
+                {
+                  "path": "CustomerDemographics",
+                  "target": "CustomerDemographics"
+                },
+                {
+                  "path": "Orders",
+                  "target": "Orders"
+                }
+              ]
+            },
+            {
+              "name": "Employees",
+              "entityType": "NorthwindModel.Employee",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Employees1",
+                  "target": "Employees"
+                },
+                {
+                  "path": "Employee1",
+                  "target": "Employees"
+                },
+                {
+                  "path": "Orders",
+                  "target": "Orders"
+                },
+                {
+                  "path": "Territories",
+                  "target": "Territories"
+                }
+              ]
+            },
+            {
+              "name": "Order_Details",
+              "entityType": "NorthwindModel.Order_Detail",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Order",
+                  "target": "Orders"
+                },
+                {
+                  "path": "Product",
+                  "target": "Products"
+                }
+              ]
+            },
+            {
+              "name": "Orders",
+              "entityType": "NorthwindModel.Order",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Customer",
+                  "target": "Customers"
+                },
+                {
+                  "path": "Employee",
+                  "target": "Employees"
+                },
+                {
+                  "path": "Order_Details",
+                  "target": "Order_Details"
+                },
+                {
+                  "path": "Shipper",
+                  "target": "Shippers"
+                }
+              ]
+            },
+            {
+              "name": "Products",
+              "entityType": "NorthwindModel.Product",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Category",
+                  "target": "Categories"
+                },
+                {
+                  "path": "Order_Details",
+                  "target": "Order_Details"
+                },
+                {
+                  "path": "Supplier",
+                  "target": "Suppliers"
+                }
+              ]
+            },
+            {
+              "name": "Regions",
+              "entityType": "NorthwindModel.Region",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Territories",
+                  "target": "Territories"
+                }
+              ]
+            },
+            {
+              "name": "Shippers",
+              "entityType": "NorthwindModel.Shipper",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Orders",
+                  "target": "Orders"
+                }
+              ]
+            },
+            {
+              "name": "Suppliers",
+              "entityType": "NorthwindModel.Supplier",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Products",
+                  "target": "Products"
+                }
+              ]
+            },
+            {
+              "name": "Territories",
+              "entityType": "NorthwindModel.Territory",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Employees",
+                  "target": "Employees"
+                },
+                {
+                  "path": "Region",
+                  "target": "Regions"
+                }
+              ]
+            },
+            {
+              "name": "Alphabetical_list_of_products",
+              "entityType": "NorthwindModel.Alphabetical_list_of_product"
+            },
+            {
+              "name": "Category_Sales_for_1997",
+              "entityType": "NorthwindModel.Category_Sales_for_1997"
+            },
+            {
+              "name": "Current_Product_Lists",
+              "entityType": "NorthwindModel.Current_Product_List"
+            },
+            {
+              "name": "Customer_and_Suppliers_by_Cities",
+              "entityType": "NorthwindModel.Customer_and_Suppliers_by_City"
+            },
+            {
+              "name": "Invoices",
+              "entityType": "NorthwindModel.Invoice"
+            },
+            {
+              "name": "Order_Details_Extendeds",
+              "entityType": "NorthwindModel.Order_Details_Extended"
+            },
+            {
+              "name": "Order_Subtotals",
+              "entityType": "NorthwindModel.Order_Subtotal"
+            },
+            {
+              "name": "Orders_Qries",
+              "entityType": "NorthwindModel.Orders_Qry"
+            },
+            {
+              "name": "Product_Sales_for_1997",
+              "entityType": "NorthwindModel.Product_Sales_for_1997"
+            },
+            {
+              "name": "Products_Above_Average_Prices",
+              "entityType": "NorthwindModel.Products_Above_Average_Price"
+            },
+            {
+              "name": "Products_by_Categories",
+              "entityType": "NorthwindModel.Products_by_Category"
+            },
+            {
+              "name": "Sales_by_Categories",
+              "entityType": "NorthwindModel.Sales_by_Category"
+            },
+            {
+              "name": "Sales_Totals_by_Amounts",
+              "entityType": "NorthwindModel.Sales_Totals_by_Amount"
+            },
+            {
+              "name": "Summary_of_Sales_by_Quarters",
+              "entityType": "NorthwindModel.Summary_of_Sales_by_Quarter"
+            },
+            {
+              "name": "Summary_of_Sales_by_Years",
+              "entityType": "NorthwindModel.Summary_of_Sales_by_Year"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
