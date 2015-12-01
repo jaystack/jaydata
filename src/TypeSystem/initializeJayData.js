@@ -25,8 +25,6 @@ if (!console.error) console.error = function() {};
   $data.versionNumber = pkg.version;
   $data.root = {};
   $data.Acorn = acorn;
-  //$data.Acorn = $data.Acorn || (typeof acorn == 'object' ? acorn : undefined);
-  //$data.Esprima = $data.Esprima || (typeof esprima == 'object' ? esprima : undefined);
 
 })($data);
 export default $data
