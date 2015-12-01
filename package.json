@@ -26,6 +26,7 @@
     "acorn": "^2.4.0",
     "atob": "^1.1.2",
     "btoa": "^1.1.2",
+    "dot": "^1.0.3",
     "odatajs": "^4.0.0",
     "xmldom": "^0.1.19"
   },
@@ -79,6 +80,7 @@
     "browserify": "^11.2.0",
     "browserify-derequire": "^0.9.4",
     "browserify-shim": "^3.8.11",
+    "chai": "^3.4.1",
     "google-closure-compiler": "^20151015.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.2.1",
