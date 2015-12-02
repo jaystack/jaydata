@@ -43,6 +43,8 @@ namespace WebApi_2_2_OData_4
             client.EntitySet<TestItemGroup>("TestItemGroups");
             client.EntitySet<TestItemType>("TestItemTypes");
 
+            client.AddEnumType(typeof(UserType));
+
             var model = client.GetEdmModel();
             IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting(config, model);
             conventions.Insert(0, new ContainmentRoutingConvention());

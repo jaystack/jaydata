@@ -13,7 +13,8 @@ namespace JayData.Test.WebApi_2_2_OData_4.Model
         public NewsReaderContext()
             : base("NewsReaderContext")
         {
-
+            System.Data.Entity.Database.SetInitializer<NewsReaderContext>(new initdb());
+            //System.Data.Entity.Database.SetInitializer<NewsReaderContext>(null);
         }
 
         public DbSet<Category> Categories { get; set; }
@@ -28,16 +29,16 @@ namespace JayData.Test.WebApi_2_2_OData_4.Model
         public DbSet<TestItemType> TestItemTypes { get; set; }
     }
 
-    public class initdb : DropCreateDatabaseAlways<NewsReaderContext>
+    public class initdb : DropCreateDatabaseIfModelChanges<NewsReaderContext>
     {
         protected override void Seed(NewsReaderContext context)
         {
-            var usr1 = new User { LoginName = "Usr1", Email = "usr1@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio1", Birthday = new DateTime(1975, 1, 1), Location = new Location { City = "City 1", Zip = 1117, Country = "Country 1", Address = "Test data1" } } };
-            var usr2 = new User { LoginName = "Usr2", Email = "usr2@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio2", Birthday = new DateTime(1976, 2, 1), Location = new Location { City = "City 2", Zip = 1118, Country = "Country 2", Address = "Test data2" } } };
-            var usr3 = new User { LoginName = "Usr3", Email = "usr3@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio3", Birthday = new DateTime(1977, 3, 1), Location = new Location { City = "City 3", Zip = 1119, Country = "Country 3", Address = "Test data3" } } };
-            var usr4 = new User { LoginName = "Usr4", Email = "usr4@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio4", Birthday = new DateTime(1978, 4, 1), Location = new Location { City = "City 4", Zip = 1120, Country = "Country 4", Address = "Test data4" } } };
-            var usr5 = new User { LoginName = "Usr5", Email = "usr5@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio5", Birthday = new DateTime(1979, 5, 1), Location = new Location { City = "City 5", Zip = 1121, Country = "Country 5", Address = "Test data5" } } };
-            var usr6 = new User { LoginName = "StartsWithTest", Email = "swt@company.com", Profile = new UserProfile { FullName = "Starts With Test", Bio = "Bio6", Birthday = new DateTime(1980, 5, 1), Location = new Location { City = "City 6", Zip = 1122, Country = "Country 6", Address = "Test data6" } } };
+            var usr1 = new User { UserType = UserType.Admin, LoginName = "Usr1", Email = "usr1@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio1", Birthday = new DateTime(1975, 1, 1), Location = new Location { City = "City 1", Zip = 1117, Country = "Country 1", Address = "Test data1" } } };
+            var usr2 = new User { UserType = UserType.Guest, LoginName = "Usr2", Email = "usr2@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio2", Birthday = new DateTime(1976, 2, 1), Location = new Location { City = "City 2", Zip = 1118, Country = "Country 2", Address = "Test data2" } } };
+            var usr3 = new User { UserType = UserType.Customer, LoginName = "Usr3", Email = "usr3@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio3", Birthday = new DateTime(1977, 3, 1), Location = new Location { City = "City 3", Zip = 1119, Country = "Country 3", Address = "Test data3" } } };
+            var usr4 = new User { UserType = UserType.Customer, LoginName = "Usr4", Email = "usr4@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio4", Birthday = new DateTime(1978, 4, 1), Location = new Location { City = "City 4", Zip = 1120, Country = "Country 4", Address = "Test data4" } } };
+            var usr5 = new User { UserType = UserType.Guest, LoginName = "Usr5", Email = "usr5@company.com", Profile = new UserProfile { FullName = "Full Name", Bio = "Bio5", Birthday = new DateTime(1979, 5, 1), Location = new Location { City = "City 5", Zip = 1121, Country = "Country 5", Address = "Test data5" } } };
+            var usr6 = new User { UserType = UserType.Customer, LoginName = "StartsWithTest", Email = "swt@company.com", Profile = new UserProfile { FullName = "Starts With Test", Bio = "Bio6", Birthday = new DateTime(1980, 5, 1), Location = new Location { City = "City 6", Zip = 1122, Country = "Country 6", Address = "Test data6" } } };
             var cat1 = new Category { Title = "Sport" };
             var cat2 = new Category { Title = "World" };
             var cat3 = new Category { Title = "Politics" };
