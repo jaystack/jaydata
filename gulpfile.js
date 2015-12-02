@@ -1,4 +1,4 @@
-﻿require('babel/register');
+﻿require('babel-register');
 var browserify = require('browserify');
 var config = require('./build/config.json');
 var pkg = require('./package.json');
@@ -108,7 +108,9 @@ for (var i = 0; i < config.components.length; i++) {
 function gulpTask(td, config){
 
     var task = browserify(td.browserify).transform(babelify.configure({
-        compact: false
+        compact: false,
+        presets: ["es2015"],
+        plugins: ["add-module-exports"]
     }));
     task = task.require.apply(task, td.require);
 
