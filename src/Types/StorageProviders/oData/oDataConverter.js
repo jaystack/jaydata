@@ -1,5 +1,8 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
+$data.defaults = $data.defaults || {};
+$data.defaults.oDataWebApi = false;
+
 $data.oDataConverter = {
     fromDb: {
         '$data.Byte': $data.Container.proxyConverter,
@@ -45,6 +48,7 @@ $data.oDataConverter = {
             }
         },
         '$data.Time': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.Duration': $data.Container.proxyConverter,
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
@@ -86,6 +90,7 @@ $data.oDataConverter = {
         '$data.Number': $data.Container.proxyConverter,
         '$data.Date': function (e) { return e ? e.toISOString().replace('Z', '') : e; },
         '$data.Time': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.Duration': $data.Container.proxyConverter,
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
         '$data.String': $data.Container.proxyConverter,
@@ -113,21 +118,22 @@ $data.oDataConverter = {
         '$data.Entity': function (e) { return JSON.stringify(e); },
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Int32': $data.Container.proxyConverter,
-        '$data.Number': $data.Container.proxyConverter, // double: 13.5D
+        '$data.Number': function (v) { return v && $data.defaults.oDataWebApi ? v + 'd' : v; },
         '$data.Int16': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
-        '$data.Decimal': function (v) { return v ? v + 'm' : v; },
-        '$data.Float': function (v) { return v ? v + 'f' : v; },
+        '$data.Decimal': function (v) { return v && $data.defaults.oDataWebApi ? v + 'm' : v; },
+        '$data.Float': function (v) { return v && $data.defaults.oDataWebApi ? v + 'f' : v; },
         '$data.Int64': $data.Container.proxyConverter,
-        '$data.Time': function (v) { return v ? "time'" + v + "'" : v; },
+        '$data.Time': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.Duration': function (v) { return v ? "duration'" + v + "'" : v; },
-        '$data.DateTimeOffset': function (date) { return date ? "" + date + "" : date; },
+        '$data.DateTimeOffset': function (d) { return d ? encodeURIComponent(d) : d },
         '$data.Date': function (date) { return date ? "datetime'" + date + "'" : date; },
         '$data.String': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.ObjectID': function (text) { return typeof text === 'string' ? "'" + text.replace(/'/g, "''") + "'" : text; },
         '$data.Boolean': function (bool) { return typeof bool === 'boolean' ? bool.toString() : bool; },
-        '$data.Blob': function (b) { return b ? "X'" + $data.Blob.toHexString($data.Container.convertTo(atob(b), $data.Blob)) + "'" : b; },
+        '$data.Blob': function (b) { return b ? "binary'" + b + "'" : b; },
         '$data.Object': function (o) { return JSON.stringify(o); },
         '$data.Array': function (o) { return JSON.stringify(o); },
         '$data.GeographyPoint': function (g) { if (g) { return $data.GeographyBase.stringifyToUrl(g); } return g; },
@@ -241,6 +247,12 @@ $data.oDataConverter = {
             }
             return v;
         },
+        '$data.Day': function (v) {
+            if (typeof v === 'string' && /^date'/.test(v)) {
+                return $data.Container.convertTo(v.slice(5, v.length - 1), $data.Day);
+            }
+            return v;
+        },
         '$data.Duration': function (v) {
             if (typeof v === 'string' && /^duration'/.test(v)) {
                 return $data.Container.convertTo(v.slice(9, v.length - 1), $data.Duration);
@@ -301,6 +313,7 @@ $data.oDataConverter = {
         '$data.Date': function (v) { return v.toISOString().replace('Z', ''); },
         '$data.DateTimeOffset': function(v){ return v.toISOString(); },
         '$data.Time': function (v) { return v.toString(); },
+        '$data.Day': function (v) { return v.toString(); },
         '$data.Duration': function (v) { return v.toString(); },
         '$data.Number': function (v) { return v.toString(); },
         '$data.String': function (v) { return v.toString(); },
@@ -326,6 +339,7 @@ $data.oDataConverter = {
         '$data.Date': function (o) { return o instanceof $data.Date ? o.toISOString().replace('Z', '') : o.toString() },
         '$data.DateTimeOffset': function(v){ return v ? v.toISOString() : v; },
         '$data.Time': function (o) { return o.toString(); },
+        '$data.Day': function (o) { return o.toString(); },
         '$data.Duration': function (o) { return o.toString(); },
         '$data.String': function (o) { return o.toString(); },
         '$data.Boolean': function (o) { return o.toString(); },

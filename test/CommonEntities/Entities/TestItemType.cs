@@ -12,7 +12,7 @@ namespace JayData.Test.CommonItems.Entities
         [Key]
         public int Id { get; set; }
 
-        public byte?[] blob { get; set; }
+        public byte[] blob { get; set; }
         public bool? b0 { get; set; }
         public byte? b1 { get; set; }
         public DateTime? d0 { get; set; }

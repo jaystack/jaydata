@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.OData.Edm.Library;
+using Microsoft.Spatial;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,6 +13,12 @@ namespace JayData.Test.CommonItems.Entities
     [Table("TestTable2")]
     public class TestItemGuid
     {
+        public TestItemGuid()
+        {
+            openProperties = new Dictionary<string, object>();
+            emails = new List<string>();
+        }
+
         [Key]
         public Guid Id { get; set; }
         public int? i0 { get; set; }
@@ -21,6 +29,9 @@ namespace JayData.Test.CommonItems.Entities
         //TODO: np refactor
 
         //Edm.Time not support https://github.com/OData/WebApi/issues/118
+        public TimeOfDay time { get; set; }
+        public Date date { get; set; }
+
         public DateTime t { get; set; }
         public TimeSpan dur { get; set; }
         //public  Duration dur { get; set; }
@@ -29,5 +40,10 @@ namespace JayData.Test.CommonItems.Entities
         public Decimal dec { get; set; }
         public float flt { get; set; }
 
+        public IDictionary<string, object> openProperties { get; set; }
+
+        public List<string> emails { get; set; }
+
+        public GeographyPoint Entrance { get; set; }
     }
 }

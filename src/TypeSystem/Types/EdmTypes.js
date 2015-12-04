@@ -22,6 +22,14 @@ import $data from '../TypeSystem.js'
     $data.Container.registerType('Edm.Time', Edm_Time);
     $data.Container.mapType(Edm_Time, $data.Time);
 
+    function Edm_TimeOfDay() { };
+    $data.Container.registerType('Edm.TimeOfDay', Edm_TimeOfDay);
+    $data.Container.mapType(Edm_TimeOfDay, $data.Time);
+    
+    function Edm_Date() { };
+    $data.Container.registerType('Edm.Date', Edm_Date);
+    $data.Container.mapType(Edm_Date, $data.Day);
+
     function Edm_Duration() { }    ;
     $data.Container.registerType('Edm.Duration', Edm_Duration);
     $data.Container.mapType(Edm_Duration, $data.Duration);
@@ -134,7 +142,8 @@ import $data from '../TypeSystem.js'
         '$data.Int16': 'Edm.Int16',
         '$data.Int64': 'Edm.Int64',
         '$data.DateTimeOffset': 'Edm.DateTimeOffset',
-        '$data.Time': 'Edm.Time',
+        '$data.Time': 'Edm.TimeOfDay',
+        '$data.Day': 'Edm.Date',
         '$data.Duration': 'Edm.Duration',
         '$data.Boolean': 'Edm.Boolean',
         '$data.Blob': 'Edm.Binary',

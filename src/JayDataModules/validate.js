@@ -71,6 +71,12 @@ import jQuery from 'jQuery'
             minValue: { key: 'min' },
             maxValue: { key: 'max' }
         },
+        '$data.Day': {
+            required: { key: 'required' },
+            customValidator: { key: 'customValidator', validateMethod: true },
+            minValue: { key: 'min' },
+            maxValue: { key: 'max' }
+        },
         '$data.Duration': {
             required: { key: 'required' },
             customValidator: { key: 'customValidator', validateMethod: true }

@@ -1,13 +1,16 @@
 import $data from '../TypeSystem.js'
+import Exception from '../Exception.js';
+import { Guard } from '../utils.js';
 
 /* $data.Geometry */
 $data.GeometryBase = function GeometryBase() {
     $data.Geospatial.apply(this, arguments);
 
-    this.crs = $data.GeometryBase.defaultCrs;
+    this.crs = this.crs || $data.GeometryBase.defaultCrs;
     $data.GeometryBase.validateGeoJSON(this);
 };
 
+$data.GeometryBase.disableSRID = false;
 $data.GeometryBase.defaultCrs = {
     properties: {
         name: 'EPSG:0'
@@ -32,8 +35,20 @@ $data.GeometryBase.stringifyToUrl = function (geoData) {
     if (geoData instanceof $data.GeometryBase && geoData.constructor && geoData.constructor.stringifyToUrl) {
         return geoData.constructor.stringifyToUrl(geoData);
     } else if (geoData instanceof $data.GeometryBase && geoData.constructor && Array.isArray(geoData.constructor.validMembers) && geoData.constructor.validMembers[0] === 'coordinates') {
-        var data = "geometry'" + geoData.type.toUpperCase() + '(';
-        function buildArray(d, context) {
+        var data = "geometry'";
+        function getSRID(g){
+            if(!$data.GeometryBase.disableSRID && g.crs && g.crs.properties && g.crs.properties.name){
+                var r = /EPSG:(\d+)/i;
+                var matches = r.exec(g.crs.properties.name);
+                if(matches){
+                    data +="SRID=" + matches[1] + ";";
+                }
+            }
+            return data;
+        }
+        data = getSRID(geoData);
+        data += geoData.type + '(';
+        function buildArray(d) {
             if (Array.isArray(d[0])) {
 
                 for (var i = 0; i < d.length; i++) {
@@ -50,8 +65,9 @@ $data.GeometryBase.stringifyToUrl = function (geoData) {
             } else {
                 data += d.join(' ');
             }
+            return data;
         }
-        buildArray(geoData.coordinates, data);
+        data = buildArray(geoData.coordinates);
 
         data += ")'";
         return data;

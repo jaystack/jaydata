@@ -18,6 +18,7 @@ $data.Int32 = function JayInt32() { };
 $data.Int64 = function JayInt64(v) { };
 $data.ObjectID = typeof $data.mongoDBDriver !== 'undefined' && typeof $data.mongoDBDriver.ObjectID !== 'undefined' ? $data.mongoDBDriver.ObjectID : function JayObjectID() { };
 $data.Time = function JayTime() { };
+$data.Day = function JayDay() { };
 $data.Duration = function JayDuration() { };
 $data.DateTimeOffset = function JayDateTimeOffset(val) {
     this.value = val;
@@ -41,6 +42,7 @@ $data.Container.registerType(["$data.Array", "array", "Array", "[]", "JayArray"]
 });
 $data.Container.registerType(["$data.Date", "datetime", "date", "JayDate"], $data.Date);
 $data.Container.registerType(["$data.Time", "time", "JayTime"], $data.Time);
+$data.Container.registerType(["$data.Day", "day", "JayDay"], $data.Day);
 $data.Container.registerType(["$data.Duration", "duration", "JayDuration"], $data.Duration);
 $data.Container.registerType(["$data.DateTimeOffset", "offset", "datetimeoffset", "JayDateTimeOffset"], $data.DateTimeOffset);
 $data.Container.registerType(["$data.Boolean", "bool", "boolean", "JayBoolean"], $data.Boolean);

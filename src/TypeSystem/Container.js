@@ -98,6 +98,7 @@ export function ContainerCtor(parentContainer) {
           case t === $data.Int64:
           case t === $data.DateTimeOffset:
           case t === $data.Time:
+          case t === $data.Day:
           case t === $data.Duration:
 
           case t === $data.SimpleBase:

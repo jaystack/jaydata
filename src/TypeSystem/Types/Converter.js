@@ -121,6 +121,35 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
 })();
 (function () {
     function parseFromString(value) {
+        var regex = /^(-?)([0-9]{1,4})-(1[0-2]|0[0-9]|[0-9])-([0-2][0-9]|3[0-1]|[0-9])$/;
+
+        var matches = regex.exec(value)
+        if (!matches) throw 0;
+        var date = matches[1];
+        date += ('0000' + matches[2]).slice(-4);
+        date += '-' + ('00' + matches[3]).slice(-2);
+        date += '-' + ('00' + matches[4]).slice(-2);
+        return date;
+    }
+    function parseFromDate(value){
+        var val = value.getFullYear() + '-' + (value.getMonth() + 1) + '-' + value.getDate();
+        return parseFromString(val);
+    }
+
+    $data.Container.registerConverter('$data.Day', {
+        '$data.String': parseFromString,
+        '$data.Number': function tt(value) {
+            var t = 1000*60*60*24;
+            var day = value * t;
+            if(isNaN(day)) throw 0;
+            
+            return parseFromDate(new Date(day));
+        },
+        '$data.Date': parseFromDate
+    });
+})();
+(function () {
+    function parseFromString(value) {
         return value;
     }
 

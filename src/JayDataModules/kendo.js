@@ -25,6 +25,7 @@ import kendo from 'kendo'
         "$data.Date": "date",
         "$data.DateTimeOffset": "date",
         "$data.Time": "string",
+        "$data.Day": "string",
         "$data.Duration": "string",
         "$data.Byte": "number",
         "$data.SByte": "number",
