@@ -1,4 +1,4 @@
-﻿require('babel/register');
+﻿require('babel-register');
 var browserify = require('browserify');
 var config = require('./build/config.json');
 var pkg = require('./package.json');
@@ -23,6 +23,9 @@ var exec = require('child_process').exec;
 var eslint = require('gulp-eslint');
 var header = require('gulp-header');
 var footer = require('gulp-footer');
+var webserver = require('gulp-webserver');
+var selenium = require('selenium-standalone');
+var nightwatch = require('gulp-nightwatch');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -31,6 +34,7 @@ var paths = {
 }
 
 gulp.task('default', ['all']);
+if (!fs.existsSync('./dist')) fs.mkdirSync('./dist');
 
 gulp.task('lint', function(){
     return gulp.src(['src/**/*.js'])
@@ -75,13 +79,48 @@ gulp.task('jaydata.min', function(){
     .pipe(gulp.dest('./dist/public'));
 });
 
-gulp.task('test', ['bundle'], function(done){
-    karma.start({
+var webserverInstance;
+gulp.task('webserver', function() {
+    webserverInstance = gulp.src('./')
+    .pipe(webserver({
+        port: 53999,
+        fallback: 'test.html'
+    }));
+    return webserverInstance;
+});
+
+gulp.task('selenium', function (done) {
+    selenium.install({
+        logger: function (message) { }
+    }, function (err) {
+        if (err) return done(err);
+        
+        selenium.start(function (err, child) {
+            if (err) return done(err);
+            selenium.child = child;
+            done();
+        });
+    });
+});
+
+gulp.task('test', ['webserver', 'selenium'/*'bundle'*/], function(){
+    return gulp.src('')
+    .pipe(nightwatch({
+        configFile: './nightwatch.conf.json'/*,
+        cliArgs: {
+            env: 'chrome',
+            tag: 'sandbox'
+        }*/
+    })).on('end', function(){
+        process.exit(0);
+    });
+    
+    /*karma.start({
     	configFile: __dirname + '/karma.conf.js',
     	singleRun: true
     }, function(){
         done();
-    });
+    });*/
 });
 
 gulp.task('apidocs', ['jaydata'], function (cb) {
@@ -108,7 +147,9 @@ for (var i = 0; i < config.components.length; i++) {
 function gulpTask(td, config){
 
     var task = browserify(td.browserify).transform(babelify.configure({
-        compact: false
+        compact: false,
+        presets: ["es2015"],
+        plugins: ["add-module-exports"]
     }));
     task = task.require.apply(task, td.require);
 
