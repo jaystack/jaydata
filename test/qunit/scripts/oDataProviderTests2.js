@@ -461,8 +461,6 @@ $(document).ready(function () {
 		})
     });
 	
-	//enum
-	
 	test("geographypoint value", 3, function () {
 		stop(1);
 

@@ -5,6 +5,7 @@ $data.defaults.oDataWebApi = false;
 
 $data.oDataConverter = {
     fromDb: {
+        '$data.Enum': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': $data.Container.proxyConverter,
@@ -77,6 +78,7 @@ $data.oDataConverter = {
         '$data.Guid': function (guid) { return guid ? guid.toString() : guid; }
     },
     toDb: {
+        '$data.Enum': $data.Container.proxyConverter,
         '$data.Entity': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
@@ -115,6 +117,7 @@ $data.oDataConverter = {
         '$data.Guid': $data.Container.proxyConverter
     },
     escape: {
+        '$data.Enum': function (e, enumType) { return  (typeof e == "number" || e) ? ((enumType ? enumType.fullName : "") + "'" + e + "'") : e },
         '$data.Entity': function (e) { return JSON.stringify(e); },
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Int32': $data.Container.proxyConverter,

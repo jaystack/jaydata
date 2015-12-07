@@ -15,6 +15,7 @@ $data.Class.define('$data.StorageModel', null, null, {
     constructor: function () {
         ///<field name="LogicalType" type="$data.Entity">User defined type</field>
         this.ComplexTypes = [];
+        this.Enums = [];
         this.Associations = [];
     },
     LogicalType: {},
@@ -25,6 +26,7 @@ $data.Class.define('$data.StorageModel', null, null, {
     TableName: {},
     TableOptions: { value: undefined },
     ComplexTypes: {},
+    Enums: {},
     Associations: {},
     ContextType: {},
     Roles: {}
@@ -378,18 +380,26 @@ $data.Class.define('$data.EntityContext', null, null,
 
             storageModel.Associations = storageModel.Associations || [];
             storageModel.ComplexTypes = storageModel.ComplexTypes || [];
+            storageModel.Enums = storageModel.Enums || [];
             for (var j = 0; j < storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().length; j++) {
                 var memDef = storageModel.LogicalType.memberDefinitions.getPublicMappedProperties()[j];
                 ///<param name="memDef" type="MemberDefinition">Member definition instance</param>
 
                 var memDefResolvedDataType = Container.resolveType(memDef.dataType);
 
-                if ((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1) && Object.isNullOrUndefined(memDef.inverseProperty)) {
+                if (((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1) || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum))) 
+                    && Object.isNullOrUndefined(memDef.inverseProperty)) 
+                {
                     //copy member definition
                     var t = JSON.parse(JSON.stringify(memDef));
                     //change datatype to resolved type
                     t.dataType = memDefResolvedDataType;
                     dbEntityInstanceDefinition[memDef.name] = t;
+                    
+                    if(memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)){
+                         this._build_EnumDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef)
+                    }
+                    
                     continue;
                 }
 
@@ -641,6 +651,24 @@ $data.Class.define('$data.EntityContext', null, null,
             ReferentialConstraint: [],
             ToPropertyName: toPropName
         });
+    },
+    _build_EnumDefinition: function (dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef) {
+        storageModel.Enums.push(memDefResolvedDataType);
+        
+        var typeName = Container.resolveName(memDefResolvedDataType);
+        var converterGroups = this.storageProvider.fieldConverter;
+        
+        var createEnumConverter = function(converterGroup){
+            converterGroup[typeName] = function(value){
+                return converterGroup["$data.Enum"].call(this, value, memDefResolvedDataType);
+            }
+        }
+        
+        for (var i in converterGroups) {
+            if (!converterGroups[i][typeName] && converterGroups[i]["$data.Enum"]) {
+                createEnumConverter(converterGroups[i])
+            }
+        }
     },
 
     _successInitProvider: function (context, error) {
