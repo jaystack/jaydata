@@ -12,7 +12,10 @@ $data.setModelContainer = function(modelHolder){
   _modelHolder = modelHolder;
 };
 
-
+$data.defaults = $data.defaults || {}
+$data.defaults.openTypeDefaultPropertyName = "Dynamics";
+$data.defaults.openTypeDefaultType = '$data.Object';
+$data.defaults.openTypeDefaultValue = {};
 
 $data.__global = process.browser ? window : global
 $data.setGlobal = function(obj){
@@ -594,7 +597,9 @@ $data.setGlobal = function(obj){
         }
       }
 
+      var openTypeDefinition = classFunction.staticDefinitions && classFunction.staticDefinitions.getMember('openType');
       if (classDefinition) {
+        if(openTypeDefinition) delete classDefinition.openType;
         this.buildStaticMembers(classFunction, classDefinition);
 
         if (classDefinition.constructor)
@@ -602,6 +607,32 @@ $data.setGlobal = function(obj){
       }
 
       if (instanceDefinition) {
+        
+        //build open type member
+        if (!openTypeDefinition && classDefinition && (typeof classFunction.openType === "string" || classFunction.openType === true) && classFunction.isAssignableTo($data.Entity)) {
+          var openTypePropertyName = $data.defaults.openTypeDefaultPropertyName;
+          var openTypeDefaultType = Container.resolveType($data.defaults.openTypeDefaultType);
+          var openTypeDefaultValue = $data.defaults.openTypeDefaultValue;
+          if (typeof classFunction.openType == "string") {
+            openTypePropertyName = classFunction.openType;
+          }
+          
+          var definedOpenTypeMember = classFunction.getMemberDefinition(openTypePropertyName);
+          if(definedOpenTypeMember && Container.resolveType(definedOpenTypeMember.type || definedOpenTypeMember.dataType) !== openTypeDefaultType) {
+            Guard.raise(new Exception("Type Error", "OpenType default type missmatch"));
+          }
+          if (!definedOpenTypeMember && instanceDefinition[openTypePropertyName]) {
+            var memberType = Container.resolveType(instanceDefinition[openTypePropertyName].type || instanceDefinition[openTypePropertyName].dataType);
+            if(memberType !== openTypeDefaultType){
+              Guard.raise(new Exception("Type Error", "OpenType default type missmatch"));
+            }
+          }
+          if(!definedOpenTypeMember && !instanceDefinition[openTypePropertyName]){
+            var defaultValue = typeof openTypeDefaultValue !== "undefined" ? openTypeDefaultValue : {};
+            instanceDefinition[openTypePropertyName] = { type: openTypeDefaultType, defaultValue:  defaultValue };
+          }
+        }
+        
         this.buildInstanceMembers(classFunction, instanceDefinition);
       }
 
