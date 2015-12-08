@@ -2,17 +2,17 @@ $(document).ready(function () {
     module("oData_enum");
 	
 	$data.Enum.extend("$data.testEnum", {
-		Admin: { value: 0 },
-		User: { value: 1 },
-		Customer: { value: 2 },
-		Guest: { value: 4 }
+		Admin: 0,
+		User: 1,
+		Customer: 2,
+		Guest: 4
 	})
 	
-	$data.Enum.extend("$data.testStrEnum", {
-		Admin: { value: 'admin' },
-		User: { value: 'user' },
-		Customer: { value: 'customer' },
-		Guest: { value: 'guest' }
+	$data.Enum.extend("$data.testStrEnum", "Edm.String", {
+		Admin: 'admin',
+		User: 'user',
+		Customer: 'customer',
+		Guest: 'guest'
 	})
 	
 	var testEnumEntity = $data.Class.define("$data.testEnumEntity", $data.Entity, null, {
@@ -45,10 +45,13 @@ $(document).ready(function () {
 		})
     });
 	
-	test("enum value", 3, function () {
+	test("enum value", 4, function () {
 		stop(1);
 
 		ctx.onReady(function(ctx){
+			
+			equal($data.testEnum.__enumType, $data.Integer, 'enumType')
+			
 			var value = $data.testEnum.Customer;
 			
 			var fromDb = ctx.storageProvider.fieldConverter.fromDb['$data.testEnum']
@@ -85,10 +88,13 @@ $(document).ready(function () {
 		})
     });
 	
-	test("str enum value", 3, function () {
+	test("str enum value", 4, function () {
 		stop(1);
 
 		ctx.onReady(function(ctx){
+			
+			equal($data.testStrEnum.__enumType, $data.String, 'enumType')
+			
 			var value = $data.testStrEnum.Customer;
 			
 			var fromDb = ctx.storageProvider.fieldConverter.fromDb['$data.testStrEnum']
