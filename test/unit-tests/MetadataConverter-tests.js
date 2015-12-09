@@ -174,13 +174,12 @@ describe("Metadata.processMetadata", function() {
         expect(types).to.have.length(27)
     })
 
-    it("should create a context type that is creatable", function(done) {
+    it("should create a context type that can read data from nwind online", function(done) {
         var md = new Metadata({},schema)
         var types = []
         md.processMetadata(types)
         var CtxType = types.filter(t => t.inheritsFrom === $data.EntityContext)[0]
         var i = new CtxType("http://services.odata.org/V4/Northwind/Northwind.svc")
-        console.log(i.Categories)
         i.Categories.toArray((data) => {
             expect(data[0]).to.be.instanceof(i.Categories.Category)
             done()
