@@ -2,6 +2,8 @@ import $data from '../../src'
 import op from '../../src/Types/StorageProviders/oData'
 import {Metadata} from '../../src/JaySvcUtil/Metadata'
 import {expect} from 'chai'
+
+
 describe("Metadata", function() {
     var md
     beforeEach(() => md = new Metadata({},{}))
@@ -180,7 +182,7 @@ describe("Metadata.processMetadata", function() {
         var i = new CtxType("http://services.odata.org/V4/Northwind/Northwind.svc")
         console.log(i.Categories)
         i.Categories.toArray((data) => {
-            console.log(data)
+            expect(data[0]).to.be.instanceof(i.Categories.Category)
             done()
         })
     })
