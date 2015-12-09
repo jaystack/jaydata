@@ -1414,7 +1414,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var filterCompiler = Container.createoDataWhereCompiler(this.provider);
         context.data = "";
         filterCompiler.compile(expression.selector, context);
-        context["$filter"] = context.data;
+        context["$filter"] = encodeURIComponent(context.data);
         context.data = "";
 
     },
