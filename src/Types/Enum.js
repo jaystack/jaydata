@@ -27,8 +27,21 @@ $data.Enum = $data.Class.define("$data.Enum", null, null, {
         var getEnumDef = function(value){
             return { get: function() { return value }, set: function() { }, enumMember: true }
         }
+        
+        var defaultValue = 0;
+        var isValueCalculation = [$data.Byte, $data.SByte, $data.Int16, $data.Integer, $data.Int64].indexOf(enumType) >= 0;
+        
         for (var i in enumDefinition) {
-            classDefinition[i] = getEnumDef(enumDefinition[i]);
+            var val = enumDefinition[i]
+            if (isValueCalculation && typeof val !== "number" && !val) {
+               val = defaultValue;
+            }
+            if (typeof val === "number") {
+               defaultValue = val; 
+            }
+            enumDefinition[i] = val;
+            defaultValue++;
+            classDefinition[i] = getEnumDef(val);
         }
         
         $data.Base.extend.call(this, name, container, {}, classDefinition);

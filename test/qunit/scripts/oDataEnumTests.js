@@ -2,9 +2,9 @@ $(document).ready(function () {
     module("oData_enum");
 	
 	$data.Enum.extend("$data.testEnum", {
-		Admin: 0,
-		User: 1,
-		Customer: 2,
+		Admin: "",
+		User: undefined,
+		Customer: "",
 		Guest: 4
 	})
 	
