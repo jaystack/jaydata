@@ -35,7 +35,7 @@ namespace WebApi_2_2_OData_4.Controllers
             item1.openProperties.Add("t5", GeographyPoint.Create(64.1, 142.1));
 
             list.Add(item1);
-            var item = new TestItemGuid { Id = Guid.NewGuid(), Entrance = GeographyPoint.Create(64.1, 142.1), date = DateTime.Now, time = new TimeOfDay(22, 10, 15, 00), b0 = null, dec = (decimal)1.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99336998), flt = 15.56f, i0 = 62341, t = DateTime.Now.AddDays(-2), lng = 4344253L, s0 = "3nd row" };
+            var item = new TestItemGuid { Id = Guid.NewGuid()/*, Entrance = GeographyPoint.Create(64.1, 142.1)*/, date = DateTime.Now, time = new TimeOfDay(22, 10, 15, 00), b0 = null, dec = (decimal)1.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99336998), flt = 15.56f, i0 = 62341, t = DateTime.Now.AddDays(-2), lng = 4344253L, s0 = "3nd row" };
             item.openProperties.Add("t0", 1);
             item.openProperties.Add("t1", "xx");
             item.openProperties.Add("t2", DateTime.Now);
