@@ -152,20 +152,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += '}';
             }
             if (this.references && meta.$keys) this._buildKey('forKey', meta.$type, meta.$keys, context);
-            //else if (this.references && meta.$item && meta.$item.$keys) this._buildKey('forKey', meta.$type, meta.$item.$keys, context);
-            //else context.src += 'var forKey = typeof itemKey !== "undefined" ? itemKey : undefined;';
-            /*context.src += 'if (typeof forKey !== "undefined" && forKey){';
-            context.src += 'if (cache[forKey]){';
-            context.src += iter + ' = cache[forKey];';
-            context.src += '}else{';
-            context.src += iter + ' = [];';
-            context.src += 'cache[forKey] = ' + iter + ';';
-            context.src += '}';
-            context.src += '}else{';
-            context.src += iter + ' = [];';
-            context.src += '}';*/
             context.src += iter + ' = typeof ' + iter + ' == "undefined" ? [] : ' + iter + ';';
-            //context.src += iter + ' = [];';
             if (this.references && meta.$item.$keys) {
                 var keycacheName = 'keycache_' + iter.replace(/\./gi, '_');
                 context.src += 'var ' + keycacheName + ';';
@@ -177,7 +164,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += '}else{';
                 context.src += keycacheName + ' = keycache[kci];';
                 context.src += '}';
-                //context.src += 'var ' + keycacheName + ' = ' + (meta.$item.$keys ? '[]' : 'null') + ';';
             }
             context.iter = undefined;
             context.forEach = true;
@@ -225,16 +211,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += '}}else{';
                     context.src += iter + '.push(' + (context.item || item) + ');';
                     context.src += '}';
-                    /*context.src += 'if (typeof itemKey !== "undefined" && itemKey !== null){';
-                    context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && itemKey){';
-                    context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(itemKey) < 0){';
-                    context.src += iter + '.push(' + (context.item || item) + ');';
-                    context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(itemKey);'
-                    context.src += '}}else{';
-                    context.src += iter + '.push(' + (context.item || item) + ');';
-                    context.src += '}}else{';
-                    context.src += iter + '.push(' + (context.item || item) + ');';
-                    context.src += '}';*/
                 } else {
                     context.src += iter + '.push(' + (context.item || item) + ');';
                 }
@@ -302,6 +278,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }
             }
+            if (resolvedType && resolvedType.openType){
+                context.src += item + '.' + resolvedType.openType + ' = {};';
+                context.src += 'for (var prop in di){ if ([' + Object.keys(meta).map(function(prop){ return '"' + prop + '"'; }).join(', ') + '].indexOf(prop) < 0){ ' + item + '.' + resolvedType.openType + '[prop] = di[prop]; } };';
+            }
             for (var i in meta) {
                 if (i.indexOf('$') < 0) {
                     context.current = i;
@@ -352,7 +332,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             } else if (converter) {
                                 context.src += item + '.' + i + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta[i] + ');';
                             } else {
-                                //var type = Container.resolveName(Container.resolveType(type.memberDefinitions.getMember(i).type));
                                 var typeIndex = Container.getIndex(Container.resolveType(type.memberDefinitions.getMember(i).type));
                                 context.src += item + '.' + i + ' = new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta[i] + ');';
                             }
@@ -385,9 +364,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.build(meta, context);
         if (context.item) context.src += 'if (typeof result === "undefined") result = ' + context.item + ';';
         context.src += 'return result;';
-
-        /*var beautify = require('beautifyjs');
-        console.log(beautify.js_beautify(context.src));*/
 
         var fn = new Function('meta', 'data', 'Container', context.src).bind(this);
         var ret = fn(meta, data, Container);

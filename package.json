@@ -123,5 +123,8 @@
     "ko": "global:ko",
     "q": "global:Q",
     "Ext": "global:Ext"
+  },
+  "scripts": {
+    "test": "mocha --compilers js:babel-register"
   }
 }
