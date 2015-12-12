@@ -1,5 +1,6 @@
 ﻿using JayData.Test.CommonItems.Entities;
 using JayData.Test.WebApi_2_2_OData_4.Model;
+using Microsoft.Spatial;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -131,6 +132,34 @@ namespace WebApi_2_2_OData_4.Controllers
         {
             return db.Articles.Any(p => p.Id == key);
         }
+
+
+
+
+        [HttpPost]
+        public string GetFirstArticleTitle([FromODataUri] int key, ODataActionParameters parameters)
+        {
+            var contains = (string)parameters["contains"] ?? "";
+            return db.Articles.Where(a => a.Category.Id == key && a.Title.Contains(contains)).Select(a => a.Title).FirstOrDefault() ?? " - ";
+        }
+
+        [HttpPost]
+        public string GetFirstArticleTitle(ODataActionParameters parameters)
+        {
+            var contains = (string)parameters["contains"] ?? "";
+            return db.Articles.Where(a => a.Title.Contains(contains)).Select(a => a.Title).FirstOrDefault() ?? " - ";
+        }
+
+        [HttpPost]
+        public GeographyPoint LocationSwipe([FromODataUri] int key, ODataActionParameters parameters)
+        {
+            var loc = (GeographyPoint)parameters["Loc"] ?? null;
+            return GeographyPoint.Create(loc.Longitude, loc.Latitude);
+        }
+
+
+
+
         protected override void Dispose(bool disposing)
         {
             db.Dispose();

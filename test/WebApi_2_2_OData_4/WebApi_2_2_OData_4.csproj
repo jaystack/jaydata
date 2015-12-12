@@ -120,6 +120,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\NonBindableActionsController.cs" />
     <Compile Include="Controllers\TestItemTypesController.cs" />
     <Compile Include="Controllers\TestItemGroupsController.cs" />
     <Compile Include="Controllers\TestTable2Controller.cs" />

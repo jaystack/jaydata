@@ -8,16 +8,10 @@ using System.Threading.Tasks;
 
 namespace JayData.Test.CommonItems.Entities
 {
-    public partial class Article
+    public partial class Article : MyTClass
     {
-        [Key]
-        public int Id { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
-        //[Column(TypeName = "ntext"), MaxLength]
-        [Required]
-        public string Title { get; set; }
-        //[Column(TypeName = "ntext"), MaxLength]
         public string Lead { get; set; }
         //[Column(TypeName = "ntext"), MaxLength]
         public string Body { get; set; }

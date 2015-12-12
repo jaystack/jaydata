@@ -18,7 +18,6 @@ var babelify = require('babelify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var fs = require('fs');
-var karma = require('karma').server;
 var exec = require('child_process').exec;
 var eslint = require('gulp-eslint');
 var header = require('gulp-header');
