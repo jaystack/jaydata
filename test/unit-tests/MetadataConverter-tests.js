@@ -1,5 +1,5 @@
-import $data from '../../src'
-import op from '../../src/Types/StorageProviders/oData'
+import $data from '../../src/index.js'
+import op from '../../src/Types/StorageProviders/oData/index.js'
 import {Metadata} from '../../src/JaySvcUtil/Metadata'
 import {expect} from 'chai'
 
@@ -167,6 +167,7 @@ describe("Metadata.createContextType", function() {
 
 describe("Metadata.processMetadata", function() {
     var schema = require('../data/schema.json')
+    this.timeout(10000)
     it("should create a context type field all entity sets", function() {
         var md = new Metadata({},schema)
         var types = []
@@ -185,5 +186,29 @@ describe("Metadata.processMetadata", function() {
             done()
         })
     })
+})
+
+import metaReader from '../../src/JaySvcUtil/ODataJSReader.js'
+
+
+describe("ODataJSReader.read", function() {
+    this.timeout(10000)
+    var nwurl = 'http://services.odata.org/V4/Northwind/Northwind.svc'
+    it("should read some metadata", done => {
+        var url = `${nwurl}/$metadata`
+        metaReader.read({url}, (e, r) => {
+          expect(e).to.be.empty
+          expect(r).to.be.not.empty
+          done()
+        })
+    })
+
+    it.only("should read some metadata", done => {
+        console.log($data.service(nwurl, {}, (t) => {
+            console.log("!done", t)
+            done(undefined, t)
+        }))
+    })
+
 })
 
