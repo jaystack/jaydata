@@ -32,11 +32,17 @@
             constructor: function () {
                 var _this = this;
 
-                _this.getEntity().propertyChanged.attach(function (sender, val) {
+                _this.subscriptions = [];
+
+                var propFunc = function(sender, val) {
                     if (_this[val.propertyName]() !== val.newValue) {
                         _this[val.propertyName](val.newValue);
                     }
-                });
+                };
+
+                _this.propFunc = propFunc;
+
+                _this.getEntity().propertyChanged.attach(propFunc);
             },
 
             retrieveProperty: function (memberDefinition) {
@@ -45,11 +51,13 @@
                 var backingFieldName = "_" + propertyName;
 
                 if (!_this[backingFieldName]) {
-                    koProperty = new ko.observable(_this.getEntity()[propertyName]);
+                    var koProperty = new ko.observable(_this.getEntity()[propertyName]);
 
-                    koProperty.subscribe(function (val) {
+                    var koSubscription = koProperty.subscribe(function (val) {
                         _this.getEntity()[propertyName] = val;
                     });
+
+                    _this.subscriptions.push(koSubscription);
 
                     _this[backingFieldName] = koProperty;
                 }
@@ -58,7 +66,12 @@
             },
             storeProperty: function (memberDefinition, value) {
             },
-            equalityComparers: { type: $data.Object }
+            equalityComparers: { type: $data.Object },
+            dispose: function() {
+                for (var i=0; i< this.subscriptions.length; i++)
+                    this.subscriptions[i].dispose();
+                this.getEntity().propertyChanged.detach(this.propFunc);
+            }
         };
 
         var properties = originalType.memberDefinitions.getPublicMappedProperties();
