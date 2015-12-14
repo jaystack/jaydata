@@ -280,7 +280,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
             }
             if (resolvedType && resolvedType.openType){
                 context.src += item + '.' + resolvedType.openType + ' = {};';
-                context.src += 'for (var prop in di){ if ([' + Object.keys(meta).map(function(prop){ return '"' + prop + '"'; }).join(', ') + '].indexOf(prop) < 0){ ' + item + '.' + resolvedType.openType + '[prop] = di[prop]; } };';
+                context.src += 'for (var prop in di){ if ([' + resolvedType.memberDefinitions.getPublicMappedPropertyNames().map(function(prop){
+                    return '"' + prop + '"';
+                }).join(',') + '].indexOf(prop) < 0){ ' + item + '.' + resolvedType.openType + '[prop] = di[prop]; } };';
             }
             for (var i in meta) {
                 if (i.indexOf('$') < 0) {
@@ -364,7 +366,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.build(meta, context);
         if (context.item) context.src += 'if (typeof result === "undefined") result = ' + context.item + ';';
         context.src += 'return result;';
-
+        
         var fn = new Function('meta', 'data', 'Container', context.src).bind(this);
         var ret = fn(meta, data, Container);
         return ret;
