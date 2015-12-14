@@ -25,7 +25,7 @@ namespace WebApi_2_2_OData_4.Controllers
             //return db.TestTable2;
             var list = new List<TestItemGuid>();
 
-            list.Add(new TestItemGuid { Id = Guid.NewGuid(), date = Date.Now, time = new TimeOfDay(15, 10, 15, 00), b0 = true, dec = (decimal)2.2, dtOffset = new DateTimeOffset(DateTime.Now), dur = DateTime.Now - DateTime.Today, flt = 3.56f, i0 = 1234, t = DateTime.Now, lng = 4324233L, s0 = "1st row" });
+            list.Add(new TestItemGuid { Id = Guid.NewGuid(), date = DateTime.Parse("2015-12-12"), time = new TimeOfDay(15, 10, 15, 00), b0 = true, dec = (decimal)2.2, dtOffset = new DateTimeOffset(DateTime.Now), dur = DateTime.Now - DateTime.Now.AddMinutes(345), flt = 3.56f, i0 = 1234, t = DateTime.Now, lng = 4324233L, s0 = "1st row" });
             var item1 = new TestItemGuid { Id = Guid.NewGuid(), date = new Date(2000, 3, 15), time = new TimeSpan(99336998), b0 = false, dec = (decimal)4.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99696998), flt = 5.56f, i0 = 6234, t = DateTime.Now.AddDays(-3), lng = 4344233L, s0 = "2nd row" };
             item1.openProperties.Add("t0", 1.0f);
             item1.openProperties.Add("t1", false);

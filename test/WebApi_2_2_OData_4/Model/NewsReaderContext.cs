@@ -124,7 +124,7 @@ namespace JayData.Test.WebApi_2_2_OData_4.Model
             context.TestTable.Add(new TestItem { Id = 18, i0 = 3, b0 = false, d0 = new DateTime(2012, 5, 15), n0 = 17.15, s0 = "barack" });
             context.TestTable.Add(new TestItem { Id = 20, i0 = 4, b0 = null, d0 = new DateTime(2015, 5, 15), n0 = 67.65, s0 = "árvíztűrő tükörfúrógép ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP" });
 
-            context.TestTable2.Add(new TestItemGuid { Id = Guid.NewGuid(), date = Date.Now, time = new TimeOfDay(15, 10, 15, 00), b0 = true, dec = (decimal)2.2, dtOffset = new DateTimeOffset(DateTime.Now), dur = DateTime.Now - DateTime.Today, flt = 3.56f, i0 = 1234, t = DateTime.Now, lng = 4324233L, s0 = "1st row" });
+            context.TestTable2.Add(new TestItemGuid { Id = Guid.NewGuid(), date = DateTime.Parse("2015-12-12"), time = new TimeOfDay(15, 10, 15, 00), b0 = true, dec = (decimal)2.2, dtOffset = new DateTimeOffset(DateTime.Now), dur = DateTime.Now - DateTime.Today, flt = 3.56f, i0 = 1234, t = DateTime.Now, lng = 4324233L, s0 = "1st row" });
             context.TestTable2.Add(new TestItemGuid { Id = Guid.NewGuid(), date = new Date(2000, 3, 15), time = new TimeSpan(99336998), b0 = false, dec = (decimal)4.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99696998), flt = 5.56f, i0 = 6234, t = DateTime.Now.AddDays(-3), lng = 4344233L, s0 = "2nd row" });
             var item = new TestItemGuid { Id = Guid.NewGuid(), date = DateTime.Now, time = new TimeOfDay(22, 10, 15, 00), b0 = null, dec = (decimal)1.2, dtOffset = new DateTimeOffset(DateTime.Today), dur = new TimeSpan(99336998), flt = 15.56f, i0 = 62341, t = DateTime.Now.AddDays(-2), lng = 4344253L, s0 = "3nd row" };
             item.openProperties.Add("t0", 1);
@@ -136,8 +136,8 @@ namespace JayData.Test.WebApi_2_2_OData_4.Model
             context.TestTable2.Add(item);
 
 
-            context.TestItemTypes.Add(new TestItemType { b0 = false, b1 = 1, blob = Encoding.UTF8.GetBytes("hello jaydata"), d0 = DateTime.Now, de0 = (decimal)2.2, g0 = Guid.NewGuid(), i0 = 42, i16 = 23, i64 = 1337, Id = 1, n0 = 34.5, s0 = "JayData", si0 = 4.25f });
-            context.TestItemTypes.Add(new TestItemType { b0 = false, b1 = 7, blob = Encoding.UTF8.GetBytes("hello jayservices"), d0 = DateTime.Now, de0 = (decimal)2.5, g0 = Guid.NewGuid(), i0 = 45, i16 = 27, i64 = 1339, Id = 2, n0 = 36.5, s0 = "JayServices", si0 = 3.25f });
+            context.TestItemTypes.Add(new TestItemType { b0 = false, b1 = 1, blob = Encoding.UTF8.GetBytes("hello jaydata"), d0 = DateTime.Parse("2015-12-12"), de0 = (decimal)2.2, g0 = Guid.Parse("d89ade51-c58b-48a2-ba72-e9157165eb6e"), i0 = 42, i16 = 23, i64 = 1337, Id = 1, n0 = 34.5, s0 = "JayData", si0 = 4.25f });
+            context.TestItemTypes.Add(new TestItemType { b0 = true, b1 = 7, blob = Encoding.UTF8.GetBytes("hello jayservices"), d0 = DateTime.Now, de0 = (decimal)2.5, g0 = Guid.NewGuid(), i0 = 45, i16 = 27, i64 = 1339, Id = 2, n0 = 36.5, s0 = "JayServices", si0 = 3.25f });
             context.TestItemTypes.Add(new TestItemType { b0 = false, b1 = 5, d0 = DateTime.Now, de0 = (decimal)2.7, g0 = Guid.NewGuid(), i0 = 47, i16 = 29, i64 = 1338, Id = 3, n0 = 44.5, s0 = "xxx", si0 = 5.25f });
 
 

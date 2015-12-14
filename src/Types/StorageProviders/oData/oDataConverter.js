@@ -5,7 +5,7 @@ $data.defaults.oDataWebApi = false;
 
 $data.oDataConverter = {
     fromDb: {
-        '$data.Enum': $data.Container.proxyConverter,
+        '$data.Enum': function(v, enumType) { return $data.Container.convertTo(v, enumType); },
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': $data.Container.proxyConverter,
@@ -48,7 +48,7 @@ $data.oDataConverter = {
                 return dbData;
             }
         },
-        '$data.Time': $data.Container.proxyConverter,
+        '$data.Time': function(v) { return $data.Container.convertTo(v, $data.Time); },
         '$data.Day': $data.Container.proxyConverter,
         '$data.Duration': $data.Container.proxyConverter,
         '$data.String': $data.Container.proxyConverter,
@@ -117,7 +117,7 @@ $data.oDataConverter = {
         '$data.Guid': $data.Container.proxyConverter
     },
     escape: {
-        '$data.Enum': function (e, enumType) { return  (typeof e == "number" || e) ? ((enumType ? enumType.fullName : "") + "'" + e + "'") : e },
+        '$data.Enum': function (e, enumType) { return  (e !== null && e !== undefined) ? ((enumType ? enumType.fullName : "") + "'" + e + "'") : e },
         '$data.Entity': function (e) { return JSON.stringify(e); },
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Int32': $data.Container.proxyConverter,

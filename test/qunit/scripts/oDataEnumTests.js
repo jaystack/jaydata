@@ -1,14 +1,28 @@
 $(document).ready(function () {
     module("oData_enum");
 	
-	$data.Enum.extend("$data.testEnum", {
-		Admin: "",
-		User: undefined,
-		Customer: "",
-		Guest: 4
+	// $data.Enum.extend("$data.testEnum", {
+	// 	Admin: "",
+	// 	User: undefined,
+	// 	Customer: "",
+	// 	Guest: 4
+	// })
+	
+	// $data.createEnum("$data.testEnum", [
+	// 	'Admin',
+	// 	'User',
+	// 	'Customer',
+	// 	{ name: "Guest", value: 4 }
+	// ])
+	
+	$data.createEnum("$data.testEnum", {
+		Admin: undefined,
+		User: false,
+		Customer: {},
+		Guest: { value: 4 }
 	})
 	
-	$data.Enum.extend("$data.testStrEnum", "Edm.String", {
+	$data.createEnum("$data.testStrEnum", "Edm.String", {
 		Admin: 'admin',
 		User: 'user',
 		Customer: 'customer',

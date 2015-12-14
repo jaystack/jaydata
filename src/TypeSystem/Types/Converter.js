@@ -159,19 +159,19 @@ $data.Container.registerConverter('$data.DateTimeOffset', {
 })();
 $data.Container.registerConverter('$data.Decimal', {
     '$data.Boolean': function(value){
-        return value ? '1' : '0';
+        return value ? 1 : 0;
     },
     '$data.Number': function(value){
-        return value.toString();
+        return value;
     },
     '$data.String': function(value){
         if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
-        return value;
+        return parseFloat(value);
     },
     '$data.Date': function(value){
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
-        return r.toString();
+        return r;
     }
 });
 
@@ -276,24 +276,24 @@ $data.Container.registerConverter('$data.Int16', {
 
 $data.Container.registerConverter('$data.Int64', {
     '$data.Boolean': function(value){
-        return value ? '1' : '0';
+        return value ? 1 : 0;
     },
     '$data.Number': function(value){
         var r = value.toString();
         if (r.indexOf('.') > 0) return r.split('.')[0];
         if (r.indexOf('.') == 0) throw 0;
-        return r;
+        return parseInt(r);
     },
     '$data.String': function(value){
         if (!/^\-?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value)) throw 0;
         if (value.indexOf('.') > 0) return value.split('.')[0];
         if (value.indexOf('.') == 0) throw 0;
-        return value;
+        return parseInt(value);
     },
     '$data.Date': function(value){
         var r = value.valueOf();
         if (isNaN(r)) throw 0;
-        return r.toString();
+        return r;
     }
 });
 
