@@ -44,6 +44,6 @@ namespace JayData.Test.CommonItems.Entities
 
         public List<string> emails { get; set; }
 
-        public GeographyPoint Entrance { get; set; }
+        //public GeographyPoint Entrance { get; set; }
     }
 }
