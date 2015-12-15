@@ -57,17 +57,13 @@ namespace WebApi_2_2_OData_4
             client.AddEnumType(typeof(UserType));
 
 
-            var action = client.EntityType<Category>().Action("GetFirstArticleTitle");
-            action.Parameter<string>("contains");
-            action.Returns<string>();
+            var tig1 = client.EntityType<TestItemGuid>().Collection.Action("GetTitles");
+            tig1.Parameter<int>("count");
+            tig1.Returns<string>();
 
-            var action3 = client.EntityType<Category>().Collection.Action("GetFirstArticleTitle");
-            action3.Parameter<string>("contains");
-            action3.Returns<string>();
+            var tig2 = client.EntityType<TestItemGuid>().Action("GetDisplayText");
 
-            var action5 = client.EntityType<Category>().Function("LocationSwipe");
-            action5.Parameter<GeographyPoint>("Loc");
-            action5.Returns<GeographyPoint>();
+            tig2.ReturnsCollection<string>();
 
 
             var a6 = client.Action("SAction1");

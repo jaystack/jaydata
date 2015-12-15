@@ -2,7 +2,7 @@ $(document).ready(function () {
     module("oData_read");
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.User', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		LoginName: { type: 'Edm.String' },
 		Email: { type: 'Edm.String' },
 		UserType: { type: 'JayData.Test.CommonItems.Entities.UserType', nullable: false },
@@ -18,7 +18,7 @@ $(document).ready(function () {
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.MyTClass', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		Title: { type: 'Edm.String' }
 	}, {
 		openType: { value: true }
@@ -38,7 +38,7 @@ $(document).ready(function () {
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.UserProfile', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		FullName: { type: 'Edm.String' },
 		Bio: { type: 'Edm.Binary' },
 		Avatar: { type: 'Edm.String' },
@@ -55,13 +55,13 @@ $(document).ready(function () {
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.Tag', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		Title: { type: 'Edm.String' },
 		Articles: { type: 'Array', elementType: 'JayData.Test.CommonItems.Entities.TagConnection', inverseProperty: "Tag" },
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.TestItem', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		i0: { type: 'Edm.Int32' },
 		b0: { type: 'Edm.Boolean' },
 		s0: { type: 'Edm.String' },
@@ -75,13 +75,13 @@ $(document).ready(function () {
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.TagConnection', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		Article: { type: 'JayData.Test.CommonItems.Entities.Article', inverseProperty: "Tags" },
 		Tag: { type: 'JayData.Test.CommonItems.Entities.Tag', inverseProperty: "Articles" }
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.TestItemGuid', {
-		Id: { type: 'Edm.Guid', nullable: false, required: true },
+		Id: { type: 'Edm.Guid', nullable: false, required: true, key: true },
 		i0: { type: 'Edm.Int32' },
 		b0: { type: 'Edm.Boolean' },
 		s0: { type: 'Edm.String' },
@@ -94,19 +94,20 @@ $(document).ready(function () {
 		dec: { type: 'Edm.Decimal', nullable: false },
 		flt: { type: 'Edm.Single', nullable: false },
 		emails: { type: 'Array', elementType: 'Edm.String' },
-		Group: { type: 'JayData.Test.CommonItems.Entities.TestItemGroup', inverseProperty: "Items" }
+		Group: { type: 'JayData.Test.CommonItems.Entities.TestItemGroup', inverseProperty: "Items" },
+		GetDisplayText: { type: $data.ServiceAction, namespace: "Default", returnType: 'Edm.String', params: [] }
 	}, {
 		openType: { value: true }
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.TestItemGroup', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		Name: { type: 'Edm.String' },
 		Items: { type: 'Array', elementType: 'JayData.Test.CommonItems.Entities.TestItemGuid', inverseProperty: "Group" },
 	})
 	
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.TestItemType', {
-		Id: { type: 'Edm.Int32', nullable: false, required: true },
+		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		blob: { type: 'Edm.Binary' },
 		b0: { type: 'Edm.Boolean' },
 		b1: { type: 'Edm.Byte' },
@@ -137,7 +138,11 @@ $(document).ready(function () {
 		Tags: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.Tag' },
 		TestTable: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItem' },
 		TagConnections: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TagConnection' },
-		TestTable2: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItemGuid' },
+		TestTable2: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItemGuid',
+			actions: {
+				GetTitles: { type: $data.ServiceAction, namespace: "Default", returnType: '$data.Queryable', elementType: 'Edm.String', params: [{ name: 'count', type: 'Edm.Int32' }] }
+			}
+		},
 		TestItemGroups: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItemGroup' },
 		TestItemTypes: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItemType' },
 		SAction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
@@ -152,55 +157,13 @@ $(document).ready(function () {
 		start(1)
 	}
 	var ctx = window.c = new Default.Container('http://localhost:9000/odata')
+	ctx.prepareRequest = function(r){
+		r[0].headers = {
+			"Accept": "application/json;odata.metadata=full;q=0.9, */*;q=0.1",
+			"Content-Type": "application/json;IEEE754Compatible=true"
+		}
+	}
 
-// 	test("read int32", 12, function () {
-// 		stop(4);
-// 
-// 		ctx.onReady(function(ctx){
-// 			
-// 			ctx.TestItemTypes.toArray(function(r){
-// 				ok(r.length > 0, 'has result')
-// 				equal(r.length, 3, 'result count')
-// 				
-// 				if(r.length){
-// 					var item = r[0]
-// 					equal(typeof item.i0, 'number', 'read type check')
-// 					equal(item.i0, 42, 'read value check')
-// 				}
-// 				
-// 				start(1);
-// 			}, tErro)
-// 			
-// 			ctx.TestItemTypes.filter('it.i0 == 42').toArray(function(r){
-// 				ok(r.length > 0, 'query has result')
-// 				equal(r.length, 1, 'query result count')
-// 				
-// 				if(r.length){
-// 					var item = r[0]
-// 					equal(typeof item.i0, 'number', 'query read type check')
-// 					equal(item.i0, 42, 'query read value check')
-// 				}
-// 				
-// 				start(1);
-// 			}, tErro)
-// 			
-// 			ctx.TestItemTypes.map('it.i0').toArray(function(r){
-// 				ok(r.length > 0, 'map has result')
-// 				equal(r.length, 3, 'map result count')
-// 				
-// 				if(r.length){
-// 					var item = r[0]
-// 					equal(typeof item, 'number', 'map read type check')
-// 					equal(item, 42, 'map read value check')
-// 				}
-// 				
-// 				start(1);
-// 			}, tErro)
-// 				
-// 			start(1);
-// 		})
-//     });
-	
 	var createTest = function (typeName, setName, setLength, setFilterLength, propName, propValue, propType, cfg){
 		cfg = cfg || {}
 		//cfg.isDeepEqual
@@ -270,8 +233,8 @@ $(document).ready(function () {
 	
 	createTest('int16', 'TestItemTypes', 3, 1, 'i16', 23, 'number')
 	createTest('int32', 'TestItemTypes', 3, 1, 'i0', 42, 'number')
-	createTest('int64', 'TestItemTypes', 3, 1, 'i64', 1337, 'number')
-	createTest('decimal', 'TestItemTypes', 3, 1, 'de0', 2.2, 'number')
+	createTest('int64', 'TestItemTypes', 3, 1, 'i64', '1337', 'string')
+	createTest('decimal', 'TestItemTypes', 3, 1, 'de0', '2.20', 'string')
 	createTest('float', 'TestItemTypes', 3, 1, 'si0', 4.25, 'number')
 	createTest('double', 'TestItemTypes', 3, 1, 'n0', 34.5, 'number')
 	createTest('byte', 'TestItemTypes', 3, 1, 'b1', 1, 'number')
@@ -327,28 +290,102 @@ $(document).ready(function () {
 		})
 	})
 	
-	// test('read open type', 1, function () {
-	// 	stop(2);
-	// 	
-	// 	ctx.onReady(function(){
-	// 		
-	// 		ctx.TestTable2.toArray(function(items){
-	// 			ok(items.length > 0, 'read articles')
-	// 			
-	// 			if(items.length){
-	// 				var item = items[0]
-	// 				
-	// 				console.log(item)
-	// 				
-	// 				
-	// 			}
-	// 			
-	// 			
-	// 			start(1);
-	// 		})
-	// 					
-	// 		start(1);			
-	// 	})
-	// })
+	test('read open type', 7, function () {
+		stop(2);
+		
+		ctx.onReady(function(){
+			
+			ctx.TestTable2.toArray(function(items){
+				ok(items.length > 1, 'read items')
+				
+				if(items.length){
+					var item = items[2]
+					
+					equal(typeof item.Dynamics, "object", 'Dynamics property type');
+					if(item.Dynamics) {
+						equal(item.Dynamics.t0, 1, 't0 property');
+						equal(item.Dynamics.t1, "xx", 't1 property');
+						equal(item.Dynamics.t2, "2015-12-15T18:33:10.9354508+01:00", 't2 property');
+						equal(item.Dynamics.t3, "2015-12-15", 't3 property');
+						equal(item.Dynamics.t4, false, 't4 property');
+					
+					}
+				}
+				
+				
+				start(1);
+			})
+						
+			start(1);			
+		})
+	})
 	
+	test('read Service Action', 3, function () {
+		stop(3);
+		
+		ctx.onReady(function(){
+			
+			ctx.SAction1(2, function(result){
+				
+				equal(result, 'a1_ 2', 'Action string result');
+				
+				start(1);
+			})
+			
+			ctx.SAction2(2, function(articles){
+				
+				ok(articles.length > 1, 'read articles')
+				
+				if(articles.length){
+					var item = articles[1]
+					equal(item instanceof JayData.Test.CommonItems.Entities.Article, true, 'item type');
+				}
+				
+				
+				start(1);
+			})
+						
+			start(1);			
+		})
+	})
+	
+	test('read Collection Action', 1, function () {
+		stop(2);
+		
+		ctx.onReady(function(){
+			
+			ctx.TestTable2.GetTitles(3).toArray(function(result){
+				deepEqual(result, ["1st row", "2nd row", "3rd row"], 'Action string list result');
+				
+				start(1);
+			})
+						
+			start(1);			
+		})
+	})
+	
+	test('read Entity Action', 2, function () {
+		stop(3);
+		
+		ctx.onReady(function(){
+			
+			ctx.TestTable2.toArray(function(items){
+				ok(items.length > 0, 'has items')
+				
+				if(items.length){
+					
+					items[0].GetDisplayText(function(text){
+						equal(text, items[0].Id + " - item", 'item GetDisplayText action result');
+						
+						start(1)
+					})
+					
+				}				
+				
+				start(1);
+			})
+						
+			start(1);			
+		})
+	})
 });
