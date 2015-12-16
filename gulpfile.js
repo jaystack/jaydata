@@ -99,8 +99,7 @@ var webserverInstance;
 gulp.task('webserver', function() {
     webserverInstance = gulp.src('./')
     .pipe(webserver({
-        port: 53999,
-        fallback: 'test.html'
+        port: 53999
     }));
     return webserverInstance;
 });
