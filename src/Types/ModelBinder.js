@@ -7,10 +7,13 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.providerName = null;
         if (this.context.storageProvider && typeof this.context.storageProvider.getType === 'function') {
             this.references = !(this.context.storageProvider.providerConfiguration.modelBinderOptimization || false);
-            for (var i in $data.RegisteredStorageProviders) {
-                if ($data.RegisteredStorageProviders[i] === this.context.storageProvider.getType()) {
-                    this.providerName = i;
-                    break;
+            this.providerName = this.context.storageProvider.providerName;
+            if (!this.providerName) {
+                for (var i in $data.RegisteredStorageProviders) {
+                    if ($data.RegisteredStorageProviders[i] === this.context.storageProvider.getType()) {
+                        this.providerName = i;
+                        break;
+                    }
                 }
             }
         }
