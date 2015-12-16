@@ -1,4 +1,3 @@
-﻿require('babel-register');
 var browserify = require('browserify');
 var config = require('./build/config.json');
 var pkg = require('./package.json');
@@ -11,7 +10,6 @@ var replace = require('gulp-replace');
 var header = require('gulp-header');
 var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
-var uglify = require('gulp-uglify');
 var closureCompiler = require('gulp-closure-compiler');
 var derequire = require('browserify-derequire');
 var babelify = require('babelify');
@@ -25,6 +23,8 @@ var footer = require('gulp-footer');
 var webserver = require('gulp-webserver');
 var selenium = require('selenium-standalone');
 var nightwatch = require('gulp-nightwatch');
+var rename = require('gulp-rename');
+var del = require('del');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -78,6 +78,23 @@ gulp.task('jaydata.min', function(){
     .pipe(gulp.dest('./dist/public'));
 });
 
+gulp.task('minify', ['bundle'], function(){
+    return gulp.src('./dist/public/**/*.js')
+    .pipe(uglify({
+        preserveComments: 'license'
+    }))
+    .pipe(rename({ extname: '.min.js' }))
+    .pipe(gulp.dest('./dist/public'));
+});
+
+gulp.task('clean', function(){
+    return del([
+        './dist/.eslint',
+        './dist/lib',
+        './dist/public'
+    ]);
+});
+
 var webserverInstance;
 gulp.task('webserver', function() {
     webserverInstance = gulp.src('./')
@@ -93,7 +110,7 @@ gulp.task('selenium', function (done) {
         logger: function (message) { }
     }, function (err) {
         if (err) return done(err);
-        
+
         selenium.start(function (err, child) {
             if (err) return done(err);
             selenium.child = child;
@@ -113,7 +130,7 @@ gulp.task('test', ['webserver', 'selenium'/*'bundle'*/], function(){
     })).on('end', function(){
         process.exit(0);
     });
-    
+
     /*karma.start({
     	configFile: __dirname + '/karma.conf.js',
     	singleRun: true
@@ -144,7 +161,7 @@ for (var i = 0; i < config.components.length; i++) {
 }
 
 function gulpTask(td, config){
-
+    td.browserify.debug = true;
     var task = browserify(td.browserify).transform(babelify.configure({
         compact: false,
         presets: ["es2015"],
@@ -167,11 +184,8 @@ function gulpTask(td, config){
     task = task.bundle()
         .on("error", function (err) { console.log("Error: " + err.message) })
         .pipe(source(td.destFile))
-        .pipe(buffer());
-
-    if(config.options.min){
-        task = task.pipe(uglify());
-    }
+        .pipe(buffer())
+        .pipe(sourcemaps.init({ loadMaps: true }));
 
     if (td.header){
         task = task.pipe(header(fs.readFileSync(td.header, 'utf8'), { pkg: pkg }));
@@ -182,7 +196,14 @@ function gulpTask(td, config){
         task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8'), { pkg: pkg }));
     }
 
-    task = task.pipe(gulp.dest(td.destFolder));
+    task = task
+        .pipe(gulp.dest(td.destFolder))
+        .pipe(uglify({
+            preserveComments: 'license'
+        }))
+        .pipe(rename({ extname: '.min.js' }))
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest(td.destFolder));
 
     return task;
 
