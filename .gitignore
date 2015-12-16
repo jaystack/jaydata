@@ -20,6 +20,7 @@ Scripts/jaydata*
 packages
 node_modules
 npm-debug.log
+nugetpkg
 /dist/*
 !dist/package.json
 !dist/core.js

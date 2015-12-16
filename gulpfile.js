@@ -25,6 +25,7 @@ var selenium = require('selenium-standalone');
 var nightwatch = require('gulp-nightwatch');
 var rename = require('gulp-rename');
 var del = require('del');
+var nugetpack = require('gulp-nuget-pack');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -93,6 +94,32 @@ gulp.task('clean', function(){
         './dist/lib',
         './dist/public'
     ]);
+});
+
+gulp.task('nuget', function(done){
+    nugetpack({
+        id: "JayData",
+        title: "JayData",
+        version: pkg.version,
+        dependencies: [
+            { id: "jQuery", version: "1.8" },
+            { id: "odatajs", version: "4.0" }
+        ],
+        authors: "JayStack Technologies",
+        owners: "JayStack Technologies",
+        projectUrl: "http://jaydata.org",
+        iconUrl: "http://jaydata.org/Themes/Bootstrap/Styles/img/logo_jaydata_5.png",
+        licenseUrl: "http://jaydata.org/licensing",
+        requireLicenseAcceptance: true,
+        copyright: "JayStack Technologies",
+        summary: "JayData is a standards-based (mostly HTML5), cross-platform Javascript library and a set of practices to access and manipulate data from various online and offline sources.",
+        description: "The unified data-management library for JavaScript/HTML5",
+        tags: "jaydata jslq javascript js html5 data management odata indexeddb sqlite azure yql facebook fql mongodb HTML5 localStorage knockout kendoui angular opensource cross-platform cross-layer",
+        outputDir: "./nugetpkg",
+        baseDir: "./dist/public"
+    }, [
+        './dist/public'
+    ], done);
 });
 
 var webserverInstance;
