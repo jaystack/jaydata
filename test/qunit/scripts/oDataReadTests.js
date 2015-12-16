@@ -169,8 +169,15 @@ $(document).ready(function () {
 		//cfg.isDeepEqual
 		cfg.valueConverter = cfg.valueConverter || function(v) { return v }
 		
-		test("read " + typeName, 12, function () {
-			stop(4);
+		var stops = 4;
+		var asserts = 12;
+		if(cfg.noFilter){
+			stops--;
+			asserts -= 4;
+		}
+		
+		test("read " + typeName, asserts, function () {
+			stop(stops);
 	
 			ctx.onReady(function(ctx){
 				
@@ -191,22 +198,24 @@ $(document).ready(function () {
 					start(1);
 				}, tErro)
 				
-				ctx[setName].filter('it.'+ propName + ' == this.val', {val:propValue}).toArray(function(r){
-					ok(r.length > 0, 'query has result')
-					equal(r.length, setFilterLength, 'query result count')
-					
-					if(r.length){
-						var item = r[0]
-						equal(typeof item[propName], propType, 'query read type check')
-						if(cfg.isDeepEqual){
-							deepEqual(item[propName], propValue, 'query read value check')
-						} else {
-							equal(cfg.valueConverter(item[propName]), cfg.valueConverter(propValue), 'query read value check')
+				if (!cfg.noFilter) {
+					ctx[setName].filter('it.'+ propName + ' == this.val', {val:propValue}).toArray(function(r){
+						ok(r.length > 0, 'query has result')
+						equal(r.length, setFilterLength, 'query result count')
+						
+						if(r.length){
+							var item = r[0]
+							equal(typeof item[propName], propType, 'query read type check')
+							if(cfg.isDeepEqual){
+								deepEqual(item[propName], propValue, 'query read value check')
+							} else {
+								equal(cfg.valueConverter(item[propName]), cfg.valueConverter(propValue), 'query read value check')
+							}
 						}
-					}
-					
-					start(1);
-				}, tErro)
+						
+						start(1);
+					}, tErro)
+				}
 				
 				ctx[setName].map('it.' + propName).toArray(function(r){
 					ok(r.length > 0, 'map has result')
@@ -249,6 +258,7 @@ $(document).ready(function () {
 	createTest('timeofday', 'TestTable2', 3, 1, 'time', "15:10:15.000", 'string')
 	createTest('date', 'TestTable2', 3, 1, 'date', "2015-12-12", 'string')
 	createTest('duration', 'TestTable2', 3, 1, 'dur', "-PT5H45M", 'string')
+	createTest('collection string', 'TestTable2', 3, 1, 'emails', ["a@example.com","b@example.com","c@example.com"], 'object', { isDeepEqual: true, noFilter: true })
 	createTest('enum', 'Users', 6, 1, 'UserType', 0, 'number')
 	
 	

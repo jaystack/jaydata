@@ -1,6 +1,7 @@
 ﻿using JayData.Test.CommonItems.Entities;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Values;
 using Microsoft.Spatial;
 using Owin;
 using System;
@@ -104,8 +105,21 @@ namespace WebApi_2_2_OData_4
 
             var model = client.GetEdmModel();
 
+            const string namespaceName = "https://jaystack.com/jaydata/schema";
+            var type = "JayData.Test.CommonItems.Entities.MyTClass";
+            const string localName = "OpenProperty";
+
+            var stringType = EdmCoreModel.Instance.GetString(true);
+            var value = new EdmStringConstant(stringType, "Dynamics");
 
 
+            model.SetAnnotationValue((IEdmEntityType)model.FindType(type), namespaceName, localName, value);
+
+            var valueT = new EdmStringConstant(stringType, "Display");
+            model.SetAnnotationValue(((IEdmEntityType)model.FindType(type)).FindProperty("Title"), namespaceName, "mode", valueT);
+
+            
+            
             UpgradeBidirectionalNavigationProperties(model, "Articles", "Categories", "JayData.Test.CommonItems.Entities.Article", "JayData.Test.CommonItems.Entities.Category", "Category", "Articles", EdmMultiplicity.ZeroOrOne, EdmMultiplicity.Many);
 
             UpgradeBidirectionalNavigationProperties(model, "Articles", "Users", "JayData.Test.CommonItems.Entities.Article", "JayData.Test.CommonItems.Entities.User", "Reviewer", "RevieweredArticles", EdmMultiplicity.ZeroOrOne, EdmMultiplicity.Many);
