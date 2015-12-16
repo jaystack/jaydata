@@ -19,8 +19,8 @@ namespace JayData.Test.CommonItems.Entities
         public byte?[] blob { get; set; }
         public double? n0 { get; set; }
         public DateTime? d0 { get; set; }
-        public virtual List<Tag> Tags { get; set; }
-        public virtual User User { get; set; }
+        //public virtual List<Tag> Tags { get; set; }
+        //public virtual User User { get; set; }
         public Guid? g0 { get; set; }
 
         public long? l0 { get; set; }

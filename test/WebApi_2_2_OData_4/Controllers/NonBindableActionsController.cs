@@ -15,35 +15,38 @@ namespace WebApi_2_2_OData_4.Controllers
     public class NonBindableActionsController : ODataController
     {
         NewsReaderContext db = new NewsReaderContext();
-        
 
-        [HttpGet]
+
+        [HttpPost]
         [Route("SAction1")]
-        public string SAction1([FromODataUri]int number)
+        public string SAction1(ODataActionParameters param)
         {
+            var number = (int)param["number"];
             return "a1_ " + number.ToString();
         }
 
-        //[HttpPost]
-        [HttpGet]
+        [HttpPost]
         [Route("SAction2")]
         [EnableQuery]
-        public IQueryable<Article> SAction2([FromODataUri]int count)
+        public IQueryable<Article> SAction2(ODataActionParameters param)
         {
+            var count = (int)param["count"];
             return db.Articles.Take(count);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("SFunction1")]
-        public List<string> SFunction1([FromODataUri]int number)
+        public List<string> SFunction1(ODataActionParameters param)
         {
+            var number = (int)param["number"];
             return new List<string>() { "f1_ ", number.ToString() };
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("SFunction2")]
-        public string SFunction2([FromODataUri]int number)
+        public string SFunction2(ODataActionParameters param)
         {
+            var number = (int)param["number"];
             return "f2_ " + number.ToString();
         }
     }

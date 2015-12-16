@@ -10,6 +10,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             for (var i in $data.RegisteredStorageProviders) {
                 if ($data.RegisteredStorageProviders[i] === this.context.storageProvider.getType()) {
                     this.providerName = i;
+                    break;
                 }
             }
         }
@@ -278,14 +279,16 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }
             }
-            if (resolvedType && resolvedType.openType){
-                context.src += item + '.' + resolvedType.openType + ' = {};';
+            var openTypeProperty = null;
+            if (this.providerName == "oData" && resolvedType && resolvedType.openType){
+                openTypeProperty = (resolvedType.openType === true ? $data.defaults.openTypeDefaultPropertyName : resolvedType.openType);
+                context.src += item + '.' + openTypeProperty + ' = {};';
                 context.src += 'for (var prop in di){ if ([' + resolvedType.memberDefinitions.getPublicMappedPropertyNames().map(function(prop){
                     return '"' + prop + '"';
-                }).join(',') + '].indexOf(prop) < 0){ ' + item + '.' + resolvedType.openType + '[prop] = di[prop]; } };';
+                }).join(',') + '].indexOf(prop) < 0 && prop.indexOf("@") < 0 && prop.indexOf("#") < 0){ ' + item + '.' + openTypeProperty + '[prop] = di[prop]; } };';
             }
             for (var i in meta) {
-                if (i.indexOf('$') < 0) {
+                if (i.indexOf('$') < 0 && i != openTypeProperty) {
                     context.current = i;
                     if (!meta[i].$item) {
                         if (meta[i].$value) {

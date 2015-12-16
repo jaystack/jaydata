@@ -173,7 +173,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
                 context.urlText += '(' + this.provider.getEntityKeysValue(expression.boundItem) + ')';
             }
         }
-        context.urlText += "/" + expression.cfg.serviceName;
+        context.urlText += "/" + (expression.cfg.namespace ? (expression.cfg.namespace + "." + expression.cfg.serviceName) : expression.cfg.serviceName);
         context.method = context.method || expression.cfg.method;
 
         //this.logicalType = expression.returnType;
