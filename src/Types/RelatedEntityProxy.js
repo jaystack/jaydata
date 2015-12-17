@@ -1,3 +1,5 @@
+import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+
 $data.Class.define("$data.RelatedEntityProxy", null, null, {
     constructor: function (entityKeyObject, navigationProperty, type, parent, context) {
         this._entityKeyObject = entityKeyObject;
@@ -34,12 +36,12 @@ $data.Class.define("$data.RelatedEntityProxy", null, null, {
             var entitySet = null;
             var expression = null;
             if (firstProxy._parent instanceof $data.Entity) {
-                entitySet = c.getEntitySetFromElementType(firstProxy._parent.getType());
+                entitySet = context.getEntitySetFromElementType(firstProxy._parent.getType());
                 
                 var proxyClass = context._createRelatedEntityProxyClass(entitySet.elementType);
                 proxyChains.unshift(new proxyClass(firstProxy._parent, undefined, entitySet.elementType));
             } else {
-                entitySet = c.getEntitySetFromElementType(firstProxy._type);
+                entitySet = context.getEntitySetFromElementType(firstProxy._type);
             }
             
             expression = entitySet.expression;
@@ -68,8 +70,8 @@ $data.Class.define("$data.RelatedEntityProxy", null, null, {
             }
             
             var preparator = Container.createQueryExpressionCreator(context);
-            var expression = preparator.Visit(expression);
-            context.log({ event: "EntityExpression", data: expression });
+            expression = preparator.Visit(expression);
+            //context.log({ event: "EntityExpression", data: expression });
             
             var queryable = Container.createQueryable(entitySet , expression);
             queryable.defaultType = returnType || queryable.defaultType;
@@ -91,3 +93,5 @@ $data.Class.define("$data.RelatedEntityProxy", null, null, {
         return result;
     }
 }, {});
+
+export default $data
