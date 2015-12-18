@@ -29,10 +29,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "acorn": "^2.4.0",
-    "atob": "^1.1.2",
-    "btoa": "^1.1.2",
-    "odatajs": "^4.0.0"
+      "acorn": "^2.6.4",
+      "atob": "^2.0.0",
+      "btoa": "^1.1.2",
+      "dot": "^1.0.3",
+      "odatajs": "git://github.com/jaydata/olingo-odata4-js.git"
   },
   "contributors": [
     {

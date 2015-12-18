@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "acorn": "^2.6.4",
-    "atob": "^1.1.2",
+    "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
     "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
