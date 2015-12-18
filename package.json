@@ -94,6 +94,7 @@
     "gulp-eslint": "^1.1.1",
     "gulp-footer": "^1.0.5",
     "gulp-header": "^1.7.1",
+    "gulp-mocha": "^2.2.0",
     "gulp-nightwatch": "^0.2.6",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
