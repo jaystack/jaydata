@@ -27,7 +27,7 @@
     "atob": "^1.1.2",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "odatajs": "^4.0.0",
+    "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "xmldom": "^0.1.19"
   },
   "contributors": [
@@ -107,6 +107,7 @@
     "jsdoc": "^3.4.0",
     "minimist": "^1.2.0",
     "nightwatch": "^0.8.8",
+    "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "selenium-standalone": "^4.7.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
