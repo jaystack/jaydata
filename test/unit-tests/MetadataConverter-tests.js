@@ -203,13 +203,23 @@ describe("ODataJSReader.read", function() {
           done()
         })
     })
+})
 
-    it.only("should read some metadata", done => {
-        console.log($data.service(nwurl, {}, (t) => {
-            console.log("!done", t)
-            done(undefined, t)
-        }))
+describe("JaySvcUtil", function() {
+    this.timeout(10000)
+    var nwurl = 'http://services.odata.org/V4/Northwind/Northwind.svc'
+    it.only("autoload metadata then provide entitycontext to read 2 category objects", done => {
+        $data.service(nwurl, {}, (factory) => {
+            expect(factory).to.be.function
+            var ctx = factory()
+            ctx.onReady(function() {
+                ctx.Categories.take(2).toArray( array => {
+                    expect(array).to.have.length(2)
+                    expect(array[0]).to.be.instanceof(ctx.Categories.Category)
+                    done()
+                })
+            })
+        })
     })
-
 })
 

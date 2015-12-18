@@ -1,0 +1,55 @@
+[
+  {
+    "task": "rascal/log",
+    "message": "[hbs]Job indexer message received[/hbs]"
+  },
+  {
+    "task": "rascal/log",
+    "condition": "!content.jobId",
+    "message": "[hbs]Job is missing jobId, skipping[/hbs]"
+  },
+  {
+    "task": "sequence",
+    "condition": "content.jobId",
+    "items": [
+      {
+        "task": "rascal/log",
+        "message": "[hbs]Indexing job {{content.jobId}}[/hbs]"
+      },
+      {
+        "task": "get-job",
+        "jobId": "@content.jobId",
+        "resultTo": "job"
+      },
+      {
+        "task": "rascal/log",
+        "condition": "!job",
+        "message": "[hbs]Job does not exist or may be on hold, skipping[/hbs]"
+      },
+      {
+        "task": "sequence",
+        "condition": "job",
+        "items": [
+          {
+            "task": "convert-job",
+            "job": "@job",
+            "resultTo": "indexDocument"
+          },
+          {
+            "task": "rascal/log",
+            "message": "[hbs]indexer created {{@job.length}} document entries[/hbs]"
+          },
+          {
+            "task": "store-document",
+            "document": "@indexDocument",
+            "resultTo": "store-result"
+          },
+          {
+            "task": "rascal/log",
+            "message": "[hbs]Indexing complete for job {{content.jobId}}[/hbs]"
+          }
+        ]
+      }
+    ]
+  }
+]

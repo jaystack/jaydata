@@ -93,7 +93,7 @@ gulp.task('selenium', function (done) {
         logger: function (message) { }
     }, function (err) {
         if (err) return done(err);
-        
+
         selenium.start(function (err, child) {
             if (err) return done(err);
             selenium.child = child;
@@ -113,7 +113,7 @@ gulp.task('test', ['webserver', 'selenium'/*'bundle'*/], function(){
     })).on('end', function(){
         process.exit(0);
     });
-    
+
     /*karma.start({
     	configFile: __dirname + '/karma.conf.js',
     	singleRun: true
@@ -187,3 +187,9 @@ function gulpTask(td, config){
     return task;
 
 }
+
+var mocha = require('gulp-mocha');
+gulp.task('mocha', () => {
+    return gulp.src('test/unit-tests/**.js', {read: false})
+        .pipe(mocha({reporter:'dot'}));
+});

@@ -1,13 +1,40 @@
 import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
+import { Metadata } from './Metadata.js'
+import  metadataReader from './ODataJSReader.js'
 
 $data.Class.define('$data.MetadataLoaderClass', null, null, {
-    load: function (metadataUri, callBack, config) {
 
+    createFactoryFunc: function (CtxType, cnf) {
+
+        function factory(config) {
+            if (CtxType) {
+                var cfg = $data.typeSystem.extend({
+                    name: 'oData',
+                    oDataServiceHost: cnf.SerivceUri,
+                    user: cnf.user,
+                    password: cnf.password,
+                    withCredentials: cnf.withCredentials,
+                    maxDataServiceVersion: '4.0'
+                }, config)
+
+
+                return new CtxType(cfg);
+            } else {
+                return null;
+            }
+        }
+
+        factory.type = CtxType
+        return factory
+    },
+
+    load: function (metadataUri, callBack, config) {
+        console.log("Load meta", arguments)
         var cnf = {
             EntityBaseClass: '$data.Entity',
             ContextBaseClass: '$data.EntityContext',
             AutoCreateContext: false,
-            DefaultNamespace: ('ns' + Math.random()).replace('.', '') + metadataUri.replace(/[^\w]/g, "_"),
+            DefaultNamespace:  undefined,
             ContextInstanceName: 'context',
             EntitySetBaseClass: '$data.EntitySet',
             CollectionBaseClass: 'Array',
@@ -54,71 +81,26 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             callBack.error('metadata url is missing');
         }
 
-        var self = this;
-        self._loadXMLDoc(cnf, function (xml, response) {
-            if (response.statusCode < 200 || response.statusCode > 299) {
-                callBack.error(response);
-                return;
-            }
 
-            var versionInfo = self._findVersion(xml);
-            if (self.xsltRepoUrl) {
-                console.log('XSLT: ' + self.xsltRepoUrl + self._supportedODataVersionXSLT)
-                self._loadXMLDoc({
-                    metadataUri: self.xsltRepoUrl + self._supportedODataVersionXSLT,
-                    user: cnf.user,
-                    password: cnf.password,
-                    httpHeaders: cnf.httpHeaders
-                }, function (xsl, response) {
-                    if (response.statusCode < 200 || response.statusCode > 299) {
-                        callBack.error(response);
-                        return;
-                    }
-                    var text = response.responseText;
-                    text = text.replace('xmlns:edm="@@VERSIONNS@@"', 'xmlns:edm="' + versionInfo.ns + '"');
-                    text = text.replace('@@VERSION@@', versionInfo.version);
+        metadataReader.read({url:cnf.metadataUri}, (e, r) => {
+            console.log("result", r)
+            var metadata = new Metadata({}, r)
+            var types = []
+            metadata.processMetadata(types)
+            var contextType = types.pop()
+            let factory = this.createFactoryFunc(contextType, cnf)
+            callBack.success(factory)
 
-                    if (window.ActiveXObject === undefined) {
-                        var parser = new DOMParser();
-                        xsl = parser.parseFromString(text, "text/xml");
-                    } else {
-                        xsl = new ActiveXObject("Microsoft.XMLDOM");
-                        xsl.async = false;
-                        xsl.loadXML(text);
-                    }
+        })
 
-                    self._transform(callBack, versionInfo, xml, xsl, cnf);
-                });
-            } else {
-                self._transform(callBack, versionInfo, xml, undefined, cnf);
-            }
 
-        });
+        return;
+
     },
     debugMode: { type: 'bool', value: false },
     xsltRepoUrl: { type: 'string', value: '' },
 
-    createFactoryFunc: function (ctxType, cnf, versionInfo) {
-        var self = this;
-        return function (config) {
-            if (ctxType) {
-                var cfg = $data.typeSystem.extend({
-                    name: 'oData',
-                    oDataServiceHost: cnf.SerivceUri,
-                    //maxDataServiceVersion: '',
-                    user: cnf.user,
-                    password: cnf.password,
-                    withCredentials: cnf.withCredentials,
-                    maxDataServiceVersion: cnf.maxDataServiceVersion || versionInfo.maxVersion || '4.0'
-                }, config)
 
-
-                return new ctxType(cfg);
-            } else {
-                return null;
-            }
-        }
-    },
 
     _transform: function (callBack, versionInfo, xml, xsl, cnf) {
         var self = this;

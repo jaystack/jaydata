@@ -1,5 +1,11 @@
 import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
 
+Array.prototype.applyToAll = function(thisArg, args) {
+    this.forEach(i => {
+        i.apply(thisArg, args)
+    })
+}
+
 var containsField = (obj, field, cb) => {
     if (field in (obj || {})) {
         cb(obj[field])
@@ -16,6 +22,126 @@ var parsebool = (b,d) => {
         default: return d
     }
 }
+
+export class EntityProperty {
+    constructor(entity, definition) {
+        this.definition = definition;
+        this.entity = entity
+        this.builders = []
+        for (var key in this.definition) {
+            var builder = EntityProperty.processors[key].call(this, this.definition[key])
+            if (builder) {
+                this.builders.push(builder)
+            }
+        }
+    }
+
+    createPropDef() {
+        var pd = {}
+        return (this.entity &&
+               this.entity.createPropDef &&
+               this.entity.createPropDef(this, pd)) || pd
+    }
+
+    buildType(container, typeDef) {
+        var prop = this.createPropDef()
+        this.builders.forEach( b=> {
+            b.call(this, container, prop)
+        })
+        typeDef[this.name] = prop
+    }
+
+    static create(entity, definition) {
+        return new EntityProperty(entity, definition)
+    }
+}
+
+
+
+export class EntityType {
+    constructor(schema, definition) {
+        this.schema = schema
+        this.definition = definition
+        this.properties = this.definition.property.map(EntityProperty.create.bind(this))
+    }
+
+    buildType() {
+        var typeDef = {}
+        this.properties.forEach(pr => {
+            pr.buildType()
+        })
+    }
+
+    get name() {
+        return [this.schema.namespace, this.definition.name].filter(i => i).join(".")
+    }
+}
+
+
+
+
+// EntityType.processors = {
+//     name: function(name) {
+//         this.name = name
+//         this.properties = []
+//     },
+
+//     key: function(keyProps) {
+//         this.createPropDef = function(property, def) {
+//             if (keyProps.some(kp => kp.propertyDef &&
+//                                    kp.propertyDef.some(pd => pd.name === property.name))) {
+//                 def.key = true
+//             }
+//         }
+//     },
+
+//     property: function(propertyArray) {
+//         propertyArray.forEach(p => {
+//             var ep = new EntityProperty(this, p)
+//             this.properties.push(ep)
+//             this.builders.push(function(container, typeDef) {
+//                 ep.buildType(container, typeDef)
+//             })
+//         })
+//     }
+// }
+
+
+
+// export class Schema {
+//     constructor(metadata, schemaDefinition) {
+//         this.metadata = metadata
+//         this.definition = schemaDefinition
+//         this.typeCreators = []
+//     }
+
+//     buildUp() {
+//         for(var key in this.definition) {
+//             Schema.processors[key].call(this, this.definition[key])
+//         }
+//     }
+
+
+//     createTypes(container) {
+
+//     }
+// }
+
+// Schema.processors = {
+
+//     "namespace" : function processNamespace(value) {
+
+//     },
+
+//     "entityType": function(entityTypeArray) {
+//         entityTypeArray.forEach(etd => {
+//             var et = new EntityType(this, etd)
+//             this.typeCreators.push(et.createType.bind(et))
+//         })
+//     }
+// }
+
+
 
 export class Metadata {
 
@@ -62,6 +188,7 @@ export class Metadata {
             definition
         }
     }
+
 
     createEntityDefinition(entitySchema) {
         var props = (entitySchema.property || []).map(this.createProperty.bind(this, entitySchema))
