@@ -20,11 +20,10 @@ Scripts/jaydata*
 packages
 node_modules
 npm-debug.log
+nugetpkg
 /dist/*
 !dist/package.json
-!dist/core.js
-!dist/odata.js
-!dist/mongodb.js
+!dist/*.js
 coverage
 docs
 jaydata.js

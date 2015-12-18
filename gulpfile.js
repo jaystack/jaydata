@@ -1,4 +1,4 @@
-﻿require('babel-register');
+require('babel-register')
 var browserify = require('browserify');
 var config = require('./build/config.json');
 var pkg = require('./package.json');
@@ -11,7 +11,6 @@ var replace = require('gulp-replace');
 var header = require('gulp-header');
 var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
-var uglify = require('gulp-uglify');
 var closureCompiler = require('gulp-closure-compiler');
 var derequire = require('browserify-derequire');
 var babelify = require('babelify');
@@ -25,6 +24,9 @@ var footer = require('gulp-footer');
 var webserver = require('gulp-webserver');
 var selenium = require('selenium-standalone');
 var nightwatch = require('gulp-nightwatch');
+var rename = require('gulp-rename');
+var del = require('del');
+var nugetpack = require('gulp-nuget-pack');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -78,12 +80,54 @@ gulp.task('jaydata.min', function(){
     .pipe(gulp.dest('./dist/public'));
 });
 
+gulp.task('minify', ['bundle'], function(){
+    return gulp.src('./dist/public/**/*.js')
+    .pipe(uglify({
+        preserveComments: 'license'
+    }))
+    .pipe(rename({ extname: '.min.js' }))
+    .pipe(gulp.dest('./dist/public'));
+});
+
+gulp.task('clean', function(){
+    return del([
+        './dist/.eslint',
+        './dist/lib',
+        './dist/public'
+    ]);
+});
+
+gulp.task('nuget', function(done){
+    nugetpack({
+        id: "JayData",
+        title: "JayData",
+        version: pkg.version,
+        dependencies: [
+            { id: "jQuery", version: "1.8" },
+            { id: "odatajs", version: "4.0" }
+        ],
+        authors: "JayStack Technologies",
+        owners: "JayStack Technologies",
+        projectUrl: "http://jaydata.org",
+        iconUrl: "http://jaydata.org/Themes/Bootstrap/Styles/img/logo_jaydata_5.png",
+        licenseUrl: "http://jaydata.org/licensing",
+        requireLicenseAcceptance: true,
+        copyright: "JayStack Technologies",
+        summary: "JayData is a standards-based (mostly HTML5), cross-platform Javascript library and a set of practices to access and manipulate data from various online and offline sources.",
+        description: "The unified data-management library for JavaScript/HTML5",
+        tags: "jaydata jslq javascript js html5 data management odata indexeddb sqlite azure yql facebook fql mongodb HTML5 localStorage knockout kendoui angular opensource cross-platform cross-layer",
+        outputDir: "./nugetpkg",
+        baseDir: "./dist/public"
+    }, [
+        './dist/public'
+    ], done);
+});
+
 var webserverInstance;
 gulp.task('webserver', function() {
     webserverInstance = gulp.src('./')
     .pipe(webserver({
-        port: 53999,
-        fallback: 'test.html'
+        port: 53999
     }));
     return webserverInstance;
 });
@@ -144,7 +188,7 @@ for (var i = 0; i < config.components.length; i++) {
 }
 
 function gulpTask(td, config){
-
+    td.browserify.debug = true;
     var task = browserify(td.browserify).transform(babelify.configure({
         compact: false,
         presets: ["es2015"],
@@ -167,11 +211,8 @@ function gulpTask(td, config){
     task = task.bundle()
         .on("error", function (err) { console.log("Error: " + err.message) })
         .pipe(source(td.destFile))
-        .pipe(buffer());
-
-    if(config.options.min){
-        task = task.pipe(uglify());
-    }
+        .pipe(buffer())
+        .pipe(sourcemaps.init({ loadMaps: true }));
 
     if (td.header){
         task = task.pipe(header(fs.readFileSync(td.header, 'utf8'), { pkg: pkg }));
@@ -182,7 +223,14 @@ function gulpTask(td, config){
         task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8'), { pkg: pkg }));
     }
 
-    task = task.pipe(gulp.dest(td.destFolder));
+    task = task
+        .pipe(gulp.dest(td.destFolder))
+        .pipe(uglify({
+            preserveComments: 'license'
+        }))
+        .pipe(rename({ extname: '.min.js' }))
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest(td.destFolder));
 
     return task;
 

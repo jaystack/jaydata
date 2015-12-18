@@ -377,7 +377,7 @@ export function ContainerCtor(parentContainer) {
         parent.registerType.apply(parent, arguments);
       }
       if (!type.name) {
-        type.name = namesArray[0].shortName;
+        try{ type.name = namesArray[0].shortName; }catch(err){ }
       }
     };
 
@@ -488,5 +488,4 @@ export function ContainerCtor(parentContainer) {
       }
       return root;
     };
-  }
-
+ }

@@ -12,6 +12,7 @@ import Access from './Access.js';
 import Promise from './Promise.js';
 import Entity from './Entity.js';
 import Enum from './Enum.js';
+import RelatedEntityProxy from './RelatedEntityProxy.js';
 import EntityContext from './EntityContext.js';
 import QueryProvider from './QueryProvider.js';
 import ModelBinder from './ModelBinder.js';

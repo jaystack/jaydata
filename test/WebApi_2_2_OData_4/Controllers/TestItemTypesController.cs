@@ -6,9 +6,12 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.OData;
 
 namespace WebApi_2_2_OData_4.Controllers
@@ -16,6 +19,35 @@ namespace WebApi_2_2_OData_4.Controllers
     public class TestItemTypesController : ODataController
     {
         NewsReaderContext db = new NewsReaderContext();
+
+        public override Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
+        {
+            var response = base.ExecuteAsync(controllerContext, cancellationToken);
+            response.Wait(cancellationToken);
+
+            PatchResponse(response.Result);
+
+            return response;
+        }
+
+        private void PatchResponse(HttpResponseMessage responseMessage)
+        {
+            if (responseMessage != null && responseMessage.Content != null)
+            {
+                IEnumerable<string> cTypes = new List<string>();
+                if (this.Request.Content.Headers.TryGetValues("Content-Type", out cTypes))
+                {
+                    if (cTypes != null && cTypes.Any(
+                        h => h.Contains("IEEE754Compatible=true")))
+                    {
+                        responseMessage.Content.Headers.TryAddWithoutValidation(
+                           "Content-Type", "IEEE754Compatible=true");
+                    }
+                }
+            }
+        }
+
+
 
         [EnableQuery]
         public IQueryable<TestItemType> Get()

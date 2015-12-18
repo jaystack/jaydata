@@ -1,5 +1,14 @@
-JayData
-=======
+[![JayData Logo](https://s3.amazonaws.com/jaydata-cdn/logo_jaydata_dark.png)](http://jaydata.org)
+
+[![NPM](https://nodei.co/npm/jaydata.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/jaydata/)
+
+[![npm version](https://badge.fury.io/js/jaydata.svg)](https://badge.fury.io/js/jaydata)
+[![Dependency Status](https://david-dm.org/jaydata/jaydata.svg)](https://david-dm.org/jaydata/jaydata)
+[![Issue Stats](http://issuestats.com/github/jaydata/jaydata/badge/issue?style=flat)](http://issuestats.com/github/jaydata/jaydata)
+[![Issue Stats](http://issuestats.com/github/jaydata/jaydata/badge/pr?style=flat)](http://issuestats.com/github/jaydata/jaydata)
+
+[![license MIT](http://img.shields.io/badge/license-MIT-blue.svg)](license-MIT)
+[![license GPL](http://img.shields.io/badge/license-GPL-blue.svg)](license-GPL)
 
 **Update October 13, 2015** - JayStack receives **massive investment** to **boost JayData product development** and offer more premium services! http://bit.ly/jayfunding
 
@@ -37,20 +46,17 @@ but it should be used under GPL if you distribute your software under GPLv2. Jay
 commercial product recommended for enterprise projects and commercial development efforts.
 http://jaystack.com/licensing
 
+## Installation
+
+```bash
+$ npm install jaydata
+```
+
 ## How to build
 
-TBD
-
-#### Important note
-as of now you need a stub file under to be created as
-```
-\ jaydata
-     \node_modules
-	       \jaydata
-		         \core.js
-```
-
-with a content of
-```javascript
-module.exports = require('../../src/index.js')
+```bash
+$ git clone https://github.com/jaydata/jaydata.git
+$ cd jaydata
+$ npm install
+$ gulp
 ```

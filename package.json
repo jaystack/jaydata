@@ -24,10 +24,10 @@
   },
   "dependencies": {
     "acorn": "^2.6.4",
-    "atob": "^1.1.2",
+    "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "odatajs": "^4.0.0",
+    "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "xmldom": "^0.1.19"
   },
   "contributors": [
@@ -84,6 +84,7 @@
     "browserify-derequire": "^0.9.4",
     "browserify-shim": "^3.8.11",
     "chai": "^3.4.1",
+    "del": "^2.2.0",
     "google-closure-compiler": "^20151015.0.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.1",
@@ -96,6 +97,7 @@
     "gulp-header": "^1.7.1",
     "gulp-mocha": "^2.2.0",
     "gulp-nightwatch": "^0.2.6",
+    "gulp-nuget-pack": "0.0.6",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^1.6.0",
@@ -106,6 +108,7 @@
     "jsdoc": "^3.4.0",
     "minimist": "^1.2.0",
     "nightwatch": "^0.8.8",
+    "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "selenium-standalone": "^4.7.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"

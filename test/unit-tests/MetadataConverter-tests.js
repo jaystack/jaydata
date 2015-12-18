@@ -208,7 +208,7 @@ describe("ODataJSReader.read", function() {
 describe("JaySvcUtil", function() {
     this.timeout(10000)
     var nwurl = 'http://services.odata.org/V4/Northwind/Northwind.svc'
-    it.only("autoload metadata then provide entitycontext to read 2 category objects", done => {
+    it("autoload metadata then provide entitycontext to read 2 category objects", done => {
         $data.service(nwurl, {}, (factory) => {
             expect(factory).to.be.function
             var ctx = factory()
