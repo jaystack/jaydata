@@ -16,7 +16,7 @@
     "iPhone",
     "Android"
   ],
-  "version": "1.4.1",
+  "version": "1.5.0",
   "homepage": "http://jaydata.org",
   "author": {
     "name": "JayData",
@@ -101,6 +101,7 @@
     "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.1",
+    "gulp-vinyl-zip": "^1.1.2",
     "gulp-webserver": "^0.9.1",
     "istanbul": "^0.4.1",
     "jaguarjs-jsdoc": "0.0.1",
