@@ -27,6 +27,8 @@ var nightwatch = require('gulp-nightwatch');
 var rename = require('gulp-rename');
 var del = require('del');
 var nugetpack = require('gulp-nuget-pack');
+var zip = require('gulp-vinyl-zip');
+var spawn = require('child_process').spawn;
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -97,7 +99,8 @@ gulp.task('clean', function(){
     ]);
 });
 
-gulp.task('nuget', function(done){
+gulp.task('nuget', ['bundle'], function(done){
+    if (!fs.existsSync('./release')) fs.mkdirSync('./release');
     nugetpack({
         id: "JayData",
         title: "JayData",
@@ -116,11 +119,21 @@ gulp.task('nuget', function(done){
         summary: "JayData is a standards-based (mostly HTML5), cross-platform Javascript library and a set of practices to access and manipulate data from various online and offline sources.",
         description: "The unified data-management library for JavaScript/HTML5",
         tags: "jaydata jslq javascript js html5 data management odata indexeddb sqlite azure yql facebook fql mongodb HTML5 localStorage knockout kendoui angular opensource cross-platform cross-layer",
-        outputDir: "./nugetpkg",
+        outputDir: "./release/nugetpkg",
         baseDir: "./dist/public"
     }, [
         './dist/public'
     ], done);
+});
+
+gulp.task('release', ['bundle'], function(){
+    if (!fs.existsSync('./release')) fs.mkdirSync('./release');
+    return gulp.src(['./dist/public/**/*', './build/*.txt', './jaydata.d.ts'])
+    .pipe(zip.dest('./release/jaydata.zip'));
+});
+
+gulp.task('npm', ['nodejs', 'bundle', 'lint'], function (done) {
+    spawn('npm', ['publish', './dist', '--tag ctp'], { stdio: 'inherit' }).on('close', done);
 });
 
 var webserverInstance;

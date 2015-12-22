@@ -1,4 +1,5 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import atob from 'atob'
 
 $data.defaults = $data.defaults || {};
 $data.defaults.oDataWebApi = false;

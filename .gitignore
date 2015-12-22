@@ -24,6 +24,7 @@ nugetpkg
 /dist/*
 !dist/package.json
 !dist/*.js
+release
 coverage
 docs
 jaydata.js

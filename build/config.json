@@ -199,7 +199,7 @@
         },
         {
             "taskName": "all",
-            "dependencies": ["lint", "bundle", "nodejs", "apidocs"]
+            "dependencies": ["clean", "lint", "bundle", "nodejs", "apidocs", "release", "nuget"]
         }
     ]
 }
