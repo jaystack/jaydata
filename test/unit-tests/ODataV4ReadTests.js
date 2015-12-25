@@ -4,7 +4,7 @@ import oData from '../../src/Types/StorageProviders/oData'
 import atob from 'atob'
 import { expect } from 'chai';
 
-$data.setModelContainer(global)
+//$data.setModelContainer(global)
 
 
 
@@ -154,20 +154,20 @@ describe('OData protocol tests', function () {
 		Profile: { type: 'JayData.Test.CommonItems.Entities.UserProfile' }
 	})
 	
-	$data.Enum.extend("JayData.Test.CommonItems.Entities.UserType", {
-		Admin: 0,
-		Customer: 1,
-		Guest: 2
-	})
+	var UserType = $data.createEnum("JayData.Test.CommonItems.Entities.UserType", [
+		{ name: 'Admin', value: 0 },
+		{ name: 'Customer', value: 1 },
+		{ name: 'Guest', value: 2 }
+	])
 	
-	$data.Entity.extend('JayData.Test.CommonItems.Entities.MyTClass', {
+	var base_MyTClass = $data.Entity.extend('JayData.Test.CommonItems.Entities.MyTClass', {
 		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		Title: { type: 'Edm.String' }
 	}, {
 		openType: { value: true }
 	})
 	
-	JayData.Test.CommonItems.Entities.MyTClass.extend('JayData.Test.CommonItems.Entities.Article',{
+	var articleClass = base_MyTClass.extend('JayData.Test.CommonItems.Entities.Article',{
 		RowVersion: { type: 'Edm.Binary' },
 		Lead: { type: 'Edm.String' },
 		Body: { type: 'Edm.String' },
@@ -190,7 +190,7 @@ describe('OData protocol tests', function () {
 		User: { type: 'JayData.Test.CommonItems.Entities.User', required: true, nullable: false, inverseProperty: "Profile" }
 	})
 	
-	JayData.Test.CommonItems.Entities.MyTClass.extend('JayData.Test.CommonItems.Entities.Category', {
+	base_MyTClass.extend('JayData.Test.CommonItems.Entities.Category', {
 		RowVersion: { type: 'Edm.Binary' },
 		Subtitle: { type: 'Edm.String' },
 		Description: { type: 'Edm.String' },
@@ -273,7 +273,7 @@ describe('OData protocol tests', function () {
 	})
 	
 	
-	$data.EntityContext.extend('Default.Container', {
+	var Context = $data.EntityContext.extend('Default.Container', {
 		Users: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.User' },
 		Articles: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.Article' },
 		UserProfiles: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.UserProfile' },
@@ -290,12 +290,11 @@ describe('OData protocol tests', function () {
 		TestItemTypes: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItemType' },
 		SAction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
 		SAction2: { type: $data.ServiceAction, returnType: '$data.Queryable', elementType: 'JayData.Test.CommonItems.Entities.Article', EntitySet: 'Articles', params: [{ name: 'count', type: 'Edm.Int32' }] },
-		SFunction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
-		//SFunction2: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
+		SFunction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] }
 	})
 	
 	
-	var ctx = new Default.Container('http://localhost:9000/odata')
+	var ctx = new Context('http://localhost:9000/odata')
 	ctx.prepareRequest = function(r){
 		r[0].headers = {
 			"Accept": "application/json;odata.metadata=full;q=0.9, */*;q=0.1",
@@ -410,7 +409,7 @@ describe('OData protocol tests', function () {
 				
 				if(articles.length){
 					var item = articles[0]
-					expect(item instanceof JayData.Test.CommonItems.Entities.MyTClass).to.equal(true)
+					expect(item instanceof base_MyTClass).to.equal(true)
 					expect(typeof item.Id).to.equal("number")
 					expect(typeof item.Title).to.equal("string")
 					
@@ -425,7 +424,7 @@ describe('OData protocol tests', function () {
 				
 				if(articles.length){
 					var item = articles[0]
-					expect(item instanceof JayData.Test.CommonItems.Entities.MyTClass).to.equal(true)
+					expect(item instanceof base_MyTClass).to.equal(true)
 					expect(typeof item.Id).to.equal("number")
 					expect(typeof item.Title).to.equal("string")
 					
@@ -475,7 +474,7 @@ describe('OData protocol tests', function () {
 					
 					if(articles.length){
 						var item = articles[1]
-						expect(item instanceof JayData.Test.CommonItems.Entities.Article).to.equal(true);
+						expect(item instanceof articleClass).to.equal(true);
 					}
 					done()
 				})

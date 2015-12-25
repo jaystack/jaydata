@@ -1,6 +1,6 @@
 $(document).ready(function () {
     module("oData_read");
-	
+		
 	$data.Entity.extend('JayData.Test.CommonItems.Entities.User', {
 		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		LoginName: { type: 'Edm.String' },
@@ -11,20 +11,20 @@ $(document).ready(function () {
 		Profile: { type: 'JayData.Test.CommonItems.Entities.UserProfile' }
 	})
 	
-	$data.Enum.extend("JayData.Test.CommonItems.Entities.UserType", {
-		Admin: 0,
-		Customer: 1,
-		Guest: 2
-	})
+	var UserType = $data.createEnum("JayData.Test.CommonItems.Entities.UserType", [
+		{ name: 'Admin', value: 0 },
+		{ name: 'Customer', value: 1 },
+		{ name: 'Guest', value: 2 }
+	])
 	
-	$data.Entity.extend('JayData.Test.CommonItems.Entities.MyTClass', {
+	var base_MyTClass = $data.Entity.extend('JayData.Test.CommonItems.Entities.MyTClass', {
 		Id: { type: 'Edm.Int32', nullable: false, required: true, key: true },
 		Title: { type: 'Edm.String' }
 	}, {
 		openType: { value: true }
 	})
 	
-	JayData.Test.CommonItems.Entities.MyTClass.extend('JayData.Test.CommonItems.Entities.Article',{
+	base_MyTClass.extend('JayData.Test.CommonItems.Entities.Article',{
 		RowVersion: { type: 'Edm.Binary' },
 		Lead: { type: 'Edm.String' },
 		Body: { type: 'Edm.String' },
@@ -47,7 +47,7 @@ $(document).ready(function () {
 		User: { type: 'JayData.Test.CommonItems.Entities.User', required: true, nullable: false, inverseProperty: "Profile" }
 	})
 	
-	JayData.Test.CommonItems.Entities.MyTClass.extend('JayData.Test.CommonItems.Entities.Category', {
+	base_MyTClass.extend('JayData.Test.CommonItems.Entities.Category', {
 		RowVersion: { type: 'Edm.Binary' },
 		Subtitle: { type: 'Edm.String' },
 		Description: { type: 'Edm.String' },
@@ -130,7 +130,7 @@ $(document).ready(function () {
 	})
 	
 	
-	$data.EntityContext.extend('Default.Container', {
+	var Context = $data.EntityContext.extend('Default.Container', {
 		Users: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.User' },
 		Articles: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.Article' },
 		UserProfiles: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.UserProfile' },
@@ -147,8 +147,7 @@ $(document).ready(function () {
 		TestItemTypes: { type: $data.EntitySet, elementType: 'JayData.Test.CommonItems.Entities.TestItemType' },
 		SAction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
 		SAction2: { type: $data.ServiceAction, returnType: '$data.Queryable', elementType: 'JayData.Test.CommonItems.Entities.Article', EntitySet: 'Articles', params: [{ name: 'count', type: 'Edm.Int32' }] },
-		SFunction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
-		//SFunction2: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] },
+		SFunction1: { type: $data.ServiceAction, returnType: 'Edm.String', params: [{ name: 'number', type: 'Edm.Int32' }] }
 	})
 
 	
