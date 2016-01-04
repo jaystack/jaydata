@@ -16,7 +16,6 @@ var babelify = require('babelify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var fs = require('fs');
-var exec = require('child_process').exec;
 var eslint = require('gulp-eslint');
 var header = require('gulp-header');
 var footer = require('gulp-footer');
@@ -27,7 +26,9 @@ var rename = require('gulp-rename');
 var del = require('del');
 var nugetpack = require('gulp-nuget-pack');
 var zip = require('gulp-vinyl-zip');
-var spawn = require('child_process').spawn;
+var npm = require('npm');
+var argv = require('yargs').argv;
+var exec = require('child_process').exec;
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -131,8 +132,69 @@ gulp.task('release', ['bundle'], function(){
     .pipe(zip.dest('./release/jaydata.zip'));
 });
 
-gulp.task('npm', ['nodejs', 'bundle', 'lint'], function (done) {
-    spawn('npm', ['publish', './dist', '--tag ctp'], { stdio: 'inherit' }).on('close', done);
+gulp.task('npm', /*['nodejs', 'bundle', 'lint'],*/ function (callback) {
+    var username = argv.username;
+    var password = argv.password;
+    var email = argv.email;
+
+    if (!username) {
+        var usernameError = new Error("Username is required as an argument --username exampleUsername");
+        return callback(usernameError);
+    }
+    if (!password) {
+        var passwordError = new Error("Password is required as an argument --password  examplepassword");
+        return callback(passwordError);
+    }
+    if (!email) {
+        var emailError = new Error("Email is required as an argument --email example@email.com");
+        return callback(emailError);
+    }
+
+    var uri = "http://registry.npmjs.org/";
+    npm.load(null, function (loadError) {
+        if (loadError) {
+            return callback(loadError);
+        }
+        var auth = {
+            username: username,
+            password: password,
+            email: email,
+            alwaysAuth: true
+        };
+        var addUserParams = {
+            auth: auth
+        };
+        npm.registry.adduser(uri, addUserParams, function (addUserError, data, raw, res) {
+            if (addUserError) {
+                return callback(addUserError);
+            }
+
+            var metadata = require('./dist/package.json');
+            metadata = JSON.parse(JSON.stringify(metadata));
+            npm.commands.pack(['./dist'], function (packError) {
+                if (packError) {
+                    return callback(packError);
+                }
+                var fileName = metadata.name + '-' + metadata.version + '.tgz';
+                var bodyPath = require.resolve('./' + fileName);
+                var body = fs.createReadStream(bodyPath);
+                var publishParams = {
+                    metadata: metadata,
+                    access: 'public',
+                    tag: 'next',
+                    body: body,
+                    auth: auth
+                };
+                npm.registry.publish(uri, publishParams, function (publishError, resp) {
+                    if (publishError) {
+                        return callback(publishError);
+                    }
+                    console.log("Publish succesfull: " + JSON.stringify(resp));
+                    return callback();
+                });
+            })
+        });
+    });
 });
 
 var webserverInstance;
@@ -179,7 +241,7 @@ gulp.task('test', ['webserver', 'selenium'/*'bundle'*/], function(){
 });
 
 gulp.task('apidocs', ['jaydata'], function (cb) {
-    exec('node_modules\\.bin\\jsdoc dist\\public\\jaydata.js -t node_modules\\jaguarjs-jsdoc -d apidocs', function (err, stdout, stderr) {
+    exec('"./node_modules/.bin/jsdoc" "./dist/public/jaydata.js" -t "./node_modules/jaguarjs-jsdoc" -d apidocs', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
         cb(err);
