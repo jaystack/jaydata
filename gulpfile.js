@@ -96,7 +96,7 @@ gulp.task('clean', function(){
         './dist/.eslint',
         './dist/lib',
         './dist/public'
-    ]);
+    ], { force: true });
 });
 
 gulp.task('nuget', ['bundle'], function(done){
