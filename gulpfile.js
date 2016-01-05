@@ -94,8 +94,8 @@ gulp.task('minify', ['bundle'], function(){
 gulp.task('clean', function(){
     return del([
         './dist/.eslint',
-        './dist/lib',
-        './dist/public'
+        './dist/lib/**',
+        './dist/public/**'
     ], { force: true });
 });
 
