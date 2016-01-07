@@ -122,6 +122,8 @@
     ]
   },
   "browserify-shim": {
+    "atob": "global:atob",
+    "btoa": "global:btoa",
     "jQuery": "global:jQuery",
     "odatajs": "global:odatajs",
     "angular": "global:angular",
