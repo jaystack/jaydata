@@ -2059,10 +2059,11 @@ $data.Class.define('$data.EntityContext', null, null,
         return Container.resolveType(proxyClassName);
     },
     _relatedEntityGetMethod: function (targetType, navigation, context){
-        var proxyClass = this._createRelatedEntityProxyClass(targetType);
+        var that = this;
         var keys = targetType.memberDefinitions.getKeyProperties();
 
         return function (keyValue) {
+            var proxyClass = that._createRelatedEntityProxyClass(targetType);
             if (keys.length === 1 && typeof keyValue !== 'object') {
                 var keyV = {};
                 keyV[keys[0].name] = keyValue;
