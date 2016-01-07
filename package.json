@@ -109,10 +109,12 @@
     "jsdoc": "^3.4.0",
     "minimist": "^1.2.0",
     "nightwatch": "^0.8.8",
+    "npm": "^3.5.2",
     "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "selenium-standalone": "^4.7.2",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "yargs": "^3.31.0"
   },
   "browserify": {
     "transform": [
