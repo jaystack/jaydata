@@ -27,6 +27,7 @@
     "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
+    "odata-metadata": "git://github.com/jaystack/odata-metadata.git",
     "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "xmldom": "^0.1.19"
   },
