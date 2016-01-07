@@ -171,4 +171,14 @@ $data.Class.define('$data.ServiceAction', $data.ServiceOperation, null, {}, {
     }
 });
 
+$data.Class.define('$data.ServiceFunction', $data.ServiceOperation, null, {}, {
+    generateServiceOperation: function (cfg) {
+        if (!cfg.method) {
+            cfg.method = 'GET'; //default Function method is GET
+        }
+
+        return $data.ServiceOperation.generateServiceOperation.apply(this, arguments);
+    }
+});
+
 export default $data
