@@ -508,7 +508,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///	</signature>
 
         this._checkOperation('take');
-        var constExp = Container.createConstantExpression(amount, "number");
+        var constExp = Container.createConstantExpression(amount, "integer");
         var takeExp = Container.createPagingExpression(this.expression, constExp, $data.Expressions.ExpressionType.Take);
         return Container.createQueryable(this, takeExp);
     },
@@ -529,7 +529,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///	</signature>
 
         this._checkOperation('skip');
-        var constExp = Container.createConstantExpression(amount, "number");
+        var constExp = Container.createConstantExpression(amount, "integer");
         var takeExp = Container.createPagingExpression(this.expression, constExp, $data.Expressions.ExpressionType.Skip);
         return Container.createQueryable(this, takeExp);
     },

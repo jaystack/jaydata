@@ -553,6 +553,23 @@ describe('OData protocol tests', function () {
 			})
 		})
 	})
+    
+    describe('take - skip test', () => {
+		it('read articles', (done) => {
+			ctx.Articles.skip(3).take(5).toArray(function(articles){
+				expect(articles.length === 5).to.equal(true)
+
+				if(articles.length){
+					var item = articles[0]
+					expect(item instanceof base_MyTClass).to.equal(true)
+					expect(typeof item.Id).to.equal("number")
+					expect(typeof item.Title).to.equal("string")
+
+					done()
+				}
+			})
+		})
+	})
 
 	describe('read open type', () => {
 
