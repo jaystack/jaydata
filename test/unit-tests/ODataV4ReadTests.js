@@ -580,13 +580,13 @@ describe('OData protocol tests', function () {
 				if(items.length){
 					var item = items[2]
 
-					expect(typeof item.Dynamics).to.equal("object");
-					if(item.Dynamics) {
-						expect(item.Dynamics.t0).to.equal(1);
-						expect(item.Dynamics.t1).to.equal("xx");
-						expect(item.Dynamics.t2).to.equal("2015-12-15T18:33:10.9354508+01:00");
-						expect(item.Dynamics.t3).to.equal("2015-12-15");
-						expect(item.Dynamics.t4).to.equal(false);
+					expect(typeof item.dynamicProperties).to.equal("object");
+					if(item.dynamicProperties) {
+						expect(item.dynamicProperties.t0).to.equal(1);
+						expect(item.dynamicProperties.t1).to.equal("xx");
+						expect(item.dynamicProperties.t2).to.equal("2015-12-15T18:33:10.9354508+01:00");
+						expect(item.dynamicProperties.t3).to.equal("2015-12-15");
+						expect(item.dynamicProperties.t4).to.equal(false);
 					}
 				}
 

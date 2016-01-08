@@ -310,13 +310,13 @@ $(document).ready(function () {
 				if(items.length){
 					var item = items[2]
 					
-					equal(typeof item.Dynamics, "object", 'Dynamics property type');
-					if(item.Dynamics) {
-						equal(item.Dynamics.t0, 1, 't0 property');
-						equal(item.Dynamics.t1, "xx", 't1 property');
-						equal(item.Dynamics.t2, "2015-12-15T18:33:10.9354508+01:00", 't2 property');
-						equal(item.Dynamics.t3, "2015-12-15", 't3 property');
-						equal(item.Dynamics.t4, false, 't4 property');
+					equal(typeof item.dynamicProperties, "object", 'dynamicProperties property type');
+					if(item.dynamicProperties) {
+						equal(item.dynamicProperties.t0, 1, 't0 property');
+						equal(item.dynamicProperties.t1, "xx", 't1 property');
+						equal(item.dynamicProperties.t2, "2015-12-15T18:33:10.9354508+01:00", 't2 property');
+						equal(item.dynamicProperties.t3, "2015-12-15", 't3 property');
+						equal(item.dynamicProperties.t4, false, 't4 property');
 					
 					}
 				}

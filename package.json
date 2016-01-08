@@ -27,8 +27,8 @@
     "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "odata-metadata": "git://github.com/jaystack/odata-metadata.git",
-    "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
+    "odata-metadata": "^0.1.0",
+    "jaydata-odatajs": "^4.0.0",
     "xmldom": "^0.1.19"
   },
   "contributors": [
@@ -110,7 +110,6 @@
     "minimist": "^1.2.0",
     "nightwatch": "^0.8.8",
     "npm": "^3.5.2",
-    "odatajs": "git://github.com/jaydata/olingo-odata4-js.git",
     "selenium-standalone": "^4.7.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
@@ -125,7 +124,7 @@
     "atob": "global:atob",
     "btoa": "global:btoa",
     "jQuery": "global:jQuery",
-    "odatajs": "global:odatajs",
+    "jaydata-odatajs": "global:odatajs",
     "angular": "global:angular",
     "Handlebars": "global:Handlebars",
     "kendo": "global:kendo",

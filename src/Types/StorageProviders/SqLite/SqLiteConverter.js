@@ -21,6 +21,9 @@ $data.SqLiteConverter = {
             if (arguments.length == 0) return [];
             return arguments[0] ? JSON.parse(arguments[0]) : undefined;
         },
+        "$data.Object": function(v){
+            try{ return JSON.parse(v); }catch(err){ return v; }
+        },
         "$data.Guid": function (g) { return g ? $data.parseGuid(g).toString() : g; },
         '$data.GeographyPoint': function (g) { if (g) { return new $data.GeographyPoint(JSON.parse(g)); } return g; },
         '$data.GeographyLineString': function (g) { if (g) { return new $data.GeographyLineString(JSON.parse(g)); } return g; },
@@ -55,7 +58,7 @@ $data.SqLiteConverter = {
         "$data.Blob": function(b){ return b ? $data.Blob.toBase64(b) : b; },
         "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
         "$data.Guid": function (g) { return g ? g.toString() : g; },
-        "$data.Object": function (value) { if (value === null) { return null; } throw 'Not supported exception'; },
+        "$data.Object": function (value) { if (value === null) { return null; } else { JSON.stringify(value); } },
         '$data.GeographyPoint': function (g) { if (g) { return JSON.stringify(g); } return g; },
         '$data.GeographyLineString': function (g) { if (g) { return JSON.stringify(g); } return g; },
         '$data.GeographyPolygon': function (g) { if (g) { return JSON.stringify(g); } return g; },

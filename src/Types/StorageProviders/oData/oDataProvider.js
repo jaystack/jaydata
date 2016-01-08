@@ -1,5 +1,5 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
-import odatajs from 'odatajs';
+import odatajs from 'jaydata-odatajs';
 
 var OData = $data.__global['OData'];
 var datajs = $data.__global['datajs'];

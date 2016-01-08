@@ -1,31 +1,31 @@
 import $data, { $C, Guard, Container, Exception } from '../TypeSystem/index.js';
 import { Edm } from 'odata-metadata'
 import { Metadata } from './Metadata.js'
-import odatajs from 'odatajs';
+import odatajs from 'jaydata-odatajs';
 
 export class MetadataDownloader {
     constructor(options) {
         this.options = options || {}
         this.prepareRequest = options.prepareRequest || function() { }
-        
+
         if (typeof odatajs === 'undefined' || typeof odatajs.oData === 'undefined') {
             Guard.raise(new Exception('odatajs is required', 'Not Found!'));
         } else {
             this.oData = odatajs.oData
         }
-        
+
     }
-    
+
     load(callBack) {
-        
+
         var pHandler = new $data.PromiseHandler();
         callBack = pHandler.createCallback(callBack);
-        
+
         var serviceUrl = this.options.url.replace('/$metadata', '')
         var metadataUrl = serviceUrl.replace(/\/+$/, '') + '/$metadata'
         this.options.SerivceUri = serviceUrl
-        
-        
+
+
         var requestData = [
             {
                 requestUri: metadataUrl,
@@ -36,27 +36,27 @@ export class MetadataDownloader {
                 var edmMetadata = new Edm.Edmx(data)
                 var metadata = new Metadata(this.options, edmMetadata);
                 var types = metadata.processMetadata()
-                
+
                 var contextType = types.filter((t)=> t.isAssignableTo($data.EntityContext))[0]
-                
+
                 var factory = this._createFactoryFunc(contextType);
                 factory.type = contextType;
-                
+
                 callBack.success(factory)
-            }, 
+            },
             callBack.error,
             this.oData.metadataHandler
         ]
-        
+
         this._appendBasicAuth(requestData[0], this.options.user, this.options.password, this.options.withCredentials);
-        
+
         this.prepareRequest.call(this, requestData);
-        
+
         this.oData.request.apply(this.oData, requestData);
-        
+
         return pHandler.getPromise();
     }
-    
+
     _createFactoryFunc(ctxType){
         return (config) => {
             if (ctxType) {
@@ -75,7 +75,7 @@ export class MetadataDownloader {
             }
         }
     }
-    
+
     _appendBasicAuth(request, user, password, withCredentials) {
         request.headers = request.headers || {};
         if (!request.headers.Authorization && user && password) {
@@ -85,7 +85,7 @@ export class MetadataDownloader {
             request.withCredentials = withCredentials;
         }
     }
-    
+
     __encodeBase64 (val) {
         var b64array = "ABCDEFGHIJKLMNOP" +
                            "QRSTUVWXYZabcdef" +

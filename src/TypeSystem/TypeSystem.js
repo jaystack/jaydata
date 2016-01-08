@@ -13,7 +13,7 @@ $data.setModelContainer = function(modelHolder){
 };
 
 $data.defaults = $data.defaults || {}
-$data.defaults.openTypeDefaultPropertyName = "Dynamics";
+$data.defaults.openTypeDefaultPropertyName = "dynamicProperties";
 $data.defaults.openTypeDefaultType = '$data.Object';
 $data.defaults.openTypeDefaultValue = {};
 
@@ -607,7 +607,7 @@ $data.setGlobal = function(obj){
       }
 
       if (instanceDefinition) {
-        
+
         //build open type member
         if (!openTypeDefinition && classDefinition && (typeof classFunction.openType === "string" || classFunction.openType === true) && classFunction.isAssignableTo($data.Entity)) {
           var openTypePropertyName = $data.defaults.openTypeDefaultPropertyName;
@@ -616,7 +616,7 @@ $data.setGlobal = function(obj){
           if (typeof classFunction.openType == "string") {
             openTypePropertyName = classFunction.openType;
           }
-          
+
           var definedOpenTypeMember = classFunction.getMemberDefinition(openTypePropertyName);
           if(definedOpenTypeMember && Container.resolveType(definedOpenTypeMember.type || definedOpenTypeMember.dataType) !== openTypeDefaultType) {
             Guard.raise(new Exception("Type Error", "OpenType default type missmatch"));
@@ -632,7 +632,7 @@ $data.setGlobal = function(obj){
             instanceDefinition[openTypePropertyName] = { type: openTypeDefaultType, defaultValue:  defaultValue };
           }
         }
-        
+
         this.buildInstanceMembers(classFunction, instanceDefinition);
       }
 
@@ -846,7 +846,7 @@ $data.setGlobal = function(obj){
   var Class
   $data.Class = Class = new ClassEngineBase();
 
- 
+
   $data.ContainerClass = ContainerCtor;
 
   var c;
