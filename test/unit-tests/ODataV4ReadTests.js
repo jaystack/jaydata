@@ -593,6 +593,20 @@ describe('OData protocol tests', function () {
 				done()
 			})
 		})
+        
+        it('create class', () => {
+            var a = new ctx.TestTable2.elementType();
+            var b = new ctx.TestTable2.elementType();
+            
+            expect(typeof a.dynamicProperties).to.equal("object");
+            expect(typeof b.dynamicProperties).to.equal("object");
+            
+            expect(a.dynamicProperties).to.not.equal(b.dynamicProperties);
+            
+            a.dynamicProperties.p1 = 'jaydata'
+            expect(a.dynamicProperties.p1).to.equal('jaydata');
+            expect(b.dynamicProperties.p1).to.not.equal('jaydata');
+		})
 	})
 
 	describe('OData Actions', () => {

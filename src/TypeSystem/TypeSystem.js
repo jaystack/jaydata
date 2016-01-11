@@ -15,7 +15,7 @@ $data.setModelContainer = function(modelHolder){
 $data.defaults = $data.defaults || {}
 $data.defaults.openTypeDefaultPropertyName = "dynamicProperties";
 $data.defaults.openTypeDefaultType = '$data.Object';
-$data.defaults.openTypeDefaultValue = {};
+$data.defaults.openTypeDefaultValue = function() { return {}; };
 
 $data.__global = process.browser ? window : global
 $data.setGlobal = function(obj){
@@ -628,7 +628,7 @@ $data.setGlobal = function(obj){
             }
           }
           if(!definedOpenTypeMember && !instanceDefinition[openTypePropertyName]){
-            var defaultValue = typeof openTypeDefaultValue !== "undefined" ? openTypeDefaultValue : {};
+            var defaultValue = typeof openTypeDefaultValue !== "undefined" ? openTypeDefaultValue : (function() { return {}; });
             instanceDefinition[openTypePropertyName] = { type: openTypeDefaultType, defaultValue:  defaultValue };
           }
         }
