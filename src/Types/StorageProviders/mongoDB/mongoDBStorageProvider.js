@@ -41,7 +41,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
     },
     initializeStore: function(callBack){
         var self = this;
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var server = this._getServer();
         new this.driver.Db(this.providerConfiguration.databaseName, server, { safe: false }).open(function(error, client){
@@ -158,7 +158,7 @@ $C('$data.storageProviders.mongoDB.mongoDBProvider', $data.StorageProviderBase, 
     },
     executeQuery: function(query, callBack){
         var self = this;
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var entitySet = query.context.getEntitySetFromElementType(query.defaultType);
         this._compile(query);

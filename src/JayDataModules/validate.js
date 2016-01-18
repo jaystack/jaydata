@@ -1,5 +1,5 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
-import jQuery from 'jQuery'
+import jQuery from 'jquery'
 
 (function ($data, $) {
 
@@ -146,7 +146,7 @@ import jQuery from 'jQuery'
         var validateResult = { rules: {}, messages: {} };
         buildValidationModel(model.getType(), validateResult);
 
-        callBack = $data.typeSystem.createCallbackSetting(callBack, {});
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack, {});
         if (callBack.success) {
             var origCallback = callBack.success;
             callBack.success = function (form, event) {

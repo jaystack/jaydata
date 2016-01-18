@@ -9,7 +9,7 @@ import ChangeDistributor from './Notifications/ChangeDistributor.js';
 import ChangeCollector from './Notifications/ChangeCollector.js';
 import Transaction from './Transaction.js';
 import Access from './Access.js';
-import Promise from './Promise.js';
+//import Promise from './Promise.js';
 import Entity from './Entity.js';
 import Enum from './Enum.js';
 import RelatedEntityProxy from './RelatedEntityProxy.js';
@@ -38,8 +38,10 @@ import Anonymous from './Authentication/Anonymous.js';
 import FacebookAuth from './Authentication/FacebookAuth.js';
 import BasicAuth from './Authentication/BasicAuth.js';
 //import JaySvcUtil from '../JaySvcUtil/JaySvcUtil.js';
-import deferred from '../JayDataModules/deferred.js';
+//import deferred from '../JayDataModules/deferred.js';
 //import JayStorm from './JayStorm.js';
 
+import { PromiseHandler } from 'jaydata-promise-handler';
+PromiseHandler.use($data);
 
 export default $data

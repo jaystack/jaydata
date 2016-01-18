@@ -1,6 +1,5 @@
 import $data from '../TypeSystem.js'
-import Exception from '../Exception.js';
-import { Guard } from '../utils.js';
+import { Guard, Exception } from 'jaydata-error-handler';
 import btoa from 'btoa'
 
 var bufferOrArray = eval('typeof Buf' + 'fer !== "undefined" ? Buf' + 'fer : Uint8Array');

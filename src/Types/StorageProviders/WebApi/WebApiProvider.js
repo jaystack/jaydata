@@ -95,7 +95,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
         }
     },
     initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         callBack.success(this.context);
     },
     buildDbType_generateConvertToFunction: function (storageModel, context) {
@@ -147,7 +147,7 @@ $C('$data.storageProviders.webApi.webApiProvider', $data.StorageProviderBase, nu
     },
     buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
 
         var result;

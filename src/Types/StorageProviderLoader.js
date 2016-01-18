@@ -61,7 +61,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
         $data.RegisteredStorageProviders = $data.RegisteredStorageProviders || {};
 
         $data.Trace.log('Loading provider(s): ' + providerList);
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
 
         var self = this;
         var cacheKey = providerList.join(',');

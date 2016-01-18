@@ -21,7 +21,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
         //console.log("xslt template loaded");
 
 
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var self = this;
 

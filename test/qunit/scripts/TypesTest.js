@@ -50,7 +50,7 @@ function TypeTests(providerConfig, msg) {
                                 promises.push(item.remove(context.storeToken));
                             });
 
-                            return $.when.apply($, promises);
+                            return Promise.all(promises);
                         } else {
                             items.forEach(function (item) {
                                 context.remove(item);
@@ -77,7 +77,7 @@ function TypeTests(providerConfig, msg) {
                 var promises = [];
 
                 for (var i = 0; i < num; i++) {
-                    
+
                     var item = new TestItemType({
                         'b0': counter % 2 ? false : true,
                         'b1': 8 + (counter * 2),
@@ -105,7 +105,7 @@ function TypeTests(providerConfig, msg) {
                 }
 
                 if (context.storageProvider.providerConfiguration.noBatch) {
-                    return $.when.apply($, promises);
+                    return Promise.all(promises);
                 } else {
                     return context.saveChanges();
                 }
@@ -155,7 +155,7 @@ function TypeTests(providerConfig, msg) {
                 success: function () {
 
                     context.TestItemTypes.toArray(function (items) {
-                        
+
                         equal(items[0].b0, false, 'b0');
                         equal(items[0].b1, 230, 'b1');
                         ok(Math.abs(items[0].d0.valueOf() - refDate.valueOf()) < 100, 'd0');
@@ -275,7 +275,7 @@ function TypeTests(providerConfig, msg) {
 
                 _finishCb(context);
             }).fail($data.debug);
-            
+
         });
     });
 
@@ -538,6 +538,5 @@ function TypeTests(providerConfig, msg) {
             });
     });
 
-    
-}
 
+}

@@ -3,9 +3,9 @@
 [![NPM](https://nodei.co/npm/jaydata.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/jaydata/)
 
 [![npm version](https://badge.fury.io/js/jaydata.svg)](https://badge.fury.io/js/jaydata)
-[![Dependency Status](https://david-dm.org/jaydata/jaydata.svg)](https://david-dm.org/jaydata/jaydata)
-[![Issue Stats](http://issuestats.com/github/jaydata/jaydata/badge/issue?style=flat)](http://issuestats.com/github/jaydata/jaydata)
-[![Issue Stats](http://issuestats.com/github/jaydata/jaydata/badge/pr?style=flat)](http://issuestats.com/github/jaydata/jaydata)
+[![Dependency Status](https://david-dm.org/jaystack/jaydata.svg)](https://david-dm.org/jaystack/jaydata)
+[![Issue Stats](http://issuestats.com/github/jaystack/jaydata/badge/issue?style=flat)](http://issuestats.com/github/jaydata/jaydata)
+[![Issue Stats](http://issuestats.com/github/jaystack/jaydata/badge/pr?style=flat)](http://issuestats.com/github/jaydata/jaydata)
 
 [![license MIT](http://img.shields.io/badge/license-MIT-blue.svg)](license-MIT)
 [![license GPL](http://img.shields.io/badge/license-GPL-blue.svg)](license-GPL)

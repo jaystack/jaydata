@@ -20,7 +20,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             this.providerConfiguration.databaseName = this.providerConfiguration.localStoreName;
     },
     initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var setKeys = [];
         for(var i in this.context._entitySetReferences){
@@ -32,7 +32,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
             var that = this;
             var storeData = $data.__global.localStorage.getItem(localStoreName);
 
-            if (!Object.isNullOrUndefined(storeData)) {
+            if (!Guard.isNullOrUndefined(storeData)) {
                 localStorageData = JSON.parse(storeData,
                     function (key, value) {
                         if (setKeys.indexOf(key) > -1 && value.map) {
@@ -97,7 +97,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         callBack.success(this.context);
     },
     executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var sql;
         try {

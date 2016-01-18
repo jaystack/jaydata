@@ -182,7 +182,7 @@ function promiseTests(providerConfig, msg) {
         })
         .fail(function (ex) {
             start(3);
-            
+
             ok(false, ex);
         })
         .then(function (db) {
@@ -253,7 +253,7 @@ function promiseTests(providerConfig, msg) {
             });
         }).fail(function (ex) {
             start(1);
-            
+
             ok(false, ex);
         });
 
@@ -297,7 +297,7 @@ function promiseTests(providerConfig, msg) {
             });
         }).fail(function (ex) {
             start(1);
-            
+
             ok(false, ex);
         });
 
@@ -339,7 +339,7 @@ function promiseTests(providerConfig, msg) {
             });
         }).fail(function (ex) {
             start(1);
-            
+
             ok(false, ex);
         });
 
@@ -376,12 +376,12 @@ function promiseTests(providerConfig, msg) {
             });
         }).fail(function (ex) {
             start(1);
-            
+
             ok(false, ex);
         });
 
     });
-    
+
     test('promise handler deferred - wait save', 4, function () {
         $data.PromiseHandler = $data.Deferred;
 
@@ -415,7 +415,7 @@ function promiseTests(providerConfig, msg) {
             });
         }).fail(function (ex) {
             start(1);
-            
+
             ok(false, ex);
         });
 
@@ -452,7 +452,7 @@ function promiseTests(providerConfig, msg) {
             });
         }).fail(function (ex) {
             start(1);
-            
+
             ok(false, ex);
         });
 

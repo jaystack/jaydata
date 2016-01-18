@@ -9,7 +9,7 @@ function T4_CrossProviderTests() {
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
         ComplexTypeTests({ name: 'sqLite', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
-        LiveArrayTests({ name: 'sqLite', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
+        //LiveArrayTests({ name: 'sqLite', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
         if ($data.storageProviders.sqLitePro) {
             EntityContextOnUpdateTests({ name: 'sqLite', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'sqLite');
         }
@@ -19,7 +19,7 @@ function T4_CrossProviderTests() {
     //indexedDb
     if ($data.StorageProviderLoader.isSupported('indexedDb')) {
         ComplexTypeTests({ name: 'indexedDb', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
-        LiveArrayTests({ name: 'indexedDb', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
+        //LiveArrayTests({ name: 'indexedDb', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
         if ($data.storageProviders.indexedDbPro) {
             EntityContextOnUpdateTests({ name: 'indexedDb', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'indexedDb');
         }
@@ -28,12 +28,12 @@ function T4_CrossProviderTests() {
 
     //InMemory
     ComplexTypeTests({ name: 'InMemory', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
-    LiveArrayTests({ name: 'InMemory', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
+    //LiveArrayTests({ name: 'InMemory', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
     BatchExecuteQueryTests({ name: 'InMemory', databaseName: 'BatchExecuteQueryTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'InMemory');
 
     //LocalStore
     ComplexTypeTests({ name: 'LocalStore', databaseName: 'ComplexTypeTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
-    LiveArrayTests({ name: 'LocalStore', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
+    //LiveArrayTests({ name: 'LocalStore', databaseName: 'LiveArrayTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
     BatchExecuteQueryTests({ name: 'LocalStore', databaseName: 'BatchExecuteQueryTests_T4', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'LocalStore');
 }
 
@@ -630,7 +630,7 @@ function EntityContextOnUpdateTests(providerConfig, msg) {
     });
 };
 
-function LiveArrayTests(providerConfig, msg) {
+/*function LiveArrayTests(providerConfig, msg) {
     if (typeof module == 'function') module("LiveArrayTests_" + (msg || ''));
 
     test("toLiveArray", 5, function () {
@@ -696,7 +696,7 @@ function LiveArrayTests(providerConfig, msg) {
             });
         });
     });
-}
+}*/
 
 function BatchExecuteQueryTests(providerConfig, msg) {
     if (typeof module == 'function') module("BatchExecuteQueryTests_" + (msg || ''));

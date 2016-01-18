@@ -181,7 +181,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
     },
 
     initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         this.context._storageModel.forEach(function (item, index) {
             this.SqlCommands.push(this.createSqlFromStorageModel(item) + " ");
         }, this);
@@ -241,7 +241,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         });
     },
     executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var sqlConnection = this._createSqlConnection();
         var sql = this._compile(query);
         query.actionPack = sql.actions;
@@ -495,11 +495,11 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         var fieldValue = "";
         var fieldParam = [];
         item.physicalData.constructor.memberDefinitions.getPublicMappedProperties().forEach(function (fieldDef, i) {
-            if (fieldDef.key && !fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+            if (fieldDef.key && !fieldDef.computed && Guard.isNullOrUndefined(item.physicalData[fieldDef.name])) {
                 Guard.raise(new Exception('Key is not set', 'Value exception', item));
                 return;
             }
-            if (fieldDef.key && fieldDef.computed && Object.isNullOrUndefined(item.physicalData[fieldDef.name])) {
+            if (fieldDef.key && fieldDef.computed && Guard.isNullOrUndefined(item.physicalData[fieldDef.name])) {
                 var typeName = Container.resolveName(fieldDef.type);
                 if (typeof this.supportedAutoincrementKeys[typeName] === 'function') {
                     item.physicalData[fieldDef.name] = this.supportedAutoincrementKeys[typeName]();

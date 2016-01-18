@@ -408,7 +408,7 @@ import ko from 'ko'
         $data.Queryable.prototype.toArray = function (onResult_items, transaction) {
             if (ko.isObservable(onResult_items)) {
                 if (typeof onResult_items.push !== 'undefined') {
-                    var callBack = $data.typeSystem.createCallbackSetting();
+                    var callBack = $data.PromiseHandlerBase.createCallbackSettings();
 
                     return this.toArray(function (results, tran) {
                         onResult_items([]);

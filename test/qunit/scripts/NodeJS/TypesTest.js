@@ -47,7 +47,7 @@ function TypeTests(providerConfig, msg) {
                                 promises.push(item.remove(context.storeToken));
                             });
 
-                            return $.when.apply($, promises);
+                            return Promise.all(promises);
                         } else {
                             items.forEach(function (item) {
                                 context.remove(item);
@@ -99,7 +99,7 @@ function TypeTests(providerConfig, msg) {
                 }
 
                 if (context.storageProvider.providerConfiguration.noBatch) {
-                    return $.when.apply($, promises);
+                    return Promise.all(promises);
                 } else {
                     return context.saveChanges();
                 }

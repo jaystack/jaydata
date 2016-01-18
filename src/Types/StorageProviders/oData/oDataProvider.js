@@ -1,5 +1,5 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
-import odatajs from 'jaydata-odatajs';
+import * as odatajs from 'jaydata-odatajs';
 
 var OData = $data.__global['OData'];
 var datajs = $data.__global['datajs'];
@@ -85,7 +85,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         }
     },
     initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         switch (this.providerConfiguration.dbCreation) {
             case $data.storageProviders.DbCreationType.DropAllExistingTables:
                 var that = this;
@@ -176,7 +176,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
     buildDbType_modifyInstanceDefinition: function () { return; },
     executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var sql = {};
         try {
@@ -484,7 +484,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         var arrayProperty = [];
                         for (var ap = 0; ap < data[memDef.name].length; ap++) {
                             var aitem = data[memDef.name][ap];
-                            if (aeType.isAssignableTo && !Object.isNullOrUndefined(aitem)) {
+                            if (aeType.isAssignableTo && !Guard.isNullOrUndefined(aitem)) {
                                 arrayProperty.push(new aeType(aitem, { converters: that.fieldConverter.fromDb }));
                             } else {
                                 var etypeName = Container.resolveName(aeType);

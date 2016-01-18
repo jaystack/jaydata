@@ -12,7 +12,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
             Access_Token: ''
         }, cfg);
         this.initializeStore = function (callBack) {
-            callBack = $data.typeSystem.createCallbackSetting(callBack);
+            callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
             callBack.success(this.context);
         };
 
@@ -96,7 +96,7 @@ $data.Class.define('$data.storageProviders.Facebook.FacebookProvider', $data.Sto
         writable: true
     },
     executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         if (!this.AuthenticationProvider)
             this.AuthenticationProvider = new $data.Authentication.Anonymous({});

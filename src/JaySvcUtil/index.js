@@ -1,8 +1,8 @@
 import $data from '../TypeSystem/index.js';
-import expressions from '../Types/Expressions/index.js';
+import { DynamicMetadata } from 'jaydata-dynamic-metadata';
 
-import metadata from './Metadata.js';
-import metadataDownloader from './MetadataDownloader.js';
-import service from './Service.js';
+var dynamicMetadata = new DynamicMetadata($data);
+$data.service = dynamicMetadata.service.bind(dynamicMetadata);
+$data.initService = dynamicMetadata.initService.bind(dynamicMetadata);
 
 export default $data

@@ -25,8 +25,31 @@
      <script type="text/javascript" src="dist/public/jaydatamodules/inMemory.js" /></script>
      <script type="text/javascript" src="dist/public/jaydatamodules/knockout.js" /></script>
      <script type="text/javascript" src="dist/public/jaydatamodules/validate.js" /></script>
+     <script type="text/javascript" src="dist/public/jaydatamodules/deferred.js" /></script>
 
     <script>
+      if (typeof Promise != 'function'){
+          window.Promise = {
+              all: function(promises){
+                  return $.when.apply(this, promises);
+              }
+          };
+      }else{
+          Promise.prototype['fail'] = function(onReject){
+			return this.then(null, function(reason){
+				onReject(reason);
+				throw reason;
+			});
+		};
+
+		Promise.prototype['always'] = function(onResolveOrReject) {
+			return this.then(onResolveOrReject, function(reason) {
+				onResolveOrReject(reason);
+				throw reason;
+			});
+		};
+      }
+      //$data.PromiseHandler.compatibilityMode();
       $data.setModelContainer(window)
       //$data.setGlobal(window)
     </script>
@@ -73,8 +96,6 @@
     <script src="test/qunit/scripts/oDataProviderTests2.js" type="text/javascript"></script>
     <!--<script src="test/qunit/scripts/oDataEnumTests.js" type="text/javascript"></script>
     <script src="test/qunit/scripts/oDataReadTests.js" type="text/javascript"></script>-->
-
-
 </head>
 <body>
 

@@ -41,7 +41,7 @@ $data.Class.defineEx('$data.EntitySet',
     },
 
     addNew: function(item, cb) {
-        var callback = $data.typeSystem.createCallbackSetting(cb);
+        var callback = $data.PromiseHandlerBase.createCallbackSettings(cb);
         var _item = new this.createNew(item);
         this.entityContext.saveChanges(cb);
         return _item;
@@ -49,7 +49,7 @@ $data.Class.defineEx('$data.EntitySet',
 
     executeQuery: function (expression, on_ready) {
         //var compiledQuery = this.entityContext
-        var callBack = $data.typeSystem.createCallbackSetting(on_ready);
+        var callBack = $data.PromiseHandlerBase.createCallbackSettings(on_ready);
         this.entityContext.executeQuery(expression, callBack);
     },
     getTraceString: function (expression) {

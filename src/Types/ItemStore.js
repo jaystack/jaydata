@@ -563,8 +563,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 //use the current entity store informations
                 storeAlias = this._getStoreAlias(entity, storeAlias);
                 entityType.read(self._getKeyObjectFromEntity(entity, entityType), storeAlias)
-                    .then(function () { callback.success('attach'); })
-                    .fail(function () { callback.success('add'); });
+                    .then(function () { callback.success('attach'); }, function () { callback.success('add'); });
                 break;
         }
 

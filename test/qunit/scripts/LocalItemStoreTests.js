@@ -239,7 +239,7 @@
             promises.push($data("Cart11").save({ Value: i, Product: 'item' + i }));
         }
 
-        $.when(promises).then(function () {
+        Promise.all(promises).then(function () {
             $data("Cart11").query(function (item) { return item.Value >= this.val }, { val: 5 }).then(function (items) {
                 equal(items.length, 5, 'query length correct');
 
@@ -262,7 +262,7 @@
             promises.push($data("Cart13").save({ Value: i, Product: 'item' + i }));
         }
 
-        $.when(promises).then(function () {
+        Promise.all(promises).then(function () {
             $data("Cart13").query(function (item) { return item.Product.contains(this.val) == true; }, { val: 'tem5' }).then(function (items) {
                 equal(items.length, 1, 'query length correct');
 
@@ -285,7 +285,7 @@
             promises.push($data("Cart12").save({ Value: i, Product: 'item' + i }));
         }
 
-        $.when(promises).then(function () {
+        Promise.all(promises).then(function () {
             $data("Cart12").takeFirst(function (item) { return item.Value >= this.val && item.Value < 6 }, { val: 5 }).then(function (item) {
                 equal(item.Value, 5, 'item.Value is correct');
 
