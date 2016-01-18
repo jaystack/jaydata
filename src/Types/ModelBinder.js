@@ -60,9 +60,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += 'if(';
                 var path = selector.split('.');
                 for (var j = 0; j < path.length; j++) {
-                    context.src += 'di.' + path.slice(0, j + 1).join('.') + (j < path.length - 1 ? ' && ' : ' !== undefined && typeof di.' + selector + ' === "object"');
+                    context.src += 'di["' + path.slice(0, j + 1).join('"]["') + '"]' + (j < path.length - 1 ? ' && ' : ' !== undefined && typeof di.' + selector + ' === "object"');
                 }
-                context.src += '){di = di.' + selector + ';}' + (i < meta.$selector.length - 1 ? 'else ' : '');
+                context.src += '){di = di["' + path.join('"]["') + '"];}' + (i < meta.$selector.length - 1 ? 'else ' : '');
             }
 
             context.src += 'if (di === null){';
@@ -80,16 +80,16 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.src += 'var ' + name + 'Fn = function(di){';
             if (!(Array.isArray(keys)) || keys.length == 1) {
                 if (typeof keys !== 'string') keys = keys[0];
-                context.src += 'if (typeof di.' + keys + ' === "undefined") return undefined;';
-                context.src += 'if (di.' + keys + ' === null) return null;';
-                context.src += 'var key = ("' + type + '_' + typeIndex + '_' + keys + '#" + di.' + keys + ');';
+                context.src += 'if (typeof di["' + keys + '"] === "undefined") return undefined;';
+                context.src += 'if (di["' + keys + '"] === null) return null;';
+                context.src += 'var key = ("' + type + '_' + typeIndex + '_' + keys + '#" + di["' + keys + '"]);';
             } else {
                 context.src += 'var key = "";';
                 for (var i = 0; i < keys.length; i++) {
                     var id = typeof keys[i] !== 'object' ? keys[i] : keys[i].$source;
-                    context.src += 'if (typeof di.' + id + ' === "undefined") return undefined;';
-                    context.src += 'if (di.' + id + ' === null) return null;';
-                    context.src += 'key += ("' + type + '_' + typeIndex + '_' + id + '#" + di.' + id + ');';
+                    context.src += 'if (typeof di["' + id + '"] === "undefined") return undefined;';
+                    context.src += 'if (di["' + id + '"] === null) return null;';
+                    context.src += 'key += ("' + type + '_' + typeIndex + '_' + id + '#" + di["' + id + '"]);';
                 }
             }
 
@@ -140,9 +140,9 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.item = item;
             this._buildSelector(meta, context);
             if (converter) {
-                context.src += 'var ' + item + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta.$source + ');';
+                context.src += 'var ' + item + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di["' + meta.$source + '"]);';
             } else {
-                context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta.$source + ');';
+                context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(di["' + meta.$source + '"]);';
             }
         } else if (meta.$item) {
             context.meta.push('$item');
@@ -309,12 +309,12 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 var typeIndex = Container.getIndex(Container.resolveType(meta[i].$type));
                                 var converter = this.context.storageProvider.fieldConverter.fromDb[type];
                                 if (converter) {
-                                    context.src += 'return self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta[i].$source + ');';
+                                    context.src += 'return self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di["' + meta[i].$source + '"]);';
                                 } else {
-                                    context.src += 'return new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta[i].$source + ');';
+                                    context.src += 'return new (Container.resolveByIndex(' + typeIndex + '))(di["' + meta[i].$source + '"]);';
                                 }
                             } else {
-                                context.src += item + '.' + i + ' = di.' + meta[i].$source + ';';
+                                context.src += item + '.' + i + ' = di["' + meta[i].$source + '"];';
                             }
                             context.src += '};';
                             if (meta[i].$type) context.src += item + '.' + i + ' = fn(di);';
@@ -336,12 +336,12 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             var entityTypeIndex = Container.getIndex(meta.$type);
                             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
                             if (this.providerName && memDef && memDef.converter && memDef.converter[this.providerName] && typeof memDef.converter[this.providerName].fromDb == 'function') {
-                                context.src += item + '.' + i + ' = Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '").converter.' + this.providerName + '.fromDb(di.' + meta[i] + ', Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '"), self.context, Container.resolveByIndex("' + entityTypeIndex + '"));';
+                                context.src += item + '.' + i + ' = Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '").converter.' + this.providerName + '.fromDb(di["' + meta[i] + '"], Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '"), self.context, Container.resolveByIndex("' + entityTypeIndex + '"));';
                             } else if (converter) {
-                                context.src += item + '.' + i + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di.' + meta[i] + ');';
+                                context.src += item + '.' + i + ' = self.context.storageProvider.fieldConverter.fromDb["' + type + '"](di["' + meta[i] + '"]);';
                             } else {
                                 var typeIndex = Container.getIndex(Container.resolveType(type.memberDefinitions.getMember(i).type));
-                                context.src += item + '.' + i + ' = new (Container.resolveByIndex(' + typeIndex + '))(di.' + meta[i] + ');';
+                                context.src += item + '.' + i + ' = new (Container.resolveByIndex(' + typeIndex + '))(di["' + meta[i] + '"]);';
                             }
                         }
                     } else {
@@ -372,7 +372,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
         this.build(meta, context);
         if (context.item) context.src += 'if (typeof result === "undefined") result = ' + context.item + ';';
         context.src += 'return result;';
-        
+
         var fn = new Function('meta', 'data', 'Container', context.src).bind(this);
         var ret = fn(meta, data, Container);
         return ret;
