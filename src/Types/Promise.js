@@ -22,7 +22,7 @@ $data.Class.define('$data.Promise', null, null, {
 $data.Class.define('$data.PromiseHandlerBase', null, null, {
     constructor: function () { },
     createCallback: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         return {
             success: callBack.success,

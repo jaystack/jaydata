@@ -239,7 +239,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
 
     initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var self = this;
 
         this.initializeMemoryStore({
@@ -311,7 +311,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
         });
     },
     initializeMemoryStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var self = this;
 
         if (self.originalContext && self.providerConfiguration.memoryOperations) {
@@ -332,7 +332,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
 
     _initializeStore: function (callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var self = this;
 
 
@@ -438,7 +438,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     },
 
     executeQuery: function (query, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var self = this;
 
         //var compiledQuery = self._compile(query);

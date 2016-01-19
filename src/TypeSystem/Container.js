@@ -1,6 +1,5 @@
 import $data from './initializeJayData.js';
-import Exception from './Exception.js';
-import { Guard } from './utils.js';
+import { Guard, Exception } from 'jaydata-error-handler';
 import { StringFunctions } from './Extensions.js'
 
 
@@ -391,7 +390,7 @@ export function ContainerCtor(parentContainer) {
     this.convertTo = function(value, tType, eType /*if Array*/ , options) {
       Guard.requireValue("typeOrName", tType);
 
-      if (Object.isNullOrUndefined(value))
+      if (Guard.isNullOrUndefined(value))
         return value;
 
       var sourceTypeName = Container.getTypeName(value);

@@ -11,8 +11,7 @@ import Blob from './Types/Blob.js';
 import EdmTypes from './Types/EdmTypes.js';
 import Converter from './Types/Converter.js';
 
-import { Guard as _guard } from './utils.js';
-import _exception from './Exception.js';
+import { Guard as _guard, Exception as _exception } from 'jaydata-error-handler';
 
 export var Guard = _guard;
 $data.Guard = _guard;

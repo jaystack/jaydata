@@ -1,5 +1,5 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
-import jQuery from 'jQuery';
+import jQuery from 'jquery';
 import Handlebars from 'Handlebars'
 
 (function ($data, Handlebars, $) {

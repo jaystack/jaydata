@@ -3,17 +3,17 @@ import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.j
 $data.Class.define('$data.Validation.Defaults', null, null, null, {
     validators: {
         value: {
-            required: function (value, definedValue) { return !Object.isNullOrUndefined(value); },
-            customValidator: function (value, definedValue) { return Object.isNullOrUndefined(value) || typeof definedValue == "function" ? definedValue(value) : true; },
+            required: function (value, definedValue) { return !Guard.isNullOrUndefined(value); },
+            customValidator: function (value, definedValue) { return Guard.isNullOrUndefined(value) || typeof definedValue == "function" ? definedValue(value) : true; },
 
-            minValue: function (value, definedValue) { return Object.isNullOrUndefined(value) || value >= definedValue; },
-            maxValue: function (value, definedValue) { return Object.isNullOrUndefined(value) || value <= definedValue; },
+            minValue: function (value, definedValue) { return Guard.isNullOrUndefined(value) || value >= definedValue; },
+            maxValue: function (value, definedValue) { return Guard.isNullOrUndefined(value) || value <= definedValue; },
 
-            minLength: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length >= definedValue; },
-            maxLength: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length <= definedValue; },
-            length: function (value, definedValue) { return Object.isNullOrUndefined(value) || value.length == definedValue; },
+            minLength: function (value, definedValue) { return Guard.isNullOrUndefined(value) || value.length >= definedValue; },
+            maxLength: function (value, definedValue) { return Guard.isNullOrUndefined(value) || value.length <= definedValue; },
+            length: function (value, definedValue) { return Guard.isNullOrUndefined(value) || value.length == definedValue; },
             regex: function (value, definedValue) {
-                return Object.isNullOrUndefined(value) ||
+                return Guard.isNullOrUndefined(value) ||
                     value.match(typeof definedValue === 'string'
                         ? new RegExp((definedValue.indexOf('/') === 0 && definedValue.lastIndexOf('/') === (definedValue.length - 1)) ? definedValue.slice(1, -1) : definedValue)
                         : definedValue)

@@ -1,6 +1,5 @@
 import $data from './initializeJayData.js';
-import Exception from './Exception.js';
-import { Guard } from './utils.js';
+import { Guard, Exception } from 'jaydata-error-handler';
 import { StringFunctions } from './Extensions.js'
 import {ContainerInstance, ContainerCtor} from './Container.js'
 

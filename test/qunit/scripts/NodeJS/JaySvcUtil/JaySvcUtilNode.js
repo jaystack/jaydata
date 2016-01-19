@@ -8,7 +8,7 @@ $data.Class.define('$data.MetadataLoaderClass', null, null, {
             username = undefined;
             password = undefined;
         }
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
 
         var self = this;
         self._loadXMLDoc(metadataUri, username, password, function (xml) {

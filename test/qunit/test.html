@@ -241,7 +241,7 @@
 
                 operators.orig[op] = base.prototype[op];
                 base.prototype[op] = function () {
-                    var cb = $data.typeSystem.createCallbackSetting(arguments[operator.cbArg]);
+                    var cb = $data.PromiseHandlerBase.createCallbackSettings(arguments[operator.cbArg]);
                     arguments[operator.cbArg] = {};
                     arguments[operator.cbArg].success = checkArgs(cb.success, arguments[operator.tArg]);
                     arguments[operator.cbArg].error = checkArgs(cb.error, arguments[operator.tArg], true);

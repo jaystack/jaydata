@@ -8,7 +8,7 @@ $C('$data.Expressions.ConstantExpression', $data.Expressions.ExpressionNode, nul
 
         this.type = type;
         this.name = name;
-        if (!Object.isNullOrUndefined(this.value)) {
+        if (!Guard.isNullOrUndefined(this.value)) {
             this.type = Container.resolveType(this.type)
             if (Container.resolveType(Container.getTypeName(this.value)) !== this.type)
                 this.value = Container.convertTo(value, this.type);

@@ -32,8 +32,8 @@
         stop(1);
         $data.StorageProviderLoader.load(['indexedDb'], function () {
             start(1);
-            var provider = $data.storageProviders.indexedDb ? 
-                new $data.storageProviders.indexedDb.IndexedDBStorageProvider() : 
+            var provider = $data.storageProviders.indexedDb ?
+                new $data.storageProviders.indexedDb.IndexedDBStorageProvider() :
                 new $data.storageProviders.indexedDbPro.IndexedDBStorageProvider();
 
             ok(provider.indexedDB, "IndexedDB interface found");
@@ -739,7 +739,7 @@
     });
 
     test('indexed_db_simple_tests', function () {
-        
+
         var context = new idbexample.idbContext({
             name: 'indexedDb',
             databaseName: 'idbexample_idbContext1',
@@ -781,7 +781,7 @@
                     //    });
                     //}); return;
                     subQuery = context.Items2.filter("it.i0<10").select(function (item) { return item.i0; });
-                    $.when(
+                    Promise.all([
                             context.Items1.filter(function (item) { return item.i0 == this.a; }, { a: 40 }).toArray(function (result) {
                                 equal(result.length, 1, "param query result legth");
                                 equal(result[0].i0, 40, "item id error");
@@ -874,7 +874,7 @@
                                 equal(result[0].i0, 7, "skip - take filter, id error");
                                 equal(result[1].i0, 8, "skip - take filter, id error");
                             }),
-                            
+
                             context.Items1.filter("it.i0<10 && it.i0>=5").orderBy("it.s0").toArray(function (result) {
                                 equal(result.length, 5, "orderBy filter, result count error");
                                 equal(result[0].i0, 9, "orderBy filter, id error");
@@ -928,7 +928,7 @@
                             context.Items2.filter("(it.Id == this.i && it.i0==500) || (it.i0 == 500 && it.i0 != 501)", { i: item2_500_guid }).toArray(function (result) {
                                 equal(result.length, 1, "multiple key, result length");
                             })
-                    ).then(function () {
+                    ]).then(function () {
                         close(context);
                     }).fail(function () {
                         ok(false, JSON.stringify(arguments));

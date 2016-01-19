@@ -59,7 +59,7 @@ $data.Class.define('$example.Context', $data.EntityContext, null, {
 });
 
 $example.Context.deleteData = function (ctx, callback) {
-    callback = $data.typeSystem.createCallbackSetting(callback);
+    callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
 
     ctx.onReady(function () {
         ctx.People.toArray(function (p) {

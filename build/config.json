@@ -96,7 +96,9 @@
             "require": ["./src/JayDataModules/angular.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "angular.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "errorhandlermodule",
@@ -104,7 +106,9 @@
             "require": ["./src/JayDataModules/errorhandler.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "errorhandler.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "formbindermodule",
@@ -112,7 +116,9 @@
             "require": ["./src/JayDataModules/formBinder.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "formBinder.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "handlebarsmodule",
@@ -120,7 +126,9 @@
             "require": ["./src/JayDataModules/handlebars.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "handlebars.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "inmemorymodule",
@@ -128,7 +136,9 @@
             "require": ["./src/JayDataModules/inMemory.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "inMemory.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "mscrmclientmodule",
@@ -136,7 +146,9 @@
             "require": ["./src/JayDataModules/jaydata.mscrm.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "jaydata.mscrm.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
 
 
@@ -146,7 +158,9 @@
             "require": ["./src/JayDataModules/kendo.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "kendo.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "knockoutmodule",
@@ -154,7 +168,19 @@
             "require": ["./src/JayDataModules/knockout.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "knockout.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
+        },
+        {
+            "taskName": "deferredmodule",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/JayDataModules/deferred.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "destFile": "deferred.js",
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "qdeferredmodule",
@@ -162,7 +188,9 @@
             "require": ["./src/JayDataModules/qDeferred.js", { "entry": true }],
             "external": ["jaydata/core", "q"],
             "destFile": "qDeferred.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "senchamodule",
@@ -170,7 +198,9 @@
             "require": ["./src/JayDataModules/sencha.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "sencha.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "templatemodule",
@@ -178,7 +208,9 @@
             "require": ["./src/JayDataModules/template.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "template.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "validatemodule",
@@ -186,13 +218,15 @@
             "require": ["./src/JayDataModules/validate.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "validate.js",
-            "destFolder": "./dist/public/jaydatamodules"
+            "destFolder": "./dist/public/jaydatamodules",
+            "header": "./build/jaydata-dep-header.js",
+            "footer": "./build/jaydata-dep-footer.js"
         },
         {
             "taskName": "jaydatamodules",
             "dependencies": ["angularmodule", "errorhandlermodule", "formbindermodule",
               "handlebarsmodule", "inmemorymodule", "mscrmclientmodule", "kendomodule", "knockoutmodule",
-              "qdeferredmodule", "senchamodule", "templatemodule", "validatemodule"]
+              "qdeferredmodule", "deferredmodule", "senchamodule", "templatemodule", "validatemodule"]
         },
         {
             "taskName": "bundle",

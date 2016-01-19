@@ -38,7 +38,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
         Guard.raise("Pure class");
     },
     loadRawData: function (tableName, callBack) {
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         callBack.error(new Exception('loadRawData is not supported', 'Invalid Operation'));
     },
 

@@ -15,7 +15,7 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
             resultSkipFirstLevel: true
         }, cfg);
         this.initializeStore = function (callBack) {
-            callBack = $data.typeSystem.createCallbackSetting(callBack);
+            callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
             callBack.success(this.context);
         };
 
@@ -88,7 +88,7 @@ $data.Class.define('$data.storageProviders.YQL.YQLProvider', $data.StorageProvid
     fieldConverter: { value: $data.YQLConverter },
     executeQuery: function (query, callBack) {
         var self = this;
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var schema = query.defaultType;
         var entitSetDefinition = query.context.getType().memberDefinitions.asArray().filter(function (m) { return m.elementType == schema })[0] || {};
         var ctx = this.context;

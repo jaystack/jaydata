@@ -148,7 +148,7 @@ $data.Class.define('$data.EntityContext', null, null,
         }
         var i = 0, providerType;
         var providerList = [].concat(storageProviderCfg.name);
-        var callBack = $data.typeSystem.createCallbackSetting({ success: this._successInitProvider, error: this._successInitProvider });
+        var callBack = $data.PromiseHandlerBase.createCallbackSettings({ success: this._successInitProvider, error: this._successInitProvider });
 
         this._initStorageModelSync();
         ctx._initializeEntitySets(ctx.getType());
@@ -225,7 +225,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var isWrite = false;
 
         function readParam(value) {
-            if (Object.isNullOrUndefined(value)) return;
+            if (Guard.isNullOrUndefined(value)) return;
 
             if (typeof value === 'boolean') {
                 isWrite = value;
@@ -243,7 +243,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var pHandler = new $data.PromiseHandler();
         callBack = pHandler.createCallback(callBack);
 
-        //callBack = $data.typeSystem.createCallbackSetting(callBack);
+        //callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         this.storageProvider._beginTran(tables, isWrite, callBack);
 
         return pHandler.getPromise();
@@ -387,19 +387,19 @@ $data.Class.define('$data.EntityContext', null, null,
 
                 var memDefResolvedDataType = Container.resolveType(memDef.dataType);
 
-                if (((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1) || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum))) 
-                    && Object.isNullOrUndefined(memDef.inverseProperty)) 
+                if (((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1) || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)))
+                    && Guard.isNullOrUndefined(memDef.inverseProperty))
                 {
                     //copy member definition
                     var t = JSON.parse(JSON.stringify(memDef));
                     //change datatype to resolved type
                     t.dataType = memDefResolvedDataType;
                     dbEntityInstanceDefinition[memDef.name] = t;
-                    
+
                     if(memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)){
                          this._build_EnumDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef)
                     }
-                    
+
                     continue;
                 }
 
@@ -654,16 +654,16 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _build_EnumDefinition: function (dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef) {
         storageModel.Enums.push(memDefResolvedDataType);
-        
+
         var typeName = Container.resolveName(memDefResolvedDataType);
         var converterGroups = this.storageProvider.fieldConverter;
-        
+
         var createEnumConverter = function(converterGroup){
             converterGroup[typeName] = function(value){
                 return converterGroup["$data.Enum"].call(this, value, memDefResolvedDataType);
             }
         }
-        
+
         for (var i in converterGroups) {
             if (!converterGroups[i][typeName] && converterGroups[i]["$data.Enum"]) {
                 createEnumConverter(converterGroups[i])
@@ -757,7 +757,7 @@ $data.Class.define('$data.EntityContext', null, null,
         query.transaction = transaction instanceof $data.Transaction ? transaction : undefined;
         var returnTransaction = this._isReturnTransaction(transaction);
 
-        callBack = $data.typeSystem.createCallbackSetting(callBack);
+        callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
         var that = this;
         var clbWrapper = {};
         clbWrapper.success = that.executeQuerySuccess(that, returnTransaction, callBack);
@@ -1983,7 +1983,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var fieldName = typeof member === 'string' ? member : member.name;
             if (entity instanceof $data.Entity) {
                 entitySet = this.getEntitySetFromElementType(entity.getType());
-            } else if (!Object.isNullOrUndefined(entity) && entity.constructor !== $data.Object) { //just a single key
+            } else if (!Guard.isNullOrUndefined(entity) && entity.constructor !== $data.Object) { //just a single key
                 var keyDef = entitySet.elementType.memberDefinitions.getKeyProperties()[0];
                 var key = {};
                 key[keyDef.name] = entity;

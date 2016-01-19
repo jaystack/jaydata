@@ -9,11 +9,11 @@ $data.Class.define('$data.dbClient.sqLiteNJClient.SqLiteNjCommand', $data.dbClie
     },
     executeNonQuery: function (callback) {
         // TODO
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
         this.exec(this.query, this.parameters, callback.success, callback.error);
     },
     executeQuery: function (callback) {
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
         this.exec(this.query, this.parameters, callback.success, callback.error);
     },
     exec: function (query, parameters, callback, errorhandler) {

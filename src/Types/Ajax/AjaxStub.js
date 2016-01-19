@@ -2,7 +2,7 @@ import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.j
 
 $data.ajax = $data.ajax || function () {
     var cfg = arguments[arguments.length - 1];
-    var clb = $data.typeSystem.createCallbackSetting(cfg);
+    var clb = $data.PromiseHandlerBase.createCallbackSettings(cfg);
     clb.error("Not implemented");
 };
 

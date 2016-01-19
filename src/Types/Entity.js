@@ -375,7 +375,7 @@ $data.Entity = $data.Class.define("$data.Entity", null, null, {
         /// </param>
         /// <returns>value associated for [i]memberDefinition[/i]</returns>
 
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
         if (this[memberDefinition.name] != undefined) {
             if (tran instanceof $data.Transaction)
                 callback.success(this[memberDefinition.name], tran);
@@ -409,7 +409,7 @@ $data.Entity = $data.Class.define("$data.Entity", null, null, {
         /// <param name="callback" type="Function">done</param>
         this[memberDefinition.name] = value;
 
-        //callback = $data.typeSystem.createCallbackSetting(callback);
+        //callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
         var pHandler = new $data.PromiseHandler();
         callback = pHandler.createCallback(callback);
         callback.success(this[memberDefinition.name]);
@@ -584,7 +584,7 @@ $data.Entity = $data.Class.define("$data.Entity", null, null, {
     },
 
     'from$data.Object': function (value, type, t, options) {
-        if (!Object.isNullOrUndefined(value)) {
+        if (!Guard.isNullOrUndefined(value)) {
             var newInstanceOptions;
             if (options && options.converters) {
                 newInstanceOptions = {

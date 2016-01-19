@@ -27,8 +27,11 @@
     "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "odata-metadata": "^0.1.0",
     "jaydata-odatajs": "^4.0.0",
+    "jaydata-error-handler": "^0.0.1",
+    "jaydata-promise-handler": "^0.0.1",
+    "jaydata-dynamic-metadata": "^0.0.3",
+    "odata-metadata": "^0.1.0",
     "xmldom": "^0.1.19"
   },
   "contributors": [
@@ -115,15 +118,10 @@
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^3.31.0"
   },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
-  },
   "browserify-shim": {
     "atob": "global:atob",
     "btoa": "global:btoa",
-    "jQuery": "global:jQuery",
+    "jquery": "global:jQuery",
     "jaydata-odatajs": "global:odatajs",
     "angular": "global:angular",
     "Handlebars": "global:Handlebars",

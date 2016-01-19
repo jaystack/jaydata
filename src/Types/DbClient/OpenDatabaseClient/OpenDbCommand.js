@@ -8,11 +8,11 @@ $data.Class.define('$data.dbClient.openDatabaseClient.OpenDbCommand', $data.dbCl
         this.parameters = params;
     },
     executeNonQuery: function (callback, tran, isWrite) {
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
         this.exec(this.query, this.parameters, callback.success, callback.error, tran, isWrite);
     },
     executeQuery: function (callback, tran, isWrite) {
-        callback = $data.typeSystem.createCallbackSetting(callback);
+        callback = $data.PromiseHandlerBase.createCallbackSettings(callback);
         this.exec(this.query, this.parameters, callback.success, callback.error, tran, isWrite);
     },
     exec: function (query, parameters, callback, errorhandler, transaction, isWrite) {

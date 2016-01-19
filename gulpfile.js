@@ -263,7 +263,7 @@ for (var i = 0; i < config.components.length; i++) {
 
 function gulpTask(td, config){
     td.browserify.debug = true;
-    var task = browserify(td.browserify).transform(babelify.configure({
+    var task = browserify(td.browserify).transform({ global: true }, 'browserify-shim').transform(babelify.configure({
         compact: false,
         presets: ["es2015"],
         plugins: ["add-module-exports"]

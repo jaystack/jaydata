@@ -1,6 +1,5 @@
 import $data from '../TypeSystem.js'
-import Exception from '../Exception.js';
-import { Guard } from '../utils.js';
+import { Guard, Exception } from 'jaydata-error-handler';
 
 /* $data.Geometry */
 $data.GeometryBase = function GeometryBase() {
