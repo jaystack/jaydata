@@ -2,7 +2,7 @@ function T4_CrossProviderTests() {
 
     //oData
     ComplexTypeTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables}, 'oDataV4');
-    LiveArrayTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+    //LiveArrayTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
     BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
     //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
 
@@ -46,8 +46,8 @@ function _finishCb(context) {
 
 ComplexTypeTests = function ComplexTypeTests(providerConfig, msg) {
     if (typeof module == 'function') module("ComplexTypeTests_" + (msg || ''));
-    
-    
+
+
     if(providerConfig.name !== "oData"){
         test("Save and load complex values", 5*7+1, function () {
             stop();
