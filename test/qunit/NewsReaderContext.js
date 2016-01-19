@@ -10,7 +10,7 @@ $data.Class.define("$news.Types.Article", $data.Entity, null, {
     Title: { type: "string" },
     Lead: { type: "string" },
     Body: { type: "string" },
-    CreateDate: { type: "datetime" },
+    CreateDate: { type: "datetimeoffset" },
     Thumbnail_LowRes: { type: "blob" },
     Thumbnail_HighRes: { type: "blob" },
     Category: { type: "$news.Types.Category", inverseProperty: "Articles" },
@@ -44,7 +44,7 @@ $data.Class.define("$news.Types.UserProfile", $data.Entity, null, {
     Bio: { type: "string" },
     Avatar: { type: "blob" },
     Location: { type: "$news.Types.Location" },
-    Birthday: { type: "date" },
+    Birthday: { type: "datetimeoffset" },
     User: { type: "$news.Types.User", inverseProperty: "Profile", required: true }
 }, null);
 $data.Class.define("$news.Types.Location", $data.Entity, null, {
@@ -60,7 +60,7 @@ $data.Class.define("$news.Types.TestItem", $data.Entity, null, {
     s0: { type: "string" },
     blob: { type: "blob" },
     n0: { type: "number" },
-    d0: { type: "date" },
+    d0: { type: "datetimeoffset" },
     Tags: { type: 'Array', elementType: '$news.Types.Tag', inverseProperty: '$$unbound' },
     User: { type: '$news.Types.User', inverseProperty: '$$unbound' }
 }, null);
@@ -119,12 +119,21 @@ $data.Class.define("$news.Types.NewsContext", $data.EntityContext, null, {
 
 $news.Types.NewsContext.generateTestData = function (context, callBack) {
 
-    var usr1 = new $news.Types.User({ LoginName: "Usr1", Email: "usr1@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name", Bio: "Bio1", Birthday: new Date(Date.parse("1975/01/01")), Location: new $news.Types.Location({ Zip: 2840, City: 'City1', Address: 'Address6', Country: 'Country1' }) }) });
-    var usr2 = new $news.Types.User({ LoginName: "Usr2", Email: "usr2@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name", Bio: "Bio2", Birthday: new Date(Date.parse("1976/02/01")), Location: new $news.Types.Location({ Zip: 1117, City: 'City2', Address: 'Address7', Country: 'Country2' }) }) });
-    var usr3 = new $news.Types.User({ LoginName: "Usr3", Email: "usr3@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name1", Bio: "Bio3", Birthday: new Date(Date.parse("1977/03/01")), Location: new $news.Types.Location({ Zip: 1115, City: 'City3', Address: 'Address8', Country: 'Country3' }) }) });
-    var usr4 = new $news.Types.User({ LoginName: "Usr4", Email: "usr4@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name1", Bio: "Bio4", Birthday: new Date(Date.parse("1978/04/01")), Location: new $news.Types.Location({ Zip: 1211, City: 'City4', Address: 'Address9', Country: 'Country4' }) }) });
-    var usr5 = new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com", Profile: new $news.Types.UserProfile({ FullName: "Full Name2", Bio: "Bio5", Birthday: new Date(Date.parse("1979/05/01")), Location: new $news.Types.Location({ Zip: 3451, City: 'City5', Address: 'Address0', Country: 'Country5' }) }) });
-    var usr6 = new $news.Types.User({ LoginName: "StartsWithTest", Email: "swt@company.com", Profile: new $news.Types.UserProfile({ FullName: "Starts With Test", Bio: "Bio6", Birthday: new Date(Date.parse("1980/06/01")), Location: new $news.Types.Location({ Zip: 8475, City: 'City6', Address: 'Address7', Country: 'Country8' }) }) });
+    var userProfiles = [
+        new $news.Types.UserProfile({ FullName: "Full Name", Bio: "Bio1", Birthday: new Date(Date.parse("1975/01/01")), Location: new $news.Types.Location({ Zip: 2840, City: 'City1', Address: 'Address6', Country: 'Country1' }) }),
+        new $news.Types.UserProfile({ FullName: "Full Name", Bio: "Bio2", Birthday: new Date(Date.parse("1976/02/01")), Location: new $news.Types.Location({ Zip: 1117, City: 'City2', Address: 'Address7', Country: 'Country2' }) }),
+        new $news.Types.UserProfile({ FullName: "Full Name1", Bio: "Bio3", Birthday: new Date(Date.parse("1977/03/01")), Location: new $news.Types.Location({ Zip: 1115, City: 'City3', Address: 'Address8', Country: 'Country3' }) }),
+        new $news.Types.UserProfile({ FullName: "Full Name1", Bio: "Bio4", Birthday: new Date(Date.parse("1978/04/01")), Location: new $news.Types.Location({ Zip: 1211, City: 'City4', Address: 'Address9', Country: 'Country4' }) }),
+        new $news.Types.UserProfile({ FullName: "Full Name2", Bio: "Bio5", Birthday: new Date(Date.parse("1979/05/01")), Location: new $news.Types.Location({ Zip: 3451, City: 'City5', Address: 'Address0', Country: 'Country5' }) }),
+        new $news.Types.UserProfile({ FullName: "Starts With Test", Bio: "Bio6", Birthday: new Date(Date.parse("1980/06/01")), Location: new $news.Types.Location({ Zip: 8475, City: 'City6', Address: 'Address7', Country: 'Country8' }) }),
+    ];
+
+    var usr1 = new $news.Types.User({ LoginName: "Usr1", Email: "usr1@company.com" });
+    var usr2 = new $news.Types.User({ LoginName: "Usr2", Email: "usr2@company.com" });
+    var usr3 = new $news.Types.User({ LoginName: "Usr3", Email: "usr3@company.com" });
+    var usr4 = new $news.Types.User({ LoginName: "Usr4", Email: "usr4@company.com" });
+    var usr5 = new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com" });
+    var usr6 = new $news.Types.User({ LoginName: "StartsWithTest", Email: "swt@company.com" });
     var cat1 = new $news.Types.Category({ Title: "Sport" });
     var cat2 = new $news.Types.Category({ Title: "World" });
     var cat3 = new $news.Types.Category({ Title: "Politics" });
@@ -181,12 +190,27 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
     //}
     //console.log("Original");
     //console.log(Date());
+    
+    
+    if(context.storageProvider.name !== 'oData'){
+        usr1.Profile = userProfiles[0]
+        usr2.Profile = userProfiles[1]
+        usr3.Profile = userProfiles[2]
+        usr4.Profile = userProfiles[3]
+        usr5.Profile = userProfiles[4]
+        usr6.Profile = userProfiles[5]
+    }
+    
+    
+    
     context.saveChanges({
         success: function (count) {
-            console.log("Success upload testdb for: " + count + " items");
-            if (callBack) {
-                callBack(count);
-            }
+            if(context.storageProvider.name !== 'oData'){
+                console.log("Success upload testdb for: " + count + " items");
+                if (callBack) {
+                    callBack(count);
+                }
+            
             //    console.log(Date());
             //    for (var t = 0; t < 50000; t++) {
             //        $news.context.Users.add(new $news.Types.User({ LoginName: "Usr5", Email: "usr5@company.com", Profile: null }));
@@ -196,6 +220,31 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
             //    $news.context.saveChanges(function () {
             //        console.log("END: " + Date());
             //    });
+            
+            } else {
+                userProfiles[0].Id = usr1.Id
+                userProfiles[1].Id = usr2.Id
+                userProfiles[2].Id = usr3.Id
+                userProfiles[3].Id = usr4.Id
+                userProfiles[4].Id = usr5.Id
+                userProfiles[5].Id = usr6.Id
+                
+                context.UserProfiles.addMany(userProfiles);
+
+                context.saveChanges({
+                    success: function(count2){
+                        count += count2;
+                        
+                        console.log("Success upload testdb for: " + count + " items");
+                        if (callBack) {
+                            callBack(count);
+                        }
+                    },
+                    error:  function () {
+                        console.log("Generate test data ERROR: ", arguments);
+                    }
+                })
+            }
         },
         error: function () {
             console.log("Generate test data ERROR: ", arguments);

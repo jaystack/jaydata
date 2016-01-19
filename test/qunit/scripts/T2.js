@@ -14,6 +14,12 @@
     //T3_oDataV3({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
     //T3WebapiBugfix({ name: "oData", databaseName: 'T1', maxDataServiceVersion: '3.0', oDataServiceHost: "/odata", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_oDataV3');
 
+    EntityContextTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+    T3({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+    T3_oDataV3({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+    //T3WebapiBugfix({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+
+
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
 		EntityContextTests({ name: "sqLite", databaseName: 'T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');
 		T3({ name: "sqLite", databaseName: 'T1', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, '_Web_SQL');

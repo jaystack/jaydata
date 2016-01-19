@@ -1,10 +1,10 @@
 function T4_CrossProviderTests() {
 
     //oData
-    //ComplexTypeTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
-    //LiveArrayTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
-    //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReader.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oData');
-    //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "/Services/emptyNewsReaderV3.svc", serviceUrl: '/Services/oDataDbDelete.asmx', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
+    ComplexTypeTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables}, 'oDataV4');
+    LiveArrayTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+    BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
+    //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
 
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
@@ -46,210 +46,213 @@ function _finishCb(context) {
 
 ComplexTypeTests = function ComplexTypeTests(providerConfig, msg) {
     if (typeof module == 'function') module("ComplexTypeTests_" + (msg || ''));
+    
+    
+    if(providerConfig.name !== "oData"){
+        test("Save and load complex values", 5*7+1, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
-    test("Save and load complex values", 5*7+1, function () {
-        stop();
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                for (var i = 0; i < 5; i++) {
+                    context.UserProfiles.add(new $news.Types.UserProfile({
+                        FullName: 'FullName_' + i,
+                        Birthday: new Date(),
+                        Location: new $news.Types.Location({
+                            Address: 'Address' + i,
+                            Zip: 1000 * (i + 1),
+                            Country: 'Country' + i,
+                            City: 'City' + i
+                        }),
+                        User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
+                    }));
+                }
 
-            for (var i = 0; i < 5; i++) {
-                context.UserProfiles.add(new $news.Types.UserProfile({
-                    FullName: 'FullName_' + i,
-                    Birthday: new Date(),
-                    Location: new $news.Types.Location({
-                        Address: 'Address' + i,
-                        Zip: 1000 * (i + 1),
-                        Country: 'Country' + i,
-                        City: 'City' + i
-                    }),
-                    User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
-                }));
-            }
+                context.saveChanges(function () {
+                    context.UserProfiles.toArray(function (res) {
+                        equal(res.length, 5, 'result count');
 
-            context.saveChanges(function () {
-                context.UserProfiles.toArray(function (res) {
-                    equal(res.length, 5, 'result count');
+                        for (var i = 0; i < 5; i++) {
+                            equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
+                            equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
 
-                    for (var i = 0; i < 5; i++) {
-                        equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
-                        equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
+                            equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
+                            equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
+                            equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
+                            equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
+                            equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
+                        }
 
-                        equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
-                        equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
-                        equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
-                        equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
-                        equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
-                    }
-
-                    _finishCb(context);
+                        _finishCb(context);
+                    });
                 });
             });
+
         });
 
-    });
+        test("Map complex values", 5 * 7 + 1, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
-    test("Map complex values", 5 * 7 + 1, function () {
-        stop();
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                for (var i = 0; i < 5; i++) {
+                    context.UserProfiles.add(new $news.Types.UserProfile({
+                        FullName: 'FullName_' + i,
+                        Birthday: new Date(),
+                        Location: new $news.Types.Location({
+                            Address: 'Address' + i,
+                            Zip: 1000 * (i + 1),
+                            Country: 'Country' + i,
+                            City: 'City' + i
+                        }),
+                        User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
+                    }));
+                }
 
-            for (var i = 0; i < 5; i++) {
-                context.UserProfiles.add(new $news.Types.UserProfile({
-                    FullName: 'FullName_' + i,
-                    Birthday: new Date(),
-                    Location: new $news.Types.Location({
-                        Address: 'Address' + i,
-                        Zip: 1000 * (i + 1),
-                        Country: 'Country' + i,
-                        City: 'City' + i
-                    }),
-                    User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
-                }));
-            }
+                context.saveChanges(function () {
+                    context.UserProfiles.map(function (it) { return { Location: it.Location } }).toArray(function (res) {
+                        equal(res.length, 5, 'result count');
 
-            context.saveChanges(function () {
-                context.UserProfiles.map(function (it) { return { Location: it.Location } }).toArray(function (res) {
-                    equal(res.length, 5, 'result count');
+                        for (var i = 0; i < 5; i++) {
+                            equal(res[i] instanceof $news.Types.UserProfile, false, 'item is UserProfile');
+                            ok(res[i].FullName === undefined, 'item[i].FullName is string');
 
-                    for (var i = 0; i < 5; i++) {
-                        equal(res[i] instanceof $news.Types.UserProfile, false, 'item is UserProfile');
-                        ok(res[i].FullName === undefined, 'item[i].FullName is string');
+                            equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
+                            equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
+                            equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
+                            equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
+                            equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
+                        }
 
-                        equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
-                        equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
-                        equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
-                        equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
-                        equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
-                    }
-
-                    _finishCb(context);
+                        _finishCb(context);
+                    });
                 });
             });
+
         });
 
-    });
+        test("filter Complex value", 5 * 7 + 1, function () {
+            if (typeof $data.storageProviders.IndexedDBPro !== undefined && msg === 'indexedDb') { expect(1); ok(true, 'not supported'); return; }
 
-    test("filter Complex value", 5 * 7 + 1, function () {
-        if (typeof $data.storageProviders.IndexedDBPro !== undefined && msg === 'indexedDb') { expect(1); ok(true, 'not supported'); return; }
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
-        stop();
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                for (var i = 0; i < 5; i++) {
+                    context.UserProfiles.add(new $news.Types.UserProfile({
+                        FullName: 'FullName_' + i,
+                        Birthday: new Date(),
+                        Location: new $news.Types.Location({
+                            Address: 'Address' + i,
+                            Zip: 1000 * (i + 1),
+                            Country: 'Country' + i,
+                            City: 'City' + i
+                        }),
+                        User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
+                    }));
+                }
 
-            for (var i = 0; i < 5; i++) {
-                context.UserProfiles.add(new $news.Types.UserProfile({
-                    FullName: 'FullName_' + i,
-                    Birthday: new Date(),
-                    Location: new $news.Types.Location({
-                        Address: 'Address' + i,
-                        Zip: 1000 * (i + 1),
-                        Country: 'Country' + i,
-                        City: 'City' + i
-                    }),
-                    User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
-                }));
-            }
+                context.saveChanges(function () {
+                    context.UserProfiles.filter(function (it) { return it.Location.Address.contains('Address') }).toArray(function (res) {
+                        equal(res.length, 5, 'result count');
 
-            context.saveChanges(function () {
-                context.UserProfiles.filter(function (it) { return it.Location.Address.contains('Address') }).toArray(function (res) {
-                    equal(res.length, 5, 'result count');
+                        for (var i = 0; i < 5; i++) {
+                            equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
+                            equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
 
-                    for (var i = 0; i < 5; i++) {
-                        equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
-                        equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
+                            equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
+                            equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
+                            equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
+                            equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
+                            equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
+                        }
 
-                        equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
-                        equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
-                        equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
-                        equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
-                        equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
-                    }
-
-                    _finishCb(context);
+                        _finishCb(context);
+                    });
                 });
             });
+
         });
 
-    });
+        test("filter Complex value 2", 5 * 7 + 1, function () {
+            if (typeof $data.storageProviders.IndexedDBPro !== undefined && msg === 'indexedDb') { expect(1); ok(true, 'not supported'); return; }
 
-    test("filter Complex value 2", 5 * 7 + 1, function () {
-        if (typeof $data.storageProviders.IndexedDBPro !== undefined && msg === 'indexedDb') { expect(1); ok(true, 'not supported'); return; }
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
-        stop();
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                for (var i = 0; i < 5; i++) {
+                    context.UserProfiles.add(new $news.Types.UserProfile({
+                        FullName: 'FullName_' + i,
+                        Birthday: new Date(),
+                        Location: new $news.Types.Location({
+                            Address: 'Address' + i,
+                            Zip: 1000 * (i + 1),
+                            Country: 'Country' + i,
+                            City: 'City' + i
+                        }),
+                        User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
+                    }));
+                }
 
-            for (var i = 0; i < 5; i++) {
-                context.UserProfiles.add(new $news.Types.UserProfile({
-                    FullName: 'FullName_' + i,
-                    Birthday: new Date(),
-                    Location: new $news.Types.Location({
-                        Address: 'Address' + i,
-                        Zip: 1000 * (i + 1),
-                        Country: 'Country' + i,
-                        City: 'City' + i
-                    }),
-                    User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
-                }));
-            }
+                context.saveChanges(function () {
+                    context.UserProfiles.filter(function (it) { return it.Location.Address.contains('Address') && it.Location.Zip < 9999 }).toArray(function (res) {
+                        equal(res.length, 5, 'result count');
 
-            context.saveChanges(function () {
-                context.UserProfiles.filter(function (it) { return it.Location.Address.contains('Address') && it.Location.Zip < 9999 }).toArray(function (res) {
-                    equal(res.length, 5, 'result count');
+                        for (var i = 0; i < 5; i++) {
+                            equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
+                            equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
 
-                    for (var i = 0; i < 5; i++) {
-                        equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
-                        equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
+                            equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
+                            equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
+                            equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
+                            equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
+                            equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
+                        }
 
-                        equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
-                        equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
-                        equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
-                        equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
-                        equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
-                    }
-
-                    _finishCb(context);
+                        _finishCb(context);
+                    });
                 });
             });
+
         });
 
-    });
+        test("filter string values", 5 * 7 + 1, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
-    test("filter string values", 5 * 7 + 1, function () {
-        stop();
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                for (var i = 0; i < 5; i++) {
+                    context.UserProfiles.add(new $news.Types.UserProfile({
+                        FullName: 'FullName_' + i,
+                        Birthday: new Date(),
+                        Location: new $news.Types.Location({
+                            Address: 'Address' + i,
+                            Zip: 1000 * (i + 1),
+                            Country: 'Country' + i,
+                            City: 'City' + i
+                        }),
+                        User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
+                    }));
+                }
 
-            for (var i = 0; i < 5; i++) {
-                context.UserProfiles.add(new $news.Types.UserProfile({
-                    FullName: 'FullName_' + i,
-                    Birthday: new Date(),
-                    Location: new $news.Types.Location({
-                        Address: 'Address' + i,
-                        Zip: 1000 * (i + 1),
-                        Country: 'Country' + i,
-                        City: 'City' + i
-                    }),
-                    User: new $news.Types.User({ Email: 'email', LoginName: 'login' + i })
-                }));
-            }
+                context.saveChanges(function () {
+                    context.UserProfiles.filter(function (it) { return it.FullName.contains('Full') == true }).toArray(function (res) {
+                        equal(res.length, 5, 'result count');
 
-            context.saveChanges(function () {
-                context.UserProfiles.filter(function (it) { return it.FullName.contains('Full') == true }).toArray(function (res) {
-                    equal(res.length, 5, 'result count');
+                        for (var i = 0; i < 5; i++) {
+                            equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
+                            equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
 
-                    for (var i = 0; i < 5; i++) {
-                        equal(res[i] instanceof $news.Types.UserProfile, true, 'item is UserProfile');
-                        equal(res[i].FullName, 'FullName_' + i, 'item[i].FullName is string');
+                            equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
+                            equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
+                            equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
+                            equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
+                            equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
+                        }
 
-                        equal(res[i].Location instanceof $news.Types.Location, true, 'item is UserProfile');
-                        equal(res[i].Location.Address, 'Address' + i, 'item[i].Location.Address is string');
-                        equal(res[i].Location.Zip, 1000 * (i + 1), 'item[i].Location.Zip is string');
-                        equal(res[i].Location.Country, 'Country' + i, 'item[i].Location.Country is string');
-                        equal(res[i].Location.City, 'City' + i, 'item[i].Location.City is string');
-                    }
-
-                    _finishCb(context);
+                        _finishCb(context);
+                    });
                 });
             });
-        });
 
-    });
+        });
+    }
 
     test("orderby with null field Value", 5 * 2 + 1, function () {
         stop();
@@ -311,35 +314,37 @@ ComplexTypeTests = function ComplexTypeTests(providerConfig, msg) {
 
     });
 
-    test("orderbyDESC orderbyASC", 5 * 4*2 + 1, function () {
-        stop();
-        (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+    if(providerConfig.name !== "oData"){
+        test("orderbyDESC orderbyASC", 5 * 4*2 + 1, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
 
-            for (var i = 0; i < 5; i++) {
-                context.TestTable2.add({ Id: $data.createGuid(), i0: 1, s0: 'value' + i });
-                context.TestTable2.add({ Id: $data.createGuid(), i0: 1, s0: 'value' + i });
-                context.TestTable2.add({ Id: $data.createGuid(), i0: 2, s0: 'value' + i });
-                context.TestTable2.add({ Id: $data.createGuid(), i0: 2, s0: 'value' + i });
-            }
+                for (var i = 0; i < 5; i++) {
+                    context.TestTable2.add({ Id: $data.createGuid(), i0: 1, s0: 'value' + i });
+                    context.TestTable2.add({ Id: $data.createGuid(), i0: 1, s0: 'value' + i });
+                    context.TestTable2.add({ Id: $data.createGuid(), i0: 2, s0: 'value' + i });
+                    context.TestTable2.add({ Id: $data.createGuid(), i0: 2, s0: 'value' + i });
+                }
 
-            context.saveChanges(function () {
-                context.TestTable2.orderByDescending('it.i0').orderBy('it.s0').toArray(function (res) {
-                    equal(res.length, 20, 'result count');
+                context.saveChanges(function () {
+                    context.TestTable2.orderByDescending('it.i0').orderBy('it.s0').toArray(function (res) {
+                        equal(res.length, 20, 'result count');
 
-                    for (var i = 0; i < res.length; i++) {
-                        var i0 = i < 10 ? 2 : 1;
-                        equal(res[i].i0, i0, 'i0: ' + i0);
-                        var s0 = 'value' + Math.floor((i > 9 ? (i - 10) : i) / 2);
-                        equal(res[i].s0, s0, 's0: ' + s0);
+                        for (var i = 0; i < res.length; i++) {
+                            var i0 = i < 10 ? 2 : 1;
+                            equal(res[i].i0, i0, 'i0: ' + i0);
+                            var s0 = 'value' + Math.floor((i > 9 ? (i - 10) : i) / 2);
+                            equal(res[i].s0, s0, 's0: ' + s0);
 
-                    }
+                        }
 
-                    _finishCb(context);
+                        _finishCb(context);
+                    });
                 });
             });
-        });
 
-    });
+        });
+    }
 };
 
 function EntityContextOnUpdateTests(providerConfig, msg) {

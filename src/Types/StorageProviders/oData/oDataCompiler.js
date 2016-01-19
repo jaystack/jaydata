@@ -240,7 +240,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             var compiler = new $data.storageProviders.oData.oDataCompiler();
             var compiled = compiler.compile(queryable);
             context.postData.__batchRequests.push({
-                requestUri: compiled.queryText,
+                requestUri: this.provider.providerConfiguration.oDataServiceHost + compiled.queryText,
                 method: compiled.method,
                 data: compiled.data,
                 headers: compiled.headers
