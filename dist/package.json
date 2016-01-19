@@ -32,8 +32,13 @@
       "acorn": "^2.6.4",
       "atob": "^2.0.0",
       "btoa": "^1.1.2",
+      "dot": "^1.0.3",
+      "jaydata-odatajs": "^4.0.0",
+      "jaydata-error-handler": "^0.0.1",
+      "jaydata-promise-handler": "^0.0.1",
+      "jaydata-dynamic-metadata": "^0.0.2",
       "odata-metadata": "^0.1.0",
-      "jaydata-odatajs": "^4.0.0"
+      "xmldom": "^0.1.19"
   },
   "contributors": [
     {
