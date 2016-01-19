@@ -127,7 +127,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                             builder.addKeyField(prop.name);
                         }
                         if (prop.concurrencyMode === $data.ConcurrencyMode.Fixed) {
-                            builder.modelBinderConfig[prop.name] = { $selector: 'json:__metadata', $source: 'etag' }
+                            builder.modelBinderConfig[prop.name] = { $source: '@odata.etag' }
                         } else if (type === $data.Array && prop.elementType) {
                             builder.selectModelBinderProperty(prop.name);
                             builder.modelBinderConfig['$type'] = type;
