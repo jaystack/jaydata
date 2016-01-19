@@ -36,7 +36,7 @@
       "jaydata-odatajs": "^4.0.0",
       "jaydata-error-handler": "^0.0.1",
       "jaydata-promise-handler": "^0.0.1",
-      "jaydata-dynamic-metadata": "^0.0.2",
+      "jaydata-dynamic-metadata": "^0.0.3",
       "odata-metadata": "^0.1.0",
       "xmldom": "^0.1.19"
   },
