@@ -43,6 +43,86 @@ var checkODataMode = function(context, functionName){
     return context.providerConfiguration[functionName] === true || $data.defaults.OData[functionName] === true;
 }
 
+$C('$data.storageProviders.oData.ItemContainer', $data.Base, null, {
+    constructor: function(){
+        this._items = [];
+        this._entities = [];
+    },
+    _items: { type: $data.Array },
+    _entities: { type: $data.Array },
+    add: function(entity, request, countable){
+        var item = {
+            entity: entity,
+            request: request,
+            itemIndex: ++this.maxItemIndex,
+            dependentSum: 0
+        };
+        
+        request.headers = request.headers || {};
+        request.headers["content-Id"] = item.itemIndex; 
+        
+        
+        if(countable !== false){
+            this.length++;
+        }
+        
+        this._entities.push(entity)
+        this._items.push(item);
+        
+        return item.itemIndex
+    },
+    getItemIndex: function(entity){
+        if(!entity) return -1;
+        var idx = this._entities.indexOf(entity);
+        if(idx >= 0 && !this._items[idx].removed) {
+            return this._items[idx].itemIndex;
+        }
+        return -1;
+    },
+    setDependency: function(itemIndex){
+        var item = this._items[itemIndex];
+        if(item && !item.removed) {
+            item.dependentSum++;
+            return true;
+        }
+        return false;
+    },
+    remove: function(entity){
+        var idx = this._entities.indexOf(entity);
+        if(idx >= 0) {
+            var item = this._items[idx];
+            if(!item.removed && item.dependentSum < 1){
+                this._items[idx].removed = true;
+                this.length--;
+                return true;
+            }
+        }
+        return false;
+    },
+    getByResponse: function(response, i){
+        //use response.headers['content-id']
+        
+        var idx = i;
+        
+        if(!this._indexCalculated){
+            this._indexCalculated = true;
+            this._dataForResult = this._items.filter(function(it){
+                return !it.removed;
+            });
+        }
+         
+        var item = this._dataForResult[idx++];
+        return item ? item.entity : null
+    },
+    _calculateResultIndex: function(){
+         
+    },
+    
+    maxItemIndex: { value: 0 },
+    length: { value: 0 }
+});
+
+
 
 $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null,
 {
@@ -61,6 +141,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             //enableJSONP: undefined,
             //useJsonLight: undefined
             //disableBatch: undefined
+            //withReferenceMethods: undefined
             UpdateMethod: 'PATCH'
         }, cfg);
 
@@ -154,29 +235,31 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                             if (refValue instanceof $data.Array) {
                                 dbInstance.initData[association.FromPropertyName] = dbInstance[association.FromPropertyName] || [];
                                 refValue.forEach(function (rv) {
-                                    if (rv.entityState == $data.EntityState.Modified || convertedItems.indexOf(rv) < 0) {
+                                    var contentId = convertedItems.getItemIndex(rv);
+                                    if (rv.entityState == $data.EntityState.Modified || contentId < 0) {
                                         var sMod = context._storageModel.getStorageModel(rv.getType())
                                         var tblName = sMod.TableName;
                                         var pk = '(' + context.storageProvider.getEntityKeysValue({ data: rv, entitySet: context.getEntitySetFromElementType(rv.getType()) }) + ')';
                                         dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: tblName + pk } });
                                     } else {
-                                        var contentId = convertedItems.indexOf(rv);
                                         if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                        dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId + 1) } });
+                                        dbInstance.initData[association.FromPropertyName].push({ __metadata: { uri: "$" + (contentId) } });
+                                        convertedItems.setDependency(contentId);
                                     }
                                 }, this);
                             } else if (refValue === null) {
                                 dbInstance.initData[association.FromPropertyName] = null;
                             } else {
-                                if (refValue.entityState == $data.EntityState.Modified || convertedItems.indexOf(refValue) < 0) {
+                                var contentId = convertedItems.getItemIndex(refValue);
+                                if (refValue.entityState == $data.EntityState.Modified || contentId < 0) {
                                     var sMod = context._storageModel.getStorageModel(refValue.getType())
                                     var tblName = sMod.TableName;
                                     var pk = '(' + context.storageProvider.getEntityKeysValue({ data: refValue, entitySet: context.getEntitySetFromElementType(refValue.getType()) }) + ')';
                                     dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: tblName + pk } };
                                 } else {
-                                    var contentId = convertedItems.indexOf(refValue);
                                     if (contentId < 0) { Guard.raise("Dependency graph error"); }
-                                    dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId + 1) } };
+                                    dbInstance.initData[association.FromPropertyName] = { __metadata: { uri: "$" + (contentId) } };
+                                    convertedItems.setDependency(contentId);
                                 }
                             }
                         }
@@ -297,29 +380,19 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
     _buildSaveData: function(independentBlocks, convertedItem) {
         var requests = [];
-        var additionalItems = [];
         for (var index = 0; index < independentBlocks.length; index++) {
             var requestPart = []
             for (var i = 0; i < independentBlocks[index].length; i++) {
-                convertedItem.push(independentBlocks[index][i].data);
                 var request = {
-                    requestUri: this.providerConfiguration.oDataServiceHost + '/',
-                    headers: {
-                        "Content-Id": convertedItem.length
-                    }
+                    requestUri: this.providerConfiguration.oDataServiceHost + '/'
                 };
-                independentBlocks[index][i].contentId = convertedItem.length
+                convertedItem.add(independentBlocks[index][i].data, request);
                 
                 var entityState = independentBlocks[index][i].data.entityState;
                 if(typeof this._buildRequestObject['EntityState_' + entityState] === 'function'){
                     var reqObjects = this._buildRequestObject['EntityState_' + entityState](this, independentBlocks[index][i], convertedItem, request)
                     if(reqObjects && reqObjects.length > 0){
-                        if(typeof reqObjects[0] !== "function") {
-                            requestPart.push(reqObjects.shift())
-                        }
-                        if(reqObjects.length > 0){
-                            additionalItems.push(...reqObjects)
-                        }
+                        requestPart.push(...reqObjects)
                     }
                     
                 } else {
@@ -328,7 +401,6 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
             requests.push(requestPart);
         }
-        additionalItems.length > 0 && requestPart.push(...additionalItems)
         
         return requests;
     },
@@ -343,7 +415,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 request.requestUri += item.entitySet.tableName;
                 request.data = provider.save_getInitData(item, convertedItem, undefined, undefined, additionalItems);
                 
-                return provider._calculateRestSaveItems(request, item, additionalItems, true)
+                return provider._calculateRestSaveItems(request, item, convertedItem, additionalItems, true)
             },
             'EntityState_30': function(provider, item, convertedItem, request){
                 var additionalItems = [];
@@ -353,7 +425,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 provider.save_addConcurrencyHeader(item, request.headers);
                 request.data = provider.save_getInitData(item, convertedItem, undefined, undefined, additionalItems);
                 
-                return provider._calculateRestSaveItems(request, item, additionalItems, false)
+                return provider._calculateRestSaveItems(request, item, convertedItem, additionalItems, false)
             },
             'EntityState_40': function(provider, item, convertedItem, request){
                 request.method = "DELETE";
@@ -364,10 +436,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 return [request]
             },
             'ReferenceUpdate': function(provider, item, memdef){
-                return function(isCreate, baseDataSaved, itemRequestIndex) {
-                    var request = {
-                        headers: {}
-                    };
+                return function(isCreate, baseDataSaved, itemRequestIndex, convertedItem, request) {
                     var value = item.physicalData[memdef.name]; 
                     if(value && value.__metadata && value.__metadata.uri){
                         request.method = 'POST'
@@ -381,8 +450,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     }
                     
                     return function(isBatch){
-                        if(isBatch && item.contentId && item.data.entityState === $data.EntityState.Added){
-                            request.requestUri = '$' + item.contentId;
+                        var contentId = convertedItem.getItemIndex(item.data)
+                        if(isBatch && contentId && item.data.entityState === $data.EntityState.Added){
+                            request.requestUri = '$' + contentId;
                         } else {
                             request.requestUri = provider.providerConfiguration.oDataServiceHost + '/';
                             request.requestUri += item.entitySet.tableName;
@@ -402,21 +472,30 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             }
         }
     },
-    _calculateRestSaveItems: function(request, item, additionalItems, isCreate) {
+    _calculateRestSaveItems: function(request, item, convertedItem, additionalItems, isCreate) {
         var requests = [];
         var baseDataSaved = false;
         
-        // var keys = item.physicalData.getType().memberDefinitions.getKeyProperties();
-        // var dataProperties = Object.keys(request.data)
-        // if (isCreate || (dataProperties.length > keys.length)) {
-        //     //all keys on data if update
-             requests.push(request)
-             baseDataSaved = true;
-        // }
+        var keys = item.physicalData.getType().memberDefinitions.getKeyProperties();
+        var dataProperties = Object.keys(request.data)
+        if (isCreate || (dataProperties.length > keys.length)) {
+            //all keys on data if update
+            requests.push(request)
+            baseDataSaved = true;
+        } else {
+            if(!convertedItem.remove(item.data)){
+                requests.push(request)
+                baseDataSaved = true;
+            }
+        }
         
         for (var i = 0; i < additionalItems.length; i++) {
-            var newItem = additionalItems[i](isCreate, baseDataSaved, i)
-            newItem && requests.push(newItem)
+            var additionalRequest = {};
+            var newItem = additionalItems[i](isCreate, baseDataSaved, i, convertedItem, additionalRequest)
+            if(newItem){
+                requests.push(newItem)
+                convertedItem.add(item.data, additionalRequest, false);
+            }
         }
         
         return requests;
@@ -434,20 +513,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             
             var requestData = [request, function (data, response) {
                 if (response.statusCode >= 200 && response.statusCode < 300) {
-                    var item = convertedItem[index];
-                    if(item instanceof $data.Entity){
-                        if (response.statusCode == 204) {
-                            //if (response.headers.ETag || response.headers.Etag || response.headers.etag) {
-                            if (response['@odata.etag']) {
-                                var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
-                                if (property && property[0]) {
-                                    //item[property[0].name] = response.headers.ETag || response.headers.Etag || response.headers.etag;
-                                    item[property[0].name] = response['@odata.etag'];
-                                }
-                            }
-                        } else {
-                            that.reload_fromResponse(item, data, response);
-                        }
+                    //var item = convertedItem[index];
+                    var item = convertedItem.getByResponse(response, index);
+                    if(item instanceof $data.Entity && response.statusCode != 204){
+                        that.reload_fromResponse(item, data, response);
                     }
 
                     sendRequests(requestObjects, ++index, callBack);
@@ -501,7 +570,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                     callBack.error(errors);
                 }
             } else {
-                var convertedItem = [];
+                var convertedItem = new $data.storageProviders.oData.ItemContainer();
                 var currentItems = that._buildSaveData([[items[idx]]], convertedItem)
                 that._saveRest(currentItems, convertedItem, {
                     success: function () {
@@ -520,9 +589,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         doSave();
     },
     _saveBatch: function (independentBlocks, callBack) {
-        var convertedItem = [];
+        var convertedItem = new $data.storageProviders.oData.ItemContainer();
         var batchRequests = [];
-        var maxContentId = 0;
+        //var maxContentId = 0;
         
         var requestObjects = this._buildSaveData(independentBlocks, convertedItem)
         for (var index = 0; index < requestObjects.length; index++) {
@@ -530,18 +599,18 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 var request = requestObjects[index][i]
                 if(typeof request === 'function'){ 
                     request = request(true);
-                } else {
-                    maxContentId = (request.headers && request.headers['Content-Id'] > maxContentId) ? request.headers['Content-Id'] : maxContentId
+                // } else {
+                //     maxContentId = (request.headers && request.headers['Content-Id'] > maxContentId) ? request.headers['Content-Id'] : maxContentId
                 }
                 batchRequests.push(request);
             }
         }
         var that = this;
-        for(var i = 0; i < batchRequests.length; i++){
-            if (batchRequests[i].headers && !batchRequests[i].headers['Content-Id']){
-                batchRequests[i].headers['Content-Id'] = ++maxContentId
-            }
-        }
+        // for(var i = 0; i < batchRequests.length; i++){
+        //     if (batchRequests[i].headers && !batchRequests[i].headers['Content-Id']){
+        //         batchRequests[i].headers['Content-Id'] = ++maxContentId
+        //     }
+        // }
 
         var requestData = [{
             requestUri: this.providerConfiguration.oDataServiceHost + "/$batch",
@@ -558,20 +627,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
                 for (var i = 0; i < result.length; i++) {
                     if (result[i].statusCode >= 200 && result[i].statusCode < 300) {
-                        var item = convertedItem[i];
-                        if(item instanceof $data.Entity){
-                            if (result[i].statusCode == 204) {
-                                //if (result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag) {
-                                if (result[i]['@odata.etag']) {
-                                    var property = item.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
-                                    if (property && property[0]) {
-                                        //item[property[0].name] = result[i].headers.ETag || result[i].headers.Etag || result[i].headers.etag;
-                                        item[property[0].name] = result[i]['@odata.etag'];
-                                    }
-                                }
-                                continue;
-                            }
-
+                        var item = convertedItem.getByResponse(result[i], i);
+                        if(item instanceof $data.Entity && result[i].statusCode != 204){
                             that.reload_fromResponse(item, result[i].data, result[i]);
                         }
                     } else {
