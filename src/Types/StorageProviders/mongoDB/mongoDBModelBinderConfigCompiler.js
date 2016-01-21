@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata-core';
 
 $C('$data.modelBinder.mongoDBModelBinderConfigCompiler', $data.modelBinder.ModelBinderConfigCompiler, null, {
     _addPropertyToModelBinderConfig: function (elementType, builder) {

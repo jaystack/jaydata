@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata-core';
 import * as odatajs from 'jaydata-odatajs';
 
 var OData = $data.__global['OData'];

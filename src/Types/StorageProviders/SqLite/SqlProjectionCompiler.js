@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata-core';
 import { SqlStatementBlocks } from './SqLiteCompiler.js';
 
 $C('$data.sqLite.SqlProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null,

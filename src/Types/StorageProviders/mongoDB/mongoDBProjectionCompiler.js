@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata-core';
 
 $C('$data.storageProviders.mongoDB.mongoDBProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider, lambdaPrefix, compiler) {

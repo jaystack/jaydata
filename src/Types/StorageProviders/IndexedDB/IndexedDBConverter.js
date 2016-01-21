@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
+import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata-core';
 
 $data.IndexedDBConverter = {
     fromDb: {

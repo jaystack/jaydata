@@ -1,5 +1,5 @@
 import btoa from 'btoa';
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 
 $data.Class.define('$data.storageProviders.mongoDB.mongoDBProvider.ClientObjectID', null, null, {
     constructor: function(){

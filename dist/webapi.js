@@ -1,1 +1,1 @@
-module.exports = require('./lib/Types/StorageProviders/WebApi/index.js');
+module.exports = require('jaydata-webapi');

@@ -1,4 +1,4 @@
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 
 import YQLConverter from './YQLConverter.js';
 import YQLProvider from './YQLProvider.js';

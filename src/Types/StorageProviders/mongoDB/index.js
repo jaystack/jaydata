@@ -1,4 +1,4 @@
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 import objectid from './ClientObjectID.js';
 import converter from './mongoDBConverter.js';
 import modelbinder from './mongoDBModelBinderConfigCompiler.js';

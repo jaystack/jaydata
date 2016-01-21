@@ -1,4 +1,4 @@
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 
 import FacebookConverter from './FacebookConverter.js';
 import FacebookProvider from './FacebookProvider.js';

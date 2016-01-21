@@ -1,5 +1,5 @@
 import mock$data from '../core.js';
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 import op from '../../src/Types/StorageProviders/oData'
 import {Metadata} from '../../src/JaySvcUtil/Metadata'
 import {expect} from 'chai'

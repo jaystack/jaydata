@@ -32,13 +32,21 @@
       "acorn": "^2.6.4",
       "atob": "^2.0.0",
       "btoa": "^1.1.2",
-      "dot": "^1.0.3",
       "jaydata-odatajs": "^4.0.0",
       "jaydata-error-handler": "^0.0.1",
       "jaydata-promise-handler": "^0.0.1",
       "jaydata-dynamic-metadata": "^0.0.4",
       "odata-metadata": "^0.1.0",
-      "xmldom": "^0.1.19"
+      "xmldom": "^0.1.19",
+      "jaydata-core": "^1.5.0",
+      "jaydata-facebook": "^1.5.0",
+      "jaydata-indexeddb": "^1.5.0",
+      "jaydata-inmemory": "^1.5.0",
+      "jaydata-mongodb": "^1.5.0",
+      "jaydata-odata": "^1.5.0",
+      "jaydata-sqlite": "^1.5.0",
+      "jaydata-webapi": "^1.5.0",
+      "jaydata-yql": "^1.5.0"
   },
   "contributors": [
     {

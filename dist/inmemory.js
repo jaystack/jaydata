@@ -1,1 +1,1 @@
-module.exports = require('./lib/Types/StorageProviders/InMemory/index.js');
+module.exports = require('jaydata-inmemory');

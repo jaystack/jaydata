@@ -1,1 +1,1 @@
-module.exports = require('./lib/Types/StorageProviders/SqLite/index.js');
+module.exports = require('jaydata-sqlite');

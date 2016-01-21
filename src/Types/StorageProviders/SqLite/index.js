@@ -1,4 +1,4 @@
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 
 //dbCommand
 import DbCommand from '../../DbClient/DbCommand.js';

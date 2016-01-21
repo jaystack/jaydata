@@ -61,17 +61,36 @@ gulp.task('lint', function(){
     .pipe(eslint.failAfterError())
 });
 
-gulp.task('nodejs', function() {
-    return gulp.src(['src/**/*.js'])
-    .pipe(babel({
-        compact: false
-    }))
-    .pipe(gulp.dest('./dist/lib'))
-    .on('error', function(err){
-		console.log('>>> ERROR', err);
-		this.emit('end');
-	});
-});
+gulp.task('nodejs', ['clean'].concat(config.modules.map(function(m){ return m.package; })));
+
+for (var i = 0; i < config.modules.length; i++) {
+    (function(m) {
+        var package = fs.readFileSync('dist/package.json', 'utf8');
+
+        gulp.task(m.package + '-package.json', function(){
+            var json = JSON.parse(package);
+            json.main = 'lib/index.js';
+            json.name = m.package;
+            json.dependencies = m.dependencies || {};
+
+            var stream = source('package.json');
+            stream.end(JSON.stringify(json, null, 2));
+            stream.pipe(gulp.dest('./npm/' + m.package));
+        });
+
+        gulp.task(m.package, [m.package + '-package.json'], function() {
+            return gulp.src(m.src)
+            .pipe(babel({
+                compact: false
+            }))
+            .pipe(gulp.dest('./npm/' + m.package + '/lib'))
+            .on('error', function(err){
+        		console.log('>>> ERROR', err);
+        		this.emit('end');
+        	});
+        });
+    })(config.modules[i]);
+}
 
 gulp.task('jaydata.min', function(){
     return gulp.src('./dist/public/jaydata.js')
@@ -92,7 +111,8 @@ gulp.task('minify', ['bundle'], function(){
 });
 
 gulp.task('clean', function(){
-    return del([
+    del.sync([
+        './npm/**',
         './dist/.eslint',
         './dist/lib/**',
         './dist/public/**'

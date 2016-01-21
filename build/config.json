@@ -4,11 +4,86 @@
         "bool": [ "min" ],
         "default": { "env": "dev", "min": false, "dest": "build", "output": "build" }
     },
+    "modules": [
+        {
+            "package": "jaydata-core",
+            "src": ["src/**/*.js", "!src/Types/StorageProviders", "!src/JayDataModules"],
+            "dependencies": {
+                "acorn": "^2.6.4",
+                "atob": "^2.0.0",
+                "btoa": "^1.1.2",
+                "jaydata-odatajs": "^4.0.0",
+                "jaydata-error-handler": "^0.0.1",
+                "jaydata-promise-handler": "^0.0.1",
+                "jaydata-dynamic-metadata": "^0.0.4",
+                "odata-metadata": "^0.1.0",
+                "xmldom": "^0.1.19"
+            }
+        },
+        {
+            "package": "jaydata-facebook",
+            "src": ["src/Types/StorageProviders/Facebook/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0"
+            }
+        },
+        {
+            "package": "jaydata-indexeddb",
+            "src": ["src/Types/StorageProviders/IndexedDB/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0"
+            }
+        },
+        {
+            "package": "jaydata-inmemory",
+            "src": ["src/Types/StorageProviders/InMemory/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0"
+            }
+        },
+        {
+            "package": "jaydata-mongodb",
+            "src": ["src/Types/StorageProviders/mongoDB/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0",
+                "mongodb": "^2.1.3"
+            }
+        },
+        {
+            "package": "jaydata-odata",
+            "src": ["src/Types/StorageProviders/oData/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0",
+                "jaydata-odatajs": "^4.0.0"
+            }
+        },
+        {
+            "package": "jaydata-sqlite",
+            "src": ["src/Types/StorageProviders/SqLite/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0"
+            }
+        },
+        {
+            "package": "jaydata-webapi",
+            "src": ["src/Types/StorageProviders/WebApi/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0"
+            }
+        },
+        {
+            "package": "jaydata-yql",
+            "src": ["src/Types/StorageProviders/yql/**/*.js"],
+            "dependencies": {
+                "jaydata-core": "^1.5.0"
+            }
+        }
+    ],
     "components": [
         {
             "taskName": "jaydata",
             "browserify": {},
-            "require": ["./src/index.js", { "expose": "jaydata/core" }],
+            "require": ["./src/index.js", { "expose": "jaydata-core" }],
             "ignore": ["crypto", "jaydata-odatajs"],
             "destFile": "jaydata.js",
             "destFolder": "./dist/public",
@@ -19,7 +94,7 @@
             "taskName": "odataprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/oData/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "ignore": ["jaydata-odatajs"],
             "destFile": "oDataProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
@@ -30,7 +105,7 @@
             "taskName": "sqliteprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/SqLite/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "SqLiteProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
             "header": "./build/jaydata-dep-header.js",
@@ -40,7 +115,7 @@
             "taskName": "inmemoryprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/InMemory/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "InMemoryProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
             "header": "./build/jaydata-dep-header.js",
@@ -50,7 +125,7 @@
             "taskName": "yqlprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/YQL/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "YQLProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
             "header": "./build/jaydata-dep-header.js",
@@ -60,7 +135,7 @@
             "taskName": "indexeddbprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/IndexedDB/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "IndexedDbProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
             "header": "./build/jaydata-dep-header.js",
@@ -70,7 +145,7 @@
             "taskName": "webapiprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/WebApi/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "WebApiProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
             "header": "./build/jaydata-dep-header.js",
@@ -80,7 +155,7 @@
             "taskName": "facebookprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/Facebook/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "FacebookProvider.js",
             "destFolder": "./dist/public/jaydataproviders",
             "header": "./build/jaydata-dep-header.js",
@@ -94,7 +169,7 @@
             "taskName": "angularmodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/angular.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "angular.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -104,7 +179,7 @@
             "taskName": "errorhandlermodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/errorhandler.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "errorhandler.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -114,7 +189,7 @@
             "taskName": "formbindermodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/formBinder.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "formBinder.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -124,7 +199,7 @@
             "taskName": "handlebarsmodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/handlebars.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "handlebars.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -134,7 +209,7 @@
             "taskName": "inmemorymodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/inMemory.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "inMemory.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -144,7 +219,7 @@
             "taskName": "mscrmclientmodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/jaydata.mscrm.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "jaydata.mscrm.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -156,7 +231,7 @@
             "taskName": "kendomodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/kendo.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "kendo.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -166,7 +241,7 @@
             "taskName": "knockoutmodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/knockout.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "knockout.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -176,7 +251,7 @@
             "taskName": "deferredmodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/deferred.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "deferred.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -186,7 +261,7 @@
             "taskName": "qdeferredmodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/qDeferred.js", { "entry": true }],
-            "external": ["jaydata/core", "q"],
+            "external": ["jaydata-core", "q"],
             "destFile": "qDeferred.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -196,7 +271,7 @@
             "taskName": "senchamodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/sencha.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "sencha.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -206,7 +281,7 @@
             "taskName": "templatemodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/template.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "template.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",
@@ -216,7 +291,7 @@
             "taskName": "validatemodule",
             "browserify": { "standalone": "$data" },
             "require": ["./src/JayDataModules/validate.js", { "entry": true }],
-            "external": ["jaydata/core"],
+            "external": ["jaydata-core"],
             "destFile": "validate.js",
             "destFolder": "./dist/public/jaydatamodules",
             "header": "./build/jaydata-dep-header.js",

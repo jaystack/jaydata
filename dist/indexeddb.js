@@ -1,1 +1,1 @@
-module.exports = require('./lib/Types/StorageProviders/IndexedDB/index.js');
+module.exports = require('jaydata-indexeddb');

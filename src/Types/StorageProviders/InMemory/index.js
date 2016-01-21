@@ -1,4 +1,4 @@
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 
 import InMemoryConverter from './InMemoryConverter.js';
 import InMemoryProvider from './InMemoryProvider.js';

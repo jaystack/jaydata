@@ -1,4 +1,4 @@
-import $data from 'jaydata/core';
+import $data from 'jaydata-core';
 import converter from './oDataConverter.js';
 import provider from './oDataProvider.js';
 import compiler from './oDataCompiler.js';

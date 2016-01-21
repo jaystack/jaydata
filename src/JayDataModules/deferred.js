@@ -1,4 +1,4 @@
-import $data, { $C, Guard, Container, Exception } from 'jaydata/core';
+import $data, { $C, Guard, Container, Exception } from 'jaydata-core';
 import jQuery from 'jquery';
 
 class Deferred extends $data.PromiseHandlerBase{
