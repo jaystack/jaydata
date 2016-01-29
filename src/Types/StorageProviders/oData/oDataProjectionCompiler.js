@@ -19,29 +19,18 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         this.mapping = "";
 
         this.Visit(expression.selector, context);
-        if (context['$select']) { context['$select'] += ','; } else { context['$select'] = ''; }
-        context["$select"] += context.data;
-        context.data = "";
     },
     VisitParametricQueryExpression: function (expression, context) {
         this.Visit(expression.expression, context);
+        var m = this.mapping.split('.');
         if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
-            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += this.mapping.replace(/\./g, '/')
+            this.BuildExpand(m, context);	
         } if (expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
-            var m = this.mapping.split('.');
             m.pop();
-            if (m.length > 0) {
-                if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-                context['$expand'] += m.join('/');
-            }
+            this.BuildExpand(m, context);
         } else {
-            var m = this.mapping.split('.');
             m.pop();
-            if (m.length > 0) {
-                if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-                context['$expand'] += m.join('/');
-            }
+            this.BuildExpand(m, context);
         }
     },
     VisitObjectLiteralExpression: function (expression, context) {
@@ -63,16 +52,25 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         if (this.ObjectLiteralPath) { this.ObjectLiteralPath += '.' + expression.fieldName; } else { this.ObjectLiteralPath = expression.fieldName; }
         this.Visit(expression.expression, context);
 
+        var m = this.mapping.split('.');
         if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
-            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += this.mapping.replace(/\./g, '/')
+            this.BuildExpand(m, context);
         } else {
-            var m = this.mapping.split('.');
             m.pop();
-            if (m.length > 0) {
-                if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-                context['$expand'] += m.join('/');
-            }
+            this.BuildExpand(m, context);
+        }
+    },
+    
+    BuildExpand: function(m, context) {
+        if (m.length == 0)
+            return;
+        if (m.length == 1) {
+            if (context['$select']) { context['$select'] += ','; } else { context['$select'] = ''; }
+            context['$select'] += m[0];
+        }
+        else {
+            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
+            context['$expand'] += m.map(function(x, i) { return (i == 0 ? '' : i == m.length - 1 ? '$select=' : '$expand=') + x }).join('(') + Array(m.length).join(')');
         }
     },
 

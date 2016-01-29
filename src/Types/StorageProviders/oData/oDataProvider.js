@@ -378,13 +378,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             this._saveRestMany(independentBlocks, callBack);
         }
     },
-    _buildSaveData: function(independentBlocks, convertedItem) {
+    _buildSaveData: function(independentBlocks, convertedItem, batch) {
         var requests = [];
         for (var index = 0; index < independentBlocks.length; index++) {
             var requestPart = []
             for (var i = 0; i < independentBlocks[index].length; i++) {
                 var request = {
-                    requestUri: this.providerConfiguration.oDataServiceHost + '/'
+                    requestUri: batch ? '' : this.providerConfiguration.oDataServiceHost + '/'
                 };
                 convertedItem.add(independentBlocks[index][i].data, request);
                 
@@ -593,7 +593,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var batchRequests = [];
         //var maxContentId = 0;
         
-        var requestObjects = this._buildSaveData(independentBlocks, convertedItem)
+        var requestObjects = this._buildSaveData(independentBlocks, convertedItem, true)
         for (var index = 0; index < requestObjects.length; index++) {
             for (var i = 0; i < requestObjects[index].length; i++) {
                 var request = requestObjects[index][i]

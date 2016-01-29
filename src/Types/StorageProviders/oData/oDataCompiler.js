@@ -74,11 +74,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     VisitIncludeExpression: function (expression, context) {
         this.Visit(expression.source, context);
         if (!context['$select']) {
-            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += expression.selector.value.replace(/\./g, '/');
-
             this.includes = this.includes || [];
             var includeFragment = expression.selector.value.split('.');
+            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
+            context['$expand'] += includeFragment.map(function(x, i) { return (i == 0 ? x : '$expand=' + x) }).join('(') + Array(includeFragment.length).join(')');	
             var tempData = null;
             var storageModel = this.mainEntitySet.entityContext._storageModel.getStorageModel(this.mainEntitySet.createNew);
             for (var i = 0; i < includeFragment.length; i++) {
