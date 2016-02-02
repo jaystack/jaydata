@@ -85,6 +85,8 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 for (var k = 0; k < changedItems.length; k++) {
                     if (changedItems[k].data == currentDependency) {
                         ixDependendOn = k;
+                        changedItems[k].referredBy = changedItems[k].referredBy || [];
+                        changedItems[k].referredBy.push(current.data)
                         break;
                     }
                 }
