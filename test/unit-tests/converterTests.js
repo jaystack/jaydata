@@ -20,7 +20,7 @@ function convertTest(v, e) {
     it(testText, () => {
       expect(typeof e).to.equal(typeof $data.Container.convertTo(v, type), 'Bad type of converted value ' + e + ' != ' + $data.Container.convertTo(v, type))
       expect(e).to.deep.equal($data.Container.convertTo(v, type), 'Bad conversion of "' + v + '" to type ' + (type.fullName || type.name) + ', expected value is "' + JSON.stringify(e) + '"')
-    })
+    });
   };
 }
 
@@ -59,8 +59,8 @@ describe('Convert tests', () => {
       'from Function': convertTest(function () { }, true),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Integer', () => {
     convertTo($data.Integer, {
       'from Boolean true': convertTest(true, 1),
@@ -81,8 +81,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Int32', () => {
     convertTo($data.Int32, {
       'from Boolean true': convertTest(true, 1),
@@ -103,8 +103,8 @@ describe('Convert tests', () => {
       'from Function': convertTest(function () { }, 0),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Number', () => {
     convertTo($data.Number, {
       'from Boolean true': convertTest(true, 1),
@@ -125,8 +125,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Byte', () => {
     convertTo($data.Byte, {
       'from Boolean true': convertTest(true, 1),
@@ -147,8 +147,8 @@ describe('Convert tests', () => {
       'from Function': convertTest(function () { }, 0),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.SByte', () => {
     convertTo($data.SByte, {
       'from Boolean true': convertTest(true, 1),
@@ -169,8 +169,8 @@ describe('Convert tests', () => {
       'from Function': convertTest(function () { }, 0),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Int16', () => {
     convertTo($data.Int16, {
       'from Boolean true': convertTest(true, 1),
@@ -191,8 +191,8 @@ describe('Convert tests', () => {
       'from Function': convertTest(function () { }, 0),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Float', () => {
     convertTo($data.Float, {
       'from Boolean true': convertTest(true, 1),
@@ -213,8 +213,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Int64', () => {
     convertTo($data.Int64, {
       'from Boolean true': convertTest(true, '1'),
@@ -235,8 +235,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Decimal', () => {
     convertTo($data.Decimal, {
       'from Boolean true': convertTest(true, '1'),
@@ -257,8 +257,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Object', () => {
     convertTo($data.Object, {
       'from Boolean true': convertTestFail(true),
@@ -279,8 +279,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Array', () => {
     convertTo($data.Array, {
       'from Boolean true': convertTestFail(true),
@@ -301,8 +301,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.String', () => {
     convertTo($data.String, {
       'from Boolean true': convertTest(true, 'true'),
@@ -323,8 +323,8 @@ describe('Convert tests', () => {
       'from Function': convertTest(function () { }, (function () { }).toString()),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Date', () => {
     convertTo($data.Date, {
       'from Boolean true': convertTest(true, new Date(1)),
@@ -345,8 +345,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.DateTimeOffset', () => {
     convertTo($data.DateTimeOffset, {
       'from Boolean true': convertTest(true, new Date(1)),
@@ -367,8 +367,8 @@ describe('Convert tests', () => {
       'from Function': convertTestFail(function () { }),
       'from null': convertTest(null, null),
       'from undefined': convertTest(undefined, undefined)
-    })
-  })
+    });
+  });
   describe('$data.Time', () => {
     convertTo($data.Time, {
       'from Boolean true': convertTestFail(true),
@@ -396,8 +396,8 @@ describe('Convert tests', () => {
       'from valid time string with tick3': convertTest('1:3:5.67', '01:03:05.670'),
       'from valid time string with tick4': convertTest('1:3:5.6', '01:03:05.600'),
       'from time string': convertTest('0:0:0', '00:00:00')
-    })
-  })
+    });
+  });
   describe('$data.Blob', () => {
     convertTo($data.Blob, {
       'from Boolean true': convertTest(true, new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([1])),
@@ -422,7 +422,6 @@ describe('Convert tests', () => {
       'from Buffer': typeof Buffer !== 'undefined' ? convertTest(new Buffer([1, 2, 3]), new Buffer([1, 2, 3])) : convertTestFail({ a: 1 }),
       'from Blob': (function () { try { return convertTest(new Blob(['javascript']), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0x6a, 0x61, 0x76, 0x61, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74])) } catch (e) { } })(),
       'from ArrayBuffer': (function () { try { return convertTest(new ArrayBuffer(3), new (typeof Buffer !== 'undefined' ? Buffer : Uint8Array)([0, 0, 0])) } catch (e) { } })()
-    })
-  })
-})
-
+    });
+  });
+});
