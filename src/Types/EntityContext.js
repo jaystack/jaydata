@@ -1276,6 +1276,9 @@ $data.Class.define('$data.EntityContext', null, null,
                 for (var i = 0; i < d.dependentOn.length; i++) {
                     if (skipItems.indexOf(d.dependentOn[i]) < 0) {
                         temp.push(d.dependentOn[i]);
+                    } else {
+                        d.additionalDependentOn = d.additionalDependentOn || [];
+                        d.additionalDependentOn.push(d.dependentOn[i]);
                     }
                 }
                 d.dependentOn = temp;
