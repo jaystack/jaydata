@@ -1,30 +1,9 @@
 import mock$data from '../core.js';
 import $data from 'jaydata/core';
 import { expect } from 'chai';
-
-function equal(actual, expected, msg) {
-  it(msg, () => {
-    expect(actual).to.equal(expected);
-  });
-}
-
-function deepEqual(actual, expected, msg) {
-  it(msg, () => {
-    expect(actual).to.deepEqual(expected);
-  });
-}
-
-function notEqual(actual, expected, msg) {
-  it(msg, () => {
-    expect(actual).to.not.equal(expected);
-  });
-}
-
-function ok(actual, msg) {
-  it(msg, () => {
-    expect(actual !== undefined).to.equal(true);
-  });
-}
+import { equal, deepEqual, notEqual, ok, test } from './qunitToMocha.js';
+$data.setModelContainer(global);
+import newsReaderContext from './NewsReaderContext_server.js';
 
 describe('typeSystemTests', () => {
   describe('Class framework initialization', () => {
@@ -192,14 +171,13 @@ describe('typeSystemTests', () => {
     it("nsClass is defined", () => {
       expect(nsClass).to.not.equal(undefined);
     });
-    // it("$namespace5.hello.world.nsClass is defined", () => {
-    //   expect($namespace5.hello.world.nsClass).to.be.undefined;
-    // });
+		it("$namespace5.hello.world.nsClass is defined", () => {
+			expect($namespace5.hello.world.nsClass).to.be.not.undefined;
+		});
     it("$namespace5.hello.world.nsClass name is nsClass", () => {
       expect(nsClass.name).to.equal("nsClass");
     });
   });
-  
   
   //define class with inheritence
   var classBase = $data.Class.define('classBase', dataClass, null, {
@@ -808,7 +786,6 @@ describe('typeSystemTests', () => {
     }
 
     $data.Container.registerType('$some.int', $data.Integer);
-    console.log('int overrid - TEST! $data.Integer to $data.Integer');
     equal($data.Container.resolveType('$some.int'), $data.Integer, 'int override failed');
 
   });
@@ -861,7 +838,7 @@ describe('typeSystemTests', () => {
       $data.typeSystem.extend(target, obj);
       ok(false, "exception were expected");
     } catch (e) {
-      equal(e.message, 'Exception thrown');
+      ok(e, 'Exception thrown');
     }
   });
 
@@ -930,10 +907,10 @@ describe('typeSystemTests', () => {
     equal(item.Desc, undefined, '1 Desc ctor init failed');
     notEqual(item.Age, 23, '1 Age ctor init failed');
     equal(item.Age, undefined, '1 Age ctor init failed');
+		var props1 = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
 
     it('1 public members failed', () => {
-      var props = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
-      expect(props).to.deepEqual(['Title']);
+      expect(props1).to.deep.equal(['Title']);
     });
 
     Types.AAExtended.addMember('Desc', {
@@ -948,8 +925,8 @@ describe('typeSystemTests', () => {
 
     
     it('1 public members failed', () => {
-      var props = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
-      expect(props).to.deepEqual(['Title', 'Desc']);
+      var props2 = Types.AAExtended.memberDefinitions.getPublicMappedProperties().map(function (def) { return def.name; });
+      expect(props2).to.deep.equal(['Title', 'Desc']);
     });
 
 
@@ -992,9 +969,123 @@ describe('typeSystemTests', () => {
   
   
   
-  
-  //////////////////////////////////
+	describe('Type add field', () => {
+		var Types = {};
+		Types.AAAExtendedProperty = $data.Entity.extend("Types.AAAExtendedProperty", {
+				Title: { type: 'string' }
+		});
 
+		Types.AAAExtendedProperty.addProperty('GetTitleComputed', function () { return this.Title + ' world'; });
+
+		var item = new Types.AAAExtendedProperty({ Title: 'hello' });
+		equal(item.Title, 'hello', 'Title value');
+		equal('GetTitleComputed' in item, true, 'computed property on item');
+		equal(item.GetTitleComputed, 'hello world', 'computed property value');
+
+		equal('GetTitleComputed2' in item, false, 'computed property not on item 2');
+
+		Types.AAAExtendedProperty.addProperty('GetTitleComputed2', function () { return this.Title + ' world2'; });
+		equal('GetTitleComputed2' in item, true, 'computed property on item 3');
+		equal(item.GetTitleComputed2, 'hello world2', 'computed property value 3');
+
+		item.GetTitleComputed2 = 'not hello';
+		equal(item.GetTitleComputed2, 'hello world2', 'computed property value after change');
+
+		Types.AAAExtendedProperty.addProperty('GetTitleComputed3', function () { return this.Title + ' world3'; }, function (value) { this.Title = value; });
+		item.GetTitleComputed3 = 'hi';
+		equal(item.GetTitleComputed3, 'hi world3', 'computed property value after change 2');
+
+		Types.AAAExtendedProperty.addProperty('GetTitleComputed4', 'string', function () { return this.Title + ' world4'; }, function (value) { this.Title = value; });
+		equal(item.GetTitleComputed4, 'hi world4', 'computed property value after change 3');
+
+
+		var comp = Types.AAAExtendedProperty.memberDefinitions.getMember('GetTitleComputed4');
+		equal(comp instanceof $data.MemberDefinition, true, 'memDef type');
+		ok($data.Container.resolveType(comp.type) === $data.String, 'memDef type');
+		equal('get' in comp, true, 'memDef get');
+		equal('set' in comp, true, 'memDef set');
+		equal(comp.notMapped, true, 'memDef notMapped');
+		equal(comp.storeOnObject, true, 'memDef storeOnObject');
+
+		comp = Types.AAAExtendedProperty.memberDefinitions.getMember('GetTitleComputed2');
+		equal(comp instanceof $data.MemberDefinition, true, 'memDef type');
+		ok(!comp.type, 'memDef type not set');
+		equal('get' in comp, true, 'memDef get');
+		equal('set' in comp, true, 'memDef set');
+		equal(comp.set.toString().replace(/[\n ]/g, ''), "function(){}", 'setter default value');
+		equal(comp.notMapped, true, 'memDef notMapped');
+		equal(comp.storeOnObject, true, 'memDef storeOnObject');
+	});
+
+	describe('Type add field to $news.Types.Article', () => {
+		var propDef = $news.Types.Article.memberDefinitions.getMember('shortLead');
+		ok(!propDef, 'shortLead not defined');
+
+		$news.Types.Article.addProperty('shortLead', 'string', function () {
+				return this.Lead && this.Lead.length > 20 ? (this.Lead.substring(0, 20) + '...') : this.Lead;
+		});
+
+		var article = new $news.Types.Article({ Title: 'Important Article', Lead: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur nec lorem est, eu ultricies quam. Proin venenatis dolor porta justo sodales laoreet. Mauris turpis risus, facilisis ac consequat quis, mollis a elit. In iaculis rutrum massa. In consectetur aliquet bibendum. Quisque tincidunt aliquet ante, eu sodales felis facilisis vel. Phasellus lacus turpis, euismod eu hendrerit vitae, elementum sit amet neque. Fusce eget justo eget ligula iaculis mollis. Aenean vitae commodo nibh. Nullam ut neque nec ante viverra sollicitudin' });
+		equal(article.shortLead, 'Lorem ipsum dolor si...', 'short Lead value');
+	});
+  
+	describe('Type add member override', () => {
+		var Types = {};
+		Types.AAOverride = $data.Entity.extend("Types.AAOverride", {
+				Title: { type: 'string' },
+				myFunc: function () {
+						return 'orig Function';
+				}
+		});
+
+		var item = new Types.AAOverride({ Title: 'apple' });
+		equal(item.myFunc(), 'orig Function', 'orig myFunc');
+		equal(typeof item.myFunc2, 'undefined', 'not defined myFunc');
+
+		Types.AAOverride.addMember('myFunc', function () {
+				return 'Function #2';
+		});
+
+		equal(item.myFunc(), 'Function #2', 'updated myFunc');
+		equal(typeof item.myFunc2, 'undefined', 'not defined myFunc 2');
+
+		Types.AAOverride.addMember('myFunc2', function () {
+				return 'myFunc2 Function #2';
+		});
+
+		equal(typeof item.myFunc2, 'function', 'defined myFunc 2');
+		equal(item.myFunc2(), 'myFunc2 Function #2', 'myFunc2');
+
+		var item2 = new Types.AAOverride({ Title: 'world' });
+		equal(typeof item2.myFunc2, 'function', 'defined myFunc 2');
+		equal(item2.myFunc2(), 'myFunc2 Function #2', 'myFunc2');
+
+		var func = function () {
+				return 'Function #3';
+		};
+		Types.AAOverride.addMember('myFunc', func);
+
+		equal(item.myFunc(), 'Function #3', 'updated myFunc 2');
+		ok(Types.AAOverride.memberDefinitions.getMember('myFunc').method === func, 'definition has good pointer');
+		var def = Types.AAOverride.memberDefinitions.asArray().filter(function (d) { return d.name === 'myFunc'; })[0]
+		ok(def.method === func, 'definition has good pointer 2');
+	});
+
+	describe('type create factory', () => {
+
+		var instance = dataClass.create();
+		equal(instance instanceof dataClass, true, 'instanceof');
+		equal(instance instanceof $data.Base, true, 'instanceof base');
+		equal(instance instanceof $data.Entity, false, 'instanceof entity');
+
+		var art = $news.Types.Article.create({ Lead: 'lead', Title: 'title' });
+		equal(art instanceof $news.Types.Article, true, 'instanceof');
+		equal(art instanceof $data.Base, true, 'instanceof base');
+		equal(art instanceof $data.Entity, true, 'instanceof entity');
+		equal(art.Lead, 'lead', 'art.Lead');
+		equal(art.Title, 'title', 'art.Title');
+
+	});
 
   describe('type with default values', () => {
     var sharedArray = [];
@@ -1116,7 +1207,7 @@ describe('typeSystemTests', () => {
     ok(container.resolveType(container.FoobarTypeName), "sub container can resolve type");
     equal($data.Container.resolveName(container.FoobarTypeName), "FoobarTypeName", "main container can resolve type");
 
-    $data.define("RuntimeType1", {});
+    var RuntimeType1 = $data.define("RuntimeType1", {});
     equal(typeof RuntimeType1, "function", "type is globally visible");
 
     $data.define("RuntimeType2", container, { F1: { type: String, defaultValue: 'foobar' } });
@@ -1154,6 +1245,4 @@ describe('typeSystemTests', () => {
     ok(i4 instanceof ipc, "contained type is mapped");
 
   })
-
-
 });
