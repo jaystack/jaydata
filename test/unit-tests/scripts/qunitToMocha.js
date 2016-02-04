@@ -34,3 +34,19 @@ exports.test = function(testText, count, next) {
 
 exports.stop = function(int) {};
 exports.start = function(int) {};
+
+exports.asyncQTM = {
+  test : function(testText, count, next) {
+    it(testText, next);
+  },
+  equal : function(actual, expected, msg) {
+    expect(actual).to.equal(expected, msg);
+  },
+  notequal : function(actual, expected, msg) {
+    expect(actual).to.not.equal(expected, msg);
+  },
+  stop : function(int) {},
+  ok : function(actual, msg) {
+		expect(actual !== undefined).to.equal(true, msg);
+	}
+}
