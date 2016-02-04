@@ -1,9 +1,9 @@
 import mock$data from '../core.js';
 import $data from 'jaydata/core';
 import { expect } from 'chai';
-import { equal, deepEqual, notEqual, ok, test } from './qunitToMocha.js';
+import { equal, deepEqual, notEqual, ok, test } from './scripts/qunitToMocha.js';
 $data.setModelContainer(global);
-import newsReaderContext from './NewsReaderContext_server.js';
+import newsReaderContext from './scripts/NewsReaderContext.js';
 
 describe('typeSystemTests', () => {
   describe('Class framework initialization', () => {

@@ -1,4 +1,4 @@
-import mock$data from '../core.js';
+import mock$data from '../../core.js';
 import $data from 'jaydata/core';
 import { expect } from 'chai';
 

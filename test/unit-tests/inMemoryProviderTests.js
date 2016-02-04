@@ -2,11 +2,11 @@ import mock$data from '../core.js';
 import $data from 'jaydata/core';
 import YQL from '../../src/Types/StorageProviders/YQL'
 import InMemory from '../../src/Types/StorageProviders/InMemory'
-//import $data from 'jaydata/yql';
+import InMemoryModule from '../../src/JayDataModules/inMemory.js'
 import { expect } from 'chai';
-import { equal, deepEqual, notEqual, ok, test, stop ,start } from './qunitToMocha.js';
+import { equal, deepEqual, notEqual, ok, test, stop ,start } from './scripts/qunitToMocha.js';
 $data.setModelContainer(global);
-import newsReaderContext from './NewsReaderContext_server.js';
+import newsReaderContext from './scripts/NewsReaderContext.js';
 
 
 
@@ -578,52 +578,52 @@ test('remove from context', 4, function () {
 	});
 });
 
-//test('array toQueryable with jayData type', 3, function () {
-//	stop(1);
-//	var items = [
-//		new $data.Yahoo.types.Geo.ocean({woeid: 1234, name: 'ocean1', lang: 'en-us'}),
-//		new $data.Yahoo.types.Geo.ocean({woeid: 1235, name: 'ocean2', lang: 'en-us'})
-//	];
-//
-//	var arrayQueryable = items.toQueryable();
-//
-//	equal(arrayQueryable instanceof $data.Queryable, true, 'array toQueryable failed');
-//
-//	arrayQueryable.filter(function (o) {
-//		return o.name == 'ocean1'
-//	}).toArray(function (r) {
-//		start();
-//		equal(r.length, 1, 'arrayQueryable filter result length failed');
-//		equal(r[0].name, 'ocean1', 'arrayQueryable filter result[0] name failed');
-//	});
-//});
+test('array toQueryable with jayData type', 3, function () {
+	stop(1);
+	var items = [
+		new $data.Yahoo.types.Geo.ocean({woeid: 1234, name: 'ocean1', lang: 'en-us'}),
+		new $data.Yahoo.types.Geo.ocean({woeid: 1235, name: 'ocean2', lang: 'en-us'})
+	];
 
-//test('array toQueryable with object (not supported)', 3, function () {
-//	stop(1);
-//	var items = [
-//		{name: 'a1', age: 10},
-//		{name: 'a2', age: 25}
-//	];
-//	try {
-//		var arrayQueryable = items.toQueryable();
-//
-//		equal(arrayQueryable instanceof $data.Queryable, true, 'array toQueryable failed');
-//
-//		arrayQueryable.filter(function (o) {
-//			return o.name == 'a1'
-//		}).toArray(function (r) {
-//			start();
-//			equal(r.length, 1, 'arrayQueryable filter result length failed');
-//			equal(r[0].name, 'ocean1', 'arrayQueryable filter result[0] name failed');
-//		});
-//	} catch (e) {
-//		expect(2);
-//		start();
-//		ok(true, 'Not supported');
-//		ok(true, e);
-//	}
-//
-//});
+	var arrayQueryable = items.toQueryable();
+
+	equal(arrayQueryable instanceof $data.Queryable, true, 'array toQueryable failed');
+
+	arrayQueryable.filter(function (o) {
+		return o.name == 'ocean1'
+	}).toArray(function (r) {
+		start();
+		equal(r.length, 1, 'arrayQueryable filter result length failed');
+		equal(r[0].name, 'ocean1', 'arrayQueryable filter result[0] name failed');
+	});
+});
+
+test('array toQueryable with object (not supported)', 3, function () {
+	stop(1);
+	var items = [
+		{name: 'a1', age: 10},
+		{name: 'a2', age: 25}
+	];
+	try {
+		var arrayQueryable = items.toQueryable();
+
+		equal(arrayQueryable instanceof $data.Queryable, true, 'array toQueryable failed');
+
+		arrayQueryable.filter(function (o) {
+			return o.name == 'a1'
+		}).toArray(function (r) {
+			start();
+			equal(r.length, 1, 'arrayQueryable filter result length failed');
+			equal(r[0].name, 'ocean1', 'arrayQueryable filter result[0] name failed');
+		});
+	} catch (e) {
+		expect(2);
+		start();
+		ok(true, 'Not supported');
+		ok(true, e);
+	}
+
+});
 
 
 test('orderbyDescending with take', 2, function () {
