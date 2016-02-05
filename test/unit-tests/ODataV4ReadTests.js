@@ -10,7 +10,6 @@ $data.defaults.oDataWebApi = true;
 
 
 describe('OData Enum', () => {
-
 	$data.createEnum("$data.testEnum", {
 		Admin: undefined,
 		User: false,
