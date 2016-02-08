@@ -15,7 +15,6 @@ exports.EntityContextTests = function(providerConfig, msg) {
     this.timeout(30 * 1000);
     asyncQTM.test('store token set after saveChanges', 4, function (start) {
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-
         var article = new db.Articles.elementType({ Title: 'Title', Lead: 'Lead', Body: 'Body' });
         db.Articles.add(article);
         asyncQTM.equal(article.storeToken, undefined, 'StoreToken is not avaliable after create');
@@ -26,7 +25,6 @@ exports.EntityContextTests = function(providerConfig, msg) {
             asyncQTM.equal(rarticle.Title, 'Title', 'Article Title');
             asyncQTM.equal(article.storeToken, db.storeToken, 'StoreToken is set');
             asyncQTM.equal(article.storeToken, rarticle.storeToken, 'StoreToken is same on loaded entity');
-
             start();
           });
         });
