@@ -7,8 +7,8 @@ export class RequestBuilder {
     get(){
         return this._request; 
     }
-    add(activity){
-        this._activities.push(activity);
+    add(...activities){
+        this._activities.push(...activities);
         return this;
     }
     build(){
@@ -24,12 +24,12 @@ export class RequestBuilder {
     }
 }
 
-class RequestActivity {
+export class RequestActivity {
     constructor(){}
     implementation(request, provider){ }
 }
 
-class SetRequestActivity extends RequestActivity {
+export class SetRequestActivity extends RequestActivity {
     constructor(key, value){
         super()
         this.key = key;
