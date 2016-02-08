@@ -1,6 +1,10 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 import * as odatajs from 'jaydata-odatajs';
 import * as activities from './oDataRequestActivities.js'
+import { strategy as emptySaveStrategy } from './SaveStrategies/empty'
+import { strategy as singleSaveStrategy } from './SaveStrategies/single'
+import { strategy as batchSaveStrategy } from './SaveStrategies/batch'
+
 
 var OData = $data.__global['OData'];
 var datajs = $data.__global['datajs'];
@@ -44,7 +48,10 @@ if(!("enableDeepSave" in $data.defaults.OData)){
 }
 
 var checkODataMode = function(context, functionName){
-    return context.providerConfiguration[functionName] === true || $data.defaults.OData[functionName] === true;
+    if(typeof context.providerConfiguration[functionName] !== 'undefined'){
+        return !!context.providerConfiguration[functionName];
+    }
+    return !!$data.defaults.OData[functionName];
 }
 
 $C('$data.storageProviders.oData.RequestManager', $data.Base, null, {
@@ -400,114 +407,29 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             this._checkDeepSave(changedItems)
         }
         var convertedItems = this._buildSaveData(independentBlocks, changedItems)
-        this.saveActionSelector(convertedItems, callBack);
-    },
-    saveActionSelector: function(convertedItems, callBack){
-        var requests = convertedItems.getItems();
-        if(checkODataMode(this, "disableBatch") || requests.length == 1){
-            this.saveActions['single'].apply(this, arguments);
-        } else if(requests.length > 1) {
-            this.saveActions['batch'].apply(this, arguments);
+        var actionMode = this.saveStrategySelector(convertedItems);
+        if(actionMode){
+            actionMode.save(this, convertedItems, callBack);
         } else {
-            callBack.success(0);
+            callBack.error(new Exception('Not Found', 'Save action not found'));
         }
     },
-    saveActions: {
-        value: {
-            'single': function (convertedItems, callBack) {
-                var that = this;
-                var items = convertedItems.getItems();
-                
-                var doSave = function(items, index, done){
-                    var item = items[index];
-                    if(!item) return done()
-                    
-                    var request = item.request.build().get();
-                    var requestData = [request, function (data, response) {
-                        if (response.statusCode >= 200 && response.statusCode < 300) {
-                            var item = convertedItems.getByResponse(response, index);
-                            if(item instanceof $data.Entity && response.statusCode != 204){
-                                that.reload_fromResponse(item, data, response);
-                                convertedItems.setProcessed(item);
-                            }
-
-                            doSave(items, ++index, done);
-                        } else {
-                            done(response);
-                        }
-
-                    }, done];
-
-                    that.appendBasicAuth(requestData[0], that.providerConfiguration.user, that.providerConfiguration.password, that.providerConfiguration.withCredentials);
-                    that.context.prepareRequest.call(that, requestData);
-                    that.oData.request.apply(that, requestData);
-                }
-                
-                doSave(items, 0, function(err, result){
-                    if(err) return callBack.error(that.parseError(err));
-                    callBack.success(result);
-                })
-            },
-            'batch': function (convertedItems, callBack) {
-                var that = this;
-                var items = convertedItems.getItems();
-                var requests = items.map(function(it){ return it.request.build().get() })
-                
-                var requestData = [{
-                    requestUri: this.providerConfiguration.oDataServiceHost + "/$batch",
-                    method: "POST",
-                    data: {
-                        __batchRequests: [{ __changeRequests: requests }]
-                    },
-                    headers: {
-                    }
-                }, function (data, response) {
-                    if (response.statusCode == 200 || response.statusCode == 202) {
-                        var result = data.__batchResponses[0].__changeResponses;
-                        var errors = [];
-
-                        for (var i = 0; i < result.length; i++) {
-                            if (result[i].statusCode >= 200 && result[i].statusCode < 300) {
-                                var item = convertedItems.getByResponse(result[i], i);
-                                if(item instanceof $data.Entity && result[i].statusCode != 204){
-                                    that.reload_fromResponse(item, result[i].data, result[i]);
-                                    convertedItems.setProcessed(item);
-                                }
-                            } else {
-                                errors.push(that.parseError(result[i]));
-                            }
-                        }
-                        if (errors.length > 0) {
-                            if (errors.length === 1) {
-                                callBack.error(errors[0]);
-                            } else {
-                                callBack.error(new Exception('See inner exceptions', 'Batch failed', errors));
-                            }
-                        } else if (callBack.success) {
-                            callBack.success(convertedItems.length);
-                        }
-                    } else {
-                        callBack.error(that.parseError(response));
-                    }
-
-                }, function (e) {
-                    callBack.error(that.parseError(e));
-                }, this.oData.batch.batchHandler];
-
-                if (typeof this.providerConfiguration.useJsonLight !== 'undefined') {
-                    requestData[0].useJsonLight = this.providerConfiguration.useJsonLight;
-                }
-
-                this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
-                //if (this.providerConfiguration.user) {
-                //    requestData[0].user = this.providerConfiguration.user;
-                //    requestData[0].password = this.providerConfiguration.password || "";
-                //}
-
-                this.context.prepareRequest.call(this, requestData);
-                this.oData.request.apply(this, requestData);
+    saveStrategySelector: function(convertedItems){
+        for(var i = 0; i < this.saveStrategies.length; i++){
+            var saveAction = this.saveStrategies[i];
+            if(saveAction.condition(this, convertedItems)){
+                return saveAction;
             }
-        }  
+        }
+        
+        return null;
+    },
+    saveStrategies: {
+        value: [
+            batchSaveStrategy,
+            singleSaveStrategy,
+            emptySaveStrategy
+        ]
     },
     
     _discoverSaveOrder: function(changedItems){
@@ -639,25 +561,31 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     _buildRequestObject: {
         value: {
             'EntityState_20': function(provider, item, convertedItem, request, changedItems){
-                request.add(new activities.SetMethod("POST"))
-                    .add(new activities.AppendUrl(item.entitySet.tableName))
+                request.add(
+                    new activities.SetMethod("POST"), 
+                    new activities.AppendUrl(item.entitySet.tableName)
+                )
                 
                 provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
             },
             'EntityState_30': function(provider, item, convertedItem, request, changedItems){
-                request.add(new activities.SetMethod(provider.providerConfiguration.UpdateMethod))
-                    .add(new activities.AppendUrl(item.entitySet.tableName))
-                    .add(new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")"))
+                request.add(
+                    new activities.SetMethod(provider.providerConfiguration.UpdateMethod),
+                    new activities.AppendUrl(item.entitySet.tableName), 
+                    new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")")
+                )
                 
                 provider.addETagHeader(item, request)
                 
                 provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
             },
             'EntityState_40': function(provider, item, convertedItem, request, changedItems){
-                request.add(new activities.SetMethod("DELETE"))
-                    .add(new activities.ClearRequestData())
-                    .add(new activities.AppendUrl(item.entitySet.tableName))
-                    .add(new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")"))
+                request.add(
+                    new activities.SetMethod("DELETE"),
+                    new activities.ClearRequestData(),
+                    new activities.AppendUrl(item.entitySet.tableName),
+                    new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")")
+                )
                 
                 provider.addETagHeader(item, request)
             },
@@ -856,11 +784,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 } else {
                     if(item.data.entityState === $data.EntityState.Added || value !== null) return
                     
-                    additionalRequest.add(new activities.SetUrl(this.providerConfiguration.oDataServiceHost + '/'))
-                        .add(new activities.AppendUrl(item.entitySet.tableName))
-                        .add(new activities.AppendUrl("(" + this.getEntityKeysValue(item) + ")"))
-                        .add(new activities.SetMethod('DELETE'))
-                        .add(new activities.ClearRequestData())
+                    additionalRequest.add(
+                        new activities.SetUrl(this.providerConfiguration.oDataServiceHost + '/'),
+                        new activities.AppendUrl(item.entitySet.tableName),
+                        new activities.AppendUrl("(" + this.getEntityKeysValue(item) + ")"),
+                        new activities.SetMethod('DELETE'),
+                        new activities.ClearRequestData())
                 }
                 
                 additionalRequest.add(function(req, provider){
