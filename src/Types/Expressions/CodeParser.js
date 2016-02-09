@@ -105,7 +105,7 @@ $C('$data.Expressions.CodeParser', null, null, {
         return this.ParserParameter(node,
             this.lambdaParams.indexOf(node.name) > -1
                 ? $data.Expressions.ExpressionType.LambdaParameterReference
-                : $data.Expressions.ExpressionType.Parameter
+                : $data.Expressions.ExpressionType.ParameterReference
             );
     },
 
@@ -134,8 +134,12 @@ $C('$data.Expressions.CodeParser', null, null, {
     ParserFunctionExpression: function(node){
         var params = new Array(node.params.length);
         for (var i = 0; i < node.params.length; i++){
-            this.lambdaParams.push(node.params[i].name);
-            params[i] = this.ParserParameter(node.params[i], $data.Expressions.ExpressionType.LambdaParameter);
+            if(i === 0 || $data.defaults.parameterResolutionCompatibility){
+                this.lambdaParams.push(node.params[i].name);
+                params[i] = this.ParserParameter(node.params[i], $data.Expressions.ExpressionType.LambdaParameter);
+            } else {
+                params[i] = this.ParserParameter(node.params[i], $data.Expressions.ExpressionType.Parameter);
+            }
             params[i].owningFunction = result;
         }
         var result = new $data.Expressions.FunctionExpression(node.id ? node.id.name : node.id, params, this.ParserBuild(node.body));

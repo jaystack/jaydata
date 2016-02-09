@@ -66,7 +66,7 @@
                 var q = $data.NewsReaderContext.Users.where(function (m) { return m.LoginName == unknownParam }, { x: "Joe" });
                 var r = q.toTraceString();
             } catch (e) {
-                equal(e, "Global parameter unknownParam not found. For query parameters use 'this.field' notation", "Exception");
+                equal(e, "Parameter 'unknownParam' is missing!", "Exception");
                 thrown = true;
                 //equal(e.name, "InvalidOperation", "Exception.name");
                 //equal(e.message, "Unknown variable in 'where' operation. The variable isn't referenced in the parameter context and not a global variable: 'unknownParam'.", "Exception.message");

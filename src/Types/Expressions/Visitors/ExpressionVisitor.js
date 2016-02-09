@@ -40,7 +40,11 @@ $C('$data.Expressions.ExpressionVisitor', null, null,
                         break;
                         //result = th
                     case $data.Expressions.ThisExpression:
-                        result = this.VisitThis(eNode, context);
+                        if ($data.defaults.parameterResolutionCompatibility) {
+                            result = this.VisitThis(eNode, context);
+                        } else {
+                            Guard.raise("Keyword 'this' is not allowed. You should get value from parameter. (it, p1) => it.Title == p1");
+                        }
                         break;
                     case $data.Expressions.ObjectLiteralExpression:
                         result = this.VisitObjectLiteral(eNode, context);

@@ -44,6 +44,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     This: "this",
     LambdaParameterReference: "lambdaParameterReference",
     LambdaParameter: "lambdaParameter",
+    ParameterReference: "parameterReference",
     Parameter: "parameter",
 
     ArrayLiteral: "arrayLiteral",

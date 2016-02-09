@@ -12,6 +12,7 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
     	/// <param name="expression"></param>
     	/// <param name="resolver"></param>
         this.lambdaParamCache = {};
+        this.paramCache = {};
     },
 
     Visit: function (expression, resolver) {
@@ -67,11 +68,24 @@ $C('$data.Expressions.ParameterResolverVisitor', $data.Expressions.ExpressionVis
         ///TODO let the resolver handle lambdaReferences if it wants to deal with it
         switch(eNode.nodeType){
             case $data.Expressions.ExpressionType.Parameter:
+                node = resolver.Visit(eNode, resolver);
+                this.paramCache[node.name] = node;
+                return node;
+            case $data.Expressions.ExpressionType.ParameterReference:
+                if ($data.defaults.parameterResolutionCompatibility) {
+                    return resolver.Visit(eNode, resolver);
+                }
+            
+                var paramNode = this.paramCache[eNode.name];
+                if (paramNode) {
+                    return paramNode;
+                } else {
+                    Guard.raise("Missing parameter '" + eNode.name + "'");
+                }
+                break;
             case $data.Expressions.ExpressionType.LambdaParameter:
                 node = resolver.Visit(eNode, resolver);
-                if (node.nodeType == $data.Expressions.ExpressionType.LambdaParameter) {
-                    this.lambdaParamCache[node.name] = node;
-                }
+                this.lambdaParamCache[node.name] = node;
                 return node;
             case $data.Expressions.ExpressionType.LambdaParameterReference:
                 var lambdaParam = this.lambdaParamCache[eNode.name];

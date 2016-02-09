@@ -8,7 +8,8 @@ $C("$data.Expressions.GlobalContextProcessor", $data.Expressions.ParameterProces
 
     canResolve: function (paramExpression) {
         ///<param name="paramExpression" type="$data.Expressions.ParameterExpression" />
-        return paramExpression.nodeType == $data.Expressions.ExpressionType.Parameter && this.global && typeof this.global === 'object' &&
+        return (paramExpression.nodeType == $data.Expressions.ExpressionType.Parameter || ($data.defaults.parameterResolutionCompatibility && paramExpression.nodeType == $data.Expressions.ExpressionType.ParameterReference)) && 
+               this.global && typeof this.global === 'object' &&
                paramExpression.name in this.global;
     },
 
@@ -35,8 +36,11 @@ $C("$data.Expressions.ConstantValueResolver", $data.Expressions.ParameterProcess
 
     canResolve: function (paramExpression) {
         ///<param name="paramExpression" type="$data.Expressions.ParameterExpression" />
-        return (paramExpression.name === '$context') || (paramExpression.nodeType == $data.Expressions.ExpressionType.This && this.paramsObject)
+        if($data.defaults.parameterResolutionCompatibility){
+            return (paramExpression.name === '$context') || (paramExpression.nodeType == $data.Expressions.ExpressionType.This && this.paramsObject)
                     ? true : (this.paramResolver.canResolve(paramExpression) || this.globalResolver.canResolve(paramExpression));
+        }
+        return (paramExpression.name === '$context') ? true : this.paramResolver.canResolve(paramExpression);
     },
 
     resolve: function (paramExpression) {
@@ -45,10 +49,13 @@ $C("$data.Expressions.ConstantValueResolver", $data.Expressions.ParameterProcess
         if (paramExpression.name === '$context') {
             return Container.createEntityContextExpression(this.scopeContext);
         }
-        if (paramExpression.nodeType == $data.Expressions.ExpressionType.This) {
-            return Container.createConstantExpression(this.paramsObject, typeof this.paramsObject, 'this');
+        if ($data.defaults.parameterResolutionCompatibility) {
+            if (paramExpression.nodeType == $data.Expressions.ExpressionType.This) {
+                return Container.createConstantExpression(this.paramsObject, typeof this.paramsObject, 'this');
+            }
+            return this.paramResolver.canResolve(paramExpression) ? this.paramResolver.resolve(paramExpression) : this.globalResolver.resolve(paramExpression);
         }
-        return this.paramResolver.canResolve(paramExpression) ? this.paramResolver.resolve(paramExpression) : this.globalResolver.resolve(paramExpression);
+        return this.paramResolver.resolve(paramExpression);
     }
 
 });

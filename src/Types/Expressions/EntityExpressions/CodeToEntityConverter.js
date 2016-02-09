@@ -84,7 +84,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 //TODO: throw descriptive exception or return a value
                 break;
             default:
-                Guard.raise("Global parameter " + expression.name + " not found. For query parameters use 'this.field' notation");
+                Guard.raise("Parameter '" + expression.name + "' is missing!");
                 break;
         }
     },

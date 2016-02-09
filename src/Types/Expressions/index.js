@@ -1,4 +1,9 @@
 import $data from '../../TypeSystem/index.js';
+
+$data.defaults = $data.defaults || {};
+$data.defaults.parameterResolutionCompatibility = true;
+
+
 import ExpressionNode2 from './ExpressionNode2.js';
 import ArrayLiteralExpression from './ArrayLiteralExpression.js';
 import CallExpression from './CallExpression.js';
