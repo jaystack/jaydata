@@ -208,7 +208,7 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
     context.saveChanges({
         success: function (count) {
             if(context.storageProvider.name !== 'oData'){
-                console.log("Success upload testdb for: " + count + " items");
+                //console.log("Success upload testdb for: " + count + " items");
                 if (callBack) {
                     callBack(count);
                 }
@@ -237,7 +237,7 @@ $news.Types.NewsContext.generateTestData = function (context, callBack) {
                     success: function(count2){
                         count += count2;
                         
-                        console.log("Success upload testdb for: " + count + " items");
+                        //console.log("Success upload testdb for: " + count + " items");
                         if (callBack) {
                             callBack(count);
                         }

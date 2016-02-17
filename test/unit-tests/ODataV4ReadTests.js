@@ -348,7 +348,7 @@ describe('OData protocol tests', function () {
     // })
 
     var ctx = null
-    var base_MyTClass = null
+    //var base_MyTClass = null
     before(function(done){
         $data.initService("http://localhost:9000/odata", {}, function(_ctx){
             ctx = _ctx
@@ -359,7 +359,7 @@ describe('OData protocol tests', function () {
                 }
             }
 
-            base_MyTClass = $data.Container.resolveType('JayData.Test.CommonItems.Entities.MyTClass')
+            //base_MyTClass = $data.Container.resolveType('JayData.Test.CommonItems.Entities.MyTClass')
             done()
         })
     })
@@ -520,7 +520,7 @@ describe('OData protocol tests', function () {
 		})
 	})
 
-	describe('read base type', () => {
+	/*describe('read base type', () => {
 
 		it('read articles', (done) => {
 			ctx.Articles.toArray(function(articles){
@@ -551,7 +551,7 @@ describe('OData protocol tests', function () {
 				}
 			})
 		})
-	})
+	})*/
     
     describe('take - skip test', () => {
 		it('read articles', (done) => {
@@ -560,7 +560,7 @@ describe('OData protocol tests', function () {
 
 				if(articles.length){
 					var item = articles[0]
-					expect(item instanceof base_MyTClass).to.equal(true)
+					expect(item instanceof ctx.Articles.elementType).to.equal(true)
 					expect(typeof item.Id).to.equal("number")
 					expect(typeof item.Title).to.equal("string")
 

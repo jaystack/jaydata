@@ -234,7 +234,6 @@
     });
 
     test('deep_include_fix', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(18);
         stop(3);
@@ -439,7 +438,6 @@
         });
     });
     test('map as jaydata type', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(6);
         stop(1);
 
@@ -461,7 +459,6 @@
         });
     });
     test('map as default', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(6);
         stop(1);
 
@@ -640,7 +637,6 @@
     });
     test('navProperty many', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
 
         expect(5);
         stop(1);
@@ -663,7 +659,6 @@
     });
     test('navProperty single', function () {
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
 
         expect(3);
         stop(1);
@@ -979,7 +974,6 @@
         });
     });
     test('1003_even if a simple field is projected an Article is returned', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(2);
         
         stop(3);
@@ -1006,7 +1000,6 @@
         });
     });
     test('1003_additional_test1', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1034,7 +1027,6 @@
         });
     });
     test('1003_additional_test2', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(3);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1064,7 +1056,6 @@
         });
     });
     test('1003_additional_test3', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(6);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1093,7 +1084,6 @@
         });
     });
     test('1003_additional_test4', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(11);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1128,7 +1118,6 @@
         });
     });
     test('1003_additional_test5', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(3);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1156,7 +1145,6 @@
         });
     });
     test('1003_additional_test6', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(5);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1164,7 +1152,7 @@
                 start(1);
                 $news.Types.NewsContext.generateTestData(db, function () {
                     start(1);
-                    var q2 = db.Articles.filter(function (a) { return a.Category.Id == 1; }, null).map(function (a) { return { Title: a.Title, LoginName: a.Author.LoginName }; });
+                    var q2 = db.Articles.filter(function (a) { return a.Category.Id > 1; }, null).map(function (a) { return { Title: a.Title, LoginName: a.Author.LoginName }; });
                     q2.toArray(function (a) {
                         start(1);
                         notEqual(a[0] instanceof $news.Types.UserProfile, true, 'result type failed');
@@ -1184,7 +1172,6 @@
         });
     });
     test('1002_even if map is used with anon type an Article is returned', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(3);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1298,7 +1285,6 @@
         });
     });
     test('1038_Include complex type property', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(7);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1306,35 +1292,36 @@
                 start(1);
                 $news.Types.NewsContext.generateTestData(db, function () {
                     start(1);
-                    var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: 1 })
-                           .select(function (item) {
-                               return {
-                                   Title: item.Title,
-                                   Lead: item.Lead,
-                                   Body: item.Body,
-                                   CreateDate: item.CreateDate,
-                                   Author: {
-                                       Profile: item.Author.Profile //Location hiányzik
-                                   },
-                                   CmpType: item.Author.Profile
-                               };
-                           });
-                    var meta = q.toTraceString();
-                    console.dir(meta);
-                    q.toArray(function (result) {
-                        start(1);
-                        console.dir(result);
-                        ok(result, 'Query OK');
-                        equal(result.length, 1, 'Result nnumber fiaild');
+                    db.Articles.first(null, null, function(a){
+                        var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: a.Id })
+                            .select(function (item) {
+                                return {
+                                    Title: item.Title,
+                                    Lead: item.Lead,
+                                    Body: item.Body,
+                                    CreateDate: item.CreateDate,
+                                    Author: {
+                                        Profile: item.Author.Profile //Location hiányzik
+                                    },
+                                    CmpType: item.Author.Profile
+                                };
+                            });
+                        var meta = q.toTraceString();
+                        console.dir(meta);
+                        q.toArray(function (result) {
+                            start(1);
+                            console.dir(result);
+                            ok(result, 'Query OK');
+                            equal(result.length, 1, 'Result nnumber fiaild');
 
-                        notEqual(result[0].Author instanceof $news.Types.UserProfile, true, 'Author type loading faild');
-                        equal(result[0].Author.Profile instanceof $news.Types.UserProfile, true, 'Author.Profile type loading faild');
+                            notEqual(result[0].Author instanceof $news.Types.UserProfile, true, 'Author type loading faild');
+                            equal(result[0].Author.Profile instanceof $news.Types.UserProfile, true, 'Author.Profile type loading faild');
 
-                        equal(result[0].CmpType instanceof $news.Types.UserProfile, true, 'Profile type loading faild');
-                        equal(result[0].CmpType.Location instanceof $news.Types.Location, true, 'Profile.Location type loading faild');
-                    });
-                    ok(true);
-
+                            equal(result[0].CmpType instanceof $news.Types.UserProfile, true, 'Profile type loading faild');
+                            equal(result[0].CmpType.Location instanceof $news.Types.Location, true, 'Profile.Location type loading faild');
+                        });
+                        ok(true);
+                    })
                 });
 
             } catch (ex) {
@@ -1347,7 +1334,6 @@
         });
     });
     test('1038_additional_tests_1', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(8);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1355,34 +1341,35 @@
                 start(1);
                 $news.Types.NewsContext.generateTestData(db, function () {
                     start(1);
-                    var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: 1 })
-                           .select(function (item) {
-                               return {
-                                   a: {
-                                       b: {
-                                           c: {
-                                               d: item.Title
-                                           }
-                                       }
-                                   },
-                               };
-                           });
-                    q.toArray(function (result) {
-                        start(1);
-                        console.dir(result);
-                        ok(result, 'Query OK');
-                        equal(result.length, 1, 'Result nnumber fiaild');
+                    db.Articles.first(null, null, function(a){
+                        var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: a.Id })
+                            .select(function (item) {
+                                return {
+                                    a: {
+                                        b: {
+                                            c: {
+                                                d: item.Title
+                                            }
+                                        }
+                                    },
+                                };
+                            });
+                        q.toArray(function (result) {
+                            start(1);
+                            console.dir(result);
+                            ok(result, 'Query OK');
+                            equal(result.length, 1, 'Result nnumber fiaild');
 
-                        equal(typeof result[0], "object", 'object structure build');
-                        equal(typeof result[0].a, "object", 'object structure build (a)');
-                        equal(typeof result[0].a.b, "object", 'object structure build (a.b)');
-                        equal(typeof result[0].a.b.c, "object", 'object structure build (a.b.c)');
-                        equal(typeof result[0].a.b.c.d, "string", 'object structure build (a.b.c.d)');
-                        ok(result[0].a.b.c.d.length > 0, 'Complex type loading faild');
+                            equal(typeof result[0], "object", 'object structure build');
+                            equal(typeof result[0].a, "object", 'object structure build (a)');
+                            equal(typeof result[0].a.b, "object", 'object structure build (a.b)');
+                            equal(typeof result[0].a.b.c, "object", 'object structure build (a.b.c)');
+                            equal(typeof result[0].a.b.c.d, "string", 'object structure build (a.b.c.d)');
+                            ok(result[0].a.b.c.d.length > 0, 'Complex type loading faild');
 
+                        });
                     });
                 });
-
             } catch (ex) {
                 start(3);
                 ok(false, "Unhandled exception occured");
@@ -1489,7 +1476,6 @@
         });
     });
     test("974_Projection of Navigational property return a typed entity result but it's init data is empty", function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1509,7 +1495,6 @@
         });
     });
     test("975_Complex type projections - illegal instruction", function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1594,7 +1579,6 @@
     //    });
     //});
     test('1012_websql provider - Projected Navigational properties are incorrect.', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(4);
         stop(3);
@@ -1625,7 +1609,6 @@
     });
     test('1024_ODATA projection of complex type does not get values', 3, function () {
         if (providerConfig.name == "sqLite") { ok(true, "Not supported"); ok(true, "Not supported"); ok(true, "Not supported"); return; }
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); ok(true, "Not supported"); ok(true, "Not supported"); return; }
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
             try {
@@ -1678,7 +1661,6 @@
         });
     });
     test('1023_additional_test_1', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(6);
         stop(3);
@@ -1710,7 +1692,6 @@
         });
     });
     test('1023_additional_test_2', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(14);
         stop(3);
@@ -1918,7 +1899,6 @@
         });
     });
     test('get_mapped_custom', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(23);
         stop(4);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1983,7 +1963,6 @@
     });
 
     test('Include: indirect -> map scalar(string)', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(53);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2010,7 +1989,6 @@
         });
     });
     test('Include: indirect -> map scalar(int)', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(79);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2022,10 +2000,11 @@
                     success: function (categoriesId) {
                         start(1);
                         equal(categoriesId.length, 26, 'Article category error');
+                        var ref = categoriesId[0] || 0; 
                         categoriesId.forEach(function (ci, index) {
                             equal(typeof ci, 'number', 'data type error at ' + index + '. position');
                             ok(ci > 0, 'data min value error at ' + index + '. position');
-                            ok(ci < 6, 'data max value error at ' + index + '. position');
+                            ok(Math.abs(ref - ci) < 6, 'data max value error at ' + index + '. position');
                         });
                     },
                     error: function (error) {
@@ -2037,7 +2016,6 @@
         });
     });
     test('Include: indirect -> map object include scalar(string)', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(79);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2065,7 +2043,6 @@
         });
     });
     test('Include: indirect -> map object include scalar(int)', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(105);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2078,11 +2055,12 @@
                     success: function (categoriesId) {
                         start(1);
                         equal(categoriesId.length, 26, 'Article category error');
+                        var ref = categoriesId[0].t || 0; 
                         categoriesId.forEach(function (ci, index) {
                             equal(typeof ci, 'object', 'data type error at ' + index + '. position');
                             equal(typeof ci.t, 'number', 'data type error at ' + index + '. position');
                             ok(ci.t > 0, 'data min value error at ' + index + '. position');
-                            ok(ci.t < 6, 'data max value error at ' + index + '. position');
+                            ok(Math.abs(ref - ci.t) < 6, 'data max value error at ' + index + '. position');
                         });
                     },
                     error: function (error) {
@@ -2094,7 +2072,6 @@
         });
     });
     test('Include: indirect -> map Entity_', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(105);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2107,10 +2084,11 @@
                     success: function (results) {
                         start(1);
                         equal(results.length, 26, 'Result number error');
+                        var ref = results[0].Id || 0; 
                         results.forEach(function (r, index) {
                             ok(r instanceof $news.Types.Category, 'data type error at ' + index + '. position');
                             ok(r.Id > 0, 'category Id min value error at ' + index + '. position');
-                            ok(r.Id < 6, 'category Id max value error at ' + index + '. position');
+                            ok(Math.abs(ref - r.Id) < 6, 'category Id max value error at ' + index + '. position');
                             ok(r.Title.length >= 4, 'category title error at ' + index + '. position');
                         });
                     },
@@ -2124,7 +2102,6 @@
     });
     /*FIX: odata need expand*/
     test('Include: indirect -> map EntitySet', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(209);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2137,13 +2114,14 @@
                     success: function (results) {
                         start(1);
                         equal(results.length, 26, 'Result number error');
+                        var ref = results[0][0].Id || 0; 
                         results.forEach(function (r, index) {
                             ok(r instanceof Array, 'data type error at ' + index + '. position');
                             equal(r.length, 2, "tagconnection number faild");
                             r.forEach(function (tc) {
                                 ok(tc instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
                                 ok(tc.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
-                                ok(tc.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                                ok(Math.abs(ref - tc.Id)< 53, 'TagConnection Id max value error at ' + index + '. position');
                             });
                         });
                     },
@@ -2182,7 +2160,6 @@
         });
     });
     test('Include: indirect -> map object include Entity', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(131);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2195,11 +2172,12 @@
                     success: function (results) {
                         start(1);
                         equal(results.length, 26, 'Result number error');
+                        var ref = results[0].r.Id || 0; 
                         results.forEach(function (r, index) {
                             equal(typeof r, 'object', 'data type error at ' + index + '. position');
                             ok(r.r instanceof $news.Types.Category, 'data type error at ' + index + '. position');
                             ok(r.r.Id > 0, 'category Id min value error at ' + index + '. position');
-                            ok(r.r.Id < 6, 'category Id max value error at ' + index + '. position');
+                            ok(Math.abs(ref - r.r.Id) < 6, 'category Id max value error at ' + index + '. position');
                             ok(r.r.Title.length >= 4, 'category title error at ' + index + '. position');
                         });
                     },
@@ -2212,7 +2190,6 @@
         });
     });
     test('Include: indirect -> map object include EntitySet', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(287);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2225,6 +2202,7 @@
                     success: function (results) {
                         start(1);
                         equal(results.length, 26, 'Result number error');
+                        var ref = results[0].r[0].Id || 0; 
                         results.forEach(function (r, index) {
                             equal(typeof r, 'object', 'data type error at ' + index + '. position');
                             ok(r.r instanceof Array, 'data type error at ' + index + '. position');
@@ -2232,7 +2210,7 @@
                             r.r.forEach(function (tc, index) {
                                 ok(tc instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
                                 ok(tc.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
-                                ok(tc.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                                ok(Math.abs(ref - tc.Id)  < 53, 'TagConnection Id max value error at ' + index + '. position');
                                 ok(index < 2, 'TagConnection number error');
                             });
                         });
@@ -2407,7 +2385,6 @@
         });
     });
     test('Include: mixed -> filter, map, include', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(39);
         var refDate = new Date(Date.parse("1979/05/01"));
         stop(3);
@@ -2487,7 +2464,6 @@
         });
     });
     test('Include: mixed -> filter, map (without complex type property), include', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(38);
         var refDate = new Date(Date.parse("1979/05/01"));
         stop(3);
@@ -2567,7 +2543,6 @@
         });
     });
     test('Include: many mixed -> filter, map (without complex type property), include', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(75);
         var refDate = new Date(Date.parse("1979/05/01"));
         stop(3);
@@ -2787,7 +2762,6 @@
         });
     });
     test('Include: direct -> deep Entity', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(209);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2823,7 +2797,6 @@
         });
     });
     test('Include: direct -> mixed deep Entity, EntitySet', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(417);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

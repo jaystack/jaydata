@@ -1,10 +1,10 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
 $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.EntityExpressionVisitor, null, {
-    constructor: function (entityContext) {
-        this.entityContext = entityContext;
+    constructor: function (provider) {
+        this.provider = provider; 
+        this.entityContext = provider.context;
         this.hasObjectLiteral = false;
-        this.ObjectLiteralPath = "";
         this.modelBinderMapping = [];
     },
 
@@ -25,53 +25,62 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
     },
     VisitParametricQueryExpression: function (expression, context) {
         this.Visit(expression.expression, context);
-        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
-            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += this.mapping.replace(/\./g, '/')
-        } if (expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
-            var m = this.mapping.split('.');
+        var m = this.mapping.split('.');
+        
+        if (!(expression.expression instanceof $data.Expressions.EntityExpression) && !(expression.expression instanceof $data.Expressions.EntitySetExpression)) {
             m.pop();
-            if (m.length > 0) {
-                if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-                context['$expand'] += m.join('/');
+        }
+        
+        if (m.length > 0) {
+            if(!context['$expand'] || !(context['$expand'] instanceof $data.storageProviders.oData.ODataIncludeFragment)){
+                context['$expand'] = new $data.storageProviders.oData.ODataIncludeFragment();
             }
-        } else {
-            var m = this.mapping.split('.');
-            m.pop();
-            if (m.length > 0) {
-                if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-                context['$expand'] += m.join('/');
-            }
+            context['$expand'].addInclude(m.join('.'))
         }
     },
     VisitObjectLiteralExpression: function (expression, context) {
         ///<summary></summary>
         ///<param name="expression" type="$data.Expressions.ObjectLiteralExpression" mayBeNull="false"></param>
         ///<param name="context" mayBeNull="false"></param>
-        var tempObjectLiteralPath = this.ObjectLiteralPath;
+        
         this.hasObjectLiteral = true;
         expression.members.forEach(function (member, index) {
             this.Visit(member, context);
             if (index < expression.members.length - 1) { context.data += ','; }
             this.mapping = '';
         }, this);
-        this.ObjectLiteralPath = tempObjectLiteralPath;
     },
     VisitObjectFieldExpression: function (expression, context) {
-
-
-        if (this.ObjectLiteralPath) { this.ObjectLiteralPath += '.' + expression.fieldName; } else { this.ObjectLiteralPath = expression.fieldName; }
         this.Visit(expression.expression, context);
+        
+        var m = this.mapping.split('.');
+        var propertyName = "";
+        if (!(expression.expression instanceof $data.Expressions.EntityExpression) && !(expression.expression instanceof $data.Expressions.EntitySetExpression)) {
+            propertyName = m.pop();
+        }
 
-        if (expression.expression instanceof $data.Expressions.EntityExpression || expression.expression instanceof $data.Expressions.EntitySetExpression) {
-            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += this.mapping.replace(/\./g, '/')
-        } else {
-            var m = this.mapping.split('.');
-            m.pop();
-            if (m.length > 0) {
-                if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-                context['$expand'] += m.join('/');
+        if (m.length > 0) {
+            if(!context['$expand'] || !(context['$expand'] instanceof $data.storageProviders.oData.ODataIncludeFragment)){
+                context['$expand'] = new $data.storageProviders.oData.ODataIncludeFragment();
+            }
+            
+            if(expression.expression instanceof $data.Expressions.EntityFieldExpression && expression.expression.selector instanceof $data.Expressions.MemberInfoExpression){
+                var storageModel = this.entityContext._storageModel.getStorageModel(expression.expression.selector.memberDefinition.definedBy)
+                if(!storageModel) return;
+                
+                var isComplexProperty = storageModel && !!storageModel.ComplexTypes[expression.memberName];
+                if(isComplexProperty){
+                    var complexProperty = m.pop();
+                    context['$expand'].addImplicitMap(m.join('.'), complexProperty);
+                    return;
+                }
+            }
+            
+            
+            if (expression.expression instanceof $data.Expressions.ComplexTypeExpression) {
+                context['$expand'].addImplicitMap(m.join('.'), propertyName);
+            } else {
+                context['$expand'].addInclude(m.join('.'))
             }
         }
     },
@@ -103,16 +112,48 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         }
     },
     VisitAssociationInfoExpression: function (expression, context) {
-        if (context.data && context.data.length > 0 && context.data[context.data.length - 1] != ',') { context.data += '/'; }
-        context.data += expression.associationInfo.FromPropertyName;
         if (this.mapping && this.mapping.length > 0) { this.mapping += '.'; }
         this.mapping += expression.associationInfo.FromPropertyName;
+        
+        if (context.data && context.data.length > 0 && context.data[context.data.length - 1] != ',') { 
+            if(!context['$expand'] || !(context['$expand'] instanceof $data.storageProviders.oData.ODataIncludeFragment)){
+                context['$expand'] = new $data.storageProviders.oData.ODataIncludeFragment();
+            }
+            context['$expand'].addInclude(this.mapping)
+        } else {
+            context.data += expression.associationInfo.FromPropertyName;
+        }
+
     },
     VisitMemberInfoExpression: function (expression, context) {
-        if (context.data && context.data.length > 0 && context.data[context.data.length - 1] != ',') { context.data += '/'; }
-        context.data += expression.memberName;
+        var storageModel = this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy)
+        var isComplexProperty = storageModel && !!storageModel.ComplexTypes[expression.memberName];
+        var isComplexField = !storageModel;
+        
+        if (context.data && context.data.length > 0 && context.data[context.data.length - 1] != ',') {
+            if(this.mapping){
+                if(!context['$expand'] || !(context['$expand'] instanceof $data.storageProviders.oData.ODataIncludeFragment)){
+                    context['$expand'] = new $data.storageProviders.oData.ODataIncludeFragment();
+                }
+                if(isComplexField){
+                    var m = this.mapping.split('.');
+                    var complexProperty = m.pop();
+                    if(this.provider.checkODataMode("disableCompltexTypeMapping")){
+                        context['$expand'].addImplicitMap(m.join('.'), complexProperty);
+                    } else {
+                        context['$expand'].addImplicitMap(m.join('.'), complexProperty + "/" + expression.memberName);
+                    }
+                } else if(!isComplexProperty) {
+                    context['$expand'].addImplicitMap(this.mapping, expression.memberName);
+                }
+            } 
+        } else {
+            //if(context.data[context.data.length - 1] != ',') context.data += '/';
+            context.data += expression.memberName;
+        }
+        
         if (this.mapping && this.mapping.length > 0) { this.mapping += '.'; }
-        this.mapping += expression.memberName;
+        this.mapping += expression.memberName;        
     },
     VisitConstantExpression: function (expression, context) {
         //Guard.raise(new Exception('Constant value is not supported in Projection.', 'Not supported!'));

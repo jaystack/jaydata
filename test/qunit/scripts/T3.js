@@ -842,7 +842,7 @@ function T3(providerConfig, msg) {
         });
     });
     test('full_table_length_with_include', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(2);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -867,7 +867,7 @@ function T3(providerConfig, msg) {
         });
     });
     test('full_table_length_with_multiple_include', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         expect(2);
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -892,7 +892,7 @@ function T3(providerConfig, msg) {
         });
     });
     test('full_table_single', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(2);
         stop(3);
@@ -900,24 +900,25 @@ function T3(providerConfig, msg) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-
-                db.Articles.single(function (a) { return a.Id == 1; }, null, {
-                    success: function (result) {
-                        start(1);
-                        ok(result, 'query failed');
-                        ok(result instanceof $news.Types.Article, 'Result faild');
-                    },
-                    error: function (error) {
-                        start(1);
-                        console.dir(error);
-                        ok(false, error);
-                    }
+                db.Articles.select('it.Id').first(null, null, function(id){
+                    db.Articles.single(function (a) { return a.Id == this.id; }, { id: id }, {
+                        success: function (result) {
+                            start(1);
+                            ok(result, 'query failed');
+                            ok(result instanceof $news.Types.Article, 'Result faild');
+                        },
+                        error: function (error) {
+                            start(1);
+                            console.dir(error);
+                            ok(false, error);
+                        }
+                    });
                 });
             });
         });
     });
     test('full_table_single_faild', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         //if (providerConfig.name == "sqLite") { ok(true, "Not supported"); return; }
         expect(1);
         stop(3);
@@ -925,16 +926,17 @@ function T3(providerConfig, msg) {
             start(1);
             $news.Types.NewsContext.generateTestData(db, function () {
                 start(1);
-
-                db.Articles.single(function (a) { return a.Id > 1; }, null, {
-                    success: function (result) {
-                        start(1);
-                        ok(false, 'Single return more than 1 item');
-                    },
-                    error: function (error) {
-                        start(1);
-                        ok(true, 'OK');
-                    }
+                db.Articles.select('it.Id').first(null, null, function(id){
+                    db.Articles.single(function (a) { return a.Id > this.id; }, { id: id }, {
+                        success: function (result) {
+                            start(1);
+                            ok(false, 'Single return more than 1 item');
+                        },
+                        error: function (error) {
+                            start(1);
+                            ok(true, 'OK');
+                        }
+                    });
                 });
             });
         });
@@ -1282,7 +1284,7 @@ function T3(providerConfig, msg) {
     });
 
     test('Select with constant value', function () {
-        if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
+        //if (providerConfig.name == "oData") { ok(true, "Not supported"); return; }
         
         stop(3);
         (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

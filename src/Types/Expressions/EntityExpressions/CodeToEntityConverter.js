@@ -130,6 +130,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 return result;
 
             case exp instanceof $data.Expressions.EntitySetExpression:
+            case exp instanceof $data.Expressions.FrameOperationExpression:
                 var operation = this.scopeContext.resolveSetOperations(member.value, exp, context.frameType);
                 if (!operation) {
                     Guard.raise("Unknown entity field operation: " + member.getJSON());
@@ -209,6 +210,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
         }
 
         switch (exp.expressionType) {
+            case $data.Expressions.EntitySetExpression:
             case $data.Expressions.EntityExpression:
                 var memberDefinition = exp.getMemberDefinition(member.value);
                 if (!memberDefinition) {

@@ -46,6 +46,9 @@ if(!("eTagAny" in $data.defaults.OData)){
 if(!("enableDeepSave" in $data.defaults.OData)){
     $data.defaults.OData.enableDeepSave = false;
 }
+if(!("disableCompltexTypeMapping" in $data.defaults.OData)){
+    $data.defaults.OData.disableCompltexTypeMapping = false;
+}
 
 var checkODataMode = function(context, functionName){
     if(typeof context.providerConfiguration[functionName] !== 'undefined'){
@@ -1081,8 +1084,20 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
     supportedSetOperations: {
         value: {
-            filter: {},
-            map: {},
+            filter: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                frameType: $data.Expressions.FilterExpression,
+                includeFrameName: '$filter',
+                includeCompiler: '$data.storageProviders.oData.oDataWhereCompiler'
+            },
+            map: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                frameType: $data.Expressions.ProjectionExpression,
+                includeFrameName: '$select',
+                includeCompiler: '$data.storageProviders.oData.oDataProjectionCompiler'
+            },
             length: {},
             forEach: {},
             toArray: {},
@@ -1101,14 +1116,44 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 mapTo: 'all',
                 frameType: $data.Expressions.EveryExpression
             },
-            take: {},
-            skip: {},
-            orderBy: {},
-            orderByDescending: {},
+            take: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                frameType: $data.Expressions.PagingExpression,
+                includeFrameName: '$top',
+                includeCompiler: '$data.storageProviders.oData.oDataPagingCompiler'
+            },
+            skip: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                frameType: $data.Expressions.PagingExpression,
+                includeFrameName: '$skip',
+                includeCompiler: '$data.storageProviders.oData.oDataPagingCompiler'
+            },
+            orderBy: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                frameType: $data.Expressions.OrderExpression,
+                includeFrameName: '$orderby',
+                includeCompiler: '$data.storageProviders.oData.oDataOrderCompiler'
+            },
+            orderByDescending: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                frameType: $data.Expressions.OrderExpression,
+                includeFrameName: '$orderby',
+                includeCompiler: '$data.storageProviders.oData.oDataOrderCompiler'
+            },
             first: {},
             include: {},
             batchDelete: {},
-            withInlineCount: {},
+            withInlineCount: {
+                allowedIn: [$data.Expressions.IncludeExpression],
+                parameters: [],
+                frameType: $data.Expressions.InlineCountExpression,
+                includeFrameName: '$count',
+                implementation: function(){ return 'true' }
+            },
             find: {}
         },
         enumerable: true,
@@ -1307,6 +1352,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         } while (i < input.length);
 
         return base64;
+    },
+    checkODataMode: function(functionName){
+        return checkODataMode(this, functionName)
     }
 }, null);
 

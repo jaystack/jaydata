@@ -5,6 +5,14 @@ $C('$data.Expressions.FrameOperationExpression', $data.Expressions.ExpressionNod
         this.source = source;
         this.operation = operation;
         this.parameters = parameters;
+        
+        switch (true) {
+            case this.source instanceof $data.Expressions.EntitySetExpression:
+            case this.source instanceof $data.Expressions.FrameOperationExpression:
+                this.elementType = this.source.elementType;
+                this.storageModel = this.source.storageModel;
+                break;
+        }
     },
     nodeType: { value: $data.Expressions.ExpressionType.FrameOperation }
 

@@ -749,11 +749,40 @@ $data.Class.define('$data.Queryable', null, null,
         ///			Articles.include("Category");
         ///		</example>
         ///	</signature>
+        
+        if(this.entityContext && this.entityContext.storageProvider && this.entityContext.storageProvider.name === "oData"){
+            return this.include2.apply(this, arguments);
+        }
 
         this._checkOperation('include');
         var constExp = Container.createConstantExpression(selector, "string");
         var takeExp = Container.createIncludeExpression(this.expression, constExp);
         return Container.createQueryable(this, takeExp);
+    },
+    include2: function (selector, thisArg) {
+		///	<summary>Includes the given entity set in the query if it's an inverse property.</summary>
+        ///	<param name="selector" type="$data.String">Entity set name</param>
+        ///	<returns type="$data.Queryable" />
+        ///	<signature>
+        ///		<summary>Includes the given entity set in the query if it's an inverse property.</summary>
+        ///		<param name="selector" type="$data.String">
+        ///			The name of the entity set you want to include in the query.
+        ///		</param>
+        ///		<returns type="$data.Queryable" />
+		///		<example>
+		///			Include the Category on every Article. &#10;
+        ///			Articles.include("Category");
+        ///		</example>
+        ///	</signature>
+
+        this._checkOperation('include');
+        if(typeof selector === 'string' && (selector.length < 3 || selector.substr(0, 3) !== 'it.')){
+            selector = 'it.' + selector;
+        }
+        var expression = Container.createCodeExpression(selector, thisArg);
+        var includeExp = Container.createIncludeExpression(this.expression, expression);
+        
+        return Container.createQueryable(this, includeExp);
     },
 
     withInlineCount: function (selector) {

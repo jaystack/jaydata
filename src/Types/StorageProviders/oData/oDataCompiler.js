@@ -20,6 +20,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         var queryFragments = { urlText: "" };
 
         this.Visit(query.expression, queryFragments);
+        if(queryFragments.$expand){
+            queryFragments.$expand = queryFragments.$expand.toString();
+        }
+        
 
         query.modelBinderConfig = {};
         var modelBinder = Container.createModelBinderConfigCompiler(query, this.includes, true);
@@ -73,28 +77,12 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     },
     VisitIncludeExpression: function (expression, context) {
         this.Visit(expression.source, context);
-        if (!context['$select']) {
-            if (context['$expand']) { context['$expand'] += ','; } else { context['$expand'] = ''; }
-            context['$expand'] += expression.selector.value.replace(/\./g, '/');
 
-            this.includes = this.includes || [];
-            var includeFragment = expression.selector.value.split('.');
-            var tempData = null;
-            var storageModel = this.mainEntitySet.entityContext._storageModel.getStorageModel(this.mainEntitySet.createNew);
-            for (var i = 0; i < includeFragment.length; i++) {
-                if (tempData) { tempData += '.' + includeFragment[i]; } else { tempData = includeFragment[i]; }
-                var association = storageModel.Associations[includeFragment[i]];
-                if (association) {
-                    if (!this.includes.some(function (include) { return include.name == tempData }, this)) {
-                        this.includes.push({ name: tempData, type: association.ToType });
-                    }
-                }
-                else {
-                    Guard.raise(new Exception("The given include path is invalid: " + expression.selector.value + ", invalid point: " + tempData));
-                }
-                storageModel = this.mainEntitySet.entityContext._storageModel.getStorageModel(association.ToType);
-            }
-        }
+        var includeCompiler = Container.createoDataIncludeCompiler(this.provider);
+        this.includes = this.includes || []
+        var includeContext = { data: context["$expand"], includes: this.includes }
+        includeCompiler.compile(expression.selector, includeContext);
+        context["$expand"] = includeContext.data;
     },
     VisitFindExpression: function (expression, context) {
         this.Visit(expression.source, context);
@@ -134,7 +122,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.source, context);
 
-        var projectionCompiler = Container.createoDataProjectionCompiler(this.context);
+        var projectionCompiler = Container.createoDataProjectionCompiler(this.provider);
         projectionCompiler.compile(expression, context);
     },
     VisitFilterExpression: function (expression, context) {

@@ -47,7 +47,7 @@ exports.asyncQTM = {
   },
   stop : function(int) {},
   ok : function(actual, msg) {
-		expect(actual !== undefined).to.equal(true, msg);
+		expect(!!actual).to.equal(true, msg);
 	},
   deepEqual : function(actual, expected, msg) {
 		expect(actual).to.deep.equal(expected, msg);

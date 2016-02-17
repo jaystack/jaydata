@@ -55,8 +55,13 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
                 this.storageModel = c.instance._storageModel.getStorageModel(this.elementType);
                 break;
             case this.source instanceof $data.Expressions.EntitySetExpression:
-                this.elementType = this.source.elementType;
-                this.storageModel = this.source.storageModel;
+                if (selector instanceof $data.Expressions.AssociationInfoExpression) {
+                    this.elementType = selector.associationInfo.ToType,
+                    this.storageModel = c.instance._storageModel.getStorageModel(selector.associationInfo.ToType)
+                } else {
+                    this.elementType = this.source.elementType;
+                    this.storageModel = this.source.storageModel;
+                }
                 break;
             case this.source instanceof $data.Expressions.ServiceOperationExpression:
                 this.elementType = this.source.elementType;//?????????
@@ -75,6 +80,15 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
         //EntityTypeInfo
 
     },
+    getMemberDefinition: function (name) {
+        var memdef = this.elementType.getMemberDefinition(name);
+        if (!(memdef)) {
+            Guard.raise(new Exception("Unknown member " + name + " on type "+ this.entityType.name, "MemberNotFound"));
+        };
+            memdef.storageModel = this.storageModel;
+        return memdef;
+    },
+    
     instance: { enumerable: false },
     nodeType: { value: $data.Expressions.ExpressionType.EntitySet, enumerable: true }
 });

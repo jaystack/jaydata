@@ -19,25 +19,25 @@ exports.T3 = function (providerConfig, msg) {
           db.Articles
             .filter("Id", "==", 1)
             .toArray(function (items) {
-              start();
               asyncQTM.equal(items.length, 1, "one record found");
               asyncQTM.equal(items[0].Id, 1, "record is Id = 1");
+              start();
             });
 
           db.Articles
             .filter("Id", "in", [1, 3, 5, 7])
             .toArray(function (items) {
-              start();
               asyncQTM.equal(items.length, 4, "one record found");
               asyncQTM.equal(items[1].Id, 3, "record is Id = 3");
+              start();
             });
 
           db.Articles
             .filter("Title", ".startsWith", "Article2")
             .filter("Title", ".contains", "25")
             .toArray(function (items) {
-              start();
               asyncQTM.equal(items.length, 1, "one record found");
+              start();
             });
 
 
@@ -46,8 +46,8 @@ exports.T3 = function (providerConfig, msg) {
             .filter("Author.LoginName", ".startsWith", "Usr1")
             .filter("Id", ">", 10)
             .toArray(function (items) {
-              start();
               asyncQTM.equal(items[0].Author.LoginName, 'Usr1', 'Author matches');
+              start();
             });
 
         });
@@ -728,7 +728,7 @@ exports.T3 = function (providerConfig, msg) {
     //   });
     // });
     // asyncQTM.test('full_table_length_with_include', 3, function (start) {
-    //   if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
+    //   //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
 
     //   (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
     //     start(1);
@@ -752,7 +752,7 @@ exports.T3 = function (providerConfig, msg) {
     //   });
     // });
     // asyncQTM.test('full_table_length_with_multiple_include', 3, function (start) {
-    //   if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
+    //   //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
 
     //   (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
     //     start(1);
@@ -776,7 +776,7 @@ exports.T3 = function (providerConfig, msg) {
     //   });
     // });
     // asyncQTM.test('full_table_single', 3, function (start) {
-    //   if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
+    //   //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
     //   //if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported"); return start(); }
         
     //   (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -784,39 +784,43 @@ exports.T3 = function (providerConfig, msg) {
     //     $news.Types.NewsContext.generateTestData(db, function () {
     //       start(1);
 
-    //       db.Articles.single(function (a) { return a.Id == 1; }, null, {
-    //         success: function (result) {
-    //           start(1);
-    //           asyncQTM.ok(result, 'query failed');
-    //           asyncQTM.ok(result instanceof $news.Types.Article, 'Result faild');
-    //         },
-    //         error: function (error) {
-    //           start(1);
-    //           console.dir(error);
-    //           asyncQTM.ok(false, error);
-    //         }
+    //       db.Articles.select('it.Id').first(null, null, function(id){
+    //         db.Articles.single(function (a) { return a.Id == this.id; }, { id: id }, {
+    //           success: function (result) {
+    //             start(1);
+    //             asyncQTM.ok(result, 'query failed');
+    //             asyncQTM.ok(result instanceof $news.Types.Article, 'Result faild');
+    //           },
+    //           error: function (error) {
+    //             start(1);
+    //             console.dir(error);
+    //             asyncQTM.ok(false, error);
+    //           }
+    //         });
     //       });
     //     });
     //   });
     // });
     // asyncQTM.test('full_table_single_faild', 3, function (start) {
-    //   if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
+    //   //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
     //   //if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported"); return start(); }
         
     //   (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
     //     start(1);
     //     $news.Types.NewsContext.generateTestData(db, function () {
     //       start(1);
-
-    //       db.Articles.single(function (a) { return a.Id > 1; }, null, {
-    //         success: function (result) {
-    //           start(1);
-    //           asyncQTM.ok(false, 'Single return more than 1 item');
-    //         },
-    //         error: function (error) {
-    //           start(1);
-    //           asyncQTM.ok(true, 'OK');
-    //         }
+    
+    //       db.Articles.select('it.Id').first(null, null, function(id){
+    //         db.Articles.single(function (a) { return a.Id > this.id; }, { id: id }, {
+    //           success: function (result) {
+    //             start(1);
+    //             asyncQTM.ok(false, 'Single return more than 1 item');
+    //           },
+    //           error: function (error) {
+    //             start(1);
+    //             asyncQTM.ok(true, 'OK');
+    //           }
+    //         });
     //       });
     //     });
     //   });
@@ -1164,7 +1168,7 @@ exports.T3 = function (providerConfig, msg) {
     // });
 
     // asyncQTM.test('Select with constant value', 3, function (start) {
-    //   if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
+    //   //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); return start(); }
 
 
     //   (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {

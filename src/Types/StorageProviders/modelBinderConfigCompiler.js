@@ -1,8 +1,71 @@
 import $data, { $C, Guard, Container, Exception } from '../../TypeSystem/index.js';
 
 $C('$data.modelBinder.FindProjectionVisitor', $data.Expressions.EntityExpressionVisitor, null, {
-    VisitProjectionExpression: function (expression) {
-        this.projectionExpression = expression;
+    constructor: function(includes){
+        this._includes = includes;
+    },
+    VisitProjectionExpression: function (expression, context) {
+        this.projectionExpression = this.projectionExpression || expression;
+        context && (context.projectionExpression = context.projectionExpression || expression);
+        this.Visit(expression.source, context)
+    },
+    VisitIncludeExpression: function (expression, context) {
+        this.Visit(expression.source, context)
+        if(!(expression.selector instanceof $data.Expressions.ConstantExpression)) {
+            var selectorContext = {};
+            this.Visit(expression.selector.expression, selectorContext);
+            
+            if(selectorContext.hasIncludeProjectionExpression){
+                var include = this._includes.filter(function(it){ return it.name === selectorContext.includePath; })[0];
+                if(include){
+                    include.projectionExpression = selectorContext.includeProjectionExpression
+                }
+                
+                context && (context.hasIncludeProjectionExpression = true);
+            }
+        }
+    },
+    VisitFrameOperationExpression: function(expression, context){
+        this.Visit(expression.source, context);
+        
+        var opDef = expression.operation.memberDefinition;
+        if(opDef && opDef.frameType === $data.Expressions.ProjectionExpression){
+            var paramCounter = 0;
+            var params = opDef.parameters || [{ name: "@expression" }];
+            
+            var args = params.map(function (item, index) {
+                if (item.name === "@expression") {
+                    return expression.source;
+                } else {
+                    return expression.parameters[paramCounter++]
+                };
+            });
+            
+            for (var i = 0; i < args.length; i++) {
+                var arg = args[i];
+                if (arg && arg.value instanceof $data.Queryable) {
+                    var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
+                    var prep_expression = preparator.Visit(arg.value.expression);
+                    
+                    var visitor = new $data.modelBinder.FindProjectionVisitor(this._inculdes);
+                    var visitorContext = { };
+                    var compiled = visitor.Visit(prep_expression, visitorContext);
+                    
+                    if(context && visitorContext.projectionExpression){
+                        context.hasIncludeProjectionExpression = true;
+                        context.includeProjectionExpression = visitorContext.projectionExpression;
+                    }
+                }
+            }
+        }
+    },
+    VisitAssociationInfoExpression: function (expression, context) {
+        var propName = expression.associationInfo.FromPropertyName;
+        
+        if(context) {
+            context.includePath = context.includePath ? (context.includePath + '.') : "";
+            context.includePath += propName;
+        }
     }
 });
 
@@ -11,6 +74,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         this._query = query;
         this._includes = includes;
         this._isoDataProvider = oDataProvider || false;
+        this.depth = [];
     },
     VisitSingleExpression: function (expression) {
         this._defaultModelBinder(expression);
@@ -81,13 +145,14 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     },
 
     VisitExpression: function (expression, builder) {
-        var projVisitor = Container.createFindProjectionVisitor();
-        projVisitor.Visit(expression);
+        var projVisitor = Container.createFindProjectionVisitor(this._includes);
+        var projContext = {};
+        projVisitor.Visit(expression, projContext);
 
-        if (projVisitor.projectionExpression) {
-            this.Visit(projVisitor.projectionExpression, builder);
+        if (projContext.projectionExpression) {
+            this.Visit(projContext.projectionExpression, builder);
         } else {
-            this.DefaultSelection(builder, this._query.defaultType, this._includes);
+            this.DefaultSelection(builder, this._query.defaultType, this._includes, projContext.hasIncludeProjectionExpression);
         }
     },
     _defaultModelBinder: function (expression) {
@@ -143,7 +208,10 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                             builder.popModelBinderProperty();
                             builder.popModelBinderProperty();
                         } else {
-                            builder.modelBinderConfig[prop.name] = prop.name;
+                            builder.modelBinderConfig[prop.name] = {
+                                $source: prop.name,
+                                $type: prop.type
+                            };
                         }
                     }
                 }
@@ -206,14 +274,20 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
             }
         }, this);
     },
-    DefaultSelection: function (builder, type, allIncludes) {
+    DefaultSelection: function (builder, type, allIncludes, custom) {
         //no projection, get all item from entitySet
-        builder.modelBinderConfig['$type'] = type;
+        builder.modelBinderConfig['$type'] = custom ? $data.Object : type;
 
         var storageModel = this._query.context._storageModel.getStorageModel(type);
         this._addPropertyToModelBinderConfig(type, builder);
         if (allIncludes) {
+            let excludeDeepInclude = [];
             allIncludes.forEach(function (include) {
+                if(excludeDeepInclude.some(function(incName){ return include.name.length > incName.length && include.name.substr(0, incName.length) === incName })) {
+                    return;
+                }
+                this.depth.push(include.name);
+                
                 var includes = include.name.split('.');
                 var association = null;
                 var tmpStorageModel = storageModel;
@@ -236,16 +310,27 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                     builder.modelBinderConfig['$type'] = $data.Array;
                     builder.selectModelBinderProperty('$item');
                     builder.modelBinderConfig['$type'] = include.type;
-                    this._addPropertyToModelBinderConfig(include.type, builder);
+                    if(include.projectionExpression){
+                        excludeDeepInclude.push(include.name);
+                        this.Visit(include.projectionExpression, builder);
+                    } else {
+                        this._addPropertyToModelBinderConfig(include.type, builder);
+                    }
                     builder.popModelBinderProperty();
                 } else {
                     builder.modelBinderConfig['$type'] = include.type;
-                    this._addPropertyToModelBinderConfig(include.type, builder);
+                    if(include.projectionExpression){
+                        excludeDeepInclude.push(include.name);
+                        this.Visit(include.projectionExpression, builder);
+                    } else {
+                        this._addPropertyToModelBinderConfig(include.type, builder);
+                    }
                 }
 
                 for (var i = 0; i < includes.length + itemCount; i++) {
                     builder.popModelBinderProperty();
                 }
+                this.depth.pop();
             }, this);
         }
     },
@@ -268,7 +353,11 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     VisitEntityAsProjection: function (expression, builder) {
         this.mapping = '';
         this.Visit(expression.expression, builder);
+        this.depth.push(this.mapping);
+        this.mapping = this.depth.join('.');
+        
         var includes;
+        var currentInclude;
         if (this.mapping && this._includes instanceof Array) {
             includes = this._includes.filter(function (inc) {
                 return inc.name.indexOf(this.mapping + '.') === 0
@@ -277,22 +366,46 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 return { name: inc.name.replace(this.mapping + '.', ''), type: inc.type };
             }, this);
 
-            if (includes.length > 0){
-                this.DefaultSelection(builder, expression.expression.entityType, includes);
-                //console.warn('WARN: include for mapped properties is not supported!');
-            }
+            // if (includes.length > 0){
+            //     this.DefaultSelection(builder, expression.expression.entityType, includes);
+            //     //console.warn('WARN: include for mapped properties is not supported!');
+            // }
+            
+            currentInclude = this._includes.filter(function (inc) {
+                return inc.name === this.mapping;
+            }, this)[0];
         }
-
+        
         if (expression.expression instanceof $data.Expressions.EntityExpression) {
-            this.DefaultSelection(builder, expression.expression.entityType/*, includes*/)
+            if(currentInclude && currentInclude.projectionExpression){
+                let tmpIncludes = this._includes;
+                this._includes = includes;
+                let tmpDepth = this.depth;
+                this.depth = [];
+                this.Visit(currentInclude.projectionExpression, builder);
+                this._includes = tmpIncludes;
+                this.depth = tmpDepth;
+            } else {
+                this.DefaultSelection(builder, expression.expression.entityType, includes)
+            }
         } else if (expression.expression instanceof $data.Expressions.EntitySetExpression) {
             builder.modelBinderConfig.$type = $data.Array;
             builder.modelBinderConfig.$item = {};
             builder.selectModelBinderProperty('$item');
-            this.DefaultSelection(builder, expression.expression.elementType /*, includes*/)
+            if(currentInclude && currentInclude.projectionExpression){
+                let tmpIncludes = this._includes;
+                this._includes = includes;
+                let tmpDepth = this.depth;
+                this.depth = [];
+                this.Visit(currentInclude.projectionExpression, builder);
+                this._includes = tmpIncludes;
+                this.depth = tmpDepth;
+            } else {
+                this.DefaultSelection(builder, expression.expression.elementType, includes)
+            }
             builder.popModelBinderProperty();
         }
-
+        this.depth.pop();
     },
 
     VisitEntityFieldExpression: function (expression, builder) {

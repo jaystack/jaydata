@@ -3,10 +3,12 @@ import $data from 'jaydata/core';
 import oData from '../../src/Types/StorageProviders/oData'
 import { expect } from 'chai';
 import { asyncQTM } from './scripts/qunitToMocha.js';
-$data.setModelContainer(global);
 import newsReaderContext from './scripts/NewsReaderContext.js';
 
+$data.setModelContainer(global);
 $data.defaults.OData.withReferenceMethods = true;
+$data.defaults.OData.disableCompltexTypeMapping = true;
+
 var exports = module.exports = {};
 exports.EntityContextTests = function(providerConfig, msg) {
   msg = msg || '';
@@ -239,7 +241,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('deep_include_fix', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported"); start(); return; }
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -338,7 +340,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
         db.saveChanges(function () {
 
           db.Articles.length(function (c) {
-            console.log("!!!!", c);
+            //console.log("!!!!", c);
             db.Articles.single('it.Title == "TitleData"', null, function (item) {
               db.Articles.attach(item);
               asyncQTM.ok(item.Category === undefined, 'article category is undefined');
@@ -435,7 +437,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
       });
     });
     asyncQTM.test('map as jaydata type', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       asyncQTM.stop(1);
 
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -456,7 +458,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
       });
     });
     asyncQTM.test('map as default', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       asyncQTM.stop(1);
 
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -632,14 +634,14 @@ exports.EntityContextTests = function(providerConfig, msg) {
 
     asyncQTM.test('navProperty many', 1, function (start) {
       //if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported");start(); return; }
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(1);
 
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
           db.Articles.map(function (a) { return { id: a.Id, catArticles: a.Category.Articles }; }).toArray(function (art) {
-            console.log(art);
+            // console.log(art);
             asyncQTM.equal(art[0].catArticles instanceof Array, true, 'many nav property is array');
             asyncQTM.equal(art[1].catArticles instanceof Array, true, 'many nav property is array');
 
@@ -655,7 +657,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
 
     asyncQTM.test('navProperty single', 1, function (start) {
       //if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported");start(); return; }
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
 
       asyncQTM.stop(1);
@@ -951,7 +953,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_even if a simple field is projected an Article is returned', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
@@ -975,7 +977,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_additional_test1', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
@@ -1001,14 +1003,14 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_additional_test2', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
             var q2 = db.Articles.map(function (a) { return a.Author; });
-            console.dir(q2.toTraceString());
+            // console.dir(q2.toTraceString());
             q2.toArray(function (a) {
-              console.dir(a);
+            //   console.dir(a);
               asyncQTM.equal(a[0] instanceof $news.Types.User, true, 'result type failed');
               asyncQTM.equal(typeof a[0].LoginName, 'string', 'result type failed');
               asyncQTM.equal(typeof a[0].Id, 'number', 'result type failed');
@@ -1026,7 +1028,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_additional_test3', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
@@ -1052,7 +1054,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_additional_test4', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
@@ -1084,7 +1086,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_additional_test5', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
@@ -1107,11 +1109,11 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1003_additional_test6', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
-            var q2 = db.Articles.filter(function (a) { return a.Category.Id == 1; }, null).map(function (a) { return { Title: a.Title, LoginName: a.Author.LoginName }; });
+            var q2 = db.Articles.filter(function (a) { return a.Category.Id > 1; }, null).map(function (a) { return { Title: a.Title, LoginName: a.Author.LoginName }; });
             q2.toArray(function (a) {
               asyncQTM.notequal(a[0] instanceof $news.Types.UserProfile, true, 'result type failed');
               asyncQTM.equal(typeof a[0].Title, 'string', 'Title filed type faild');
@@ -1132,7 +1134,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1002_even if map is used with anon type an Article is returned', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
@@ -1239,39 +1241,42 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1038_Include complex type property', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
-            var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: 1 })
-              .select(function (item) {
-                return {
-                  Title: item.Title,
-                  Lead: item.Lead,
-                  Body: item.Body,
-                  CreateDate: item.CreateDate,
-                  Author: {
-                    Profile: item.Author.Profile //Location hiányzik
-                  },
-                  CmpType: item.Author.Profile
-                };
-              });
-            var meta = q.toTraceString();
-            console.dir(meta);
-            q.toArray(function (result) {
+            db.Articles.first(null, null, function(a){
 
-              console.dir(result);
-              asyncQTM.ok(result, 'Query OK');
-              asyncQTM.equal(result.length, 1, 'Result nnumber fiaild');
+                var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: a.Id })
+                .select(function (item) {
+                    return {
+                    Title: item.Title,
+                    Lead: item.Lead,
+                    Body: item.Body,
+                    CreateDate: item.CreateDate,
+                    Author: {
+                        Profile: item.Author.Profile //Location hiányzik
+                    },
+                    CmpType: item.Author.Profile
+                    };
+                });
+                var meta = q.toTraceString();
+                // console.dir(meta);
+                q.toArray(function (result) {
 
-              asyncQTM.notequal(result[0].Author instanceof $news.Types.UserProfile, true, 'Author type loading faild');
-              asyncQTM.equal(result[0].Author.Profile instanceof $news.Types.UserProfile, true, 'Author.Profile type loading faild');
+                // console.dir(result);
+                asyncQTM.ok(result, 'Query OK');
+                asyncQTM.equal(result.length, 1, 'Result nnumber fiaild');
 
-              asyncQTM.equal(result[0].CmpType instanceof $news.Types.UserProfile, true, 'Profile type loading faild');
-              asyncQTM.equal(result[0].CmpType.Location instanceof $news.Types.Location, true, 'Profile.Location type loading faild');
-              start();
-            });
-            asyncQTM.ok(true);
+                asyncQTM.notequal(result[0].Author instanceof $news.Types.UserProfile, true, 'Author type loading faild');
+                asyncQTM.equal(result[0].Author.Profile instanceof $news.Types.UserProfile, true, 'Author.Profile type loading faild');
+
+                asyncQTM.equal(result[0].CmpType instanceof $news.Types.UserProfile, true, 'Profile type loading faild');
+                asyncQTM.equal(result[0].CmpType.Location instanceof $news.Types.Location, true, 'Profile.Location type loading faild');
+                start();
+                });
+                asyncQTM.ok(true);
+            })
           });
         } catch (ex) {
           asyncQTM.ok(false, "Unhandled exception occured");
@@ -1284,41 +1289,42 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1038_additional_tests_1', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
-            var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: 1 })
-              .select(function (item) {
-                return {
-                  a: {
-                    b: {
-                      c: {
-                        d: item.Title
-                      }
-                    }
-                  },
-                };
-              });
-            q.toArray(function (result) {
+            db.Articles.first(null, null, function(a){
+                var q = db.Articles.where(function (item) { return item.Id == this.id }, { id: a.Id })
+                .select(function (item) {
+                    return {
+                    a: {
+                        b: {
+                        c: {
+                            d: item.Title
+                        }
+                        }
+                    },
+                    };
+                });
+                q.toArray(function (result) {
 
-              console.dir(result);
-              asyncQTM.ok(result, 'Query OK');
-              asyncQTM.equal(result.length, 1, 'Result nnumber fiaild');
+                    //console.dir(result);
+                    asyncQTM.ok(result, 'Query OK');
+                    asyncQTM.equal(result.length, 1, 'Result nnumber fiaild');
 
-              asyncQTM.equal(typeof result[0], "object", 'object structure build');
-              asyncQTM.equal(typeof result[0].a, "object", 'object structure build (a)');
-              asyncQTM.equal(typeof result[0].a.b, "object", 'object structure build (a.b)');
-              asyncQTM.equal(typeof result[0].a.b.c, "object", 'object structure build (a.b.c)');
-              asyncQTM.equal(typeof result[0].a.b.c.d, "string", 'object structure build (a.b.c.d)');
-              asyncQTM.ok(result[0].a.b.c.d.length > 0, 'Complex type loading faild');
-              start();
+                    asyncQTM.equal(typeof result[0], "object", 'object structure build');
+                    asyncQTM.equal(typeof result[0].a, "object", 'object structure build (a)');
+                    asyncQTM.equal(typeof result[0].a.b, "object", 'object structure build (a.b)');
+                    asyncQTM.equal(typeof result[0].a.b.c, "object", 'object structure build (a.b.c)');
+                    asyncQTM.equal(typeof result[0].a.b.c.d, "string", 'object structure build (a.b.c.d)');
+                    asyncQTM.ok(result[0].a.b.c.d.length > 0, 'Complex type loading faild');
+                    start();
 
+                });
             });
           });
-
         } catch (ex) {
           asyncQTM.ok(false, "Unhandled exception occured");
           start();
@@ -1372,8 +1378,8 @@ exports.EntityContextTests = function(providerConfig, msg) {
               },
               error: function (error) {
                 console.dir(error);
-                start();
                 asyncQTM.ok(false, error);
+                start();
               }
             });
           });
@@ -1417,7 +1423,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test("974_Projection of Navigational property return a typed entity result but it's init data is empty", 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1436,7 +1442,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test("975_Complex type projections - illegal instruction", 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         asyncQTM.ok(db, 'Databse generation faild');
         $news.Types.NewsContext.generateTestData(db, function () {
@@ -1509,7 +1515,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1012_websql provider - Projected Navigational properties are incorrect.', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
@@ -1517,7 +1523,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
 
             var q = db.Articles.map(function (a) { return { T: a.Title, AuthorID: a.Author.Id, A: a.Author } });
             q.toArray(function (article) {
-              console.dir(article);
+            //   console.dir(article);
               asyncQTM.equal(article.length, 26, 'Not all articles loaded');
               asyncQTM.equal(typeof article[0].T, 'string', "result type faild");
               asyncQTM.equal(typeof article[0].AuthorID, 'number', "category filed not loaded");
@@ -1537,7 +1543,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
 
     asyncQTM.test('1024_ODATA projection of complex type does not get values', 3, function (start) {
       if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported"); asyncQTM.ok(true, "Not supported"); asyncQTM.ok(true, "Not supported"); start(); return; }
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); asyncQTM.ok(true, "Not supported"); asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); asyncQTM.ok(true, "Not supported"); asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
@@ -1587,7 +1593,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1023_additional_test_1', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       //if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported");start(); return; }
       
       asyncQTM.stop(3);
@@ -1618,7 +1624,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('1023_additional_test_2', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       //if (providerConfig.name == "sqLite") { asyncQTM.ok(true, "Not supported");start(); return; }
       
       asyncQTM.stop(3);
@@ -1705,7 +1711,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
         try {
           $news.Types.NewsContext.generateTestData(db, function () {
             var q = db.Articles.orderBy(function (item) { return item.Author.Profile.Location.City; });
-            console.dir(q.toTraceString());
+            // console.dir(q.toTraceString());
             q.toArray(function (article) {
               asyncQTM.equal(article[0] instanceof $news.Types.Article, true, "result type faild");
               asyncQTM.ok(article[0].Title.length > 0, "category filed not loaded");
@@ -1764,12 +1770,12 @@ exports.EntityContextTests = function(providerConfig, msg) {
                         success: function () {
                           asyncQTM.equal(typeof articleEntity.Id, 'number', 'Article Id faild');
                           start();
-                          console.log('Article ID: ' + articleEntity.Id);
+                        //   console.log('Article ID: ' + articleEntity.Id);
                         },
                         error: function (error) {
                           console.dir(error);
                           asyncQTM.ok(false, error);
-                          star();
+                          start();
                         }
                       });
                     });
@@ -1808,7 +1814,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('get_mapped_custom', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         asyncQTM.ok(db, "Db create faild");
         try {
@@ -1868,7 +1874,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map scalar(string)', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
           var q = db.Articles.map(function (a) { return a.Category.Title });
@@ -1891,7 +1897,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map scalar(int)', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -1900,14 +1906,16 @@ exports.EntityContextTests = function(providerConfig, msg) {
           q.toArray({
             success: function (categoriesId) {
               asyncQTM.equal(categoriesId.length, 26, 'Article category error');
+              var ref = categoriesId[0] || 0; 
               categoriesId.forEach(function (ci, index) {
                 asyncQTM.equal(typeof ci, 'number', 'data type error at ' + index + '. position');
                 asyncQTM.ok(ci > 0, 'data min value error at ' + index + '. position');
-                asyncQTM.ok(ci < 6, 'data max value error at ' + index + '. position');
-                start();
+                asyncQTM.ok(Math.abs(ref - ci) < 6, 'data max value error at ' + index + '. position');
               });
+              start();
             },
             error: function (error) {
+              console.log('error', error)
               asyncQTM.ok(false, error);
               start();
             }
@@ -1917,11 +1925,11 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map object include scalar(string)', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
           var q = db.Articles.map(function (a) { return { t: a.Category.Title } });
-          console.log('q: ', q.toTraceString());
+        //   console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (categoriesTitle) {
               asyncQTM.equal(categoriesTitle.length, 26, 'Article category error');
@@ -1929,8 +1937,8 @@ exports.EntityContextTests = function(providerConfig, msg) {
                 asyncQTM.equal(typeof ct, 'object', 'data type error at ' + index + '. position');
                 asyncQTM.equal(typeof ct.t, 'string', 'data type error at ' + index + '. position');
                 asyncQTM.ok(ct.t.length >= 4, 'data length error at ' + index + '. position');
-                start();
               });
+              start();
             },
             error: function (error) {
               asyncQTM.ok(false, error);
@@ -1942,19 +1950,20 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map object include scalar(int)', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
           var q = db.Articles.map(function (a) { return { t: a.Category.Id } });
-          console.log('q: ', q.toTraceString());
+        //   console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (categoriesId) {
               asyncQTM.equal(categoriesId.length, 26, 'Article category error');
+              var ref = categoriesId[0].t || 0;
               categoriesId.forEach(function (ci, index) {
                 asyncQTM.equal(typeof ci, 'object', 'data type error at ' + index + '. position');
                 asyncQTM.equal(typeof ci.t, 'number', 'data type error at ' + index + '. position');
                 asyncQTM.ok(ci.t > 0, 'data min value error at ' + index + '. position');
-                asyncQTM.ok(ci.t < 6, 'data max value error at ' + index + '. position');
+                asyncQTM.ok(Math.abs(ref - ci.t) < 6, 'data max value error at ' + index + '. position');
               });
               start();
             },
@@ -1968,18 +1977,19 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map Entity_', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
           var q = db.Articles.map(function (a) { return a.Category; });
-          console.log('q: ', q.toTraceString());
+        //   console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (results) {
               asyncQTM.equal(results.length, 26, 'Result number error');
+              var ref = results[0].Id || 0; 
               results.forEach(function (r, index) {
                 asyncQTM.ok(r instanceof $news.Types.Category, 'data type error at ' + index + '. position');
                 asyncQTM.ok(r.Id > 0, 'category Id min value error at ' + index + '. position');
-                asyncQTM.ok(r.Id < 6, 'category Id max value error at ' + index + '. position');
+                asyncQTM.ok(Math.abs(ref - r.Id) < 6, 'category Id max value error at ' + index + '. position');
                 asyncQTM.ok(r.Title.length >= 4, 'category title error at ' + index + '. position');
               });
               start();
@@ -1995,7 +2005,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
   
     /*FIX: odata need expand*/
     asyncQTM.test('Include: indirect -> map EntitySet', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
           var q = db.Articles.map(function (a) { return a.Tags; });
@@ -2003,16 +2013,17 @@ exports.EntityContextTests = function(providerConfig, msg) {
           q.toArray({
             success: function (results) {
               asyncQTM.equal(results.length, 26, 'Result number error');
+              var ref = results[0][0].Id || 0; 
               results.forEach(function (r, index) {
                 asyncQTM.ok(r instanceof Array, 'data type error at ' + index + '. position');
                 asyncQTM.equal(r.length, 2, "tagconnection number faild");
                 r.forEach(function (tc) {
                   asyncQTM.ok(tc instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
                   asyncQTM.ok(tc.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
-                  asyncQTM.ok(tc.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                  asyncQTM.ok(Math.abs(ref - tc.Id) < 53, 'TagConnection Id max value error at ' + index + '. position');
                 });
-                start();
               });
+              start();
             },
             error: function (error) {
               asyncQTM.ok(false, error);
@@ -2047,7 +2058,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map object include Entity', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2057,11 +2068,12 @@ exports.EntityContextTests = function(providerConfig, msg) {
           q.toArray({
             success: function (results) {
               asyncQTM.equal(results.length, 26, 'Result number error');
+              var ref = results[0].r.Id || 0; 
               results.forEach(function (r, index) {
                 asyncQTM.equal(typeof r, 'object', 'data type error at ' + index + '. position');
                 asyncQTM.ok(r.r instanceof $news.Types.Category, 'data type error at ' + index + '. position');
                 asyncQTM.ok(r.r.Id > 0, 'category Id min value error at ' + index + '. position');
-                asyncQTM.ok(r.r.Id < 6, 'category Id max value error at ' + index + '. position');
+                asyncQTM.ok(Math.abs(ref - r.r.Id) < 6, 'category Id max value error at ' + index + '. position');
                 asyncQTM.ok(r.r.Title.length >= 4, 'category title error at ' + index + '. position');
               });
               start();
@@ -2076,7 +2088,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: indirect -> map object include EntitySet', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
       //     asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
         $news.Types.NewsContext.generateTestData(db, function () {
@@ -2085,6 +2097,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
           q.toArray({
             success: function (results) {
               asyncQTM.equal(results.length, 26, 'Result number error');
+              var ref = results[0].r[0].Id || 0; 
               results.forEach(function (r, index) {
                 asyncQTM.equal(typeof r, 'object', 'data type error at ' + index + '. position');
                 asyncQTM.ok(r.r instanceof Array, 'data type error at ' + index + '. position');
@@ -2092,7 +2105,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
                 r.r.forEach(function (tc, index) {
                   asyncQTM.ok(tc instanceof $news.Types.TagConnection, 'data type error at ' + index + '. position');
                   asyncQTM.ok(tc.Id > 0, 'TagConnection Id min value error at ' + index + '. position');
-                  asyncQTM.ok(tc.Id < 53, 'TagConnection Id max value error at ' + index + '. position');
+                  asyncQTM.ok(Math.abs(ref - tc.Id) < 53, 'TagConnection Id max value error at ' + index + '. position');
                   asyncQTM.ok(index < 2, 'TagConnection number error');
                 });
               });
@@ -2255,8 +2268,8 @@ exports.EntityContextTests = function(providerConfig, msg) {
               Promise.all(promises).then(function () { start() });
             },
             error: function (error) {
-              start();
               asyncQTM.ok(false, error);
+              start();
             }
           });
         });
@@ -2264,7 +2277,7 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: mixed -> filter, map, include', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       var refDate = new Date(Date.parse("1979/05/01"));
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
@@ -2334,8 +2347,8 @@ exports.EntityContextTests = function(providerConfig, msg) {
               Promise.all(promises).then(function () { start() });
             },
             error: function (error) {
-              start();
               asyncQTM.ok(false, error);
+              start();
             }
           });
         });
@@ -2343,14 +2356,12 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: mixed -> filter, map (without complex type property), include', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       var refDate = new Date(Date.parse("1979/05/01"));
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-        start();
         $news.Types.NewsContext.generateTestData(db, function () {
-          start();
           var q = db.Articles.include("Author.Profile").include("Category")
             .filter(function (item) { return item.Category.Title == 'World' && item.Author.Profile.FullName == 'Full Name2' && item.Reviewer.Profile.Bio == "Bio3" })
             .map(function (item) {
@@ -2368,7 +2379,6 @@ exports.EntityContextTests = function(providerConfig, msg) {
           //console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (results) {
-              start();
               asyncQTM.equal(results.length, 1, 'Article category error');
               results.forEach(function (r, index) {
                 asyncQTM.ok(r instanceof Object, 'data type error at ' + index + '. position');
@@ -2413,10 +2423,11 @@ exports.EntityContextTests = function(providerConfig, msg) {
                   asyncQTM.ok(['Article21', 'Article22', 'Article23', 'Article24', 'Article25'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
                 });
               });
+              start();
             },
             error: function (error) {
-              start();
               asyncQTM.ok(false, error);
+              start();
             }
           });
         });
@@ -2424,14 +2435,12 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: many mixed -> filter, map (without complex type property), include', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       var refDate = new Date(Date.parse("1979/05/01"));
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-        start();
         $news.Types.NewsContext.generateTestData(db, function () {
-          start();
           var q = db.Articles.include("Author.Profile").include("Category")
             .filter(function (item) { return (item.Category.Title == 'World' || item.Category.Title == 'Sport') && item.Author.Profile.FullName == 'Full Name2' })
             .map(function (item) {
@@ -2449,7 +2458,6 @@ exports.EntityContextTests = function(providerConfig, msg) {
           //console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (results) {
-              start();
               asyncQTM.equal(results.length, 2, 'Article category error');
 
               var r = results[0];
@@ -2541,10 +2549,11 @@ exports.EntityContextTests = function(providerConfig, msg) {
                 asyncQTM.ok(a instanceof $news.Types.Article, 'r.Articles[i] data type error at ' + index + '. position');
                 asyncQTM.ok(['Article21', 'Article22', 'Article23', 'Article24', 'Article25'].indexOf(a.Title) >= 0, 'r.Articles[i].Title value error  at ' + index + '. position');
               });
+              start();
             },
             error: function (error) {
-              start();
               asyncQTM.ok(false, error);
+              start();
             }
           });
         });
@@ -2639,18 +2648,15 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: direct -> deep Entity', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-        start();
         $news.Types.NewsContext.generateTestData(db, function () {
-          start();
           var q = db.Articles.include('Author.Profile');
           //console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (result) {
-              start();
               asyncQTM.equal(result.length, 26, 'Article category error');
               result.forEach(function (article, index) {
                 asyncQTM.ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
@@ -2665,10 +2671,11 @@ exports.EntityContextTests = function(providerConfig, msg) {
 
 
               });
+              start();
             },
             error: function (error) {
-              start();
               asyncQTM.ok(false, error);
+              start();
             }
           });
         });
@@ -2676,18 +2683,15 @@ exports.EntityContextTests = function(providerConfig, msg) {
     });
 
     asyncQTM.test('Include: direct -> mixed deep Entity, EntitySet', 1, function (start) {
-      if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
+      //if (providerConfig.name == "oData") { asyncQTM.ok(true, "Not supported"); start(); return; }
 
       asyncQTM.stop(3);
       (new $news.Types.NewsContext(providerConfig)).onReady(function (db) {
-        start();
         $news.Types.NewsContext.generateTestData(db, function () {
-          start();
           var q = db.Articles.include('Author.Profile').include('Category').include('Tags');
           //console.log('q: ', q.toTraceString());
           q.toArray({
             success: function (result) {
-              start();
               asyncQTM.equal(result.length, 26, 'Article category error');
               result.forEach(function (article, index) {
                 asyncQTM.ok(article instanceof $news.Types.Article, 'data type error at ' + index + '. position');
@@ -2709,10 +2713,11 @@ exports.EntityContextTests = function(providerConfig, msg) {
                   asyncQTM.equal(typeof tag.Id, 'number', 'article.Tag[i].Id data type error at ' + index + '. position');
                 });
               });
+              start();
             },
             error: function (error) {
-              start();
               asyncQTM.ok(false, error);
+              start();
             }
           });
         });

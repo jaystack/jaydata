@@ -93,6 +93,17 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
             return Container.createOrderExpression(source, selector, expression.nodeType);
         }
         return expression;
+    },
+    
+    VisitIncludeExpression: function(expression, context){
+        var source = this.Visit(expression.source, context);
+        context = context || {};
+        context.frameType = expression.getType();
+        var selector = this.Visit(expression.selector, context);
+        if (source !== expression.source || selector !== expression.selector) {
+            return Container.createIncludeExpression(source, selector, expression.nodeType);
+        }
+        return expression;
     }
 });
 
