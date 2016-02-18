@@ -151,21 +151,24 @@ $C('$data.storageProviders.oData.oDataIncludeCompiler', $data.Expressions.Entity
             if(opDef.includeCompiler){
                 for (var i = 0; i < args.length; i++) {
                     var arg = args[i];
+                    var compilerType = Container.resolveType(opDef.includeCompiler);
+                    var compiler = new compilerType(this.provider);
+                    var frameContext = { data: "", $expand: context.current };
+                                        
                     if (arg && arg.value instanceof $data.Queryable) {
                         var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
                         var prep_expression = preparator.Visit(arg.value.expression);
-                        
-                        var compilerType = Container.resolveType(opDef.includeCompiler);
-                        var compiler = new compilerType(this.provider);
-                        var frameContext = { data: "", $expand: context.current };
-                        var compiled = compiler.compile(prep_expression, frameContext);
+                        arg = prep_expression;
+                    }
+                    
+                    var compiled = compiler.compile(arg, frameContext);
+                    
+                    if(context.current['$operators'].indexOf(opName) < 0){
+                        context.current[opName] = [];
+                        context.current['$operators'].push(opName);    
+                    }
+                    context.current[opName].push(frameContext[opName] || frameContext.data);
 
-                        if(context.current['$operators'].indexOf(opName) < 0){
-                            context.current[opName] = [];
-                            context.current['$operators'].push(opName);    
-                        }
-                        context.current[opName].push(frameContext[opName] || frameContext.data);
-                    };
                 }
             } else if(opDef.implementation) {
                 if(context.current['$operators'].indexOf(opName) < 0){

@@ -131,6 +131,10 @@ $C('$data.Expressions.CodeParser', null, null, {
         return new $data.Expressions.ObjectFieldExpression(node.key.name, this.ParserBuild(node.value));
     },
 
+    ParserArrowFunctionExpression: function(node){
+        return this.ParserFunctionExpression(node);
+    },
+
     ParserFunctionExpression: function(node){
         var params = new Array(node.params.length);
         for (var i = 0; i < node.params.length; i++){

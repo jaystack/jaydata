@@ -1105,42 +1105,45 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             some: {
                 invokable: false,
                 allowedIn: [$data.Expressions.FilterExpression],
-                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                parameters: [{ name: "some", dataType: "$data.Queryable" }],
                 mapTo: 'any',
                 frameType: $data.Expressions.SomeExpression
             },
             every: {
                 invokable: false,
                 allowedIn: [$data.Expressions.FilterExpression],
-                parameters: [{ name: "filter", dataType: "$data.Queryable" }],
+                parameters: [{ name: "every", dataType: "$data.Queryable" }],
                 mapTo: 'all',
                 frameType: $data.Expressions.EveryExpression
             },
             take: {
                 allowedIn: [$data.Expressions.IncludeExpression],
-                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                parameters: [{ name: "take", dataType: "$data.Integer" }],
                 frameType: $data.Expressions.PagingExpression,
                 includeFrameName: '$top',
                 includeCompiler: '$data.storageProviders.oData.oDataPagingCompiler'
             },
             skip: {
                 allowedIn: [$data.Expressions.IncludeExpression],
-                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                parameters: [{ name: "skip", dataType: "$data.Integer" }],
                 frameType: $data.Expressions.PagingExpression,
                 includeFrameName: '$skip',
                 includeCompiler: '$data.storageProviders.oData.oDataPagingCompiler'
             },
             orderBy: {
                 allowedIn: [$data.Expressions.IncludeExpression],
-                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                parameters: [{ name: "orderBy", dataType: "$data.Queryable" }],
                 frameType: $data.Expressions.OrderExpression,
                 includeFrameName: '$orderby',
                 includeCompiler: '$data.storageProviders.oData.oDataOrderCompiler'
             },
             orderByDescending: {
                 allowedIn: [$data.Expressions.IncludeExpression],
-                parameters: [{ name: "map", dataType: "$data.Queryable" }],
+                parameters: [{ name: "orderByDescending", dataType: "$data.Queryable" }],
                 frameType: $data.Expressions.OrderExpression,
+                frameTypeFactory: function(source, selector){
+                    return new $data.Expressions.OrderExpression(source, selector, $data.Expressions.ExpressionType.OrderByDescending)
+                },
                 includeFrameName: '$orderby',
                 includeCompiler: '$data.storageProviders.oData.oDataOrderCompiler'
             },

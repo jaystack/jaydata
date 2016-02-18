@@ -23,14 +23,14 @@
     "url": "http://jaydata.org"
   },
   "dependencies": {
-    "acorn": "^2.6.4",
+    "acorn": "^3.0.2",
     "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "jaydata-odatajs": "^4.0.0",
-    "jaydata-error-handler": "^0.0.1",
-    "jaydata-promise-handler": "^0.0.1",
     "jaydata-dynamic-metadata": "^0.0.4",
+    "jaydata-error-handler": "^0.0.1",
+    "jaydata-odatajs": "^4.0.0",
+    "jaydata-promise-handler": "^0.0.1",
     "odata-metadata": "^0.1.0",
     "xmldom": "^0.1.19"
   },

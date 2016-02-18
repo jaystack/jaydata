@@ -101,7 +101,7 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
         context.frameType = expression.getType();
         var selector = this.Visit(expression.selector, context);
         if (source !== expression.source || selector !== expression.selector) {
-            return Container.createIncludeExpression(source, selector, expression.nodeType);
+            return Container.createIncludeExpression(source, selector);
         }
         return expression;
     }

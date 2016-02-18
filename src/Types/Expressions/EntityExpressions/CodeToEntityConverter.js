@@ -107,7 +107,38 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
         var exp = this.Visit(expression.expression, context);
         var member = this.Visit(expression.member, context);
         var args = expression.args.map(function (arg) {
-            return self.Visit(arg, context);
+            if (arg instanceof $data.Expressions.FunctionExpression && 
+               (exp instanceof $data.Expressions.EntitySetExpression || exp instanceof $data.Expressions.FrameOperationExpression))
+            {
+                var operation = self.scopeContext.resolveSetOperations(member.value, exp, context.frameType);
+                if(!operation){
+                    Guard.raise("Unknown entity field operation: " + member.getJSON());
+                }
+                
+                var entitySet = self.scopeContext.getEntitySetFromElementType(exp.elementType)
+                var setExpr = null;
+                if(!entitySet){
+                    //TODO
+                    Guard.raise("Nested operations without entity set is not supported");
+                } else {
+                    setExpr = entitySet.expression;
+                }
+                
+                var frameType = context.frameType;
+                context.frameType = operation.frameType;
+                context.lambdaParameters.push(setExpr);
+                var res = self.Visit(arg, context);
+                context.lambdaParameters.pop();
+                context.frameType = frameType;
+                
+                if (operation.frameTypeFactory) {
+                    return operation.frameTypeFactory(setExpr, res)
+                } else {
+                    return new operation.frameType(setExpr, res);
+                }
+            } else {
+                return self.Visit(arg, context);
+            }
         });
         var result;
 
