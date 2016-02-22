@@ -776,7 +776,7 @@ $data.Class.define('$data.Queryable', null, null,
         ///	</signature>
 
         this._checkOperation('include');
-        if(typeof selector === 'string' && (selector.length < 3 || selector.substr(0, 3) !== 'it.')){
+        if(typeof selector === 'string' && (selector.length < 3 || selector.substr(0, 3) !== 'it.') && !/^[^\.]*(=>)/.test(selector)){
             selector = 'it.' + selector;
         }
         var expression = Container.createCodeExpression(selector, thisArg);

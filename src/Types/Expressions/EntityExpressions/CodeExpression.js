@@ -4,7 +4,7 @@ $C('$data.Expressions.CodeExpression', $data.Expressions.ExpressionNode, null, {
     constructor: function (source, parameters) {
         if (Container.resolveType(Container.getTypeName(source)) == $data.String && 
             source.replace(/^[\s\xA0]+/, "").match("^function") != "function" && 
-            source.replace(/^[\s\xA0]+/, "").match("=>") != "=>") 
+             !/^[^\.]*(=>)/.test(source.replace(/^[\s\xA0]+/, ""))) 
         {
             source = "function (it) { return " + source + "; }";
         }

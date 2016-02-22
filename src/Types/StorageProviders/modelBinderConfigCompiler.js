@@ -43,18 +43,20 @@ $C('$data.modelBinder.FindProjectionVisitor', $data.Expressions.EntityExpression
             
             for (var i = 0; i < args.length; i++) {
                 var arg = args[i];
-                if (arg && arg.value instanceof $data.Queryable) {
+                
+                if (arg instanceof $data.Expressions.ConstantExpression && arg.value instanceof $data.Queryable) {
                     var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
-                    var prep_expression = preparator.Visit(arg.value.expression);
+                    arg = preparator.Visit(arg.value.expression);
                     
-                    var visitor = new $data.modelBinder.FindProjectionVisitor(this._inculdes);
-                    var visitorContext = { };
-                    var compiled = visitor.Visit(prep_expression, visitorContext);
-                    
-                    if(context && visitorContext.projectionExpression){
-                        context.hasIncludeProjectionExpression = true;
-                        context.includeProjectionExpression = visitorContext.projectionExpression;
-                    }
+                }
+                
+                var visitor = new $data.modelBinder.FindProjectionVisitor(this._inculdes);
+                var visitorContext = { };
+                var compiled = visitor.Visit(arg, visitorContext);
+                
+                if(context && visitorContext.projectionExpression){
+                    context.hasIncludeProjectionExpression = true;
+                    context.includeProjectionExpression = visitorContext.projectionExpression;
                 }
             }
         }
