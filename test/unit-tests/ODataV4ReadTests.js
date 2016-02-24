@@ -153,9 +153,10 @@ describe('OData protocol tests', function () {
                     "Content-Type": "application/json;IEEE754Compatible=true"
                 }
             }
-
             //base_MyTClass = $data.Container.resolveType('JayData.Test.CommonItems.Entities.MyTClass')
-            done()
+            ctx.InitDb(function(){
+                done()
+            })
         })
     })
 
