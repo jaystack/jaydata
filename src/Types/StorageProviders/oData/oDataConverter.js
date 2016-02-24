@@ -100,7 +100,18 @@ $data.oDataConverter = {
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': function (v) { return v ? $data.Blob.toBase64(v) : v; },
         '$data.Object': $data.Container.proxyConverter,
-        '$data.Array': $data.Container.proxyConverter,
+        '$data.Array': function(o, def){
+            if(o && def && def.elementType){
+                var typeName = Container.resolveName(def.elementType);
+                var values = [];
+                for(var i = 0; i < o.length; i++){
+                    values.push($data.oDataConverter['toDb'][typeName](o[i]));
+                }
+                
+                return values;
+            }
+            return $data.Container.proxyConverter.apply(this, arguments);
+        },
         '$data.GeographyPoint': $data.Container.proxyConverter,
         '$data.GeographyLineString': $data.Container.proxyConverter,
         '$data.GeographyPolygon': $data.Container.proxyConverter,
@@ -139,7 +150,18 @@ $data.oDataConverter = {
         '$data.Boolean': function (bool) { return typeof bool === 'boolean' ? bool.toString() : bool; },
         '$data.Blob': function (b) { return b ? "binary'" + b + "'" : b; },
         '$data.Object': function (o) { return JSON.stringify(o); },
-        '$data.Array': function (o) { return JSON.stringify(o); },
+        '$data.Array': function (o, def) {
+            if(o && def && def.elementType){
+                var typeName = Container.resolveName(def.elementType);
+                var values = [];
+                for(var i = 0; i < o.length; i++){
+                    values.push($data.oDataConverter['escape'][typeName](o[i]));
+                }
+                
+                return "[" + values.join(',') + "]"
+            } 
+            return JSON.stringify(o); 
+        },
         '$data.GeographyPoint': function (g) { if (g) { return $data.GeographyBase.stringifyToUrl(g); } return g; },
         '$data.GeographyLineString': function (g) { if (g) { return $data.GeographyBase.stringifyToUrl(g); } return g; },
         '$data.GeographyPolygon': function (g) { if (g) { return $data.GeographyBase.stringifyToUrl(g); } return g; },

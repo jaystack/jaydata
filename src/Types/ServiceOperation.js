@@ -88,7 +88,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                         for (var i = 0; i < cfg.params.length; i++) {
                             var paramConfig = cfg.params[i];
                             if (paramConfig.name && paramConfig.type && paramConfig.name in argObj) {
-                                paramConstExpression.push(Container.createConstantExpression(argObj[paramConfig.name], Container.resolveType(paramConfig.type), paramConfig.name));
+                                paramConstExpression.push(Container.createConstantExpression(argObj[paramConfig.name], Container.resolveType(paramConfig.type), paramConfig.name, paramConfig.elementType));
                             }
                         }
                     }
@@ -100,7 +100,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
                             //TODO: check params type
                             var paramConfig = cfg.params[i];
                             if (paramConfig.name && paramConfig.type && arguments[i] !== undefined) {
-                                paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(paramConfig.type), paramConfig.name));
+                                paramConstExpression.push(Container.createConstantExpression(arguments[i], Container.resolveType(paramConfig.type), paramConfig.name, paramConfig.elementType));
                             }
                         }
                     }

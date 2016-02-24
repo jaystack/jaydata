@@ -32,9 +32,14 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         var queryText = queryFragments.urlText;
         var addAmp = false;
+        
+        if(queryFragments.$funcParams){
+            queryText += "(" + queryFragments.$funcParams + ")"
+        }
+        
         for (var name in queryFragments) {
             if (name != "urlText" && name != "actionPack" && name != "data" && name != "lambda" && name != "method" && name != "postData" &&
-                name != "_isBatchExecuteQuery" && name != "_subQueries" && queryFragments[name] != "") {
+                name != "_isBatchExecuteQuery" && name != "_subQueries" && name != "$funcParams" && queryFragments[name] != "") {
 
                 if (addAmp) { queryText += "&"; } else { queryText += "?"; }
                 addAmp = true;
@@ -166,9 +171,11 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
         //this.logicalType = expression.returnType;
         if (expression.params) {
+            context.serviceConfig = expression.cfg
             for (var i = 0; i < expression.params.length; i++) {
                 this.Visit(expression.params[i], context);
             }
+            delete context.serviceConfig;
         }
     },
     VisitBatchDeleteExpression: function (expression, context) {
@@ -183,16 +190,34 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             typeName = $data.Entity.fullName;
 
         var converter = this.provider.fieldConverter.toDb[typeName];
-        var value = converter ? converter(expression.value) : expression.value;
+        var value = converter ? converter(expression.value, expression) : expression.value;
 
 
         if (context.method === 'GET' || !context.method) {
             converter = this.provider.fieldConverter.escape[typeName];
-            value = converter ? converter(value) : value;
-
+            value = converter ? converter(value, expression) : value;
             if (value !== undefined) {
-                if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
-                context['$urlParams'] += expression.name + '=' + value;
+                var serviceConfig = context.serviceConfig || {};
+                var paramConfig = (serviceConfig && serviceConfig.params.filter(p => p.name == expression.name)[0]) || {}
+                
+                var useAlias = serviceConfig.namespace && 
+                    (paramConfig.useAlias || 
+                     serviceConfig.useAlias || 
+                     this.provider.providerConfiguration.useParameterAlias || 
+                     $data.defaults.OData.useParameterAlias);
+                     
+                var paramValue = useAlias ? "@" + expression.name : value;
+                var paramName = (useAlias ? "@" : "") + expression.name; 
+                
+                if (serviceConfig.namespace) {
+                    if (context['$funcParams']) { context['$funcParams'] += ','; } else { context['$funcParams'] = ''; }
+                        context['$funcParams'] += expression.name + '=' + paramValue;
+                }
+                
+                if (!serviceConfig.namespace || useAlias) {
+                    if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
+                        context['$urlParams'] += paramName + '=' + value;
+                }
             }
         } else {
             context.postData = context.postData || {};
