@@ -867,10 +867,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         var property = item.data.getType().memberDefinitions.getPublicMappedProperties().filter(function (memDef) { return memDef.concurrencyMode === $data.ConcurrencyMode.Fixed });
         if (property && property[0]) {
             var headerValue = (typeof value !== "undefined") ? value : item.data[property[0].name];
-            if(request instanceof activities.RequestBuilder){
-                request.add(new activities.SetHeaderProperty('If-Match', headerValue))
-            } else {
-                request.headers['If-Match'] = headerValue;
+            if(typeof headerValue !== "undefined"){
+                if(request instanceof activities.RequestBuilder){
+                    request.add(new activities.SetHeaderProperty('If-Match', headerValue))
+                } else {
+                    request.headers['If-Match'] = headerValue;
+                }
             }
         }
     },
