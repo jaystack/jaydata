@@ -657,4 +657,51 @@ describe('OData include', () => {
             expect(q.toTraceString().queryText).to.equal(result);
         })
     })
+    
+    describe('nested paramter resolution', () => {
+        var result = "/Categories?$expand=Articles($filter=(Id gt 2)),Articles($filter=(Id gt 3))"
+        
+        it('missing both parameter', ()=>{
+            var oldValue = $data.defaults.parameterResolutionCompatibility;
+            $data.defaults.parameterResolutionCompatibility = false;
+            
+            var hasException = false;
+            try{
+                var q = ctx.Categories.include('c => c.Articles.filter(a => a.Id > p2).filter(a => a.Id > p3)', {p1: 1, p2: 2, p3: 3}).toTraceString()
+            } catch(ex) {
+                hasException = true;
+            }
+            
+            expect(hasException).to.be.true;
+            
+            $data.defaults.parameterResolutionCompatibility = oldValue;
+        })
+        
+        it('missing a parameter', ()=>{
+            var oldValue = $data.defaults.parameterResolutionCompatibility;
+            $data.defaults.parameterResolutionCompatibility = false;
+            
+            var hasException = false;
+            try{
+                ctx.Categories.include('(c, p3) => c.Articles.filter(a => a.Id > p2).filter(a => a.Id > p3)', {p1: 1, p2: 2, p3: 3}).toTraceString()
+            } catch(ex) {
+                hasException = true;
+            }
+            
+            expect(hasException).to.be.true;
+            
+            $data.defaults.parameterResolutionCompatibility = oldValue;
+        })
+        
+        it('parameter resolution', ()=>{
+            var oldValue = $data.defaults.parameterResolutionCompatibility;
+            $data.defaults.parameterResolutionCompatibility = false;
+            
+            let q = ctx.Categories.include('(c, p2, p3) => c.Articles.filter(a => a.Id > p2).filter(a => a.Id > p3)', {p1: 1, p2: 2, p3: 3})
+            expect(q.toTraceString().queryText).to.equal(result);
+            
+            
+            $data.defaults.parameterResolutionCompatibility = oldValue;
+        })
+    })
 })
