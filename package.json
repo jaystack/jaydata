@@ -16,7 +16,7 @@
     "iPhone",
     "Android"
   ],
-  "version": "1.5.0",
+  "version": "1.5.1",
   "homepage": "http://jaydata.org",
   "author": {
     "name": "JayData",
@@ -27,7 +27,7 @@
     "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "jaydata-dynamic-metadata": "^0.0.4",
+    "jaydata-dynamic-metadata": "^0.0.5",
     "jaydata-error-handler": "^0.0.1",
     "jaydata-odatajs": "^4.0.0",
     "jaydata-promise-handler": "^0.0.1",
