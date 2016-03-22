@@ -25,7 +25,7 @@ Microsoft .NET developers can utilize Entity Framework and LINQ on server-side t
 data from different databases. The aim of JayData library is to give a similar tool to JavaScript developers.
 
 JayData is cross-platform (runs on HTML5 desktop and mobile browsers, can be hosted in PhoneGap environment
-on iPhone, iPad and Android) and cross-layer as it works on client-side and server-side (Node.JS).
+on iPhone, iPad, Android or Windows Phone 8+) and cross-layer as it works on client-side and server-side (Node.JS).
 
 Please read the release notes for current status of the providers.
 
@@ -60,3 +60,7 @@ $ cd jaydata
 $ npm install
 $ gulp
 ```
+
+## Related projects
+[JaySvcUtil](https://github.com/jaystack/jaysvcutil) - Code generator tool that builds JayData data model classes from $metadata service of OData endpoints. 
+[Dynamic Metadata](https://github.com/jaystack/jaydata-dynamic-metadata)
