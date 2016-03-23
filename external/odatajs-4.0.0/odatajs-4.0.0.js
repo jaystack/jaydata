@@ -16,17 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ (function(){
 var init = function(exports, module, require) {
-  
 
-// version information 
+
+// version information
 exports.version = { major: 4, minor: 0, build: 0 };
 
 // core stuff, always needed
 exports.deferred = require('./lib/deferred.js');
 exports.utils = require('./lib/utils.js');
 
-// only needed for xml metadata 
+// only needed for xml metadata
 exports.xml = require('./lib/xml.js');
 
 // only need in browser case
@@ -380,14 +381,14 @@ function DataCacheOperation(stateMachine, promise, isCancelable, index, count, d
     /** Transitions this operation to a new state.
      * @method DataCacheOperation#transition
      * @param {Object} state - State to transition the operation to.
-     * @param {Object} [data] - 
+     * @param {Object} [data] -
      */
     that.transition = function (state, data) {
         that.s = state;
         stateData = data;
         operationStateMachine(state, cacheState, data);
     };
-    
+
     return that;
 }
 
@@ -507,7 +508,7 @@ function DataCache(options) {
               * @method DataCache#cancelCount
               */
             cancel: function () {
-               
+
                 if (request) {
                     canceled = true;
                     request.abort();
@@ -646,9 +647,9 @@ function DataCache(options) {
 
             that.readRange(index, pageSize).then(successCallback, errorCallback);
 
-            return { Dispose: function () { 
+            return { Dispose: function () {
                 obs.dispose(); // otherwise the check isStopped obs.onNext(data.value[i]);
-                disposed = true; 
+                disposed = true;
                 } };
         });
     };
@@ -661,7 +662,7 @@ function DataCache(options) {
      * during cache initialization.
      */
     var cacheFailureCallback = function (message) {
-        
+
 
         return function (error) {
             cacheFailure = { message: message, error: error };
@@ -826,7 +827,7 @@ function DataCache(options) {
                         if (data["@odata.context"] && !returnData["@odata.context"]) {
                             returnData["@odata.context"] = data["@odata.context"];
                         }
-                        
+
                         for (var i = 0, length = data.value.length; i < length && (count < 0 || returnData.value.length < count); i++) {
                             var dataIndex = backwards ? length - i - 1 : i;
                             var item = data.value[dataIndex];
@@ -894,7 +895,7 @@ function DataCache(options) {
      *     4.- The cache has run out of available space (overflowed).
     */
     var prefetch = function (start) {
-        
+
 
         if (allDataLocal || prefetchSize === 0 || overflowed) {
             return;
@@ -922,7 +923,7 @@ function DataCache(options) {
     };
 
     /** Requests a page from the cache local store.
-     * @method DataCache~readPage    
+     * @method DataCache~readPage
      * @param {Number} key - Zero-based index of the reuqested page.
      * @returns {DjsDeferred} A promise for a found flag and page object with (i)ndex, (c)ount, (d)ata, and (t)icks.
      */
@@ -960,7 +961,7 @@ function DataCache(options) {
     };
 
     /** Saves a page to the cache local store.
-     * @method DataCache~savePage    
+     * @method DataCache~savePage
      * @param {Number} key - Zero-based index of the requested page.
      * @param {Object} page - Object with (i)ndex, (c)ount, (d)ata, and (t)icks.
      * @returns {DjsDeferred} A promise with no value.
@@ -1007,7 +1008,7 @@ function DataCache(options) {
     };
 
     /** Saves the cache's current settings to the local store.
-     * @method DataCache~saveSettings    
+     * @method DataCache~saveSettings
      * @param {Function} success - Success callback.
      * @param {Function} error - Errror callback.
      */
@@ -1029,14 +1030,14 @@ function DataCache(options) {
     };
 
     /** Creates a function that handles a store error.
-     * @method DataCache~storeFailureCallback    
+     * @method DataCache~storeFailureCallback
      * @param {DjsDeferred} deferred - Deferred object to resolve.
      * @returns {Function} Function to use as error callback.
-    
+
      * This function will specifically handle problems when interacting with the store.
      */
     var storeFailureCallback = function (deferred/*, message*/) {
-        
+
 
         return function (/*error*/) {
             // var console = windo1w.console;
@@ -1049,7 +1050,7 @@ function DataCache(options) {
     };
 
     /** Updates the cache's settings based on a page object.
-     * @method DataCache~updateSettings    
+     * @method DataCache~updateSettings
      * @param {Object} page - Object with (i)ndex, (c)ount, (d)ata.
      * @param {Number} pageBytes - Size of the page in bytes.
      */
@@ -1081,15 +1082,15 @@ function DataCache(options) {
     };
 
     /** State machine describing the behavior for cancelling a read or prefetch operation.
-     * @method DataCache~cancelStateMachine    
+     * @method DataCache~cancelStateMachine
      * @param {DataCacheOperation} operation - Operation being run.
      * @param {Object} opTargetState - Operation state to transition to.
      * @param {Object} cacheState - Current cache state.
-     * @param {Object} [data] - 
+     * @param {Object} [data] -
      * This state machine contains behavior common to read and prefetch operations.
      */
     var cancelStateMachine = function (operation, opTargetState, cacheState, data) {
-        
+
 
         var canceled = operation.canceled && opTargetState !== OPERATION_STATE_END;
         if (canceled) {
@@ -1105,16 +1106,16 @@ function DataCache(options) {
     };
 
     /** State machine describing the behavior of a clear operation.
-     * @method DataCache~destroyStateMachine    
+     * @method DataCache~destroyStateMachine
      * @param {DataCacheOperation} operation - Operation being run.
      * @param {Object} opTargetState - Operation state to transition to.
      * @param {Object} cacheState - Current cache state.
-    
+
      * Clear operations have the highest priority and can't be interrupted by other operations; however,
      * they will preempt any other operation currently executing.
      */
     var destroyStateMachine = function (operation, opTargetState, cacheState) {
-        
+
 
         var transition = operation.transition;
 
@@ -1152,21 +1153,21 @@ function DataCache(options) {
     };
 
     /** State machine describing the behavior of a prefetch operation.
-     * @method DataCache~prefetchStateMachine    
+     * @method DataCache~prefetchStateMachine
      * @param {DataCacheOperation} operation - Operation being run.
      * @param {Object} opTargetState - Operation state to transition to.
      * @param {Object} cacheState - Current cache state.
-     * @param {Object} [data] - 
-    
+     * @param {Object} [data] -
+
      *  Prefetch operations have the lowest priority and will be interrupted by operations of
      *  other kinds. A preempted prefetch operation will resume its execution only when the state
      *  of the cache returns to idle.
-     * 
+     *
      *  If a clear operation starts executing then all the prefetch operations are canceled,
      *  even if they haven't started executing yet.
      */
     var prefetchStateMachine = function (operation, opTargetState, cacheState, data) {
-        
+
 
         // Handle cancelation
         if (!cancelStateMachine(operation, opTargetState, cacheState, data)) {
@@ -1222,22 +1223,22 @@ function DataCache(options) {
     };
 
     /** State machine describing the behavior of a read operation.
-     * @method DataCache~readStateMachine    
+     * @method DataCache~readStateMachine
      * @param {DataCacheOperation} operation - Operation being run.
      * @param {Object} opTargetState - Operation state to transition to.
      * @param {Object} cacheState - Current cache state.
-     * @param {Object} [data] - 
-    
+     * @param {Object} [data] -
+
      * Read operations have a higher priority than prefetch operations, but lower than
      * clear operations. They will preempt any prefetch operation currently running
      * but will be interrupted by a clear operation.
-     *          
+     *
      * If a clear operation starts executing then all the currently running
      * read operations are canceled. Read operations that haven't started yet will
      * wait in the start state until the destory operation finishes.
      */
     var readStateMachine = function (operation, opTargetState, cacheState, data) {
-        
+
 
         // Handle cancelation
         if (!cancelStateMachine(operation, opTargetState, cacheState, data)) {
@@ -1304,11 +1305,11 @@ function DataCache(options) {
     };
 
     /** State machine describing the behavior for reading and saving data into the cache.
-     * @method DataCache~readSaveStateMachine    
+     * @method DataCache~readSaveStateMachine
      * @param {DataCacheOperation} operation - Operation being run.
      * @param {Object} opTargetState - Operation state to transition to.
      * @param {Object} cacheState - Current cache state.
-     * @param {Object} [data] - 
+     * @param {Object} [data] -
      * @param {Boolean} isPrefetch - Flag indicating whether a read (false) or prefetch (true) operation is running.
      * This state machine contains behavior common to read and prefetch operations.
     */
@@ -1437,7 +1438,7 @@ function DataCache(options) {
 }
 
 /** Creates a data cache for a collection that is efficiently loaded on-demand.
- * @param options 
+ * @param options
  * Options for the data cache, including name, source, pageSize, TODO check doku
  * prefetchSize, cacheSize, storage mechanism, and initial prefetch and local-data handler.
  * @returns {DataCache} A new data cache instance.
@@ -1462,7 +1463,7 @@ function createDataCache (options) {
 /** estimateSize (see {@link estimateSize}) */
 exports.estimateSize = estimateSize;
 
-/** createDataCache */  
+/** createDataCache */
 exports.createDataCache = createDataCache;
 
 
@@ -1471,7 +1472,7 @@ exports.createDataCache = createDataCache;
 'use strict';
 
  /** @module cache/source */
- 
+
 var utils = require("./../utils.js");
 var odataRequest = require("./../odata.js");
 
@@ -1610,7 +1611,7 @@ function queryForDataInternal(uri, options, data, success, error) {
 function ODataCacheSource (options) {
     var that = this;
     var uri = options.source;
-    
+
     that.identifier = normalizeURICase(encodeURI(decodeURI(uri)));
     that.options = options;
 
@@ -1634,7 +1635,7 @@ function ODataCacheSource (options) {
             }, error, undefined, options.httpClient, options.metadata
         );
     };
-    
+
     /** Gets a number of consecutive items from the collection.
      * @method ODataCacheSource#read
      * @param {Number} index - Zero-based index of the items to retrieve.
@@ -1698,7 +1699,7 @@ function forwardCall(thisValue, name, returnValue) {
  * For compatibility with http://api.jquery.com/category/deferred-object/
  * we disregard this value instead.
  * </li></ul>
- * @class DjsDeferred 
+ * @class DjsDeferred
  */
  function DjsDeferred() {
     this._arguments = undefined;
@@ -1781,7 +1782,7 @@ DjsDeferred.prototype = {
      * @method DjsDeferred#reject
      */
     reject: function (/* args */) {
-        
+
         if (this._fail) {
             var i, len;
             for (i = 0, len = this._fail.length; i < len; i++) {
@@ -1839,7 +1840,7 @@ var odataMetadata = exports.metadata  = require('./odata/metadata.js');
 var odataNet      = exports.net       = require('./odata/net.js');
 var odataJson     = exports.json      = require('./odata/json.js');
                     exports.batch     = require('./odata/batch.js');
-                    
+
 
 
 var utils = require('./utils.js');
@@ -1913,11 +1914,11 @@ exports.defaultMetadata = []; //TODO check why is the defaultMetadata an Array? 
 
 /** Reads data from the specified URL.
  * @param urlOrRequest - URL to read data from.
- * @param {Function} [success] - 
- * @param {Function} [error] - 
- * @param {Object} [handler] - 
- * @param {Object} [httpClient] - 
- * @param {Object} [metadata] - 
+ * @param {Function} [success] -
+ * @param {Function} [error] -
+ * @param {Object} [handler] -
+ * @param {Object} [httpClient] -
+ * @param {Object} [metadata] -
  */
 exports.read = function (urlOrRequest, success, error, handler, httpClient, metadata) {
 
@@ -1933,11 +1934,11 @@ exports.read = function (urlOrRequest, success, error, handler, httpClient, meta
 
 /** Sends a request containing OData payload to a server.
  * @param {Object} request - Object that represents the request to be sent.
- * @param {Function} [success] - 
- * @param {Function} [error] - 
- * @param {Object} [handler] - 
- * @param {Object} [httpClient] - 
- * @param {Object} [metadata] - 
+ * @param {Function} [success] -
+ * @param {Function} [error] -
+ * @param {Object} [handler] -
+ * @param {Object} [httpClient] -
+ * @param {Object} [metadata] -
  */
 exports.request = function (request, success, error, handler, httpClient, metadata) {
 
@@ -1966,7 +1967,7 @@ exports.request = function (request, success, error, handler, httpClient, metada
         odataUtils.prepareRequest(request, handler, context);
         return odataUtils.invokeRequest(request, success, error, handler, httpClient, context);
     } catch (err) {
-        // errors in success handler for sync requests are catched here and result in error handler calls. 
+        // errors in success handler for sync requests are catched here and result in error handler calls.
         // So here we fix this and throw that error further.
         if (err.bIsSuccessHandlerError) {
             throw err;
@@ -2028,7 +2029,7 @@ function hex16() {
 }
 
 /** Creates a string that can be used as a multipart request boundary.
- * @param {String} [prefix] - 
+ * @param {String} [prefix] -
  * @returns {String} Boundary string of the format: <prefix><hex16>-<hex16>-<hex16>
  */
 function createBoundary(prefix) {
@@ -2208,7 +2209,7 @@ function readResponse(text, context, delimiter) {
 /** Returns a substring from the position defined by the context up to the next line break (CRLF).
  * @param {String} text - Input string.
  * @param context - Context used for reading the input string.
- * @returns {String} Substring to the first ocurrence of a line break or null if none can be found. 
+ * @returns {String} Substring to the first ocurrence of a line break or null if none can be found.
  */
 function readLine(text, context) {
 
@@ -2282,12 +2283,12 @@ function writeBatchPartDelimiter(boundary, close) {
  * a change set grouping several CUD (create, update, delete) requests.
  * @param part - Request or change set object in payload representation format
  * @param context - Object containing context information used for the serialization
- * @param {boolean} [nested] - 
+ * @param {boolean} [nested] -
  * @returns {String} String representing the serialized part
  * A change set is an array of request objects and they cannot be nested inside other change sets.
  */
 function writeBatchPart(part, context, nested) {
-    
+
 
     var changeSet = part.__changeRequests;
     var result;
@@ -2445,7 +2446,7 @@ function fixRequestHeader(request, name, value) {
  * @param {String} version - Version value.
  *  If the request has already a version value higher than the one supplied the this function does nothing.
  */
-function fixDataServiceVersionHeader(request, version) {   
+function fixDataServiceVersionHeader(request, version) {
 
     if (request) {
         var headers = request.headers;
@@ -3616,7 +3617,7 @@ var odataHandler    = require('./handler.js');
 
 
 
-// imports 
+// imports
 var contains = utils.contains;
 var normalizeURI = utils.normalizeURI;
 var xmlAttributes = oDSxml.xmlAttributes;
@@ -4080,7 +4081,7 @@ function parseConceptualModelElement(element) {
             } else {
                 item[childSchema.propertyName] = parseConceptualModelElement(child);
             }
-        } 
+        }
     });
 
     if (elementSchema.text) {
@@ -4135,7 +4136,7 @@ var ticks = 0;
  * request but may in practice return content with a different MIME type.
  */
 function canUseJSONP(request) {
-    
+
     return !(request.method && request.method !== "GET");
 
 
@@ -4596,7 +4597,7 @@ var geographyTypes = [
  * @returns The first truthy value to be returned from the callback; null or the last falsy value otherwise.
  */
 function forEachSchema(metadata, callback) {
-    
+
 
     if (!metadata) {
         return null;
@@ -4798,7 +4799,7 @@ function invokeRequest(request, success, error, handler, httpClient, context) {
             error(err);
             return;
         }
-        // errors in success handler for sync requests result in error handler calls. So here we fix this. 
+        // errors in success handler for sync requests result in error handler calls. So here we fix this.
         try {
             success(response.data, response);
         } catch (err) {
@@ -4906,7 +4907,7 @@ function isGeographyEdmType(typeName) {
     //check with edm
     return contains(geographyEdmTypes, typeName) ||
         (typeName.indexOf('.') === -1 && contains(geographyTypes, typeName));
-        
+
 }
 
 /** Checks whether the specified type name is a geometry EDM type.
@@ -5058,7 +5059,7 @@ function lookupEntityType(name, metadata) {
 function lookupDefaultEntityContainer(metadata) {
 
     return forEachSchema(metadata, function (schema) {
-        if (isObject(schema.entityContainer)) { 
+        if (isObject(schema.entityContainer)) {
             return schema.entityContainer;
         }
     });
@@ -5086,8 +5087,8 @@ function lookupFunctionImport(functionImports, name) {
 }
 
 /** Looks up the target entity type for a navigation property.
- * @param {Object} navigationProperty - 
- * @param {Object} metadata - 
+ * @param {Object} navigationProperty -
+ * @param {Object} metadata -
  * @returns {String} The entity type name for the specified property, null if not found.
  */
 function lookupNavigationPropertyType(navigationProperty, metadata) {
@@ -5123,7 +5124,7 @@ function lookupNavigationPropertyType(navigationProperty, metadata) {
 }
 
 /** Looks up the target entityset name for a navigation property.
- * @param {Object} navigationProperty - 
+ * @param {Object} navigationProperty -
  * @param {Object} sourceEntitySetName -
  * @param {Object} metadata -
  * metadata
@@ -5156,7 +5157,7 @@ function lookupNavigationPropertyEntitySet(navigationProperty, sourceEntitySetNa
 
 /** Gets the entitySet info, container name and functionImports for an entitySet
  * @param {Object} entitySetName -
- * @param {Object} metadata - 
+ * @param {Object} metadata -
  * @returns {Object} The info about the entitySet.
  */
 function getEntitySetInfo(entitySetName, metadata) {
@@ -5247,7 +5248,7 @@ var normalHeaders = {
     "content-encoding": "Content-Encoding",
     "content-length": "Content-Length",
     "odata-version": "OData-Version",
-    
+
     // Headers used by request
     "accept": "Accept",
     "accept-charset": "Accept-Charset",
@@ -5258,7 +5259,7 @@ var normalHeaders = {
     "prefer": "Prefer",
     "content-id": "Content-ID",
     "content-transfer-encoding": "Content-Transfer-Encoding",
-    
+
     // Headers used by response
     "etag": "ETag",
     "location": "Location",
@@ -5440,7 +5441,7 @@ function parseTimeOfDay(propertyValue, nullOnError) {
  * timezone-aware Date APIs will only work with the local timezone.
  */
 function parseDateTimeOffset(propertyValue, nullOnError) {
-    
+
 
     return parseDateTimeMaybeOffset(propertyValue, true, nullOnError);
 }
@@ -5705,7 +5706,7 @@ exports.defaultStoreMechanism = "best";
 
 /** Creates a new store object.
  * @param {String} name - Store name.
- * @param {String} [mechanism] - 
+ * @param {String} [mechanism] -
  * @returns {Object} Store object.
 */
 exports.createStore = function (name, mechanism) {
@@ -6313,7 +6314,7 @@ IndexedDBStore.prototype.clear = function (success, error) {
  * @method module:store/indexeddb~IndexedDBStore#close
 */
 IndexedDBStore.prototype.close = function () {
-    
+
     if (this.db) {
         this.db.close();
         this.db = null;
@@ -6400,7 +6401,7 @@ IndexedDBStore.prototype.read = function (key, success, error) {
         };
 
         for (var i = 0; i < keys.length; i++) {
-            // Some tools have issues because get is a javascript reserved word. 
+            // Some tools have issues because get is a javascript reserved word.
             var objectStore = transaction.objectStore(name);
             var request = objectStore.get.call(objectStore, keys[i]);
             request.onsuccess = function (event) {
@@ -6567,7 +6568,7 @@ function MemoryStore(name) {
      * @param {Function} [error] - Callback for handling errors. If not specified then store.defaultError is invoked.
     */
     this.addOrUpdate = function (key, value, success, error) {
-        
+
         error = getErrorCallback(error);
 
         if (validateKeyInput(key, error)) {
@@ -6731,7 +6732,7 @@ function inBrowser() {
  * of the ActiveXObject.
 */
 var activeXObject = function (progId) {
-    
+
     if (window.ActiveXObject) {
         return new window.ActiveXObject(progId);
     }
@@ -6741,7 +6742,7 @@ var activeXObject = function (progId) {
 /** Checks whether the specified value is different from null and undefined.
  * @param [value] Value to check ( may be null)
  * @returns {Boolean} true if the value is assigned; false otherwise.
-*/     
+*/
 function assigned(value) {
     return value !== null && value !== undefined;
 }
@@ -6859,7 +6860,7 @@ function isObject(value) {
 /** Parses a value in base 10.
  * @param {String} value - String value to parse.
  * @returns {Number} The parsed value, NaN if not a valid value.
-*/   
+*/
 function parseInt10(value) {
     return parseInt(value, 10);
 }
@@ -7248,8 +7249,8 @@ function getFormatKind(format, defaultFormatKind) {
 }
 
 
-    
-    
+
+
 exports.inBrowser = inBrowser;
 exports.activeXObject = activeXObject;
 exports.assigned = assigned;
@@ -7279,7 +7280,7 @@ exports.startsWith = startsWith;
 exports.endsWith = endsWith;
 exports.getFormatKind = getFormatKind;}, "xml" : function(exports, module, require) {
 'use strict';
- 
+
 
 /** @module odatajs/xml */
 
@@ -7613,7 +7614,7 @@ function xmlFindElementByPath(root, namespaceURI, path) {
 * The last segment of the path may be decorated with a starting @ character to indicate that the desired node is a DOM attribute.
 */
 function xmlFindNodeByPath(root, namespaceURI, path) {
-    
+
 
     var lastSegmentStart = path.lastIndexOf("/");
     var nodePath = path.substring(lastSegmentStart + 1);
@@ -7631,8 +7632,8 @@ function xmlFindNodeByPath(root, namespaceURI, path) {
 
 /** Returns the first child DOM element under the specified DOM node that matches the specified namespace URI and local name.
  * @param domNode - DOM node from which the child DOM element is going to be retrieved.
- * @param {String} [namespaceURI] - 
- * @param {String} [localName] - 
+ * @param {String} [namespaceURI] -
+ * @param {String} [localName] -
  * @return The node's first child DOM element that matches the specified namespace URI and local name; null otherwise.
  */
 function xmlFirstChildElement(domNode, namespaceURI, localName) {
@@ -7642,8 +7643,8 @@ function xmlFirstChildElement(domNode, namespaceURI, localName) {
 
 /** Returns the first descendant DOM element under the specified DOM node that matches the specified namespace URI and local name.
  * @param domNode - DOM node from which the descendant DOM element is going to be retrieved.
- * @param {String} [namespaceURI] - 
- * @param {String} [localName] - 
+ * @param {String} [namespaceURI] -
+ * @param {String} [localName] -
  * @return The node's first descendant DOM element that matches the specified namespace URI and local name; null otherwise.
 */
 function xmlFirstDescendantElement(domNode, namespaceURI, localName) {
@@ -7656,10 +7657,10 @@ function xmlFirstDescendantElement(domNode, namespaceURI, localName) {
 
 /** Returns the first descendant DOM element under the specified DOM node that matches the specified namespace URI and local name.
  * @param domNode - DOM node from which the descendant DOM element is going to be retrieved.
- * @param {String} [namespaceURI] - 
- * @param {String} [localName] - 
- * @param {Boolean} recursive 
- * - True if the search should include all the descendants of the DOM node.  
+ * @param {String} [namespaceURI] -
+ * @param {String} [localName] -
+ * @param {Boolean} recursive
+ * - True if the search should include all the descendants of the DOM node.
  * - False if the search should be scoped only to the direct children of the DOM node.
  * @return The node's first descendant DOM element that matches the specified namespace URI and local name; null otherwise.
  */
@@ -7750,7 +7751,7 @@ function xmlNamespaceURI(domNode) {
  * @return Value of the domNode or the inner text if domNode represents a DOM element node.
  */
 function xmlNodeValue(domNode) {
-    
+
     if (domNode.nodeType === 1) {
         return xmlInnerText(domNode);
     }
@@ -7783,8 +7784,8 @@ function xmlTraverse(domNode, recursive, onChildCallback) {
 
 /** Returns the next sibling DOM element of the specified DOM node.
  * @param domNode - DOM node from which the next sibling is going to be retrieved.
- * @param {String} [namespaceURI] - 
- * @param {String} [localName] - 
+ * @param {String} [namespaceURI] -
+ * @param {String} [localName] -
  * @return The node's next sibling DOM element, null if there is none.
  */
 function xmlSiblingElement(domNode, namespaceURI, localName) {
@@ -7932,7 +7933,7 @@ function xmlNewFragment(dom, text) {
  * @param dom - DOM document used to create the text node.
  * @param {String} text - Text value for the DOM text node.
  * @return DOM text node.
- */ 
+ */
 function xmlNewText(dom, text) {
     return dom.createTextNode(text);
 }
@@ -8105,3 +8106,4 @@ window.odatajs = {};
 init.call(this,window.odatajs,window.odatajs,require);
 
 
+})();

@@ -22,9 +22,7 @@
             "external": ["jaydata/core"],
             "ignore": ["jaydata-odatajs"],
             "destFile": "oDataProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "sqliteprovider",
@@ -32,9 +30,7 @@
             "require": ["./src/Types/StorageProviders/SqLite/index.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "SqLiteProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "inmemoryprovider",
@@ -42,9 +38,7 @@
             "require": ["./src/Types/StorageProviders/InMemory/index.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "InMemoryProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "yqlprovider",
@@ -52,9 +46,7 @@
             "require": ["./src/Types/StorageProviders/YQL/index.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "YQLProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "indexeddbprovider",
@@ -62,9 +54,7 @@
             "require": ["./src/Types/StorageProviders/IndexedDB/index.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "IndexedDbProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "webapiprovider",
@@ -72,9 +62,7 @@
             "require": ["./src/Types/StorageProviders/WebApi/index.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "WebApiProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "facebookprovider",
@@ -82,9 +70,7 @@
             "require": ["./src/Types/StorageProviders/Facebook/index.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "FacebookProvider.js",
-            "destFolder": "./dist/public/jaydataproviders",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydataproviders"
         },
         {
             "taskName": "jaydataproviders",
@@ -96,9 +82,7 @@
             "require": ["./src/JayDataModules/angular.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "angular.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "errorhandlermodule",
@@ -106,9 +90,7 @@
             "require": ["./src/JayDataModules/errorhandler.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "errorhandler.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "formbindermodule",
@@ -116,9 +98,7 @@
             "require": ["./src/JayDataModules/formBinder.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "formBinder.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "handlebarsmodule",
@@ -126,9 +106,7 @@
             "require": ["./src/JayDataModules/handlebars.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "handlebars.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "inmemorymodule",
@@ -136,9 +114,7 @@
             "require": ["./src/JayDataModules/inMemory.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "inMemory.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "mscrmclientmodule",
@@ -146,9 +122,7 @@
             "require": ["./src/JayDataModules/jaydata.mscrm.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "jaydata.mscrm.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
 
 
@@ -158,9 +132,7 @@
             "require": ["./src/JayDataModules/kendo.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "kendo.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "knockoutmodule",
@@ -168,9 +140,7 @@
             "require": ["./src/JayDataModules/knockout.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "knockout.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "deferredmodule",
@@ -178,9 +148,7 @@
             "require": ["./src/JayDataModules/deferred.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "deferred.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "qdeferredmodule",
@@ -188,9 +156,7 @@
             "require": ["./src/JayDataModules/qDeferred.js", { "entry": true }],
             "external": ["jaydata/core", "q"],
             "destFile": "qDeferred.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "senchamodule",
@@ -198,9 +164,7 @@
             "require": ["./src/JayDataModules/sencha.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "sencha.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "templatemodule",
@@ -208,9 +172,7 @@
             "require": ["./src/JayDataModules/template.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "template.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "validatemodule",
@@ -218,9 +180,7 @@
             "require": ["./src/JayDataModules/validate.js", { "entry": true }],
             "external": ["jaydata/core"],
             "destFile": "validate.js",
-            "destFolder": "./dist/public/jaydatamodules",
-            "header": "./build/jaydata-dep-header.js",
-            "footer": "./build/jaydata-dep-footer.js"
+            "destFolder": "./dist/public/jaydatamodules"
         },
         {
             "taskName": "jaydatamodules",

@@ -2,24 +2,21 @@
 	$data.version = 'JayData <%=pkg.version %>';
 	$data.versionNumber = '<%=pkg.version %>';*/
 
-	if (typeof window !== "undefined"){
-		window.require = require;
-	}
-
 	if (typeof exports === "object" && typeof module !== "undefined") {
-		module.exports = require('jaydata/core')
+		module.exports = require('<%=module.require[1].expose %>')
 	} else if (typeof define === "function" && define.amd) {
 		var interopRequire = require;
 		define([], function(){
-			return interopRequire('jaydata/core');
+			return interopRequire('<%=module.require[1].expose %>');
 		});
 
-		define('jaydata/core', [], function(){
-			return interopRequire('jaydata/core');
+		define('<%=module.require[1].expose %>', [], function(){
+			return interopRequire('<%=module.require[1].expose %>');
 		});
 	} else {
 		var g;
 		if (typeof window !== "undefined") {
+			window.require = require;
 			g = window
 		} else if (typeof global !== "undefined") {
 			g = global
@@ -28,6 +25,6 @@
 		} else {
 			g = this
 		}
-		g.$data = require('jaydata/core');
+		g.$data = require('<%=module.require[1].expose %>');
 	}
 })();
