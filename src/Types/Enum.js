@@ -112,6 +112,27 @@ $data.Enum = $data.Class.define("$data.Enum", null, null, {
         });
         
         return enumClass;
+    },
+    
+    hasMetadata: function(key, property){
+        return typeof Reflect !== 'undefined' && Reflect.hasMetadata(key, this, property)
+    },
+    getMetadatas: function(property){
+        var result = {};
+        if(typeof Reflect !== 'undefined'){
+            var keys = Reflect.getMetadataKeys(this, property);
+            keys.forEach(key => {
+                result[key] = Reflect.getMetadata(key, this, property)
+            })
+        }
+        
+        return result;
+    },
+    getMetadata: function(key, property) {
+        return typeof Reflect !== 'undefined' ? Reflect.getMetadata(key, this, property) : undefined
+    },
+    setMetadata: function(key, value, property) {
+        return typeof Reflect !== 'undefined' && Reflect.defineMetadata(key, value, this, property)
     }
 });
 
