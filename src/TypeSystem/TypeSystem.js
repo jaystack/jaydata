@@ -964,7 +964,7 @@ $data.setGlobal = function(obj){
     hasMetadata: function(key, property){
         return typeof Reflect !== 'undefined' && Reflect.hasMetadata(key, this.prototype, property)
     },
-    getMetadatas: function(property){
+    getAllMetadata: function(property){
         var result = {};
         if(typeof Reflect !== 'undefined'){
             var keys = Reflect.getMetadataKeys(this.prototype, property);

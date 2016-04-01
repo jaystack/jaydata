@@ -117,7 +117,7 @@ $data.Enum = $data.Class.define("$data.Enum", null, null, {
     hasMetadata: function(key, property){
         return typeof Reflect !== 'undefined' && Reflect.hasMetadata(key, this, property)
     },
-    getMetadatas: function(property){
+    getAllMetadata: function(property){
         var result = {};
         if(typeof Reflect !== 'undefined'){
             var keys = Reflect.getMetadataKeys(this, property);
