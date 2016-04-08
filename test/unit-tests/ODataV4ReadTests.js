@@ -81,12 +81,12 @@ describe('OData Enum', () => {
 		it('escape converter', () => {
 			var toDb = ctx.storageProvider.fieldConverter.toDb['$data.testEnum']
 			var escape = ctx.storageProvider.fieldConverter.escape['$data.testEnum']
-			expect(escape(toDb(convertedValue))).to.equal( "$data.testEnum'2'")
+			expect(escape(toDb(convertedValue))).to.equal( "$data.testEnum'Customer'")
 		})
 
 		it('url query', () => {
 			var query = ctx.testEnumEntities.filter('it.myEnum == this.val', { val: value });
-			expect(query.toTraceString().queryText).to.equal("/testEnumEntities?$filter=(myEnum eq $data.testEnum'2')")
+			expect(query.toTraceString().queryText).to.equal("/testEnumEntities?$filter=(myEnum eq $data.testEnum'Customer')")
 		})
 	})
 
@@ -129,12 +129,12 @@ describe('OData Enum', () => {
 		it('escape converter', () => {
 			var toDb = ctx.storageProvider.fieldConverter.toDb['$data.testStrEnum']
 			var escape = ctx.storageProvider.fieldConverter.escape['$data.testStrEnum']
-			expect(escape(toDb(convertedValue))).to.equal( "$data.testStrEnum'customer'")
+			expect(escape(toDb(convertedValue))).to.equal( "$data.testStrEnum'Customer'")
 		})
 
 		it('url query', () => {
 			var query = ctx.testEnumEntities.filter('it.myStrEnum == this.val', { val: value });
-			expect(query.toTraceString().queryText).to.equal("/testEnumEntities?$filter=(myStrEnum eq $data.testStrEnum'customer')")
+			expect(query.toTraceString().queryText).to.equal("/testEnumEntities?$filter=(myStrEnum eq $data.testStrEnum'Customer')")
 		})
 	})
 
@@ -279,7 +279,7 @@ describe('OData protocol tests', function () {
 	createTest('date', 'TestTable2', 3, 1, 'date', "2015-12-12", undefined, 'string')
 	createTest('duration', 'TestTable2', 3, 1, 'dur', "-PT5H45M", undefined, 'string')
 	createTest('collection string', 'TestTable2', 3, 1, 'emails', ["a@example.com","b@example.com","c@example.com"], undefined, 'object', { isDeepEqual: true, noFilter: true })
-	createTest('enum', 'Users', 6, 1, 'UserType', 0, undefined, 'number')
+	createTest('enum', 'Users', 6, 1, 'UserType', 0, 2, 'number')
 
 	describe('write', () => {
 		it('create new', (done) => {

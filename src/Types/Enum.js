@@ -89,6 +89,12 @@ $data.Enum = $data.Class.define("$data.Enum", null, null, {
             enumOptions.push(enumVal.name);
             classDefinition[enumVal.name] = getEnumDef(enumVal.value, enumVal.index);
         }
+        classDefinition.getEnumName = function(enumValue){
+            var def = enumDef.filter(d => d.value === enumValue)[0]
+            if(def){
+                return def.name
+            }
+        }
         
         var enumClass = $data.Base.extend.call(this, name, container, {}, classDefinition);
         

@@ -79,7 +79,7 @@ $data.oDataConverter = {
         '$data.Guid': function (guid) { return guid ? guid.toString() : guid; }
     },
     toDb: {
-        '$data.Enum': $data.Container.proxyConverter,
+        '$data.Enum': function (e, enumType) { return  (e !== null && e !== undefined) ? (enumType && enumType.getEnumName ? enumType.getEnumName(e) : "") : e },
         '$data.Entity': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
