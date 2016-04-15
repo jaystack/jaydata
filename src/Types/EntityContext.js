@@ -666,7 +666,8 @@ $data.Class.define('$data.EntityContext', null, null,
 
         for (var i in converterGroups) {
             if (!converterGroups[i][typeName] && converterGroups[i]["$data.Enum"]) {
-                createEnumConverter(converterGroups[i])
+                createEnumConverter(converterGroups[i]);
+                if ($data.SqLiteFieldMapping) $data.SqLiteFieldMapping[typeName] = 'INTEGER';
             }
         }
     },

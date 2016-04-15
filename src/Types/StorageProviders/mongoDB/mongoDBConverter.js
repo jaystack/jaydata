@@ -3,6 +3,7 @@ import atob from 'atob';
 
 $data.mongoDBConverter = {
     fromDb: {
+        '$data.Enum': function(v, enumType) { return $data.Container.convertTo(v, enumType); },
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': $data.Container.proxyConverter,
@@ -12,6 +13,8 @@ $data.mongoDBConverter = {
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Int32': $data.Container.proxyConverter,
         '$data.Number': $data.Container.proxyConverter,
+        '$data.Duration': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.Date': function (date) { return date ? new Date(date) : date; },
         '$data.DateTimeOffset': function (date) { return date ? new Date(date) : date; },
         '$data.Time': function (date) { return date ? Container.convertTo(date, $data.Time) : date; },
@@ -38,6 +41,7 @@ $data.mongoDBConverter = {
         "$data.Guid": function (g) { return g ? $data.parseGuid(g).toString() : g; }
     },
     toDb: {
+        '$data.Enum': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': $data.Container.proxyConverter,
@@ -50,6 +54,8 @@ $data.mongoDBConverter = {
         '$data.Date': $data.Container.proxyConverter,
         '$data.DateTimeOffset': $data.Container.proxyConverter,
         '$data.Time': $data.Container.proxyConverter,
+        '$data.Duration': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.String': $data.Container.proxyConverter,
         '$data.Boolean': $data.Container.proxyConverter,
         '$data.Blob': $data.Container.proxyConverter,

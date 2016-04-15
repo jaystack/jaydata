@@ -2,6 +2,9 @@ import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydat
 
 $data.SqLiteConverter = {
     fromDb: {
+        '$data.Enum': function(v, enumType) { return $data.Container.convertTo(v, enumType); },
+        '$data.Duration': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': $data.Container.proxyConverter,
@@ -41,6 +44,9 @@ $data.SqLiteConverter = {
         '$data.GeometryCollection': function (g) { if (g) { return new $data.GeometryCollection(JSON.parse(g)); } return g; }
     },
     toDb: {
+        '$data.Enum': $data.Container.proxyConverter,
+        '$data.Duration': $data.Container.proxyConverter,
+        '$data.Day': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': $data.Container.proxyConverter,
@@ -87,7 +93,9 @@ $data.SqLiteFieldMapping = {
     "$data.Int32": "INTEGER",
     "$data.Number": "REAL",
     "$data.Date": "REAL",
+    "$data.Duration": "TEXT",
     "$data.Time": "TEXT",
+    "$data.Day": "TEXT",
     "$data.DateTimeOffset": "REAL",
     "$data.String": "TEXT",
     "$data.Boolean": "INTEGER",
