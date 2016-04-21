@@ -664,7 +664,7 @@ $data.define = function (name, container, definition) {
     var entityType = $data.Entity.extend(name, container, _def);
     return entityType;
 }
-$data.implementation = function (name) {
+$data.$data = $data.implementation = function (name) {
     return Container.resolveType(name);
 };
 
