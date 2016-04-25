@@ -35,7 +35,6 @@ import AjaxStub from './Ajax/AjaxStub.js';
 import modelBinderConfigCompiler from './StorageProviders/modelBinderConfigCompiler.js';
 import AuthenticationBase from './Authentication/AuthenticationBase.js';
 import Anonymous from './Authentication/Anonymous.js';
-import FacebookAuth from './Authentication/FacebookAuth.js';
 import BasicAuth from './Authentication/BasicAuth.js';
 //import JaySvcUtil from '../JaySvcUtil/JaySvcUtil.js';
 //import deferred from '../JayDataModules/deferred.js';

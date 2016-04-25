@@ -41,14 +41,6 @@
             "destFolder": "./dist/public/jaydataproviders"
         },
         {
-            "taskName": "yqlprovider",
-            "browserify": { "standalone": "$data" },
-            "require": ["./src/Types/StorageProviders/YQL/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
-            "destFile": "YQLProvider.js",
-            "destFolder": "./dist/public/jaydataproviders"
-        },
-        {
             "taskName": "indexeddbprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/IndexedDB/index.js", { "entry": true }],
@@ -65,16 +57,8 @@
             "destFolder": "./dist/public/jaydataproviders"
         },
         {
-            "taskName": "facebookprovider",
-            "browserify": { "standalone": "$data" },
-            "require": ["./src/Types/StorageProviders/Facebook/index.js", { "entry": true }],
-            "external": ["jaydata/core"],
-            "destFile": "FacebookProvider.js",
-            "destFolder": "./dist/public/jaydataproviders"
-        },
-        {
             "taskName": "jaydataproviders",
-            "dependencies": ["odataprovider", "sqliteprovider", "inmemoryprovider", "yqlprovider", "indexeddbprovider", "webapiprovider", "facebookprovider"]
+            "dependencies": ["odataprovider", "sqliteprovider", "inmemoryprovider", "indexeddbprovider", "webapiprovider"]
         },
         {
             "taskName": "angularmodule",

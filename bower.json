@@ -5,7 +5,7 @@
   "authors": ["Hajnalka Battancs <hajnalka.battancs@jaydata.org>", "Dániel József", "János Roden", "László Horváth", "Peter Nochta <peter.nochta@jaydata.org>",
      "Péter Zentai <peter.zentai@jaydata.org>", "Róbert Bónay <robert.bonay@jaydata.org>", "Szabolcs Czinege", "Viktor Borza <viktor.borza@jaydata.org>", "Viktor Lázár <viktor.lazar@jaydata.org>",
      "Zoltán Gyebrovszki", "Gábor Dolla"],
-  "description": "JayData is a unified data access library for JavaScript to CRUD data from different sources like WebSQL, IndexedDB, MongoDb, WebAPI,  OData, HTML5 localStorage, Facebook or YQL. The library can be integrated with KendoUI, Knockout.js, Handlebars.js or Sencha Touch 2 and can be used on Node.js as well.",
+  "description": "JayData is a unified data access library for JavaScript to CRUD data from different sources like WebSQL, IndexedDB, MongoDb, WebAPI,  OData or HTML5 localStorage. The library can be integrated with KendoUI, Knockout.js, Handlebars.js or Sencha Touch 2 and can be used on Node.js as well.",
   "main": ["./release/jaydata.min.js","./release/jaydata.js","./release/jaydata-vsdoc.js"],
   "keywords": ["mobile data", "javascipt data", "local storage", "mobile platform", "html5", "html5 application", "html5 applications", "html5 local", "html5 local storage", "html5 mobile", "crossplatform mobile developement", "opensource mobile", "opensource data library", "html5 library", "hybrid mobile", "nodejs data",
     "jadata","odata", "web api", "kendo ui", "sencha touch", "websql", "sqlite", "mongodb"
