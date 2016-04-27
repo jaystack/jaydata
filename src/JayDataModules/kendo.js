@@ -241,7 +241,7 @@ import kendo from 'kendo'
                         if (propNameParts.length == 1) {
                             var propValue = e.value;
                             if (!jayInstance.changeFromJay) {
-                                propValue = propValue.innerInstance ? propValue.innerInstance() : propValue;
+                                propValue = propValue && propValue.innerInstance ? propValue.innerInstance() : propValue;
                                 jayInstance[propName] = propValue;
                                 if (options && options.autoSave) {
                                     jayInstance.save();
