@@ -1,6 +1,6 @@
 {
   "name": "jaydata",
-  "version": "1.5.2",
+  "version": "1.5.4",
   "description": "Cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
   "keywords": [
     "HTML5 data management",
@@ -36,8 +36,8 @@
       "jaydata-odatajs": "^4.0.0",
       "jaydata-error-handler": "^0.0.1",
       "jaydata-promise-handler": "^0.0.1",
-      "jaydata-dynamic-metadata": "^0.0.5",
-      "odata-metadata": "^0.1.0",
+      "jaydata-dynamic-metadata": "^0.1.9",
+      "odata-v4-metadata": "^0.1.2",
       "xmldom": "^0.1.19"
   },
   "contributors": [

@@ -6,10 +6,6 @@
 		module.exports = require('<%=module.require[1].expose %>')
 	} else if (typeof define === "function" && define.amd) {
 		var interopRequire = require;
-		define([], function(){
-			return interopRequire('<%=module.require[1].expose %>');
-		});
-
 		define('<%=module.require[1].expose %>', [], function(){
 			return interopRequire('<%=module.require[1].expose %>');
 		});

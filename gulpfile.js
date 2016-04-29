@@ -29,6 +29,7 @@ var zip = require('gulp-vinyl-zip');
 var npm = require('npm');
 var argv = require('yargs').argv;
 var exec = require('child_process').exec;
+var replace = require('gulp-replace');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -299,6 +300,10 @@ function gulpTask(td, config){
 
     if (td.footer){
         task = task.pipe(footer(fs.readFileSync(td.footer, 'utf8'), { pkg: pkg, module: td }));
+    }
+    
+    if (td.amd){
+        task = task.pipe(replace('define([]', 'define(' + (td.amd.name ? '"' + td.amd.name + '",' : '') + JSON.stringify(td.amd.deps || [])));
     }
 
     task = task
