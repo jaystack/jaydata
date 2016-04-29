@@ -129,7 +129,7 @@ gulp.task('nuget', ['bundle'], function(done){
 
 gulp.task('release', ['bundle'], function(){
     if (!fs.existsSync('./release')) fs.mkdirSync('./release');
-    return gulp.src(['./dist/public/**/*', './build/*.txt', './jaydata.d.ts'])
+    return gulp.src(['./dist/public/**/*', './build/*.txt'])
     .pipe(zip.dest('./release/jaydata.zip'));
 });
 
