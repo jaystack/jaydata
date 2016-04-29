@@ -523,5 +523,23 @@ describe('OData protocol tests', function () {
 
 	})
 
+	describe('filter: contains', () => {
+
+		it('url', () => {
+			var q = ctx.Articles.filter(a => a.Title.contains('Art')).toTraceString()
+            expect(q.queryText).to.equal("/Articles?$filter=contains(Title,'Art')");
+		})
+        
+        it('result', (done) => {
+            ctx.Articles.filter(a => a.Title.contains('21'))
+                .toArray(data => {
+                    expect(data.length).to.equal(1)
+                    done()
+                })
+		})
+	})
+    
+    
+
 })
 
