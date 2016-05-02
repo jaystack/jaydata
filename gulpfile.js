@@ -94,10 +94,12 @@ gulp.task('minify', ['bundle'], function(){
 
 gulp.task('clean', function(){
     return del([
-        './dist/.eslint',
-        './dist/lib/**',
-        './dist/public/**'
-    ], { force: true });
+        'dist/.eslint',
+        'dist/lib/**',
+        'dist/public/**',
+        '!dist/public/jaydata-compatibility.js',
+        '!dist/public'
+    ]);
 });
 
 gulp.task('nuget', ['bundle'], function(done){
