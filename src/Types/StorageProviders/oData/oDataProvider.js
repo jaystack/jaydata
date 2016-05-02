@@ -891,25 +891,25 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
     supportedBinaryOperators: {
         value: {
-            equal: { mapTo: 'eq', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            notEqual: { mapTo: 'ne', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            equalTyped: { mapTo: 'eq', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            notEqualTyped: { mapTo: 'ne', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            greaterThan: { mapTo: 'gt', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            greaterThanOrEqual: { mapTo: 'ge', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
+            equal: { mapTo: 'eq', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            notEqual: { mapTo: 'ne', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            equalTyped: { mapTo: 'eq', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            notEqualTyped: { mapTo: 'ne', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            greaterThan: { mapTo: 'gt', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            greaterThanOrEqual: { mapTo: 'ge', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
 
-            lessThan: { mapTo: 'lt', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            lessThenOrEqual: { mapTo: 'le', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            or: { mapTo: 'or', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            and: { mapTo: 'and', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
+            lessThan: { mapTo: 'lt', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            lessThenOrEqual: { mapTo: 'le', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            or: { mapTo: 'or', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            and: { mapTo: 'and', dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
 
-            add: { mapTo: 'add', dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            divide: { mapTo: 'div', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            multiply: { mapTo: 'mul', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            subtract: { mapTo: 'sub', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
-            modulo: { mapTo: 'mod', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] },
+            add: { mapTo: 'add', dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            divide: { mapTo: 'div', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            multiply: { mapTo: 'mul', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            subtract: { mapTo: 'sub', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
+            modulo: { mapTo: 'mod', allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] },
 
-            "in": { mapTo: "in", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression] }
+            "in": { mapTo: "in", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression] }
         }
     },
 
@@ -925,87 +925,87 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
             contains: {
                 mapTo: "contains",
-                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression" }, { name: "substring", dataType: "string" }]
             },
 
             startsWith: {
                 mapTo: "startswith",
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
             },
 
             endsWith: {
                 mapTo: "endswith",
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
             },
 
             length: [{
                 allowedType: 'string',
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
             {
                 allowedType: 'GeographyLineString',
                 mapTo: "geo.length",
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: ['GeographyLineString'] }],
                 fixedDataType: 'decimal'
             },
             {
                 allowedType: 'GeometryLineString',
                 mapTo: "geo.length",
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: 'GeometryLineString' }],
                 fixedDataType: 'decimal'
             }],
 
             strLength: {
                 mapTo: "length",
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
 
             indexOf: {
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 mapTo: "indexof",
                 baseIndex: 1,
                 parameters: [{ name: '@expression', dataType: "string" }, { name: 'strFragment', dataType: 'string' }]
             },
 
             replace: {
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: '@expression', dataType: "string" }, { name: 'strFrom', dataType: 'string' }, { name: 'strTo', dataType: 'string' }]
             },
 
             substr: {
                 mapTo: "substring",
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "startFrom", dataType: "number" }, { name: "length", dataType: "number", optional: "true" }]
             },
 
             toLowerCase: {
                 mapTo: "tolower",
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
 
             toUpperCase: {
                 mapTo: "toupper",
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
 
             },
 
             trim: {
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
 
 
             concat: {
-                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
             },
 
@@ -1013,41 +1013,41 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             /* data functions */
 
             day: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             hour: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             minute: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             month: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             second: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             year: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
 
             /* number functions */
             round: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             floor: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             ceiling: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
 
@@ -1056,13 +1056,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             distance: [{
                 allowedType: 'GeographyPoint',
                 mapTo: "geo.distance",
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "to", dataType: 'GeographyPoint' }],
                 fixedDataType: 'decimal'
             }, {
                 allowedType: 'GeometryPoint',
                 mapTo: "geo.distance",
-                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "to", dataType: 'GeometryPoint' }],
                 fixedDataType: 'decimal'
             }],
@@ -1070,13 +1070,13 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             intersects: [{
                 allowedType: 'GeographyPoint',
                 mapTo: "geo.intersects",
-                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: 'GeographyPoint' }, { name: "in", dataType: 'GeographyPolygon' }]
 
             }, {
                 allowedType: 'GeometryPoint',
                 mapTo: "geo.intersects",
-                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression],
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "in", dataType: 'GeometryPolygon' }]
 
             }]

@@ -203,17 +203,26 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
 
         for (var i = 0; i < args.length; i++) {
             var arg = args[i];
-            if (arg && arg.value instanceof $data.Queryable) {
-                var frameExpression = new opDef.frameType(arg.value.expression);
-                var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
-                var prep_expression = preparator.Visit(frameExpression);
-
+            
+            if(!opDef.method) {
                 var compiler = new $data.storageProviders.oData.oDataWhereCompiler(this.provider, true);
                 var frameContext = { data: "" };
-                var compiled = compiler.compile(prep_expression, frameContext);
-
-                context.data += (frameContext.lambda + ': ' + frameContext.data);
-            };
+                                    
+                if (arg && arg.value instanceof $data.Queryable) {
+                    var preparator = Container.createQueryExpressionCreator(arg.value.entityContext);
+                    var prep_expression = preparator.Visit(arg.value.expression);
+                    arg = prep_expression;
+                } else if(arg) {
+                    arg = arg.selector;
+                }
+                
+                var compiled = compiler.compile(arg, frameContext);
+                
+                if(frameContext.data){
+                    context.data += (frameContext.lambda + ': ' + frameContext.data);
+                }
+            }
+            
         }
         context.data += ")";
     }
