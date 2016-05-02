@@ -102,22 +102,24 @@ $C('$data.Expressions.ToArrayExpression', $data.Expressions.FrameOperator, null,
 });
 
 $C('$data.Expressions.SomeExpression', $data.Expressions.FrameOperator, null, {
-    constructor: function (source) {
+    constructor: function (source, selector) {
         ///<signature>
         ///<param name="source" type="$data.Expressions.EntitySetExpression" />
         ///</signature>
         this.source = source;
+        this.selector = selector;
         this.resultType = $data.Object;
     },
     nodeType: { value: $data.Expressions.ExpressionType.Some, enumerable: true }
 });
 
 $C('$data.Expressions.EveryExpression', $data.Expressions.FrameOperator, null, {
-    constructor: function (source) {
+    constructor: function (source, selector) {
         ///<signature>
         ///<param name="source" type="$data.Expressions.EntitySetExpression" />
         ///</signature>
         this.source = source;
+        this.selector = selector;
         this.resultType = $data.Object;
     },
     nodeType: { value: $data.Expressions.ExpressionType.Every, enumerable: true }

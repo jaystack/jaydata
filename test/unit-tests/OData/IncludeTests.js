@@ -704,4 +704,122 @@ describe('OData include', () => {
             $data.defaults.parameterResolutionCompatibility = oldValue;
         })
     })
+    
+    
+    
+    describe('url: nested empty some', () => {
+        var result = '/Categories?$filter=Articles/any()'
+        
+        it('string property with it prefix', ()=>{
+            let q = ctx.Categories.filter('it.Articles.some()')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('arrow function', ()=>{
+            let q = ctx.Categories.filter(c => c.Articles.some())
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('string arrow function', ()=>{
+            let q = ctx.Categories.filter('c => c.Articles.some()')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('function', ()=>{
+            let q = ctx.Categories.filter(function(c) { return c.Articles.some() })
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('queryable', ()=>{
+            let q = ctx.Categories.filter('it.Articles.some()')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+    })
+    
+    describe('url: nested some', () => {
+        var result = "/Categories?$filter=Articles/any(a: (a/Title eq 'Article'))"
+        
+        it('string property with it prefix', ()=>{
+            let q = ctx.Categories.filter('it.Articles.some(a => a.Title == "Article")')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('arrow function', ()=>{
+            let q = ctx.Categories.filter(c => c.Articles.some(a => a.Title == "Article"))
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('string arrow function', ()=>{
+            let q = ctx.Categories.filter('c => c.Articles.some(a => a.Title == "Article")')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('function', ()=>{
+            let q = ctx.Categories.filter(function(c) { return c.Articles.some(a => a.Title == "Article") })
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('queryable', ()=>{
+            let q = ctx.Categories.filter('it.Articles.some(this.query)', { query: ctx.Articles.filter(a => a.Title == "Article") })
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+    })
+    
+    describe('url: nested empty every', () => {
+        var result = '/Categories?$filter=Articles/all()'
+        
+        it('string property with it prefix', ()=>{
+            let q = ctx.Categories.filter('it.Articles.every()')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('arrow function', ()=>{
+            let q = ctx.Categories.filter(c => c.Articles.every())
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('string arrow function', ()=>{
+            let q = ctx.Categories.filter('c => c.Articles.every()')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('function', ()=>{
+            let q = ctx.Categories.filter(function(c) { return c.Articles.every() })
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('queryable', ()=>{
+            let q = ctx.Categories.filter('it.Articles.every()')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+    })
+    
+    describe('url: nested every', () => {
+        var result = "/Categories?$filter=Articles/all(a: (a/Title eq 'Article'))"
+        
+        it('string property with it prefix', ()=>{
+            let q = ctx.Categories.filter('it.Articles.every(a => a.Title == "Article")')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('arrow function', ()=>{
+            let q = ctx.Categories.filter(c => c.Articles.every(a => a.Title == "Article"))
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('string arrow function', ()=>{
+            let q = ctx.Categories.filter('c => c.Articles.every(a => a.Title == "Article")')
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('function', ()=>{
+            let q = ctx.Categories.filter(function(c) { return c.Articles.every(a => a.Title == "Article") })
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+        
+        it('queryable', ()=>{
+            let q = ctx.Categories.filter('it.Articles.every(this.query)', { query: ctx.Articles.filter(a => a.Title == "Article") })
+            expect(q.toTraceString().queryText).to.equal(result);
+        })
+    })
 })
