@@ -1,0 +1,137 @@
+{
+  "name": "jaydata",
+  "version": "1.5.5",
+  "description": "Cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
+  "keywords": [
+    "HTML5 data management",
+    "JavaScript",
+    "JavaScript Language Query",
+    "JSLQ",
+    "OData",
+    "SQLite",
+    "WebSQL",
+    "IndexedDB",
+    "YQL",
+    "Facebook",
+    "cross-platform",
+    "iPhone",
+    "Android"
+  ],
+  "homepage": "http://jaydata.org",
+  "author": {
+    "name": "JayData",
+    "url": "http://jaydata.org"
+  },
+  "dependencies": {
+    "acorn": "^3.0.2",
+    "atob": "^2.0.0",
+    "btoa": "^1.1.2",
+    "dot": "^1.0.3",
+    "jaydata-dynamic-metadata": "^0.1.9",
+    "jaydata-error-handler": "^0.0.1",
+    "jaydata-odatajs": "^4.0.0",
+    "jaydata-promise-handler": "^0.0.1",
+    "odata-v4-metadata": "^0.1.2",
+    "reflect-metadata": "^0.1.3",
+    "xmldom": "^0.1.19"
+  },
+  "contributors": [
+    {
+      "name": "Dániel József"
+    },
+    {
+      "name": "Hajnalka Battancs"
+    },
+    {
+      "name": "János Roden"
+    },
+    {
+      "name": "László Horváth"
+    },
+    {
+      "name": "Péter Zentai"
+    },
+    {
+      "name": "Péter Nochta"
+    },
+    {
+      "name": "Róbert Bónay"
+    },
+    {
+      "name": "Szabolcs Czinege"
+    },
+    {
+      "name": "Viktor Borza"
+    },
+    {
+      "name": "Viktor Lázár"
+    },
+    {
+      "name": "Zoltán Gyebrovszki"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jaydata/jaydata.git"
+  },
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "license": "(MIT OR GPL-2.0)",
+  "devDependencies": {
+    "babel": "^6.1.18",
+    "babel-eslint": "^5.0.0-beta4",
+    "babel-plugin-add-module-exports": "^0.1.1",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-register": "^6.2.0",
+    "babelify": "^7.2.0",
+    "browserify": "^12.0.1",
+    "browserify-derequire": "^0.9.4",
+    "browserify-shim": "^3.8.11",
+    "chai": "^3.4.1",
+    "del": "^2.2.0",
+    "google-closure-compiler": "^20151015.0.0",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-closure-compiler": "^0.3.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-derequire": "^2.1.0",
+    "gulp-eslint": "^1.1.1",
+    "gulp-footer": "^1.0.5",
+    "gulp-header": "^1.7.1",
+    "gulp-nightwatch": "^0.2.6",
+    "gulp-nuget-pack": "0.0.6",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^1.5.1",
+    "gulp-vinyl-zip": "^1.1.2",
+    "gulp-webserver": "^0.9.1",
+    "istanbul": "^0.4.1",
+    "jaguarjs-jsdoc": "0.0.1",
+    "jsdoc": "^3.4.0",
+    "minimist": "^1.2.0",
+    "nightwatch": "^0.8.8",
+    "npm": "^3.5.2",
+    "selenium-standalone": "^4.7.2",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "yargs": "^3.31.0"
+  },
+  "browserify-shim": {
+    "atob": "global:atob",
+    "btoa": "global:btoa",
+    "jquery": "global:jQuery",
+    "jaydata-odatajs": "global:odatajs",
+    "angular": "global:angular",
+    "Handlebars": "global:Handlebars",
+    "kendo": "global:kendo",
+    "ko": "global:ko",
+    "q": "global:Q",
+    "Ext": "global:Ext"
+  },
+  "scripts": {
+    "test": "mocha --compilers js:babel-register"
+  }
+}

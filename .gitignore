@@ -7,7 +7,6 @@ CommandLine.dll
 JayData_readme.txt
 JaySvcUtil.exe
 Scripts/jaydata*
-build
 /obj/*
 /3rdparty/*
 /bin/*
@@ -18,4 +17,17 @@ build
 !bin/System.Web.Optimization.dll
 !bin/System.Web.Providers.dll
 !bin/WebGrease.dll
-
+packages
+node_modules
+npm-debug.log
+nugetpkg
+/dist/*
+!dist/package.json
+!dist/*.js
+release
+coverage
+docs
+jaydata.js
+test.js
+apidocs
+.history/*
