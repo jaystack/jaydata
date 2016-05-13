@@ -9,7 +9,7 @@
             "taskName": "jaydata",
             "browserify": {},
             "require": ["./src/index.js", { "expose": "jaydata/core" }],
-            "ignore": ["crypto", "jaydata-odatajs", "reflect-metadata"],
+            "ignore": ["crypto", "jaydata-odatajs"],
             "destFile": "jaydata.js",
             "destFolder": "./dist/public",
             "header": "./build/jaydata-header.js",

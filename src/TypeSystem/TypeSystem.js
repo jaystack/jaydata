@@ -2,8 +2,8 @@ import $data from './initializeJayData.js';
 import { Guard, Exception } from 'jaydata-error-handler';
 import { StringFunctions } from './Extensions.js'
 import {ContainerInstance, ContainerCtor} from './Container.js'
-import 'reflect-metadata'
 
+import {} from './PreHtml5Compatible.js'
 
 $data.StringFunctions = StringFunctions
 
@@ -703,7 +703,7 @@ $data.setGlobal = function(obj){
       this.addMethod(holder, memberDefinition.name, memberDefinition.method, propagation);
       
       for(var meta in memberDefinition){
-          if(Reflect !== 'undefined' && typeof memberDefinition[meta] !== 'undefined' && memberDefinition.hasOwnProperty(meta)){
+          if(typeof Reflect !== 'undefined' && Reflect.defineMetadata && typeof memberDefinition[meta] !== 'undefined' && memberDefinition.hasOwnProperty(meta)){
               Reflect.defineMetadata('definition:' + meta, memberDefinition[meta], holder, memberDefinition.name)
           }
       }
@@ -718,7 +718,7 @@ $data.setGlobal = function(obj){
       this.addProperty(holder, memberDefinition.name, pd, propagation);
       
       for(var meta in memberDefinition){
-          if(Reflect !== 'undefined' && typeof memberDefinition[meta] !== 'undefined' && memberDefinition.hasOwnProperty(meta)){
+          if(typeof Reflect !== 'undefined' && Reflect.defineMetadata && typeof memberDefinition[meta] !== 'undefined' && memberDefinition.hasOwnProperty(meta)){
               Reflect.defineMetadata('definition:' + meta, memberDefinition[meta], holder, memberDefinition.name)
           }
       }
@@ -962,11 +962,11 @@ $data.setGlobal = function(obj){
     },
     
     hasMetadata: function(key, property){
-        return typeof Reflect !== 'undefined' && Reflect.hasMetadata(key, this.prototype, property)
+        return typeof Reflect !== 'undefined' && Reflect.hasMetadata && Reflect.hasMetadata(key, this.prototype, property)
     },
     getAllMetadata: function(property){
         var result = {};
-        if(typeof Reflect !== 'undefined'){
+        if(typeof Reflect !== 'undefined' && Reflect.getMetadataKeys && Reflect.getMetadata){
             var keys = Reflect.getMetadataKeys(this.prototype, property);
             keys.forEach(key => {
                 result[key] = Reflect.getMetadata(key, this.prototype, property)
@@ -976,10 +976,10 @@ $data.setGlobal = function(obj){
         return result;
     },
     getMetadata: function(key, property) {
-        return typeof Reflect !== 'undefined' ? Reflect.getMetadata(key, this.prototype, property) : undefined
+        return typeof Reflect !== 'undefined' && Reflect.getMetadata ? Reflect.getMetadata(key, this.prototype, property) : undefined
     },
     setMetadata: function(key, value, property) {
-        return typeof Reflect !== 'undefined' && Reflect.defineMetadata(key, value, this.prototype, property)
+        return typeof Reflect !== 'undefined' && Reflect.defineMetadata && Reflect.defineMetadata(key, value, this.prototype, property)
     }
   });
 

@@ -121,11 +121,11 @@ $data.Enum = $data.Class.define("$data.Enum", null, null, {
     },
     
     hasMetadata: function(key, property){
-        return typeof Reflect !== 'undefined' && Reflect.hasMetadata(key, this, property)
+        return typeof Reflect !== 'undefined' && Reflect.hasMetadata && Reflect.hasMetadata(key, this, property)
     },
     getAllMetadata: function(property){
         var result = {};
-        if(typeof Reflect !== 'undefined'){
+        if(typeof Reflect !== 'undefined' && Reflect.getMetadataKeys && Reflect.getMetadata){
             var keys = Reflect.getMetadataKeys(this, property);
             keys.forEach(key => {
                 result[key] = Reflect.getMetadata(key, this, property)
@@ -135,10 +135,10 @@ $data.Enum = $data.Class.define("$data.Enum", null, null, {
         return result;
     },
     getMetadata: function(key, property) {
-        return typeof Reflect !== 'undefined' ? Reflect.getMetadata(key, this, property) : undefined
+        return typeof Reflect !== 'undefined' && Reflect.getMetadata ? Reflect.getMetadata(key, this, property) : undefined
     },
     setMetadata: function(key, value, property) {
-        return typeof Reflect !== 'undefined' && Reflect.defineMetadata(key, value, this, property)
+        return typeof Reflect !== 'undefined' && Reflect.defineMetadata && Reflect.defineMetadata(key, value, this, property)
     }
 });
 
