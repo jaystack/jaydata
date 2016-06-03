@@ -11,6 +11,9 @@ var _modelHolder = null;
 $data.setModelContainer = function(modelHolder){
   _modelHolder = modelHolder;
 };
+$data.getModelContainer = function(){
+  return _modelHolder;
+};
 
 $data.defaults = $data.defaults || {}
 $data.defaults.openTypeDefaultPropertyName = "dynamicProperties";

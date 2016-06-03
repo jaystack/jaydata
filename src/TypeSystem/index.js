@@ -13,6 +13,9 @@ import Converter from './Types/Converter.js';
 
 import { Guard as _guard, Exception as _exception } from 'jaydata-error-handler';
 
+import { PromiseHandler } from 'jaydata-promise-handler';
+PromiseHandler.use($data);
+
 export var Guard = _guard;
 $data.Guard = _guard;
 

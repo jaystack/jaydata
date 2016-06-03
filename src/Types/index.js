@@ -41,7 +41,6 @@ import BasicAuth from './Authentication/BasicAuth.js';
 //import deferred from '../JayDataModules/deferred.js';
 //import JayStorm from './JayStorm.js';
 
-import { PromiseHandler } from 'jaydata-promise-handler';
-PromiseHandler.use($data);
+
 
 export default $data

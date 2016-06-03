@@ -27,7 +27,7 @@
     "atob": "^2.0.0",
     "btoa": "^1.1.2",
     "dot": "^1.0.3",
-    "jaydata-dynamic-metadata": "^0.1.11",
+    "jaydata-dynamic-metadata": "^0.1.13",
     "jaydata-error-handler": "^0.0.1",
     "jaydata-odatajs": "^4.0.0",
     "jaydata-promise-handler": "^0.0.1",
