@@ -275,8 +275,11 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += '}';
                     context.src += '}';
                 } else {
+                    var isEnum = resolvedType.isAssignableTo && resolvedType.isAssignableTo($data.Enum);
                     if (isEntityType) {
                         context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
+                    } else if (isEnum) {
+                        context.src += item + ' = Container.resolveByIndex(' + typeIndex + ')[di["' + context.current + '"]];';
                     } else {
                         context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
                     }
