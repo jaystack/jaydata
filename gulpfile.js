@@ -109,8 +109,7 @@ gulp.task('nuget', ['bundle'], function(done){
         title: "JayData",
         version: pkg.version,
         dependencies: [
-            { id: "jQuery", version: "1.8" },
-            { id: "odatajs", version: "4.0" }
+            { id: "jQuery", version: "1.8" }
         ],
         authors: "JayStack Technologies",
         owners: "JayStack Technologies",

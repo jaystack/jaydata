@@ -1,36 +1,9 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
-import * as odatajs from 'jaydata-odatajs';
 import * as activities from './oDataRequestActivities.js'
 import { strategy as emptySaveStrategy } from './SaveStrategies/empty'
 import { strategy as singleSaveStrategy } from './SaveStrategies/single'
 import { strategy as batchSaveStrategy } from './SaveStrategies/batch'
 
-
-var OData = $data.__global['OData'];
-var datajs = $data.__global['datajs'];
-
-var datajsPatch;
-datajsPatch = function (OData) {
-    // just datajs-1.1.0
-    if (OData && OData.jsonHandler && 'useJsonLight' in OData.jsonHandler && typeof datajs === 'object' && !datajs.version) {
-        $data.Trace.log('!!!!!!! - patch datajs 1.1.0');
-        var oldread = OData.defaultHandler.read;
-        OData.defaultHandler.read = function (p, context) {
-            delete context.contentType;
-            delete context.dataServiceVersion;
-
-            oldread.apply(this, arguments);
-        };
-        var oldwrite = OData.defaultHandler.write;
-        OData.defaultHandler.write = function (p, context) {
-            delete context.contentType;
-            delete context.dataServiceVersion;
-
-            oldwrite.apply(this, arguments);
-        };
-    }
-    datajsPatch = function () { };
-}
 
 $data.defaults = $data.defaults || {};
 $data.defaults.OData = $data.defaults.OData || {};
@@ -178,19 +151,14 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             UpdateMethod: 'PATCH'
         }, cfg);
 
-        if (this.providerConfiguration.maxDataServiceVersion === "4.0") {
+        if (typeof $data.odatajs === 'undefined' || typeof $data.odatajs.oData === 'undefined') {
             if (typeof odatajs === 'undefined' || typeof odatajs.oData === 'undefined') {
                 Guard.raise(new Exception('odatajs is required', 'Not Found!'));
             } else {
                 this.oData = odatajs.oData
             }
         } else {
-            if (typeof OData === 'undefined') {
-                Guard.raise(new Exception('datajs is required', 'Not Found!'));
-            } else {
-                this.oData = OData;
-                datajsPatch(this.oData);
-            }
+            this.oData = $data.odatajs.oData
         }
 
         //this.fixkDataServiceVersions(cfg);
