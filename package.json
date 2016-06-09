@@ -130,6 +130,7 @@
     "Ext": "global:Ext"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-register"
+    "test": "mocha --compilers js:babel-register test/unit-tests/",
+    "stest": "mocha --compilers js:babel-register"
   }
 }

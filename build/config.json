@@ -61,7 +61,7 @@
                 "deps": ["jaydata/core"]
             },
             "destFile": "YQLProvider.js",
-            "destFolder": "./dist/public/jaydataproviders"
+            "destFolder": "./dist/deprecated/jaydataproviders"
         },
         {
             "taskName": "indexeddbprovider",
@@ -97,7 +97,7 @@
                 "deps": ["jaydata/core"]
             },
             "destFile": "FacebookProvider.js",
-            "destFolder": "./dist/public/jaydataproviders"
+            "destFolder": "./dist/deprecated/jaydataproviders"
         },
         {
             "taskName": "jaydataproviders",
@@ -268,8 +268,20 @@
               "qdeferredmodule", "deferredmodule", "senchamodule", "templatemodule", "validatemodule"]
         },
         {
+            "taskName": "compatibility",
+            "browserify": { "standalone": "$data" },
+            "require": ["./jaydata-compatibility.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "amd": {
+                "name": "jaydata/compatibility",
+                "deps": ["jaydata/core"]
+            },
+            "destFile": "jaydata-compatibility.js",
+            "destFolder": "./dist/public"
+        },
+        {
             "taskName": "bundle",
-            "dependencies": ["jaydata", "jaydataproviders", "jaydatamodules"]
+            "dependencies": ["jaydata", "jaydataproviders", "jaydatamodules", "compatibility"]
         },
         {
             "taskName": "all",
