@@ -216,10 +216,14 @@ $C('$data.Expressions.ExpressionNode', null, null, {
         ///TODO
         this.expressionType = this.constructor;
     },
-    toJSON: function(){
-      var res = JSON.parse(JSON.stringify(this))
-      res.expressionType = Container.resolveName(this._expressionType);
-      return res
+    toJSON: function toJSON() {
+        var __proto__ = $data('$data.Expressions.ExpressionNode').prototype;
+        var origToJSON = __proto__.toJSON;
+        delete __proto__.toJSON;
+        var res = JSON.parse(JSON.stringify(this));
+        res.expressionType = _index.Container.resolveName(this._expressionType);
+        __proto__.toJSON = origToJSON;
+        return res;
     },
     getJSON: function () { return jsonify(this); },
 

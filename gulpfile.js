@@ -22,7 +22,6 @@ var footer = require('gulp-footer');
 var webserver = require('gulp-webserver');
 var selenium = require('selenium-standalone');
 var nightwatch = require('gulp-nightwatch');
-var rename = require('gulp-rename');
 var del = require('del');
 var nugetpack = require('gulp-nuget-pack');
 var zip = require('gulp-vinyl-zip');
