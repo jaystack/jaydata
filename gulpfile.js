@@ -253,7 +253,7 @@ gulp.task('apidocs', ['jaydata'], function (cb) {
 for (var i = 0; i < config.components.length; i++) {
   (function(td) {
     if (td.browserify) {
-      gulp.task(td.taskName, td.dependencies, function() {
+      gulp.task(td.taskName, td.dependencies || [], function() {
         return gulpTask(td, config);
       });
     } else {
