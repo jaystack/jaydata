@@ -101,7 +101,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
 
     build: function (meta, context) {
         if (meta.$selector) {
-            if (!(Array.isArray(meta.$selector))) meta.$selector = [meta.$selector];
+            if (!Array.isArray(meta.$selector)) meta.$selector = [meta.$selector];
             for (var i = 0; i < meta.$selector.length; i++) {
                 meta.$selector[i] = meta.$selector[i].replace('json:', '');
             }
@@ -144,9 +144,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
             } else {
                 context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(di["' + meta.$source + '"]);';
             }
+            context.src += 'var ' + item + '_inheritance;';
         } else if (meta.$item) {
             context.meta.push('$item');
-            var iter = (context.item && context.current ? context.item + '.' + context.current : (context.item ? context.item : 'result'));
+            var iter = context.item && context.current ? context.item + '.' + context.current : context.item ? context.item : 'result';
             context.iter = iter;
             if (iter.indexOf('.') < 0) context.src += 'var ' + iter + ';';
             context.src += 'var fn = function(di){';
@@ -185,21 +186,21 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += 'if (forKey){';
                 context.src += 'if (cache[forKey]){';
                 context.src += iter + ' = cache[forKey];';
-                context.src += 'if (' + iter + '.indexOf(' + (context.item || item) + ') < 0){';
-                context.src += iter + '.push(' + (context.item || item) + ');';
+                context.src += 'if (' + iter + '.indexOf(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ') < 0){';
+                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                 context.src += '}}else{';
                 context.src += 'cache[forKey] = ' + iter + ';';
-                context.src += iter + '.push(' + (context.item || item) + ');';
+                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                 context.src += '}}else{';
                 if (this.references && meta.$item.$keys) this._buildKey('cacheKey', meta.$type, meta.$item.$keys, context, 'diBackup');
                 context.src += 'if (typeof cacheKey != "undefined" && cacheKey !== null){';
                 context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + ' && cacheKey){';
                 context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(cacheKey) < 0){';
-                context.src += iter + '.push(' + (context.item || item) + ');';
+                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                 context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(cacheKey);';
                 context.src += '}';
                 context.src += '}else{';
-                context.src += iter + '.push(' + (context.item || item) + ');';
+                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                 context.src += '}';
                 context.src += '}';
                 context.src += '}';
@@ -208,15 +209,15 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += 'if (typeof ' + itemForKey + ' !== "undefined" && ' + itemForKey + ' !== null){';
                     context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && ' + itemForKey + '){';
                     context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(' + itemForKey + ') < 0){';
-                    context.src += iter + '.push(' + (context.item || item) + ');';
-                    context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(' + itemForKey + ');'
+                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                    context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(' + itemForKey + ');';
                     context.src += '}}else{';
-                    context.src += iter + '.push(' + (context.item || item) + ');';
+                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                     context.src += '}}else{';
-                    context.src += iter + '.push(' + (context.item || item) + ');';
+                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                     context.src += '}';
                 } else {
-                    context.src += iter + '.push(' + (context.item || item) + ');';
+                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
                 }
             }
             context.src += '};';
@@ -224,7 +225,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.src += 'else forEachFn(di, 0);';
             context.forEach = false;
             context.item = null;
-            context.src += '};fn(typeof di === "undefined" ? data : di);'
+            context.src += '};fn(typeof di === "undefined" ? data : di);';
             context.meta.pop();
         } else if (meta.$type) {
             if (!context.forEach) {
@@ -241,13 +242,11 @@ $data.Class.define('$data.ModelBinder', null, null, {
             if (context.item == item) item += 'new_';
             context.item = item;
 
-
             var isPrimitive = false;
-            if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo)
-                isPrimitive = true;
+            if (!meta.$source && !meta.$value && resolvedType !== $data.Array && resolvedType !== $data.Object && !resolvedType.isAssignableTo) isPrimitive = true;
             if (resolvedType === $data.Object || resolvedType === $data.Array) {
                 var keys = Object.keys(meta);
-                if (keys.length == 1 || (keys.length == 2 && meta.$selector)) isPrimitive = true;
+                if (keys.length == 1 || keys.length == 2 && meta.$selector) isPrimitive = true;
             }
 
             if (isPrimitive) {
@@ -257,42 +256,62 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 } else {
                     context.src += 'var ' + item + ' = di;';
                 }
+                context.src += 'var ' + item + '_inheritance;';
             } else {
                 if (this.references && meta.$keys) {
                     this._buildKey('itemKey', meta.$type, meta.$keys, context);
                     context.src += 'if (itemKey === null) return null;';
                     context.src += 'var ' + item + ';';
+                    context.src += 'var ' + item + '_inheritance;';
                     context.src += 'if (itemKey && cache[itemKey]){';
                     context.src += item + ' = cache[itemKey];';
+                    context.src += '}else{';
+                    context.src += 'if (di && di["@odata.type"]){';
+                    context.src += 'var odataTypeName = di["@odata.type"].split("#")[1];';
+                    context.src += 'var odataType = Container.resolveType(odataTypeName);';
+                    context.src += 'if (odataType){';
+                    context.src += item + '_inheritance = new odataType(di);';
+                    context.src += '}';
                     context.src += '}else{';
                     if (isEntityType) {
                         context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
                     } else {
                         context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
                     }
+                    context.src += '}';
                     context.src += 'if (itemKey){';
                     context.src += 'cache[itemKey] = ' + item + ';';
                     context.src += '}';
                     context.src += '}';
                 } else {
                     var isEnum = resolvedType.isAssignableTo && resolvedType.isAssignableTo($data.Enum);
+                    context.src += 'var ' + item + ';';
+                    context.src += 'var ' + item + '_inheritance;';
+                    context.src += 'if (di["' + context.current + '"] && di["' + context.current + '"]["@odata.type"]){';
+                    context.src += 'var odataType = Container.resolveType(di["' + context.current + '"]["@odata.type"].split("#")[1]);';
+                    context.src += 'if (odataType){';
+                    context.src += item + '_inheritance = new odataType(di["' + context.current + '"])';
+                    context.src += '}';
+                    context.src += '}else{';
                     if (isEntityType) {
-                        context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
+                        context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
                     } else if (isEnum) {
                         context.src += item + ' = Container.resolveByIndex(' + typeIndex + ')[di["' + context.current + '"]];';
                     } else {
-                        context.src += 'var ' + item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
+                        context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
                     }
+                    context.src += '}';
                 }
             }
             var openTypeProperty = null;
-            if (this.providerName == "oData" && resolvedType && resolvedType.openType){
-                openTypeProperty = (resolvedType.openType === true ? $data.defaults.openTypeDefaultPropertyName : resolvedType.openType);
+            if (this.providerName == "oData" && resolvedType && resolvedType.openType) {
+                openTypeProperty = resolvedType.openType === true ? $data.defaults.openTypeDefaultPropertyName : resolvedType.openType;
                 context.src += item + '.' + openTypeProperty + ' = {};';
-                context.src += 'for (var prop in di){ if ([' + resolvedType.memberDefinitions.getPublicMappedPropertyNames().map(function(prop){
+                context.src += 'for (var prop in di){ if ([' + resolvedType.memberDefinitions.getPublicMappedPropertyNames().map(function (prop) {
                     return '"' + prop + '"';
                 }).join(',') + '].indexOf(prop) < 0 && prop.indexOf("@") < 0 && prop.indexOf("#") < 0){ ' + item + '.' + openTypeProperty + '[prop] = di[prop]; } };';
             }
+            context.src += 'if (!' + context.item + '_inheritance){';
             for (var i in meta) {
                 if (i.indexOf('$') < 0 && i != openTypeProperty) {
                     context.current = i;
@@ -320,16 +339,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 context.src += item + '.' + i + ' = di["' + meta[i].$source + '"];';
                             }
                             context.src += '};';
-                            if (meta[i].$type) context.src += item + '.' + i + ' = fn(di);';
-                            else context.src += 'fn(di);';
+                            if (meta[i].$type) context.src += item + '.' + i + ' = fn(di);';else context.src += 'fn(di);';
                         } else if (meta[i].$type) {
                             context.meta.push(i);
                             context.src += 'var fn = function(di){';
                             this._buildSelector(meta[i], context);
                             this.build(meta[i], context);
                             context.src += 'return ' + context.item + ';};';
-                            if (meta[i].$type === $data.Object) context.src += item + '.' + i + ' = self._deepExtend(' + item + '.' + i + ', fn(di));';
-                            else context.src += item + '.' + i + ' = fn(di);';
+                            if (meta[i].$type === $data.Object) context.src += item + '.' + i + ' = self._deepExtend(' + item + '.' + i + ', fn(di));';else context.src += item + '.' + i + ' = fn(di);';
                             context.item = item;
                             context.meta.pop();
                         } else if (meta.$type) {
@@ -338,6 +355,12 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             var entityType = Container.resolveType(meta.$type);
                             var entityTypeIndex = Container.getIndex(meta.$type);
                             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
+                            context.src += 'if (di["' + meta[i] + '"] && di["' + meta[i] + '"]["@odata.type"]){';
+                            context.src += 'var odataType = Container.resolveType(di["' + meta[i] + '"]["@odata.type"].split("#")[1]);';
+                            context.src += 'if (odataType){';
+                            context.src += item + '.' + i + ' = new odataType(di["' + meta[i] + '"])';
+                            context.src += '}';
+                            context.src += '}else{';
                             if (this.providerName && memDef && memDef.converter && memDef.converter[this.providerName] && typeof memDef.converter[this.providerName].fromDb == 'function') {
                                 context.src += item + '.' + i + ' = Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '").converter.' + this.providerName + '.fromDb(di["' + meta[i] + '"], Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '"), self.context, Container.resolveByIndex("' + entityTypeIndex + '"));';
                             } else if (converter) {
@@ -346,6 +369,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 var typeIndex = Container.getIndex(Container.resolveType(type.memberDefinitions.getMember(i).type));
                                 context.src += item + '.' + i + ' = new (Container.resolveByIndex(' + typeIndex + '))(di["' + meta[i] + '"]);';
                             }
+                            context.src += '}';
                         }
                     } else {
                         context.meta.push(i);
@@ -355,6 +379,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                 }
             }
+            context.src += '}';
             context.src += item + ' = self._finalize(' + item + ');';
         }
     },

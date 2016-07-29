@@ -28,7 +28,6 @@ var zip = require('gulp-vinyl-zip');
 var npm = require('npm');
 var argv = require('yargs').argv;
 var exec = require('child_process').exec;
-var replace = require('gulp-replace');
 
 config.options = minimist(process.argv.slice(2), config.buildDefaultOptions);
 var paths = {
@@ -66,6 +65,7 @@ gulp.task('nodejs', function() {
     .pipe(babel({
         compact: false
     }))
+    .pipe(replace("'jaydata/core'", "require('path').join(global.__jaydataModuleRoot, 'core.js')"))
     .pipe(gulp.dest('./dist/lib'))
     .on('error', function(err){
 		console.log('>>> ERROR', err);
