@@ -209,12 +209,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
                 var paramValue = useAlias ? "@" + expression.name : value;
                 var paramName = (useAlias ? "@" : "") + expression.name; 
                 
-                //if (serviceConfig.namespace) {
-                    if (context['$funcParams']) { context['$funcParams'] += ','; } else { context['$funcParams'] = ''; }
-                        context['$funcParams'] += expression.name + '=' + paramValue;
-                //}
+                if (context['$funcParams']) { context['$funcParams'] += ','; } else { context['$funcParams'] = ''; }
+                    context['$funcParams'] += expression.name + '=' + paramValue;
                 
-                if (/*!serviceConfig.namespace ||*/ useAlias) {
+                if (useAlias) {
                     if (context['$urlParams']) { context['$urlParams'] += '&'; } else { context['$urlParams'] = ''; }
                         context['$urlParams'] += paramName + '=' + value;
                 }
