@@ -68,7 +68,7 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
     VisitFindExpression: function (expression, context) {
         var source = this.Visit(expression.source, context);
         if (source !== expression.source)
-            return Container.createFindExpression(source);
+            return Container.createFindExpression(source, expression.params, expression.subMember);
         return expression;
     },
 
