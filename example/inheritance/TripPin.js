@@ -131,8 +131,7 @@
         Trips: {
             "type": "Array",
             "elementType": "Microsoft.OData.SampleService.Models.TripPin.Trip",
-            //"inverseProperty": "$$unbound"
-            "inverseProperty": "Person"
+            "inverseProperty": "$$unbound"
         },
         Photo: {
             "type": "Microsoft.OData.SampleService.Models.TripPin.Photo",
@@ -328,9 +327,7 @@
         PlanItems: {
             "type": "Array",
             "elementType": "Microsoft.OData.SampleService.Models.TripPin.PlanItem",
-            //mock
-            inverseProperty: 'Trip'
-            //"inverseProperty": "$$unbound"
+            "inverseProperty": "$$unbound"
         },
         GetInvolvedPeople: {
             "type": "$data.ServiceFunction",
@@ -338,11 +335,6 @@
             "returnType": "$data.Queryable",
             "params": [],
             "elementType": "Microsoft.OData.SampleService.Models.TripPin.Person"
-        },
-        //mock
-        Person: {
-            type: 'Microsoft.OData.SampleService.Models.TripPin.Person',
-            inverseProperty: 'Trips'
         }
     });
 
@@ -354,16 +346,6 @@
         People: {
             "type": "$data.EntitySet",
             "elementType": "Microsoft.OData.SampleService.Models.TripPin.Person"
-        },
-        //mock
-        Trips: {
-            type: $data.EntitySet,
-            elementType: 'Microsoft.OData.SampleService.Models.TripPin.Trip'
-        },
-        //mock
-        PlanItems: {
-            type: $data.EntitySet,
-            elementType: 'Microsoft.OData.SampleService.Models.TripPin.PlanItem'
         },
         Airlines: {
             "type": "$data.EntitySet",

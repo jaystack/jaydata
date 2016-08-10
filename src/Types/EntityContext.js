@@ -151,6 +151,7 @@ $data.Class.define('$data.EntityContext', null, null,
         var callBack = $data.PromiseHandlerBase.createCallbackSettings({ success: this._successInitProvider, error: this._successInitProvider });
 
         this._initStorageModelSync();
+        this._initStorageModelNavigationProperties();
         ctx._initializeEntitySets(ctx.getType());
 
         $data.StorageProviderLoader.load(providerList, {
@@ -299,7 +300,34 @@ $data.Class.define('$data.EntityContext', null, null,
             this.storageProvider.initializeStore(callBack);
         }
     },
+    _createNavPropStorageModel: function(logicalType){
+        var ctx = this;
+        logicalType.memberDefinitions.getPublicMappedProperties().filter(function(it){ return it.inverseProperty; }).forEach(function(memDef){
+            var item = Container.resolveType(memDef.elementType || memDef.dataType);
+            if (!ctx._storageModel.filter(function(it){ return it.LogicalType == item; })[0]){
+                var storageModel = new $data.StorageModel();
+                storageModel.TableName = item.tableName || item.name;
+                storageModel.TableOptions = item.tableOptions;
+                storageModel.ItemName = item.name;
+                storageModel.LogicalType = item;
+                storageModel.LogicalTypeName = item.name;
+                storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                storageModel.ContextType = ctx.getType();
 
+                ctx._storageModel.push(storageModel);
+                var name = Container.resolveName(item);
+                ctx._storageModel[name] = storageModel;
+
+                ctx._createNavPropStorageModel(storageModel.LogicalType);
+            }
+        });
+    },
+    _initStorageModelNavigationProperties: function _initStorageModelNavigationProperties(){
+        for (var i = 0; i < this._storageModel.length; i++) {
+            var storageModel = this._storageModel[i];
+            this._createNavPropStorageModel(storageModel.LogicalType);
+        }
+    },
     _initStorageModelSync: function() {
         var _memDefArray = this.getType().memberDefinitions.asArray();
 
