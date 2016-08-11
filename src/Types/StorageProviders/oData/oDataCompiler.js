@@ -96,20 +96,10 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
             context.urlText += "/" + expression.subMember.memberName;
         }
 
-        context.urlText += '(';
-        if (expression.params.length === 1) {
-            var param = expression.params[0];
-            var typeName = Container.resolveName(param.type);
-
-            var converter = this.provider.fieldConverter.toDb[typeName];
-            var value = converter ? converter(param.value) : param.value;
-
-            converter = this.provider.fieldConverter.escape[typeName];
-            value = converter ? converter(param.value) : param.value;
-            context.urlText += value;
-        } else {
-            for (var i = 0; i < expression.params.length; i++) {
-                var param = expression.params[i];
+        if (expression.params && expression.params.length > 0){
+            context.urlText += '(';
+            if (expression.params.length === 1) {
+                var param = expression.params[0];
                 var typeName = Container.resolveName(param.type);
 
                 var converter = this.provider.fieldConverter.toDb[typeName];
@@ -117,12 +107,24 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
 
                 converter = this.provider.fieldConverter.escape[typeName];
                 value = converter ? converter(param.value) : param.value;
+                context.urlText += value;
+            } else {
+                for (var i = 0; i < expression.params.length; i++) {
+                    var param = expression.params[i];
+                    var typeName = Container.resolveName(param.type);
 
-                if (i > 0) context.urlText += ',';
-                context.urlText += param.name + '=' + value;
+                    var converter = this.provider.fieldConverter.toDb[typeName];
+                    var value = converter ? converter(param.value) : param.value;
+
+                    converter = this.provider.fieldConverter.escape[typeName];
+                    value = converter ? converter(param.value) : param.value;
+
+                    if (i > 0) context.urlText += ',';
+                    context.urlText += param.name + '=' + value;
+                }
             }
+            context.urlText += ')';
         }
-        context.urlText += ')';
     },
     VisitProjectionExpression: function (expression, context) {
         this.Visit(expression.source, context);
@@ -151,6 +153,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         }
     },
     VisitEntitySetExpression: function (expression, context) {
+        this.Visit(expression.source, context);
         context.urlText += "/" + expression.instance.tableName;
         //this.logicalType = expression.instance.elementType;
         if (expression.params) {

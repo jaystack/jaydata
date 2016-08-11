@@ -282,6 +282,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         for (var i = 0, l = this._storageModel.length; i < l; i++){
             var storageModel = this._storageModel[i];
+            if (storageModel.BaseType) continue;
             this[storageModel.ItemName] = new $data.EntitySet(storageModel.LogicalType, this, storageModel.ItemName, storageModel.EventHandlers, storageModel.Roles);
             var sm = this[storageModel.ItemName];
             sm.name = storageModel.ItemName;
@@ -306,7 +307,7 @@ $data.Class.define('$data.EntityContext', null, null,
             var item = Container.resolveType(memDef.elementType || memDef.dataType);
             if (!ctx._storageModel.filter(function(it){ return it.LogicalType == item; })[0]){
                 var storageModel = new $data.StorageModel();
-                storageModel.TableName = item.tableName || item.name;
+                storageModel.TableName = memDef.name;
                 storageModel.TableOptions = item.tableOptions;
                 storageModel.ItemName = item.name;
                 storageModel.LogicalType = item;
@@ -385,97 +386,112 @@ $data.Class.define('$data.EntityContext', null, null,
                     this._storageModel.push(storageModel);
                     var name = Container.resolveName(elementType);
                     this._storageModel[name] = storageModel;
+
+                    if (elementType.inheritedTo){
+                        var ctx = this;
+                        elementType.inheritedTo.forEach(function(type){
+                            var storageModel = new $data.StorageModel();
+                            storageModel.TableName = item.tableName || item.name;
+                            storageModel.TableOptions = item.tableOptions;
+                            storageModel.ItemName = item.name;
+                            storageModel.LogicalType = type;
+                            storageModel.LogicalTypeName = type.name;
+                            storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                            storageModel.ContextType = ctx.getType();
+                            storageModel.BaseType = elementType;
+
+                            ctx._storageModel.push(storageModel);
+                            var name = Container.resolveName(type);
+                            ctx._storageModel[name] = storageModel;
+                        });
+                    }
                 }
             }
         }
 
     },
-    _initializeStorageModel: function () {
+    _buildDbInstanceDefinition: function(storageModel, dbEntityInstanceDefinition){
+        storageModel.Associations = storageModel.Associations || [];
+        storageModel.ComplexTypes = storageModel.ComplexTypes || [];
+        storageModel.Enums = storageModel.Enums || [];
+        for (var j = 0; j < storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().length; j++) {
+            var memDef = storageModel.LogicalType.memberDefinitions.getPublicMappedProperties()[j];
+            ///<param name="memDef" type="MemberDefinition">Member definition instance</param>
 
+            var memDefResolvedDataType = Container.resolveType(memDef.dataType);
+
+            if ((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1 || memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)) && Guard.isNullOrUndefined(memDef.inverseProperty)) {
+                //copy member definition
+                var t = JSON.parse(JSON.stringify(memDef));
+                //change datatype to resolved type
+                t.dataType = memDefResolvedDataType;
+                dbEntityInstanceDefinition[memDef.name] = t;
+
+                if (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)) {
+                    this._build_EnumDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                }
+
+                continue;
+            }
+
+            this._buildDbType_navigationPropertyComplite(memDef, memDefResolvedDataType, storageModel);
+
+            //var memDef_dataType = this.getDataType(memDef.dataType);
+            if ((memDefResolvedDataType === $data.Array || memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet)) && memDef.inverseProperty && memDef.inverseProperty !== '$$unbound') {
+                this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+            } else {
+                if (memDef.inverseProperty) {
+                    if (memDef.inverseProperty === '$$unbound') {
+                        //member definition is navigation but not back reference
+                        if (memDefResolvedDataType === $data.Array) {
+                            this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                        } else {
+                            this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                        }
+                    } else {
+                        //member definition is navigation property one..one or one..many case
+                        var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
+                        if (fields) {
+                            if (fields.elementType) {
+                                //member definition is one..many connection
+                                var referealResolvedType = Container.resolveType(fields.elementType);
+                                if (referealResolvedType === storageModel.LogicalType) {
+                                    this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                                } else {
+                                    if (typeof intellisense === 'undefined') {
+                                        Guard.raise(new Exception('Inverse property not valid, refereed item element type not match: ' + storageModel.LogicalTypeName, ', property: ' + memDef.name));
+                                    }
+                                }
+                            } else {
+                                //member definition is one..one connection
+                                this._buildDbType_ElementType_OneOneDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            }
+                        } else {
+                            if (typeof intellisense === 'undefined') {
+                                Guard.raise(new Exception('Inverse property not valid'));
+                            }
+                        }
+                    }
+                } else {
+                    //member definition is a complex type
+                    this._buildDbType_addComplexTypePropertyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                }
+            }
+        }
+    },
+    _initializeStorageModel: function _initializeStorageModel() {
 
         var _memDefArray = this.getType().memberDefinitions.asArray();
 
-
-        if (typeof intellisense !== 'undefined')
-            return;
-
+        if (typeof intellisense !== 'undefined') return;
 
         for (var i = 0; i < this._storageModel.length; i++) {
             var storageModel = this._storageModel[i];
 
             ///<param name="storageModel" type="$data.StorageModel">Storage model item</param>
             var dbEntityInstanceDefinition = {};
-
-            storageModel.Associations = storageModel.Associations || [];
-            storageModel.ComplexTypes = storageModel.ComplexTypes || [];
-            storageModel.Enums = storageModel.Enums || [];
-            for (var j = 0; j < storageModel.LogicalType.memberDefinitions.getPublicMappedProperties().length; j++) {
-                var memDef = storageModel.LogicalType.memberDefinitions.getPublicMappedProperties()[j];
-                ///<param name="memDef" type="MemberDefinition">Member definition instance</param>
-
-                var memDefResolvedDataType = Container.resolveType(memDef.dataType);
-
-                if (((this.storageProvider.supportedDataTypes.indexOf(memDefResolvedDataType) > -1) || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)))
-                    && Guard.isNullOrUndefined(memDef.inverseProperty))
-                {
-                    //copy member definition
-                    var t = JSON.parse(JSON.stringify(memDef));
-                    //change datatype to resolved type
-                    t.dataType = memDefResolvedDataType;
-                    dbEntityInstanceDefinition[memDef.name] = t;
-
-                    if(memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.Enum)){
-                         this._build_EnumDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef)
-                    }
-
-                    continue;
-                }
-
-                this._buildDbType_navigationPropertyComplite(memDef, memDefResolvedDataType, storageModel);
-
-                //var memDef_dataType = this.getDataType(memDef.dataType);
-                if ((memDefResolvedDataType === $data.Array || (memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet))) &&
-                    (memDef.inverseProperty && memDef.inverseProperty !== '$$unbound')) {
-                    this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                } else {
-                    if (memDef.inverseProperty) {
-                        if (memDef.inverseProperty === '$$unbound') {
-                            //member definition is navigation but not back reference
-                            if (memDefResolvedDataType === $data.Array) {
-                                this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                            } else {
-                                this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                            }
-                        } else {
-                            //member definition is navigation property one..one or one..many case
-                            var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
-                            if (fields) {
-                                if (fields.elementType) {
-                                    //member definition is one..many connection
-                                    var referealResolvedType = Container.resolveType(fields.elementType);
-                                    if (referealResolvedType === storageModel.LogicalType) {
-                                        this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                                    } else {
-                                        if (typeof intellisense === 'undefined') {
-                                            Guard.raise(new Exception('Inverse property not valid, refereed item element type not match: ' + storageModel.LogicalTypeName, ', property: ' + memDef.name));
-                                        }
-                                    }
-                                } else {
-                                    //member definition is one..one connection
-                                    this._buildDbType_ElementType_OneOneDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                                }
-                            } else {
-                                if (typeof intellisense === 'undefined') {
-                                    Guard.raise(new Exception('Inverse property not valid'));
-                                }
-                            }
-                        }
-                    } else {
-                        //member definition is a complex type
-                        this._buildDbType_addComplexTypePropertyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                    }
-                }
-            }
+            this._buildDbInstanceDefinition(storageModel, dbEntityInstanceDefinition);
+            
             this._buildDbType_modifyInstanceDefinition(dbEntityInstanceDefinition, storageModel, this);
             var dbEntityClassDefinition = {};
             dbEntityClassDefinition.convertTo = this._buildDbType_generateConvertToFunction(storageModel, this);
@@ -779,6 +795,34 @@ $data.Class.define('$data.EntityContext', null, null,
                 result = this._entitySetReferences[eval(elementType).name];
             } catch (ex) { }
         }
+        if (!result){
+            if (!this._storageModel[elementType.name]){
+                var storageModel = new $data.StorageModel();
+                storageModel.TableName = elementType.name;
+                storageModel.ItemName = elementType.name;
+                storageModel.LogicalType = elementType;
+                storageModel.LogicalTypeName = elementType.name;
+
+                var dbEntityInstanceDefinition = {};
+                this._buildDbInstanceDefinition(storageModel, dbEntityInstanceDefinition);
+
+                var dbEntityClassDefinition = {};
+                dbEntityClassDefinition.convertTo = this._buildDbType_generateConvertToFunction(storageModel, this);
+
+                storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                storageModel.PhysicalType = $data.Class.define(storageModel.PhysicalTypeName, $data.Entity, storageModel.LogicalType.container, dbEntityInstanceDefinition, dbEntityClassDefinition);
+                storageModel.ContextType = this.getType();
+
+                this._storageModel.push(storageModel);
+                var name = Container.resolveName(elementType);
+                this._storageModel[name] = storageModel;
+            }
+
+            result = this._entitySetReferences[elementType.name] = new $data.EntitySet(elementType, this, elementType.name);
+            result.tableName = storageModel.TableName;
+        }
+        
+        //console.log(Object.keys(this._entitySetReferences), Object.keys(this._storageModel), elementType.name);
         return result;
     },
     executeQuery: function (queryable, callBack, transaction) {

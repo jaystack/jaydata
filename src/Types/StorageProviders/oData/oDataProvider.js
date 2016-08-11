@@ -531,35 +531,25 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
     },
     _buildRequestObject: {
         value: {
-            'EntityState_20': function(provider, item, convertedItem, request, changedItems){
-                request.add(
-                    new activities.SetMethod("POST"), 
-                    new activities.AppendUrl(item.entitySet.tableName)
-                )
-                
+            'EntityState_20': function EntityState_20(provider, item, convertedItem, request, changedItems) {
+                request.add(new activities.SetMethod("POST"), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
+                if (item.data["@odata.type"]) request.add(new activities.SetDataProperty("@odata.type", item.data["@odata.type"]));
                 provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
             },
-            'EntityState_30': function(provider, item, convertedItem, request, changedItems){
-                request.add(
-                    new activities.SetMethod(provider.providerConfiguration.UpdateMethod),
-                    new activities.AppendUrl(item.entitySet.tableName), 
-                    new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")")
-                )
-                
-                provider.addETagHeader(item, request)
-                
+            'EntityState_30': function EntityState_30(provider, item, convertedItem, request, changedItems) {
+                request.add(new activities.SetMethod(provider.providerConfiguration.UpdateMethod), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
+                if (provider.getEntityKeysValue(item)) request.add(new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")"));
+                if (item.data["@odata.type"]) request.add(new activities.SetDataProperty("@odata.type", item.data["@odata.type"]));
+
+                provider.addETagHeader(item, request);
+
                 provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
             },
-            'EntityState_40': function(provider, item, convertedItem, request, changedItems){
-                request.add(
-                    new activities.SetMethod("DELETE"),
-                    new activities.ClearRequestData(),
-                    new activities.AppendUrl(item.entitySet.tableName),
-                    new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")")
-                )
-                
-                provider.addETagHeader(item, request)
-            },
+            'EntityState_40': function EntityState_40(provider, item, convertedItem, request, changedItems) {
+                request.add(new activities.SetMethod("DELETE"), new activities.ClearRequestData(), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
+                if (provider.getEntityKeysValue(item)) request.add(new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")"));
+                provider.addETagHeader(item, request);
+            }
         }
     },
     reload_fromResponse: function (item, data, response) {

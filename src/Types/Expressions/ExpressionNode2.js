@@ -221,7 +221,7 @@ $C('$data.Expressions.ExpressionNode', null, null, {
         var origToJSON = __proto__.toJSON;
         delete __proto__.toJSON;
         var res = JSON.parse(JSON.stringify(this));
-        res.expressionType = _index.Container.resolveName(this._expressionType);
+        res.expressionType = Container.resolveName(this._expressionType);
         __proto__.toJSON = origToJSON;
         return res;
     },

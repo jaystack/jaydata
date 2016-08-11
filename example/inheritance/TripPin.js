@@ -378,7 +378,7 @@
         if (ctxType) {
             var cfg = $data.typeSystem.extend({
                 name: "oData",
-                oDataServiceHost: "http://services.odata.org/V4/(S(wpi040cv1vije4pw4qqws3vy))/TripPinServiceRW",
+                oDataServiceHost: "http://services.odata.org/V4/(S(gvre15a1n5l4dda5bdbzfhko))/TripPinServiceRW",
                 withCredentials: false,
                 maxDataServiceVersion: "4.0"
             }, config);

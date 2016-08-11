@@ -205,6 +205,10 @@ $data.Entity = $data.Class.define("$data.Entity", null, null, {
         this.changedProperties = undefined;
         this.entityState = undefined;
 
+
+        if (thisType.inheritsFrom != $data.Entity){
+            this["@odata.type"] = '#' + thisType.fullName;
+        }
     },
     toString: function () {
         /// <summary>Returns a string that represents the current $data.Entity</summary>

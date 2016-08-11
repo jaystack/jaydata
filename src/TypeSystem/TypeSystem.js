@@ -568,6 +568,8 @@ $data.setGlobal = function(obj){
     buildType: function(classFunction, baseClasses, instanceDefinition, classDefinition) {
       var baseClass = baseClasses[0].type;
       classFunction.inheritsFrom = baseClass;
+      baseClass.inheritedTo = baseClass.inheritedTo || [];
+      baseClass.inheritedTo.push(classFunction);
 
       if (baseClass) {
         classFunction.prototype = Object.create(baseClass.prototype);

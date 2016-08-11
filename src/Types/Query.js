@@ -34,7 +34,7 @@ $C('$data.Query', null, null,
 
         var fn = function(expression){
             if (expression instanceof $data.Expressions.EntitySetExpression){
-                if (ret.indexOf(ctx._entitySetReferences[expression.elementType.name]) < 0)
+                if (ctx._entitySetReferences[expression.elementType.name] && ret.indexOf(ctx._entitySetReferences[expression.elementType.name]) < 0)
                     ret.push(ctx._entitySetReferences[expression.elementType.name]);
             }
             if (expression.source) fn(expression.source);
