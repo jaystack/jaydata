@@ -539,7 +539,35 @@ describe('OData protocol tests', function () {
 		})
 	})
     
-    
+    describe.only('inheritance', () => {
+		it('read', () => {
+			return ctx.GenericArticles.toArray().then((articles) => {
+				expect(articles.filter(it => it.Id == 1)[0].getType()).to.equal($data('Inheritance.PublicArticle'));
+				expect(articles.filter(it => it.Id == 2)[0].getType()).to.equal($data('Inheritance.InternalArticle'));
+			});
+		});
+
+		it('write', () => {
+			var t = ctx.prepareRequest;
+			ctx.prepareRequest = function(){};
+			var t1 = new ($data('Inheritance.InternalArticle'))({
+				InternalTitle: 'internal',
+				InternalBody: 'internal',
+				ValidTill: new Date()
+			});
+			var t2 = new ($data('Inheritance.PublicArticle'))({
+				Lead: 'lead',
+				PublishDate: new Date()
+			});
+			ctx.GenericArticles.add(t1);
+			ctx.GenericArticles.add(t2);
+			var p = ctx.saveChanges(function(c){
+				expect(c).to.equal(2);
+			});
+			ctx.prepareRequest = t;
+			return p;
+		});
+	});
 
 })
 
