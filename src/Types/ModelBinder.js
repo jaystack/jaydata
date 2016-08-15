@@ -149,7 +149,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
             context.meta.push('$item');
             var iter = context.item && context.current ? context.item + '.' + context.current : context.item ? context.item : 'result';
             context.iter = iter;
-            if (iter.indexOf('.') < 0) context.src += 'var ' + iter + ';';
+            if (iter.indexOf('.') < 0){
+                context.src += 'var ' + iter + ';';
+                context.src += 'var ' + iter + '_inheritance;';
+            }
             context.src += 'var fn = function(di){';
             if (meta.$selector) {
                 context.src += 'if (typeof di !== "undefined" && !(Array.isArray(di))){';
@@ -266,19 +269,21 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += 'if (itemKey && cache[itemKey]){';
                     context.src += item + ' = cache[itemKey];';
                     context.src += '}else{';
-                    context.src += 'if (di && di["@odata.type"]){';
-                    context.src += 'var odataTypeName = di["@odata.type"].split("#")[1];';
-                    context.src += 'var odataType = Container.resolveType(odataTypeName);';
-                    context.src += 'if (odataType){';
-                    context.src += item + '_inheritance = new odataType(di);';
-                    context.src += '}';
-                    context.src += '}else{';
+                    if (resolvedType.inheritedTo){
+                        context.src += 'if (di && di["@odata.type"]){';
+                        context.src += 'var odataTypeName = di["@odata.type"].split("#")[1];';
+                        context.src += 'var odataType = Container.resolveType(odataTypeName);';
+                        context.src += 'if (odataType){';
+                        context.src += item + '_inheritance = new odataType(di);';
+                        context.src += '}';
+                        context.src += '}else{';
+                    }
                     if (isEntityType) {
                         context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
                     } else {
                         context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
                     }
-                    context.src += '}';
+                    if (resolvedType.inheritedTo){ context.src += '}'; }
                     context.src += 'if (itemKey){';
                     context.src += 'cache[itemKey] = ' + item + ';';
                     context.src += '}';
@@ -287,12 +292,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     var isEnum = resolvedType.isAssignableTo && resolvedType.isAssignableTo($data.Enum);
                     context.src += 'var ' + item + ';';
                     context.src += 'var ' + item + '_inheritance;';
-                    context.src += 'if (di["' + context.current + '"] && di["' + context.current + '"]["@odata.type"]){';
-                    context.src += 'var odataType = Container.resolveType(di["' + context.current + '"]["@odata.type"].split("#")[1]);';
-                    context.src += 'if (odataType){';
-                    context.src += item + '_inheritance = new odataType(di["' + context.current + '"])';
-                    context.src += '}';
-                    context.src += '}else{';
+                    if (resolvedType.inheritedTo){
+                        context.src += 'if (di["' + context.current + '"] && di["' + context.current + '"]["@odata.type"]){';
+                        context.src += 'var odataType = Container.resolveType(di["' + context.current + '"]["@odata.type"].split("#")[1]);';
+                        context.src += 'if (odataType){';
+                        context.src += item + '_inheritance = new odataType(di["' + context.current + '"])';
+                        context.src += '}';
+                        context.src += '}else{';
+                    }
                     if (isEntityType) {
                         context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
                     } else if (isEnum) {
@@ -300,7 +307,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     } else {
                         context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))();';
                     }
-                    context.src += '}';
+                    if (resolvedType.inheritedTo){ context.src += '}'; }
                 }
             }
             var openTypeProperty = null;
@@ -355,12 +362,14 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             var entityType = Container.resolveType(meta.$type);
                             var entityTypeIndex = Container.getIndex(meta.$type);
                             var converter = this.context.storageProvider.fieldConverter.fromDb[type];
-                            context.src += 'if (di["' + meta[i] + '"] && di["' + meta[i] + '"]["@odata.type"]){';
-                            context.src += 'var odataType = Container.resolveType(di["' + meta[i] + '"]["@odata.type"].split("#")[1]);';
-                            context.src += 'if (odataType){';
-                            context.src += item + '.' + i + ' = new odataType(di["' + meta[i] + '"])';
-                            context.src += '}';
-                            context.src += '}else{';
+                            if (entityType.inheritedTo){
+                                context.src += 'if (di["' + meta[i] + '"] && di["' + meta[i] + '"]["@odata.type"]){';
+                                context.src += 'var odataType = Container.resolveType(di["' + meta[i] + '"]["@odata.type"].split("#")[1]);';
+                                context.src += 'if (odataType){';
+                                context.src += item + '.' + i + ' = new odataType(di["' + meta[i] + '"])';
+                                context.src += '}';
+                                context.src += '}else{';
+                            }
                             if (this.providerName && memDef && memDef.converter && memDef.converter[this.providerName] && typeof memDef.converter[this.providerName].fromDb == 'function') {
                                 context.src += item + '.' + i + ' = Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '").converter.' + this.providerName + '.fromDb(di["' + meta[i] + '"], Container.resolveByIndex("' + entityTypeIndex + '").memberDefinitions.getMember("' + i + '"), self.context, Container.resolveByIndex("' + entityTypeIndex + '"));';
                             } else if (converter) {
@@ -369,7 +378,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 var typeIndex = Container.getIndex(Container.resolveType(type.memberDefinitions.getMember(i).type));
                                 context.src += item + '.' + i + ' = new (Container.resolveByIndex(' + typeIndex + '))(di["' + meta[i] + '"]);';
                             }
-                            context.src += '}';
+                            if (entityType.inheritedTo){ context.src += '}'; }
                         }
                     } else {
                         context.meta.push(i);

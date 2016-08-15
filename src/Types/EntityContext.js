@@ -795,7 +795,7 @@ $data.Class.define('$data.EntityContext', null, null,
                 result = this._entitySetReferences[eval(elementType).name];
             } catch (ex) { }
         }
-        if (!result){
+        if (!result && elementType.isAssignableTo && elementType.isAssignableTo($data.Entity)){
             if (!this._storageModel[elementType.name]){
                 var storageModel = new $data.StorageModel();
                 storageModel.TableName = elementType.name;

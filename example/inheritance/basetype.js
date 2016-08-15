@@ -47,6 +47,6 @@ NewsReader.factory({ useParameterAlias: true }).onReady(function(ctx){
     ctx.GenericArticles.add(t2);
     ctx.saveChanges(function(c){
         console.log(c);
-        //ctx.GenericArticles.toArray(console.log.bind(console));
+        ctx.GenericArticles.toArray(console.log.bind(console));
     });
 });

@@ -8,6 +8,7 @@ TripPin.factory({ useParameterAlias: true }).onReady(function(ctx){
     }), function(r){
         console.log('result:', r);
     });*/
+    //ctx.getPeople('russellwhyte').getTrips(1003).getPlanItems().read(console.log.bind(console));
     /*ctx.getPeople('russellwhyte').getTrips(1003).getPlanItems().create(new ($data('Microsoft.OData.SampleService.Models.TripPin.Event'))({
         "ConfirmationCode": "4372899DD",
         "Description": "Client Meeting",
@@ -32,7 +33,7 @@ TripPin.factory({ useParameterAlias: true }).onReady(function(ctx){
     /*ctx.getPeople('russellwhyte').getTrips(1003).getPlanItems(21).delete(function(r){
         console.log('result:', r);
     });*/
-    /*ctx.People.include('Trips.PlanItems').find('russellwhyte', function(r){
-        //console.log(r.Trips[0].PlanItems);
-    });*/
+    ctx.People.include('Trips.PlanItems').find('russellwhyte', function(r){
+        console.log(r.Trips[0].PlanItems);
+    });
 });

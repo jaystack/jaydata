@@ -227,9 +227,6 @@
         },
         Duration: {
             "type": "Edm.Duration"
-        },
-        Trip: {
-            type: 'Microsoft.OData.SampleService.Models.TripPin.Trip'
         }
     });
 

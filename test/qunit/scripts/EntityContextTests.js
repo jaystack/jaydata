@@ -1766,14 +1766,14 @@
             var context = new Tests.ActionContextTest_1({ name: 'oData', oDataServiceHost: '/api' });
             context.onReady(function () {
                 var q = context.Categories.Lasts(5).toTraceString();
-                equal(q.queryText, '/Categories/Lasts?Top=5', 'Lasts Collection action queryText');
+                equal(q.queryText, '/Categories/Lasts(Top=5)', 'Lasts Collection action queryText');
             });
         });
         test('Collection Queryable result compile - object param', 1, function () {
             var context = new Tests.ActionContextTest_1({ name: 'oData', oDataServiceHost: '/api' });
             context.onReady(function () {
                 var q = context.Categories.Lasts({ Top: 5 }).toTraceString();
-                equal(q.queryText, '/Categories/Lasts?Top=5', 'Lasts Collection action queryText');
+                equal(q.queryText, '/Categories/Lasts(Top=5)', 'Lasts Collection action queryText');
             });
         });
 
@@ -1818,7 +1818,7 @@
             });
 
             ok(p.then, 'Lasts, promise returned');
-        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+        }, "/api/Categories/Lasts(Top=5)", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
 
         checkUrlTextAndHookResult('Collection Queryable result inline - object param', 6, function (context) {
             var p = context.Categories.Lasts({ Top: 5 }, function (data) {
@@ -1830,7 +1830,7 @@
             });
 
             ok(p.then, 'Lasts, promise returned');
-        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+        }, "/api/Categories/Lasts(Top=5)", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
 
         checkUrlTextAndHookResult('Collection Queryable result - toArray', 6, function (context) {
             var q = context.Categories.Lasts(5);
@@ -1844,7 +1844,7 @@
             })
 
             ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
-        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+        }, "/api/Categories/Lasts(Top=5)", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
 
         checkUrlTextAndHookResult('Collection Queryable result - toArray - object param', 6, function (context) {
             var q = context.Categories.Lasts({ Top: 5 });
@@ -1858,7 +1858,7 @@
             })
 
             ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
-        }, "/api/Categories/Lasts?Top=5", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+        }, "/api/Categories/Lasts(Top=5)", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
 
         checkUrlTextAndHookResult('Collection Queryable result with filter', 6, function (context) {
             var q = context.Categories.Lasts(5).filter(function (c) { return c.Name == 'World'; });
@@ -1872,7 +1872,7 @@
             })
 
             ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
-        }, "/api/Categories/Lasts?Top=5&$filter=(Name eq 'World')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+        }, "/api/Categories/Lasts(Top=5)?$filter=(Name eq 'World')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
 
         checkUrlTextAndHookResult('Collection Queryable result with filter - object param', 6, function (context) {
             var q = context.Categories.Lasts({ Top: 5 }).filter(function (c) { return c.Name == 'World'; });
@@ -1886,7 +1886,7 @@
             })
 
             ok(q instanceof $data.Queryable, 'Lasts, queryable returned');
-        }, "/api/Categories/Lasts?Top=5&$filter=(Name eq 'World')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
+        }, "/api/Categories/Lasts(Top=5)?$filter=(Name eq 'World')", { results: [{ Id: 1, Name: 'Sport', Description: 'desc' }, { Id: 2, Name: 'Action', Description: 'desc2' }] });
 
         checkUrlTextAndHookResult('Collection String result', 1, function (context) {
             context.Categories.LastModifiedName(function (data) {
@@ -2173,21 +2173,21 @@
             var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, false, 'Hello', new Date('2000/01/02')).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000')", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 2', 1, function (context) {
 
             var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, false).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false)", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 3', 1, function (context) {
 
             var p = context.ManyParamFunc({ a: 42, b: 'World' }, 15, null, undefined, new Date('2000/01/02')).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000')", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 4', 1, function (context) {
 
@@ -2207,21 +2207,21 @@
             var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false, p4: 'Hello', p5: new Date('2000/01/02') }).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false&p4='Hello'&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false,p4='Hello',p5=datetime'2000-01-01T23:00:00.000')", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 2 - object param', 1, function (context) {
 
             var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: false }).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=false", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=false)", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 3 - object param', 1, function (context) {
 
             var p = context.ManyParamFunc({ p1: { a: 42, b: 'World' }, p2: 15, p3: null, p4: undefined, p5: new Date('2000/01/02') }).then(function (val) {
                 equal(val, "hello world");
             });
-        }, "/api/ManyParamFunc?p1={\"a\":42,\"b\":\"World\"}&p2=15&p3=null&p5=datetime'2000-01-01T23:00:00.000'", { ManyParamFunc: 'hello world' });
+        }, "/api/ManyParamFunc(p1={\"a\":42,\"b\":\"World\"},p2=15,p3=null,p5=datetime'2000-01-01T23:00:00.000')", { ManyParamFunc: 'hello world' });
 
         checkUrlTextAndHookResult('Context Operation param resolve 4 - object param', 1, function (context) {
 
