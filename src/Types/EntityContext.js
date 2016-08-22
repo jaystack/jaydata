@@ -437,44 +437,46 @@ $data.Class.define('$data.EntityContext', null, null,
             this._buildDbType_navigationPropertyComplite(memDef, memDefResolvedDataType, storageModel);
 
             //var memDef_dataType = this.getDataType(memDef.dataType);
-            if ((memDefResolvedDataType === $data.Array || memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet)) && memDef.inverseProperty && memDef.inverseProperty !== '$$unbound') {
-                this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-            } else {
-                if (memDef.inverseProperty) {
-                    if (memDef.inverseProperty === '$$unbound') {
-                        //member definition is navigation but not back reference
-                        if (memDefResolvedDataType === $data.Array) {
-                            this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+            if (memDef.definedBy === storageModel.LogicalType){
+                if ((memDefResolvedDataType === $data.Array || memDefResolvedDataType.isAssignableTo && memDefResolvedDataType.isAssignableTo($data.EntitySet)) && memDef.inverseProperty && memDef.inverseProperty !== '$$unbound') {
+                    this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                } else {
+                    if (memDef.inverseProperty) {
+                        if (memDef.inverseProperty === '$$unbound') {
+                            //member definition is navigation but not back reference
+                            if (memDefResolvedDataType === $data.Array) {
+                                this._buildDbType_Collection_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            } else {
+                                this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                            }
                         } else {
-                            this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                        }
-                    } else {
-                        //member definition is navigation property one..one or one..many case
-                        var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
-                        if (fields) {
-                            if (fields.elementType) {
-                                //member definition is one..many connection
-                                var referealResolvedType = Container.resolveType(fields.elementType);
-                                if (referealResolvedType === storageModel.LogicalType) {
-                                    this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                                } else {
-                                    if (typeof intellisense === 'undefined') {
-                                        Guard.raise(new Exception('Inverse property not valid, refereed item element type not match: ' + storageModel.LogicalTypeName, ', property: ' + memDef.name));
+                            //member definition is navigation property one..one or one..many case
+                            var fields = memDefResolvedDataType.memberDefinitions.getMember(memDef.inverseProperty);
+                            if (fields) {
+                                if (fields.elementType) {
+                                    //member definition is one..many connection
+                                    var referealResolvedType = Container.resolveType(fields.elementType);
+                                    if (referealResolvedType === storageModel.LogicalType) {
+                                        this._buildDbType_ElementType_OneManyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
+                                    } else {
+                                        if (typeof intellisense === 'undefined') {
+                                            Guard.raise(new Exception('Inverse property not valid, refereed item element type not match: ' + storageModel.LogicalTypeName, ', property: ' + memDef.name));
+                                        }
                                     }
+                                } else {
+                                    //member definition is one..one connection
+                                    this._buildDbType_ElementType_OneOneDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
                                 }
                             } else {
-                                //member definition is one..one connection
-                                this._buildDbType_ElementType_OneOneDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
-                            }
-                        } else {
-                            if (typeof intellisense === 'undefined') {
-                                Guard.raise(new Exception('Inverse property not valid'));
+                                if (typeof intellisense === 'undefined') {
+                                    Guard.raise(new Exception('Inverse property not valid'));
+                                }
                             }
                         }
+                    } else {
+                        //member definition is a complex type
+                        this._buildDbType_addComplexTypePropertyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
                     }
-                } else {
-                    //member definition is a complex type
-                    this._buildDbType_addComplexTypePropertyDefinition(dbEntityInstanceDefinition, storageModel, memDefResolvedDataType, memDef);
                 }
             }
         }

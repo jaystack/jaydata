@@ -285,7 +285,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     }
                     if (resolvedType.inheritedTo){ context.src += '}'; }
                     context.src += 'if (itemKey){';
-                    context.src += 'cache[itemKey] = ' + item + ';';
+                    context.src += 'cache[itemKey] = ' + item + ' || ' + item + '_inheritance;';
                     context.src += '}';
                     context.src += '}';
                 } else {
@@ -389,7 +389,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 }
             }
             context.src += '}';
-            context.src += item + ' = self._finalize(' + item + ');';
+            context.src += item + ' = self._finalize(' + item + ' || ' + item + '_inheritance);';
         }
     },
 
