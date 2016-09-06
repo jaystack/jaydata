@@ -18,7 +18,7 @@ $data.SqLiteConverter = {
         "$data.DateTimeOffset": function (dbData) { return dbData != null ? new Date(dbData) : dbData; },
         "$data.Time": $data.Container.proxyConverter,
         "$data.String": $data.Container.proxyConverter,
-        "$data.Boolean": function (b) { return b === 1 ? true : false; },
+        "$data.Boolean": function (b) { return Guard.isNullOrUndefined(b) ? b : (b === 1 ? true : false); },
         "$data.Blob": function(b){ return b ? $data.Container.convertTo(atob(b), $data.Blob) : b; },
         "$data.Array": function () {
             if (arguments.length == 0) return [];
@@ -60,7 +60,7 @@ $data.SqLiteConverter = {
         "$data.DateTimeOffset": function (date) { return date ? date.valueOf() : null; },
         "$data.Time": $data.Container.proxyConverter,
         "$data.String": $data.Container.proxyConverter,
-        "$data.Boolean": function (b) { return b ? 1 : 0; },
+        "$data.Boolean": function (b) { return Guard.isNullOrUndefined(b) ? b : (b ? 1 : 0); },
         "$data.Blob": function(b){ return b ? $data.Blob.toBase64(b) : b; },
         "$data.Array": function (arr) { return arr ? JSON.stringify(arr) : arr; },
         "$data.Guid": function (g) { return g ? g.toString() : g; },
