@@ -114,6 +114,9 @@ $C('$data.storageProviders.oData.oDataIncludeCompiler', $data.Expressions.Entity
     
     VisitAssociationInfoExpression: function (expression, context) {
         var propName = expression.associationInfo.FromPropertyName;
+        if (expression.associationInfo.FromType.inheritsFrom.fullName != "$data.Entity"){
+            propName = expression.associationInfo.FromType.fullName + "/" + propName;
+        }
         
         this.includePath = this.includePath ? (this.includePath + '.') : "";
         this.includePath += propName;

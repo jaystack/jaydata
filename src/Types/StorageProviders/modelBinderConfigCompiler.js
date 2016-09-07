@@ -171,10 +171,20 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         builder.resetModelBinderProperty();
         this._query.modelBinderConfig = builder.modelBinderConfig;
     },
+    _inheritanceMemberDefinitions: function(type, memdefs){
+        var self = this;
+        if (type.inheritedTo){
+            type.inheritedTo.forEach(function(it){
+                memdefs = self._inheritanceMemberDefinitions(it, memdefs.concat(it.memberDefinitions.getPublicMappedProperties()));
+            });
+        }
+        return memdefs;
+    },
     _addPropertyToModelBinderConfig: function (elementType, builder) {
         var storageModel = this._query.context._storageModel.getStorageModel(elementType);
         if (elementType.memberDefinitions) {
-            elementType.memberDefinitions.getPublicMappedProperties().forEach(function (prop) {
+            var memberDefinitions = this._inheritanceMemberDefinitions(elementType, elementType.memberDefinitions.getPublicMappedProperties());
+            memberDefinitions.forEach(function (prop) {
                 if ((!storageModel) || (storageModel && !storageModel.Associations[prop.name] && !storageModel.ComplexTypes[prop.name])) {
 
                     var type = Container.resolveType(prop.dataType);
@@ -290,7 +300,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 }
                 this.depth.push(include.name);
                 
-                var includes = include.name.split('.');
+                var includes = include.name.split('/').pop().split('.');
                 var association = null;
                 var tmpStorageModel = storageModel;
                 var itemCount = 0;

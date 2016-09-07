@@ -585,7 +585,7 @@ $data.setGlobal = function(obj){
             }
           }
         }
-        classFunction.baseTypes = baseClass.baseTypes ? [].concat(baseClass.baseTypes) : [];
+        classFunction.baseTypes = (baseClass.baseTypes || []).slice();
         for (var i = 0; i < baseClasses.length; i++) {
           classFunction.baseTypes.push(baseClasses[i].type);
         }

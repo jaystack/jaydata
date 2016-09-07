@@ -418,6 +418,68 @@
             "type": "Edm.Boolean",
             "nullable": false,
             "required": true
+        },
+        Authors: {
+            "type": "Array",
+            "elementType": "Inheritance.User",
+            "inverseProperty": "RelatedArticle"
+        },
+        CreatedBy: {
+            "type": "Inheritance.User",
+            "inverseProperty": "CreatedArticles"
+        }
+    });
+
+    types["Inheritance.User"] = $data("$data.Entity").extend("Inheritance.User", {
+        Id: {
+            "type": "Edm.Int32",
+            "nullable": false,
+            "required": true,
+            "key": true
+        },
+        Name: {
+            "type": "Edm.String"
+        },
+        Email: {
+            "type": "Edm.String"
+        },
+        RelatedArticle: {
+            "type": "Inheritance.GenericArticle",
+            "inverseProperty": "Authors"
+        },
+        RelatedPublicArticle: {
+            "type": "Inheritance.PublicArticle",
+            "inverseProperty": "RelatedAuthors"
+        },
+        CreatedArticles: {
+            "type": "Array",
+            "elementType": "Inheritance.GenericArticle",
+            "inverseProperty": "CreatedBy"
+        },
+        PublishedArticles: {
+            "type": "Array",
+            "elementType": "Inheritance.PublicArticle",
+            "inverseProperty": "PublishedBy"
+        }
+    });
+
+    types["Inheritance.PublicArticle"] = types["Inheritance.GenericArticle"].extend("Inheritance.PublicArticle", {
+        Lead: {
+            "type": "Edm.String"
+        },
+        PublishDate: {
+            "type": "Edm.DateTimeOffset",
+            "nullable": false,
+            "required": true
+        },
+        RelatedAuthors: {
+            "type": "Array",
+            "elementType": "Inheritance.User",
+            "inverseProperty": "RelatedPublicArticle"
+        },
+        PublishedBy: {
+            "type": "Inheritance.User",
+            "inverseProperty": "PublishedArticles"
         }
     });
 
@@ -429,17 +491,6 @@
             "type": "Edm.String"
         },
         ValidTill: {
-            "type": "Edm.DateTimeOffset",
-            "nullable": false,
-            "required": true
-        }
-    });
-
-    types["Inheritance.PublicArticle"] = types["Inheritance.GenericArticle"].extend("Inheritance.PublicArticle", {
-        Lead: {
-            "type": "Edm.String"
-        },
-        PublishDate: {
             "type": "Edm.DateTimeOffset",
             "nullable": false,
             "required": true
@@ -538,6 +589,10 @@
         GenericArticles: {
             "type": "$data.EntitySet",
             "elementType": "Inheritance.GenericArticle"
+        },
+        InheritanceUsers: {
+            "type": "$data.EntitySet",
+            "elementType": "Inheritance.User"
         },
         Delete: {
             "type": "$data.ServiceAction",

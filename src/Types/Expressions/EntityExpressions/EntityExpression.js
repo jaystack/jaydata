@@ -33,10 +33,22 @@ $C('$data.Expressions.EntityExpression', $data.Expressions.ExpressionNode, null,
 
     getMemberDefinition: function (name) {
         var memdef = this.entityType.getMemberDefinition(name);
-        if (!(memdef)) {
-            Guard.raise(new Exception("Unknown member " + name + " on type "+ this.entityType.name, "MemberNotFound"));
+        if (!memdef) {
+            var findMember = function(type){
+                if (type.inheritedTo){
+                    for (var i = 0; i < type.inheritedTo.length; i++){
+                        memdef = type.inheritedTo[i].getMemberDefinition(name);
+                        if (!memdef) findMember(type.inheritedTo[i]);
+                        else break;
+                    }
+                }
+            };
+            findMember(this.entityType);
+            if (!memdef){
+                Guard.raise(new Exception("Unknown member " + name + " on type " + this.entityType.name, "MemberNotFound"));
+            }
         };
-            memdef.storageModel = this.storageModel;
+        memdef.storageModel = this.storageModel;
         return memdef;
     },
 
