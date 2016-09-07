@@ -29,7 +29,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-      "acorn": "^3.0.2",
+      "acorn": "^3.3.0",
       "atob": "^2.0.0",
       "btoa": "^1.1.2",
       "dot": "^1.0.3",

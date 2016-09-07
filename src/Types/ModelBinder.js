@@ -189,21 +189,21 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 context.src += 'if (forKey){';
                 context.src += 'if (cache[forKey]){';
                 context.src += iter + ' = cache[forKey];';
-                context.src += 'if (' + iter + '.indexOf(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ') < 0){';
-                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                context.src += 'if (' + iter + '.indexOf(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ') < 0){';
+                context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                 context.src += '}}else{';
                 context.src += 'cache[forKey] = ' + iter + ';';
-                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                 context.src += '}}else{';
                 if (this.references && meta.$item.$keys) this._buildKey('cacheKey', meta.$type, meta.$item.$keys, context, 'diBackup');
                 context.src += 'if (typeof cacheKey != "undefined" && cacheKey !== null){';
                 context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + ' && cacheKey){';
                 context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(cacheKey) < 0){';
-                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                 context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(cacheKey);';
                 context.src += '}';
                 context.src += '}else{';
-                context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                 context.src += '}';
                 context.src += '}';
                 context.src += '}';
@@ -212,15 +212,15 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     context.src += 'if (typeof ' + itemForKey + ' !== "undefined" && ' + itemForKey + ' !== null){';
                     context.src += 'if (typeof keycache_' + iter.replace(/\./gi, '_') + ' !== "undefined" && ' + itemForKey + '){';
                     context.src += 'if (keycache_' + iter.replace(/\./gi, '_') + '.indexOf(' + itemForKey + ') < 0){';
-                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                    context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                     context.src += 'keycache_' + iter.replace(/\./gi, '_') + '.push(' + itemForKey + ');';
                     context.src += '}}else{';
-                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                    context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                     context.src += '}}else{';
-                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                    context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                     context.src += '}';
                 } else {
-                    context.src += iter + '.push(' + (context.item || item) + '_inheritance || ' + (context.item || item) + ');';
+                    context.src += iter + '.push(' /*+ (context.item || item) + '_inheritance || '*/ + (context.item || item) + ');';
                 }
             }
             context.src += '};';
@@ -274,7 +274,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         context.src += 'var odataTypeName = di["@odata.type"].split("#")[1];';
                         context.src += 'var odataType = Container.resolveType(odataTypeName);';
                         context.src += 'if (odataType){';
-                        context.src += item + '_inheritance = new odataType(di);';
+                        context.src += item + '_inheritance = new odataType(undefined, { setDefaultValues: false });';//di);';
                         context.src += '}';
                         context.src += '}else{';
                     }
@@ -296,7 +296,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         context.src += 'if (di["' + context.current + '"] && di["' + context.current + '"]["@odata.type"]){';
                         context.src += 'var odataType = Container.resolveType(di["' + context.current + '"]["@odata.type"].split("#")[1]);';
                         context.src += 'if (odataType){';
-                        context.src += item + '_inheritance = new odataType(di["' + context.current + '"])';
+                        context.src += item + '_inheritance = new odataType(undefined, { setDefaultValues: false });';/*di["' + context.current + '"])';*/
                         context.src += '}';
                         context.src += '}else{';
                     }
@@ -318,9 +318,21 @@ $data.Class.define('$data.ModelBinder', null, null, {
                     return '"' + prop + '"';
                 }).join(',') + '].indexOf(prop) < 0 && prop.indexOf("@") < 0 && prop.indexOf("#") < 0){ ' + item + '.' + openTypeProperty + '[prop] = di[prop]; } };';
             }
-            context.src += 'if (!' + context.item + '_inheritance){';
+            context.src += 'var ' + context.item + '_type;';
+            context.src += 'var ' + context.item + '_memberDefinitionNames;';
+            context.src += 'if (' + context.item + '_inheritance){';
+            context.src += context.item + ' = ' + context.item + '_inheritance;';
+            context.src += 'if (typeof ' + context.item + '.getType == "function"){';
+            context.src += context.item + '_type = ' + context.item + '.getType();';
+            context.src += context.item + '_memberDefinitionNames = ' + context.item + '_type' +
+                '.memberDefinitions.getPublicMappedProperties()' +
+                '.filter(function(it){ return it.definedBy == ' + context.item + '_type || it.definedBy == ' + context.item + '_type.inheritsFrom; })' +
+                '.map(function(it){ return it.name; });';
+            context.src += '}';
+            context.src += '}';
             for (var i in meta) {
                 if (i.indexOf('$') < 0 && i != openTypeProperty) {
+                    context.src += 'if (!' + context.item + '_memberDefinitionNames || (' + context.item + '_memberDefinitionNames && ' + context.item + '_memberDefinitionNames.indexOf("' + i + '") >= 0)){';
                     context.current = i;
                     if (!meta[i].$item) {
                         if (meta[i].$value) {
@@ -366,7 +378,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                                 context.src += 'if (di["' + meta[i] + '"] && di["' + meta[i] + '"]["@odata.type"]){';
                                 context.src += 'var odataType = Container.resolveType(di["' + meta[i] + '"]["@odata.type"].split("#")[1]);';
                                 context.src += 'if (odataType){';
-                                context.src += item + '.' + i + ' = new odataType(di["' + meta[i] + '"])';
+                                context.src += item + '.' + i + ' = new odataType(undefined, { setDefaultValues: false });';//di["' + meta[i] + '"])';
                                 context.src += '}';
                                 context.src += '}else{';
                             }
@@ -386,10 +398,10 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         context.item = item;
                         context.meta.pop();
                     }
+                    context.src += '}';
                 }
             }
-            context.src += '}';
-            context.src += item + ' = self._finalize(' + item + ' || ' + item + '_inheritance);';
+            context.src += item + ' = self._finalize(' + /*item + '_inheritance' + ' || ' +*/ item + ');';
         }
     },
 
