@@ -53,7 +53,7 @@ export class ODataIncludeFragment {
     
     _createIncludePath(path) {
         if(!path) return this;
-        var inc = path.split('.');
+        var inc = path;
         
         var current = this;
         for(var i = 0; i < inc.length; i++){
@@ -93,6 +93,7 @@ $data.storageProviders.oData.ODataIncludeFragment = ODataIncludeFragment;
 $C('$data.storageProviders.oData.oDataIncludeCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function (provider) {
         this.provider = provider;
+        this.entityContext = provider.context;
     },
 
     compile: function (expression, context) {
@@ -114,7 +115,7 @@ $C('$data.storageProviders.oData.oDataIncludeCompiler', $data.Expressions.Entity
     
     VisitAssociationInfoExpression: function (expression, context) {
         var propName = expression.associationInfo.FromPropertyName;
-        if (expression.associationInfo.FromType.inheritsFrom.fullName != "$data.Entity"){
+        if (this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom)){
             propName = expression.associationInfo.FromType.fullName + "/" + propName;
         }
         

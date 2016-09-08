@@ -2,7 +2,8 @@ var $data = require('../../dist/odata');
 var NewsReader = require('./basetype.context');
 
 NewsReader.factory({ useParameterAlias: true }).onReady(function(ctx){
-    ctx.GenericArticles.include('CreatedBy').include('PublishedBy').include('PublishedBy.CreatedArticles').toArray({
+    ctx.GenericArticles.filter(function(it){ return it.PublishedBy.Name == "InheritanceUser9"; }).orderBy(function(it){ return it.PublishedBy.Name; }).map(function(it){ return it.CreatedBy; }).toArray($data.fdebug);
+    /*ctx.GenericArticles.include('CreatedBy').include('PublishedBy').include('PublishedBy.CreatedArticles').toArray({
         success: function(r){
             console.log(r.map(function(it){
                 it.initData["@odata.type"] = it.getType().fullName;
@@ -45,5 +46,5 @@ NewsReader.factory({ useParameterAlias: true }).onReady(function(ctx){
             console.log(err);
             console.log('*********************', err.data[0].request);
         }
-    });
+    });*/
 });

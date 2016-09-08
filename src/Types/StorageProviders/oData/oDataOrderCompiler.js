@@ -3,6 +3,7 @@ import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydat
 $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oData.oDataWhereCompiler, null, {
     constructor: function (provider) {
         this.provider = provider;
+        this.entityContext = provider.context;
     },
 
     compile: function (expression, context) {
@@ -34,14 +35,22 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
         }
     },
     VisitAssociationInfoExpression: function (expression, context) {
-        context.data += expression.associationInfo.FromPropertyName + '/';
+        var propName = expression.associationInfo.FromPropertyName;
+        if (this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom)){
+            propName = expression.associationInfo.FromType.fullName + "/" + propName;
+        }
+        context.data += propName + '/';
     },
     VisitEntityExpression: function (expression, context) {
         this.Visit(expression.source, context);
         this.Visit(expression.selector, context);
     },
     VisitMemberInfoExpression: function (expression, context) {
-        context.data += expression.memberName;
+        var propName = expression.memberName;
+        if (this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom)){
+            propName = expression.memberDefinition.definedBy.fullName + "/" + propName;
+        }
+        context.data += propName;
     },
     VisitEntityFieldOperationExpression: function (expression, context) {
         Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
