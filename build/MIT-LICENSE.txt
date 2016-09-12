@@ -1,4 +1,4 @@
-Copyright (c) 2013 JayStack Technologies LLC. http://jaydata.org/licensing
+Copyright (c) 2016 JayStack Technologies LLC. http://jaydata.org/licensing
 
  
 Permission is hereby granted, free of charge, to any person obtaining
