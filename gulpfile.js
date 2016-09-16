@@ -60,7 +60,12 @@ gulp.task('lint', function(){
     .pipe(eslint.failAfterError())
 });
 
-gulp.task('nodejs', function() {
+gulp.task('readme', function(){
+    gulp.src('README.md')
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('nodejs', ['readme'], function() {
     return gulp.src(['src/**/*.js'])
     .pipe(babel({
         compact: false
