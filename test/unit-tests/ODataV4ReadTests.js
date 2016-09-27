@@ -539,7 +539,7 @@ describe('OData protocol tests', function () {
 		})
 	})
     
-    describe.only('inheritance', () => {
+    describe('inheritance', () => {
 		it('read', () => {
 			return ctx.GenericArticles.toArray().then((articles) => {
 				expect(articles.filter(it => it.Id == 1)[0].getType()).to.equal($data('Inheritance.PublicArticle'));
@@ -566,6 +566,39 @@ describe('OData protocol tests', function () {
 			});
 			ctx.prepareRequest = t;
 			return p;
+		});
+
+		it('include 1..*', () => {
+			var q = ctx.GenericArticles.include('RelatedAuthors').toTraceString();
+			expect(q.queryText).to.equal('/GenericArticles?$expand=Inheritance.PublicArticle/RelatedAuthors');
+		});
+
+		it('include 1..1', () => {
+			$data.Entity.extend('myBaseClass', {
+				id: { type: 'int', computed: true, key: true }
+			});
+
+			$data('myBaseClass').extend('myInheritedClass', {
+				association: { type: 'anotherInheritedClass', inverseProperty: 'inverse', required: true }
+			});
+
+			$data.Entity.extend('anotherClass', {
+				foobar: { type: 'string' }
+			});
+
+			$data.Entity.extend('anotherInheritedClass', {
+				inverse: { type: 'myInheritedClass', inverseProperty: 'association' }
+			});
+
+			$data.EntityContext.extend('myInheritanceContext', {
+				mySet: { type: $data.EntitySet, elementType: 'myBaseClass' }
+			});
+
+			var ctx = new ($data('myInheritanceContext'))('http://myodataservice.com');
+			return ctx.onReady().then(() => {
+				var q = ctx.mySet.include('association').toTraceString();
+				expect(q.queryText).to.equal('/mySet?$expand=myInheritedClass/association');
+			});
 		});
 	});
 

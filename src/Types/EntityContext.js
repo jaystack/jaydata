@@ -611,7 +611,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
         var associationType = memDef.inverseProperty === '$$unbound' ? '$$unbound' : '0..1';
-        var association = this._addAssociationElement(storageModel.LogicalType, associationType, memDef.name, refereedStorageModel.LogicalType, "*", memDef.inverseProperty);
+        var association = this._addAssociationElement(memDef.definedBy, associationType, memDef.name, refereedStorageModel.LogicalType, "*", memDef.inverseProperty);
         storageModel.Associations[memDef.name] = association;
         storageModel.Associations.push(association);
     },
@@ -656,7 +656,7 @@ $data.Class.define('$data.EntityContext', null, null,
 
         this._addNavigationPropertyDefinition(dbEntityInstanceDefinition, memDef, memDef.name);
 
-        var association = this._addAssociationElement(storageModel.LogicalType,
+        var association = this._addAssociationElement(memDef.definedBy,
                                                  memDef.required ? "0..1" : "1",
                                                  memDef.name,
                                                  refereedStorageModel.LogicalType,
