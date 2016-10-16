@@ -297,7 +297,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
-                data: sql.postData,
+                data: sql.postData == null ? null : JSON.parse(JSON.stringify(sql.postData)), /*Temporary fix*/
                 headers: {
                 }
             },
