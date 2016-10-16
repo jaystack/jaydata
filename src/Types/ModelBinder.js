@@ -55,6 +55,11 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 meta.$selector = [meta.$selector];
             }
 
+            context.src += 'if (di === null){';
+            if (context.iter) context.src += context.iter + ' = null;';
+            context.src += 'return null;';
+            context.src += '}';
+
             for (var i = 0; i < meta.$selector.length; i++) {
                 var selector = meta.$selector[i].replace('json:', '');
                 context.src += 'if(';
@@ -64,11 +69,6 @@ $data.Class.define('$data.ModelBinder', null, null, {
                 }
                 context.src += '){di = di["' + path.join('"]["') + '"];}' + (i < meta.$selector.length - 1 ? 'else ' : '');
             }
-
-            context.src += 'if (di === null){';
-            if (context.iter) context.src += context.iter + ' = null;';
-            context.src += 'return null;';
-            context.src += '}';
         }
     },
 
