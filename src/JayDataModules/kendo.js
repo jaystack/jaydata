@@ -79,7 +79,7 @@ import kendo from 'kendo'
 			        //defaultValue: true,
 			        //defaultValue: 'abc',
 			        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
-			        validation: {
+                    validation: {
 			            required: getRequired(canonicType, pd)
 			        }
 			    }
@@ -438,59 +438,83 @@ import kendo from 'kendo'
                     if (options.data.filter) {
                         var filter = "";
                         var thisArg = {};
-                        options.data.filter.filters.forEach(function (f, index) {
-                            if (index > 0) {
-                                filter += options.data.filter.logic == "or" ? " || " : " && ";
-                            }
-
+                        var createJayDataExpressionFilter = function (f) {
+                            var value = f.value;
+                            var memberDef = q.defaultType.memberDefinitions['$' + f.field];
+                            var isString = memberDef.originalType == "Edm.String";
+                            var caseIgnore = f.ignoreCase;
+                            var itField = "it." + f.field;
+                            if (caseIgnore == true)
+                                itField += ".toLowerCase()";
+                            value = "'" + value + "'";
+                            var tempFilter = '';
                             switch (f.operator) {
                                 case 'eq':
-                                    filter += "it." + f.field;
-                                    filter += " == this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " == " + value;
                                     break;
                                 case 'neq':
-                                    filter += "it." + f.field;
-                                    filter += " != this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " != " + value;
                                     break;
                                 case 'startswith':
-                                    filter += "it." + f.field;
-                                    filter += ".startsWith(this." + f.field + ")";
+                                    tempFilter += itField;
+                                    tempFilter += ".startsWith(" + value + ")";
                                     break;
                                 case 'contains':
-                                    filter += "it." + f.field;
-                                    filter += ".contains(this." + f.field + ")";
+                                    tempFilter += itField;
+                                    tempFilter += ".contains(" + value + ")";
                                     break;
                                 case 'doesnotcontain':
-                                    filter += "!";
-                                    filter += "it." + f.field;
-                                    filter += ".contains(this." + f.field + ")";
+                                    tempFilter += "!";
+                                    tempFilter += itField;
+                                    tempFilter += ".contains(" + value + ")";
                                     break;
                                 case 'endswith':
-                                    filter += "it." + f.field;
-                                    filter += ".endsWith(this." + f.field + ")";
+                                    tempFilter += itField;
+                                    tempFilter += ".endsWith(" + value + ")";
                                     break;
                                 case 'gte':
-                                    filter += "it." + f.field;
-                                    filter += " >= this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " >= " + value;
                                     break;
                                 case 'gt':
-                                    filter += "it." + f.field;
-                                    filter += " > this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " > " + value;
                                     break;
                                 case 'lte':
-                                    filter += "it." + f.field;
-                                    filter += " <= this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " <= " + value;
                                     break;
                                 case 'lt':
-                                    filter += "it." + f.field;
-                                    filter += " < this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " < " + value;
                                     break;
                                 default:
                                     $data.Trace.log('unknown operator', f.operator);
                                     break;
                             }
-                            thisArg[f.field] = f.value;
-                        })
+                            return tempFilter;
+                        };
+                        options.data.filter.filters.forEach(function (flt, index) {
+                            if (index > 0) {
+                                filter += options.data.filter.logic == "or" ? " || " : " && ";
+                            }
+                            if (flt.filters) {
+                                var innerFilter = '';
+                                flt.filters.forEach(function (innerF, innerIndex) {
+                                    if (innerIndex > 0) {
+                                        innerFilter += flt.logic == "or" ? " || " : " && ";
+                                    }
+                                    innerFilter += createJayDataExpressionFilter(innerF);
+                                });
+
+                                filter += '(' + innerFilter + ')';
+                            }
+                            else
+                                filter += createJayDataExpressionFilter(flt);
+                        });
+                        if (filter != null && filter != "")
                         q = q.filter(filter, thisArg);
                     }
                     var allItemsQ = q;
