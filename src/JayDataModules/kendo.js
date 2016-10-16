@@ -70,6 +70,7 @@ import kendo from 'kendo'
 			    //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
 			    fields[pd.name] = {
 			        //TODO
+                    field: pd.name,
 			        type: getKendoTypeName(canonicType, pd),
 			        nullable: getNullable(canonicType, pd),
 			        defaultValue: pd.defaultValue,
@@ -79,9 +80,9 @@ import kendo from 'kendo'
 			        //defaultValue: true,
 			        //defaultValue: 'abc',
 			        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
-			        validation: {
-			            required: getRequired(canonicType, pd)
-			        }
+			        //validation: {
+			        //    required: getRequired(canonicType, pd)
+			        //}
 			    }
 			    //};
 			});
@@ -112,7 +113,7 @@ import kendo from 'kendo'
 						.memberDefinitions
 						.getPublicMappedProperties()
 						.filter(function (pd) {
-						    return $data.Container.resolveType(pd.type) === $data.EntitySet
+                            return pd.type != null && /*Temporary fix*/ $data.Container.resolveType(pd.type) === $data.EntitySet
 						})
 						.map(function (pd) {
 						    return $data.Container.resolveType(pd.elementType)
@@ -543,20 +544,21 @@ import kendo from 'kendo'
                     }
 
                     $data.Trace.log(promises);
-                    jQuery.when.apply(this, promises).then(function (items, total) {
+                    Promise.all(promises).then(function (items, total) {
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
-                        var result = items.map(function (item) {
-                            var d = (item instanceof $data.Entity) ? item.initData : item;
+                        var responseItems = items[0];
+                        var result = responseItems.map(function (item) {
+                            var d = item instanceof $data.Entity ? item.initData : item;
                             var kendoItem = item.asKendoObservable();
                             return kendoItem;
                         });
                         var r = {
                             data: result,
-                            total: withInlineCount ? items.totalCount : (withLength ? total : total.length)
-                        }
+                            total: withInlineCount ? responseItems.totalCount : withLength ? total : total.length
+                        };
                         $data.Trace.log(r);
                         options.success(r);
-                    }).fail(function () {
+                    }).catch(function () {
                         console.log("error in create");
                         options.error({}, arguments);
                     });
@@ -577,7 +579,7 @@ import kendo from 'kendo'
                                 data.push(modelItem.initData);
                             });
                             options.success(/*{ data: data }*/);
-                        }).fail(function () {
+                        }).catch(function () {
                             console.log("error in create");
                             options.error({}, arguments);
                             ctx.stateManager.reset();
@@ -590,7 +592,7 @@ import kendo from 'kendo'
 						.then(function () {
 						    options.success(/*{ data: model[0].innerInstance().initData }*/);
 						})
-						.fail(function () {
+						.catch(function () {
 						    console.log("error in create");
 						    options.error({}, arguments);
 						});
@@ -609,7 +611,7 @@ import kendo from 'kendo'
                         });
                         ctx.saveChanges().then(function () {
                             options.success();
-                        }).fail(function () {
+                        }).catch(function () {
                             ctx.stateManager.reset();
                             //alert("error in batch update");
                             options.error({}, arguments);
@@ -618,7 +620,7 @@ import kendo from 'kendo'
                     else {
                         model[0].innerInstance().save(undefined, undefined, $data.kendo.attachMode).then(function (item) {
                             options.success();
-                        }).fail(function () {
+                        }).catch(function () {
                             //alert("error in update")
                             options.error({}, arguments);
                         });
@@ -635,7 +637,7 @@ import kendo from 'kendo'
                         });
                         ctx.saveChanges().then(function () {
                             options.success({ data: options.data });
-                        }).fail(function () {
+                        }).catch(function () {
                             ctx.stateManager.reset();
                             //alert("error in save:" + arguments[0]);
                             options.error({}, "error", options.data);
@@ -644,7 +646,7 @@ import kendo from 'kendo'
                     else {
                         model[0].innerInstance().remove().then(function () {
                             options.success({ data: options.data });
-                        }).fail(function () {
+                        }).catch(function () {
                             ctx.stateManager.reset();
                             //alert("error in save:" + arguments[0]);
                             options.error({}, "error", options.data);
