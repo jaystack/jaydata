@@ -14,6 +14,7 @@ declare module $data {
     export class Base implements Object {
         constructor(...params: any[]);
         getType: () => Base;
+        memberDefinitions: any[];
     }
 
     interface Event extends Object {
@@ -32,12 +33,30 @@ declare module $data {
         propertyChanging: Event;
         propertyChanged: Event;
         propertyValidationError: Event;
-        isValid: boolean;
+        isValid: () => boolean;
+        resetChanges: () => void;
+        refresh(): () => Promise<void>;
+        save(): () => Promise<void>;
+    }
+
+    export enum EntityState {
+        Added,
+        Deleted,
+        Detached,
+        Modified,
+        Unchanged
+    }
+
+    export enum EntityAttachMode {
+        AllChanged,
+        Default,
+        KeepChanges
     }
 
     export class Queryable<T extends Entity> implements Object {
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
+        filter(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Queryable<T>;
 
         map(projection: (it: T) => any): Queryable<any>;
 
@@ -59,16 +78,37 @@ declare module $data {
 
         order(selector: string): Queryable<T>;
         orderBy(predicate: (it: any) => any): Queryable<T>;
+        orderBy(predicate: (it: T) => any): Queryable<T>;
         orderByDescending(predicate: (it: any) => any): Queryable<T>;
 
         first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
         first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
+        first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): $data.IPromise<T>;
+        first(): $data.IPromise<T>;
 
         include(selector: string): Queryable<T>;
 
         removeAll(): $data.IPromise<Number>;
         removeAll(handler: (count: number) => void ): $data.IPromise<Number>;
         removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+
+        find(...ids: Array<any>): $data.IPromise<T>;
+
+        single(): $data.IPromise<T>;
+
+        count(): $data.IPromise<number>;
+
+        asKendoColumns(columns?: any): kendo.ui.GridColumn[];
+        asKendoModel(options?: any): kendo.data.Model;
+        asKendoDataSource(ds?: kendo.data.DataSourceOptions, modelOptions?: any): kendo.data.DataSource;
+
+        include(selector: (it: T) => any): Queryable<T>;
+
+        some(): boolean;
+
+        every(): boolean;
+
+        withInlineCount(): Queryable<T>;
     }
 
     export class EntitySet<T extends Entity> extends Queryable<T> {
@@ -77,6 +117,9 @@ declare module $data {
         
         add(item: T): T;
         add(initData: {}): T;
+
+        createNew(item: T): T;
+        createNew(initData: {}): T;
 
         attach(item: T): void;
         attach(item: {}): void;
@@ -108,6 +151,9 @@ declare module $data {
         attachOrGet(item: Entity): Entity;
         detach(item: Entity): void;
         remove(item: Entity): void;
+        trackChanges: boolean;
+        attach(item: Entity, mode?: EntityAttachMode): void;
+        batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<$data.Entity> | any>>;
     }
 
     export class Blob implements Object {
