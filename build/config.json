@@ -28,6 +28,18 @@
             "destFolder": "./dist/public/jaydataproviders"
         },
         {
+            "taskName": "odataprovider-v3",
+            "browserify": { "standalone": "$data" },
+            "require": ["./src/Types/StorageProviders/oData3/index.js", { "entry": true }],
+            "external": ["jaydata/core"],
+            "amd": {
+                "name": "jaydata/odata3",
+                "deps": ["jaydata/core"]
+            },
+            "destFile": "oDataProviderV3.js",
+            "destFolder": "./dist/public/jaydataproviders"
+        },
+        {
             "taskName": "sqliteprovider",
             "browserify": { "standalone": "$data" },
             "require": ["./src/Types/StorageProviders/SqLite/index.js", { "entry": true }],
