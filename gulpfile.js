@@ -7,6 +7,7 @@ var uglify = require('gulp-uglify');
 var minimist = require('minimist');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
+var change = require('gulp-change');
 var header = require('gulp-header');
 var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
@@ -65,12 +66,22 @@ gulp.task('readme', function(){
     .pipe(gulp.dest('./dist'));
 });
 
+var sep = require('path').sep;
+function replaceJayDataCorePath(content){
+    if (content.indexOf("'jaydata/core'") >= 0){
+        var deep = this.fname.split(sep);
+        var path = "'" + deep.map(function(){ return "../"; }).join("") + "core.js'";
+        return content.replace("'jaydata/core'", path);
+    }else return content;
+}
+
 gulp.task('nodejs', ['readme'], function() {
     return gulp.src(['src/**/*.js'])
     .pipe(babel({
         compact: false
     }))
-    .pipe(replace("'jaydata/core'", "require('path').join(global.__jaydataModuleRoot, 'core.js')"))
+    //.pipe(replace("'jaydata/core'", "require('path').join(global.__jaydataModuleRoot, 'core.js')"))
+    .pipe(change(replaceJayDataCorePath))
     .pipe(gulp.dest('./dist/lib'))
     .on('error', function(err){
 		console.log('>>> ERROR', err);
