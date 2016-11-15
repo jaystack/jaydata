@@ -353,7 +353,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 .then(function (entitySet) {
                     try {
                         var singleParam = self._findByIdQueryable(entitySet, key);
-                        return entitySet.single(singleParam.predicate, singleParam.thisArgs)
+                        return entitySet.single(singleParam.predicate)
                             .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                     } catch (e) {
                         var d = new $data.PromiseHandler();
@@ -506,23 +506,20 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
     _findByIdQueryable: function (set, keys) {
         var keysProps = set.defaultType.memberDefinitions.getKeyProperties();
         if (keysProps.length > 1 && keys && 'object' === typeof keys) {
-            var predicate = "", thisArgs = {};
+            var predicate = "";
             for (var i = 0; i < keysProps.length; i++) {
                 if (i > 0) predicate += " && ";
 
                 var key = keysProps[i];
-                predicate += "it." + key.name + " == this." + key.name;
-                thisArgs[key.name] = keys[key.name];
+                predicate += "it." + key.name + " == " + ((typeof keys[key.name]) == 'string' ? ("'" + keys[key.name] + "'") : keys[key.name]);
             }
 
             return {
-                predicate: predicate,
-                thisArgs: thisArgs
+                predicate: predicate
             };
         } else if (keysProps.length === 1) {
             return {
-                predicate: "it." + keysProps[0].name + " == this.value",
-                thisArgs: { value: keys }
+                predicate: "it." + keysProps[0].name + " == " + ((typeof keys) == 'string' ? ("'" + keys + "'") : keys)
             };
         } else {
             throw 'invalid keys';
