@@ -719,9 +719,8 @@ $data.Class.define('$data.Queryable', null, null,
                     var params = {}
                     for (var i = 0; i < parameters.length; i++) {
                         var param = parameters[i];
-                        params[param.name] = param.value;
                         if (i > 0) predicate += ' && ';
-                        predicate += "it." + param.name + " == this." + param.name;
+                        predicate += "it." + param.name + " == " + ((typeof param.value) == 'string' ? ("'" + param.value + "'") : param.value);
                     }
 
                     this.single(predicate, params, cbWrapper, transaction);
