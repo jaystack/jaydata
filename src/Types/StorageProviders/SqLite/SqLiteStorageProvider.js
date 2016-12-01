@@ -122,8 +122,8 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         value: {
             equal: { mapTo: '=', dataType: "boolean", nullMap: ' is null' },
             notEqual: { mapTo: '!=', dataType: "boolean", nullMap: ' is not null' },
-            equalTyped: { mapTo: '=', dataType: "boolean" },
-            notEqualTyped: { mapTo: '!=', dataType: "boolean" },
+            equalTyped: { mapTo: '=', dataType: "boolean", nullMap: ' is null' },
+            notEqualTyped: { mapTo: '!=', dataType: "boolean", nullMap: ' is not null' },
             greaterThan: { mapTo: '>', dataType: "boolean" },
             greaterThanOrEqual: { mapTo: '>=', dataType: "boolean" },
 

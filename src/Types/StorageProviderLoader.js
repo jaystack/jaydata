@@ -230,7 +230,7 @@ $data.Class.define('$data.StorageProviderLoaderBase', null, null, {
     loadNpmModule: function (currentProvider, providerList, callback) {
         var provider = null;
         try {
-            require(this.npmModules[currentProvider]);
+            global["require"](this.npmModules[currentProvider]);
             provider = $data.RegisteredStorageProviders[currentProvider];
             $data.Trace.log('NPM module loader successfully registered ' + currentProvider + ' provider');
         } catch (e) {

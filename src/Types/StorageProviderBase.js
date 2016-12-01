@@ -282,7 +282,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                             association.ReferentialConstraint.forEach(function (constrain) {
                                 if (complexInstance !== null) {
                                     dbInstance[constrain[association.From]] = complexInstance[constrain[association.To]];
-                                } else {
+                                } else if (Guard.isNullOrUndefined(logicalEntity[constrain[association.From]])) {
                                     dbInstance[constrain[association.From]] = null;
                                 }
                             }, this);
