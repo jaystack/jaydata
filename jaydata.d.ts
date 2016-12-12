@@ -53,7 +53,7 @@ declare module $data {
         KeepChanges
     }
 
-    export class Queryable<T extends Entity> implements Object {
+    export class Queryable<T> implements Object {
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
         filter(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Queryable<T>;
