@@ -3,6 +3,8 @@ import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydat
 (function ($data) {
 
     $data.Array.prototype.toQueryable = function (type) {
+        if (!(this instanceof Array))
+            return;
         if (type == null) {
             if(this.length > 0) {
                 var firtsItem = this[0];
