@@ -50,8 +50,12 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         if (sqlBuilder.getTextPart('projection') === undefined) {
             this.VisitDefaultProjection(sqlBuilder);
         }
+        var order = sqlBuilder.getTextPart("order");
+        var skip = sqlBuilder.getTextPart("skip");
+        var take = sqlBuilder.getTextPart("take");
         sqlBuilder.selectTextPart("result");
         this.sortedFilterPart.forEach(function (part) {
+            if (sqlBuilder.sets.length > 1 && (((skip || take) && part == "order") || part == "take" || part == "skip")) return;
             var part = sqlBuilder.getTextPart(part);
             if (part) {
                 sqlBuilder.addText(part.text);
@@ -65,6 +69,47 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
             sqlBuilder.selectedFragment.params = sqlBuilder.selectedFragment.params.concat(countPart.params);
         }
         sqlBuilder.resetModelBinderProperty();
+        if (sqlBuilder.sets.length > 1 && (skip || take)){
+            var sql = sqlBuilder.getTextPart("result");
+            var t0 = sql.text.replace(new RegExp("SELECT (.*?) FROM " + sqlBuilder.pagingExpressionTable), "SELECT * FROM " + sqlBuilder.pagingExpressionTable);
+            var t0fields = [];
+            sql.text.replace(/T0\.(.*?)(\s|,)/g, function (m, member, sep) {
+                var field = "T0." + member;
+                if (t0fields.indexOf(field) < 0) t0fields.push(field);
+            });
+            if (t0fields.length > 0) {
+                var params = sql.params.slice();
+                var sqlReplace = "FROM (" + t0 + " GROUP BY " + t0fields.join(", ");
+                if (order){
+                    sqlReplace += order.text;
+                    if (order.params && order.params.length > 0) params = params.concat(order.params);
+                }
+                if (take){
+                    sqlReplace += take.text;
+                    params.push(take.params[0]);
+                }
+                if (skip){
+                    sqlReplace += skip.text;
+                    params.push(skip.params[0]);
+                }
+                sqlReplace += ")";
+                sql.text = sql.text.replace("FROM " + sqlBuilder.pagingExpressionTable, sqlReplace);
+                sql.params = params.concat(sql.params);
+            } else {
+                if (order){
+                    sql.text += order.text;
+                    if (order.params && order.params.length > 0) sql.params = sql.params.concat(order.params);
+                }
+                if (take){
+                    sql.text += take.text;
+                    sql.params = sql.params.concat(take.params);
+                }
+                if (skip) {
+                    sql.text += skip.text;
+                    sql.params = sql.params.concat(skip.params);
+                }
+            }
+        }
         this.filters.push(sqlBuilder);
     },
 
@@ -84,7 +129,6 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
         filterCompiler.Visit(expression.selector, sqlBuilder);
         return expression;
     },
-
     VisitOrderExpression: function (expression, sqlBuilder) {
         this.Visit(expression.source, sqlBuilder);
         sqlBuilder.selectTextPart('order');
@@ -101,7 +145,6 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
     },
     VisitPagingExpression: function (expression, sqlBuilder) {
         this.Visit(expression.source, sqlBuilder);
-
         switch (expression.nodeType) {
             case $data.Expressions.ExpressionType.Skip:
                 sqlBuilder.selectTextPart('skip');
@@ -133,6 +176,9 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
             }
 
             var alias = sqlBuilder.getExpressionAlias(es);
+            if (setIndex == 0 && sqlBuilder.sets.length > 1) {
+                sqlBuilder.pagingExpressionTable = es.instance.tableName;
+            }
             sqlBuilder.addText(es.instance.tableName + ' ');
             sqlBuilder.addText(alias);
 
