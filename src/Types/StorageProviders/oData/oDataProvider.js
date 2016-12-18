@@ -970,6 +970,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
             /* data functions */
 
+            date: {
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                parameters: [{ name: "@expression", dataType: "date" }]
+            },
             day: {
                 allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "date" }]
