@@ -74,7 +74,7 @@ import kendo from 'kendo'
 			        type: getKendoTypeName(canonicType, pd),
 			        nullable: getNullable(canonicType, pd),
 			        defaultValue: pd.defaultValue,
-                    dateType: pd.$DateType,
+                    viewType: pd.$ViewType,
 			        //nullable: false,
 			        //nullable:  "nullable" in pd ? pd.nullable : true,
 			        editable: !pd.computed,
@@ -446,7 +446,7 @@ import kendo from 'kendo'
                             var isString = memberDef.originalType == "Edm.String";
                             var ignoreCase = f.ignoreCase;
                             var itField = "it." + f.field;
-                            if (memberDef.$DateType == 'Date') {
+                            if (memberDef.$ViewType == 'Date') {
                                 itField += '.date()';
                                 value = new Date(value);
                                 var currentDate = new Date();
