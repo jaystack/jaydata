@@ -74,6 +74,7 @@ import kendo from 'kendo'
 			        type: getKendoTypeName(canonicType, pd),
 			        nullable: getNullable(canonicType, pd),
 			        defaultValue: pd.defaultValue,
+                    dateType: pd.$DateType,
 			        //nullable: false,
 			        //nullable:  "nullable" in pd ? pd.nullable : true,
 			        editable: !pd.computed,
@@ -443,9 +444,18 @@ import kendo from 'kendo'
                             var value = f.value;
                             var memberDef = q.defaultType.memberDefinitions['$' + f.field];
                             var isString = memberDef.originalType == "Edm.String";
-                            var caseIgnore = f.ignoreCase;
+                            var ignoreCase = f.ignoreCase;
                             var itField = "it." + f.field;
-                            if (caseIgnore == true) itField += ".toLowerCase()";
+                            if (memberDef.$DateType == 'Date') {
+                                itField += '.date()';
+                                value = new Date(value);
+                                var currentDate = new Date();
+                                value.setHours(currentDate.getHours());
+                                value.setMinutes(currentDate.getMinutes());
+                                value.setSeconds(currentDate.getSeconds());
+                                value = "date\"" + value.toISOString() + "\"";
+                            }
+                            if (ignoreCase == true) itField += ".toLowerCase()";
                             value = "'" + value + "'";
                             var tempFilter = '';
                             switch (f.operator) {
