@@ -48,7 +48,9 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                         });
                         sqlBuilder.addText(SqlStatementBlocks.endGroup);
                     } else if (set instanceof $data.Queryable) {
-                        sqlBuilder.addText("(SELECT d FROM (" + set.toTraceString().sqlText + "))");
+                        var subsql = set.toTraceString();
+                        sqlBuilder.addText("(SELECT d FROM (" + subsql.sqlText + "))");
+                        subsql.params.forEach(function(p){ sqlBuilder.addParameter(p); });
                         //Guard.raise("Not yet... but coming!");
                     } else {
                         Guard.raise(new Exception("Only constant arrays and Queryables can be on the right side of 'in' operator", "UnsupportedType"));
