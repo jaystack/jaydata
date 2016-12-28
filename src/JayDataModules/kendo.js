@@ -430,10 +430,11 @@ import kendo from 'kendo'
                     var _this = this;
                     var q = query;
                     var sp = query.entityContext.storageProvider;
+                    var needsTotalCount = options.data.pageSize != null;
                     var withInlineCount = query.entityContext.storageProvider.supportedSetOperations.withInlineCount;
                     var withLength = (!withInlineCount) && query.entityContext.storageProvider.supportedSetOperations.length;
 
-                    if (withInlineCount) {
+                    if (withInlineCount && needsTotalCount == true) {
                         q = q.withInlineCount();
                     }
 
@@ -546,11 +547,13 @@ import kendo from 'kendo'
 
                     promises.push(q.toArray());
                     //var ta = q.toArray();
-                    if (withLength) {
-                        promises.push(allItemsQ.length());
-                    }
-                    else if (!withInlineCount) {
-                        promises.push(allItemsQ.toArray());
+                    if (needsTotalCount == true) {
+                        if (withLength) {
+                            promises.push(allItemsQ.length());
+                        }
+                        else if (!withInlineCount) {
+                            promises.push(allItemsQ.toArray());
+                        }
                     }
 
                     $data.Trace.log(promises);
@@ -564,7 +567,7 @@ import kendo from 'kendo'
                         });
                         var r = {
                             data: result,
-                            total: withInlineCount ? responseItems.totalCount : withLength ? total : total.length
+                            total: needsTotalCount == true ? (withInlineCount ? responseItems.totalCount : withLength ? total : total.length) : responseItems.length
                         };
                         $data.Trace.log(r);
                         options.success(r);
@@ -706,7 +709,7 @@ import kendo from 'kendo'
 
     $data.kendo = $data.kendo || {};
 
-    $data.kendo.defaultPageSize = 25;
+    $data.kendo.defaultPageSize = null;
 
     $data.Queryable.addMember("asKendoDataSource", function (ds, modelOptions) {
         var self = this;
