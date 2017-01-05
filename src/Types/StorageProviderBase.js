@@ -280,7 +280,11 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                         var complexInstance = logicalEntity[association.FromPropertyName];
                         if (complexInstance !== undefined) {
                             association.ReferentialConstraint.forEach(function (constrain) {
-                                if (complexInstance !== null) {
+                                if (complexInstance !== null &&
+                                (
+                                    (logicalEntity && !logicalEntity.changedProperties) ||
+                                    (logicalEntity && logicalEntity.changedProperties && !logicalEntity.changedProperties.some(function(md){ return md.name == constrain[association.From]; }))
+                                )) {
                                     dbInstance[constrain[association.From]] = complexInstance[constrain[association.To]];
                                 } else if (Guard.isNullOrUndefined(logicalEntity[constrain[association.From]])) {
                                     dbInstance[constrain[association.From]] = null;
@@ -297,7 +301,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                         cmpType.ReferentialConstraint.forEach(function (constrain) {
                             if (complexInstance !== null) {
                                 dbInstance[constrain[cmpType.From]] = complexInstance[constrain[cmpType.To]];
-                            } else {
+                            } else if (Guard.isNullOrUndefined(logicalEntity[constrain[association.From]])) {
                                 dbInstance[constrain[cmpType.From]] = null;
                             }
                         }, this);
