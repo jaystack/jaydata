@@ -73,7 +73,7 @@ $C('$data.sqLite.SqlCompiler', $data.Expressions.EntityExpressionVisitor, null, 
             var sql = sqlBuilder.getTextPart("result");
             var t0 = sql.text.replace(new RegExp("SELECT (.*?) FROM " + sqlBuilder.pagingExpressionTable), "SELECT * FROM " + sqlBuilder.pagingExpressionTable);
             var t0fields = [];
-            sql.text.replace(/T0\.(.*?)(\s|,)/g, function (m, member, sep) {
+            sql.text.replace(new RegExp("T0\\.(.*?)(\\s|,|\\))", "g"), function (m, member, sep) {
                 var field = "T0." + member;
                 if (t0fields.indexOf(field) < 0) t0fields.push(field);
             });
