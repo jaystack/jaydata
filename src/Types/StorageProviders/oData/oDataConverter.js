@@ -106,7 +106,9 @@ $data.oDataConverter = {
                 var values = [];
                 for(var i = 0; i < o.length; i++){
                     var obj = o[i];
-                    values.push((obj != null && obj instanceof $data.Entity) ? obj : $data.oDataConverter['toDb'][typeName](obj));
+                    if(obj != null && !(obj instanceof $data.Entity) && $data.oDataConverter['toDb'][typeName] != null)
+                        obj = $data.oDataConverter['toDb'][typeName](obj);
+                    values.push(obj);
                 }
                 
                 return values;
@@ -156,7 +158,10 @@ $data.oDataConverter = {
                 var typeName = Container.resolveName(def.elementType);
                 var values = [];
                 for(var i = 0; i < o.length; i++){
-                    values.push($data.oDataConverter['escape'][typeName](o[i]));
+                    var obj = o[i];
+                    if($data.oDataConverter['escape'][typeName] != null)
+                        obj = $data.oDataConverter['escape'][typeName](obj);
+                    values.push(obj);
                 }
                 
                 return "[" + values.join(',') + "]"
