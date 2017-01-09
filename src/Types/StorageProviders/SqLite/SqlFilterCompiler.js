@@ -49,7 +49,7 @@ $C('$data.sqLite.SqlFilterCompiler', $data.Expressions.EntityExpressionVisitor, 
                         sqlBuilder.addText(SqlStatementBlocks.endGroup);
                     } else if (set instanceof $data.Queryable) {
                         var subsql = set.toTraceString();
-                        sqlBuilder.addText("(SELECT d FROM (" + subsql.sqlText + "))");
+                        sqlBuilder.addText("(SELECT d FROM (" + subsql.sqlText.replace(new RegExp("(T[0-9]+(\.|\s|))", "g"), "SQ$1") + "))");
                         subsql.params.forEach(function(p){ sqlBuilder.addParameter(p); });
                         //Guard.raise("Not yet... but coming!");
                     } else {
