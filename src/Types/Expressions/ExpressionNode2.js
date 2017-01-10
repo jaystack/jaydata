@@ -82,7 +82,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     MemberInfo: "MemberInfo",
     QueryParameter: "QueryParameter",
     ComplexEntityField: "ComplexEntityField",
-
+    Distinct: "Distinct",
     Take: "Take",
     Skip: "Skip",
     OrderBy: "OrderBy",

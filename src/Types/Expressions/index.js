@@ -51,7 +51,7 @@ import QueryParameterExpression from './EntityExpressions/QueryParameterExpressi
 import RepresentationExpression from './EntityExpressions/RepresentationExpression.js';
 import ServiceOperationExpression from './EntityExpressions/ServiceOperationExpression.js';
 import ContinuationExpressionBuilder from './ContinuationExpressionBuilder.js';
-
+import DistinctExpression from './DistinctExpression.js';
 
 
 export default $data
