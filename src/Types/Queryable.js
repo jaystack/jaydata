@@ -534,6 +534,12 @@ $data.Class.define('$data.Queryable', null, null,
         return Container.createQueryable(this, takeExp);
     },
 
+    distinct: function distinct() {
+        this._checkOperation('distinct');
+        var distinctExp = Container.createDistinctExpression(this.expression);
+        return Container.createQueryable(this, distinctExp);
+    },
+
     order: function(selector) {
        if (selector === '' || selector === undefined || selector === null) {
            return this;

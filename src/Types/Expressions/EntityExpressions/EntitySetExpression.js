@@ -71,6 +71,9 @@ $C('$data.Expressions.EntitySetExpression', $data.Expressions.ExpressionNode, nu
                 this.elementType = this.source.resultType;
                 this.storageModel = c.instance._storageModel.getStorageModel(this.elementType);
                 break;
+            case this.source instanceof $data.Expressions.DistinctExpression:
+                Guard.raise("distinct must be after all filter and map expressions in the chain!");
+                break;
             default:
                 Guard.raise("take and skip must be the last expressions in the chain!");
                 //Guard.raise("Unknown source type for EntitySetExpression: " + this.getType().name);
