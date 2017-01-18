@@ -284,6 +284,14 @@ $C('$data.Expressions.EntityExpressionVisitor', null, null, {
             return Container.createDistinctExpression(source, selector);
         }
         return expression;
+    },
+    VisitGroupExpression: function VisitGroupExpression(expression, context) {
+        var source = this.Visit(expression.source, context);
+        var selector = this.Visit(expression.selector, context);
+        if (source !== expression.source || selector !== expression.selector) {
+            return Container.createGroupExpression(source, selector);
+        }
+        return expression;
     }
 });
 

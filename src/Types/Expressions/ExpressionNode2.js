@@ -87,6 +87,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Skip: "Skip",
     OrderBy: "OrderBy",
     OrderByDescending: "OrderByDescending",
+    GroupBy: "GroupBy",
     Include: "Include",
 
     IndexedPhysicalAnd:"IndexedDBPhysicalAndFilterExpression",
