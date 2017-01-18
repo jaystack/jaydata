@@ -265,7 +265,7 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
                 var dt = ct.ToType;
                 var et = Container.resolveType(ct.FromType.memberDefinitions.getMember(ct.FromPropertyName).elementType);
                 if (dt === $data.Array && et && et.isAssignableTo && et.isAssignableTo($data.Entity)){
-                    config = {
+                    var config = {
                         $type: $data.Array,
                         $selector: 'json:' + ct.FromPropertyName,
                         $item: {
