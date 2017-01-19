@@ -226,7 +226,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
 
                 association.ReferentialConstraint = association.ReferentialConstraint || [];
 
-                if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
+                if (((association.FromMultiplicity == "*" || association.FromMultiplicity == "$$unbound") && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
                     foreignType = association.ToType;
                     dataType = association.FromType;
                     foreignPropName = association.FromPropertyName;
