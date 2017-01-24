@@ -52,6 +52,6 @@ import RepresentationExpression from './EntityExpressions/RepresentationExpressi
 import ServiceOperationExpression from './EntityExpressions/ServiceOperationExpression.js';
 import ContinuationExpressionBuilder from './ContinuationExpressionBuilder.js';
 import DistinctExpression from './DistinctExpression.js';
-
+import GroupExpression from './GroupExpression.js';
 
 export default $data

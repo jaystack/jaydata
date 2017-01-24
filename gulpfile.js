@@ -54,7 +54,8 @@ gulp.task('lint', function(){
         rules: {
             'no-undef': 1,
             'no-unused-vars': 1,
-            'no-use-before-define': 1
+            'no-use-before-define': 1,
+            'no-implicit-globals': 1
         }
     }))
     .pipe(eslint.format('compact', fs.createWriteStream('./dist/.eslint')))

@@ -539,6 +539,13 @@ $data.Class.define('$data.Queryable', null, null,
         var distinctExp = Container.createDistinctExpression(this.expression);
         return Container.createQueryable(this, distinctExp);
     },
+    groupBy: function groupBy(selector, thisArg) {
+        this._checkOperation('groupBy');
+        var codeExpression = Container.createCodeExpression(selector, thisArg);
+        var exp = Container.createGroupExpression(this.expression, codeExpression);
+        var q = Container.createQueryable(this, exp);
+        return q;
+    },
 
     order: function(selector) {
        if (selector === '' || selector === undefined || selector === null) {

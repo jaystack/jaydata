@@ -104,6 +104,17 @@ $C('$data.Expressions.QueryExpressionCreator', $data.Expressions.EntityExpressio
             return Container.createIncludeExpression(source, selector);
         }
         return expression;
+    },
+
+    VisitGroupExpression: function VisitGroupExpression(expression, context) {
+        var source = this.Visit(expression.source, context);
+        context = context || {};
+        context.frameType = expression.getType();
+        var selector = this.Visit(expression.selector, context);
+        if (source !== expression.source || selector !== expression.selector) {
+            return Container.createGroupExpression(source, selector);
+        }
+        return expression;
     }
 });
 
