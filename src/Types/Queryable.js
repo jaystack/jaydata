@@ -21,6 +21,9 @@ $data.Class.define('$data.Queryable', null, null,
         this.entityContext = context;
         this.expression = rootExpression;
     },
+    toJSON: function(){
+        return JSON.stringify(this.expression);
+    },
 
     filter: function (predicate, thisArg) {
         ///<summary>Filters a set of entities using a boolean expression.</summary>
