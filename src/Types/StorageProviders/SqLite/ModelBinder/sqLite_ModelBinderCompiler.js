@@ -115,23 +115,27 @@ $C('$data.sqLite.sqLite_ModelBinderCompiler', $data.Expressions.EntityExpression
             if (infoIndex > 0 && info.IsMapped) {
                 var pathFragments = info.NavigationPath.split('.');
                 pathFragments.shift();
+                var popCnt = 0;
                 pathFragments.forEach(function (pathFragment, index) {
                     if (!pathFragment) { return; }
                     if (!builder.modelBinderConfig[pathFragment]) {
                         builder.selectModelBinderProperty(pathFragment);
-                        var isArray = false;
                         if (info.Association.associationInfo.ToMultiplicity === '*' && pathFragments.length - 1 === index) {
                             builder.modelBinderConfig['$type'] = $data.Array;
                             builder.selectModelBinderProperty('$item');
-                            isArray = true;
+                            popCnt++;
                         }
 
                         builder.modelBinderConfig['$type'] = this.sqlContext.sets[infoIndex].elementType;
                         this.currentObjectFieldName = this._sqlBuilder.getExpressionAlias(this.sqlContext.sets[infoIndex]);
                         this._addPropertyToModelBinderConfig(this.sqlContext.sets[infoIndex].elementType, builder);
-                        if (isArray) { builder.popModelBinderProperty(); }
+                        while (popCnt--) builder.popModelBinderProperty();
                     } else {
                         builder.selectModelBinderProperty(pathFragment);
+                        if (builder.modelBinderConfig.$type == $data.Array){
+                            builder.selectModelBinderProperty("$item");
+                            popCnt++;
+                        }
                     }
                 }, this);
                 for (var i = 0; i < pathFragments.length; i++) {

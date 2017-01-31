@@ -36,7 +36,24 @@ import ko from 'ko'
                 var backingFieldName = "_" + propertyName;
 
                 if (!_this[backingFieldName]) {
-                    var koProperty = new ko.observable(_this.getEntity()[propertyName]);
+                    var value = _this.getEntity()[propertyName];
+
+                    var deepConvert = function(value){
+                        if (Array.isArray(value)){
+                            return value.map(function(it){
+                                if (it instanceof $data.Entity){
+                                    return it.asKoObservable();
+                                }
+                                return it;
+                            });
+                        }else if (value instanceof $data.Entity){
+                            return value.asKoObservable();
+                        }
+                        return value;
+                    };
+                    value = deepConvert(value);
+
+                    var koProperty = typeof value != "undefined" ? new (memberDefinition.type)(value) : new ko.observable(value);
 
                     koProperty.subscribe(function (val) {
                         _this.getEntity()[propertyName] = val;
@@ -56,7 +73,7 @@ import ko from 'ko'
         for (var i = 0, l = properties.length; i < l; i++) {
             var propName = properties[i].name;
             instanceDefinition[propName] = {
-                type: ko.observable
+                type: properties[i].type == Array ? ko.observableArray : ko.observable
             };
             instanceDefinition["ValidationErrors"] = {
                 type: ko.observable
@@ -74,149 +91,6 @@ import ko from 'ko'
     };
 
     if (typeof ko !== 'undefined') {
-		// custom bindings
-		var ieVersion = (function() {
-			var version = 3, div = document.createElement('div'), iElems = div.getElementsByTagName('i');
-
-			// Keep constructing conditional HTML blocks until we hit one that resolves to an empty fragment
-			while (
-				div.innerHTML = '<!--[if gt IE ' + (++version) + ']><i></i><![endif]-->',
-				iElems[0]
-			){};
-			return version > 4 ? version : undefined;
-		}());
-
-		ko.utils.ensureSelectElementIsRenderedCorrectly = function(selectElement) {
-            // Workaround for IE9 rendering bug - it doesn't reliably display all the text in dynamically-added select boxes unless you force it to re-render by updating the width.
-            // (See https://github.com/SteveSanderson/knockout/issues/312, http://stackoverflow.com/questions/5908494/select-only-shows-first-char-of-selected-option)
-            if (ieVersion >= 9) {
-                var originalWidth = selectElement.style.width;
-                selectElement.style.width = 0;
-                selectElement.style.width = originalWidth;
-            }
-        };
-
-		ko.utils.setOptionNodeSelectionState = function (optionNode, isSelected) {
-            // IE6 sometimes throws "unknown error" if you try to write to .selected directly, whereas Firefox struggles with setAttribute. Pick one based on browser.
-            if (navigator.userAgent.indexOf("MSIE 6") >= 0)
-                optionNode.setAttribute("selected", isSelected);
-            else
-                optionNode.selected = isSelected;
-        };
-
-		ko.utils.setTextContent = function(element, textContent) {
-            var value = ko.utils.unwrapObservable(textContent);
-            if ((value === null) || (value === undefined))
-                value = "";
-
-            'innerText' in element ? element.innerText = value
-                                   : element.textContent = value;
-
-            if (ieVersion >= 9) {
-                // Believe it or not, this actually fixes an IE9 rendering bug
-                // (See https://github.com/SteveSanderson/knockout/issues/209)
-                element.style.display = element.style.display;
-            }
-        };
-
-		function ensureDropdownSelectionIsConsistentWithModelValue(element, modelValue, preferModelValue) {
-			if (preferModelValue) {
-				if (modelValue !== ko.selectExtensions.readValue(element))
-					ko.selectExtensions.writeValue(element, modelValue);
-			}
-
-			// No matter which direction we're syncing in, we want the end result to be equality between dropdown value and model value.
-			// If they aren't equal, either we prefer the dropdown value, or the model value couldn't be represented, so either way,
-			// change the model value to match the dropdown.
-			if (modelValue !== ko.selectExtensions.readValue(element))
-				ko.utils.triggerEvent(element, "change");
-		};
-
-		ko.bindingHandlers['options'] = {
-			'update': function (element, valueAccessor, allBindingsAccessor) {
-				if (element.tagName.toLowerCase() !== "select")
-					throw new Error("options binding applies only to SELECT elements");
-
-				var selectWasPreviouslyEmpty = element.length == 0;
-				var previousSelectedValues = ko.utils.arrayMap(ko.utils.arrayFilter(element.childNodes, function (node) {
-					return node.tagName && (node.tagName.toLowerCase() === "option") && node.selected;
-				}), function (node) {
-					return ko.selectExtensions.readValue(node) || node.innerText || node.textContent;
-				});
-				var previousScrollTop = element.scrollTop;
-
-				var value = ko.utils.unwrapObservable(valueAccessor());
-				var selectedValue = element.value;
-
-				// Remove all existing <option>s.
-				// Need to use .remove() rather than .removeChild() for <option>s otherwise IE behaves oddly (https://github.com/SteveSanderson/knockout/issues/134)
-				while (element.length > 0) {
-					ko.cleanNode(element.options[0]);
-					element.remove(0);
-				}
-
-				if (value) {
-					var allBindings = allBindingsAccessor();
-					if (typeof value.length != "number")
-						value = [value];
-					if (allBindings['optionsCaption']) {
-						var option = document.createElement("option");
-						ko.utils.setHtml(option, allBindings['optionsCaption']);
-						ko.selectExtensions.writeValue(option, allBindings['optionsCaptionValue'] || undefined);
-						element.appendChild(option);
-					}
-					for (var i = 0, j = value.length; i < j; i++) {
-						var option = document.createElement("option");
-
-						// Apply a value to the option element
-						var optionValue = typeof allBindings['optionsValue'] == "string" ? value[i][allBindings['optionsValue']] : value[i];
-						optionValue = ko.utils.unwrapObservable(optionValue);
-						ko.selectExtensions.writeValue(option, optionValue);
-
-						// Apply some text to the option element
-						var optionsTextValue = allBindings['optionsText'];
-						var optionText;
-						if (typeof optionsTextValue == "function")
-							optionText = optionsTextValue(value[i]); // Given a function; run it against the data value
-						else if (typeof optionsTextValue == "string")
-							optionText = value[i][optionsTextValue]; // Given a string; treat it as a property name on the data value
-						else
-							optionText = optionValue;				 // Given no optionsText arg; use the data value itself
-						if ((optionText === null) || (optionText === undefined))
-							optionText = "";
-
-						ko.utils.setTextContent(option, optionText);
-
-						element.appendChild(option);
-					}
-
-					// IE6 doesn't like us to assign selection to OPTION nodes before they're added to the document.
-					// That's why we first added them without selection. Now it's time to set the selection.
-					var newOptions = element.getElementsByTagName("option");
-					var countSelectionsRetained = 0;
-					for (var i = 0, j = newOptions.length; i < j; i++) {
-						if (ko.utils.arrayIndexOf(previousSelectedValues, ko.selectExtensions.readValue(newOptions[i])) >= 0) {
-							ko.utils.setOptionNodeSelectionState(newOptions[i], true);
-							countSelectionsRetained++;
-						}
-					}
-
-					element.scrollTop = previousScrollTop;
-
-					if (selectWasPreviouslyEmpty && ('value' in allBindings)) {
-						// Ensure consistency between model value and selected option.
-						// If the dropdown is being populated for the first time here (or was otherwise previously empty),
-						// the dropdown selection state is meaningless, so we preserve the model value.
-						ensureDropdownSelectionIsConsistentWithModelValue(element, ko.utils.unwrapObservable(allBindings['value']), /* preferModelValue */ true);
-					}
-
-					// Workaround for IE9 bug
-					ko.utils.ensureSelectElementIsRenderedCorrectly(element);
-				}
-			}
-		};
-		ko.bindingHandlers['options'].optionValueDomDataKey = '__ko.optionValueDomData__';
-
         /* Observable Query*/
         function checkObservableValue(expression, context) {
             if (expression instanceof $data.Expressions.ConstantExpression && ko.isObservable(expression.value)) {
@@ -235,7 +109,6 @@ import ko from 'ko'
             return expression;
         }
 
-        //$data.Expressions.ParameterResolverVisitor.prototype.resolvedObservables = [];
         var prVisitor = $data.Expressions.ParameterResolverVisitor.prototype.VisitProperty;
         $data.Expressions.ParameterResolverVisitor.prototype.VisitProperty = function (eNode, context) {
             var expression = prVisitor.call(this, eNode, context);
@@ -390,7 +263,7 @@ import ko from 'ko'
 
         $data.Entity.prototype.asKoObservable = function () {
             var type = this.getType();
-            var observableTypeName = type.namespace + '.Observable' + type.name;
+            var observableTypeName = (type.namespace ? (type.namespace + '.') : '') + 'Observable' + type.name;
             if (!Container.isTypeRegistered(observableTypeName)) {
                 ObservableFactory(type, observableTypeName);
             }
@@ -411,14 +284,7 @@ import ko from 'ko'
                     var callBack = $data.PromiseHandlerBase.createCallbackSettings();
 
                     return this.toArray(function (results, tran) {
-                        onResult_items([]);
-                        results.forEach(function (result, idx) {
-                            if (result instanceof $data.Entity) {
-                                onResult_items.push(result.asKoObservable());
-                            } else {
-                                callBack.error('Not Implemented: Observable result has anonymous objects');
-                            }
-                        });
+                        onResult_items(results.map(function(it){ return it instanceof $data.Entity ? it.asKoObservable() : it; }));
                     }, transaction);
                 } else {
                     return queryableToArray.call(this, function (result, tran) { onResult_items(result); }, transaction);
