@@ -434,7 +434,7 @@ import kendo from 'kendo'
                     var withInlineCount = query.entityContext.storageProvider.supportedSetOperations.withInlineCount;
                     var withLength = (!withInlineCount) && query.entityContext.storageProvider.supportedSetOperations.length;
 
-                    if (withInlineCount && needsTotalCount == true) {
+                    if (needsTotalCount == true && withInlineCount) {
                         q = q.withInlineCount();
                     }
 
@@ -557,7 +557,7 @@ import kendo from 'kendo'
                     }
 
                     $data.Trace.log(promises);
-                    Promise.all(promises).then(function (items, total) {
+                    Promise.all(promises).then(function (items) {
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
                         var responseItems = items[0];
                         var result = responseItems.map(function (item) {
@@ -565,9 +565,21 @@ import kendo from 'kendo'
                             var kendoItem = item.asKendoObservable();
                             return kendoItem;
                         });
+                        var totalItemsCount = responseItems.length; // no need to total count
+                        if (needsTotalCount == true) {
+                            if (withInlineCount && responseItems.totalCount)
+                                totalItemsCount = responseItems.totalCount; // q.withInlineCount()
+                            else if (withLength && items.length == 2) {
+                                var total = items[1];
+                                if (total.length)
+                                    totalItemsCount = total.length; // allItemsQ.toArray()
+                                else
+                                    totalItemsCount = total; // allItemsQ.length()
+                            }
+                        }
                         var r = {
                             data: result,
-                            total: needsTotalCount == true ? (withInlineCount ? responseItems.totalCount : withLength ? total : total.length) : responseItems.length
+                            total: totalItemsCount
                         };
                         $data.Trace.log(r);
                         options.success(r);
