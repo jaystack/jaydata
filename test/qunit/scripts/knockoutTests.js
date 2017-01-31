@@ -1,8 +1,4 @@
-﻿/// <reference path="../Scripts/knockout-2.1.0.js" />
-/// <reference path="../NewsReaderContext.js" />
-/// <reference path="../Modules/knockout.js" />
-
-$(document).ready(function () {
+﻿$(document).ready(function () {
     if (!$data.StorageProviderLoader.isSupported('sqLite')) return;
     knockoutTests({ name: "sqLite", databaseName: 'knockoutTests', oDataServiceHost: "Services/newsReader.svc", dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables });
 });
