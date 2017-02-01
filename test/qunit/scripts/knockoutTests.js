@@ -123,26 +123,27 @@ function knockoutTests(providerConfig) {
         equal(article.CreateDate, koArticle.CreateDate(), 'dateTime property ko change equal failed');
     });
 
-    test("knockout observable entity property changing array", 12, function () {
+    test("knockout observable entity property changing array", 10, function () {
         var article = new $news.Types.Article();
         var koArticle = article.asKoObservable();
-        equal(article.Tags, koArticle.Tags(), 'array property equal failed');
+        //equal(article.Tags, koArticle.Tags(), 'array property equal failed');
         article.Tags = [new $news.Types.TagConnection({ Id: 1 })];
-        deepEqual(article.Tags, koArticle.Tags(), 'array property change equal failed');
-        equal(article.Tags[0].Id, koArticle.Tags()[0].Id, 'array property element ko change equal failed');
+        deepEqual(article.Tags, koArticle.Tags().map(function(it){ return it.getEntity(); }), 'array property change equal failed');
+        equal(article.Tags[0].Id, koArticle.Tags()[0].Id(), 'array property element ko change equal failed');
         equal(article.Tags[0].Id, 1, 'array property element ko change equal failed');
         koArticle.Tags([new $news.Types.TagConnection({ Id: 2, Title: 'hello2' })]);
-        deepEqual(article.Tags, koArticle.Tags(), 'array property ko change equal failed');
-        equal(article.Tags[0].Id, koArticle.Tags()[0].Id, 'array property element ko change equal failed');
+        deepEqual(article.Tags, koArticle.Tags().map(function(it){ return it.getEntity(); }), 'array property ko change equal failed');
+        equal(article.Tags[0].Id, koArticle.Tags()[0].Id(), 'array property element ko change equal failed');
         equal(article.Tags[0].Id, 2, 'array property element ko change equal failed');
 
         article.Tags.push(new $news.Types.TagConnection({ Id: 3, Title: 'hello3' }));
-        deepEqual(article.Tags, koArticle.Tags(), 'array property push equal failed');
+        deepEqual(article.Tags, koArticle.Tags().map(function(it){ return it.getEntity(); }), 'array property push equal failed');
         equal(article.Tags.length, koArticle.Tags().length, 'array property length equal failed');
 
-        equal(koArticle.Tags.push, undefined, "Array property is koObservalble instead of koObservableArray!")
-        koArticle.Tags().push(new $news.Types.TagConnection({ Id: 4, Title: 'hello4' }));
-        deepEqual(article.Tags, koArticle.Tags(), 'array property push equal failed');
+        //equal(koArticle.Tags.push, undefined, "Array property is koObservalble instead of koObservableArray!")
+        //koArticle.Tags().push(new $news.Types.TagConnection({ Id: 4, Title: 'hello4' }));
+        koArticle.Tags.push(new $news.Types.TagConnection({ Id: 4, Title: 'hello4' }));
+        deepEqual(article.Tags, koArticle.Tags().map(function(it){ return it.getEntity(); }), 'array property push equal failed');
         equal(article.Tags.length, koArticle.Tags().length, 'array property length equal failed');
     });
 
@@ -151,11 +152,11 @@ function knockoutTests(providerConfig) {
         var koArticle = article.asKoObservable();
         equal(article.Author, koArticle.Author(), 'type property equal failed');
         article.Author = new $news.Types.User({ Id: 1, Title: 'hello' });
-        deepEqual(article.Author, koArticle.Author(), 'type property change equal failed');
-        equal(article.Author.Id, koArticle.Author().Id, 'type property value ko change equal failed');
+        deepEqual(article.Author, koArticle.Author().getEntity(), 'type property change equal failed');
+        equal(article.Author.Id, koArticle.Author().Id(), 'type property value ko change equal failed');
         koArticle.Author(new $news.Types.User({ Id: 2, Title: 'hello2' }));
-        deepEqual(article.Author, koArticle.Author(), 'type property ko change equal failed');
-        equal(article.Author.Id, koArticle.Author().Id, 'type property value ko change equal failed');
+        deepEqual(article.Author, koArticle.Author().getEntity(), 'type property ko change equal failed');
+        equal(article.Author.Id, koArticle.Author().Id(), 'type property value ko change equal failed');
 
     });
 
