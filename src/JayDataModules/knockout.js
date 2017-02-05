@@ -18,15 +18,58 @@ import ko from 'ko'
         });
     });
 
+    var deepConvert = function(value){
+        if (Array.isArray(value)){
+            return value.map(function(it){
+                if (it instanceof $data.Entity){
+                    return it.asKoObservable();
+                }
+                return it;
+            });
+        }else if (value instanceof $data.Entity){
+            return value.asKoObservable();
+        }
+        return value;
+    };
+
+    var deepReconvert = function deepReconvert(value) {
+        if (Array.isArray(value)) return value.map(deepReconvert);
+        if (ko.isObservable(value)){
+            value = value();
+            return deepReconvert(value);
+        }
+        if (value && typeof value.getEntity == "function"){
+            value = value.getEntity();
+        }
+        return value;
+    };
+
+    var deepEqual = function deepEqual(oldValue, newValue){
+        oldValue = deepReconvert(oldValue);
+        newValue = deepReconvert(newValue);
+        if (Array.isArray(newValue)){
+            var fireChange = false;
+            for (var i = 0; i < newValue.length; i++){
+                if (oldValue[i] != newValue[i]){
+                    fireChange = true;
+                    break;
+                }
+            }
+            if (oldValue.length != newValue.length) fireChange = true;
+            if (fireChange) return false;
+        }else if (oldValue !== newValue) {
+            return false;
+        }
+        return true;
+    };
+
     function ObservableFactory(originalType, observableClassNem) {
         var instanceDefinition = {
             constructor: function () {
                 var _this = this;
 
                 _this.getEntity().propertyChanged.attach(function (sender, val) {
-                    if (_this[val.propertyName]() !== val.newValue) {
-                        _this[val.propertyName](val.newValue);
-                    }
+                    if (!deepEqual(_this[val.propertyName], val.newValue)) _this[val.propertyName](deepConvert(val.newValue));
                 });
             },
 
@@ -38,28 +81,22 @@ import ko from 'ko'
                 if (!_this[backingFieldName]) {
                     var value = _this.getEntity()[propertyName];
 
-                    var deepConvert = function(value){
-                        if (Array.isArray(value)){
-                            return value.map(function(it){
-                                if (it instanceof $data.Entity){
-                                    return it.asKoObservable();
-                                }
-                                return it;
-                            });
-                        }else if (value instanceof $data.Entity){
-                            return value.asKoObservable();
-                        }
-                        return value;
-                    };
                     value = deepConvert(value);
 
-                    var koProperty = typeof value != "undefined" ? new (memberDefinition.type)(value) : new ko.observable(value);
+                    var koProperty = new (memberDefinition.type)(value);
 
+                    var originalValue = _this[backingFieldName];
+                    koProperty.subscribe(function (oldVal) {
+                        originalValue = Array.isArray(oldVal) ? oldVal.slice() : oldVal;
+                    }, null, "beforeChange");
                     koProperty.subscribe(function (val) {
-                        _this.getEntity()[propertyName] = val;
+                        if (!deepEqual(originalValue, val)) _this[backingFieldName](deepConvert(val));
+                        _this.getEntity()[propertyName] = deepReconvert(val);
                     });
 
                     _this[backingFieldName] = koProperty;
+                }else{
+                    if (!deepEqual(_this[backingFieldName], _this.getEntity()[propertyName])) _this[backingFieldName](deepConvert(_this.getEntity()[propertyName]));
                 }
 
                 return _this[backingFieldName];
@@ -76,7 +113,7 @@ import ko from 'ko'
                 type: properties[i].type == Array ? ko.observableArray : ko.observable
             };
             instanceDefinition["ValidationErrors"] = {
-                type: ko.observable
+                type: ko.observableArray
             };
         }
 
@@ -88,6 +125,12 @@ import ko from 'ko'
             {
                 isWrappedType: function (type) { return type === originalType; }
             });
+
+        $data.Container.registerConverter(observableClassNem, originalType, function (value) {
+            return value;
+        }, function (value) {
+            return typeof value.getEntity == "function" ? value.getEntity() : value;
+        });
     };
 
     if (typeof ko !== 'undefined') {
