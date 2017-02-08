@@ -7,10 +7,20 @@ $data.SqLiteConverter = {
         '$data.Day': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
-        '$data.Decimal': $data.Container.proxyConverter,
+        '$data.Decimal': function $dataDecimal(d) {
+            if (d == null) return null;
+            d = d.replace(/^0+/, '');
+            if (d.indexOf('.') == 0)
+                d = '0' + d;
+            return d;
+        },
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
-        '$data.Int64': $data.Container.proxyConverter,
+        '$data.Int64': function $dataInt64(l) {
+            if (l == null)
+                return null;
+            return l.replace(/^0+/, '');
+        },
         "$data.Integer": $data.Container.proxyConverter,
         "$data.Int32": $data.Container.proxyConverter,
         "$data.Number": $data.Container.proxyConverter,
@@ -49,10 +59,18 @@ $data.SqLiteConverter = {
         '$data.Day': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
-        '$data.Decimal': $data.Container.proxyConverter,
+        '$data.Decimal': function $dataDecimal(d) {
+            if (d == null) return null;
+            var precisionIndex = d.indexOf('.');
+            return d.toString().padStart((29 + precisionIndex + 1), '0');
+        },
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
-        '$data.Int64': $data.Container.proxyConverter,
+        '$data.Int64': function $dataInt64(l) {
+            if (l == null)
+                return null;
+            return l.toString().padStart(19, '0');
+        },
         "$data.Integer": $data.Container.proxyConverter,
         "$data.Int32": $data.Container.proxyConverter,
         "$data.Number": $data.Container.proxyConverter,
