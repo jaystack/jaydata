@@ -7,10 +7,7 @@ $data.IndexedDBConverter = {
         '$data.SByte': $data.Container.proxyConverter,
         '$data.Decimal': function $dataDecimal(d) {
             if (d == null) return null;
-            d = d.replace(/^0+/, '');
-            if (d.indexOf('.') == 0)
-                d = '0' + d;
-            return d;
+            return d.replace(/^0+(?=\d)/, '');
         },
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
