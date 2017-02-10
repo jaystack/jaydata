@@ -83,6 +83,8 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
             case et.LambdaParameter:
                 //TODO: throw descriptive exception or return a value
                 break;
+            case et.ParameterReference:
+                if (context.inCall) return Container.createConstantExpression(expression.name, $data.String);
             default:
                 Guard.raise("Parameter '" + expression.name + "' is missing!");
                 break;
@@ -104,8 +106,10 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
     VisitCall: function (expression, context) {
         //var exp = this.Visit(expression.expression);
         var self = this;
+        context.inCall = true;
         var exp = this.Visit(expression.expression, context);
         var member = this.Visit(expression.member, context);
+        delete context.inCall;
         var args = expression.args.map(function (arg) {
             if (arg instanceof $data.Expressions.FunctionExpression && 
                (exp instanceof $data.Expressions.EntitySetExpression || exp instanceof $data.Expressions.FrameOperationExpression))
@@ -150,8 +154,9 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 //var args = expressions
                 return Container.createQueryParameterExpression(exp.name + "$" + member.value, exp.index, result, typeof result);
             case exp instanceof $data.Expressions.EntityFieldExpression:
-
             case exp instanceof $data.Expressions.EntityFieldOperationExpression:
+            case exp instanceof $data.Expressions.SimpleBinaryExpression:
+            case exp instanceof $data.Expressions.ConstantExpression:
                 var operation = this.scopeContext.resolveFieldOperation(member.value, exp, context.frameType);
                 if (!operation) {
                     Guard.raise("Unknown entity field operation: " + member.getJSON());
