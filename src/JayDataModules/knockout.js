@@ -35,7 +35,7 @@ import ko from 'ko'
     var deepReconvert = function deepReconvert(value) {
         if (Array.isArray(value)) return value.map(deepReconvert);
         if (ko.isObservable(value)){
-            value = value();
+            value = value.peek();
             return deepReconvert(value);
         }
         if (value && typeof value.getEntity == "function"){
@@ -103,7 +103,7 @@ import ko from 'ko'
             },
             storeProperty: function (memberDefinition, value) {
             },
-            equalityComparers: { type: $data.Object }
+            equalityComparers: { type: ko.observable }
         };
 
         var properties = originalType.memberDefinitions.getPublicMappedProperties();
