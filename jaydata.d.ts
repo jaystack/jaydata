@@ -58,8 +58,6 @@ declare module $data {
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
 
-        find(key: any): $data.IPromise<T>;
-
         map(projection: (it: T) => any): Queryable<any>;
 
         length(): $data.IPromise<Number>;
@@ -110,6 +108,8 @@ declare module $data {
 
         remove(item: T): void;
         remove(item: {}): void;
+
+        find(key: any): $data.IPromise<T>;
 
         saveChanges(handler?: (result: number) => void): $data.IPromise<Number>;
         saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
