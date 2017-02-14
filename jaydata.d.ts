@@ -26,6 +26,8 @@ declare module $data {
         constructor();
         constructor(initData: {});
 
+        asKendoObservable(): any;
+
         entityState: number;
         changedProperties: any[];
 
@@ -35,9 +37,28 @@ declare module $data {
         isValid: boolean;
     }
 
+    export enum EntityState {
+        Detached,
+        Unchanged,
+        Added,
+        Modified,
+        Deleted,
+    }
+
+    export enum EntityAttachMode {
+        AllChanged,
+        KeepChanges,
+        Default,
+    }
+
     export class Queryable<T extends Entity> implements Object {
+
+        asKendoDataSource(options?: Object): any;
+
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
+
+        find(key: any): $data.IPromise<T>;
 
         map(projection: (it: T) => any): Queryable<any>;
 
@@ -77,17 +98,21 @@ declare module $data {
         
         add(item: T): T;
         add(initData: {}): T;
+        addMany(items: T[]): T[];
 
         attach(item: T): void;
         attach(item: {}): void;
-        attachOrGet(item: T): T;
-        attachOrGet(item: {}): T;
+        attachOrGet(item: T, mode?: EntityAttachMode): T;
+        attachOrGet(item: {}, mode?: EntityAttachMode): T;
 
         detach(item: T): void;
         detach(item: {}): void;
 
         remove(item: T): void;
         remove(item: {}): void;
+
+        saveChanges(handler?: (result: number) => void): $data.IPromise<Number>;
+        saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
 
         elementType: T;
     }
@@ -108,6 +133,9 @@ declare module $data {
         attachOrGet(item: Entity): Entity;
         detach(item: Entity): void;
         remove(item: Entity): void;
+
+        forEachEntitySet(handler: (entitySet: $data.EntitySet<$data.Entity>) => void): void;
+        getEntitySetFromElementType(entityType: Function): $data.EntitySet<$data.Entity>;
     }
 
     export class Blob implements Object {
@@ -212,6 +240,18 @@ declare module $data {
         geometries: any[];
     }
 
+}
+
+declare module $data.storageProviders {
+    export enum DbCreationType {
+        Merge,
+        DropTableIfChanged,
+        DropTableIfChange,
+        DropAllExistingTables,
+        ErrorIfChange,
+        DropDbIfChange,
+
+    }
 }
 
 declare module Q {
