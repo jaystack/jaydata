@@ -4,8 +4,8 @@ declare module $data {
             (handler: (args: T) => void ): IPromise<any>;
             (handler: (args: T) => any): IPromise<any>;
         };
-        fail: {
-            (handler: (args: T) => void ): IPromise<any>;
+        catch: {
+            (handler: (args: T) => void): IPromise<any>;
             (handler: (args: T) => any): IPromise<any>;
         };
         valueOf(): any;
@@ -252,15 +252,6 @@ declare module $data.storageProviders {
         DropDbIfChange,
 
     }
-}
-
-declare module Q {
-    export var resolve: (p: any) => $data.IPromise<any>;
-    export var when: (p: $data.IPromise<any>, then?: () => any, fail?: () => any) => $data.IPromise<any>;
-    export var all: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
-    export var allResolved: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
-
-    export var fcall: (handler: () => any) => $data.IPromise<any>;
 }
 
 interface String {
