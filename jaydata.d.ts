@@ -4,7 +4,7 @@ declare module $data {
             (handler: (args: T) => void ): IPromise<any>;
             (handler: (args: T) => any): IPromise<any>;
         };
-        catch: {
+        fail: {
             (handler: (args: T) => void): IPromise<any>;
             (handler: (args: T) => any): IPromise<any>;
         };
