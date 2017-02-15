@@ -1,3 +1,5 @@
+/// <reference path="../kendo-ui/kendo-ui.d.ts" />
+
 declare module $data {
     interface IPromise<T> extends Object {
         then: {
@@ -5,10 +7,38 @@ declare module $data {
             (handler: (args: T) => any): IPromise<any>;
         };
         fail: {
-            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => void ): IPromise<any>;
             (handler: (args: T) => any): IPromise<any>;
         };
         valueOf(): any;
+    }
+
+    interface IPromiseArray<T> extends Array<T> {
+        then: {
+            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => any): IPromise<any>;
+        };
+        fail: {
+            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => any): IPromise<any>;
+        };
+        next(): IPromiseArray<T>;
+        prev(): IPromiseArray<T>;
+        refresh(): IPromiseArray<T>;
+    }
+
+    export enum EntityState {
+        Detached,
+        Unchanged,
+        Added,
+        Modified,
+        Deleted,
+    }
+
+    export enum EntityAttachMode {
+        AllChanged,
+        KeepChanges,
+        Default,
     }
 
     export class Base implements Object {
@@ -26,39 +56,22 @@ declare module $data {
         constructor();
         constructor(initData: {});
 
-        asKendoObservable(): any;
-
-        entityState: number;
+        entityState: EntityState;
         changedProperties: any[];
 
         propertyChanging: Event;
         propertyChanged: Event;
         propertyValidationError: Event;
         isValid: boolean;
-    }
 
-    export enum EntityState {
-        Detached,
-        Unchanged,
-        Added,
-        Modified,
-        Deleted,
-    }
-
-    export enum EntityAttachMode {
-        AllChanged,
-        KeepChanges,
-        Default,
+        asKendoObservable(): kendo.data.ObservableObject;
     }
 
     export class Queryable<T extends Entity> implements Object {
-
-        asKendoDataSource(options?: Object): any;
-
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
 
-        map(projection: (it: T) => any): Queryable<any>;
+        map(projection: (it: T) => any, thisArg?: any, mappedTo?: any): Queryable<any>;
 
         length(): $data.IPromise<Number>;
         length(handler: (result: number) => void ): $data.IPromise<Number>;
@@ -69,6 +82,10 @@ declare module $data {
         toArray(): $data.IPromise<T[]>;
         toArray(handler: (result: T[]) => void ): $data.IPromise<T[]>;
         toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): $data.IPromise<T[]>;
+
+        toLiveArray(): IPromiseArray<T>;
+        toLiveArray(handler: (result: T[]) => void): IPromiseArray<T>;
+        toLiveArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): IPromiseArray<T>;
 
         single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
         single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
@@ -83,11 +100,15 @@ declare module $data {
         first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
         first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
 
+        find(key: any): $data.IPromise<T>;
+
         include(selector: string): Queryable<T>;
 
         removeAll(): $data.IPromise<Number>;
         removeAll(handler: (count: number) => void ): $data.IPromise<Number>;
         removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+
+        asKendoDataSource(options?: kendo.data.DataSourceOptions, modelOptions?: any, storeAlias?: any): kendo.data.DataSource;
     }
 
     export class EntitySet<T extends Entity> extends Queryable<T> {
@@ -98,8 +119,10 @@ declare module $data {
         add(initData: {}): T;
         addMany(items: T[]): T[];
 
-        attach(item: T): void;
-        attach(item: {}): void;
+        attach(item: T, keepChanges?: boolean): void;
+        attach(item: {}, keepChanges?: boolean): void;
+        attach(item: T, mode?: EntityAttachMode): void;
+        attach(item: {}, mode?: EntityAttachMode): void;
         attachOrGet(item: T, mode?: EntityAttachMode): T;
         attachOrGet(item: {}, mode?: EntityAttachMode): T;
 
@@ -109,9 +132,8 @@ declare module $data {
         remove(item: T): void;
         remove(item: {}): void;
 
-        find(key: any): $data.IPromise<T>;
-
-        saveChanges(handler?: (result: number) => void): $data.IPromise<Number>;
+        saveChanges(): $data.IPromise<Number>;
+        saveChanges(handler: (result: number) => void): $data.IPromise<Number>;
         saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
 
         elementType: T;
@@ -144,6 +166,7 @@ declare module $data {
     export class Guid implements Object {
         constructor(value: string);
         value: string;
+        static NewGuid(): Guid;
     }
 
 
@@ -239,7 +262,6 @@ declare module $data {
         constructor(geometries: any[]);
         geometries: any[];
     }
-
 }
 
 declare module $data.storageProviders {
