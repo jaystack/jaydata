@@ -2036,6 +2036,18 @@ $data.Class.define('$data.EntityContext', null, null,
         var entitySet = this.getEntitySetFromElementType(entity.getType());
         return entitySet.attachOrGet(entity, mode);
     },
+    detach: function (entity) {
+        /// <summary>
+        ///     Detaches an entity from its matching entity set.
+        /// </summary>
+        /// <param name="entity" type="$data.Entity" />
+
+        if (entity instanceof $data.EntityWrapper) {
+            entity = entity.getEntity();
+        }
+        var entitySet = this.getEntitySetFromElementType(entity.getType());
+        return entitySet.detach(entity);
+    },
 
     addMany: function (entities) {
         /// <summary>
