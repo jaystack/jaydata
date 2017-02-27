@@ -209,6 +209,8 @@ import kendo from 'kendo'
                     //kendo.data.Model.fn.init.call(this, feed);
                     $data.kendo.BaseModelType.fn.init.call(this, feed);
 
+                    jayInstance.uid = this.uid;
+
                     jayInstance.propertyChanged.attach(function (obj, propinfo) {
                         var jay = this;
                         var newValue = propinfo.newValue;

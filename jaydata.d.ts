@@ -37,6 +37,7 @@ declare module $data {
         resetChanges: () => void;
         refresh(): () => Promise<void>;
         save(): () => Promise<void>;
+        uid: string;
     }
 
     export enum EntityState {
