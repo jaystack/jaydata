@@ -739,7 +739,12 @@ $data.Class.define('$data.Queryable', null, null,
                         predicate += "it." + param.name + " == " + ((typeof param.value) == 'string' ? ("'" + param.value + "'") : param.value);
                     }
 
-                    this.single(predicate, params, cbWrapper, transaction);
+                    this.filter(predicate, params).toArray({
+                        success: function(result){
+                            cbWrapper.success(result[0]);
+                        },
+                        error: cbWrapper.error
+                    }, transaction);
                 }
             }
         } catch (e) {
