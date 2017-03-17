@@ -563,8 +563,7 @@ import kendo from 'kendo'
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
                         var responseItems = items[0];
                         var result = responseItems.map(function (item) {
-                            var d = item instanceof $data.Entity ? item.initData : item;
-                            var kendoItem = item.asKendoObservable();
+			    var kendoItem = (item instanceof $data.Entity ? item : new query.expression.elementType(item)).asKendoObservable();
                             return kendoItem;
                         });
                         var totalItemsCount = responseItems.length; // no need to total count
