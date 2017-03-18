@@ -154,7 +154,7 @@ declare module $data {
         remove(item: Entity): void;
         trackChanges: boolean;
         attach(item: Entity, mode?: EntityAttachMode): void;
-        batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<$data.Entity> | any>>;
+        batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<$data.Entity>>>;
     }
 
     export class Blob implements Object {
