@@ -37,7 +37,7 @@ declare module $data {
         resetChanges: () => void;
         refresh(): () => Promise<void>;
         save(): () => Promise<void>;
-        uid: string;
+        uid?: string;
     }
 
     export enum EntityState {
@@ -154,7 +154,7 @@ declare module $data {
         remove(item: Entity): void;
         trackChanges: boolean;
         attach(item: Entity, mode?: EntityAttachMode): void;
-        batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<$data.Entity>>>;
+        batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<any>>>;
     }
 
     export class Blob implements Object {
