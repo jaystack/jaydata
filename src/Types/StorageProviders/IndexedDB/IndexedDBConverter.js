@@ -14,7 +14,7 @@ $data.IndexedDBConverter = {
         '$data.Int64': function $dataInt64(l) {
             if (l == null)
                 return null;
-            return l.replace(/^0+/, '');
+            return l.replace(/^0+(?=\d)/, '');
         },
         '$data.Integer': $data.Container.proxyConverter,
         '$data.Int32': $data.Container.proxyConverter,
