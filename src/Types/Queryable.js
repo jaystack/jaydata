@@ -742,6 +742,7 @@ $data.Class.define('$data.Queryable', null, null,
 
                     this.filter(predicate, params).toArray({
                         success: function(result){
+                            if (result.length != 1) return cbWrapper.error(new Exception('result count failed'));
                             cbWrapper.success(result[0]);
                         },
                         error: cbWrapper.error
