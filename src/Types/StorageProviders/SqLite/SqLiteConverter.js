@@ -7,17 +7,10 @@ $data.SqLiteConverter = {
         '$data.Day': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
-        '$data.Decimal': function $dataDecimal(d) {
-            if (d == null) return null;
-            return d.replace(/^0+(?=\d)/, '');
-        },
+        '$data.Decimal': $data.Container.proxyConverter,
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
-        '$data.Int64': function $dataInt64(l) {
-            if (l == null)
-                return null;
-            return l.replace(/^0+(?=\d)/, '');
-        },
+        '$data.Int64': $data.Container.proxyConverter,
         "$data.Integer": $data.Container.proxyConverter,
         "$data.Int32": $data.Container.proxyConverter,
         "$data.Number": $data.Container.proxyConverter,
@@ -56,21 +49,10 @@ $data.SqLiteConverter = {
         '$data.Day': $data.Container.proxyConverter,
         '$data.Byte': $data.Container.proxyConverter,
         '$data.SByte': $data.Container.proxyConverter,
-        '$data.Decimal': function $dataDecimal(d) {
-            if (d == null) return null;
-            var dSecondPart = d.split('.')[1];
-            var padValue = 29;
-            if (dSecondPart != null && dSecondPart.length != null)
-                padValue = padValue + dSecondPart.length + 1;
-            return d.padStart(padValue, '0');
-        },
+        '$data.Decimal': $data.Container.proxyConverter,
         '$data.Float': $data.Container.proxyConverter,
         '$data.Int16': $data.Container.proxyConverter,
-        '$data.Int64': function $dataInt64(l) {
-            if (l == null)
-                return null;
-            return l.padStart(19, '0');
-        },
+        '$data.Int64': $data.Container.proxyConverter,
         "$data.Integer": $data.Container.proxyConverter,
         "$data.Int32": $data.Container.proxyConverter,
         "$data.Number": $data.Container.proxyConverter,
