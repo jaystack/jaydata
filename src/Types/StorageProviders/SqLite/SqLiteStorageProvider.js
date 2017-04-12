@@ -532,7 +532,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
         return { query: insertSqlString, param: fieldParam };
     },
     save_reloadSavedEntity: function (rowid, tableName) {
-        return { query: "SELECT * FROM " + tableName + " WHERE rowid=?", param: [rowid] };
+        return { query: "SELECT * FROM [" + tableName + "] WHERE rowid=?", param: [rowid] };
     },
     createSqlFromStorageModel: function (memberDef) {
         ///<param name="memberDef" type="$data.StorageModel">StorageModel object wich contains physical entity definition</param>
