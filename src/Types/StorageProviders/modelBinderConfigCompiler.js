@@ -183,6 +183,9 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
     _addPropertyToModelBinderConfig: function (elementType, builder) {
         var storageModel = this._query.context._storageModel.getStorageModel(elementType);
         if (elementType.memberDefinitions) {
+            if (builder.stackContainsType(elementType)) {
+                return;
+            }
             var memberDefinitions = this._inheritanceMemberDefinitions(elementType, elementType.memberDefinitions.getPublicMappedProperties());
             memberDefinitions.forEach(function (prop) {
                 if ((!storageModel) || (storageModel && !storageModel.Associations[prop.name] && !storageModel.ComplexTypes[prop.name])) {

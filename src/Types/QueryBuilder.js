@@ -46,7 +46,10 @@ $C('$data.queryBuilder', null, null, {
             this.modelBinderConfig['$keys'] = new Array();
         }
         this.modelBinderConfig['$keys'].push(name);
-    }
+    },
+    stackContainsType: function(elementType) {
+        return this._binderConfigPropertyStack.map(p => p.$type).indexOf(elementType) >= 0;
+    },
 });
 
 export default $data
