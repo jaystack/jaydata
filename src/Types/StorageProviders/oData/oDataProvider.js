@@ -200,7 +200,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                         callBack.success(that.context);
                     }];
 
-                    this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
+                    this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials, this.providerConfiguration.accessToken);
                     //if (this.providerConfiguration.user) {
                     //    requestData[0].user = this.providerConfiguration.user;
                     //    requestData[0].password = this.providerConfiguration.password || "";
@@ -348,7 +348,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             requestData[0].useJsonLight = this.providerConfiguration.useJsonLight;
         }
 
-        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials);
+        this.appendBasicAuth(requestData[0], this.providerConfiguration.user, this.providerConfiguration.password, this.providerConfiguration.withCredentials, this.providerConfiguration.accessToken);
         //if (this.providerConfiguration.user) {
         //    requestData[0].user = this.providerConfiguration.user;
         //    requestData[0].password = this.providerConfiguration.password || "";
@@ -1266,13 +1266,16 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
         return new Exception(message, error.message, data || error);
     },
-    appendBasicAuth: function (request, user, password, withCredentials) {
+    appendBasicAuth: function (request, user, password, withCredentials, accessToken) {
         request.headers = request.headers || {};
         if (!request.headers.Authorization && user && password) {
             request.headers.Authorization = "Basic " + this.__encodeBase64(user + ":" + password);
         }
         if (withCredentials){
             request.withCredentials = withCredentials;
+        }
+        if (!request.headers.Authorization && accessToken) {
+            request.headers.Authorization = "Bearer " + accessToken;
         }
     },
     __encodeBase64: function (val) {

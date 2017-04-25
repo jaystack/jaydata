@@ -105,7 +105,12 @@ $data.oDataConverter = {
                 var typeName = Container.resolveName(def.elementType);
                 var values = [];
                 for(var i = 0; i < o.length; i++){
-                    values.push($data.oDataConverter['toDb'][typeName](o[i]));
+                    try{
+                        values.push($data.oDataConverter['toDb'][typeName](o[i]));
+                    }
+                    catch(e) {
+                        values.push($data.oDataConverter['toDb']['$data.Object'](o[i]));
+                    }
                 }
                 
                 return values;

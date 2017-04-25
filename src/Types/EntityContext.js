@@ -1425,6 +1425,9 @@ $data.Class.define('$data.EntityContext', null, null,
                             case $data.Boolean:
                                 entity.data[memDef.name] = Container.getDefault(memDef.dataType);
                                 break;
+                            case $data.Guid:
+                                entity.data[memDef.name] = Container.getDefault(memDef.dataType);
+                                break;
                             default:
                                 break;
                         }

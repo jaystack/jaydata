@@ -270,6 +270,8 @@ export function ContainerCtor(parentContainer) {
           return null;
         case $data.Boolean:
           return false;
+          case $data.Guid:
+          return $data.Guid.NewGuid();
         default:
           return null;
       }
