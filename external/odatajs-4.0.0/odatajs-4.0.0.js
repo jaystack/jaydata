@@ -1520,6 +1520,7 @@ function buildODataRequest(uri, options) {
         requestUri: uri,
         user: options.user,
         password: options.password,
+        accessToken:options.accessToken,
         enableJsonpCallback: options.enableJsonpCallback,
         callbackParameterName: options.callbackParameterName,
         formatQueryString: options.formatQueryString
@@ -2820,7 +2821,10 @@ function formatJsonRequestPayload(data) {
 
         return newArrayData;
     }
-
+    for (var property in data) {
+        if (property == 'initData')
+            return data[property];
+    }
     var newdata = {};
     for (var property in data) {
         if (isJsonSerializableProperty(property)) {

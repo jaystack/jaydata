@@ -30,7 +30,7 @@ var strategy = {
 
             }, done];
 
-            that.appendBasicAuth(requestData[0], that.providerConfiguration.user, that.providerConfiguration.password, that.providerConfiguration.withCredentials);
+            that.appendBasicAuth(requestData[0], that.providerConfiguration.user, that.providerConfiguration.password, that.providerConfiguration.withCredentials, that.providerConfiguration.accessToken);
             that.context.prepareRequest.call(that, requestData);
             that.oData.request.apply(that, requestData);
         }
