@@ -122,7 +122,7 @@ $data.Class.define('$data.ServiceOperation', null, null, {}, {
 
                 //Get callback function
                 var clb = arguments[arguments.length - 1];
-                if (!(typeof clb === 'function' || (typeof clb === 'object' /*&& clb.constructor === $data.Object*/ && (typeof clb.success === 'function' || typeof clb.error === 'function')))) {
+                if (typeof clb !== 'function') {
                     clb = undefined;
                 }
 
