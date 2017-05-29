@@ -529,6 +529,11 @@ import kendo from 'kendo'
 
                         if (filter != null && filter != "") q = q.filter(filter, thisArg);
                     }
+			
+                    if (options.baseFilter != null) {
+                        q = q.filter(options.baseFilter);
+                    }
+			
                     var allItemsQ = q;
 
                     if (options.data.sort) {
