@@ -530,8 +530,11 @@ import kendo from 'kendo'
                         if (filter != null && filter != "") q = q.filter(filter, thisArg);
                     }
 			
-                    if (options.baseFilter != null) {
-                        q = q.filter(options.baseFilter);
+                    if (options.lookupBaseFilter != null) {
+                        q = q.filter(options.lookupBaseFilter);
+                    }
+                    if (options.cascadeBaseFilter != null) {
+                        q = q.filter(options.cascadeBaseFilter);
                     }
 			
                     var allItemsQ = q;
@@ -749,7 +752,8 @@ import kendo from 'kendo'
         ds.schema = {
             model: model,
             data: "data",
-            total: "total"
+            total: "total",
+            jayType: self.defaultType
         };
         return new jayDataSource(ds);
     });

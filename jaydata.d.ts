@@ -119,6 +119,9 @@ declare module $data {
         add(item: T): T;
         add(initData: {}): T;
 
+        addMany(item: T[]): T[];
+        addMany(initData: {}[]): T[];
+
         createNew(item: T): T;
         createNew(initData: {}): T;
 
