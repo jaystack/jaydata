@@ -274,12 +274,7 @@ declare module Q {
 }
 
 interface String {
-    contains(s: string): boolean;
-    startsWith(s: string): boolean;
-    endsWith(s: string): boolean;
     strLength(): number;
-    indexOf(s: string): number;
-    concat(s: string): string;
 }
 
 interface Date {

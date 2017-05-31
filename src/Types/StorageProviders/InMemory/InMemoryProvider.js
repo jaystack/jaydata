@@ -301,6 +301,13 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
                 parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
             },
 
+            includes: {
+                mapTo: "$data.StringFunctions.contains(",
+                rightValue: ")",
+                dataType: "boolean",
+                parameters: [{ name: "@expression", dataType: "string" }, { name: "strFragment", dataType: "string" }]
+            },
+
             startsWith: {
                 mapTo: "$data.StringFunctions.startsWith(",
                 rightValue: ")",

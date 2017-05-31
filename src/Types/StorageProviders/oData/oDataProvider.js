@@ -887,6 +887,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 parameters: [{ name: "@expression" }, { name: "substring", dataType: "string" }]
             },
 
+            includes: {
+                mapTo: "contains",
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                parameters: [{ name: "@expression" }, { name: "substring", dataType: "string" }]
+            },
+
             startsWith: {
                 mapTo: "startswith",
                 dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
