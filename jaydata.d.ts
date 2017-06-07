@@ -99,10 +99,6 @@ declare module $data {
 
         count(): $data.IPromise<number>;
 
-        asKendoColumns(columns?: any): kendo.ui.GridColumn[];
-        asKendoModel(options?: any): kendo.data.Model;
-        asKendoDataSource(ds?: kendo.data.DataSourceOptions, modelOptions?: any): kendo.data.DataSource;
-
         include(selector: (it: T) => any): Queryable<T>;
 
         some(): boolean;
