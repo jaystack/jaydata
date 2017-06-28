@@ -55,10 +55,12 @@ declare module $data {
     }
 
     export class Queryable<T> implements Object {
+        filter(string): Queryable<T>;
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
         filter(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Queryable<T>;
 
+        map(string): Queryable<any>;
         map(projection: (it: T) => any): Queryable<any>;
 
         length(): $data.IPromise<Number>;
