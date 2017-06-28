@@ -530,11 +530,11 @@ import kendo from 'kendo'
                         if (filter != null && filter != "") q = q.filter(filter, thisArg);
                     }
 			
-                    if (options.lookupBaseFilter != null) {
-                        q = q.filter(options.lookupBaseFilter);
+                    if (options.data.lookupBaseFilter != null) {
+                        q = q.filter(options.data.lookupBaseFilter);
                     }
-                    if (options.cascadeBaseFilter != null) {
-                        q = q.filter(options.cascadeBaseFilter);
+                    if (options.data.cascadeBaseFilter != null) {
+                        q = q.filter(options.data.cascadeBaseFilter);
                     }
 			
                     var allItemsQ = q;
@@ -592,9 +592,9 @@ import kendo from 'kendo'
                         };
                         $data.Trace.log(r);
                         options.success(r);
-                    }).catch(function () {
-                        console.log("error in create");
-                        options.error({}, arguments);
+                    }).catch(function (e) {
+                        console.error(e);
+                        options.error(e.name || "Query failed", e.message, e);
                     });
                 });
             },
@@ -613,9 +613,9 @@ import kendo from 'kendo'
                                 data.push(modelItem.initData);
                             });
                             options.success(/*{ data: data }*/);
-                        }).catch(function () {
-                            console.log("error in create");
-                            options.error({}, arguments);
+                        }).catch(function (e) {
+                            console.error(e);
+                            options.error(e.name || "Create failed", e.message, e);
                             ctx.stateManager.reset();
                         });
                     }
@@ -626,9 +626,9 @@ import kendo from 'kendo'
 						.then(function () {
 						    options.success(/*{ data: model[0].innerInstance().initData }*/);
 						})
-						.catch(function () {
-						    console.log("error in create");
-						    options.error({}, arguments);
+						.catch(function (e) {
+                            console.error(e);
+                            options.error(e.name || "Create failed", e.message, e);
 						});
                     }
                 });
@@ -645,18 +645,18 @@ import kendo from 'kendo'
                         });
                         ctx.saveChanges().then(function () {
                             options.success();
-                        }).catch(function () {
+                        }).catch(function (e) {
                             ctx.stateManager.reset();
-                            //alert("error in batch update");
-                            options.error({}, arguments);
+                            console.error(e);
+                            options.error(e.name || "Update failed", e.message, e);
                         });
                     }
                     else {
                         model[0].innerInstance().save(undefined, undefined, $data.kendo.attachMode).then(function (item) {
                             options.success();
-                        }).catch(function () {
-                            //alert("error in update")
-                            options.error({}, arguments);
+                        }).catch(function (e) {
+                            console.error(e);
+                            options.error(e.name || "Update failed", e.message, e);
                         });
                     }
                 });
@@ -671,19 +671,19 @@ import kendo from 'kendo'
                         });
                         ctx.saveChanges().then(function () {
                             options.success({ data: options.data });
-                        }).catch(function () {
+                        }).catch(function (e) {
                             ctx.stateManager.reset();
-                            //alert("error in save:" + arguments[0]);
-                            options.error({}, "error", options.data);
+                            console.error(e);
+                            options.error(e.name || "Delete failed", e.message, e);
                         });
                     }
                     else {
                         model[0].innerInstance().remove().then(function () {
                             options.success({ data: options.data });
-                        }).catch(function () {
+                        }).catch(function (e) {
                             ctx.stateManager.reset();
-                            //alert("error in save:" + arguments[0]);
-                            options.error({}, "error", options.data);
+                            console.error(e);
+                            options.error(e.name || "Delete failed", e.message, e);
                         });
                     }
                 });
