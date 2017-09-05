@@ -1118,6 +1118,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 includeCompiler: '$data.storageProviders.oData.oDataOrderCompiler'
             },
             first: {},
+            getValue: {},
             include: {},
             batchDelete: {},
             withInlineCount: {

@@ -687,6 +687,32 @@ $data.Class.define('$data.Queryable', null, null,
         return pHandler.getPromise();
     },
 
+    getValue: function (filterPredicate, thisArg, onResult, transaction) {
+		///	<summary> <see first /> </summary>
+        this._checkOperation('first');
+        var q = this;
+        if (filterPredicate) {
+            q = this.filter(filterPredicate, thisArg);
+        }
+        q = q.take(1);
+
+        var pHandler = new $data.PromiseHandler();
+        var cbWrapper = pHandler.createCallback(onResult);
+
+        var firstExpression = Container.createFirstExpression(q.expression);
+        var preparator = Container.createQueryExpressionCreator(q.entityContext);
+        try {
+            var expression = preparator.Visit(firstExpression);
+            q.entityContext.log({ event: "EntityExpression", data: expression });
+
+            q.entityContext.executeQuery(Container.createQueryable(q, expression), cbWrapper, transaction);
+        } catch (e) {
+            cbWrapper.error(e);
+        }
+
+        return pHandler.getPromise();
+    },
+
     find: function (keyValue, onResult, transaction) {
 
         var pHandler = new $data.PromiseHandler();

@@ -90,6 +90,8 @@ declare module $data {
         first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): $data.IPromise<T>;
         first(): $data.IPromise<T>;
 
+        getValue(): $data.IPromise<T>;
+
         include(selector: string): Queryable<T>;
 
         removeAll(): $data.IPromise<Number>;
