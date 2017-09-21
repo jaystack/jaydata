@@ -353,7 +353,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
                 .then(function (entitySet) {
                     try {
                         var singleParam = self._findByIdQueryable(entitySet, key);
-                        return entitySet.single(singleParam.predicate)
+                        return entitySet.single(singleParam.predicate, singleParam.paramsObject)
                             .then(function (item) { return self._setStoreAlias(item, entitySet.entityContext.storeToken); });
                     } catch (e) {
                         var d = new $data.PromiseHandler();
@@ -505,25 +505,25 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
     _findByIdQueryable: function (set, keys) {
         var keysProps = set.defaultType.memberDefinitions.getKeyProperties();
-        if (keysProps.length > 1 && keys && 'object' === typeof keys) {
-            var predicate = "";
-            for (var i = 0; i < keysProps.length; i++) {
-                if (i > 0) predicate += " && ";
-
-                var key = keysProps[i];
-                predicate += "it." + key.name + " == " + ((typeof keys[key.name]) == 'string' ? ("'" + keys[key.name] + "'") : keys[key.name]);
-            }
-
-            return {
-                predicate: predicate
-            };
-        } else if (keysProps.length === 1) {
-            return {
-                predicate: "it." + keysProps[0].name + " == " + ((typeof keys) == 'string' ? ("'" + keys + "'") : keys)
-            };
-        } else {
-            throw 'invalid keys';
+        if (!Object.isObject(keys)) {
+            var keysObject = {};
+            keysObject[keysProps[0].name] = keys;
+            keys = keysObject;
         }
+        var predicate = "function (it, ", paramsObject = {};
+        predicate += keysProps.map(function (k, i) {
+            paramsObject[k.name + "Param"] = keys[k.name];
+            return k.name + "Param";
+        }).join(" , ");
+        predicate += ") { return ";
+        predicate += keysProps.map(function (k) {
+            return "it." + k.name + " == " + k.name + "Param";
+        }).join(" && ");
+        predicate += "; }";
+        return {
+            predicate: predicate,
+            paramsObject: paramsObject
+        }; 
     },
     _getKeyObjectFromEntity: function (obj, entityType) {
         var key;
@@ -534,7 +534,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
             key = {};
 
             for (var i = 0; i < keyDefs.length; i++) {
-                key[keyDefs[0].name] = obj ? obj[keyDefs[0].name] : obj;
+                key[keyDefs[i].name] = obj ? obj[keyDefs[i].name] : obj;
             }
         }
 

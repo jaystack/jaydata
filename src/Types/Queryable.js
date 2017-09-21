@@ -757,19 +757,9 @@ $data.Class.define('$data.Queryable', null, null,
                     }
 
                 } else {
-                    var predicate = '';
-                    var params = {}
-                    for (var i = 0; i < parameters.length; i++) {
-                        var param = parameters[i];
-                        if (i > 0) predicate += ' && ';
-                        predicate += "it." + param.name + " == " + ((typeof param.value) == 'string' ? ("'" + param.value + "'") : param.value);
-                    }
-
-                    this.filter(predicate, params).toArray({
-                        success: function(result){
-                            if (result.length != 1) return cbWrapper.error(new Exception('result count failed'));
-                            cbWrapper.success(result[0]);
-                        },
+                    var findParam = $data.ItemStore._findByIdQueryable(this, keyValue);
+                    return this.single(findParam.predicate, findParam.paramsObject, {
+                        success: cbWrapper.success,
                         error: cbWrapper.error
                     }, transaction);
                 }
