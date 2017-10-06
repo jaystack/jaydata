@@ -1606,6 +1606,7 @@ $data.Class.define('$data.EntityContext', null, null,
         return pHandlerResult;
     },
     discoverDependentItemEntityState: function (data) {
+        if (data.entityState && data.entityState !== $data.EntityState.Unchanged) return;
         if (data.storeToken === this.storeToken) {
             data.entityState = (data.changedProperties && data.changedProperties.length) ? $data.EntityState.Modified : $data.EntityState.Unchanged;
         } else if (data.storeToken && this.storeToken && data.storeToken.typeName === this.storeToken.typeName && JSON.stringify(data.storeToken.args) === JSON.stringify(this.storeToken.args)) {
