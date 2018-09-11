@@ -1,15 +1,4 @@
 declare module $data {
-    interface IPromise<T> extends Object {
-        then: {
-            (handler: (args: T) => void ): IPromise<any>;
-            (handler: (args: T) => any): IPromise<any>;
-        };
-        fail: {
-            (handler: (args: T) => void ): IPromise<any>;
-            (handler: (args: T) => any): IPromise<any>;
-        };
-        valueOf(): any;
-    }
 
     export class Base implements Object {
         constructor(...params: any[]);
@@ -64,18 +53,18 @@ declare module $data {
         map(projection: string): Queryable<any>;
         map(projection: (it: T) => any): Queryable<any>;
 
-        length(): $data.IPromise<Number>;
-        length(handler: (result: number) => void ): $data.IPromise<Number>;
-        length(handler: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+        length(): Promise<Number>;
+        length(handler: (result: number) => void ): Promise<Number>;
+        length(handler: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
-        forEach(handler: (it: any) => void ): $data.IPromise<T>;
+        forEach(handler: (it: any) => void ): Promise<T>;
 
-        toArray(): $data.IPromise<T[]>;
-        toArray(handler: (result: T[]) => void ): $data.IPromise<T[]>;
-        toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): $data.IPromise<T[]>;
+        toArray(): Promise<T[]>;
+        toArray(handler: (result: T[]) => void ): Promise<T[]>;
+        toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): Promise<T[]>;
 
-        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
-        single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
+        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): Promise<T>;
+        single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): Promise<T>;
 
         take(amout: number): Queryable<T>;
         skip(amout: number): Queryable<T>;
@@ -85,24 +74,24 @@ declare module $data {
         orderBy(predicate: (it: T) => any): Queryable<T>;
         orderByDescending(predicate: (it: any) => any): Queryable<T>;
 
-        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
-        first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
-        first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): $data.IPromise<T>;
-        first(): $data.IPromise<T>;
+        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): Promise<T>;
+        first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): Promise<T>;
+        first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Promise<T>;
+        first(): Promise<T>;
 
-        getValue(): $data.IPromise<T>;
+        getValue(): Promise<T>;
 
         include(selector: string): Queryable<T>;
 
-        removeAll(): $data.IPromise<Number>;
-        removeAll(handler: (count: number) => void ): $data.IPromise<Number>;
-        removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+        removeAll(): Promise<Number>;
+        removeAll(handler: (count: number) => void ): Promise<Number>;
+        removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
-        find(...ids: Array<any>): $data.IPromise<T>;
+        find(...ids: Array<any>): Promise<T>;
 
-        single(): $data.IPromise<T>;
+        single(): Promise<T>;
 
-        count(): $data.IPromise<number>;
+        count(): Promise<number>;
 
         include(selector: (it: T) => any): Queryable<T>;
 
@@ -145,11 +134,11 @@ declare module $data {
         constructor(config: { name: string; oDataServiceHost: string; MaxDataServiceVersion: string; });
         constructor(config: { name: string; oDataServiceHost?: string; databaseName?: string; localStoreName?: string; user?: string; password?: string; });
 
-        onReady(): $data.IPromise<EntityContext>;
-        onReady(handler: (currentContext: EntityContext) => void ): $data.IPromise<EntityContext>;
-        saveChanges(): $data.IPromise<Number>;
-        saveChanges(handler: (result: number) => void ): $data.IPromise<Number>;
-        saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+        onReady(): Promise<EntityContext>;
+        onReady(handler: (currentContext: EntityContext) => void ): Promise<EntityContext>;
+        saveChanges(): Promise<Number>;
+        saveChanges(handler: (result: number) => void ): Promise<Number>;
+        saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
         add(item: Entity): Entity;
         attach(item: Entity): void;
@@ -266,12 +255,12 @@ declare module $data {
 }
 
 declare module Q {
-    export var resolve: (p: any) => $data.IPromise<any>;
-    export var when: (p: $data.IPromise<any>, then?: () => any, fail?: () => any) => $data.IPromise<any>;
-    export var all: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
-    export var allResolved: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
+    export var resolve: (p: any) => Promise<any>;
+    export var when: (p: Promise<any>, then?: () => any, fail?: () => any) => Promise<any>;
+    export var all: (p: Promise<any>[]) => Promise<any>;
+    export var allResolved: (p: Promise<any>[]) => Promise<any>;
 
-    export var fcall: (handler: () => any) => $data.IPromise<any>;
+    export var fcall: (handler: () => any) => Promise<any>;
 }
 
 interface String {
