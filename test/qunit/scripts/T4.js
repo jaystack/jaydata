@@ -975,4 +975,114 @@ function BatchExecuteQueryTests(providerConfig, msg) {
             });
         });
     });
+
+    if (providerConfig.name === "oData") {
+        test('full entity change on any property change (sendAllPropertiesOnChange)', 4, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                var article = context.Articles.add({ Title: "Article1", Lead: "Lead1", Body: "Body1" });
+                context.saveChanges(function () {
+
+                    context.Articles.filter(function (a) { return a.Id == this.Id}, { Id: article.Id }).toArray()
+                        .then(function (items) {
+                            $data.defaults.OData.sendAllPropertiesOnChange = true;
+
+                            equal(items.length, 1, 'length result');
+                            var a = items[0];
+                            notEqual(a, undefined, 'article exists');
+                            equal(a.Id, article.Id, 'Id equal');
+
+                            context.prepareRequest = function (request) {
+                                ok(Object.keys(request[0].data).length > 2, "more properties then Id, Body")
+                            };
+
+                            context.Articles.attach(a);
+                            a.Body = "changed";
+
+                            return context.saveChanges()
+                        })
+                        .fail(function (err) {
+                            ok(false, err);
+                        })
+                        .always(function () {
+                            $data.defaults.OData.sendAllPropertiesOnChange = false;
+                            _finishCb(context);
+                        });
+                });
+            });
+        });
+
+        test('full entity change on any property change (EntityAttachMode.AllChanged)', 5, function () {
+            ok(!$data.defaults.OData.sendAllPropertiesOnChange, "$data.defaults.OData.sendAllPropertiesOnChange is not true")
+
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                var article = context.Articles.add({ Title: "Article1", Lead: "Lead1", Body: "Body1" });
+                context.saveChanges(function () {
+
+                    context.Articles.filter(function (a) { return a.Id == this.Id}, { Id: article.Id }).toArray()
+                        .then(function (items) {
+                            equal(items.length, 1, 'length result');
+                            var a = items[0];
+                            notEqual(a, undefined, 'article exists');
+                            equal(a.Id, article.Id, 'Id equal');
+
+                            context.prepareRequest = function (request) {
+                                ok(Object.keys(request[0].data).length > 2, "more properties then Id, Body")
+                            };
+
+                            context.Articles.attach(a, $data.EntityAttachMode.AllChanged);
+                            a.Body = "changed";
+
+                            return context.saveChanges()
+                        })
+                        .fail(function (err) {
+                            ok(false, err);
+                        })
+                        .always(function () {
+                            _finishCb(context);
+                        });
+                });
+            });
+        });
+
+        test('full entity change on any property change with not changed entity', 4, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                var article1 = context.Articles.add({ Title: "changeTest", Lead: "Lead1", Body: "Body1" });
+                var article2 = context.Articles.add({ Title: "changeTest", Lead: "Lead1", Body: "Body1" });
+                context.saveChanges(function () {
+
+                    context.Articles.filter(function (a) { return a.Title == "changeTest"}).toArray()
+                        .then(function (items) {
+                            $data.defaults.OData.sendAllPropertiesOnChange = true;
+
+                            equal(items.length, 2, 'length result');
+                            var a1 = items[0];
+                            var a2 = items[1];
+                            notEqual(a1, undefined, 'article1 exists');
+                            notEqual(a2, undefined, 'article2 exists');
+
+                            context.prepareRequest = function (request) {
+                                console.log(request)
+                                ok(Object.keys(request[0].data).length > 2, "more properties then Id, Body")
+                            };
+
+                            context.Articles.attach(a1);
+                            context.Articles.attach(a2);
+                            a1.Body = "changed";
+
+                            return context.saveChanges()
+                        })
+                        .fail(function (err) {
+                            ok(false, err);
+                        })
+                        .always(function () {
+                            $data.defaults.OData.sendAllPropertiesOnChange = false;
+                            _finishCb(context);
+                        });
+                });
+            });
+        });
+    }
 }

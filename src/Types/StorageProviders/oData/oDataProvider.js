@@ -645,6 +645,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 case item.data.entityState === $data.EntityState.Added:
                 case this._propertyIsChanged(item.data, memdef):
                     return this.propertyConversationStrategies["default"].apply(this, arguments)
+                case !this._propertyIsChanged(item.data, memdef) && checkODataMode(this, 'sendAllPropertiesOnChange'):
+                    this.propertyConversationStrategies["default"].apply(this, arguments)
+                    return false
                 default: return false;
             }
         }
