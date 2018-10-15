@@ -720,8 +720,23 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
         value:{
             "default": function (item, memdef, convertedItems, request, changedItems) {
                 var typeName = Container.resolveName(memdef.type);
+                if(memdef.elementType) {
+                    var elementType = Container.resolveType(memdef.elementType);
+                    if (elementType.isAssignableTo && elementType.isAssignableTo($data.Entity) && Array.isArray(item.physicalData[memdef.name])) {
+                        item.physicalData[memdef.name].forEach(function (complexElement) {
+                            var innerRequest = new activities.RequestBuilder(this);
+                            this.save_getInitData({ data: complexElement }, convertedItems, true, true, innerRequest);
+                            request.add(function(req){
+                                req.data = req.data || {}
+                                req.data[memdef.name] = req.data[memdef.name] || []
+                                req.data[memdef.name].push(innerRequest.build().get().data);
+                            })
+                        }, this)
+                        return true;
+                    }
+                }
                 var converter = this.fieldConverter.toDb[typeName];
-                request.add(new activities.SetProperty(memdef.name, converter ? converter(item.physicalData[memdef.name]) : item.physicalData[memdef.name]))
+                request.add(new activities.SetProperty(memdef.name, converter ? converter(item.physicalData[memdef.name], memdef) : item.physicalData[memdef.name]))
                 return true;
             },
             "withReferenceMethods": function (item, memdef, convertedItems, request, changedItems) {

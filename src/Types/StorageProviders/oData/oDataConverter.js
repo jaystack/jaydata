@@ -103,9 +103,10 @@ $data.oDataConverter = {
         '$data.Array': function(o, def){
             if(o && def && def.elementType){
                 var typeName = Container.resolveName(def.elementType);
+                var converter = $data.oDataConverter['toDb'][typeName];
                 var values = [];
                 for(var i = 0; i < o.length; i++){
-                    values.push($data.oDataConverter['toDb'][typeName](o[i]));
+                    values.push(converter ? converter(o[i]) : o[i]);
                 }
                 
                 return values;

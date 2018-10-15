@@ -5,6 +5,7 @@ function T4_CrossProviderTests() {
     //LiveArrayTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
     BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
     //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
+    ODataTests({ serviceEndpoint: 'http://localhost:9000/odata' })
 
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
@@ -1085,4 +1086,100 @@ function BatchExecuteQueryTests(providerConfig, msg) {
             });
         });
     }
+}
+
+
+function ODataTests (config) {
+    if (typeof module == 'function') module("OData tests ");
+    test('odata array of complex type serialize create', 10, function () {
+        stop();
+        $data.initService(config.serviceEndpoint, function(context) {
+            context.TestTable3.Clear().then(function () {
+                var key = $data.Guid.NewGuid().value;
+                var item = new context.TestTable3.elementType({
+                    Id: key,
+                    Locations: [
+                        { City: 'xxxCity 1', Zip: 1117, Country: 'Country 1', Address: 'Test data1' },
+                        { City: 'xxxCity 2', Zip: 1117, Country: 'Country 2', Address: 'Test data2' },
+                        { City: 'xxxCity 3', Zip: 1117, Country: 'Country 3', Address: 'Test data3' },
+                        { City: 'xxxCity 4', Zip: 1117, Country: 'Country 4', Address: 'Test data4' }
+                    ]
+                })
+                context.TestTable3.add(item);
+                notEqual(item.Locations, undefined, "Location exists")
+                equal(item.Locations.length, 4, "Location exists item")
+                equal(typeof item.Locations[0].getType, 'function', "Location item jaydata object")
+                equal(item.Locations[0].getType().name, 'Location', "Location item type")
+
+                context.saveChanges(function (count) {
+                    equal(count, 1, 'save success');
+
+                    context.TestTable3.filter(function (a) { return a.Id == this.key}, {key}).toArray()
+                        .then(function (items) {
+                            equal(items.length, 1, 'result count')
+                            var loc = items[0];
+                            notEqual(loc.Locations, undefined, "Location exists")
+                            equal(loc.Locations.length, 4, "Location exists item")
+                            equal(typeof loc.Locations[0].getType, 'function', "Location item jaydata object")
+                            equal(loc.Locations[0].getType().name, 'Location', "Location item type")
+
+                            _finishCb(context);
+                        });
+                }).fail(function (err){
+                    ok(false, 'save');
+                    console.log(err);
+                    _finishCb(context);
+                });
+            });
+        });
+    });
+
+    test('odata array of complex type serialize update', 12, function () {
+        stop();
+        $data.initService(config.serviceEndpoint, function(context) {
+            context.TestTable3.Clear().then(function () {
+                context.TestTable3
+                    .toArray()
+                    .then(function (items) {
+                        var item = items.filter(function(i) { return i.Locations && i.Locations.length > 0 })[0];
+                        
+                        notEqual(item, undefined, 'item exists');
+                        context.TestTable3.attach(item);
+
+                        var locType = item.Locations[0].getType();
+                        equal(item.Locations.length, 4, "Location exists item")
+
+                        item.Locations = item.Locations;
+                        item.Locations.push(new locType({ City: 'xxxCity 1', Zip: 1117, Country: 'Country 1', Address: 'Test data1' }));
+
+                        notEqual(item.Locations, undefined, "Location exists")
+                        equal(item.Locations.length, 5, "Location exists item")
+                        equal(typeof item.Locations[0].getType, 'function', "Location item jaydata object")
+                        equal(item.Locations[0].getType().name, 'Location', "Location item type")
+
+                        context.saveChanges(function (count) {
+                            equal(count, 1, 'save success');
+
+                            context.TestTable3.filter(function (a) { return a.Id == this.key}, {key: item.Id}).toArray()
+                                .then(function (items) {
+
+                                    equal(items.length, 1, 'result count')
+                                    var loc = items[0];
+                                    notEqual(loc.Locations, undefined, "Location exists")
+                                    equal(loc.Locations.length, 5, "Location exists item")
+                                    equal(typeof loc.Locations[0].getType, 'function', "Location item jaydata object")
+                                    equal(loc.Locations[0].getType().name, 'Location', "Location item type")
+
+
+                                    _finishCb(context);
+                                });
+                        }).fail(function (err){
+                            ok(false, 'save');
+                            console.log(err);
+                            _finishCb(context);
+                        });
+                    });
+                });
+        });
+    });
 }
