@@ -1,5 +1,8 @@
 import $data from '../TypeSystem/index.js';
-import { DynamicMetadata, odatajs } from 'jaydata-dynamic-metadata';
+import { DynamicMetadata, odatajs, Annotations, Metadata } from 'jaydata-dynamic-metadata';
+
+$data.Annotations = Annotations;
+$data.Metadata = Metadata;
 
 $data.DynamicMetadata = DynamicMetadata;
 var dynamicMetadata = new DynamicMetadata($data);
