@@ -248,7 +248,7 @@ $data.setGlobal = function(obj){
     var property = {};
     for (var name in this) {
       if (name !== 'defineBy' && name !== 'storageModel') {
-        if ((name === 'type' || name === 'dataType') && (this[name] && typeof this[name] === 'function')) {
+        if ((name === 'type' || name === 'dataType' || name === 'elementType') && (this[name] && typeof this[name] === 'function')) {
           try {
             property[name] = Container.resolveName(this[name]);
           } catch (e) {

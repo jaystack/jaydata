@@ -5,6 +5,7 @@ function T4_CrossProviderTests() {
     //LiveArrayTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
     BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV4');
     //BatchExecuteQueryTests({ name: 'oData', oDataServiceHost: "http://localhost:9000/odata", serviceUrl: 'http://localhost:9000/odata', dbCreation: $data.storageProviders.DbCreationType.DropAllExistingTables }, 'oDataV3');
+    ODataTests({ serviceEndpoint: 'http://localhost:9000/odata' })
 
     //sqLite/WebSql
     if ($data.StorageProviderLoader.isSupported('sqLite')) {
@@ -973,6 +974,212 @@ function BatchExecuteQueryTests(providerConfig, msg) {
                     _finishCb(context);
                 });
             });
+        });
+    });
+
+    if (providerConfig.name === "oData") {
+        test('full entity change on any property change (sendAllPropertiesOnChange)', 4, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                var article = context.Articles.add({ Title: "Article1", Lead: "Lead1", Body: "Body1" });
+                context.saveChanges(function () {
+
+                    context.Articles.filter(function (a) { return a.Id == this.Id}, { Id: article.Id }).toArray()
+                        .then(function (items) {
+                            $data.defaults.OData.sendAllPropertiesOnChange = true;
+
+                            equal(items.length, 1, 'length result');
+                            var a = items[0];
+                            notEqual(a, undefined, 'article exists');
+                            equal(a.Id, article.Id, 'Id equal');
+
+                            context.prepareRequest = function (request) {
+                                ok(Object.keys(request[0].data).length > 2, "more properties then Id, Body")
+                            };
+
+                            context.Articles.attach(a);
+                            a.Body = "changed";
+
+                            return context.saveChanges()
+                        })
+                        .fail(function (err) {
+                            ok(false, err);
+                        })
+                        .always(function () {
+                            $data.defaults.OData.sendAllPropertiesOnChange = false;
+                            _finishCb(context);
+                        });
+                });
+            });
+        });
+
+        test('full entity change on any property change (EntityAttachMode.AllChanged)', 5, function () {
+            ok(!$data.defaults.OData.sendAllPropertiesOnChange, "$data.defaults.OData.sendAllPropertiesOnChange is not true")
+
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                var article = context.Articles.add({ Title: "Article1", Lead: "Lead1", Body: "Body1" });
+                context.saveChanges(function () {
+
+                    context.Articles.filter(function (a) { return a.Id == this.Id}, { Id: article.Id }).toArray()
+                        .then(function (items) {
+                            equal(items.length, 1, 'length result');
+                            var a = items[0];
+                            notEqual(a, undefined, 'article exists');
+                            equal(a.Id, article.Id, 'Id equal');
+
+                            context.prepareRequest = function (request) {
+                                ok(Object.keys(request[0].data).length > 2, "more properties then Id, Body")
+                            };
+
+                            context.Articles.attach(a, $data.EntityAttachMode.AllChanged);
+                            a.Body = "changed";
+
+                            return context.saveChanges()
+                        })
+                        .fail(function (err) {
+                            ok(false, err);
+                        })
+                        .always(function () {
+                            _finishCb(context);
+                        });
+                });
+            });
+        });
+
+        test('full entity change on any property change with not changed entity', 4, function () {
+            stop();
+            (new $news.Types.NewsContext(providerConfig)).onReady(function (context) {
+                var article1 = context.Articles.add({ Title: "changeTest", Lead: "Lead1", Body: "Body1" });
+                var article2 = context.Articles.add({ Title: "changeTest", Lead: "Lead1", Body: "Body1" });
+                context.saveChanges(function () {
+
+                    context.Articles.filter(function (a) { return a.Title == "changeTest"}).toArray()
+                        .then(function (items) {
+                            $data.defaults.OData.sendAllPropertiesOnChange = true;
+
+                            equal(items.length, 2, 'length result');
+                            var a1 = items[0];
+                            var a2 = items[1];
+                            notEqual(a1, undefined, 'article1 exists');
+                            notEqual(a2, undefined, 'article2 exists');
+
+                            context.prepareRequest = function (request) {
+                                console.log(request)
+                                ok(Object.keys(request[0].data).length > 2, "more properties then Id, Body")
+                            };
+
+                            context.Articles.attach(a1);
+                            context.Articles.attach(a2);
+                            a1.Body = "changed";
+
+                            return context.saveChanges()
+                        })
+                        .fail(function (err) {
+                            ok(false, err);
+                        })
+                        .always(function () {
+                            $data.defaults.OData.sendAllPropertiesOnChange = false;
+                            _finishCb(context);
+                        });
+                });
+            });
+        });
+    }
+}
+
+
+function ODataTests (config) {
+    if (typeof module == 'function') module("OData tests ");
+    test('odata array of complex type serialize create', 10, function () {
+        stop();
+        $data.initService(config.serviceEndpoint, function(context) {
+            context.TestTable3.Clear().then(function () {
+                var key = $data.Guid.NewGuid().value;
+                var item = new context.TestTable3.elementType({
+                    Id: key,
+                    Locations: [
+                        { City: 'xxxCity 1', Zip: 1117, Country: 'Country 1', Address: 'Test data1' },
+                        { City: 'xxxCity 2', Zip: 1117, Country: 'Country 2', Address: 'Test data2' },
+                        { City: 'xxxCity 3', Zip: 1117, Country: 'Country 3', Address: 'Test data3' },
+                        { City: 'xxxCity 4', Zip: 1117, Country: 'Country 4', Address: 'Test data4' }
+                    ]
+                })
+                context.TestTable3.add(item);
+                notEqual(item.Locations, undefined, "Location exists")
+                equal(item.Locations.length, 4, "Location exists item")
+                equal(typeof item.Locations[0].getType, 'function', "Location item jaydata object")
+                equal(item.Locations[0].getType().name, 'Location', "Location item type")
+
+                context.saveChanges(function (count) {
+                    equal(count, 1, 'save success');
+
+                    context.TestTable3.filter(function (a) { return a.Id == this.key}, {key}).toArray()
+                        .then(function (items) {
+                            equal(items.length, 1, 'result count')
+                            var loc = items[0];
+                            notEqual(loc.Locations, undefined, "Location exists")
+                            equal(loc.Locations.length, 4, "Location exists item")
+                            equal(typeof loc.Locations[0].getType, 'function', "Location item jaydata object")
+                            equal(loc.Locations[0].getType().name, 'Location', "Location item type")
+
+                            _finishCb(context);
+                        });
+                }).fail(function (err){
+                    ok(false, 'save');
+                    console.log(err);
+                    _finishCb(context);
+                });
+            });
+        });
+    });
+
+    test('odata array of complex type serialize update', 12, function () {
+        stop();
+        $data.initService(config.serviceEndpoint, function(context) {
+            context.TestTable3.Clear().then(function () {
+                context.TestTable3
+                    .toArray()
+                    .then(function (items) {
+                        var item = items.filter(function(i) { return i.Locations && i.Locations.length > 0 })[0];
+                        
+                        notEqual(item, undefined, 'item exists');
+                        context.TestTable3.attach(item);
+
+                        var locType = item.Locations[0].getType();
+                        equal(item.Locations.length, 4, "Location exists item")
+
+                        item.Locations = item.Locations;
+                        item.Locations.push(new locType({ City: 'xxxCity 1', Zip: 1117, Country: 'Country 1', Address: 'Test data1' }));
+
+                        notEqual(item.Locations, undefined, "Location exists")
+                        equal(item.Locations.length, 5, "Location exists item")
+                        equal(typeof item.Locations[0].getType, 'function', "Location item jaydata object")
+                        equal(item.Locations[0].getType().name, 'Location', "Location item type")
+
+                        context.saveChanges(function (count) {
+                            equal(count, 1, 'save success');
+
+                            context.TestTable3.filter(function (a) { return a.Id == this.key}, {key: item.Id}).toArray()
+                                .then(function (items) {
+
+                                    equal(items.length, 1, 'result count')
+                                    var loc = items[0];
+                                    notEqual(loc.Locations, undefined, "Location exists")
+                                    equal(loc.Locations.length, 5, "Location exists item")
+                                    equal(typeof loc.Locations[0].getType, 'function', "Location item jaydata object")
+                                    equal(loc.Locations[0].getType().name, 'Location', "Location item type")
+
+
+                                    _finishCb(context);
+                                });
+                        }).fail(function (err){
+                            ok(false, 'save');
+                            console.log(err);
+                            _finishCb(context);
+                        });
+                    });
+                });
         });
     });
 }

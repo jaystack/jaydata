@@ -27,7 +27,7 @@
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "dot": "^1.1.2",
-    "jaydata-dynamic-metadata": "^0.1.18",
+    "jaydata-dynamic-metadata": "^0.1.19",
     "jaydata-error-handler": "^0.0.1",
     "jaydata-odatajs": "^4.0.1",
     "jaydata-promise-handler": "^0.1.0",
@@ -123,6 +123,7 @@
     "npm": "^6.4.1",
     "selenium-standalone": "^6.15.2",
     "vinyl-buffer": "^1.0.1",
+    "vinyl-fs": "^2.4.4",
     "vinyl-source-stream": "^2.0.0",
     "yargs": "^12.0.2"
   },

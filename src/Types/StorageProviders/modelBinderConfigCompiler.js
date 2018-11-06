@@ -290,11 +290,37 @@ $C('$data.modelBinder.ModelBinderConfigCompiler', $data.Expressions.EntityExpres
         //no projection, get all item from entitySet
         builder.modelBinderConfig['$type'] = custom ? $data.Object : type;
 
+        var autoExpand = [];
+        if (this._isoDataProvider && type.isAssignableTo && type.isAssignableTo($data.Entity)) {
+            autoExpand = type.memberDefinitions
+                .getPublicMappedProperties()
+                .filter(function(m) { 
+                    return m.inverseProperty && 
+                        (m.autoExpand || 
+                            (
+                                type.autoExpands && 
+                                type.autoExpands.some(function (e) { return e === m.name })
+                            )
+                        ) 
+                })
+                .map(function(m) { 
+                    return { 
+                        name: m.name,
+                        type: Container.resolveType(m.elementType || m.type) 
+                    } 
+                })
+        }
+        
+        var _allIncludes = []
+            .concat(allIncludes || [])
+            .concat(autoExpand.filter(function (a) { return !allIncludes || !allIncludes.some(function (m) { return m.name === a.name }) }));
+
+
         var storageModel = this._query.context._storageModel.getStorageModel(type);
         this._addPropertyToModelBinderConfig(type, builder);
-        if (allIncludes) {
+        if (_allIncludes) {
             let excludeDeepInclude = [];
-            allIncludes.forEach(function (include) {
+            _allIncludes.forEach(function (include) {
                 if(excludeDeepInclude.some(function(incName){ return include.name.length > incName.length && include.name.substr(0, incName.length) === incName })) {
                     return;
                 }
