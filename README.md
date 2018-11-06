@@ -1,4 +1,4 @@
-## Notice: this library isn't maintained anymore
+## Notice: This library is being maintained by Bit Foundation.
 
 JayData is a unified data access library for JavaScript to CRUD data from different sources like WebSQL/SQLite,
 IndexedDB, MongoDb, OData, HTML5 localStorage.
