@@ -503,6 +503,14 @@ import kendo from 'kendo'
                                     tempFilter += itField;
                                     tempFilter += " < " + value;
                                     break;
+                                case 'isnull':
+                                    tempFilter += itField;
+                                    tempFilter += " == null";
+                                    break;
+                                case 'isnotnull':
+                                    tempFilter += itField;
+                                    tempFilter += " != null";
+                                    break;
                                 default:
                                     $data.Trace.log('unknown operator', f.operator);
                                     break;
