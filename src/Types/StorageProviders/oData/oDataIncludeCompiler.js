@@ -115,7 +115,8 @@ $C('$data.storageProviders.oData.oDataIncludeCompiler', $data.Expressions.Entity
     
     VisitAssociationInfoExpression: function (expression, context) {
         var propName = expression.associationInfo.FromPropertyName;
-        if (this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             propName = expression.associationInfo.FromType.fullName + "/" + propName;
         }
         

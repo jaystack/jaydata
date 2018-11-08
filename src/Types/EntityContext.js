@@ -17,6 +17,7 @@ $data.Class.define('$data.StorageModel', null, null, {
         this.ComplexTypes = [];
         this.Enums = [];
         this.Associations = [];
+        this.IsComplexType = false;
     },
     LogicalType: {},
     LogicalTypeName: {},
@@ -29,7 +30,8 @@ $data.Class.define('$data.StorageModel', null, null, {
     Enums: {},
     Associations: {},
     ContextType: {},
-    Roles: {}
+    Roles: {},
+    IsComplexType: {}
 }, null);
 $data.Class.define('$data.Association', null, null, {
     constructor: function (initParam) {
@@ -42,6 +44,7 @@ $data.Class.define('$data.Association', null, null, {
             this.ToType = initParam.ToType;
             this.ToMultiplicity = initParam.ToMultiplicity;
             this.ToPropertyName = initParam.ToPropertyName;
+            this.ReferentialConstraint = [].concat(initParam.ReferentialConstraint || []);
         }
     },
     From: {},
@@ -303,25 +306,29 @@ $data.Class.define('$data.EntityContext', null, null,
     },
     _createNavPropStorageModel: function(logicalType){
         var ctx = this;
-        logicalType.memberDefinitions.getPublicMappedProperties().filter(function(it){ return it.inverseProperty; }).forEach(function(memDef){
-            var item = Container.resolveType(memDef.elementType || memDef.dataType);
-            if (!ctx._storageModel.filter(function(it){ return it.LogicalType == item; })[0]){
-                var storageModel = new $data.StorageModel();
-                storageModel.TableName = memDef.name;
-                storageModel.TableOptions = item.tableOptions;
-                storageModel.ItemName = item.name;
-                storageModel.LogicalType = item;
-                storageModel.LogicalTypeName = item.name;
-                storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
-                storageModel.ContextType = ctx.getType();
+        logicalType.memberDefinitions.getPublicMappedProperties()
+            // .filter(function(it){ return it.inverseProperty; })
+            .forEach(function(memDef){
+                var item = Container.resolveType(memDef.elementType || memDef.dataType);
+                if (item.isAssignableTo && item.isAssignableTo($data.Entity) && !ctx._storageModel.filter(function(it){ return it.LogicalType == item; })[0]){
+                    var storageModel = new $data.StorageModel();
+                    storageModel.TableName = memDef.name;
+                    storageModel.TableOptions = item.tableOptions;
+                    storageModel.ItemName = item.name;
+                    storageModel.LogicalType = item;
+                    storageModel.LogicalTypeName = item.name;
+                    storageModel.PhysicalTypeName = $data.EntityContext._convertLogicalTypeNameToPhysical(storageModel.LogicalTypeName);
+                    storageModel.ContextType = ctx.getType();
+                    storageModel.IsComplexType = !item.memberDefinitions.getPublicMappedProperties().filter(function(p) {return p.key}).length;
 
-                ctx._storageModel.push(storageModel);
-                var name = Container.resolveName(item);
-                ctx._storageModel[name] = storageModel;
+                    ctx._storageModel.push(storageModel);
+                    
+                    var name = Container.resolveName(item);
+                    ctx._storageModel[name] = storageModel;
 
-                ctx._createNavPropStorageModel(storageModel.LogicalType);
-            }
-        });
+                    ctx._createNavPropStorageModel(storageModel.LogicalType);
+                }
+            });
     },
     _initStorageModelNavigationProperties: function _initStorageModelNavigationProperties(){
         for (var i = 0; i < this._storageModel.length; i++) {

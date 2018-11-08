@@ -70,16 +70,30 @@ $C('$data.storageProviders.oData.oDataWhereCompiler', $data.Expressions.EntityEx
 
     VisitAssociationInfoExpression: function (expression, context) {
         var propName = expression.associationInfo.FromPropertyName;
-        if (this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             propName = expression.associationInfo.FromType.fullName + "/" + propName;
         }
         context.data += propName;
     },
 
     VisitMemberInfoExpression: function (expression, context) {
-        if (this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             context.data += expression.memberDefinition.definedBy.fullName + "/" + expression.memberName;
-        }else context.data += expression.memberName;
+        }else {
+            context.data += expression.memberName
+        };
+    },
+
+    VisitComplexTypeExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+
+        if (expression.source instanceof $data.Expressions.ComplexTypeExpression) {
+            context.data += "/";
+        }
+
+        this.Visit(expression.selector, context);
     },
 
     VisitQueryParameterExpression: function (expression, context) {

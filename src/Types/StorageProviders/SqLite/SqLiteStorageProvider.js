@@ -182,7 +182,7 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
 
     initializeStore: function (callBack) {
         callBack = $data.PromiseHandlerBase.createCallbackSettings(callBack);
-        this.context._storageModel.forEach(function (item, index) {
+        this.context._storageModel.filter(function(sm) { return !sm.IsComplexType }).forEach(function (item, index) {
             this.SqlCommands.push(this.createSqlFromStorageModel(item) + " ");
         }, this);
 

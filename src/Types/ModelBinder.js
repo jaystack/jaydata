@@ -301,7 +301,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                         context.src += '}else{';
                     }
                     if (isEntityType) {
-                        context.src += item + ' = new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
+                        context.src += item + ' =  (typeof ov !== "undefined" && ov) || new (Container.resolveByIndex(' + typeIndex + '))(undefined, { setDefaultValues: false });';
                     } else if (isEnum) {
                         context.src += item + ' = Container.resolveByIndex(' + typeIndex + ')[di["' + context.current + '"]];';
                     } else {
@@ -361,11 +361,11 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             if (meta[i].$type) context.src += item + '.' + i + ' = fn(di);';else context.src += 'fn(di);';
                         } else if (meta[i].$type) {
                             context.meta.push(i);
-                            context.src += 'var fn = function(di){';
+                            context.src += 'var fn = function(di, ov){';
                             this._buildSelector(meta[i], context);
                             this.build(meta[i], context);
                             context.src += 'return ' + context.item + ';};';
-                            if (meta[i].$type === $data.Object) context.src += item + '.' + i + ' = self._deepExtend(' + item + '.' + i + ', fn(di));';else context.src += item + '.' + i + ' = fn(di);';
+                            if (meta[i].$type === $data.Object) context.src += item + '.' + i + ' = self._deepExtend(' + item + '.' + i + ', fn(di));';else context.src += item + '.' + i + ' = fn(di, ' + item + '.' + i + ');';
                             context.item = item;
                             context.meta.pop();
                         } else if (meta.$type) {

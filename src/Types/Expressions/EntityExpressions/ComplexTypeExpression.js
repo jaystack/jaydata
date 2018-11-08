@@ -14,7 +14,8 @@ $C('$data.Expressions.ComplexTypeExpression', $data.Expressions.ExpressionNode, 
         Guard.requireType("selector", selector, [$data.Expressions.EntityExpression, $data.Expressions.MemberInfoExpression]);
         this.source = source;
         this.selector = selector;
-        var dt = source.entityType.getMemberDefinition(selector.memberName).dataType;
+        var memDef = source.entityType.getMemberDefinition(selector.memberName);
+        var dt = memDef.elementType || memDef.dataType;
         var t = Container.resolveType(dt);
         this.entityType = t;
     },
