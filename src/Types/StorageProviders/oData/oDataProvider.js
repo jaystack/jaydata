@@ -520,7 +520,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 
                 var entityState = independentItem.data.entityState;
                 if(typeof this._buildRequestObject['EntityState_' + entityState] === 'function'){
-                    this._buildRequestObject['EntityState_' + entityState](this, independentItem, convertedItems, request, changedItems)
+                    if (!this._buildRequestObject['EntityState_' + entityState](this, independentItem, convertedItems, request, changedItems)){
+                        convertedItems.remove(independentItem.data);
+                    }
                 } else {
                     Guard.raise(new Exception("Not supported Entity state"));
                 }
@@ -535,20 +537,27 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 request.add(new activities.SetMethod("POST"), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
                 if (item.data["@odata.type"]) request.add(new activities.SetDataProperty("@odata.type", item.data["@odata.type"]));
                 provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
+                return request;
             },
             'EntityState_30': function EntityState_30(provider, item, convertedItem, request, changedItems) {
-                request.add(new activities.SetMethod(provider.providerConfiguration.UpdateMethod), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
-                if (provider.getEntityKeysValue(item)) request.add(new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")"));
-                if (item.data["@odata.type"]) request.add(new activities.SetDataProperty("@odata.type", item.data["@odata.type"]));
-
-                provider.addETagHeader(item, request);
-
-                provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
+                const keysValue = provider.getEntityKeysValue(item);
+                if (keysValue) {
+                    request.add(new activities.SetMethod(provider.providerConfiguration.UpdateMethod), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
+                    request.add(new activities.AppendUrl("(" + keysValue + ")"));
+                    if (item.data["@odata.type"]) request.add(new activities.SetDataProperty("@odata.type", item.data["@odata.type"]));
+                    provider.addETagHeader(item, request);
+                    provider.save_getInitData(item, convertedItem, undefined, undefined, request, changedItems);
+                    return request;
+                }
             },
             'EntityState_40': function EntityState_40(provider, item, convertedItem, request, changedItems) {
-                request.add(new activities.SetMethod("DELETE"), new activities.ClearRequestData(), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
-                if (provider.getEntityKeysValue(item)) request.add(new activities.AppendUrl("(" + provider.getEntityKeysValue(item) + ")"));
-                provider.addETagHeader(item, request);
+                const keysValue = provider.getEntityKeysValue(item);
+                if (keysValue){
+                    request.add(new activities.SetMethod("DELETE"), new activities.ClearRequestData(), new activities.AppendUrl(item.data["@odata.context"] || item.entitySet.tableName));
+                    request.add(new activities.AppendUrl("(" + keysValue + ")"));
+                    provider.addETagHeader(item, request);
+                    return request;
+                }
             }
         }
     },
@@ -1209,6 +1218,8 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             var field = memDefs[i];
             if (field.key) {
                 keyValue = entity.data[field.name];
+                if (Guard.isNullOrUndefined(keyValue)) continue;
+
                 var typeName = Container.resolveName(field.type);
 
                 var converter = this.fieldConverter.toDb[typeName];
