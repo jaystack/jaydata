@@ -928,6 +928,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
             length: [{
                 allowedType: 'string',
+                projection: function(v){ return v ? v.length : 0; },
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
@@ -948,6 +949,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
             strLength: {
                 mapTo: "length",
+                projection: function(v){ return v ? v.length : 0; },
                 dataType: "number", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.ProjectionExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: "string" }]
             },
@@ -998,27 +1000,45 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             /* data functions */
 
             day: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getUTCDate(); },
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             hour: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getUTCHours(); },
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             minute: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getUTCMinutes(); },
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             month: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getUTCMonth() + 1; },
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             second: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getUTCSeconds(); },
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
             year: {
-                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getFullYear(); },
+                parameters: [{ name: "@expression", dataType: "date" }]
+            },
+            fractionalseconds: {
+                allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                dataType: "number",
+                projection: function(v){ return new Date(v).getUTCMilliseconds() / 1000; },
                 parameters: [{ name: "@expression", dataType: "date" }]
             },
 

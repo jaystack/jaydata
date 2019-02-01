@@ -167,5 +167,8 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         //Guard.raise(new Exception('Constant value is not supported in Projection.', 'Not supported!'));
         //context.data += expression.value;
 		context.data = context.data.slice(0, context.data.length - 1);
+    },
+    VisitEntityFieldOperationExpression: function (expression, context) {
+        this.Visit(expression.source, context);
     }
 });

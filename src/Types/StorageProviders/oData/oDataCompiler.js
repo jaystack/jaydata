@@ -1,5 +1,16 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
+$C('$data.storageProviders.oData.oDataModelBinderConfigCompiler', $data.modelBinder.ModelBinderConfigCompiler, null, {
+    VisitEntityFieldOperationExpression: function(expression, builder){
+        this.Visit(expression.source, builder);
+        var opDef = expression.operation.memberDefinition;
+        if (typeof opDef.projection == "function"){
+            builder.modelBinderConfig.$type = opDef.returnType || opDef.dataType;
+            builder.modelBinderConfig.$value = function(meta, data){ return opDef.projection(data[meta.$source]); };
+        }
+    }
+});
+
 $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function () {
         this.context = {};
@@ -26,7 +37,7 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         
 
         query.modelBinderConfig = {};
-        var modelBinder = Container.createModelBinderConfigCompiler(query, this.includes, true);
+        var modelBinder = $data.storageProviders.oData.oDataModelBinderConfigCompiler.create(query, this.includes, true);
         modelBinder.Visit(query.expression);
 
 
