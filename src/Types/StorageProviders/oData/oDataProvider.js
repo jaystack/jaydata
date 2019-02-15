@@ -1084,7 +1084,35 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 parameters: [{ name: "@expression", dataType: 'GeometryPoint' }, { name: "in", dataType: 'GeometryPolygon' }]
 
-            }]
+            }],
+
+            // aggregate functions
+            'sum': {
+                allowedIn: [$data.Expressions.ProjectionExpression],
+                mapTo: 'sum',
+                aggregate: true
+            },
+            'count': {
+                allowedIn: [$data.Expressions.ProjectionExpression],
+                mapTo: 'countdistinct',
+                returnType: $data.Integer,
+                aggregate: true
+            },
+            'min': {
+                allowedIn: [$data.Expressions.ProjectionExpression],
+                mapTo: 'min',
+                aggregate: true
+            },
+            'max': {
+                allowedIn: [$data.Expressions.ProjectionExpression],
+                mapTo: 'max',
+                aggregate: true
+            },
+            'avg': {
+                allowedIn: [$data.Expressions.ProjectionExpression],
+                mapTo: 'average',
+                aggregate: true
+            }
         },
         enumerable: true,
         writable: true
@@ -1164,7 +1192,9 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 includeFrameName: '$count',
                 implementation: function(){ return 'true' }
             },
-            find: {}
+            find: {},
+            distinct: {},
+            groupBy: {}
         },
         enumerable: true,
         writable: true

@@ -168,7 +168,19 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         //context.data += expression.value;
 		context.data = context.data.slice(0, context.data.length - 1);
     },
-    VisitEntityFieldOperationExpression: function (expression, context) {
-        this.Visit(expression.source, context);
+    VisitEntityFieldOperationExpression: function VisitEntityFieldOperationExpression(expression, context) {
+        Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
+
+        var opDef = expression.operation.memberDefinition;
+        if (opDef.aggregate){
+            var opName = opDef.mapTo || opDef.name;
+            context.aggregate = context.aggregate || [];
+            
+            var temp = context.data;
+            this.Visit(expression.source, context);
+            var field = context.data.replace(temp, "");
+            context.data = temp.replace(/,$/, "");
+            context.aggregate.push(`${field} with ${opName} as ${field}`);
+        }else this.Visit(expression.source, context);
     }
 });
