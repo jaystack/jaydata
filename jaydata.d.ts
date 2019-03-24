@@ -11,6 +11,34 @@ declare module $data {
         valueOf(): any;
     }
 
+    interface IPromiseArray<T> extends Array<T> {
+        then: {
+            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => any): IPromise<any>;
+        };
+        fail: {
+            (handler: (args: T) => void): IPromise<any>;
+            (handler: (args: T) => any): IPromise<any>;
+        };
+        next(): IPromiseArray<T>;
+        prev(): IPromiseArray<T>;
+        refresh(): IPromiseArray<T>;
+    }
+
+    export enum EntityState {
+        Detached,
+        Unchanged,
+        Added,
+        Modified,
+        Deleted,
+    }
+
+    export enum EntityAttachMode {
+        AllChanged,
+        KeepChanges,
+        Default,
+    }
+
     export class Base implements Object {
         constructor(...params: any[]);
         getType: () => Base;
@@ -26,7 +54,7 @@ declare module $data {
         constructor();
         constructor(initData: {});
 
-        entityState: number;
+        entityState: EntityState;
         changedProperties: any[];
 
         propertyChanging: Event;
@@ -50,6 +78,10 @@ declare module $data {
         toArray(): $data.IPromise<T[]>;
         toArray(handler: (result: T[]) => void ): $data.IPromise<T[]>;
         toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): $data.IPromise<T[]>;
+
+        toLiveArray(): IPromiseArray<T>;
+        toLiveArray(handler: (result: T[]) => void): IPromiseArray<T>;
+        toLiveArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): IPromiseArray<T>;
 
         single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
         single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
@@ -77,11 +109,14 @@ declare module $data {
         
         add(item: T): T;
         add(initData: {}): T;
+        addMany(items: T[]): T[];
 
-        attach(item: T): void;
-        attach(item: {}): void;
-        attachOrGet(item: T): T;
-        attachOrGet(item: {}): T;
+        attach(item: T, keepChanges?: boolean): void;
+        attach(item: {}, keepChanges?: boolean): void;
+        attach(item: T, mode?: EntityAttachMode): void;
+        attach(item: {}, mode?: EntityAttachMode): void;
+        attachOrGet(item: T, mode?: EntityAttachMode): T;
+        attachOrGet(item: {}, mode?: EntityAttachMode): T;
 
         detach(item: T): void;
         detach(item: {}): void;
@@ -211,16 +246,18 @@ declare module $data {
         constructor(geometries: any[]);
         geometries: any[];
     }
-
 }
 
-declare module Q {
-    export var resolve: (p: any) => $data.IPromise<any>;
-    export var when: (p: $data.IPromise<any>, then?: () => any, fail?: () => any) => $data.IPromise<any>;
-    export var all: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
-    export var allResolved: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
+declare module $data.storageProviders {
+    export enum DbCreationType {
+        Merge,
+        DropTableIfChanged,
+        DropTableIfChange,
+        DropAllExistingTables,
+        ErrorIfChange,
+        DropDbIfChange,
 
-    export var fcall: (handler: () => any) => $data.IPromise<any>;
+    }
 }
 
 interface String {
