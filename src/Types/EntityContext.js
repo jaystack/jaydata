@@ -1416,7 +1416,7 @@ $data.Class.define('$data.EntityContext', null, null,
                     var memDef = entity.data.getType().memberDefinitions.getPublicMappedProperties()[j];
 
                     var memDefType = Container.resolveType(memDef.type);
-                    if (memDef.required && !memDef.computed && !entity.data[memDef.name] && !memDef.isDependentProperty) {
+                    if (memDef.required && !memDef.computed && !entity.data[memDef.name] && entity.data[memDef.name] !== "" && !memDef.isDependentProperty) {
                         switch (memDefType) {
                             case $data.String:
                             case $data.Number:
