@@ -2,13 +2,13 @@ declare module $data {
 
     export class Base implements Object {
         constructor(...params: any[]);
-        getType: () => Base;
-        memberDefinitions: any[];
+        static create(): Base;
+        static getMemberDefinition(name: string): any;
     }
 
     interface Event extends Object {
-        attach(eventHandler: (sender: any, event: any) => void ): void;
-        detach(eventHandler: () => void ): void;
+        attach(eventHandler: (sender: any, event: any) => void): void;
+        detach(eventHandler: () => void): void;
         fire(e: any, sender: any): void;
     }
 
@@ -16,17 +16,37 @@ declare module $data {
         constructor();
         constructor(initData: {});
 
-        entityState: number;
+        entityState: EntityState;
         changedProperties: any[];
 
         propertyChanging: Event;
         propertyChanged: Event;
         propertyValidationError: Event;
+
+        /**
+         * Determines the current $data.Entity is validated and valid. */
         isValid: () => boolean;
+        isValidated: boolean;
+        ValidationErrors: any[];
         resetChanges: () => void;
         refresh(): () => Promise<void>;
         save(): () => Promise<void>;
         uid?: string;
+
+        /**
+         * Creates pure JSON object from $data.Entity. */
+        toJSON(): any;
+
+        /**
+         * Returns a string that represents the current $data.Entity. */
+        toString(): any;
+
+        /**
+         * Determines whether the specified $data.Entity is equal to the current $data.Entity. */
+        equals(entity: $data.Entity): boolean;
+
+        getType: () => any;
+        memberDefinitions: any[];
     }
 
     export enum EntityState {
@@ -54,16 +74,16 @@ declare module $data {
         map(projection: (it: T) => any): Queryable<any>;
 
         length(): Promise<Number>;
-        length(handler: (result: number) => void ): Promise<Number>;
+        length(handler: (result: number) => void): Promise<Number>;
         length(handler: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
-        forEach(handler: (it: any) => void ): Promise<T>;
+        forEach(handler: (it: any) => void): Promise<T>;
 
         toArray(): Promise<T[]>;
-        toArray(handler: (result: T[]) => void ): Promise<T[]>;
+        toArray(handler: (result: T[]) => void): Promise<T[]>;
         toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): Promise<T[]>;
 
-        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): Promise<T>;
+        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void): Promise<T>;
         single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): Promise<T>;
 
         take(amout: number): Queryable<T>;
@@ -74,7 +94,7 @@ declare module $data {
         orderBy(predicate: (it: T) => any): Queryable<T>;
         orderByDescending(predicate: (it: any) => any): Queryable<T>;
 
-        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): Promise<T>;
+        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void): Promise<T>;
         first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): Promise<T>;
         first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Promise<T>;
         first(): Promise<T>;
@@ -84,7 +104,7 @@ declare module $data {
         include(selector: string): Queryable<T>;
 
         removeAll(): Promise<Number>;
-        removeAll(handler: (count: number) => void ): Promise<Number>;
+        removeAll(handler: (count: number) => void): Promise<Number>;
         removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
         find(...ids: Array<any>): Promise<T>;
@@ -105,7 +125,7 @@ declare module $data {
     export class EntitySet<T extends Entity> extends Queryable<T> {
         tableName: string;
         collectionName: string;
-        
+
         add(item: T): T;
         add(initData: {}): T;
 
@@ -115,10 +135,10 @@ declare module $data {
         createNew(item: T): T;
         createNew(initData: {}): T;
 
-        attach(item: T): void;
-        attach(item: {}): void;
-        attachOrGet(item: T): T;
-        attachOrGet(item: {}): T;
+        attach(item: T, mode?: EntityAttachMode): void;
+        attach(item: {}, mode?: EntityAttachMode): void;
+        attachOrGet(item: T, mode?: EntityAttachMode): T;
+        attachOrGet(item: {}, mode?: EntityAttachMode): T;
 
         detach(item: T): void;
         detach(item: {}): void;
@@ -127,6 +147,8 @@ declare module $data {
         remove(item: {}): void;
 
         elementType: T;
+
+        bulkInsert(fields, datas): Promise;
     }
 
     export class EntityContext implements Object {
@@ -135,19 +157,23 @@ declare module $data {
         constructor(config: { name: string; oDataServiceHost?: string; databaseName?: string; localStoreName?: string; user?: string; password?: string; });
 
         onReady(): Promise<EntityContext>;
-        onReady(handler: (currentContext: EntityContext) => void ): Promise<EntityContext>;
+        onReady(handler: (currentContext: EntityContext) => void): Promise<EntityContext>;
         saveChanges(): Promise<Number>;
-        saveChanges(handler: (result: number) => void ): Promise<Number>;
+        saveChanges(handler: (result: number) => void): Promise<Number>;
         saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
         add(item: Entity): Entity;
-        attach(item: Entity): void;
-        attachOrGet(item: Entity): Entity;
+        addMany(item: Entity[]): Entity[];
+        attach(item: Entity, mode?: EntityAttachMode): void;
+        attachOrGet(item: Entity, mode?: EntityAttachMode): Entity;
         detach(item: Entity): void;
-        remove(item: Entity): void;
+        remove(item: Entity): Entity;
         trackChanges: boolean;
         attach(item: Entity, mode?: EntityAttachMode): void;
         batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<any>>>;
+
+        getEntitySetFromElementType(elementType): EntitySet;
+        bulkInsert(entitySet: $data.EntitySet, fields, datas): Promise;
     }
 
     export class Blob implements Object {
