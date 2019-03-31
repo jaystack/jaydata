@@ -1,6 +1,6 @@
 {
   "name": "jaydata",
-  "version": "1.5.17",
+  "version": "1.5.18",
   "description": "Cross-platform HTML5 data-management, JavaScript Language Query (JSLQ) support for OData, SQLite, WebSQL, IndexedDB, YQL and Facebook (packaged for Node.JS)",
   "keywords": [
     "HTML5 data management",
@@ -77,11 +77,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/jaydata/jaydata.git"
+    "url": "git+ssh://git@github.com/bit-foundation/jaydata.git"
   },
   "license": "(MIT OR GPL-2.0)",
   "bugs": {
-    "url": "https://github.com/jaydata/jaydata/issues"
+    "url": "https://github.com/bit-foundation/jaydata/issues"
   },
-  "homepage": "https://github.com/jaydata/jaydata#readme"
+  "homepage": "https://github.com/bit-foundation/jaydata#readme"
 }

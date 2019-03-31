@@ -39,7 +39,7 @@ $ npm install jaydata
 ## How to build
 
 ```bash
-$ git clone https://github.com/jaystack/jaydata.git
+$ git clone https://github.com/bit-foundation/jaydata.git
 $ cd jaydata
 $ npm install
 $ gulp
