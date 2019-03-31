@@ -505,7 +505,7 @@ $data.Class.define('$data.ItemStoreClass', null, null, {
 
     _findByIdQueryable: function (set, keys) {
         var keysProps = set.defaultType.memberDefinitions.getKeyProperties();
-        if (!Object.isObject(keys)) {
+        if (!(typeof keys === "object")) {
             var keysObject = {};
             keysObject[keysProps[0].name] = keys;
             keys = keysObject;
