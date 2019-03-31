@@ -167,7 +167,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
     _getObjectStoreDefinitions: function () {
         var objectStoreDefinitions = [];
         var self = this;
-        self.context._storageModel.forEach(function (memDef) {
+        self.context._storageModel.filter(function(sm) { return !sm.IsComplexType }).forEach(function (memDef) {
             var objectStoreDefinition = self._getObjectStoreDefinition(memDef);
             objectStoreDefinitions.push(objectStoreDefinition);
         });
@@ -342,7 +342,7 @@ $data.Class.define('$data.storageProviders.indexedDb.IndexedDBStorageProvider', 
                 return ret;
             };
             var newSequences = [];
-            self.context._storageModel.forEach(function (memDef) {
+            self.context._storageModel.filter(function(sm) { return !sm.IsComplexType }).forEach(function (memDef) {
                 function createStore() {
                     /// <summary>
                     /// Creates a store for 'memDef'

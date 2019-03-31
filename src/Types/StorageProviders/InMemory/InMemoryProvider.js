@@ -49,6 +49,7 @@ $C('$data.storageProviders.InMemory.InMemoryProvider', $data.StorageProviderBase
         this.dataSource = { 'inmemory_sequence': {} };
         for(var index = 0;index<this.context._storageModel.length;index++){
             var storageModel = this.context._storageModel[index];
+            if (storageModel.IsComplexType) continue;
             //Create store for EntitySet
             this.dataSource[storageModel.TableName] = [];
             //Check primary key

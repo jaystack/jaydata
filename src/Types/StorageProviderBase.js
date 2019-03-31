@@ -222,6 +222,10 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                     keyProperties = [memDef.keys];
                 } else if (memDef && Array.isArray(memDef.keys)) {
                     keyProperties = [].concat(memDef.keys);
+                } else if (memDef && typeof memDef.foreignKeys === "string" && memDef.foreignKeys) {
+                    keyProperties = [memDef.foreignKeys];
+                } else if (memDef && Array.isArray(memDef.foreignKeys)) {
+                    keyProperties = [].concat(memDef.foreignKeys);
                 }
 
                 association.ReferentialConstraint = association.ReferentialConstraint || [];
@@ -255,8 +259,29 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 complexType.ReferentialConstraint = complexType.ReferentialConstraint || [];
 
                 complexType.ToType.memberDefinitions.getPublicMappedProperties().forEach(function (d) {
-                    instanceDefinition[complexType.FromPropertyName + '__' + d.name] = buildDbType_copyPropertyDefinition(d);
-                    complexType.ReferentialConstraint.push(buildDbType_createConstrain(complexType.ToType, complexType.FromType, d.name, complexType.FromPropertyName));
+                    if (d.inverseProperty) {
+                        var type = Container.resolveType(d.type);
+                        if (type.isAssignableTo && type.isAssignableTo($data.Entity)) {
+                            var keyProp = type.memberDefinitions.getPublicMappedProperties().filter(function(p) { return p.key })[0];
+                            
+                            var keyPropName = (d.keys && d.keys[0]) || d.name + '__' + keyProp.name;
+
+                            if (!instanceDefinition[complexType.FromPropertyName + '__' + keyPropName]) {
+                                instanceDefinition[complexType.FromPropertyName + '__' + keyPropName] = buildDbType_copyPropertyDefinition(keyProp);
+                            }
+                            
+                            var constraint = { complexNavProperty: true };
+                            constraint[complexType.ToType.name] = d.name + '.' + keyProp.name;
+                            constraint[complexType.FromType.name] = complexType.FromPropertyName + '__' + keyPropName;
+                            complexType.ReferentialConstraint.push(constraint);
+                        }
+
+                    } else {
+                        instanceDefinition[complexType.FromPropertyName + '__' + d.name] = buildDbType_copyPropertyDefinition(d);
+                        instanceDefinition[complexType.FromPropertyName + '__' + d.name].complexType = complexType;
+                        
+                        complexType.ReferentialConstraint.push(buildDbType_createConstrain(complexType.ToType, complexType.FromType, d.name, complexType.FromPropertyName));
+                    }
                 }, this);
             }, this);
         }
@@ -274,6 +299,33 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                 }
             }, this);
 
+            var getProp = function(container, path, throwWhenNoValue) {
+                var p = path.split(".");
+                var holder = container;
+                for(var i = 0; i < p.length; i++) {
+                    holder = holder[p[i]];
+                    if(!holder) {
+                        if (throwWhenNoValue) throw 'no value';
+                        return holder;
+                    }
+                }
+
+                return holder;
+            }
+
+            var setProp = function (dbInstance, complexInstance, constrain, mapping) {
+                var value = dbInstance[constrain[mapping.From]];
+                try {
+                    if (!constrain.complexNavProperty || typeof value === "undefined") {
+                        value = getProp(complexInstance, constrain[mapping.To], constrain.complexNavProperty);
+                    }
+                } catch (e) {
+                    return;
+                }
+
+                dbInstance[constrain[mapping.From]] = value;
+            }
+
             if (storageModel.Associations) {
                 storageModel.Associations.forEach(function (association) {
                     if ((association.FromMultiplicity == "*" && association.ToMultiplicity == "0..1") || (association.FromMultiplicity == "0..1" && association.ToMultiplicity == "1")) {
@@ -285,7 +337,7 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                                     (logicalEntity && !logicalEntity.changedProperties) ||
                                     (logicalEntity && logicalEntity.changedProperties && !logicalEntity.changedProperties.some(function(md){ return md.name == constrain[association.From]; }))
                                 )) {
-                                    dbInstance[constrain[association.From]] = complexInstance[constrain[association.To]];
+                                    dbInstance[constrain[association.From]] = getProp(complexInstance, constrain[association.To]);
                                 } else if (Guard.isNullOrUndefined(logicalEntity[constrain[association.From]])) {
                                     dbInstance[constrain[association.From]] = null;
                                 }
@@ -299,8 +351,13 @@ $data.Class.define('$data.StorageProviderBase', null, null,
                     var complexInstance = logicalEntity[cmpType.FromPropertyName];
                     if (complexInstance !== undefined) {
                         cmpType.ReferentialConstraint.forEach(function (constrain) {
-                            if (complexInstance !== null) {
-                                dbInstance[constrain[cmpType.From]] = complexInstance[constrain[cmpType.To]];
+                            if (complexInstance !== null &&
+                            (
+                                (logicalEntity && !logicalEntity.changedProperties) ||
+                                (logicalEntity && logicalEntity.changedProperties && !logicalEntity.changedProperties.some(function(md){ return md.name == constrain[cmpType.From]; }))
+                            )) {
+                                setProp(dbInstance, complexInstance, constrain, cmpType);
+                                // dbInstance[constrain[cmpType.From]] = getProp(complexInstance, constrain[cmpType.To]);
                             } else if (Guard.isNullOrUndefined(logicalEntity[constrain[association.From]])) {
                                 dbInstance[constrain[cmpType.From]] = null;
                             }

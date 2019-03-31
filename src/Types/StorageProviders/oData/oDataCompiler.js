@@ -1,5 +1,19 @@
 import $data, { $C, Guard, Container, Exception, MemberDefinition } from 'jaydata/core';
 
+$C('$data.storageProviders.oData.oDataModelBinderConfigCompiler', $data.modelBinder.ModelBinderConfigCompiler, null, {
+    VisitEntityFieldOperationExpression: function(expression, builder){
+        this.Visit(expression.source, builder);
+        var opDef = expression.operation.memberDefinition;
+        if (typeof opDef.projection == "function"){
+            builder.modelBinderConfig.$type = opDef.returnType || opDef.dataType;
+            builder.modelBinderConfig.$value = function(meta, data){ return opDef.projection(data[meta.$source]); };
+        }
+        if (opDef.aggregate){
+            if (opDef.returnType || opDef.dataType) builder.modelBinderConfig.$type = opDef.returnType || opDef.dataType;
+        }
+    }
+});
+
 $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpressionVisitor, null, {
     constructor: function () {
         this.context = {};
@@ -23,10 +37,31 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
         if(queryFragments.$expand){
             queryFragments.$expand = queryFragments.$expand.toString();
         }
-        
+        var $apply = "";
+        if (queryFragments.aggregate){
+            $apply = `aggregate(${queryFragments.aggregate.join(",")})`;
+        }
+        if (queryFragments.groupby){
+            queryFragments.groupby = queryFragments.groupby.filter(function(it, i, arr){ return arr.indexOf(it) == i; });
+            $apply = queryFragments.aggregate
+                ? `groupby((${queryFragments.groupby.join(",")}),${$apply})`
+                : `groupby((${queryFragments.groupby.join(",")}))`;
+        }
+        if ($apply && queryFragments.$filter){
+            $apply = `filter(${queryFragments.$filter})/${$apply}`;
+        }
+        if ($apply){
+            queryFragments = Object.assign({}, queryFragments, {
+                aggregate: [],
+                groupby: [],
+                $filter: "",
+                $select: "",
+                $apply: $apply
+            });
+        }
 
         query.modelBinderConfig = {};
-        var modelBinder = Container.createModelBinderConfigCompiler(query, this.includes, true);
+        var modelBinder = $data.storageProviders.oData.oDataModelBinderConfigCompiler.create(query, this.includes, true);
         modelBinder.Visit(query.expression);
 
 
@@ -260,5 +295,22 @@ $C('$data.storageProviders.oData.oDataCompiler', $data.Expressions.EntityExpress
                 headers: compiled.headers
             });
         }
+    },
+
+    VisitDistinctExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+        context.groupby = context.groupby || [];
+        context.groupby.push(...context.$select.split(','));
+    },
+
+    VisitGroupExpression: function (expression, context) {
+        this.Visit(expression.source, context);
+        
+        var groupContext = Object.assign({}, context);
+        var orderCompiler = Container.createoDataOrderCompiler(this.provider);
+        orderCompiler.compile(expression.selector, groupContext);
+
+        context.groupby = context.groupby || [];
+        context.groupby.push(...groupContext.data.split(','));
     }
 }, {});

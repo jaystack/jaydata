@@ -288,7 +288,7 @@ $C('$data.Expressions.CodeToEntityConverter', $data.Expressions.ExpressionVisito
                 var memDefExp = Container.createMemberInfoExpression(memDef);
                 var result;
                 //TODO!!!!
-                if (Container.isPrimitiveType(Container.resolveType(memDef.dataType))) {
+                if (Container.isPrimitiveType(Container.resolveType(memDef.dataType)) && !memDef.inverseProperty) {
                     result = Container.createEntityFieldExpression(exp, memDefExp);
                     return result;
                 }

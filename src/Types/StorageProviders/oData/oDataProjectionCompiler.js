@@ -66,7 +66,7 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
             
             if(expression.expression instanceof $data.Expressions.EntityFieldExpression && expression.expression.selector instanceof $data.Expressions.MemberInfoExpression){
                 var storageModel = this.entityContext._storageModel.getStorageModel(expression.expression.selector.memberDefinition.definedBy)
-                if(!storageModel) return;
+                if(!storageModel || storageModel.IsComplexType) return;
                 
                 var isComplexProperty = storageModel && !!storageModel.ComplexTypes[expression.memberName];
                 if(isComplexProperty){
@@ -113,7 +113,8 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
     },
     VisitAssociationInfoExpression: function (expression, context) {
         var propName = expression.associationInfo.FromPropertyName;
-        if (this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             propName = expression.associationInfo.FromType.fullName + "/" + propName;
         }
         this.mapping.push(propName);
@@ -130,11 +131,12 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
     },
     VisitMemberInfoExpression: function (expression, context) {
         var storageModel = this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy)
-        var isComplexProperty = storageModel && !!storageModel.ComplexTypes[expression.memberName];
-        var isComplexField = !storageModel;
+        var isComplexProperty = storageModel && !storageModel.IsComplexType && !!storageModel.ComplexTypes[expression.memberName];
+        var isComplexField = !storageModel || storageModel.IsComplexType;
 
         var propName = expression.memberName;
-        if (this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             propName = expression.memberDefinition.definedBy.fullName + "/" + propName;
         }
 
@@ -165,5 +167,20 @@ $C('$data.storageProviders.oData.oDataProjectionCompiler', $data.Expressions.Ent
         //Guard.raise(new Exception('Constant value is not supported in Projection.', 'Not supported!'));
         //context.data += expression.value;
 		context.data = context.data.slice(0, context.data.length - 1);
+    },
+    VisitEntityFieldOperationExpression: function VisitEntityFieldOperationExpression(expression, context) {
+        Guard.requireType("expression.operation", expression.operation, $data.Expressions.MemberInfoExpression);
+
+        var opDef = expression.operation.memberDefinition;
+        if (opDef.aggregate){
+            var opName = opDef.mapTo || opDef.name;
+            context.aggregate = context.aggregate || [];
+            
+            var temp = context.data;
+            this.Visit(expression.source, context);
+            var field = context.data.replace(temp, "");
+            context.data = temp.replace(/,$/, "");
+            context.aggregate.push(`${field} with ${opName} as ${field}`);
+        }else this.Visit(expression.source, context);
     }
 });

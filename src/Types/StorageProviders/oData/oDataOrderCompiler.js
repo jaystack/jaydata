@@ -36,7 +36,8 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
     },
     VisitAssociationInfoExpression: function (expression, context) {
         var propName = expression.associationInfo.FromPropertyName;
-        if (this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.associationInfo.FromType.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             propName = expression.associationInfo.FromType.fullName + "/" + propName;
         }
         context.data += propName + '/';
@@ -47,7 +48,8 @@ $C('$data.storageProviders.oData.oDataOrderCompiler', $data.storageProviders.oDa
     },
     VisitMemberInfoExpression: function (expression, context) {
         var propName = expression.memberName;
-        if (this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom)){
+        var sm = this.entityContext._storageModel.getStorageModel(expression.memberDefinition.definedBy.inheritsFrom);
+        if (sm && !sm.IsComplexType) {
             propName = expression.memberDefinition.definedBy.fullName + "/" + propName;
         }
         context.data += propName;
