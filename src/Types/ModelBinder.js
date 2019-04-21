@@ -343,7 +343,7 @@ $data.Class.define('$data.ModelBinder', null, null, {
                             context.item = item;
                             context.meta.pop();
                         } else if (meta[i].$source) {
-                            context.src += 'var fn = function(di){';
+                            context.src += 'var fn = function(di){ if(di == null) { return null; } ';
                             this._buildSelector(meta[i], context);
                             if (meta[i].$type) {
                                 var type = Container.resolveName(Container.resolveType(meta[i].$type));
