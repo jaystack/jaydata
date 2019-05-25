@@ -74,38 +74,42 @@ declare module $data {
         map(projection: (it: T) => any): Queryable<any>;
 
         length(): Promise<Number>;
-        length(handler: (result: number) => void): Promise<Number>;
-        length(handler: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
         forEach(handler: (it: any) => void): Promise<T>;
 
         toArray(): Promise<T[]>;
-        toArray(handler: (result: T[]) => void): Promise<T[]>;
-        toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): Promise<T[]>;
 
-        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void): Promise<T>;
-        single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): Promise<T>;
+        single(predicate: string): Promise<T>;
+        single(predicate: string, thisArg: any): Promise<T>;
+        single(predicate: (it: T) => boolean): Promise<T>;
+        single(predicate: (it: T) => boolean, thisArg: any): Promise<T>;
+        single(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Promise<T>;
+        single(): Promise<T>;
 
         take(amout: number): Queryable<T>;
         skip(amout: number): Queryable<T>;
 
         order(selector: string): Queryable<T>;
+
         orderBy(predicate: (it: any) => any): Queryable<T>;
         orderBy(predicate: (it: T) => any): Queryable<T>;
-        orderByDescending(predicate: (it: any) => any): Queryable<T>;
+        orderBy(predicate: string): Queryable<T>;
 
-        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void): Promise<T>;
-        first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): Promise<T>;
+        orderByDescending(predicate: (it: any) => any): Queryable<T>;
+        orderByDescending(predicate: (it: T) => any): Queryable<T>;
+        orderByDescending(predicate: string): Queryable<T>;
+
+        first(predicate: string): Promise<T>;
+        first(predicate: string, thisArg: any): Promise<T>;
+        first(predicate: (it: T) => boolean): Promise<T>;
+        first(predicate: (it: T) => boolean, thisArg: any): Promise<T>;
         first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Promise<T>;
         first(): Promise<T>;
 
         getValue(): Promise<T>;
 
-        include(selector: string): Queryable<T>;
 
         removeAll(): Promise<Number>;
-        removeAll(handler: (count: number) => void): Promise<Number>;
-        removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
         find(...ids: Array<any>): Promise<T>;
 
@@ -113,7 +117,8 @@ declare module $data {
 
         count(): Promise<number>;
 
-        include(selector: (it: T) => any): Queryable<T>;
+        include(projection: string): Queryable<T>;
+        include(projection: (it: T) => any): Queryable<T>;
 
         some(): boolean;
 
@@ -157,10 +162,7 @@ declare module $data {
         constructor(config: { name: string; oDataServiceHost?: string; databaseName?: string; localStoreName?: string; user?: string; password?: string; });
 
         onReady(): Promise<EntityContext>;
-        onReady(handler: (currentContext: EntityContext) => void): Promise<EntityContext>;
         saveChanges(): Promise<Number>;
-        saveChanges(handler: (result: number) => void): Promise<Number>;
-        saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): Promise<Number>;
 
         add(item: Entity): Entity;
         addMany(item: Entity[]): Entity[];
