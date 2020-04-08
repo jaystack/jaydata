@@ -83,6 +83,12 @@ $data.Class.define('$data.storageProviders.sqLite.SqLiteStorageProvider', $data.
                 allowedIn: $data.Expressions.FilterExpression,
                 parameters: [{ name: "strFragment", dataType: "string", prefix: "%", suffix: "%" }]
             },
+            includes: {
+                mapTo: "like",
+                dataType: "boolean",
+                allowedIn: $data.Expressions.FilterExpression,
+                parameters: [{ name: "strFragment", dataType: "string", prefix: "%", suffix: "%" }]
+            },
             startsWith: {
                 mapTo: "like",
                 dataType: "boolean",

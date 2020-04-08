@@ -48,8 +48,10 @@ gulp.task('lint', function(){
             node: true,
             es6: true
         },
-        ecmaFeatures: {
-            modules: true
+        parserOptions:{
+            ecmaFeatures: {
+                modules: true
+            }
         },
         rules: {
             'no-undef': 1,
@@ -101,9 +103,9 @@ gulp.task('jaydata.min', function(){
 
 gulp.task('minify', ['bundle'], function(){
     return gulp.src('./dist/public/**/*.js')
-    .pipe(uglify({
-        preserveComments: 'license'
-    }))
+    .pipe(uglify().on('error', function(e){
+        console.log(e);
+     }))
     .pipe(rename({ extname: '.min.js' }))
     .pipe(gulp.dest('./dist/public'));
 });
@@ -146,7 +148,7 @@ gulp.task('nuget', ['bundle'], function(done){
 
 gulp.task('release', ['bundle'], function(){
     if (!fs.existsSync('./release')) fs.mkdirSync('./release');
-    return gulp.src(['./dist/public/**/*', './build/*.txt'])
+    return gulp.src(['./dist/public/**/*', './build/*.txt', 'jaydata.d.ts'])
     .pipe(replace('<%=version%>', pkg.version))
     .pipe(zip.dest('./release/jaydata.zip'));
 });
@@ -288,7 +290,7 @@ function gulpTask(td, config){
     .transform({ global: true }, 'browserify-shim')
     .transform(babelify.configure({
         compact: false,
-        presets: ["es2015"],
+        presets: ["@babel/preset-env","@babel/preset-react"],
         plugins: ["add-module-exports"]
     }));
     task = task.require.apply(task, td.require);
@@ -326,9 +328,9 @@ function gulpTask(td, config){
 
     task = task
         .pipe(gulp.dest(td.destFolder))
-        .pipe(uglify({
-            preserveComments: 'license'
-        }))
+        .pipe(uglify().on('error', function(e){
+            console.log(e);
+         }))
         .pipe(rename({ extname: '.min.js' }))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(td.destFolder));

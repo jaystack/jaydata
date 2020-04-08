@@ -1,24 +1,14 @@
 declare module $data {
-    interface IPromise<T> extends Object {
-        then: {
-            (handler: (args: T) => void ): IPromise<any>;
-            (handler: (args: T) => any): IPromise<any>;
-        };
-        fail: {
-            (handler: (args: T) => void ): IPromise<any>;
-            (handler: (args: T) => any): IPromise<any>;
-        };
-        valueOf(): any;
-    }
 
     export class Base implements Object {
         constructor(...params: any[]);
-        getType: () => Base;
+        static create(): Base;
+        static getMemberDefinition(name: string): any;
     }
 
     interface Event extends Object {
-        attach(eventHandler: (sender: any, event: any) => void ): void;
-        detach(eventHandler: () => void ): void;
+        attach(eventHandler: (sender: any, event: any) => void): void;
+        detach(eventHandler: () => void): void;
         fire(e: any, sender: any): void;
     }
 
@@ -26,62 +16,134 @@ declare module $data {
         constructor();
         constructor(initData: {});
 
-        entityState: number;
+        entityState: EntityState;
         changedProperties: any[];
 
         propertyChanging: Event;
         propertyChanged: Event;
         propertyValidationError: Event;
-        isValid: boolean;
+
+        /**
+         * Determines the current $data.Entity is validated and valid. */
+        isValid: () => boolean;
+        isValidated: boolean;
+        ValidationErrors: any[];
+        resetChanges: () => void;
+        refresh(): () => Promise<void>;
+        save(): () => Promise<void>;
+        uid?: string;
+
+        /**
+         * Creates pure JSON object from $data.Entity. */
+        toJSON(): any;
+
+        /**
+         * Returns a string that represents the current $data.Entity. */
+        toString(): any;
+
+        /**
+         * Determines whether the specified $data.Entity is equal to the current $data.Entity. */
+        equals(entity: $data.Entity): boolean;
+
+        getType: () => any;
+        memberDefinitions: any[];
     }
 
-    export class Queryable<T extends Entity> implements Object {
+    export enum EntityState {
+        Added,
+        Deleted,
+        Detached,
+        Modified,
+        Unchanged
+    }
+
+    export enum EntityAttachMode {
+        AllChanged,
+        Default,
+        KeepChanges
+    }
+
+    export class Queryable<T> implements Object {
+        filter(predicate: string): Queryable<T>;
+        filter(predicate: string, thisArg: any): Queryable<T>;
         filter(predicate: (it: T) => boolean): Queryable<T>;
         filter(predicate: (it: T) => boolean, thisArg: any): Queryable<T>;
+        filter(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Queryable<T>;
 
+        map(projection: string): Queryable<any>;
         map(projection: (it: T) => any): Queryable<any>;
 
-        length(): $data.IPromise<Number>;
-        length(handler: (result: number) => void ): $data.IPromise<Number>;
-        length(handler: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+        length(): Promise<Number>;
 
-        forEach(handler: (it: any) => void ): $data.IPromise<T>;
+        forEach(handler: (it: any) => void): Promise<T>;
 
-        toArray(): $data.IPromise<T[]>;
-        toArray(handler: (result: T[]) => void ): $data.IPromise<T[]>;
-        toArray(handler: { success?: (result: T[]) => void; error?: (result: any) => void; }): $data.IPromise<T[]>;
+        toArray(): Promise<T[]>;
 
-        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
-        single(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
+        single(predicate: string): Promise<T>;
+        single(predicate: string, thisArg: any): Promise<T>;
+        single(predicate: (it: T) => boolean): Promise<T>;
+        single(predicate: (it: T) => boolean, thisArg: any): Promise<T>;
+        single(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Promise<T>;
+        single(): Promise<T>;
 
         take(amout: number): Queryable<T>;
         skip(amout: number): Queryable<T>;
 
         order(selector: string): Queryable<T>;
+
         orderBy(predicate: (it: any) => any): Queryable<T>;
+        orderBy(predicate: (it: T) => any): Queryable<T>;
+        orderBy(predicate: string): Queryable<T>;
+
         orderByDescending(predicate: (it: any) => any): Queryable<T>;
+        orderByDescending(predicate: (it: T) => any): Queryable<T>;
+        orderByDescending(predicate: string): Queryable<T>;
 
-        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): $data.IPromise<T>;
-        first(predicate: (it: T) => boolean, params?: any, handler?: { success?: (result: T) => void; error?: (result: any) => void; }): $data.IPromise<T>;
+        first(predicate: string): Promise<T>;
+        first(predicate: string, thisArg: any): Promise<T>;
+        first(predicate: (it: T) => boolean): Promise<T>;
+        first(predicate: (it: T) => boolean, thisArg: any): Promise<T>;
+        first(predicate: (it: T, ...args: Array<any>) => boolean, params?: any): Promise<T>;
+        first(): Promise<T>;
 
-        include(selector: string): Queryable<T>;
+        getValue(): Promise<T>;
 
-        removeAll(): $data.IPromise<Number>;
-        removeAll(handler: (count: number) => void ): $data.IPromise<Number>;
-        removeAll(handler: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+
+        removeAll(): Promise<Number>;
+
+        find(...ids: Array<any>): Promise<T>;
+
+        single(): Promise<T>;
+
+        count(): Promise<number>;
+
+        include(projection: string): Queryable<T>;
+        include(projection: (it: T) => any): Queryable<T>;
+
+        some(): boolean;
+
+        every(): boolean;
+
+        withInlineCount(): Queryable<T>;
     }
 
     export class EntitySet<T extends Entity> extends Queryable<T> {
         tableName: string;
         collectionName: string;
-        
+
         add(item: T): T;
         add(initData: {}): T;
 
-        attach(item: T): void;
-        attach(item: {}): void;
-        attachOrGet(item: T): T;
-        attachOrGet(item: {}): T;
+        addMany(item: T[]): T[];
+        addMany(initData: {}[]): T[];
+
+        createNew(item: T): T;
+        createNew(initData: {}): T;
+
+        attach(item: T, mode?: EntityAttachMode): void;
+        attach(item: {}, mode?: EntityAttachMode): void;
+        attachOrGet(item: T, mode?: EntityAttachMode): T;
+        attachOrGet(item: {}, mode?: EntityAttachMode): T;
 
         detach(item: T): void;
         detach(item: {}): void;
@@ -90,6 +152,8 @@ declare module $data {
         remove(item: {}): void;
 
         elementType: T;
+
+        bulkInsert(fields, datas): Promise;
     }
 
     export class EntityContext implements Object {
@@ -97,17 +161,21 @@ declare module $data {
         constructor(config: { name: string; oDataServiceHost: string; MaxDataServiceVersion: string; });
         constructor(config: { name: string; oDataServiceHost?: string; databaseName?: string; localStoreName?: string; user?: string; password?: string; });
 
-        onReady(): $data.IPromise<EntityContext>;
-        onReady(handler: (currentContext: EntityContext) => void ): $data.IPromise<EntityContext>;
-        saveChanges(): $data.IPromise<Number>;
-        saveChanges(handler: (result: number) => void ): $data.IPromise<Number>;
-        saveChanges(cb: { success?: (result: number) => void; error?: (result: any) => void; }): $data.IPromise<Number>;
+        onReady(): Promise<EntityContext>;
+        saveChanges(): Promise<Number>;
 
         add(item: Entity): Entity;
-        attach(item: Entity): void;
-        attachOrGet(item: Entity): Entity;
+        addMany(item: Entity[]): Entity[];
+        attach(item: Entity, mode?: EntityAttachMode): void;
+        attachOrGet(item: Entity, mode?: EntityAttachMode): Entity;
         detach(item: Entity): void;
-        remove(item: Entity): void;
+        remove(item: Entity): Entity;
+        trackChanges: boolean;
+        attach(item: Entity, mode?: EntityAttachMode): void;
+        batchExecuteQuery(queries: Array<$data.Queryable<$data.Entity>>): Promise<Array<Array<any>>>;
+
+        getEntitySetFromElementType(elementType): EntitySet;
+        bulkInsert(entitySet: $data.EntitySet, fields, datas): Promise;
     }
 
     export class Blob implements Object {
@@ -215,21 +283,16 @@ declare module $data {
 }
 
 declare module Q {
-    export var resolve: (p: any) => $data.IPromise<any>;
-    export var when: (p: $data.IPromise<any>, then?: () => any, fail?: () => any) => $data.IPromise<any>;
-    export var all: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
-    export var allResolved: (p: $data.IPromise<any>[]) => $data.IPromise<any>;
+    export var resolve: (p: any) => Promise<any>;
+    export var when: (p: Promise<any>, then?: () => any, fail?: () => any) => Promise<any>;
+    export var all: (p: Promise<any>[]) => Promise<any>;
+    export var allResolved: (p: Promise<any>[]) => Promise<any>;
 
-    export var fcall: (handler: () => any) => $data.IPromise<any>;
+    export var fcall: (handler: () => any) => Promise<any>;
 }
 
 interface String {
-    contains(s: string): boolean;
-    startsWith(s: string): boolean;
-    endsWith(s: string): boolean;
     strLength(): number;
-    indexOf(s: string): number;
-    concat(s: string): string;
 }
 
 interface Date {

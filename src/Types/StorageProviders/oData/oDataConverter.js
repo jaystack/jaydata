@@ -156,7 +156,10 @@ $data.oDataConverter = {
                 var typeName = Container.resolveName(def.elementType);
                 var values = [];
                 for(var i = 0; i < o.length; i++){
-                    values.push($data.oDataConverter['escape'][typeName](o[i]));
+                    var obj = o[i];
+                    if($data.oDataConverter['escape'][typeName] != null)
+                        obj = $data.oDataConverter['escape'][typeName](obj);
+                    values.push(obj);
                 }
                 
                 return "[" + values.join(',') + "]"

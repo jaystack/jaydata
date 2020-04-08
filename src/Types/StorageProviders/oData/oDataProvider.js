@@ -297,7 +297,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
             {
                 requestUri: this.providerConfiguration.oDataServiceHost + sql.queryText,
                 method: sql.method,
-                data: sql.postData,
+                data: sql.postData == null ? null : JSON.parse(JSON.stringify(sql.postData)), /*Temporary fix*/
                 headers: {
                 }
             },
@@ -914,6 +914,12 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 parameters: [{ name: "@expression" }, { name: "substring", dataType: "string" }]
             },
 
+            includes: {
+                mapTo: "contains",
+                dataType: "boolean", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                parameters: [{ name: "@expression" }, { name: "substring", dataType: "string" }]
+            },
+
             startsWith: {
                 mapTo: "startswith",
                 dataType: "string", allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
@@ -999,6 +1005,10 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
 
             /* data functions */
 
+            date: {
+                allowedIn: [$data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
+                parameters: [{ name: "@expression", dataType: "date" }]
+            },
             day: {
                 allowedIn: [$data.Expressions.ProjectionExpression, $data.Expressions.FilterExpression, $data.Expressions.OrderExpression, $data.Expressions.SomeExpression, $data.Expressions.EveryExpression],
                 dataType: "number",
@@ -1183,6 +1193,7 @@ $C('$data.storageProviders.oData.oDataProvider', $data.StorageProviderBase, null
                 includeCompiler: '$data.storageProviders.oData.oDataOrderCompiler'
             },
             first: {},
+            getValue: {},
             include: {},
             batchDelete: {},
             withInlineCount: {

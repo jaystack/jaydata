@@ -70,18 +70,20 @@ import kendo from 'kendo'
 			    //if (pd.dataType !== "Array" && !(pd.inverseProperty)) {
 			    fields[pd.name] = {
 			        //TODO
+                    field: pd.name,
 			        type: getKendoTypeName(canonicType, pd),
 			        nullable: getNullable(canonicType, pd),
 			        defaultValue: pd.defaultValue,
+                    viewType: pd.$ViewType,
 			        //nullable: false,
 			        //nullable:  "nullable" in pd ? pd.nullable : true,
 			        editable: !pd.computed,
 			        //defaultValue: true,
 			        //defaultValue: 'abc',
 			        //defaultValue: pd.type === "Edm.Boolean" ? false : undefined,
-			        validation: {
-			            required: getRequired(canonicType, pd)
-			        }
+			        //validation: {
+			        //    required: getRequired(canonicType, pd)
+			        //}
 			    }
 			    //};
 			});
@@ -112,7 +114,7 @@ import kendo from 'kendo'
 						.memberDefinitions
 						.getPublicMappedProperties()
 						.filter(function (pd) {
-						    return $data.Container.resolveType(pd.type) === $data.EntitySet
+                            return pd.type != null && /*Temporary fix*/ $data.Container.resolveType(pd.type) === $data.EntitySet
 						})
 						.map(function (pd) {
 						    return $data.Container.resolveType(pd.elementType)
@@ -206,6 +208,8 @@ import kendo from 'kendo'
 
                     //kendo.data.Model.fn.init.call(this, feed);
                     $data.kendo.BaseModelType.fn.init.call(this, feed);
+
+                    jayInstance.uid = this.uid;
 
                     jayInstance.propertyChanged.attach(function (obj, propinfo) {
                         var jay = this;
@@ -428,71 +432,119 @@ import kendo from 'kendo'
                     var _this = this;
                     var q = query;
                     var sp = query.entityContext.storageProvider;
+                    var needsTotalCount = options.data.pageSize != null;
                     var withInlineCount = query.entityContext.storageProvider.supportedSetOperations.withInlineCount;
                     var withLength = (!withInlineCount) && query.entityContext.storageProvider.supportedSetOperations.length;
 
-                    if (withInlineCount) {
+                    if (needsTotalCount == true && withInlineCount) {
                         q = q.withInlineCount();
                     }
 
                     if (options.data.filter) {
                         var filter = "";
                         var thisArg = {};
-                        options.data.filter.filters.forEach(function (f, index) {
-                            if (index > 0) {
-                                filter += options.data.filter.logic == "or" ? " || " : " && ";
+                        var createJayDataExpressionFilter = function createJayDataExpressionFilter(f) {
+                            var value = f.value;
+                            var memberDef = q.defaultType.memberDefinitions['$' + f.field];
+                            var isString = memberDef.originalType == "Edm.String";
+                            var ignoreCase = f.ignoreCase;
+                            var itField = "it." + f.field;
+                            if (memberDef.$ViewType == 'Date') {
+                                itField += '.date()';
+                                value = new Date(value);
+                                var currentDate = new Date();
+                                value.setHours(currentDate.getHours());
+                                value.setMinutes(currentDate.getMinutes());
+                                value.setSeconds(currentDate.getSeconds());
+                                value = "date\"" + value.toISOString() + "\"";
                             }
-
+                            if (ignoreCase == true) itField += ".toLowerCase()";
+                            value = "'" + value + "'";
+                            var tempFilter = '';
                             switch (f.operator) {
                                 case 'eq':
-                                    filter += "it." + f.field;
-                                    filter += " == this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " == " + value;
                                     break;
                                 case 'neq':
-                                    filter += "it." + f.field;
-                                    filter += " != this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " != " + value;
                                     break;
                                 case 'startswith':
-                                    filter += "it." + f.field;
-                                    filter += ".startsWith(this." + f.field + ")";
+                                    tempFilter += itField;
+                                    tempFilter += ".startsWith(" + value + ")";
                                     break;
                                 case 'contains':
-                                    filter += "it." + f.field;
-                                    filter += ".contains(this." + f.field + ")";
+                                    tempFilter += itField;
+                                    tempFilter += ".contains(" + value + ")";
                                     break;
                                 case 'doesnotcontain':
-                                    filter += "!";
-                                    filter += "it." + f.field;
-                                    filter += ".contains(this." + f.field + ")";
+                                    tempFilter += "!";
+                                    tempFilter += itField;
+                                    tempFilter += ".contains(" + value + ")";
                                     break;
                                 case 'endswith':
-                                    filter += "it." + f.field;
-                                    filter += ".endsWith(this." + f.field + ")";
+                                    tempFilter += itField;
+                                    tempFilter += ".endsWith(" + value + ")";
                                     break;
                                 case 'gte':
-                                    filter += "it." + f.field;
-                                    filter += " >= this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " >= " + value;
                                     break;
                                 case 'gt':
-                                    filter += "it." + f.field;
-                                    filter += " > this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " > " + value;
                                     break;
                                 case 'lte':
-                                    filter += "it." + f.field;
-                                    filter += " <= this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " <= " + value;
                                     break;
                                 case 'lt':
-                                    filter += "it." + f.field;
-                                    filter += " < this." + f.field;
+                                    tempFilter += itField;
+                                    tempFilter += " < " + value;
+                                    break;
+                                case 'isnull':
+                                    tempFilter += itField;
+                                    tempFilter += " == null";
+                                    break;
+                                case 'isnotnull':
+                                    tempFilter += itField;
+                                    tempFilter += " != null";
                                     break;
                                 default:
                                     $data.Trace.log('unknown operator', f.operator);
                                     break;
                             }
-                            thisArg[f.field] = f.value;
-                        })
-                        q = q.filter(filter, thisArg);
+                            return tempFilter;
+                        };
+
+                        options.data.filter.filters.forEach(function (flt, index) {
+                            if (index > 0) {
+                                filter += options.data.filter.logic == "or" ? " || " : " && ";
+                            }
+                            if (flt.filters) {
+                                var innerFilter = '';
+                                flt.filters.forEach(function (innerF, innerIndex) {
+                                    if (innerIndex > 0) {
+                                        innerFilter += flt.logic == "or" ? " || " : " && ";
+                                    }
+                                    innerFilter += createJayDataExpressionFilter(innerF);
+                                });
+
+                                filter += '(' + innerFilter + ')';
+                            } else filter += createJayDataExpressionFilter(flt);
+                        });
+
+                        if (filter != null && filter != "") q = q.filter(filter, thisArg);
                     }
+			
+                    if (options.data.lookupBaseFilter != null) {
+                        q = q.filter(options.data.lookupBaseFilter);
+                    }
+                    if (options.data.cascadeBaseFilter != null) {
+                        q = q.filter(options.data.cascadeBaseFilter);
+                    }
+			
                     var allItemsQ = q;
 
                     if (options.data.sort) {
@@ -513,30 +565,44 @@ import kendo from 'kendo'
 
                     promises.push(q.toArray());
                     //var ta = q.toArray();
-                    if (withLength) {
-                        promises.push(allItemsQ.length());
-                    }
-                    else if (!withInlineCount) {
-                        promises.push(allItemsQ.toArray());
+                    if (needsTotalCount == true) {
+                        if (withLength) {
+                            promises.push(allItemsQ.length());
+                        }
+                        else if (!withInlineCount) {
+                            promises.push(allItemsQ.toArray());
+                        }
                     }
 
                     $data.Trace.log(promises);
-                    jQuery.when.apply(this, promises).then(function (items, total) {
+                    Promise.all(promises).then(function (items) {
                         //var result = items.map(function (item) { return item instanceof $data.Entity ? new model(item.initData) : item; });
-                        var result = items.map(function (item) {
-                            var d = (item instanceof $data.Entity) ? item.initData : item;
-                            var kendoItem = item.asKendoObservable();
+                        var responseItems = items[0];
+                        var result = responseItems.map(function (item) {
+			    var kendoItem = (item instanceof $data.Entity ? item : new query.expression.elementType(item)).asKendoObservable();
                             return kendoItem;
                         });
+                        var totalItemsCount = responseItems.length; // no need to total count
+                        if (needsTotalCount == true) {
+                            if (withInlineCount && responseItems.totalCount)
+                                totalItemsCount = responseItems.totalCount; // q.withInlineCount()
+                            else if (withLength && items.length == 2) {
+                                var total = items[1];
+                                if (total.length)
+                                    totalItemsCount = total.length; // allItemsQ.toArray()
+                                else
+                                    totalItemsCount = total; // allItemsQ.length()
+                            }
+                        }
                         var r = {
                             data: result,
-                            total: withInlineCount ? items.totalCount : (withLength ? total : total.length)
-                        }
+                            total: totalItemsCount
+                        };
                         $data.Trace.log(r);
                         options.success(r);
-                    }).fail(function () {
-                        console.log("error in create");
-                        options.error({}, arguments);
+                    }).catch(function (e) {
+                        console.error(e);
+                        options.error(e.name || "Query failed", e.message, e);
                     });
                 });
             },
@@ -555,9 +621,9 @@ import kendo from 'kendo'
                                 data.push(modelItem.initData);
                             });
                             options.success(/*{ data: data }*/);
-                        }).fail(function () {
-                            console.log("error in create");
-                            options.error({}, arguments);
+                        }).catch(function (e) {
+                            console.error(e);
+                            options.error(e.name || "Create failed", e.message, e);
                             ctx.stateManager.reset();
                         });
                     }
@@ -568,9 +634,9 @@ import kendo from 'kendo'
 						.then(function () {
 						    options.success(/*{ data: model[0].innerInstance().initData }*/);
 						})
-						.fail(function () {
-						    console.log("error in create");
-						    options.error({}, arguments);
+						.catch(function (e) {
+                            console.error(e);
+                            options.error(e.name || "Create failed", e.message, e);
 						});
                     }
                 });
@@ -587,18 +653,18 @@ import kendo from 'kendo'
                         });
                         ctx.saveChanges().then(function () {
                             options.success();
-                        }).fail(function () {
+                        }).catch(function (e) {
                             ctx.stateManager.reset();
-                            //alert("error in batch update");
-                            options.error({}, arguments);
+                            console.error(e);
+                            options.error(e.name || "Update failed", e.message, e);
                         });
                     }
                     else {
                         model[0].innerInstance().save(undefined, undefined, $data.kendo.attachMode).then(function (item) {
                             options.success();
-                        }).fail(function () {
-                            //alert("error in update")
-                            options.error({}, arguments);
+                        }).catch(function (e) {
+                            console.error(e);
+                            options.error(e.name || "Update failed", e.message, e);
                         });
                     }
                 });
@@ -613,19 +679,19 @@ import kendo from 'kendo'
                         });
                         ctx.saveChanges().then(function () {
                             options.success({ data: options.data });
-                        }).fail(function () {
+                        }).catch(function (e) {
                             ctx.stateManager.reset();
-                            //alert("error in save:" + arguments[0]);
-                            options.error({}, "error", options.data);
+                            console.error(e);
+                            options.error(e.name || "Delete failed", e.message, e);
                         });
                     }
                     else {
                         model[0].innerInstance().remove().then(function () {
                             options.success({ data: options.data });
-                        }).fail(function () {
+                        }).catch(function (e) {
                             ctx.stateManager.reset();
-                            //alert("error in save:" + arguments[0]);
-                            options.error({}, "error", options.data);
+                            console.error(e);
+                            options.error(e.name || "Delete failed", e.message, e);
                         });
                     }
                 });
@@ -672,7 +738,7 @@ import kendo from 'kendo'
 
     $data.kendo = $data.kendo || {};
 
-    $data.kendo.defaultPageSize = 25;
+    $data.kendo.defaultPageSize = null;
 
     $data.Queryable.addMember("asKendoDataSource", function (ds, modelOptions) {
         var self = this;
@@ -694,7 +760,8 @@ import kendo from 'kendo'
         ds.schema = {
             model: model,
             data: "data",
-            total: "total"
+            total: "total",
+            jayType: self.defaultType
         };
         return new jayDataSource(ds);
     });

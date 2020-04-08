@@ -60,6 +60,7 @@ $data.Class.define("$data.Expressions.ExpressionType", null, null, {}, {
     Entity: "Entity",
     Filter: "Filter",
     First: "First",
+    GetValue: "GetValue",
     Count: "Count",
     InlineCount: "InlineCount",
     BatchExecuteQuery: "BatchExecuteQuery",
